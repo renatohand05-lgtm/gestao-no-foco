@@ -12,8 +12,7 @@ create table if not exists public.movimentacoes_bancarias (
   grupo_transferencia_id uuid,
   tipo text not null
     check (tipo in ('entrada', 'saida', 'ajuste', 'estorno', 'transferencia')),
-  transferencia_papel text
-    check (transferencia_papel in ('enviada', 'recebida')),
+  transferencia_papel text,
   valor numeric(15, 2) not null check (valor >= 0),
   saldo_anterior numeric(15, 2) not null,
   saldo_novo numeric(15, 2) not null,
@@ -38,10 +37,18 @@ create table if not exists public.movimentacoes_bancarias (
   created_by uuid references public.profiles (id) on delete set null,
   deleted_at timestamptz,
   created_at timestamptz not null default now(),
+
   constraint movimentacoes_bancarias_transferencia_papel_check check (
-    (tipo = 'transferencia' and transferencia_papel is not null)
-    or (tipo <> 'transferencia' and transferencia_papel is null)
+    (
+      tipo = 'transferencia'
+      and transferencia_papel in ('enviada', 'recebida')
+    )
+    or (
+      tipo <> 'transferencia'
+      and transferencia_papel is null
+    )
   ),
+
   constraint movimentacoes_bancarias_estorno_ref_check check (
     (tipo = 'estorno' and movimentacao_estornada_id is not null)
     or (tipo <> 'estorno')
@@ -81,6 +88,7 @@ alter table public.movimentacoes_bancarias enable row level security;
 
 drop policy if exists "Membros gerenciam movimentacoes bancarias da empresa"
   on public.movimentacoes_bancarias;
+
 create policy "Membros gerenciam movimentacoes bancarias da empresa"
   on public.movimentacoes_bancarias for all
   using (

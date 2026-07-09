@@ -41,6 +41,10 @@ export type Venda = {
   total: number;
   margem_total: number | null;
   forma_pagamento: string | null;
+  forma_pagamento_id: string | null;
+  quantidade_parcelas: number;
+  categoria_financeira_id: string | null;
+  centro_custo_id: string | null;
   observacoes: string | null;
   created_by: string | null;
   deleted_at: string | null;
@@ -88,6 +92,21 @@ export type VendaListItem = Pick<
 export type VendaDetail = Venda & {
   cliente: VendaClienteResumo;
   itens: VendaItemWithProduto[];
+  forma_pagamento_ref?: {
+    id: string;
+    nome: string;
+    tipo: string;
+    gera_financeiro?: boolean;
+  } | null;
+  categoria_financeira_ref?: {
+    id: string;
+    nome: string;
+  } | null;
+  centro_custo_ref?: {
+    id: string;
+    codigo: string;
+    nome: string;
+  } | null;
   created_by_profile?: {
     full_name: string | null;
     email: string;
@@ -133,6 +152,10 @@ export type VendaInput = {
   status?: VendaStatus;
   desconto_total?: number;
   forma_pagamento?: string | null;
+  forma_pagamento_id?: string | null;
+  quantidade_parcelas?: number;
+  categoria_financeira_id?: string | null;
+  centro_custo_id?: string | null;
   observacoes?: string | null;
   itens: VendaItemInput[];
 };
@@ -172,3 +195,21 @@ export type ClienteOption = {
 };
 
 export type ProdutoOption = VendaProdutoResumo;
+
+export type FormaPagamentoOption = {
+  id: string;
+  nome: string;
+  tipo: string;
+  ativo: boolean;
+};
+
+export type VendaCategoriaFinanceiraOption = {
+  id: string;
+  nome: string;
+};
+
+export type VendaCentroCustoOption = {
+  id: string;
+  codigo: string;
+  nome: string;
+};

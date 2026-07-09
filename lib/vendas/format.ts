@@ -1,3 +1,4 @@
+import { LEGACY_FORMA_PAGAMENTO_LABELS } from "@/lib/vendas/constants";
 import type { VendaStatus } from "@/types/vendas";
 
 export function formatVendaDate(date: string) {
@@ -50,18 +51,19 @@ export function getStatusLabel(status: VendaStatus) {
 
 export function getFormaPagamentoLabel(value: string | null | undefined) {
   if (!value) return "—";
+  return LEGACY_FORMA_PAGAMENTO_LABELS[value] ?? value;
+}
 
-  const labels: Record<string, string> = {
-    dinheiro: "Dinheiro",
-    pix: "PIX",
-    cartao_credito: "Cartão de crédito",
-    cartao_debito: "Cartão de débito",
-    boleto: "Boleto",
-    transferencia: "Transferência",
-    outro: "Outro",
-  };
+export function resolveFormaPagamentoDisplay(venda: {
+  forma_pagamento: string | null;
+  forma_pagamento_id?: string | null;
+  forma_pagamento_ref?: { nome: string } | null;
+}) {
+  if (venda.forma_pagamento_ref?.nome) {
+    return venda.forma_pagamento_ref.nome;
+  }
 
-  return labels[value] ?? value;
+  return getFormaPagamentoLabel(venda.forma_pagamento);
 }
 
 export function calcItemTotal(

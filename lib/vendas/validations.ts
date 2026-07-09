@@ -1,13 +1,10 @@
 import { z } from "zod";
 
-import {
-  VENDA_FORMA_PAGAMENTO_OPTIONS,
-  VENDA_STATUS_EDITAVEIS,
-} from "@/lib/vendas/constants";
+import { VENDA_STATUS_EDITAVEIS } from "@/lib/vendas/constants";
 
 const optionalText = z.string().trim().optional().or(z.literal(""));
+const optionalUuid = z.union([z.string().uuid(), z.literal("")]).default("");
 
-const formasPagamento = VENDA_FORMA_PAGAMENTO_OPTIONS.map((option) => option.value);
 const statusEditaveis = [...VENDA_STATUS_EDITAVEIS] as [
   "orcamento",
   "em_andamento",
@@ -36,7 +33,15 @@ export const vendaFormSchema = z
       .number()
       .min(0, "Desconto total não pode ser negativo.")
       .default(0),
-    forma_pagamento: optionalText,
+    forma_pagamento_id: optionalUuid,
+    quantidade_parcelas: z
+      .number()
+      .int()
+      .min(1, "Informe ao menos 1 parcela.")
+      .max(48, "Máximo de 48 parcelas.")
+      .default(1),
+    categoria_financeira_id: optionalUuid,
+    centro_custo_id: optionalUuid,
     observacoes: optionalText,
     itens: z
       .array(vendaItemFormSchema)
@@ -54,19 +59,6 @@ export const vendaFormSchema = z
         code: "custom",
         message: "Desconto total não pode ser maior que o subtotal.",
         path: ["desconto_total"],
-      });
-    }
-
-    if (
-      data.forma_pagamento &&
-      !formasPagamento.includes(
-        data.forma_pagamento as (typeof formasPagamento)[number],
-      )
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Forma de pagamento inválida.",
-        path: ["forma_pagamento"],
       });
     }
   });

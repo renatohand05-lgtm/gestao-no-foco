@@ -20,10 +20,7 @@ import {
   createVendaAction,
   updateVendaAction,
 } from "@/lib/vendas/actions";
-import {
-  VENDA_FORMA_PAGAMENTO_OPTIONS,
-  VENDA_STATUS_OPTIONS,
-} from "@/lib/vendas/constants";
+import { VENDA_STATUS_OPTIONS } from "@/lib/vendas/constants";
 import {
   calcItemTotal,
   calcVendaTotais,
@@ -40,7 +37,10 @@ import {
 import { PRODUTO_TIPOS_SEM_ESTOQUE } from "@/lib/estoque/constants";
 import type {
   ClienteOption,
+  FormaPagamentoOption,
   ProdutoOption,
+  VendaCentroCustoOption,
+  VendaCategoriaFinanceiraOption,
   VendaDetail,
 } from "@/types/vendas";
 
@@ -50,6 +50,9 @@ type VendaFormProps = {
   venda?: VendaDetail;
   clientes: ClienteOption[];
   produtos: ProdutoOption[];
+  formasPagamento: FormaPagamentoOption[];
+  categoriasFinanceiras: VendaCategoriaFinanceiraOption[];
+  centrosCusto: VendaCentroCustoOption[];
 };
 
 const selectClassName =
@@ -81,6 +84,9 @@ export function VendaForm({
   venda,
   clientes,
   produtos,
+  formasPagamento,
+  categoriasFinanceiras,
+  centrosCusto,
 }: VendaFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -94,13 +100,16 @@ export function VendaForm({
   const form = useForm<VendaFormInput, unknown, VendaFormValues>({
     resolver: zodResolver(vendaFormSchema),
     defaultValues: venda
-      ? vendaToFormValues(venda)
+      ? vendaToFormValues(venda, formasPagamento)
       : {
           cliente_id: "",
           data_venda: toDateInputValue(),
           status: "orcamento",
           desconto_total: 0,
-          forma_pagamento: "",
+          forma_pagamento_id: "",
+          quantidade_parcelas: 1,
+          categoria_financeira_id: "",
+          centro_custo_id: "",
           observacoes: "",
           itens: [
             {
@@ -230,16 +239,76 @@ export function VendaForm({
               </select>
             </FormField>
 
-            <FormField label="Forma de pagamento" htmlFor="forma_pagamento">
+            <FormField label="Forma de pagamento" htmlFor="forma_pagamento_id">
               <select
-                id="forma_pagamento"
-                {...form.register("forma_pagamento")}
+                id="forma_pagamento_id"
+                {...form.register("forma_pagamento_id")}
+                className={selectClassName}
+              >
+                <option value="">Opcional — obrigatória se gera financeiro</option>
+                {formasPagamento.map((forma) => (
+                  <option key={forma.id} value={forma.id}>
+                    {forma.nome}
+                  </option>
+                ))}
+              </select>
+              {formasPagamento.length === 0 ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Cadastre formas de pagamento em Financeiro para selecionar aqui.
+                </p>
+              ) : null}
+            </FormField>
+
+            <FormField
+              label="Parcelas"
+              htmlFor="quantidade_parcelas"
+              error={form.formState.errors.quantidade_parcelas?.message}
+            >
+              <Input
+                id="quantidade_parcelas"
+                type="number"
+                min={1}
+                max={48}
+                {...form.register("quantidade_parcelas", {
+                  setValueAs: (value: string | number) => {
+                    const parsed = Number(value);
+                    return Number.isNaN(parsed) ? 1 : parsed;
+                  },
+                })}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Usado ao faturar para gerar contas a receber parceladas.
+              </p>
+            </FormField>
+
+            <FormField
+              label="Categoria financeira"
+              htmlFor="categoria_financeira_id"
+            >
+              <select
+                id="categoria_financeira_id"
+                {...form.register("categoria_financeira_id")}
                 className={selectClassName}
               >
                 <option value="">Não informada</option>
-                {VENDA_FORMA_PAGAMENTO_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                {categoriasFinanceiras.map((categoria) => (
+                  <option key={categoria.id} value={categoria.id}>
+                    {categoria.nome}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            <FormField label="Centro de custo" htmlFor="centro_custo_id">
+              <select
+                id="centro_custo_id"
+                {...form.register("centro_custo_id")}
+                className={selectClassName}
+              >
+                <option value="">Não informado</option>
+                {centrosCusto.map((centro) => (
+                  <option key={centro.id} value={centro.id}>
+                    {centro.codigo} · {centro.nome}
                   </option>
                 ))}
               </select>

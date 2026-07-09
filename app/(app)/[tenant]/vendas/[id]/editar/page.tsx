@@ -31,10 +31,14 @@ export default async function EditarVendaPage({
     redirect(`/${tenantSlug}/vendas/${id}`);
   }
 
-  const [clientes, produtos] = await Promise.all([
-    service.listClientesParaVenda(),
-    service.listProdutosParaVenda(),
-  ]);
+  const [clientes, produtos, formasPagamento, categoriasFinanceiras, centrosCusto] =
+    await Promise.all([
+      service.listClientesParaVenda(),
+      service.listProdutosParaVenda(),
+      service.listFormasPagamentoParaVenda(),
+      service.listCategoriasFinanceirasParaVenda(),
+      service.listCentrosCustoParaVenda(),
+    ]);
 
   return (
     <div className="space-y-6">
@@ -61,6 +65,9 @@ export default async function EditarVendaPage({
           venda={venda}
           clientes={clientes}
           produtos={produtos}
+          formasPagamento={formasPagamento}
+          categoriasFinanceiras={categoriasFinanceiras}
+          centrosCusto={centrosCusto}
         />
       </SectionCard>
     </div>

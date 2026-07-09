@@ -25,6 +25,23 @@ export const VENDA_FORMA_PAGAMENTO_OPTIONS = [
   { value: "outro", label: "Outro" },
 ] as const;
 
+/** Rótulos legados para vendas criadas antes da integração com formas_pagamento */
+export const LEGACY_FORMA_PAGAMENTO_LABELS: Record<string, string> = {
+  dinheiro: "Dinheiro",
+  pix: "PIX",
+  cartao_credito: "Cartão de crédito",
+  cartao_debito: "Cartão de débito",
+  boleto: "Boleto",
+  transferencia: "Transferência",
+  outro: "Outro",
+  outros: "Outros",
+};
+
+/** Mapeia slug legado de venda para tipo em formas_pagamento */
+export const LEGACY_FORMA_PAGAMENTO_TIPO_MAP: Record<string, string> = {
+  outro: "outros",
+};
+
 export const VENDA_SORT_OPTIONS = [
   { value: "numero", label: "Número" },
   { value: "data_venda", label: "Data" },

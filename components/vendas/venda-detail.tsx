@@ -24,7 +24,7 @@ import {
   formatVendaDate,
   formatVendaDateTime,
   formatVendaNumero,
-  getFormaPagamentoLabel,
+  resolveFormaPagamentoDisplay,
 } from "@/lib/vendas/format";
 import { PRODUTO_TIPOS_SEM_ESTOQUE } from "@/lib/estoque/constants";
 import type { VendaDetail } from "@/types/vendas";
@@ -129,8 +129,26 @@ export function VendaDetailView({ tenantSlug, venda }: VendaDetailProps) {
             <DetailItem label="Status atual" value={<VendaStatusBadge status={venda.status} />} />
             <DetailItem
               label="Forma de pagamento"
-              value={getFormaPagamentoLabel(venda.forma_pagamento)}
+              value={resolveFormaPagamentoDisplay(venda)}
             />
+            {venda.categoria_financeira_ref ? (
+              <DetailItem
+                label="Categoria financeira"
+                value={venda.categoria_financeira_ref.nome}
+              />
+            ) : null}
+            {venda.centro_custo_ref ? (
+              <DetailItem
+                label="Centro de custo"
+                value={`${venda.centro_custo_ref.codigo} · ${venda.centro_custo_ref.nome}`}
+              />
+            ) : null}
+            {(venda.quantidade_parcelas ?? 1) > 1 ? (
+              <DetailItem
+                label="Parcelas"
+                value={`${venda.quantidade_parcelas} parcela(s)`}
+              />
+            ) : null}
             <DetailItem label="Subtotal" value={formatCurrency(venda.subtotal)} />
             <DetailItem
               label="Desconto total"

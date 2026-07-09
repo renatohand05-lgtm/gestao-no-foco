@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type ActionType = "create" | "edit" | "delete" | "view";
@@ -63,16 +63,22 @@ export function ActionButton({
   );
 
   if (href) {
+    const isDisabled = disabled || loading;
+
     return (
-      <Button
-        variant={config.variant}
-        size={size}
-        disabled={disabled || loading}
-        className={cn(className)}
-        render={<Link href={href} />}
+      <Link
+        href={href}
+        aria-disabled={isDisabled}
+        tabIndex={isDisabled ? -1 : undefined}
+        className={cn(
+          buttonVariants({ variant: config.variant, size }),
+          isDisabled && "pointer-events-none opacity-50",
+          className,
+        )}
+        onClick={isDisabled ? (event) => event.preventDefault() : undefined}
       >
         {content}
-      </Button>
+      </Link>
     );
   }
 

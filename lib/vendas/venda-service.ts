@@ -1,24 +1,30 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { PRODUTO_TIPOS_SEM_ESTOQUE } from "@/lib/estoque/constants";
-import { createEstoqueService } from "@/lib/estoque/estoque-service";
 import { createClient } from "@/lib/supabase/server";
+import {
+  cancelarVendaAtomico,
+  faturarVendaAtomico,
+} from "@/lib/vendas/venda-faturamento-rpc";
 import {
   VENDA_STATUS_EDITAVEIS,
   VENDAS_DEFAULT_PER_PAGE,
   VENDAS_MAX_PER_PAGE,
 } from "@/lib/vendas/constants";
-import { formatVendaNumero } from "@/lib/vendas/format";
 import { buildVendaHeaderPayload } from "@/lib/vendas/mappers";
+import { validateFormaPagamentoParaFaturamento } from "@/lib/vendas/venda-faturamento-validation";
 import type { Database } from "@/types/database";
 import type {
   ClienteOption,
   CreateVendaInput,
+  FormaPagamentoOption,
   ListVendasParams,
   PaginatedResult,
   ProdutoOption,
   SortOrder,
   UpdateVendaInput,
+  VendaCentroCustoOption,
+  VendaCategoriaFinanceiraOption,
   VendaDetail,
   VendasAbertasView,
   VendaItemWithProduto,
@@ -242,9 +248,54 @@ export class VendaService {
       createdByProfile = profile ?? null;
     }
 
+    let formaPagamentoRef = null;
+
+    if (vendaData.forma_pagamento_id) {
+      const { data: forma } = await this.supabase
+        .from("formas_pagamento")
+        .select("id, nome, tipo, gera_financeiro")
+        .eq("tenant_id", this.tenantId)
+        .eq("id", vendaData.forma_pagamento_id)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+      formaPagamentoRef = forma ?? null;
+    }
+
+    let categoriaFinanceiraRef = null;
+
+    if (vendaData.categoria_financeira_id) {
+      const { data: categoria } = await this.supabase
+        .from("categorias_financeiras")
+        .select("id, nome")
+        .eq("tenant_id", this.tenantId)
+        .eq("id", vendaData.categoria_financeira_id)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+      categoriaFinanceiraRef = categoria ?? null;
+    }
+
+    let centroCustoRef = null;
+
+    if (vendaData.centro_custo_id) {
+      const { data: centro } = await this.supabase
+        .from("centros_custo")
+        .select("id, codigo, nome")
+        .eq("tenant_id", this.tenantId)
+        .eq("id", vendaData.centro_custo_id)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+      centroCustoRef = centro ?? null;
+    }
+
     return {
       ...vendaData,
       itens: (itens ?? []) as VendaItemWithProduto[],
+      forma_pagamento_ref: formaPagamentoRef,
+      categoria_financeira_ref: categoriaFinanceiraRef,
+      centro_custo_ref: centroCustoRef,
       created_by_profile: createdByProfile,
     };
   }
@@ -398,6 +449,68 @@ export class VendaService {
     };
   }
 
+  async listFormasPagamentoParaVenda(): Promise<FormaPagamentoOption[]> {
+    const { data, error } = await this.supabase
+      .from("formas_pagamento")
+      .select("id, nome, tipo, ativo")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("ativo", true)
+      .order("nome", { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data ?? []) as FormaPagamentoOption[];
+  }
+
+  async listCategoriasFinanceirasParaVenda(): Promise<
+    VendaCategoriaFinanceiraOption[]
+  > {
+    const { data, error } = await this.supabase
+      .from("categorias_financeiras")
+      .select("id, nome")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("ativo", true)
+      .in("tipo", ["receita", "ambos"])
+      .order("nome", { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data ?? [];
+  }
+
+  async listCentrosCustoParaVenda(): Promise<VendaCentroCustoOption[]> {
+    const { data, error } = await this.supabase
+      .from("centros_custo")
+      .select("id, codigo, nome")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("ativo", true)
+      .order("codigo", { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data ?? [];
+  }
+
+  private async loadFormasMap(formaPagamentoId?: string | null) {
+    const formas = await this.listFormasPagamentoParaVenda();
+    const map = new Map(formas.map((forma) => [forma.id, forma]));
+
+    if (formaPagamentoId && !map.has(formaPagamentoId)) {
+      throw new Error("Forma de pagamento não encontrada ou inativa.");
+    }
+
+    return map;
+  }
+
   async listClientesParaVenda(): Promise<ClienteOption[]> {
     const { data, error } = await this.supabase
       .from("clientes")
@@ -526,7 +639,8 @@ export class VendaService {
     const produtos = await this.loadProdutosMap(
       input.itens.map((item) => item.produto_id),
     );
-    const header = buildVendaHeaderPayload(input, produtos);
+    const formas = await this.loadFormasMap(input.forma_pagamento_id);
+    const header = buildVendaHeaderPayload(input, produtos, formas);
 
     const { data: venda, error } = await this.supabase
       .from("vendas")
@@ -540,6 +654,7 @@ export class VendaService {
         total: header.total,
         margem_total: header.margem_total,
         forma_pagamento: header.forma_pagamento,
+        forma_pagamento_id: header.forma_pagamento_id,
         observacoes: header.observacoes,
         created_by: createdBy,
       })
@@ -576,7 +691,8 @@ export class VendaService {
     const produtos = await this.loadProdutosMap(
       input.itens.map((item) => item.produto_id),
     );
-    const header = buildVendaHeaderPayload(input, produtos);
+    const formas = await this.loadFormasMap(input.forma_pagamento_id);
+    const header = buildVendaHeaderPayload(input, produtos, formas);
 
     const { error } = await this.supabase
       .from("vendas")
@@ -589,6 +705,7 @@ export class VendaService {
         total: header.total,
         margem_total: header.margem_total,
         forma_pagamento: header.forma_pagamento,
+        forma_pagamento_id: header.forma_pagamento_id,
         observacoes: header.observacoes,
       })
       .eq("tenant_id", this.tenantId)
@@ -655,53 +772,6 @@ export class VendaService {
     }
   }
 
-  private async processStockSaida(
-    venda: VendaDetail,
-    createdBy: string | null,
-  ) {
-    const estoqueService = await createEstoqueService(this.tenantId);
-
-    const stockItems = aggregateStockItems(venda.itens);
-    const referencia = `${formatVendaNumero(venda.numero)} (ID: ${venda.id})`;
-
-    for (const item of stockItems) {
-      await estoqueService.createMovimentacao(
-        {
-          produto_id: item.produto_id,
-          tipo: "saida",
-          quantidade: item.quantidade,
-          motivo: `Faturamento da venda ${referencia}`,
-          origem: "venda",
-          observacoes: referencia,
-        },
-        createdBy,
-      );
-    }
-  }
-
-  private async processStockDevolucao(
-    venda: VendaDetail,
-    createdBy: string | null,
-  ) {
-    const estoqueService = await createEstoqueService(this.tenantId);
-    const stockItems = aggregateStockItems(venda.itens);
-    const referencia = `${formatVendaNumero(venda.numero)} (ID: ${venda.id})`;
-
-    for (const item of stockItems) {
-      await estoqueService.createMovimentacao(
-        {
-          produto_id: item.produto_id,
-          tipo: "entrada",
-          quantidade: item.quantidade,
-          motivo: `Cancelamento da venda ${referencia}`,
-          origem: "devolucao",
-          observacoes: referencia,
-        },
-        createdBy,
-      );
-    }
-  }
-
   async faturar(id: string, createdBy: string | null): Promise<VendaDetail> {
     const venda = await this.getById(id);
 
@@ -722,18 +792,13 @@ export class VendaService {
     }
 
     await this.validateStockForFaturamento(venda.itens);
-    await this.processStockSaida(venda, createdBy);
+    await validateFormaPagamentoParaFaturamento(
+      this.supabase,
+      this.tenantId,
+      venda,
+    );
 
-    const { error } = await this.supabase
-      .from("vendas")
-      .update({ status: "faturado" })
-      .eq("tenant_id", this.tenantId)
-      .eq("id", id)
-      .is("deleted_at", null);
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await faturarVendaAtomico(this.supabase, this.tenantId, id, createdBy);
 
     const detail = await this.getById(id);
     if (!detail) {
@@ -754,20 +819,7 @@ export class VendaService {
       throw new Error("Esta venda já está cancelada.");
     }
 
-    if (venda.status === "faturado") {
-      await this.processStockDevolucao(venda, createdBy);
-    }
-
-    const { error } = await this.supabase
-      .from("vendas")
-      .update({ status: "cancelado" })
-      .eq("tenant_id", this.tenantId)
-      .eq("id", id)
-      .is("deleted_at", null);
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await cancelarVendaAtomico(this.supabase, this.tenantId, id, createdBy);
 
     const detail = await this.getById(id);
     if (!detail) {

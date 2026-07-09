@@ -16,6 +16,7 @@ function revalidateVendaPaths(tenantSlug: string, vendaId?: string) {
   revalidatePath(`/${tenantSlug}/vendas`);
   revalidatePath(`/${tenantSlug}/estoque`);
   revalidatePath(`/${tenantSlug}/produtos`);
+  revalidatePath(`/${tenantSlug}/financeiro/contas-receber`);
 
   if (vendaId) {
     revalidatePath(`/${tenantSlug}/vendas/${vendaId}`);

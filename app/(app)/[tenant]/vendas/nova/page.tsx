@@ -15,10 +15,14 @@ export default async function NovaVendaPage({
   const tenant = await requireTenant(tenantSlug);
   const service = await createVendaService(tenant.id);
 
-  const [clientes, produtos] = await Promise.all([
-    service.listClientesParaVenda(),
-    service.listProdutosParaVenda(),
-  ]);
+  const [clientes, produtos, formasPagamento, categoriasFinanceiras, centrosCusto] =
+    await Promise.all([
+      service.listClientesParaVenda(),
+      service.listProdutosParaVenda(),
+      service.listFormasPagamentoParaVenda(),
+      service.listCategoriasFinanceirasParaVenda(),
+      service.listCentrosCustoParaVenda(),
+    ]);
 
   return (
     <div className="space-y-6">
@@ -40,6 +44,9 @@ export default async function NovaVendaPage({
           mode="create"
           clientes={clientes}
           produtos={produtos}
+          formasPagamento={formasPagamento}
+          categoriasFinanceiras={categoriasFinanceiras}
+          centrosCusto={centrosCusto}
         />
       </SectionCard>
     </div>

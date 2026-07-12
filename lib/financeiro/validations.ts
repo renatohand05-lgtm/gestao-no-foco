@@ -162,14 +162,18 @@ export const contaReceberFormSchema = z
     cliente_id: z.string().uuid("Selecione um cliente."),
     venda_id: optionalUuid,
     forma_pagamento_id: optionalUuid,
-    categoria_financeira_id: optionalUuid,
-    centro_custo_id: optionalUuid,
+    categoria_financeira_id: z
+      .string()
+      .uuid("Selecione a categoria financeira."),
+    centro_custo_id: z.string().uuid("Selecione o centro de custo."),
+    plano_conta_id: z.string().uuid("Selecione o plano de contas."),
     descricao: z.string().trim().min(2, "Informe a descrição do título."),
     valor_original: z.number().min(0.01, "Informe o valor original."),
     desconto: z.number().min(0).default(0),
     juros: z.number().min(0).default(0),
     multa: z.number().min(0).default(0),
     data_emissao: dateField,
+    data_competencia: dateField,
     data_vencimento: dateField,
     parcelas: z.number().int().min(1).max(48).default(1),
     observacoes: optionalText,
@@ -186,10 +190,12 @@ export const contaReceberFormSchema = z
 
 export const receberContaFormSchema = z.object({
   data_recebimento: dateField,
-  valor_recebido: z.number().min(0).optional(),
+  // Sprint atual: quitação integral — valor deve bater com o líquido (RPC rejeita parcial).
+  valor_recebido: z.number().min(0.01, "Informe o valor recebido."),
   desconto: z.number().min(0).optional(),
   juros: z.number().min(0).optional(),
   multa: z.number().min(0).optional(),
+  conta_bancaria_id: z.string().uuid("Selecione uma conta bancária."),
 });
 
 export type ContaReceberFormInput = z.input<typeof contaReceberFormSchema>;
@@ -202,9 +208,11 @@ export const contaPagarFormSchema = z
     fornecedor_id: optionalUuid,
     fornecedor_nome: optionalText,
     forma_pagamento_id: optionalUuid,
-    categoria_financeira_id: optionalUuid,
-    centro_custo_id: optionalUuid,
-    plano_conta_id: optionalUuid,
+    categoria_financeira_id: z
+      .string()
+      .uuid("Selecione a categoria financeira."),
+    centro_custo_id: z.string().uuid("Selecione o centro de custo."),
+    plano_conta_id: z.string().uuid("Selecione o plano de contas."),
     descricao: z.string().trim().min(2, "Informe a descrição do título."),
     valor_original: z.number().min(0.01, "Informe o valor original."),
     desconto: z.number().min(0).default(0),
@@ -236,10 +244,40 @@ export const pagarContaFormSchema = z.object({
   conta_bancaria_id: optionalUuid,
 });
 
+export const classificacaoContaPagarFormSchema = z.object({
+  categoria_financeira_id: z
+    .string()
+    .uuid("Selecione a categoria financeira."),
+  centro_custo_id: z.string().uuid("Selecione o centro de custo."),
+  plano_conta_id: z.string().uuid("Selecione o plano de contas."),
+  data_competencia: dateField,
+});
+
+export const classificacaoContaReceberFormSchema = z.object({
+  categoria_financeira_id: z
+    .string()
+    .uuid("Selecione a categoria financeira."),
+  centro_custo_id: z.string().uuid("Selecione o centro de custo."),
+  plano_conta_id: z.string().uuid("Selecione o plano de contas."),
+  data_competencia: dateField,
+});
+
 export type ContaPagarFormInput = z.input<typeof contaPagarFormSchema>;
 export type ContaPagarFormValues = z.output<typeof contaPagarFormSchema>;
 export type PagarContaFormInput = z.input<typeof pagarContaFormSchema>;
 export type PagarContaFormValues = z.output<typeof pagarContaFormSchema>;
+export type ClassificacaoContaPagarFormInput = z.input<
+  typeof classificacaoContaPagarFormSchema
+>;
+export type ClassificacaoContaPagarFormValues = z.output<
+  typeof classificacaoContaPagarFormSchema
+>;
+export type ClassificacaoContaReceberFormInput = z.input<
+  typeof classificacaoContaReceberFormSchema
+>;
+export type ClassificacaoContaReceberFormValues = z.output<
+  typeof classificacaoContaReceberFormSchema
+>;
 
 const movimentacaoBancariaTiposManuais = ["entrada", "saida", "ajuste"] as const;
 

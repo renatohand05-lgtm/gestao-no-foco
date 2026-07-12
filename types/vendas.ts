@@ -97,6 +97,7 @@ export type VendaDetail = Venda & {
     nome: string;
     tipo: string;
     gera_financeiro?: boolean;
+    dias_compensacao?: number;
   } | null;
   categoria_financeira_ref?: {
     id: string;
@@ -186,6 +187,7 @@ export type VendaSuccessMessage =
   | "updated"
   | "deleted"
   | "faturado"
+  | "faturado_recebido"
   | "cancelado";
 
 export type ClienteOption = {

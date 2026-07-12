@@ -31,7 +31,7 @@ export function ContaBancariaTable({ tenantSlug, items }: Props) {
             <TableHead>Conta</TableHead>
             <TableHead className="hidden sm:table-cell">Tipo</TableHead>
             <TableHead className="hidden md:table-cell">Banco</TableHead>
-            <TableHead className="hidden lg:table-cell">Saldo inicial</TableHead>
+            <TableHead className="hidden lg:table-cell">Saldo</TableHead>
             <TableHead className="hidden xl:table-cell">Status</TableHead>
             <TableHead className="w-12" />
           </TableRow>
@@ -47,7 +47,9 @@ export function ContaBancariaTable({ tenantSlug, items }: Props) {
               </TableCell>
               <TableCell className="hidden sm:table-cell">{getContaBancariaTipoLabel(item.tipo)}</TableCell>
               <TableCell className="hidden md:table-cell">{item.banco || "—"}</TableCell>
-              <TableCell className="hidden lg:table-cell">{formatCurrency(item.saldo_inicial)}</TableCell>
+              <TableCell className="hidden lg:table-cell">
+                {formatCurrency(item.saldo_atual ?? item.saldo_inicial)}
+              </TableCell>
               <TableCell className="hidden xl:table-cell"><FinanceiroStatusBadge ativo={item.ativo} /></TableCell>
               <TableCell><ContaBancariaRowActions tenantSlug={tenantSlug} item={item} /></TableCell>
             </TableRow>

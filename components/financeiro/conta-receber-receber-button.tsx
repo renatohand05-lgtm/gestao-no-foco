@@ -10,9 +10,14 @@ import type { ContaReceberDetail } from "@/types/contas-receber";
 type Props = {
   tenantSlug: string;
   item: ContaReceberDetail;
+  contasBancarias: { id: string; nome: string }[];
 };
 
-export function ContaReceberReceberButton({ tenantSlug, item }: Props) {
+export function ContaReceberReceberButton({
+  tenantSlug,
+  item,
+  contasBancarias,
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -26,6 +31,7 @@ export function ContaReceberReceberButton({ tenantSlug, item }: Props) {
         onOpenChange={setOpen}
         tenantSlug={tenantSlug}
         item={item}
+        contasBancarias={contasBancarias}
       />
     </>
   );

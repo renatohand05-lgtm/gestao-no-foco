@@ -8,20 +8,21 @@ import {
   addDays,
   addMonths,
   calcSaldoPendente,
-  calcValorLiquido,
   canCancelarContaPagar,
+  canEditClassificacaoContaPagar,
   canEditContaPagar,
-  canPagarContaPagar,
   resolveStatusExibicao,
   splitValorParcelas,
   todayISO,
 } from "@/lib/financeiro/conta-pagar-utils";
 import { buildContaPagarPayload } from "@/lib/financeiro/mappers";
+import { baixarContaPagarAtomico } from "@/lib/financeiro/movimentacao-bancaria-rpc";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type {
   CategoriaFinanceiraOption,
   CentroCustoOption,
+  ClassificacaoContaPagarInput,
   ContaBancariaOption,
   ContaPagarDetail,
   ContaPagarListItem,
@@ -330,7 +331,7 @@ export class ContaPagarService {
     const { data, error } = await this.supabase
       .from("contas_pagar")
       .insert(rows)
-      .select("id")
+      .select("id, parcela_numero")
       .order("parcela_numero", { ascending: true });
 
     if (error) throw new Error(error.message);
@@ -383,55 +384,29 @@ export class ContaPagarService {
     return detail;
   }
 
-  async pagar(id: string, input: PagarContaInput): Promise<ContaPagarDetail> {
+  async updateClassificacao(
+    id: string,
+    input: ClassificacaoContaPagarInput,
+  ): Promise<ContaPagarDetail> {
     const current = await this.getById(id);
 
     if (!current) {
       throw new Error("Conta a pagar não encontrada.");
     }
 
-    if (!canPagarContaPagar(current)) {
-      throw new Error("Esta conta não pode receber baixa no status atual.");
+    if (!canEditClassificacaoContaPagar(current)) {
+      throw new Error(
+        "Somente contas não canceladas permitem corrigir a classificação.",
+      );
     }
-
-    const desconto = input.desconto ?? current.desconto;
-    const juros = input.juros ?? current.juros;
-    const multa = input.multa ?? current.multa;
-    const valorLiquido = calcValorLiquido({
-      valor_original: current.valor_original,
-      desconto,
-      juros,
-      multa,
-    });
-    const saldoAtual = Math.max(valorLiquido - current.valor_pago, 0);
-    const valorPagamento = input.valor_pagamento ?? saldoAtual;
-
-    if (valorPagamento <= 0) {
-      throw new Error("Informe um valor de pagamento maior que zero.");
-    }
-
-    if (valorPagamento > saldoAtual + 0.001) {
-      throw new Error("Valor de pagamento excede o saldo pendente.");
-    }
-
-    const novoValorPago = current.valor_pago + valorPagamento;
-    const saldoRestante = valorLiquido - novoValorPago;
-    const status: ContaPagarStatusPersistido =
-      saldoRestante <= 0.001 ? "pago" : "parcial";
 
     const { data, error } = await this.supabase
       .from("contas_pagar")
       .update({
-        desconto,
-        juros,
-        multa,
-        valor_pago: novoValorPago,
-        data_pagamento: input.data_pagamento,
-        status,
-        forma_pagamento_id:
-          input.forma_pagamento_id ?? current.forma_pagamento_id,
-        conta_bancaria_id:
-          input.conta_bancaria_id ?? current.conta_bancaria_id,
+        categoria_financeira_id: input.categoria_financeira_id,
+        centro_custo_id: input.centro_custo_id,
+        plano_conta_id: input.plano_conta_id,
+        data_competencia: input.data_competencia,
       })
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
@@ -442,6 +417,27 @@ export class ContaPagarService {
     if (error) throw new Error(error.message);
 
     const detail = await this.getById(data.id);
+    if (!detail) {
+      throw new Error("Erro ao carregar conta a pagar atualizada.");
+    }
+
+    return detail;
+  }
+
+  async pagar(id: string, input: PagarContaInput): Promise<ContaPagarDetail> {
+    await baixarContaPagarAtomico(this.supabase, {
+      tenantId: this.tenantId,
+      contaPagarId: id,
+      dataPagamento: input.data_pagamento,
+      contaBancariaId: input.conta_bancaria_id,
+      valorPagamento: input.valor_pagamento,
+      desconto: input.desconto,
+      juros: input.juros,
+      multa: input.multa,
+      formaPagamentoId: input.forma_pagamento_id,
+    });
+
+    const detail = await this.getById(id);
     if (!detail) {
       throw new Error("Erro ao carregar conta após baixa.");
     }

@@ -16,11 +16,13 @@ import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createContaPagarAction,
+  updateClassificacaoContaPagarAction,
   updateContaPagarAction,
 } from "@/lib/financeiro/actions";
 import { todayISO } from "@/lib/financeiro/conta-pagar-utils";
 import { contaPagarToFormValues } from "@/lib/financeiro/mappers";
 import {
+  classificacaoContaPagarFormSchema,
   contaPagarFormSchema,
   type ContaPagarFormInput,
   type ContaPagarFormValues,
@@ -38,6 +40,8 @@ type Props = {
   tenantSlug: string;
   mode: "create" | "edit";
   item?: ContaPagarDetail;
+  /** Quando true, só classificação contábil é editável (ex.: título já pago). */
+  classificacaoOnly?: boolean;
   fornecedores: FornecedorOption[];
   formasPagamento: FormaPagamentoOption[];
   categorias: CategoriaFinanceiraOption[];
@@ -46,7 +50,7 @@ type Props = {
 };
 
 const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
+  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60";
 
 const numberFieldOptions = {
   setValueAs: (value: string | number) => {
@@ -60,6 +64,7 @@ export function ContaPagarForm({
   tenantSlug,
   mode,
   item,
+  classificacaoOnly = false,
   fornecedores,
   formasPagamento,
   categorias,
@@ -69,9 +74,17 @@ export function ContaPagarForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const lockFinanceiro = classificacaoOnly;
 
   const form = useForm<ContaPagarFormInput, unknown, ContaPagarFormValues>({
-    resolver: zodResolver(contaPagarFormSchema),
+    // Em modo classificação o RHF omite campos disabled no submit;
+    // por isso validamos só os 4 campos editáveis.
+    resolver: zodResolver(
+      classificacaoOnly
+        ? classificacaoContaPagarFormSchema
+        : contaPagarFormSchema,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any,
     defaultValues: item
       ? contaPagarToFormValues(item)
       : {
@@ -98,13 +111,20 @@ export function ContaPagarForm({
     setLoading(true);
     setError(null);
 
-    const payload =
-      mode === "edit" ? { ...values, parcelas: item?.parcela_total ?? 1 } : values;
-
     const result =
       mode === "create"
-        ? await createContaPagarAction(tenantSlug, payload)
-        : await updateContaPagarAction(tenantSlug, item!.id, payload);
+        ? await createContaPagarAction(tenantSlug, values)
+        : classificacaoOnly
+          ? await updateClassificacaoContaPagarAction(tenantSlug, item!.id, {
+              categoria_financeira_id: values.categoria_financeira_id,
+              centro_custo_id: values.centro_custo_id,
+              plano_conta_id: values.plano_conta_id,
+              data_competencia: values.data_competencia,
+            })
+          : await updateContaPagarAction(tenantSlug, item!.id, {
+              ...values,
+              parcelas: item?.parcela_total ?? 1,
+            });
 
     if (!result.success) {
       setError(result.error);
@@ -132,9 +152,20 @@ export function ContaPagarForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
+        {classificacaoOnly ? (
+          <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+            Título já baixado: você pode corrigir apenas a classificação contábil
+            (categoria, plano de contas, centro de custo e competência).
+          </p>
+        ) : null}
+
         <FormSection
           title="Identificação"
-          description="Fornecedor e classificação do título."
+          description={
+            classificacaoOnly
+              ? "Ajuste a classificação do título."
+              : "Fornecedor e classificação do título."
+          }
         >
           <FormGrid>
             <FormField label="Fornecedor cadastrado" htmlFor="fornecedor_id">
@@ -142,6 +173,7 @@ export function ContaPagarForm({
                 id="fornecedor_id"
                 {...form.register("fornecedor_id")}
                 className={selectClassName}
+                disabled={lockFinanceiro}
               >
                 <option value="">Sem vínculo</option>
                 {fornecedores.map((fornecedor) => (
@@ -161,6 +193,7 @@ export function ContaPagarForm({
                 id="fornecedor_nome"
                 {...form.register("fornecedor_nome")}
                 placeholder="Quando não houver cadastro"
+                disabled={lockFinanceiro}
               />
             </FormField>
 
@@ -169,6 +202,7 @@ export function ContaPagarForm({
                 id="forma_pagamento_id"
                 {...form.register("forma_pagamento_id")}
                 className={selectClassName}
+                disabled={lockFinanceiro}
               >
                 <option value="">Não informada</option>
                 {formasPagamento.map((forma) => (
@@ -182,13 +216,15 @@ export function ContaPagarForm({
             <FormField
               label="Categoria financeira"
               htmlFor="categoria_financeira_id"
+              required
+              error={form.formState.errors.categoria_financeira_id?.message}
             >
               <select
                 id="categoria_financeira_id"
                 {...form.register("categoria_financeira_id")}
                 className={selectClassName}
               >
-                <option value="">Não informada</option>
+                <option value="">Selecione a categoria</option>
                 {categorias.map((categoria) => (
                   <option key={categoria.id} value={categoria.id}>
                     {categoria.nome}
@@ -197,13 +233,18 @@ export function ContaPagarForm({
               </select>
             </FormField>
 
-            <FormField label="Centro de custo" htmlFor="centro_custo_id">
+            <FormField
+              label="Centro de custo"
+              htmlFor="centro_custo_id"
+              required
+              error={form.formState.errors.centro_custo_id?.message}
+            >
               <select
                 id="centro_custo_id"
                 {...form.register("centro_custo_id")}
                 className={selectClassName}
               >
-                <option value="">Não informado</option>
+                <option value="">Selecione o centro de custo</option>
                 {centrosCusto.map((centro) => (
                   <option key={centro.id} value={centro.id}>
                     {centro.codigo} · {centro.nome}
@@ -212,13 +253,18 @@ export function ContaPagarForm({
               </select>
             </FormField>
 
-            <FormField label="Plano de contas" htmlFor="plano_conta_id">
+            <FormField
+              label="Plano de contas"
+              htmlFor="plano_conta_id"
+              required
+              error={form.formState.errors.plano_conta_id?.message}
+            >
               <select
                 id="plano_conta_id"
                 {...form.register("plano_conta_id")}
                 className={selectClassName}
               >
-                <option value="">Não informado</option>
+                <option value="">Selecione o plano de contas</option>
                 {planoContas.map((conta) => (
                   <option key={conta.id} value={conta.id}>
                     {conta.codigo} · {conta.nome}
@@ -238,6 +284,7 @@ export function ContaPagarForm({
                 id="descricao"
                 {...form.register("descricao")}
                 placeholder="Pagamento de fornecedor"
+                disabled={lockFinanceiro}
               />
             </FormField>
           </FormGrid>
@@ -256,6 +303,7 @@ export function ContaPagarForm({
                 type="number"
                 step="0.01"
                 {...form.register("valor_original", numberFieldOptions)}
+                disabled={lockFinanceiro}
               />
             </FormField>
             <FormField label="Desconto" htmlFor="desconto">
@@ -264,6 +312,7 @@ export function ContaPagarForm({
                 type="number"
                 step="0.01"
                 {...form.register("desconto", numberFieldOptions)}
+                disabled={lockFinanceiro}
               />
             </FormField>
             <FormField label="Juros" htmlFor="juros">
@@ -272,6 +321,7 @@ export function ContaPagarForm({
                 type="number"
                 step="0.01"
                 {...form.register("juros", numberFieldOptions)}
+                disabled={lockFinanceiro}
               />
             </FormField>
             <FormField label="Multa" htmlFor="multa">
@@ -280,6 +330,7 @@ export function ContaPagarForm({
                 type="number"
                 step="0.01"
                 {...form.register("multa", numberFieldOptions)}
+                disabled={lockFinanceiro}
               />
             </FormField>
             <FormField
@@ -292,6 +343,7 @@ export function ContaPagarForm({
                 id="data_emissao"
                 type="date"
                 {...form.register("data_emissao")}
+                disabled={lockFinanceiro}
               />
             </FormField>
             <FormField
@@ -316,6 +368,7 @@ export function ContaPagarForm({
                 id="data_vencimento"
                 type="date"
                 {...form.register("data_vencimento")}
+                disabled={lockFinanceiro}
               />
             </FormField>
             {mode === "create" ? (
@@ -350,7 +403,12 @@ export function ContaPagarForm({
 
         <FormSection title="Observações">
           <FormField label="Observações" htmlFor="observacoes">
-            <Textarea id="observacoes" rows={3} {...form.register("observacoes")} />
+            <Textarea
+              id="observacoes"
+              rows={3}
+              {...form.register("observacoes")}
+              disabled={lockFinanceiro}
+            />
           </FormField>
         </FormSection>
 

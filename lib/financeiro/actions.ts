@@ -28,6 +28,8 @@ import { createPlanoContaService } from "@/lib/financeiro/plano-conta-service";
 import {
   categoriaFinanceiraFormSchema,
   centroCustoFormSchema,
+  classificacaoContaPagarFormSchema,
+  classificacaoContaReceberFormSchema,
   contaBancariaFormSchema,
   contaPagarFormSchema,
   contaReceberFormSchema,
@@ -424,6 +426,7 @@ export async function createContaReceberAction(
     const item = await service.create(normalizeContaReceberFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-receber", item.id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id: item.id };
   } catch (error) {
     return {
@@ -448,6 +451,7 @@ export async function updateContaReceberAction(
     await service.update(id, normalizeContaReceberFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-receber", id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
     return {
@@ -456,6 +460,31 @@ export async function updateContaReceberAction(
         error instanceof Error
           ? error.message
           : "Erro ao atualizar conta a receber.",
+    };
+  }
+}
+
+export async function updateClassificacaoContaReceberAction(
+  tenantSlug: string,
+  id: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const parsed = classificacaoContaReceberFormSchema.parse(values);
+    const service = await createContaReceberService(tenant.id);
+    await service.updateClassificacao(id, parsed);
+
+    revalidateFinanceiroPaths(tenantSlug, "contas-receber", id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, id };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Erro ao corrigir classificação da conta a receber.",
     };
   }
 }
@@ -472,6 +501,12 @@ export async function receberContaReceberAction(
     await service.receber(id, normalizeReceberContaFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-receber", id);
+    revalidateFluxoCaixaPaths(tenantSlug);
+    revalidateFinanceiroPaths(
+      tenantSlug,
+      "contas-bancarias",
+      parsed.conta_bancaria_id,
+    );
     return { success: true, id };
   } catch (error) {
     return {
@@ -541,6 +576,7 @@ export async function createContaPagarAction(
     const item = await service.create(normalizeContaPagarFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-pagar", item.id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id: item.id };
   } catch (error) {
     return {
@@ -565,6 +601,7 @@ export async function updateContaPagarAction(
     await service.update(id, normalizeContaPagarFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-pagar", id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
     return {
@@ -573,6 +610,31 @@ export async function updateContaPagarAction(
         error instanceof Error
           ? error.message
           : "Erro ao atualizar conta a pagar.",
+    };
+  }
+}
+
+export async function updateClassificacaoContaPagarAction(
+  tenantSlug: string,
+  id: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const parsed = classificacaoContaPagarFormSchema.parse(values);
+    const service = await createContaPagarService(tenant.id);
+    await service.updateClassificacao(id, parsed);
+
+    revalidateFinanceiroPaths(tenantSlug, "contas-pagar", id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, id };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Erro ao corrigir classificação da conta a pagar.",
     };
   }
 }
@@ -589,6 +651,7 @@ export async function pagarContaPagarAction(
     await service.pagar(id, normalizePagarContaFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-pagar", id);
+    revalidateFluxoCaixaPaths(tenantSlug);
     return { success: true, id };
   } catch (error) {
     return {

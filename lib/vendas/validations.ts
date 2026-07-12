@@ -67,3 +67,19 @@ export type VendaItemFormInput = z.input<typeof vendaItemFormSchema>;
 export type VendaItemFormValues = z.output<typeof vendaItemFormSchema>;
 export type VendaFormInput = z.input<typeof vendaFormSchema>;
 export type VendaFormValues = z.output<typeof vendaFormSchema>;
+
+export const faturarEReceberVendaFormSchema = z.object({
+  conta_bancaria_id: z.string().uuid("Selecione a conta bancária."),
+  data_recebimento: z
+    .string()
+    .trim()
+    .min(1, "Informe a data de recebimento.")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida."),
+});
+
+export type FaturarEReceberVendaFormInput = z.input<
+  typeof faturarEReceberVendaFormSchema
+>;
+export type FaturarEReceberVendaFormValues = z.output<
+  typeof faturarEReceberVendaFormSchema
+>;

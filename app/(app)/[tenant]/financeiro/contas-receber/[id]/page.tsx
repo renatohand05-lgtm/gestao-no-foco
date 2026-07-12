@@ -19,7 +19,10 @@ export default async function DetailPage({
   const { success, error } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const service = await createContaReceberService(tenant.id);
-  const item = await service.getById(id);
+  const [item, contasBancarias] = await Promise.all([
+    service.getById(id),
+    service.listContasBancarias(),
+  ]);
 
   if (!item) {
     notFound();
@@ -31,7 +34,11 @@ export default async function DetailPage({
         success={success as ContaReceberSuccessMessage | undefined}
         error={error}
       />
-      <ContaReceberDetail tenantSlug={tenantSlug} item={item} />
+      <ContaReceberDetail
+        tenantSlug={tenantSlug}
+        item={item}
+        contasBancarias={contasBancarias}
+      />
     </div>
   );
 }

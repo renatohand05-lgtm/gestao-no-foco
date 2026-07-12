@@ -3,23 +3,58 @@
 Documento de melhorias futuras do módulo financeiro e integrações relacionadas.  
 **Não representa pendências bloqueantes** dos sprints concluídos — são evoluções planejadas.
 
-Última atualização: fechamento Sprint 8.3.
+Última atualização: fechamento Sprint 8.6 (DRE Real).
 
 ---
 
-## Sprint 8.4 — Backlog planejado
+## Sprint 8.6 — Concluído
 
-Itens oficialmente priorizados para o próximo sprint (ver [ROADMAP.md](./ROADMAP.md)):
+DRE Real por competência entregue (leitura 100% banco, sem mock).
+
+**Pendências do Sprint 8.6:** nenhuma bloqueante.
+
+### Movido do 8.6 para backlog
+
+| Item | Descrição | Prioridade |
+|------|-----------|------------|
+| `data_competencia` / `plano_conta_id` em Contas a Receber | Paridade com CP para competência e plano diretos | Alta |
+| Tipo `custo` em categorias/plano | Separar CMV/custos de despesas operacionais na classificação | Média |
+| Depreciação/amortização no EBITDA | EBITDA contábil real | Baixa |
+| Dashboard financeiro | Indicadores gerenciais além do DRE | Alta |
+| Exportação PDF/Excel do DRE | Relatório exportável | Média |
+
+---
+
+## Sprint 8.5 — Concluído
+
+Fluxo de Caixa Real entregue (leitura 100% banco, sem mock). Correções críticas:
+
+- Link `fluxo-caixa/nova` removido da UI até existir formulário
+- Soft-delete de movimentações bancárias bloqueado (reversão somente via estorno)
+
+**Pendências do Sprint 8.5:** nenhuma bloqueante.
+
+### Movido do 8.5 para backlog
+
+| Item | Descrição | Prioridade |
+|------|-----------|------------|
+| Paginação da lista unificada do Fluxo de Caixa | Paginar lançamentos realizados + previstos | Média |
+| Projeções recorrentes futuras | Projetar além dos vencimentos cadastrados (sem recorrência hoje) | Baixa |
+| Formulário “Nova movimentação” no Fluxo de Caixa | Rota `/{tenant}/financeiro/fluxo-caixa/nova` | Alta |
+| UI de estorno de movimentação bancária | Fluxo visual de estorno (RPC já existe) | Alta |
+
+---
+
+## Itens planejados (próximos)
 
 | Item | Descrição |
 |------|-----------|
-| Fluxo de Caixa | Projeção diária e consolidada a partir de recebíveis, pagáveis e movimentações |
-| Contas Bancárias | Evolução operacional do cadastro (saldos, movimentações, integração com baixas) |
+| Dashboard financeiro | Indicadores gerenciais além do DRE |
+| Contas Bancárias (evolução) | Refinos operacionais além do histórico recente |
 | Auditoria | Trilha completa de alterações financeiras |
 | Upload de anexos | Implementação sobre `anexos_metadata` (estrutura já criada no 8.3) |
 | CRUD de Fornecedores | Módulo completo; substitui cadastro mínimo atual |
-
-**Pendências do Sprint 8.3:** nenhuma.
+| Competência nativa em Contas a Receber | Colunas `data_competencia` e `plano_conta_id` |
 
 ---
 
@@ -27,9 +62,10 @@ Itens oficialmente priorizados para o próximo sprint (ver [ROADMAP.md](./ROADMA
 
 | Item | Descrição |
 |------|-----------|
-| Seleção inteligente de formas de pagamento | Melhorar o seletor de formas na venda para ocultar opções com `gera_financeiro = false` quando a venda exigir geração financeira (parcelas, categoria, centro de custo ou forma com `gera_financeiro = true`). |
-| Assistente de migração financeira | Ferramenta ou fluxo guiado para migrar dados financeiros antigos (formas em texto, vínculos incompletos, títulos órfãos) de forma segura por tenant. |
-| Auditoria financeira completa | Trilha de auditoria para alterações em contas a receber, contas a pagar, baixas, cancelamentos e integração com vendas (quem, quando, valor anterior/novo). **Planejado para Sprint 8.4.** |
+| Formulário “Nova movimentação” / UI de estorno | Completar o ciclo operacional do Fluxo de Caixa na UI. |
+| Seleção inteligente de formas de pagamento | Melhorar o seletor de formas na venda para ocultar opções com `gera_financeiro = false` quando a venda exigir geração financeira. |
+| Assistente de migração financeira | Ferramenta ou fluxo guiado para migrar dados financeiros antigos de forma segura por tenant. |
+| Auditoria financeira completa | Trilha de auditoria para alterações em contas a receber, contas a pagar, baixas, cancelamentos e integração com vendas. |
 
 ---
 
@@ -37,9 +73,10 @@ Itens oficialmente priorizados para o próximo sprint (ver [ROADMAP.md](./ROADMA
 
 | Item | Descrição |
 |------|-----------|
-| Migração `forma_pagamento` → `forma_pagamento_id` | Script/migration para converter registros legados que ainda usam o campo texto `forma_pagamento` para o UUID `forma_pagamento_id` no cadastro de vendas. |
-| Remoção do campo legado | Após migração validada em produção, remover compatibilidade com `forma_pagamento` (texto) em mappers, validações e exibição. |
-| Detalhe da venda — classificação financeira | Ampliar exibição de categoria financeira e centro de custo no detalhe da venda (Sprint 8.2.4 introduziu exibição básica quando os campos existem; revisar escopo: links, edição rápida, indicadores de propagação para títulos). |
+| Paginação da lista unificada do Fluxo de Caixa | Lista de lançamentos realizados + previstos sem paginação na 8.5. |
+| Migração `forma_pagamento` → `forma_pagamento_id` | Script/migration para converter registros legados em vendas. |
+| Remoção do campo legado | Após migração validada, remover compatibilidade com `forma_pagamento` (texto). |
+| Detalhe da venda — classificação financeira | Ampliar exibição de categoria financeira e centro de custo no detalhe da venda. |
 
 ---
 
@@ -47,9 +84,10 @@ Itens oficialmente priorizados para o próximo sprint (ver [ROADMAP.md](./ROADMA
 
 | Item | Descrição |
 |------|-----------|
-| Título recebido bloqueia cancelamento da venda | **Manter comportamento atual.** Venda faturada com título já recebido não pode ser cancelada até estorno manual — decisão de negócio para preservar integridade contábil. |
-| Status `vencido` calculado na exibição | **Manter comportamento atual.** Status derivado de `aberto` + `data_vencimento < hoje` na camada de aplicação; não exige job de sincronização no banco. |
-| Orçamento sem forma de pagamento | **Manter comportamento atual.** Orçamentos e vendas em andamento podem ser salvos sem forma de pagamento; a exigência ocorre apenas no faturamento quando a venda gera financeiro. |
+| Projeções recorrentes no Fluxo de Caixa | Projetar caixa além dos vencimentos já cadastrados em CR/CP. |
+| Título recebido bloqueia cancelamento da venda | **Manter comportamento atual.** |
+| Status `vencido` calculado na exibição | **Manter comportamento atual.** |
+| Orçamento sem forma de pagamento | **Manter comportamento atual.** |
 
 ---
 
@@ -59,9 +97,10 @@ As decisões abaixo são **intencionais**. Não devem ser tratadas como bugs em 
 
 ### Integridade financeira
 
-- **Faturamento atômico (RPC):** estoque, status da venda e contas a receber são criados em uma única transação PostgreSQL (`faturar_venda_atomico` / `cancelar_venda_atomico`). Evita venda faturada com estoque baixado e sem título financeiro.
+- **Faturamento atômico (RPC):** estoque, status da venda e contas a receber são criados em uma única transação PostgreSQL.
 - **Cancelamento com título recebido:** bloqueio intencional para evitar inconsistência entre caixa/recebíveis e status da venda.
 - **Exclusão de títulos:** somente após cancelamento lógico (`status = cancelado`); histórico preservado via soft delete.
+- **Movimentações bancárias:** não podem ser soft-deletadas; reversão do saldo somente via **estorno** (RPC). Soft-delete direto deixaria `saldo_atual` inconsistente.
 
 ### Compatibilidade e evolução gradual
 
@@ -71,9 +110,9 @@ As decisões abaixo são **intencionais**. Não devem ser tratadas como bugs em 
 ### Modelo de status
 
 - **`vencido` não persistido:** reduz complexidade de jobs e estados duplicados; listagens e cards calculam `status_exibicao` em tempo de leitura.
-- **Multi-tenant:** todas as estruturas financeiras, contas a receber e contas a pagar isoladas por `tenant_id` com RLS no Supabase.
-- **Fornecedores mínimos (8.3):** tabela `fornecedores` criada para vínculo futuro; CRUD completo previsto no Sprint 8.4.
-- **Anexos (8.3):** coluna `anexos_metadata` em `contas_pagar` reservada; upload previsto no Sprint 8.4.
+- **Multi-tenant:** todas as estruturas financeiras isoladas por `tenant_id` com RLS no Supabase.
+- **Fornecedores mínimos (8.3):** tabela `fornecedores` criada para vínculo futuro; CRUD completo no backlog.
+- **Anexos (8.3):** coluna `anexos_metadata` em `contas_pagar` reservada; upload no backlog.
 
 ### Migrations manuais
 
@@ -84,4 +123,4 @@ As decisões abaixo são **intencionais**. Não devem ser tratadas como bugs em 
 ## Referências
 
 - Roadmap de sprints: [ROADMAP.md](./ROADMAP.md)
-- Migrations do módulo financeiro: `supabase/migrations/20260708_*.sql`
+- Migrations do módulo financeiro: `supabase/migrations/`

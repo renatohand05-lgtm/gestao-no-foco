@@ -25,6 +25,35 @@ export async function faturarVendaAtomico(
   return data;
 }
 
+export async function faturarEReceberVendaAtomico(
+  supabase: SupabaseClient<Database>,
+  params: {
+    tenantId: string;
+    vendaId: string;
+    contaBancariaId: string;
+    dataRecebimento?: string;
+    createdBy: string | null;
+  },
+): Promise<string> {
+  const { data, error } = await supabase.rpc("faturar_e_receber_venda_atomico", {
+    p_tenant_id: params.tenantId,
+    p_venda_id: params.vendaId,
+    p_conta_bancaria_id: params.contaBancariaId,
+    p_data_recebimento: params.dataRecebimento,
+    p_created_by: params.createdBy,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("Erro ao faturar e receber venda.");
+  }
+
+  return data;
+}
+
 export async function cancelarVendaAtomico(
   supabase: SupabaseClient<Database>,
   tenantId: string,

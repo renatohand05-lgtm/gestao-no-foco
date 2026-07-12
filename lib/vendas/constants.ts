@@ -55,5 +55,7 @@ export const VENDA_SUCCESS_MESSAGES = {
   updated: "Venda atualizada com sucesso.",
   deleted: "Venda excluída com sucesso.",
   faturado: "Venda faturada com sucesso. Estoque atualizado.",
+  faturado_recebido:
+    "Venda faturada e recebida com sucesso. Estoque e caixa atualizados.",
   cancelado: "Venda cancelada com sucesso.",
 } as const;

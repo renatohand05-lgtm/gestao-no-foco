@@ -280,19 +280,26 @@ export const FINANCEIRO_HUB_ITEMS = [
     href: "contas-pagar",
     cta: "Gerenciar pagáveis",
   },
+  {
+    title: "Fluxo de Caixa",
+    description: "Saldo, entradas, saídas e projeção diária das contas bancárias.",
+    href: "fluxo-caixa",
+    cta: "Ver fluxo",
+  },
+  {
+    title: "DRE",
+    description:
+      "Demonstração do Resultado por competência, com receitas, custos e despesas.",
+    href: "dre",
+    cta: "Ver DRE",
+  },
 ] as const;
 
 export const FINANCEIRO_ROADMAP_ITEMS = [
   {
-    title: "Fluxo de caixa",
+    title: "Dashboard financeiro",
     description:
-      "Projeção diária e consolidada a partir de contas bancárias e lançamentos.",
-    phase: "Sprint 8.4",
-  },
-  {
-    title: "DRE e dashboard",
-    description:
-      "Demonstrativo de resultados e indicadores financeiros por período.",
-    phase: "Sprint 8.5",
+      "Indicadores gerenciais e visão consolidada além do DRE por período.",
+    phase: "Backlog",
   },
 ] as const;

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   canCancelarContaPagar,
+  canEditClassificacaoContaPagar,
   canEditContaPagar,
   canPagarContaPagar,
 } from "@/lib/financeiro/conta-pagar-utils";
@@ -40,6 +41,8 @@ export function ContaPagarRowActions({
 
   const podePagar = canPagarContaPagar(item);
   const podeEditar = canEditContaPagar(item);
+  const podeCorrigirClassificacao =
+    !podeEditar && canEditClassificacaoContaPagar(item);
   const podeCancelar = canCancelarContaPagar(item);
   const podeExcluir = item.status === "cancelado";
 
@@ -62,16 +65,22 @@ export function ContaPagarRowActions({
             <Eye className="mr-2 size-4" />
             Ver detalhes
           </DropdownMenuItem>
-          {podeEditar ? (
+          {podeEditar || podeCorrigirClassificacao ? (
             <DropdownMenuItem
               render={
                 <Link
-                  href={`/${tenantSlug}/financeiro/contas-pagar/${item.id}/editar`}
+                  href={
+                    podeCorrigirClassificacao
+                      ? `/${tenantSlug}/financeiro/contas-pagar/${item.id}/editar?classificacaoOnly=true`
+                      : `/${tenantSlug}/financeiro/contas-pagar/${item.id}/editar`
+                  }
                 />
               }
             >
               <Pencil className="mr-2 size-4" />
-              Editar
+              {podeCorrigirClassificacao
+                ? "Corrigir classificação"
+                : "Editar"}
             </DropdownMenuItem>
           ) : null}
           {podePagar ? (

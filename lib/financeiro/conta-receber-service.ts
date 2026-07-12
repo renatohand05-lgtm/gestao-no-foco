@@ -7,20 +7,21 @@ import {
 import {
   addMonths,
   calcSaldoPendente,
-  calcValorLiquido,
   canCancelarContaReceber,
+  canEditClassificacaoContaReceber,
   canEditContaReceber,
-  canReceberContaReceber,
   resolveStatusExibicao,
   splitValorParcelas,
   todayISO,
 } from "@/lib/financeiro/conta-receber-utils";
 import { buildContaReceberPayload } from "@/lib/financeiro/mappers";
+import { baixarContaReceberAtomico } from "@/lib/financeiro/movimentacao-bancaria-rpc";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type {
   CategoriaFinanceiraOption,
   CentroCustoOption,
+  ClassificacaoContaReceberInput,
   ClienteOption,
   ContaReceberDetail,
   ContaReceberListItem,
@@ -31,6 +32,7 @@ import type {
   FormaPagamentoOption,
   ListContasReceberParams,
   PaginatedResult,
+  PlanoContaOption,
   ReceberContaInput,
   UpdateContaReceberInput,
   VendaOption,
@@ -52,6 +54,7 @@ const LIST_SELECT = `
   data_emissao,
   data_vencimento,
   data_recebimento,
+  conta_bancaria_id,
   parcela_numero,
   parcela_total,
   created_at,
@@ -65,7 +68,9 @@ const DETAIL_SELECT = `
   venda:vendas ( id, numero ),
   forma_pagamento:formas_pagamento ( id, nome ),
   categoria_financeira:categorias_financeiras ( id, nome ),
-  centro_custo:centros_custo ( id, nome, codigo )
+  centro_custo:centros_custo ( id, nome, codigo ),
+  plano_conta:plano_contas ( id, nome, codigo ),
+  conta_bancaria:contas_bancarias ( id, nome )
 `;
 
 function resolveSort(
@@ -308,7 +313,7 @@ export class ContaReceberService {
     const { data, error } = await this.supabase
       .from("contas_receber")
       .insert(rows)
-      .select("id")
+      .select("id, parcela_numero")
       .order("parcela_numero", { ascending: true });
 
     if (error) throw new Error(mapUniqueViolation(error));
@@ -359,41 +364,29 @@ export class ContaReceberService {
     return detail;
   }
 
-  async receber(id: string, input: ReceberContaInput): Promise<ContaReceberDetail> {
+  async updateClassificacao(
+    id: string,
+    input: ClassificacaoContaReceberInput,
+  ): Promise<ContaReceberDetail> {
     const current = await this.getById(id);
 
     if (!current) {
       throw new Error("Conta a receber não encontrada.");
     }
 
-    if (!canReceberContaReceber(current)) {
-      throw new Error("Esta conta não pode receber baixa no status atual.");
-    }
-
-    const desconto = input.desconto ?? current.desconto;
-    const juros = input.juros ?? current.juros;
-    const multa = input.multa ?? current.multa;
-    const valorLiquido = calcValorLiquido({
-      valor_original: current.valor_original,
-      desconto,
-      juros,
-      multa,
-    });
-    const valorRecebido = input.valor_recebido ?? valorLiquido;
-
-    if (valorRecebido < 0) {
-      throw new Error("Valor recebido não pode ser negativo.");
+    if (!canEditClassificacaoContaReceber(current)) {
+      throw new Error(
+        "Somente contas não canceladas permitem corrigir a classificação.",
+      );
     }
 
     const { data, error } = await this.supabase
       .from("contas_receber")
       .update({
-        desconto,
-        juros,
-        multa,
-        valor_recebido: valorRecebido,
-        data_recebimento: input.data_recebimento,
-        status: "recebido",
+        categoria_financeira_id: input.categoria_financeira_id,
+        centro_custo_id: input.centro_custo_id,
+        plano_conta_id: input.plano_conta_id,
+        data_competencia: input.data_competencia,
       })
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
@@ -404,6 +397,26 @@ export class ContaReceberService {
     if (error) throw new Error(error.message);
 
     const detail = await this.getById(data.id);
+    if (!detail) {
+      throw new Error("Erro ao carregar conta a receber atualizada.");
+    }
+
+    return detail;
+  }
+
+  async receber(id: string, input: ReceberContaInput): Promise<ContaReceberDetail> {
+    await baixarContaReceberAtomico(this.supabase, {
+      tenantId: this.tenantId,
+      contaReceberId: id,
+      dataRecebimento: input.data_recebimento,
+      contaBancariaId: input.conta_bancaria_id,
+      valorRecebido: input.valor_recebido,
+      desconto: input.desconto,
+      juros: input.juros,
+      multa: input.multa,
+    });
+
+    const detail = await this.getById(id);
     if (!detail) {
       throw new Error("Erro ao carregar conta após baixa.");
     }
@@ -531,6 +544,35 @@ export class ContaReceberService {
     if (error) throw new Error(error.message);
 
     return (data ?? []) as CentroCustoOption[];
+  }
+
+  async listPlanoContas(): Promise<PlanoContaOption[]> {
+    const { data, error } = await this.supabase
+      .from("plano_contas")
+      .select("id, codigo, nome")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("ativo", true)
+      .in("tipo", ["receita", "ativo"])
+      .order("codigo", { ascending: true });
+
+    if (error) throw new Error(error.message);
+
+    return (data ?? []) as PlanoContaOption[];
+  }
+
+  async listContasBancarias(): Promise<{ id: string; nome: string }[]> {
+    const { data, error } = await this.supabase
+      .from("contas_bancarias")
+      .select("id, nome")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("ativo", true)
+      .order("nome", { ascending: true });
+
+    if (error) throw new Error(error.message);
+
+    return data ?? [];
   }
 }
 

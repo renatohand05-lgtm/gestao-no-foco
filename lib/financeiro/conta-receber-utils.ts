@@ -77,6 +77,13 @@ export function canEditContaReceber(conta: ContaReceberStatusInput): boolean {
   return status === "aberto" || status === "vencido";
 }
 
+/** Permite corrigir classificação contábil (inclui títulos já recebidos). */
+export function canEditClassificacaoContaReceber(
+  conta: ContaReceberStatusInput,
+): boolean {
+  return conta.status !== "cancelado";
+}
+
 export function canReceberContaReceber(conta: ContaReceberStatusInput): boolean {
   const status = resolveStatusExibicao(conta);
   return status === "aberto" || status === "vencido";

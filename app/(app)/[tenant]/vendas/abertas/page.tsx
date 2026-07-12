@@ -5,6 +5,7 @@ import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { VendaFeedback } from "@/components/vendas/venda-feedback";
 import { VendaAbertasSearch } from "@/components/vendas/venda-abertas-search";
 import { VendaOpenView } from "@/components/vendas/venda-open-view";
+import { createContaBancariaService } from "@/lib/financeiro/conta-bancaria-service";
 import { createVendaService } from "@/lib/vendas/venda-service";
 import { requireTenant } from "@/lib/tenants";
 import type { VendaSuccessMessage } from "@/types/vendas";
@@ -27,7 +28,16 @@ export default async function VendasAbertasPage({
   const { q, success, error } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const service = await createVendaService(tenant.id);
-  const view = await service.getVendasAbertasView(q);
+  const contaBancariaService = await createContaBancariaService(tenant.id);
+  const [view, contasResult] = await Promise.all([
+    service.getVendasAbertasView(q),
+    contaBancariaService.list({ ativo: true, perPage: 100 }),
+  ]);
+
+  const contasBancarias = contasResult.data.map((conta) => ({
+    id: conta.id,
+    nome: conta.nome,
+  }));
 
   return (
     <div className="space-y-6">
@@ -65,6 +75,7 @@ export default async function VendasAbertasPage({
       <VendaOpenView
         tenantSlug={tenantSlug}
         view={view}
+        contasBancarias={contasBancarias}
         hasSearch={Boolean(q)}
         searchTerm={q}
       />

@@ -21,9 +21,14 @@ import type { ContaReceberListItem } from "@/types/contas-receber";
 type Props = {
   tenantSlug: string;
   items: ContaReceberListItem[];
+  contasBancarias: { id: string; nome: string }[];
 };
 
-export function ContaReceberTable({ tenantSlug, items }: Props) {
+export function ContaReceberTable({
+  tenantSlug,
+  items,
+  contasBancarias,
+}: Props) {
   return (
     <DataTable>
       <Table>
@@ -74,7 +79,11 @@ export function ContaReceberTable({ tenantSlug, items }: Props) {
                   <ContaReceberStatusBadge status={item.status_exibicao} />
                 </TableCell>
                 <TableCell>
-                  <ContaReceberRowActions tenantSlug={tenantSlug} item={item} />
+                  <ContaReceberRowActions
+                    tenantSlug={tenantSlug}
+                    item={item}
+                    contasBancarias={contasBancarias}
+                  />
                 </TableCell>
               </TableRow>
             );

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   canCancelarContaReceber,
+  canEditClassificacaoContaReceber,
   canEditContaReceber,
   canReceberContaReceber,
 } from "@/lib/financeiro/conta-receber-utils";
@@ -24,15 +25,22 @@ import type { ContaReceberDetail, ContaReceberListItem } from "@/types/contas-re
 type Props = {
   tenantSlug: string;
   item: ContaReceberListItem | ContaReceberDetail;
+  contasBancarias: { id: string; nome: string }[];
 };
 
-export function ContaReceberRowActions({ tenantSlug, item }: Props) {
+export function ContaReceberRowActions({
+  tenantSlug,
+  item,
+  contasBancarias,
+}: Props) {
   const [openReceber, setOpenReceber] = useState(false);
   const [openCancelar, setOpenCancelar] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
   const podeReceber = canReceberContaReceber(item);
   const podeEditar = canEditContaReceber(item);
+  const podeCorrigirClassificacao =
+    !podeEditar && canEditClassificacaoContaReceber(item);
   const podeCancelar = canCancelarContaReceber(item);
   const podeExcluir = item.status === "cancelado";
 
@@ -55,16 +63,22 @@ export function ContaReceberRowActions({ tenantSlug, item }: Props) {
             <Eye className="mr-2 size-4" />
             Ver detalhes
           </DropdownMenuItem>
-          {podeEditar ? (
+          {podeEditar || podeCorrigirClassificacao ? (
             <DropdownMenuItem
               render={
                 <Link
-                  href={`/${tenantSlug}/financeiro/contas-receber/${item.id}/editar`}
+                  href={
+                    podeCorrigirClassificacao
+                      ? `/${tenantSlug}/financeiro/contas-receber/${item.id}/editar?classificacaoOnly=true`
+                      : `/${tenantSlug}/financeiro/contas-receber/${item.id}/editar`
+                  }
                 />
               }
             >
               <Pencil className="mr-2 size-4" />
-              Editar
+              {podeCorrigirClassificacao
+                ? "Corrigir classificação"
+                : "Editar"}
             </DropdownMenuItem>
           ) : null}
           {podeReceber ? (
@@ -96,6 +110,7 @@ export function ContaReceberRowActions({ tenantSlug, item }: Props) {
         onOpenChange={setOpenReceber}
         tenantSlug={tenantSlug}
         item={item}
+        contasBancarias={contasBancarias}
       />
       <ContaReceberCancelDialog
         open={openCancelar}

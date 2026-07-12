@@ -4,17 +4,39 @@ import { ContaReceberForm } from "@/components/financeiro/conta-receber-form";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { createContaReceberService } from "@/lib/financeiro/conta-receber-service";
-import { canEditContaReceber } from "@/lib/financeiro/conta-receber-utils";
+import {
+  canEditClassificacaoContaReceber,
+  canEditContaReceber,
+} from "@/lib/financeiro/conta-receber-utils";
 import { requireTenant } from "@/lib/tenants";
 
 export const metadata = { title: "Editar conta a receber" };
 
+function resolveClassificacaoOnly(
+  searchParams: { classificacaoOnly?: string; mode?: string },
+  podeEditarCompleto: boolean,
+  podeEditarClassificacao: boolean,
+): boolean {
+  const fromQuery =
+    searchParams.classificacaoOnly === "true" ||
+    searchParams.mode === "classification";
+
+  if (fromQuery && podeEditarClassificacao) {
+    return true;
+  }
+
+  return !podeEditarCompleto && podeEditarClassificacao;
+}
+
 export default async function EditarPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenant: string; id: string }>;
+  searchParams: Promise<{ classificacaoOnly?: string; mode?: string }>;
 }) {
   const { tenant: tenantSlug, id } = await params;
+  const query = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const service = await createContaReceberService(tenant.id);
   const item = await service.getById(id);
@@ -23,23 +45,37 @@ export default async function EditarPage({
     notFound();
   }
 
-  if (!canEditContaReceber(item)) {
+  const podeEditarCompleto = canEditContaReceber(item);
+  const podeEditarClassificacao = canEditClassificacaoContaReceber(item);
+
+  if (!podeEditarCompleto && !podeEditarClassificacao) {
     notFound();
   }
 
-  const [clientes, vendas, formasPagamento, categorias, centrosCusto] =
+  const classificacaoOnly = resolveClassificacaoOnly(
+    query,
+    podeEditarCompleto,
+    podeEditarClassificacao,
+  );
+
+  const [clientes, vendas, formasPagamento, categorias, centrosCusto, planoContas] =
     await Promise.all([
       service.listClientes(),
       service.listVendas(),
       service.listFormasPagamento(),
       service.listCategorias(),
       service.listCentrosCusto(),
+      service.listPlanoContas(),
     ]);
 
   return (
     <div className="space-y-6">
       <ModuleHeader
-        title="Editar conta a receber"
+        title={
+          classificacaoOnly
+            ? "Corrigir classificação"
+            : "Editar conta a receber"
+        }
         description={item.descricao}
         breadcrumbs={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
@@ -51,23 +87,29 @@ export default async function EditarPage({
             label: item.descricao,
             href: `/${tenantSlug}/financeiro/contas-receber/${item.id}`,
           },
-          { label: "Editar" },
+          { label: classificacaoOnly ? "Corrigir classificação" : "Editar" },
         ]}
       />
 
       <SectionCard
-        title="Edição"
-        description="Atualize os dados do título em aberto."
+        title={classificacaoOnly ? "Classificação contábil" : "Edição"}
+        description={
+          classificacaoOnly
+            ? "Atualize apenas categoria, plano de contas, centro de custo e competência."
+            : "Atualize os dados do título em aberto."
+        }
       >
         <ContaReceberForm
           tenantSlug={tenantSlug}
           mode="edit"
           item={item}
+          classificacaoOnly={classificacaoOnly}
           clientes={clientes}
           vendas={vendas}
           formasPagamento={formasPagamento}
           categorias={categorias}
           centrosCusto={centrosCusto}
+          planoContas={planoContas}
         />
       </SectionCard>
     </div>

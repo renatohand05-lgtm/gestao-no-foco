@@ -19,6 +19,7 @@ export type ContaReceber = {
   forma_pagamento_id: string | null;
   categoria_financeira_id: string | null;
   centro_custo_id: string | null;
+  plano_conta_id: string | null;
   conta_bancaria_id: string | null;
   descricao: string;
   grupo_parcelamento_id: string | null;
@@ -31,6 +32,7 @@ export type ContaReceber = {
   multa: number;
   valor_recebido: number;
   data_emissao: string;
+  data_competencia: string;
   data_vencimento: string;
   data_recebimento: string | null;
   observacoes: string | null;
@@ -66,6 +68,7 @@ export type ContaReceberListItem = Pick<
   | "data_emissao"
   | "data_vencimento"
   | "data_recebimento"
+  | "conta_bancaria_id"
   | "parcela_numero"
   | "parcela_total"
   | "created_at"
@@ -81,6 +84,7 @@ export type ContaReceberDetail = ContaReceber & {
   forma_pagamento?: { id: string; nome: string } | null;
   categoria_financeira?: { id: string; nome: string } | null;
   centro_custo?: { id: string; nome: string; codigo: string } | null;
+  plano_conta?: { id: string; nome: string; codigo: string } | null;
   conta_bancaria?: { id: string; nome: string } | null;
   status_exibicao: ContaReceberStatus;
 };
@@ -89,14 +93,16 @@ export type ContaReceberInput = {
   cliente_id: string;
   venda_id?: string | null;
   forma_pagamento_id?: string | null;
-  categoria_financeira_id?: string | null;
-  centro_custo_id?: string | null;
+  categoria_financeira_id: string;
+  centro_custo_id: string;
+  plano_conta_id: string;
   descricao: string;
   valor_original: number;
   desconto?: number;
   juros?: number;
   multa?: number;
   data_emissao: string;
+  data_competencia: string;
   data_vencimento: string;
   parcelas?: number;
   observacoes?: string | null;
@@ -105,12 +111,20 @@ export type ContaReceberInput = {
 export type CreateContaReceberInput = ContaReceberInput;
 export type UpdateContaReceberInput = Partial<ContaReceberInput>;
 
+export type ClassificacaoContaReceberInput = {
+  categoria_financeira_id: string;
+  centro_custo_id: string;
+  plano_conta_id: string;
+  data_competencia: string;
+};
+
 export type ReceberContaInput = {
   data_recebimento: string;
-  valor_recebido?: number;
+  valor_recebido: number;
   juros?: number;
   multa?: number;
   desconto?: number;
+  conta_bancaria_id: string;
 };
 
 export type ListContasReceberParams = {
@@ -176,6 +190,12 @@ export type CategoriaFinanceiraOption = {
 };
 
 export type CentroCustoOption = {
+  id: string;
+  codigo: string;
+  nome: string;
+};
+
+export type PlanoContaOption = {
   id: string;
   codigo: string;
   nome: string;

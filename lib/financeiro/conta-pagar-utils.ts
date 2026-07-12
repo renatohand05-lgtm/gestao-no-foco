@@ -81,6 +81,13 @@ export function canEditContaPagar(conta: ContaPagarStatusInput): boolean {
   return status === "aberto" || status === "vencido" || status === "parcial";
 }
 
+/** Permite corrigir classificação contábil (inclui títulos já pagos). */
+export function canEditClassificacaoContaPagar(
+  conta: ContaPagarStatusInput,
+): boolean {
+  return conta.status !== "cancelado";
+}
+
 export function canPagarContaPagar(conta: ContaPagarStatusInput): boolean {
   const status = resolveStatusExibicao(conta);
   return status === "aberto" || status === "vencido" || status === "parcial";

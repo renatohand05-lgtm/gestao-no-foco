@@ -98,9 +98,9 @@ export type ContaPagarInput = {
   fornecedor_id?: string | null;
   fornecedor_nome?: string | null;
   forma_pagamento_id?: string | null;
-  categoria_financeira_id?: string | null;
-  centro_custo_id?: string | null;
-  plano_conta_id?: string | null;
+  categoria_financeira_id: string;
+  centro_custo_id: string;
+  plano_conta_id: string;
   descricao: string;
   valor_original: number;
   desconto?: number;
@@ -115,6 +115,13 @@ export type ContaPagarInput = {
 
 export type CreateContaPagarInput = ContaPagarInput;
 export type UpdateContaPagarInput = Partial<ContaPagarInput>;
+
+export type ClassificacaoContaPagarInput = {
+  categoria_financeira_id: string;
+  centro_custo_id: string;
+  plano_conta_id: string;
+  data_competencia: string;
+};
 
 export type PagarContaInput = {
   data_pagamento: string;

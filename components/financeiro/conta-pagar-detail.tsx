@@ -10,6 +10,7 @@ import {
   calcSaldoPendente,
   calcValorLiquido,
   canCancelarContaPagar,
+  canEditClassificacaoContaPagar,
   canEditContaPagar,
   canPagarContaPagar,
   formatContaPagarNumero,
@@ -78,6 +79,12 @@ export function ContaPagarDetail({
           <ActionButton
             action="edit"
             href={`/${tenantSlug}/financeiro/contas-pagar/${item.id}/editar`}
+          />
+        ) : canEditClassificacaoContaPagar(item) ? (
+          <ActionButton
+            action="edit"
+            label="Corrigir classificação"
+            href={`/${tenantSlug}/financeiro/contas-pagar/${item.id}/editar?classificacaoOnly=true`}
           />
         ) : null}
         {canCancelarContaPagar(item) ? (

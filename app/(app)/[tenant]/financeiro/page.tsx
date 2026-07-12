@@ -1,8 +1,10 @@
 import Link from "next/link";
 import {
+  ArrowLeftRight,
   ArrowRight,
   BookOpen,
   CreditCard,
+  FileSpreadsheet,
   Landmark,
   Receipt,
   Sparkles,
@@ -30,6 +32,8 @@ const ICONS = {
   categorias: Tags,
   "contas-receber": Receipt,
   "contas-pagar": Wallet,
+  "fluxo-caixa": ArrowLeftRight,
+  dre: FileSpreadsheet,
 } as const;
 
 export default async function FinanceiroPage({

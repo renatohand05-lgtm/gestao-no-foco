@@ -9,7 +9,7 @@ type FinanceiroEmptyStateProps = {
   icon: LucideIcon;
   title: string;
   description: string;
-  createLabel: string;
+  createLabel?: string;
   createHref?: string;
   hasSearch: boolean;
   hasFilters: boolean;
@@ -37,11 +37,15 @@ export function FinanceiroEmptyState({
           ? "Tente ajustar a busca ou os filtros, ou cadastre um novo registro."
           : description
       }
-      action={{
-        label: createLabel,
-        href: createHref ?? `/${tenantSlug}/financeiro/${basePath}/novo`,
-        icon: Plus,
-      }}
+      action={
+        createLabel
+          ? {
+              label: createLabel,
+              href: createHref ?? `/${tenantSlug}/financeiro/${basePath}/novo`,
+              icon: Plus,
+            }
+          : undefined
+      }
     />
   );
 }

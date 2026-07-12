@@ -71,7 +71,7 @@ export default async function Page({ params, searchParams }: PageProps) {
   const sortOrder = (order as SortOrder | undefined) ?? "asc";
   const statusFilter = (status as ContaReceberStatus | "all" | undefined) ?? "all";
 
-  const [result, resumo, clientes] = await Promise.all([
+  const [result, resumo, clientes, contasBancarias] = await Promise.all([
     service.list({
       search: q,
       page: currentPage,
@@ -85,6 +85,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     }),
     service.getResumo(),
     service.listClientes(),
+    service.listContasBancarias(),
   ]);
 
   const hasFilters =
@@ -164,7 +165,11 @@ export default async function Page({ params, searchParams }: PageProps) {
             {result.total} registro{result.total === 1 ? "" : "s"} encontrado
             {result.total === 1 ? "" : "s"}
           </p>
-          <ContaReceberTable tenantSlug={tenantSlug} items={result.data} />
+          <ContaReceberTable
+            tenantSlug={tenantSlug}
+            items={result.data}
+            contasBancarias={contasBancarias}
+          />
           <Suspense fallback={null}>
             <FinanceiroPagination
               tenantSlug={tenantSlug}

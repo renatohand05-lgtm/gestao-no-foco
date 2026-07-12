@@ -4,8 +4,10 @@ import { PRODUTO_TIPOS_SEM_ESTOQUE } from "@/lib/estoque/constants";
 import { createClient } from "@/lib/supabase/server";
 import {
   cancelarVendaAtomico,
+  faturarEReceberVendaAtomico,
   faturarVendaAtomico,
 } from "@/lib/vendas/venda-faturamento-rpc";
+import { canFaturarEReceberVenda } from "@/lib/vendas/venda-faturar-e-receber";
 import {
   VENDA_STATUS_EDITAVEIS,
   VENDAS_DEFAULT_PER_PAGE,
@@ -13,6 +15,7 @@ import {
 } from "@/lib/vendas/constants";
 import { buildVendaHeaderPayload } from "@/lib/vendas/mappers";
 import { validateFormaPagamentoParaFaturamento } from "@/lib/vendas/venda-faturamento-validation";
+import { todayISO } from "@/lib/financeiro/conta-receber-utils";
 import type { Database } from "@/types/database";
 import type {
   ClienteOption,
@@ -253,7 +256,7 @@ export class VendaService {
     if (vendaData.forma_pagamento_id) {
       const { data: forma } = await this.supabase
         .from("formas_pagamento")
-        .select("id, nome, tipo, gera_financeiro")
+        .select("id, nome, tipo, gera_financeiro, dias_compensacao")
         .eq("tenant_id", this.tenantId)
         .eq("id", vendaData.forma_pagamento_id)
         .is("deleted_at", null)
@@ -799,6 +802,55 @@ export class VendaService {
     );
 
     await faturarVendaAtomico(this.supabase, this.tenantId, id, createdBy);
+
+    const detail = await this.getById(id);
+    if (!detail) {
+      throw new Error("Erro ao carregar venda faturada.");
+    }
+
+    return detail;
+  }
+
+  async faturarEReceber(
+    id: string,
+    contaBancariaId: string,
+    createdBy: string | null,
+    dataRecebimento?: string,
+  ): Promise<VendaDetail> {
+    const venda = await this.getById(id);
+
+    if (!venda) {
+      throw new Error("Venda não encontrada.");
+    }
+
+    if (!canFaturarEReceberVenda(venda)) {
+      throw new Error(
+        "Faturar e receber só é permitido para vendas à vista com forma imediata (dinheiro, PIX ou débito).",
+      );
+    }
+
+    if (venda.itens.length === 0) {
+      throw new Error("A venda precisa ter pelo menos um item para ser faturada.");
+    }
+
+    if (!contaBancariaId) {
+      throw new Error("Informe a conta bancária para o recebimento.");
+    }
+
+    await this.validateStockForFaturamento(venda.itens);
+    await validateFormaPagamentoParaFaturamento(
+      this.supabase,
+      this.tenantId,
+      venda,
+    );
+
+    await faturarEReceberVendaAtomico(this.supabase, {
+      tenantId: this.tenantId,
+      vendaId: id,
+      contaBancariaId,
+      dataRecebimento: dataRecebimento ?? todayISO(),
+      createdBy,
+    });
 
     const detail = await this.getById(id);
     if (!detail) {

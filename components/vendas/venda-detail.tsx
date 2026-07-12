@@ -4,6 +4,7 @@ import { ModuleHeader } from "@/components/layout/module-header";
 import { VendaCancelarButton } from "@/components/vendas/venda-cancelar-button";
 import { VendaDeleteButton } from "@/components/vendas/venda-delete-button";
 import { VendaFaturarButton } from "@/components/vendas/venda-faturar-button";
+import { VendaFaturarEReceberButton } from "@/components/vendas/venda-faturar-e-receber-button";
 import { VendaStatusBadge } from "@/components/vendas/venda-status-badge";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
@@ -26,12 +27,14 @@ import {
   formatVendaNumero,
   resolveFormaPagamentoDisplay,
 } from "@/lib/vendas/format";
+import { canFaturarEReceberVenda } from "@/lib/vendas/venda-faturar-e-receber";
 import { PRODUTO_TIPOS_SEM_ESTOQUE } from "@/lib/estoque/constants";
 import type { VendaDetail } from "@/types/vendas";
 
 type VendaDetailProps = {
   tenantSlug: string;
   venda: VendaDetail;
+  contasBancarias: { id: string; nome: string }[];
 };
 
 function DetailItem({
@@ -51,12 +54,17 @@ function DetailItem({
   );
 }
 
-export function VendaDetailView({ tenantSlug, venda }: VendaDetailProps) {
+export function VendaDetailView({
+  tenantSlug,
+  venda,
+  contasBancarias,
+}: VendaDetailProps) {
   const canEdit = VENDA_STATUS_EDITAVEIS.includes(
     venda.status as (typeof VENDA_STATUS_EDITAVEIS)[number],
   );
   const canFaturar =
     venda.status === "orcamento" || venda.status === "em_andamento";
+  const canFaturarEReceber = canFaturarEReceberVenda(venda);
   const canCancelar = venda.status !== "cancelado";
 
   return (
@@ -75,6 +83,15 @@ export function VendaDetailView({ tenantSlug, venda }: VendaDetailProps) {
             tenantSlug={tenantSlug}
             vendaId={venda.id}
             vendaNumero={venda.numero}
+          />
+        ) : null}
+        {canFaturarEReceber ? (
+          <VendaFaturarEReceberButton
+            tenantSlug={tenantSlug}
+            vendaId={venda.id}
+            vendaNumero={venda.numero}
+            valorReceber={venda.total}
+            contasBancarias={contasBancarias}
           />
         ) : null}
         {canCancelar ? (

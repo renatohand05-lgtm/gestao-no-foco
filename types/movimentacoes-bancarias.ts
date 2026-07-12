@@ -118,29 +118,7 @@ export type PaginatedResult<T> = {
   totalPages: number;
 };
 
-export type FluxoCaixaResumo = {
-  saldo_total: number;
-  total_entradas: number;
-  total_saidas: number;
-  saldo_periodo: number;
-  quantidade_movimentacoes: number;
-  quantidade_contas_ativas: number;
-};
-
-export type FluxoCaixaContaSaldo = {
-  id: string;
-  nome: string;
-  tipo: string;
-  saldo_inicial: number;
-  saldo_atual: number;
-  ativo: boolean;
-};
-
-export type FluxoCaixaPeriodoParams = {
-  dataDe?: string;
-  dataAte?: string;
-  contaBancariaId?: string;
-};
+export type { FluxoCaixaContaSaldo } from "@/types/fluxo-caixa";
 
 export type MovimentacaoBancariaSuccessMessage = "created" | "deleted" | "estornado";
 

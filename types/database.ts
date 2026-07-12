@@ -710,6 +710,7 @@ export type Database = {
           forma_pagamento_id: string | null;
           categoria_financeira_id: string | null;
           centro_custo_id: string | null;
+          plano_conta_id: string | null;
           conta_bancaria_id: string | null;
           descricao: string;
           grupo_parcelamento_id: string | null;
@@ -722,6 +723,7 @@ export type Database = {
           multa: number;
           valor_recebido: number;
           data_emissao: string;
+          data_competencia: string;
           data_vencimento: string;
           data_recebimento: string | null;
           observacoes: string | null;
@@ -738,6 +740,7 @@ export type Database = {
           forma_pagamento_id?: string | null;
           categoria_financeira_id?: string | null;
           centro_custo_id?: string | null;
+          plano_conta_id?: string | null;
           conta_bancaria_id?: string | null;
           descricao: string;
           grupo_parcelamento_id?: string | null;
@@ -750,6 +753,7 @@ export type Database = {
           multa?: number;
           valor_recebido?: number;
           data_emissao?: string;
+          data_competencia?: string;
           data_vencimento: string;
           data_recebimento?: string | null;
           observacoes?: string | null;
@@ -766,6 +770,7 @@ export type Database = {
           forma_pagamento_id?: string | null;
           categoria_financeira_id?: string | null;
           centro_custo_id?: string | null;
+          plano_conta_id?: string | null;
           conta_bancaria_id?: string | null;
           descricao?: string;
           grupo_parcelamento_id?: string | null;
@@ -778,6 +783,7 @@ export type Database = {
           multa?: number;
           valor_recebido?: number;
           data_emissao?: string;
+          data_competencia?: string;
           data_vencimento?: string;
           data_recebimento?: string | null;
           observacoes?: string | null;
@@ -819,6 +825,13 @@ export type Database = {
             columns: ["centro_custo_id"];
             isOneToOne: false;
             referencedRelation: "centros_custo";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contas_receber_plano_conta_id_fkey";
+            columns: ["plano_conta_id"];
+            isOneToOne: false;
+            referencedRelation: "plano_contas";
             referencedColumns: ["id"];
           },
           {
@@ -1128,6 +1141,84 @@ export type Database = {
         Args: {
           p_tenant_id: string;
           p_venda_id: string;
+          p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      registrar_movimentacao_bancaria_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_conta_bancaria_id: string;
+          p_tipo: string;
+          p_valor: number;
+          p_data_movimentacao: string;
+          p_descricao: string;
+          p_origem?: string;
+          p_conta_pagar_id?: string | null;
+          p_conta_receber_id?: string | null;
+          p_observacoes?: string | null;
+          p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      transferir_entre_contas_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_conta_origem_id: string;
+          p_conta_destino_id: string;
+          p_valor: number;
+          p_data_movimentacao: string;
+          p_descricao: string;
+          p_observacoes?: string | null;
+          p_created_by?: string | null;
+        };
+        Returns: Json;
+      };
+      estornar_movimentacao_bancaria_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_movimentacao_id: string;
+          p_data_movimentacao: string;
+          p_observacoes?: string | null;
+          p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      baixar_conta_pagar_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_conta_pagar_id: string;
+          p_data_pagamento: string;
+          p_conta_bancaria_id?: string | null;
+          p_valor_pagamento?: number | null;
+          p_desconto?: number | null;
+          p_juros?: number | null;
+          p_multa?: number | null;
+          p_forma_pagamento_id?: string | null;
+          p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      baixar_conta_receber_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_conta_receber_id: string;
+          p_data_recebimento: string;
+          p_conta_bancaria_id?: string | null;
+          p_valor_recebido?: number | null;
+          p_desconto?: number | null;
+          p_juros?: number | null;
+          p_multa?: number | null;
+          p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      faturar_e_receber_venda_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_venda_id: string;
+          p_conta_bancaria_id: string;
+          p_data_recebimento?: string;
           p_created_by?: string | null;
         };
         Returns: string;

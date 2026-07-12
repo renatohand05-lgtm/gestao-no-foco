@@ -4,16 +4,12 @@ import {
   FINANCEIRO_DEFAULT_PER_PAGE,
   FINANCEIRO_MAX_PER_PAGE,
 } from "@/lib/financeiro/constants";
+import { buildTransferenciaBancariaPayload } from "@/lib/financeiro/mappers";
 import {
-  buildMovimentacaoBancariaPayload,
-  buildTransferenciaBancariaPayload,
-} from "@/lib/financeiro/mappers";
-import {
-  calcDeltaSaldo,
-  calcNovoSaldoBancario,
-  calcValorEstorno,
-  isMovimentacaoEstornavel,
-} from "@/lib/financeiro/movimentacao-bancaria-utils";
+  estornarMovimentacaoBancariaAtomico,
+  registrarMovimentacaoBancariaAtomico,
+  transferirEntreContasAtomico,
+} from "@/lib/financeiro/movimentacao-bancaria-rpc";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type { SortOrder } from "@/types/financeiro";
@@ -140,62 +136,28 @@ export class MovimentacaoBancariaService {
     return (data as MovimentacaoBancariaDetail | null) ?? null;
   }
 
-  private async getContaBancariaAtiva(contaBancariaId: string) {
-    const { data, error } = await this.supabase
-      .from("contas_bancarias")
-      .select("id, nome, saldo_atual, ativo")
-      .eq("tenant_id", this.tenantId)
-      .eq("id", contaBancariaId)
-      .is("deleted_at", null)
-      .maybeSingle();
-
-    if (error) throw new Error(error.message);
-
-    if (!data) {
-      throw new Error("Conta bancária não encontrada.");
-    }
-
-    if (!data.ativo) {
-      throw new Error("Conta bancária inativa não aceita movimentações.");
-    }
-
-    return data;
-  }
-
-  private async atualizarSaldoConta(contaBancariaId: string, saldoNovo: number) {
-    const { error } = await this.supabase
-      .from("contas_bancarias")
-      .update({ saldo_atual: saldoNovo })
-      .eq("tenant_id", this.tenantId)
-      .eq("id", contaBancariaId)
-      .is("deleted_at", null);
-
-    if (error) throw new Error(error.message);
-  }
-
-  private async inserirMovimentacao(
-    payload: Database["public"]["Tables"]["movimentacoes_bancarias"]["Insert"],
-    saldoNovo: number,
-  ) {
-    const { data, error } = await this.supabase
-      .from("movimentacoes_bancarias")
-      .insert(payload)
-      .select("id")
-      .single();
-
-    if (error) {
-      if (error.code === "23505") {
-        throw new Error("Esta movimentação já foi estornada.");
-      }
-      throw new Error(error.message);
-    }
-
-    await this.atualizarSaldoConta(
-      payload.conta_bancaria_id as string,
-      saldoNovo,
+  async create(
+    input: CreateMovimentacaoBancariaInput,
+    createdBy: string | null,
+  ): Promise<MovimentacaoBancariaDetail> {
+    const movimentacaoId = await registrarMovimentacaoBancariaAtomico(
+      this.supabase,
+      {
+        tenantId: this.tenantId,
+        contaBancariaId: input.conta_bancaria_id,
+        tipo: input.tipo,
+        valor: input.valor,
+        dataMovimentacao: input.data_movimentacao,
+        descricao: input.descricao,
+        origem: input.origem ?? "manual",
+        contaPagarId: input.conta_pagar_id,
+        contaReceberId: input.conta_receber_id,
+        observacoes: input.observacoes,
+        createdBy,
+      },
     );
 
-    const detail = await this.getById(data.id);
+    const detail = await this.getById(movimentacaoId);
     if (!detail) {
       throw new Error("Erro ao carregar movimentação criada.");
     }
@@ -203,133 +165,25 @@ export class MovimentacaoBancariaService {
     return detail;
   }
 
-  async create(
-    input: CreateMovimentacaoBancariaInput,
-    createdBy: string | null,
-  ): Promise<MovimentacaoBancariaDetail> {
-    const conta = await this.getContaBancariaAtiva(input.conta_bancaria_id);
-    const saldoAnterior = Number(conta.saldo_atual ?? 0);
-
-    if (input.tipo !== "ajuste" && input.valor <= 0) {
-      throw new Error("Informe um valor maior que zero.");
-    }
-
-    if (input.tipo === "ajuste" && input.valor < 0) {
-      throw new Error("Informe um saldo de ajuste válido.");
-    }
-
-    const saldoNovo = calcNovoSaldoBancario({
-      tipo: input.tipo,
-      valor: input.valor,
-      saldoAnterior,
-    });
-
-    if (input.tipo === "saida" && saldoNovo < 0) {
-      throw new Error("Saldo insuficiente para esta saída.");
-    }
-
-    return this.inserirMovimentacao(
-      {
-        tenant_id: this.tenantId,
-        ...buildMovimentacaoBancariaPayload(input),
-        saldo_anterior: saldoAnterior,
-        saldo_novo: saldoNovo,
-        origem: input.origem ?? "manual",
-        created_by: createdBy,
-      },
-      saldoNovo,
-    );
-  }
-
   async createTransferencia(
     input: CreateTransferenciaBancariaInput,
     createdBy: string | null,
   ): Promise<{ enviada: MovimentacaoBancariaDetail; recebida: MovimentacaoBancariaDetail }> {
-    if (input.conta_origem_id === input.conta_destino_id) {
-      throw new Error("Selecione contas diferentes para a transferência.");
-    }
-
-    if (input.valor <= 0) {
-      throw new Error("Informe um valor maior que zero.");
-    }
-
-    const [origem, destino] = await Promise.all([
-      this.getContaBancariaAtiva(input.conta_origem_id),
-      this.getContaBancariaAtiva(input.conta_destino_id),
-    ]);
-
-    const saldoOrigemAnterior = Number(origem.saldo_atual ?? 0);
-    const saldoDestinoAnterior = Number(destino.saldo_atual ?? 0);
-
-    if (input.valor > saldoOrigemAnterior) {
-      throw new Error("Saldo insuficiente na conta de origem.");
-    }
-
-    const saldoOrigemNovo = saldoOrigemAnterior - input.valor;
-    const saldoDestinoNovo = saldoDestinoAnterior + input.valor;
-    const grupoId = crypto.randomUUID();
     const base = buildTransferenciaBancariaPayload(input);
-
-    const { data: enviadaRow, error: enviadaError } = await this.supabase
-      .from("movimentacoes_bancarias")
-      .insert({
-        tenant_id: this.tenantId,
-        conta_bancaria_id: input.conta_origem_id,
-        conta_bancaria_contrapartida_id: input.conta_destino_id,
-        grupo_transferencia_id: grupoId,
-        tipo: "transferencia",
-        transferencia_papel: "enviada",
-        valor: input.valor,
-        saldo_anterior: saldoOrigemAnterior,
-        saldo_novo: saldoOrigemNovo,
-        data_movimentacao: base.data_movimentacao,
-        descricao: base.descricao,
-        origem: "transferencia",
-        observacoes: base.observacoes,
-        created_by: createdBy,
-      })
-      .select("id")
-      .single();
-
-    if (enviadaError) throw new Error(enviadaError.message);
-
-    const { data: recebidaRow, error: recebidaError } = await this.supabase
-      .from("movimentacoes_bancarias")
-      .insert({
-        tenant_id: this.tenantId,
-        conta_bancaria_id: input.conta_destino_id,
-        conta_bancaria_contrapartida_id: input.conta_origem_id,
-        grupo_transferencia_id: grupoId,
-        tipo: "transferencia",
-        transferencia_papel: "recebida",
-        valor: input.valor,
-        saldo_anterior: saldoDestinoAnterior,
-        saldo_novo: saldoDestinoNovo,
-        data_movimentacao: base.data_movimentacao,
-        descricao: base.descricao,
-        origem: "transferencia",
-        observacoes: base.observacoes,
-        created_by: createdBy,
-      })
-      .select("id")
-      .single();
-
-    if (recebidaError) {
-      await this.supabase
-        .from("movimentacoes_bancarias")
-        .delete()
-        .eq("id", enviadaRow.id);
-      throw new Error(recebidaError.message);
-    }
-
-    await Promise.all([
-      this.atualizarSaldoConta(input.conta_origem_id, saldoOrigemNovo),
-      this.atualizarSaldoConta(input.conta_destino_id, saldoDestinoNovo),
-    ]);
+    const result = await transferirEntreContasAtomico(this.supabase, {
+      tenantId: this.tenantId,
+      contaOrigemId: input.conta_origem_id,
+      contaDestinoId: input.conta_destino_id,
+      valor: input.valor,
+      dataMovimentacao: base.data_movimentacao,
+      descricao: base.descricao,
+      observacoes: base.observacoes,
+      createdBy,
+    });
 
     const [enviada, recebida] = await Promise.all([
-      this.getById(enviadaRow.id),
-      this.getById(recebidaRow.id),
+      this.getById(result.enviada_id),
+      this.getById(result.recebida_id),
     ]);
 
     if (!enviada || !recebida) {
@@ -344,64 +198,15 @@ export class MovimentacaoBancariaService {
     input: EstornarMovimentacaoBancariaInput,
     createdBy: string | null,
   ): Promise<MovimentacaoBancariaDetail> {
-    const original = await this.getById(movimentacaoId);
+    const estornoId = await estornarMovimentacaoBancariaAtomico(this.supabase, {
+      tenantId: this.tenantId,
+      movimentacaoId,
+      dataMovimentacao: input.data_movimentacao,
+      observacoes: input.observacoes,
+      createdBy,
+    });
 
-    if (!original) {
-      throw new Error("Movimentação não encontrada.");
-    }
-
-    if (!isMovimentacaoEstornavel(original)) {
-      throw new Error("Esta movimentação não pode ser estornada.");
-    }
-
-    const conta = await this.getContaBancariaAtiva(original.conta_bancaria_id);
-    const saldoAnterior = Number(conta.saldo_atual ?? 0);
-    const delta = calcDeltaSaldo(original);
-    const saldoNovo = saldoAnterior - delta;
-    const valor = calcValorEstorno(original);
-
-    if (saldoNovo < 0) {
-      throw new Error("Estorno resultaria em saldo negativo na conta.");
-    }
-
-    const { data: estornoRow, error: estornoError } = await this.supabase
-      .from("movimentacoes_bancarias")
-      .insert({
-        tenant_id: this.tenantId,
-        conta_bancaria_id: original.conta_bancaria_id,
-        tipo: "estorno",
-        valor,
-        saldo_anterior: saldoAnterior,
-        saldo_novo: saldoNovo,
-        data_movimentacao: input.data_movimentacao,
-        descricao: `Estorno: ${original.descricao}`,
-        origem: "estorno",
-        movimentacao_estornada_id: original.id,
-        observacoes: input.observacoes ?? null,
-        created_by: createdBy,
-      })
-      .select("id")
-      .single();
-
-    if (estornoError) {
-      if (estornoError.code === "23505") {
-        throw new Error("Esta movimentação já foi estornada.");
-      }
-      throw new Error(estornoError.message);
-    }
-
-    const { error: updateOriginalError } = await this.supabase
-      .from("movimentacoes_bancarias")
-      .update({ estornada_por_id: estornoRow.id })
-      .eq("tenant_id", this.tenantId)
-      .eq("id", original.id)
-      .is("deleted_at", null);
-
-    if (updateOriginalError) throw new Error(updateOriginalError.message);
-
-    await this.atualizarSaldoConta(original.conta_bancaria_id, saldoNovo);
-
-    const detail = await this.getById(estornoRow.id);
+    const detail = await this.getById(estornoId);
     if (!detail) {
       throw new Error("Erro ao carregar estorno criado.");
     }
@@ -416,18 +221,11 @@ export class MovimentacaoBancariaService {
       throw new Error("Movimentação não encontrada.");
     }
 
-    if (movimentacao.tipo === "estorno") {
-      throw new Error("Estornos não podem ser excluídos diretamente.");
-    }
-
-    const { error } = await this.supabase
-      .from("movimentacoes_bancarias")
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("tenant_id", this.tenantId)
-      .eq("id", id)
-      .is("deleted_at", null);
-
-    if (error) throw new Error(error.message);
+    // Movimentações alteram saldo_atual; exclusão (soft-delete) sem estorno
+    // deixaria o caixa inconsistente. Reversão somente via estorno.
+    throw new Error(
+      "Movimentações bancárias não podem ser excluídas. Utilize o estorno para reverter o efeito no saldo.",
+    );
   }
 
   async listContasBancariasAtivas() {

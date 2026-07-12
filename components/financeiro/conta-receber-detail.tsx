@@ -12,6 +12,7 @@ import {
   calcSaldoPendente,
   calcValorLiquido,
   canCancelarContaReceber,
+  canEditClassificacaoContaReceber,
   canEditContaReceber,
   canReceberContaReceber,
   formatContaReceberNumero,
@@ -22,6 +23,7 @@ import type { ContaReceberDetail } from "@/types/contas-receber";
 type Props = {
   tenantSlug: string;
   item: ContaReceberDetail;
+  contasBancarias: { id: string; nome: string }[];
 };
 
 function DetailItem({
@@ -41,7 +43,11 @@ function DetailItem({
   );
 }
 
-export function ContaReceberDetail({ tenantSlug, item }: Props) {
+export function ContaReceberDetail({
+  tenantSlug,
+  item,
+  contasBancarias,
+}: Props) {
   const valorLiquido = calcValorLiquido(item);
   const saldo = calcSaldoPendente(item);
 
@@ -61,12 +67,22 @@ export function ContaReceberDetail({ tenantSlug, item }: Props) {
       >
         <ContaReceberStatusBadge status={item.status_exibicao} />
         {canReceberContaReceber(item) ? (
-          <ContaReceberReceberButton tenantSlug={tenantSlug} item={item} />
+          <ContaReceberReceberButton
+            tenantSlug={tenantSlug}
+            item={item}
+            contasBancarias={contasBancarias}
+          />
         ) : null}
         {canEditContaReceber(item) ? (
           <ActionButton
             action="edit"
             href={`/${tenantSlug}/financeiro/contas-receber/${item.id}/editar`}
+          />
+        ) : canEditClassificacaoContaReceber(item) ? (
+          <ActionButton
+            action="edit"
+            label="Corrigir classificação"
+            href={`/${tenantSlug}/financeiro/contas-receber/${item.id}/editar?classificacaoOnly=true`}
           />
         ) : null}
         {canCancelarContaReceber(item) ? (
@@ -125,6 +141,29 @@ export function ContaReceberDetail({ tenantSlug, item }: Props) {
               }
             />
             <DetailItem
+              label="Plano de contas"
+              value={
+                item.plano_conta
+                  ? `${item.plano_conta.codigo} · ${item.plano_conta.nome}`
+                  : "—"
+              }
+            />
+            <DetailItem
+              label="Conta bancária (baixa)"
+              value={
+                item.conta_bancaria ? (
+                  <Link
+                    href={`/${tenantSlug}/financeiro/contas-bancarias/${item.conta_bancaria.id}`}
+                    className="text-emerald-700 hover:underline dark:text-emerald-300"
+                  >
+                    {item.conta_bancaria.nome}
+                  </Link>
+                ) : (
+                  "—"
+                )
+              }
+            />
+            <DetailItem
               label="Parcela"
               value={`${item.parcela_numero} de ${item.parcela_total}`}
             />
@@ -157,6 +196,10 @@ export function ContaReceberDetail({ tenantSlug, item }: Props) {
             <DetailItem
               label="Emissão"
               value={formatDateOnly(item.data_emissao)}
+            />
+            <DetailItem
+              label="Competência"
+              value={formatDateOnly(item.data_competencia)}
             />
             <DetailItem
               label="Vencimento"

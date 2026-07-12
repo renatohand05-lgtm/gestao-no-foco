@@ -4,6 +4,7 @@ import { Clock3, FileText } from "lucide-react";
 import { VendaCancelarButton } from "@/components/vendas/venda-cancelar-button";
 import { VendaDeleteButton } from "@/components/vendas/venda-delete-button";
 import { VendaFaturarButton } from "@/components/vendas/venda-faturar-button";
+import { VendaFaturarEReceberButton } from "@/components/vendas/venda-faturar-e-receber-button";
 import { VendaStatusBadge } from "@/components/vendas/venda-status-badge";
 import { ActionButton } from "@/components/ui/action-button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -19,11 +20,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatCurrency, formatVendaDate, formatVendaNumero } from "@/lib/vendas/format";
+import { canFaturarEReceberVenda } from "@/lib/vendas/venda-faturar-e-receber";
 import type { VendasAbertasView } from "@/types/vendas";
 
 type VendaOpenViewProps = {
   tenantSlug: string;
   view: VendasAbertasView;
+  contasBancarias: { id: string; nome: string }[];
   hasSearch?: boolean;
   searchTerm?: string;
 };
@@ -50,6 +53,7 @@ function ResumoItem({
 export function VendaOpenView({
   tenantSlug,
   view,
+  contasBancarias,
   hasSearch = false,
   searchTerm,
 }: VendaOpenViewProps) {
@@ -247,6 +251,16 @@ export function VendaOpenView({
                     vendaId={venda.id}
                     vendaNumero={venda.numero}
                     redirectTo={buildRedirectWithSuccess("faturado")}
+                  />
+                ) : null}
+                {canFaturarEReceberVenda(venda) ? (
+                  <VendaFaturarEReceberButton
+                    tenantSlug={tenantSlug}
+                    vendaId={venda.id}
+                    vendaNumero={venda.numero}
+                    valorReceber={venda.total}
+                    contasBancarias={contasBancarias}
+                    redirectTo={buildRedirectWithSuccess("faturado_recebido")}
                   />
                 ) : null}
                 {venda.acoes_disponiveis.includes("cancelar") ? (

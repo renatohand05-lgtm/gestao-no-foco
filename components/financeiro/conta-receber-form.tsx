@@ -31,6 +31,7 @@ import type {
   ClienteOption,
   ContaReceberDetail,
   FormaPagamentoOption,
+  PlanoContaOption,
   VendaOption,
 } from "@/types/contas-receber";
 
@@ -43,6 +44,7 @@ type Props = {
   formasPagamento: FormaPagamentoOption[];
   categorias: CategoriaFinanceiraOption[];
   centrosCusto: CentroCustoOption[];
+  planoContas: PlanoContaOption[];
 };
 
 const selectClassName =
@@ -65,6 +67,7 @@ export function ContaReceberForm({
   formasPagamento,
   categorias,
   centrosCusto,
+  planoContas,
 }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -85,12 +88,14 @@ export function ContaReceberForm({
           forma_pagamento_id: "",
           categoria_financeira_id: "",
           centro_custo_id: "",
+          plano_conta_id: "",
           descricao: "",
           valor_original: 0,
           desconto: 0,
           juros: 0,
           multa: 0,
           data_emissao: todayISO(),
+          data_competencia: todayISO(),
           data_vencimento: todayISO(),
           parcelas: 1,
           observacoes: "",
@@ -216,6 +221,8 @@ export function ContaReceberForm({
             <FormField
               label="Categoria financeira"
               htmlFor="categoria_financeira_id"
+              required
+              error={form.formState.errors.categoria_financeira_id?.message}
             >
               <select
                 id="categoria_financeira_id"
@@ -231,7 +238,12 @@ export function ContaReceberForm({
               </select>
             </FormField>
 
-            <FormField label="Centro de custo" htmlFor="centro_custo_id">
+            <FormField
+              label="Centro de custo"
+              htmlFor="centro_custo_id"
+              required
+              error={form.formState.errors.centro_custo_id?.message}
+            >
               <select
                 id="centro_custo_id"
                 {...form.register("centro_custo_id")}
@@ -241,6 +253,26 @@ export function ContaReceberForm({
                 {centrosCusto.map((centro) => (
                   <option key={centro.id} value={centro.id}>
                     {centro.codigo} · {centro.nome}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            <FormField
+              label="Plano de contas"
+              htmlFor="plano_conta_id"
+              required
+              error={form.formState.errors.plano_conta_id?.message}
+            >
+              <select
+                id="plano_conta_id"
+                {...form.register("plano_conta_id")}
+                className={selectClassName}
+              >
+                <option value="">Selecione o plano de contas</option>
+                {planoContas.map((conta) => (
+                  <option key={conta.id} value={conta.id}>
+                    {conta.codigo} · {conta.nome}
                   </option>
                 ))}
               </select>
@@ -311,6 +343,18 @@ export function ContaReceberForm({
                 id="data_emissao"
                 type="date"
                 {...form.register("data_emissao")}
+              />
+            </FormField>
+            <FormField
+              label="Data de competência"
+              htmlFor="data_competencia"
+              required
+              error={form.formState.errors.data_competencia?.message}
+            >
+              <Input
+                id="data_competencia"
+                type="date"
+                {...form.register("data_competencia")}
               />
             </FormField>
             <FormField

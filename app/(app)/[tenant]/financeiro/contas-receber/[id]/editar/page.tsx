@@ -27,13 +27,21 @@ export default async function EditarPage({
     notFound();
   }
 
-  const [clientes, vendas, formasPagamento, categorias, centrosCusto] =
+  const [
+    clientes,
+    vendas,
+    formasPagamento,
+    categorias,
+    centrosCusto,
+    planoContas,
+  ] =
     await Promise.all([
       service.listClientes(),
       service.listVendas(),
       service.listFormasPagamento(),
       service.listCategorias(),
       service.listCentrosCusto(),
+      service.listPlanoContas(),
     ]);
 
   return (
@@ -68,6 +76,7 @@ export default async function EditarPage({
           formasPagamento={formasPagamento}
           categorias={categorias}
           centrosCusto={centrosCusto}
+          planoContas={planoContas}
         />
       </SectionCard>
     </div>

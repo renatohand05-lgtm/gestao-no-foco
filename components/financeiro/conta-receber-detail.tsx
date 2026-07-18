@@ -125,6 +125,14 @@ export function ContaReceberDetail({ tenantSlug, item }: Props) {
               }
             />
             <DetailItem
+              label="Plano de contas"
+              value={
+                item.plano_conta
+                  ? `${item.plano_conta.codigo} · ${item.plano_conta.nome}`
+                  : "—"
+              }
+            />
+            <DetailItem
               label="Parcela"
               value={`${item.parcela_numero} de ${item.parcela_total}`}
             />
@@ -157,6 +165,10 @@ export function ContaReceberDetail({ tenantSlug, item }: Props) {
             <DetailItem
               label="Emissão"
               value={formatDateOnly(item.data_emissao)}
+            />
+            <DetailItem
+              label="Competência"
+              value={formatDateOnly(item.data_competencia)}
             />
             <DetailItem
               label="Vencimento"

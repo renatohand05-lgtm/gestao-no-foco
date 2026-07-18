@@ -6,6 +6,7 @@ export type ContaReceberSortField =
   | "numero"
   | "data_vencimento"
   | "data_emissao"
+  | "data_competencia"
   | "valor_original"
   | "status"
   | "created_at";
@@ -19,6 +20,7 @@ export type ContaReceber = {
   forma_pagamento_id: string | null;
   categoria_financeira_id: string | null;
   centro_custo_id: string | null;
+  plano_conta_id: string | null;
   conta_bancaria_id: string | null;
   descricao: string;
   grupo_parcelamento_id: string | null;
@@ -31,6 +33,7 @@ export type ContaReceber = {
   multa: number;
   valor_recebido: number;
   data_emissao: string;
+  data_competencia: string;
   data_vencimento: string;
   data_recebimento: string | null;
   observacoes: string | null;
@@ -64,6 +67,7 @@ export type ContaReceberListItem = Pick<
   | "multa"
   | "valor_recebido"
   | "data_emissao"
+  | "data_competencia"
   | "data_vencimento"
   | "data_recebimento"
   | "parcela_numero"
@@ -81,6 +85,7 @@ export type ContaReceberDetail = ContaReceber & {
   forma_pagamento?: { id: string; nome: string } | null;
   categoria_financeira?: { id: string; nome: string } | null;
   centro_custo?: { id: string; nome: string; codigo: string } | null;
+  plano_conta?: { id: string; nome: string; codigo: string } | null;
   conta_bancaria?: { id: string; nome: string } | null;
   status_exibicao: ContaReceberStatus;
 };
@@ -89,14 +94,16 @@ export type ContaReceberInput = {
   cliente_id: string;
   venda_id?: string | null;
   forma_pagamento_id?: string | null;
-  categoria_financeira_id?: string | null;
-  centro_custo_id?: string | null;
+  categoria_financeira_id: string;
+  centro_custo_id: string;
+  plano_conta_id: string;
   descricao: string;
   valor_original: number;
   desconto?: number;
   juros?: number;
   multa?: number;
   data_emissao: string;
+  data_competencia: string;
   data_vencimento: string;
   parcelas?: number;
   observacoes?: string | null;
@@ -176,6 +183,12 @@ export type CategoriaFinanceiraOption = {
 };
 
 export type CentroCustoOption = {
+  id: string;
+  codigo: string;
+  nome: string;
+};
+
+export type PlanoContaOption = {
   id: string;
   codigo: string;
   nome: string;

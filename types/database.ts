@@ -710,6 +710,7 @@ export type Database = {
           forma_pagamento_id: string | null;
           categoria_financeira_id: string | null;
           centro_custo_id: string | null;
+          plano_conta_id: string | null;
           conta_bancaria_id: string | null;
           descricao: string;
           grupo_parcelamento_id: string | null;
@@ -722,6 +723,7 @@ export type Database = {
           multa: number;
           valor_recebido: number;
           data_emissao: string;
+          data_competencia: string;
           data_vencimento: string;
           data_recebimento: string | null;
           observacoes: string | null;
@@ -738,6 +740,7 @@ export type Database = {
           forma_pagamento_id?: string | null;
           categoria_financeira_id?: string | null;
           centro_custo_id?: string | null;
+          plano_conta_id?: string | null;
           conta_bancaria_id?: string | null;
           descricao: string;
           grupo_parcelamento_id?: string | null;
@@ -750,6 +753,7 @@ export type Database = {
           multa?: number;
           valor_recebido?: number;
           data_emissao?: string;
+          data_competencia?: string;
           data_vencimento: string;
           data_recebimento?: string | null;
           observacoes?: string | null;
@@ -766,6 +770,7 @@ export type Database = {
           forma_pagamento_id?: string | null;
           categoria_financeira_id?: string | null;
           centro_custo_id?: string | null;
+          plano_conta_id?: string | null;
           conta_bancaria_id?: string | null;
           descricao?: string;
           grupo_parcelamento_id?: string | null;
@@ -778,6 +783,7 @@ export type Database = {
           multa?: number;
           valor_recebido?: number;
           data_emissao?: string;
+          data_competencia?: string;
           data_vencimento?: string;
           data_recebimento?: string | null;
           observacoes?: string | null;
@@ -819,6 +825,13 @@ export type Database = {
             columns: ["centro_custo_id"];
             isOneToOne: false;
             referencedRelation: "centros_custo";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contas_receber_plano_conta_id_fkey";
+            columns: ["plano_conta_id"];
+            isOneToOne: false;
+            referencedRelation: "plano_contas";
             referencedColumns: ["id"];
           },
           {

@@ -59,6 +59,11 @@ function revalidateFinanceiroPaths(
   }
 }
 
+function revalidateDrePaths(tenantSlug: string) {
+  revalidatePath(`/${tenantSlug}/relatorios`);
+  revalidatePath(`/${tenantSlug}/relatorios/dre`);
+}
+
 /* ─── Plano de Contas ─────────────────────────────────────────────── */
 
 export async function createPlanoContaAction(
@@ -424,6 +429,7 @@ export async function createContaReceberAction(
     const item = await service.create(normalizeContaReceberFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-receber", item.id);
+    revalidateDrePaths(tenantSlug);
     return { success: true, id: item.id };
   } catch (error) {
     return {
@@ -448,6 +454,7 @@ export async function updateContaReceberAction(
     await service.update(id, normalizeContaReceberFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-receber", id);
+    revalidateDrePaths(tenantSlug);
     return { success: true, id };
   } catch (error) {
     return {
@@ -541,6 +548,7 @@ export async function createContaPagarAction(
     const item = await service.create(normalizeContaPagarFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-pagar", item.id);
+    revalidateDrePaths(tenantSlug);
     return { success: true, id: item.id };
   } catch (error) {
     return {
@@ -565,6 +573,7 @@ export async function updateContaPagarAction(
     await service.update(id, normalizeContaPagarFormValues(parsed));
 
     revalidateFinanceiroPaths(tenantSlug, "contas-pagar", id);
+    revalidateDrePaths(tenantSlug);
     return { success: true, id };
   } catch (error) {
     return {

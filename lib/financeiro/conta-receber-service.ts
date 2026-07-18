@@ -31,6 +31,7 @@ import type {
   FormaPagamentoOption,
   ListContasReceberParams,
   PaginatedResult,
+  PlanoContaOption,
   ReceberContaInput,
   UpdateContaReceberInput,
   VendaOption,
@@ -50,6 +51,7 @@ const LIST_SELECT = `
   multa,
   valor_recebido,
   data_emissao,
+  data_competencia,
   data_vencimento,
   data_recebimento,
   parcela_numero,
@@ -65,7 +67,8 @@ const DETAIL_SELECT = `
   venda:vendas ( id, numero ),
   forma_pagamento:formas_pagamento ( id, nome ),
   categoria_financeira:categorias_financeiras ( id, nome ),
-  centro_custo:centros_custo ( id, nome, codigo )
+  centro_custo:centros_custo ( id, nome, codigo ),
+  plano_conta:plano_contas ( id, nome, codigo )
 `;
 
 function resolveSort(
@@ -76,6 +79,7 @@ function resolveSort(
     "numero",
     "data_vencimento",
     "data_emissao",
+    "data_competencia",
     "valor_original",
     "status",
     "created_at",
@@ -531,6 +535,22 @@ export class ContaReceberService {
     if (error) throw new Error(error.message);
 
     return (data ?? []) as CentroCustoOption[];
+  }
+
+  async listPlanoContas(): Promise<PlanoContaOption[]> {
+    const { data, error } = await this.supabase
+      .from("plano_contas")
+      .select("id, codigo, nome")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("ativo", true)
+      .eq("aceita_lancamento", true)
+      .in("tipo", ["receita", "ativo"])
+      .order("codigo", { ascending: true });
+
+    if (error) throw new Error(error.message);
+
+    return (data ?? []) as PlanoContaOption[];
   }
 }
 

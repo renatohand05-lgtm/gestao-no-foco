@@ -182,6 +182,8 @@ export function ContaPagarForm({
             <FormField
               label="Categoria financeira"
               htmlFor="categoria_financeira_id"
+              required
+              error={form.formState.errors.categoria_financeira_id?.message}
             >
               <select
                 id="categoria_financeira_id"
@@ -197,7 +199,12 @@ export function ContaPagarForm({
               </select>
             </FormField>
 
-            <FormField label="Centro de custo" htmlFor="centro_custo_id">
+            <FormField
+              label="Centro de custo"
+              htmlFor="centro_custo_id"
+              required
+              error={form.formState.errors.centro_custo_id?.message}
+            >
               <select
                 id="centro_custo_id"
                 {...form.register("centro_custo_id")}
@@ -212,7 +219,12 @@ export function ContaPagarForm({
               </select>
             </FormField>
 
-            <FormField label="Plano de contas" htmlFor="plano_conta_id">
+            <FormField
+              label="Plano de contas"
+              htmlFor="plano_conta_id"
+              required
+              error={form.formState.errors.plano_conta_id?.message}
+            >
               <select
                 id="plano_conta_id"
                 {...form.register("plano_conta_id")}

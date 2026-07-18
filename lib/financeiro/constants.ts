@@ -155,6 +155,7 @@ export const CONTA_RECEBER_SORT_OPTIONS = [
   { value: "numero", label: "Número" },
   { value: "data_vencimento", label: "Vencimento" },
   { value: "data_emissao", label: "Emissão" },
+  { value: "data_competencia", label: "Competência" },
   { value: "valor_original", label: "Valor" },
   { value: "status", label: "Status" },
   { value: "created_at", label: "Cadastro" },

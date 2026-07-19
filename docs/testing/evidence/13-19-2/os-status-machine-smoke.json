@@ -1,0 +1,58 @@
+{
+  "osId": "9c278c55-2d5f-466c-8503-9a99a853b42b",
+  "numero": 14,
+  "placa": "ST61912",
+  "finalStatus": "entregue",
+  "log": [
+    {
+      "step": "criar-os",
+      "ok": true,
+      "detail": "#14 9c278c55-2d5f-466c-8503-9a99a853b42b"
+    },
+    {
+      "step": "status-rascunho",
+      "ok": true,
+      "detail": "rascunho"
+    },
+    {
+      "step": "1-checklist",
+      "ok": true,
+      "detail": "aguardando_diagnostico"
+    },
+    {
+      "step": "2-diagnostico",
+      "ok": true,
+      "detail": "diagnostico_concluido"
+    },
+    {
+      "step": "3-orcamento",
+      "ok": true,
+      "detail": "aguardando_orcamento"
+    },
+    {
+      "step": "4-aprovacao",
+      "ok": true,
+      "detail": "aprovado"
+    },
+    {
+      "step": "5-execucao",
+      "ok": true,
+      "detail": "em_execucao"
+    },
+    {
+      "step": "6-itens-concluidos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "7-entrega",
+      "ok": true,
+      "detail": "entregue"
+    },
+    {
+      "step": "sem-transicao-invalida",
+      "ok": true,
+      "detail": "ok"
+    }
+  ]
+}

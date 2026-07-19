@@ -1,0 +1,2 @@
+export const DEFAULT_ORCAMENTO_AVISO =
+  "Este orçamento é uma estimativa baseada na inspeção inicial do veículo. Durante a desmontagem, execução do serviço ou análise técnica mais aprofundada, poderão ser identificados defeitos, peças danificadas ou necessidades adicionais que não eram visíveis inicialmente. Caso isso ocorra, a oficina entrará em contato e solicitará nova aprovação antes de executar qualquer serviço adicional.";

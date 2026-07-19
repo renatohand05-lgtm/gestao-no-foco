@@ -1,0 +1,149 @@
+{
+  "at": "2026-07-16T20:23:21.478Z",
+  "results": [
+    {
+      "path": "/teste-renato-01/dashboard",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/dashboard",
+      "title": "Dashboard | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/clientes",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/clientes",
+      "title": "Clientes | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/produtos",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/produtos",
+      "title": "Produtos & Serviços | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/estoque",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/estoque",
+      "title": "Estoque | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/vendas",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/vendas",
+      "title": "Vendas | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/ordens",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/ordens",
+      "title": "Ordens de Serviço | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/financeiro",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro",
+      "title": "Financeiro | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/financeiro/contas-pagar",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/contas-pagar",
+      "title": "Contas a Pagar | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/financeiro/contas-receber",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/contas-receber",
+      "title": "Contas a Receber | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/financeiro/dre",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/dre",
+      "title": "DRE | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/financeiro/fluxo-caixa",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/fluxo-caixa",
+      "title": "Fluxo de Caixa | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/relatorios",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/relatorios",
+      "title": "Relatórios | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    },
+    {
+      "path": "/teste-renato-01/configuracoes",
+      "initialStatus": 200,
+      "renderStatus": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/configuracoes",
+      "title": "Configurações | Gestão no Foco",
+      "notFound": false,
+      "login": false
+    }
+  ],
+  "access": {
+    "public": [
+      {
+        "path": "/",
+        "status": 200,
+        "location": null
+      },
+      {
+        "path": "/login",
+        "status": 200,
+        "location": null
+      }
+    ],
+    "noSession": {
+      "status": 307,
+      "location": "/login?redirectTo=%2Fteste-renato-01%2Fdashboard"
+    },
+    "invalidTenant": {
+      "status": 307,
+      "location": "/teste-renato-01/dashboard"
+    },
+    "authenticatedLogin": {
+      "status": 307,
+      "location": "/teste-renato-01/dashboard"
+    }
+  },
+  "consoleErrors": []
+}

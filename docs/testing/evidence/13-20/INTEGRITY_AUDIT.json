@@ -1,0 +1,138 @@
+{
+  "at": "2026-07-18T03:56:51.937Z",
+  "tenant": "teste-renato-01",
+  "aprovado": 16,
+  "bloqueador": 0,
+  "corrigido": 0,
+  "melhoria": 0,
+  "results": [
+    {
+      "module": "Segurança",
+      "scenario": "Service role não no cliente browser",
+      "result": "APROVADO",
+      "evidence": "server-only=true; clientHasService=false",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Segurança",
+      "scenario": "Nenhuma chave secreta em NEXT_PUBLIC_*",
+      "result": "APROVADO",
+      "evidence": "nenhuma",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Multiempresa",
+      "scenario": "Tenant teste-renato-01 resolvido",
+      "result": "APROVADO",
+      "evidence": "30fd2055-b14e-4922-a239-94a291869f94",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "RLS / Isolamento",
+      "scenario": "Existe outro tenant para contraste",
+      "result": "APROVADO",
+      "evidence": "gestaonofoco2",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Ordens de Serviço",
+      "scenario": "OS faturada possui venda vinculada",
+      "result": "APROVADO",
+      "evidence": "faturadas=0; semVenda=0",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Ordens de Serviço",
+      "scenario": "OS entregue sem faturamento só com exceção documentada",
+      "result": "APROVADO",
+      "evidence": "entregues=0; semFat=0; injustificadas=0",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Vendas / Contas a Receber",
+      "scenario": "Venda faturada gera uma única CR ativa",
+      "result": "APROVADO",
+      "evidence": "vendas=3; anomalias=0",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Estoque",
+      "scenario": "Faturamento não baixa estoque duas vezes (por venda+produto)",
+      "result": "APROVADO",
+      "evidence": "saidasVenda=3; dups=0",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Inspeção Digital",
+      "scenario": "Orçamento não gera receita (sem CR de orçamento)",
+      "result": "APROVADO",
+      "evidence": "versoes=8; crDescrOrc=0",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Inspeção Digital",
+      "scenario": "Aprovações registradas sem gerar CR automática",
+      "result": "APROVADO",
+      "evidence": "aprovacoes=8 (CR só via faturamento/venda)",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Contas a Pagar",
+      "scenario": "Conta paga exige estorno antes de exclusão (código)",
+      "result": "APROVADO",
+      "evidence": "guard presente em conta-pagar-service",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Fluxo de Caixa",
+      "scenario": "Estorno referencia movimentação original (sem órfãos/duplicata alvo)",
+      "result": "APROVADO",
+      "evidence": "estornos=3; orfaos=0; dupAlvo=0",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "DRE",
+      "scenario": "DRE permanece por competência (código)",
+      "result": "APROVADO",
+      "evidence": "usa data_competencia",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Fluxo de Caixa",
+      "scenario": "Fluxo permanece por caixa (código)",
+      "result": "APROVADO",
+      "evidence": "baseado em movimentacoes_bancarias",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "RLS / Isolamento",
+      "scenario": "Anon sem sessão não lê clientes de outro tenant",
+      "result": "APROVADO",
+      "evidence": "0 rows (RLS)",
+      "error": "",
+      "fix": ""
+    },
+    {
+      "module": "Permissões e RLS",
+      "scenario": "Migration inspeção habilita RLS",
+      "result": "APROVADO",
+      "evidence": "ENABLE ROW LEVEL SECURITY presente",
+      "error": "",
+      "fix": ""
+    }
+  ]
+}

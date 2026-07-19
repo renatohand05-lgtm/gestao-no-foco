@@ -72,7 +72,7 @@ export function OnboardingForm() {
         return;
       }
 
-      router.push(`/${result.slug}/dashboard`);
+      router.push(`/${result.slug}/primeiro-acesso`);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -84,7 +84,7 @@ export function OnboardingForm() {
   return (
     <AuthFormShell
       title="Configure sua empresa"
-      description="Último passo: cadastre o primeiro negócio da sua conta."
+      description="Crie a empresa e avance para o checklist de primeiro valor."
       className="max-w-lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,7 +104,7 @@ export function OnboardingForm() {
           <p className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
             Seu painel ficará em{" "}
             <span className="font-medium text-foreground">
-              /{slug}/dashboard
+              /{slug}/primeiro-acesso
             </span>
           </p>
         ) : null}
@@ -127,7 +127,7 @@ export function OnboardingForm() {
         </AuthField>
 
         <AuthSubmitButton loading={loading} loadingText="Criando empresa...">
-          Acessar dashboard
+          Continuar para o primeiro acesso
         </AuthSubmitButton>
       </form>
     </AuthFormShell>

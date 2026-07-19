@@ -1,5 +1,7 @@
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/dashboard/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -47,6 +49,22 @@ export default async function ConfiguracoesPage({
               <span className="text-muted-foreground">Seu papel:</span>{" "}
               <span className="capitalize">{tenant.role}</span>
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Comercial</CardTitle>
+            <CardDescription>Metas mensais e projeção de vendas</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Defina a meta de faturamento do mês e acompanhe o ritmo no
+              Dashboard Executivo.
+            </p>
+            <Button variant="outline" render={<Link href={`/${tenantSlug}/configuracoes/metas`} />}>
+              Gerenciar metas
+            </Button>
           </CardContent>
         </Card>
 

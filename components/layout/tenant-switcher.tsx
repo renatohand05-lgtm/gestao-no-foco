@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Building2, ChevronsUpDown, Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,14 +82,5 @@ export function TenantSwitcher({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  );
-}
-
-export function TenantSwitcherPlaceholder() {
-  return (
-    <Button variant="outline" className="w-full justify-start gap-2" disabled>
-      <Building2 className="size-4" />
-      Carregando empresas...
-    </Button>
   );
 }

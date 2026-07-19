@@ -1,0 +1,11 @@
+export { OnboardingShell } from "@/components/onboarding/onboarding-shell";
+export { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
+export { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
+export { OnboardingStep } from "@/components/onboarding/onboarding-step";
+export { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
+export { OnboardingEmptyState } from "@/components/onboarding/onboarding-empty-state";
+export { OnboardingResumeCard } from "@/components/onboarding/onboarding-resume-card";
+export { OnboardingTour } from "@/components/onboarding/onboarding-tour";
+export { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
+export { OnboardingForm } from "@/components/onboarding/onboarding-form";
+export { DashboardOnboardingLead } from "@/components/onboarding/dashboard-onboarding-lead";

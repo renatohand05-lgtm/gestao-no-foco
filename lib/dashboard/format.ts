@@ -1,13 +1,14 @@
-export function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
-}
+/**
+ * Formatadores do Dashboard.
+ * Núcleo compartilhado em `@/lib/format` — wrappers locais só para helpers de UI.
+ */
 
-export function formatNumber(value: number) {
-  return new Intl.NumberFormat("pt-BR").format(value);
-}
+export {
+  formatCurrency,
+  formatNumber,
+  formatPercent,
+  formatVariationPct,
+} from "@/lib/format";
 
 export function getGreeting(name?: string | null) {
   const hour = new Date().getHours();

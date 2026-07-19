@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/dashboard/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -29,13 +29,14 @@ export default async function RelatoriosPage({
         <CardHeader>
           <CardTitle>Indicadores</CardTitle>
           <CardDescription>
-            Dashboards e exportações em desenvolvimento
+            Visão consolidada a partir do Dashboard e dos módulos operacionais.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Os relatórios serão alimentados conforme você registrar vendas,
-            clientes e movimentações financeiras.
+            Use o Dashboard Executivo para acompanhar metas, faturamento e
+            prioridades. Relatórios especializados evoluem conforme vendas,
+            clientes e financeiro forem registrados.
           </p>
         </CardContent>
       </Card>

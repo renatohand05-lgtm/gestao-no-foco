@@ -1,29 +1,38 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { ContaReceberCancelButton } from "@/components/financeiro/conta-receber-cancel-button";
-import { ContaReceberDeleteButton } from "@/components/financeiro/conta-receber-delete-button";
+import { ContaLifecycleCancelButton } from "@/components/financeiro/conta-lifecycle-cancel-button";
+import { ContaLifecycleDeleteButton } from "@/components/financeiro/conta-lifecycle-delete-button";
+import { ContaLifecycleEstornoButton } from "@/components/financeiro/conta-lifecycle-estorno-button";
+import { ContaLancamentoHistorico } from "@/components/financeiro/conta-lancamento-historico";
 import { ContaReceberReceberButton } from "@/components/financeiro/conta-receber-receber-button";
 import { ContaReceberStatusBadge } from "@/components/financeiro/conta-receber-status-badge";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
 import { SectionCard } from "@/components/ui/section-card";
+import type { ContaLifecycleSnapshot } from "@/lib/financeiro/conta-lifecycle";
 import {
   calcSaldoPendente,
   calcValorLiquido,
   canCancelarContaReceber,
   canEditClassificacaoContaReceber,
   canEditContaReceber,
+  canEstornarContaReceber,
   canReceberContaReceber,
+  canSoftDeleteContaReceber,
   formatContaReceberNumero,
+  resolveStatusExibicao,
 } from "@/lib/financeiro/conta-receber-utils";
+import type { FinanceiroLancamentoEvent } from "@/lib/financeiro/financeiro-eventos";
 import { formatCurrency, formatDateOnly, formatFinanceiroDate } from "@/lib/financeiro/format";
-import type { ContaReceberDetail } from "@/types/contas-receber";
+import type { ContaReceberDetail as ContaReceberDetailType } from "@/types/contas-receber";
 
 type Props = {
   tenantSlug: string;
-  item: ContaReceberDetail;
+  item: ContaReceberDetailType;
   contasBancarias: { id: string; nome: string }[];
+  events?: FinanceiroLancamentoEvent[];
 };
 
 function DetailItem({
@@ -31,7 +40,7 @@ function DetailItem({
   value,
 }: {
   label: string;
-  value: React.ReactNode;
+  value: ReactNode;
 }) {
   return (
     <div className="space-y-1">
@@ -43,13 +52,33 @@ function DetailItem({
   );
 }
 
+function toSnapshot(item: ContaReceberDetailType): ContaLifecycleSnapshot {
+  return {
+    id: item.id,
+    numero: item.numero,
+    descricao: item.descricao,
+    status: resolveStatusExibicao(item),
+    valor_original: item.valor_original,
+    valor_liquidado: item.valor_recebido,
+    data_competencia: item.data_competencia,
+    data_vencimento: item.data_vencimento,
+    counterparty: item.cliente?.nome ?? "—",
+    grupo_parcelamento_id: item.grupo_parcelamento_id,
+    parcela_numero: item.parcela_numero,
+    parcela_total: item.parcela_total,
+    venda_id: item.venda_id,
+  };
+}
+
 export function ContaReceberDetail({
   tenantSlug,
   item,
   contasBancarias,
+  events = [],
 }: Props) {
   const valorLiquido = calcValorLiquido(item);
   const saldo = calcSaldoPendente(item);
+  const snapshot = toSnapshot(item);
 
   return (
     <div className="space-y-6">
@@ -85,18 +114,25 @@ export function ContaReceberDetail({
             href={`/${tenantSlug}/financeiro/contas-receber/${item.id}/editar?classificacaoOnly=true`}
           />
         ) : null}
-        {canCancelarContaReceber(item) ? (
-          <ContaReceberCancelButton
+        {canEstornarContaReceber(item) ? (
+          <ContaLifecycleEstornoButton
             tenantSlug={tenantSlug}
-            id={item.id}
-            descricao={item.descricao}
+            kind="receber"
+            snapshot={snapshot}
           />
         ) : null}
-        {item.status === "cancelado" ? (
-          <ContaReceberDeleteButton
+        {canCancelarContaReceber(item) ? (
+          <ContaLifecycleCancelButton
             tenantSlug={tenantSlug}
-            id={item.id}
-            descricao={item.descricao}
+            kind="receber"
+            snapshot={snapshot}
+          />
+        ) : null}
+        {canSoftDeleteContaReceber(item) ? (
+          <ContaLifecycleDeleteButton
+            tenantSlug={tenantSlug}
+            kind="receber"
+            snapshot={snapshot}
           />
         ) : null}
       </ModuleHeader>
@@ -230,6 +266,10 @@ export function ContaReceberDetail({
             />
           </FormGrid>
         </SectionCard>
+
+        <div className="lg:col-span-2">
+          <ContaLancamentoHistorico events={events} />
+        </div>
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createClienteAction,
+  checkClienteDuplicatesAction,
   updateClienteAction,
 } from "@/lib/clientes/actions";
 import {
@@ -61,6 +62,7 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
       : {
           tipo_pessoa: "pf",
           nome: "",
+          razao_social: "",
           documento: "",
           telefone: "",
           whatsapp: "",
@@ -73,6 +75,9 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
           bairro: "",
           cidade: "",
           estado: "",
+          segmento: "",
+          porte: "",
+          origem: "",
           observacoes: "",
           ativo: true,
         },
@@ -83,6 +88,24 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
   async function onSubmit(values: ClienteFormValues) {
     setLoading(true);
     setError(null);
+
+    const dup = await checkClienteDuplicatesAction(tenantSlug, {
+      excludeId: cliente?.id,
+      documento: values.documento,
+      email: values.email,
+      telefone: values.telefone,
+    });
+
+    if (dup.success && dup.result.hasDuplicates) {
+      setError(
+        `Possível duplicidade: ${dup.result.matches
+          .slice(0, 3)
+          .map((m) => `${m.label} (${m.matchedOn.join(", ")})`)
+          .join("; ")}. Ajuste antes de salvar.`,
+      );
+      setLoading(false);
+      return;
+    }
 
     const action =
       mode === "create"
@@ -172,8 +195,42 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
                 id="nome"
                 {...form.register("nome")}
                 placeholder={
-                  tipoPessoa === "pf" ? "Nome completo" : "Razão social"
+                  tipoPessoa === "pf" ? "Nome completo" : "Razão social / nome"
                 }
+              />
+            </FormField>
+
+            {tipoPessoa === "pj" ? (
+              <FormField
+                label="Razão social (complementar)"
+                htmlFor="razao_social"
+                className="md:col-span-2"
+              >
+                <Input
+                  id="razao_social"
+                  {...form.register("razao_social")}
+                  placeholder="Se diferente do nome fantasia usado acima"
+                />
+              </FormField>
+            ) : null}
+
+            <FormField label="Segmento" htmlFor="segmento">
+              <Input id="segmento" {...form.register("segmento")} />
+            </FormField>
+
+            <FormField label="Porte" htmlFor="porte">
+              <Input
+                id="porte"
+                {...form.register("porte")}
+                placeholder="MEI, pequeno, médio…"
+              />
+            </FormField>
+
+            <FormField label="Origem" htmlFor="origem">
+              <Input
+                id="origem"
+                {...form.register("origem")}
+                placeholder="Indicação, Google, franquia…"
               />
             </FormField>
 

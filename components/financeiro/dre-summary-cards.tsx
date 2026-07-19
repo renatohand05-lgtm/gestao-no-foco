@@ -38,6 +38,19 @@ function valueTone(value: number) {
 }
 
 export function DreSummaryCards({ resumo }: Props) {
+  const opexHints = [
+    resumo.opex_grupo_principal
+      ? `Principal: ${resumo.opex_grupo_principal}`
+      : null,
+    resumo.opex_pct_receita_liquida != null
+      ? `${resumo.opex_pct_receita_liquida.toFixed(1)}% da receita líquida`
+      : null,
+    "Pessoal + operacionais + comerciais (competência)",
+  ]
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(" · ");
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <SummaryCard
@@ -71,18 +84,24 @@ export function DreSummaryCards({ resumo }: Props) {
       <SummaryCard
         title="Despesas operacionais"
         value={formatCurrency(resumo.despesas_operacionais)}
-        hint="Contas a pagar por competência"
+        hint={opexHints}
       />
       <SummaryCard
         title="EBITDA"
         value={formatCurrency(resumo.ebitda)}
-        hint="Proxy sem depreciação/amortização"
+        hint="Margem − opex (antes de depreciação)"
         valueClassName={valueTone(resumo.ebitda)}
       />
       <SummaryCard
-        title="Resultado final"
+        title="EBIT"
+        value={formatCurrency(resumo.ebit ?? resumo.ebitda)}
+        hint="EBITDA − depreciação/amortização"
+        valueClassName={valueTone(resumo.ebit ?? resumo.ebitda)}
+      />
+      <SummaryCard
+        title="Resultado líquido"
         value={formatCurrency(resumo.resultado_final)}
-        hint="EBITDA ± resultado financeiro"
+        hint="Após financeiro e impostos classificados"
         valueClassName={valueTone(resumo.resultado_final)}
       />
     </div>

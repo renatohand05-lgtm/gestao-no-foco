@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { DreClassificationSelect } from "@/components/financeiro/dre-classification-select";
 import { PlanoContaSelect } from "@/components/financeiro/plano-conta-select";
 import { CancelButton } from "@/components/ui/cancel-button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -62,6 +63,8 @@ export function PlanoContaForm({
           aceita_lancamento: true,
           ordem: 0,
           observacoes: "",
+          dre_linha: "",
+          dre_detalhe: "",
           ativo: true,
         },
   });
@@ -150,6 +153,11 @@ export function PlanoContaForm({
                 </select>
               )} />
             </FormField>
+            <DreClassificationSelect
+              register={form.register}
+              setValue={form.setValue}
+              watch={form.watch}
+            />
             <FormField label="Observações" htmlFor="observacoes" className="md:col-span-2">
               <Textarea id="observacoes" {...form.register("observacoes")} rows={3} />
             </FormField>

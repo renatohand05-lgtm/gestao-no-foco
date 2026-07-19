@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Tags } from "lucide-react";
 
 import { CategoriaFinanceiraTable } from "@/components/financeiro/categoria-financeira-table";
+import { ApplyDreSuggestionsButton } from "@/components/financeiro/apply-dre-suggestions-button";
 import { FinanceiroEmptyState } from "@/components/financeiro/financeiro-empty-state";
 import { FinanceiroFeedback } from "@/components/financeiro/financeiro-feedback";
 import { FinanceiroFilters } from "@/components/financeiro/financeiro-filters";
@@ -83,6 +84,7 @@ export default async function Page({ params, searchParams }: PageProps) {
           { label: "Categorias Financeiras" },
         ]}
       >
+        <ApplyDreSuggestionsButton tenantSlug={tenantSlug} />
         <ActionButton
           action="create"
           label="Nova categoria"

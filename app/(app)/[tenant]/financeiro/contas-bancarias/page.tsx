@@ -130,6 +130,7 @@ export default async function Page({ params, searchParams }: PageProps) {
           icon={Landmark}
           title="Nenhuma conta bancária cadastrada"
           description="Cadastre bancos e caixas para acompanhar saldos e fluxo."
+          impact="Contas bancárias liberam leituras financeiras no Dashboard."
           createLabel="Nova conta"
           hasSearch={Boolean(q)}
           hasFilters={hasFilters}

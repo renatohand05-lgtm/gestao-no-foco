@@ -18,6 +18,7 @@ export function normalizeClienteFormValues(
 
   return {
     nome: values.nome.trim(),
+    razao_social: values.razao_social?.trim() || null,
     tipo_pessoa: values.tipo_pessoa,
     documento: documento || null,
     telefone: telefone || null,
@@ -31,6 +32,9 @@ export function normalizeClienteFormValues(
     bairro: values.bairro?.trim() || null,
     cidade: values.cidade?.trim() || null,
     estado: values.estado?.trim().toUpperCase() || null,
+    segmento: values.segmento?.trim() || null,
+    porte: values.porte?.trim() || null,
+    origem: values.origem?.trim() || null,
     observacoes: values.observacoes?.trim() || null,
     ativo: values.ativo,
   };
@@ -40,6 +44,7 @@ export function clienteToFormValues(cliente: Cliente): ClienteFormValues {
   return {
     tipo_pessoa: cliente.tipo_pessoa,
     nome: cliente.nome,
+    razao_social: cliente.razao_social ?? "",
     documento: toFormMaskValue(cliente.documento, (value) =>
       maskDocumento(value, cliente.tipo_pessoa),
     ),
@@ -54,6 +59,9 @@ export function clienteToFormValues(cliente: Cliente): ClienteFormValues {
     bairro: cliente.bairro ?? "",
     cidade: cliente.cidade ?? "",
     estado: cliente.estado ?? "",
+    segmento: cliente.segmento ?? "",
+    porte: cliente.porte ?? "",
+    origem: cliente.origem ?? "",
     observacoes: cliente.observacoes ?? "",
     ativo: cliente.ativo,
   };
@@ -62,6 +70,7 @@ export function clienteToFormValues(cliente: Cliente): ClienteFormValues {
 export function buildClientePayload(input: CreateClienteInput) {
   return {
     nome: input.nome,
+    razao_social: input.razao_social ?? null,
     tipo_pessoa: input.tipo_pessoa,
     documento: input.documento ?? null,
     telefone: input.telefone ?? null,
@@ -75,6 +84,9 @@ export function buildClientePayload(input: CreateClienteInput) {
     bairro: input.bairro ?? null,
     cidade: input.cidade ?? null,
     estado: input.estado ?? null,
+    segmento: input.segmento ?? null,
+    porte: input.porte ?? null,
+    origem: input.origem ?? null,
     observacoes: input.observacoes ?? null,
     ativo: input.ativo,
   };

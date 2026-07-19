@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/data-table";
+import { formatDreHierarchyPath, type DreLinhaEconomica } from "@/lib/dre";
 import { getCategoriaFinanceiraTipoLabel } from "@/lib/financeiro/format";
 import type { CategoriaFinanceiraListItem } from "@/types/financeiro";
 
@@ -27,7 +28,7 @@ export function CategoriaFinanceiraTable({ tenantSlug, items }: Props) {
           <TableRow>
             <TableHead>Categoria</TableHead>
             <TableHead className="hidden sm:table-cell">Tipo</TableHead>
-            <TableHead className="hidden md:table-cell">Cor</TableHead>
+            <TableHead className="hidden md:table-cell">Linha DRE</TableHead>
             <TableHead className="hidden xl:table-cell">Status</TableHead>
             <TableHead className="w-12" />
           </TableRow>
@@ -36,21 +37,35 @@ export function CategoriaFinanceiraTable({ tenantSlug, items }: Props) {
           {items.map((item) => (
             <TableRow key={item.id}>
               <TableCell>
-                <Link href={`/${tenantSlug}/financeiro/categorias/${item.id}`} className="block hover:underline">
+                <Link
+                  href={`/${tenantSlug}/financeiro/categorias/${item.id}`}
+                  className="block hover:underline"
+                >
                   <p className="font-medium">{item.nome}</p>
                 </Link>
               </TableCell>
-              <TableCell className="hidden sm:table-cell">{getCategoriaFinanceiraTipoLabel(item.tipo)}</TableCell>
-              <TableCell className="hidden md:table-cell">
-                {item.cor ? (
-                  <span className="inline-flex items-center gap-2">
-                    <span className="size-3 rounded-full border" style={{ backgroundColor: item.cor }} />
-                    {item.cor}
-                  </span>
-                ) : "—"}
+              <TableCell className="hidden sm:table-cell">
+                {getCategoriaFinanceiraTipoLabel(item.tipo)}
               </TableCell>
-              <TableCell className="hidden xl:table-cell"><FinanceiroStatusBadge ativo={item.ativo} /></TableCell>
-              <TableCell><CategoriaFinanceiraRowActions tenantSlug={tenantSlug} item={item} /></TableCell>
+              <TableCell className="hidden md:table-cell text-sm">
+                {item.dre_linha ? (
+                  formatDreHierarchyPath(
+                    item.dre_linha as DreLinhaEconomica,
+                    item.dre_detalhe,
+                  )
+                ) : (
+                  <span className="text-amber-800">Pendente</span>
+                )}
+              </TableCell>
+              <TableCell className="hidden xl:table-cell">
+                <FinanceiroStatusBadge ativo={item.ativo} />
+              </TableCell>
+              <TableCell>
+                <CategoriaFinanceiraRowActions
+                  tenantSlug={tenantSlug}
+                  item={item}
+                />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

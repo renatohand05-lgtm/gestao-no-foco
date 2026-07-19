@@ -18,7 +18,12 @@ export function ClienteEmptyState({
       description={
         hasSearch
           ? "Tente outro termo de busca ou cadastre um novo cliente."
-          : "Comece cadastrando seu primeiro cliente para organizar vendas e atendimentos."
+          : "Cadastre o primeiro cliente para organizar vendas e alimentar o comercial."
+      }
+      impact={
+        hasSearch
+          ? undefined
+          : "Clientes dão contexto às vendas e rankings do Dashboard."
       }
       action={{
         label: "Novo cliente",

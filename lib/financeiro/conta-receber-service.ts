@@ -10,12 +10,22 @@ import {
   canCancelarContaReceber,
   canEditClassificacaoContaReceber,
   canEditContaReceber,
+  canEstornarContaReceber,
+  canSoftDeleteContaReceber,
   resolveStatusExibicao,
   splitValorParcelas,
   todayISO,
 } from "@/lib/financeiro/conta-receber-utils";
+import type { ParcelScope } from "@/lib/financeiro/conta-lifecycle";
+import {
+  listFinanceiroLancamentoEvents,
+  recordFinanceiroLancamentoEvent,
+} from "@/lib/financeiro/financeiro-eventos";
 import { buildContaReceberPayload } from "@/lib/financeiro/mappers";
-import { baixarContaReceberAtomico } from "@/lib/financeiro/movimentacao-bancaria-rpc";
+import {
+  baixarContaReceberAtomico,
+  estornarMovimentacaoBancariaAtomico,
+} from "@/lib/financeiro/movimentacao-bancaria-rpc";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type {
@@ -52,9 +62,11 @@ const LIST_SELECT = `
   multa,
   valor_recebido,
   data_emissao,
+  data_competencia,
   data_vencimento,
   data_recebimento,
   conta_bancaria_id,
+  grupo_parcelamento_id,
   parcela_numero,
   parcela_total,
   created_at,
@@ -424,7 +436,14 @@ export class ContaReceberService {
     return detail;
   }
 
-  async cancelar(id: string): Promise<ContaReceberDetail> {
+  async cancelar(
+    id: string,
+    options: {
+      motivo?: string | null;
+      userId?: string | null;
+      scope?: ParcelScope;
+    } = {},
+  ): Promise<ContaReceberDetail> {
     const current = await this.getById(id);
 
     if (!current) {
@@ -432,21 +451,42 @@ export class ContaReceberService {
     }
 
     if (!canCancelarContaReceber(current)) {
+      if (canEstornarContaReceber(current)) {
+        throw new Error(
+          "Conta com recebimento não pode ser cancelada. Estorne o recebimento antes.",
+        );
+      }
       throw new Error("Esta conta não pode ser cancelada no status atual.");
     }
 
-    const { data, error } = await this.supabase
-      .from("contas_receber")
-      .update({ status: "cancelado" })
-      .eq("tenant_id", this.tenantId)
-      .eq("id", id)
-      .is("deleted_at", null)
-      .select("id")
-      .single();
+    const ids = await this.resolveParcelIds(current, options.scope ?? "atual");
 
-    if (error) throw new Error(error.message);
+    for (const parcelId of ids) {
+      const parcel = await this.getById(parcelId);
+      if (!parcel || !canCancelarContaReceber(parcel)) continue;
 
-    const detail = await this.getById(data.id);
+      const { error } = await this.supabase
+        .from("contas_receber")
+        .update({ status: "cancelado" })
+        .eq("tenant_id", this.tenantId)
+        .eq("id", parcelId)
+        .is("deleted_at", null);
+
+      if (error) throw new Error(error.message);
+
+      await recordFinanceiroLancamentoEvent(this.supabase, {
+        tenantId: this.tenantId,
+        entityType: "conta_receber",
+        entityId: parcelId,
+        action: "cancelamento",
+        motivo: options.motivo,
+        payloadAntes: { status: parcel.status },
+        payloadDepois: { status: "cancelado" },
+        userId: options.userId,
+      });
+    }
+
+    const detail = await this.getById(id);
     if (!detail) {
       throw new Error("Erro ao carregar conta após cancelamento.");
     }
@@ -454,25 +494,232 @@ export class ContaReceberService {
     return detail;
   }
 
-  async softDelete(id: string): Promise<void> {
+  async softDelete(
+    id: string,
+    options: {
+      motivo?: string | null;
+      userId?: string | null;
+      scope?: ParcelScope;
+    } = {},
+  ): Promise<void> {
     const current = await this.getById(id);
 
     if (!current) {
       throw new Error("Conta a receber não encontrada.");
     }
 
-    if (current.status !== "cancelado") {
-      throw new Error("Somente contas canceladas podem ser excluídas.");
+    if (!canSoftDeleteContaReceber(current)) {
+      if (canEstornarContaReceber(current)) {
+        throw new Error(
+          "Conta com recebimento não pode ser excluída. Estorne o recebimento antes.",
+        );
+      }
+      throw new Error("Esta conta não pode ser excluída no status atual.");
     }
 
-    const { error } = await this.supabase
+    if ((await this.countActiveBaixas(id)) > 0) {
+      throw new Error(
+        "Existem movimentações bancárias ativas vinculadas. Estorne antes de excluir.",
+      );
+    }
+
+    const ids = await this.resolveParcelIds(current, options.scope ?? "atual");
+    const now = new Date().toISOString();
+
+    for (const parcelId of ids) {
+      const parcel = await this.getById(parcelId);
+      if (!parcel || !canSoftDeleteContaReceber(parcel)) continue;
+      if ((await this.countActiveBaixas(parcelId)) > 0) continue;
+
+      const { error } = await this.supabase
+        .from("contas_receber")
+        .update({ deleted_at: now })
+        .eq("tenant_id", this.tenantId)
+        .eq("id", parcelId)
+        .is("deleted_at", null);
+
+      if (error) throw new Error(error.message);
+
+      await recordFinanceiroLancamentoEvent(this.supabase, {
+        tenantId: this.tenantId,
+        entityType: "conta_receber",
+        entityId: parcelId,
+        action: "soft_delete",
+        motivo: options.motivo,
+        payloadAntes: { status: parcel.status },
+        payloadDepois: { deleted_at: now },
+        userId: options.userId,
+      });
+    }
+  }
+
+  async estornarBaixas(
+    id: string,
+    input: { motivo: string; data_estorno?: string; userId?: string | null },
+  ): Promise<ContaReceberDetail> {
+    const motivo = input.motivo?.trim();
+    if (!motivo || motivo.length < 3) {
+      throw new Error("Informe o motivo do estorno (mínimo 3 caracteres).");
+    }
+
+    const current = await this.getById(id);
+    if (!current) throw new Error("Conta a receber não encontrada.");
+    if (!canEstornarContaReceber(current)) {
+      throw new Error("Esta conta não possui recebimento para estornar.");
+    }
+
+    const { data: moves, error } = await this.supabase
+      .from("movimentacoes_bancarias")
+      .select("id, tipo, estornada_por_id, valor")
+      .eq("tenant_id", this.tenantId)
+      .eq("conta_receber_id", id)
+      .is("deleted_at", null)
+      .is("estornada_por_id", null)
+      .neq("tipo", "estorno");
+
+    if (error) throw new Error(error.message);
+
+    const ativos = moves ?? [];
+    if (ativos.length === 0) {
+      throw new Error("Nenhuma movimentação ativa encontrada para estornar.");
+    }
+
+    const dataEstorno = input.data_estorno || todayISO();
+
+    for (const move of ativos) {
+      await estornarMovimentacaoBancariaAtomico(this.supabase, {
+        tenantId: this.tenantId,
+        movimentacaoId: move.id,
+        dataMovimentacao: dataEstorno,
+        observacoes: `Estorno CR ${current.numero}: ${motivo}`,
+        createdBy: input.userId ?? null,
+      });
+    }
+
+    const { error: reopenError } = await this.supabase
       .from("contas_receber")
-      .update({ deleted_at: new Date().toISOString() })
+      .update({
+        valor_recebido: 0,
+        status: "aberto",
+        data_recebimento: null,
+      })
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
       .is("deleted_at", null);
 
+    if (reopenError) throw new Error(reopenError.message);
+
+    await recordFinanceiroLancamentoEvent(this.supabase, {
+      tenantId: this.tenantId,
+      entityType: "conta_receber",
+      entityId: id,
+      action: "estorno",
+      motivo,
+      payloadAntes: {
+        status: current.status,
+        valor_recebido: current.valor_recebido,
+        movimentacoes: ativos.map((m) => m.id),
+      },
+      payloadDepois: { status: "aberto", valor_recebido: 0 },
+      userId: input.userId,
+    });
+
+    const detail = await this.getById(id);
+    if (!detail) throw new Error("Erro ao carregar conta após estorno.");
+    return detail;
+  }
+
+  async duplicar(
+    id: string,
+    userId?: string | null,
+  ): Promise<ContaReceberDetail> {
+    const current = await this.getById(id);
+    if (!current) throw new Error("Conta a receber não encontrada.");
+
+    const created = await this.create({
+      cliente_id: current.cliente_id,
+      venda_id: null,
+      forma_pagamento_id: current.forma_pagamento_id,
+      categoria_financeira_id: current.categoria_financeira_id!,
+      centro_custo_id: current.centro_custo_id!,
+      plano_conta_id: current.plano_conta_id!,
+      descricao: `${current.descricao} (cópia)`,
+      valor_original: current.valor_original,
+      desconto: current.desconto,
+      juros: current.juros,
+      multa: current.multa,
+      data_emissao: todayISO(),
+      data_competencia: current.data_competencia,
+      data_vencimento: current.data_vencimento,
+      parcelas: 1,
+      observacoes: current.observacoes,
+    });
+
+    await recordFinanceiroLancamentoEvent(this.supabase, {
+      tenantId: this.tenantId,
+      entityType: "conta_receber",
+      entityId: created.id,
+      action: "duplicacao",
+      motivo: `Duplicado de ${current.id}`,
+      payloadAntes: { origem_id: current.id },
+      payloadDepois: { id: created.id },
+      userId,
+    });
+
+    return created;
+  }
+
+  async listEventos(id: string) {
+    return listFinanceiroLancamentoEvents(this.supabase, {
+      tenantId: this.tenantId,
+      entityType: "conta_receber",
+      entityId: id,
+    });
+  }
+
+  private async countActiveBaixas(contaId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("movimentacoes_bancarias")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", this.tenantId)
+      .eq("conta_receber_id", contaId)
+      .is("deleted_at", null)
+      .is("estornada_por_id", null)
+      .neq("tipo", "estorno");
+
     if (error) throw new Error(error.message);
+    return count ?? 0;
+  }
+
+  private async resolveParcelIds(
+    current: ContaReceberDetail,
+    scope: ParcelScope,
+  ): Promise<string[]> {
+    if (scope === "atual" || !current.grupo_parcelamento_id) {
+      return [current.id];
+    }
+
+    let query = this.supabase
+      .from("contas_receber")
+      .select("id, parcela_numero, status, valor_recebido")
+      .eq("tenant_id", this.tenantId)
+      .eq("grupo_parcelamento_id", current.grupo_parcelamento_id)
+      .is("deleted_at", null)
+      .order("parcela_numero", { ascending: true });
+
+    if (scope === "atual_e_proximas") {
+      query = query.gte("parcela_numero", current.parcela_numero);
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+
+    return (data ?? [])
+      .filter((row) => Number(row.valor_recebido ?? 0) <= 0)
+      .filter(
+        (row) => row.status === "aberto" || row.status === "cancelado",
+      )
+      .map((row) => row.id as string);
   }
 
   async listClientes(): Promise<ClienteOption[]> {

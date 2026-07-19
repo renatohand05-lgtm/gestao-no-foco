@@ -21,6 +21,7 @@ import {
   updateContaReceberAction,
 } from "@/lib/financeiro/actions";
 import { todayISO } from "@/lib/financeiro/conta-receber-utils";
+import { formatCurrency } from "@/lib/financeiro/format";
 import { contaReceberToFormValues } from "@/lib/financeiro/mappers";
 import {
   classificacaoContaReceberFormSchema,
@@ -248,7 +249,7 @@ export function ContaReceberForm({
                     <option value="">Sem vínculo com venda</option>
                     {vendas.map((venda) => (
                       <option key={venda.id} value={venda.id}>
-                        #{venda.numero} · {formatCurrencyLabel(venda.total)}
+                        #{venda.numero} · {formatCurrency(venda.total)}
                       </option>
                     ))}
                   </select>
@@ -478,11 +479,4 @@ export function ContaReceberForm({
       </form>
     </div>
   );
-}
-
-function formatCurrencyLabel(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
 }

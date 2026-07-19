@@ -23,31 +23,10 @@ import type {
   PlanoContaTipo,
 } from "@/types/financeiro";
 
-export function formatFinanceiroDate(date: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(date));
-}
-
-export function formatCurrency(value: number | null | undefined) {
-  if (value === null || value === undefined) return "—";
-
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
-}
-
-export function formatPercent(value: number | null | undefined) {
-  if (value === null || value === undefined) return "—";
-
-  return new Intl.NumberFormat("pt-BR", {
-    style: "percent",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  }).format(value / 100);
-}
+export { formatCurrency, formatDateOnly } from "@/lib/format";
+export { formatDateTime as formatFinanceiroDate } from "@/lib/format";
+/** Taxa financeira (2–4 casas) — não usar `formatPercent` do Dashboard/Produtos. */
+export { formatPercentTaxa as formatPercent } from "@/lib/format";
 
 export function getPlanoContaTipoLabel(tipo: PlanoContaTipo) {
   return (
@@ -82,14 +61,6 @@ export function getCategoriaFinanceiraTipoLabel(tipo: CategoriaFinanceiraTipo) {
     CATEGORIA_FINANCEIRA_TIPO_OPTIONS.find((option) => option.value === tipo)
       ?.label ?? tipo
   );
-}
-
-export function formatDateOnly(date: string | null | undefined) {
-  if (!date) return "—";
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-  }).format(new Date(`${date}T12:00:00`));
 }
 
 export function getContaReceberStatusLabel(status: ContaReceberStatus) {

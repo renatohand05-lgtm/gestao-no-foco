@@ -6,6 +6,8 @@ import {
 } from "@/lib/clientes/masks";
 import type { TipoPessoa } from "@/types/clientes";
 
+export { formatDateTime as formatClienteDate } from "@/lib/format";
+
 export { onlyDigits };
 
 export function formatDocumento(
@@ -40,13 +42,6 @@ export function getDataReferenciaLabel(tipoPessoa: TipoPessoa) {
 
 export function getNomeLabel(tipoPessoa: TipoPessoa) {
   return tipoPessoa === "pf" ? "Nome completo" : "Razão social";
-}
-
-export function formatClienteDate(date: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(date));
 }
 
 export function formatEndereco(cliente: {

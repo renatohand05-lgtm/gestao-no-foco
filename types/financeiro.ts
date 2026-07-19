@@ -1,14 +1,8 @@
-export type SortOrder = "asc" | "desc";
+import type { SortOrder, PaginatedResult } from "@/types/pagination";
+
+export type { SortOrder, PaginatedResult };
 
 export type FinanceiroSuccessMessage = "created" | "updated" | "deleted";
-
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
-};
 
 export type ListFinanceiroParams = {
   page?: number;
@@ -49,6 +43,12 @@ export type PlanoConta = {
   aceita_lancamento: boolean;
   ordem: number;
   observacoes: string | null;
+  /** Linha do DRE por competência (Sprint 13.15). */
+  dre_linha: string | null;
+  /** Detalhe gerencial hierárquico (13.15.2). */
+  dre_detalhe?: string | null;
+  dre_classificacao_origem?: string | null;
+  dre_classificacao_em?: string | null;
   ativo: boolean;
   deleted_at: string | null;
   created_at: string;
@@ -100,6 +100,9 @@ export type PlanoContaInput = {
   aceita_lancamento: boolean;
   ordem?: number;
   observacoes?: string | null;
+  dre_linha?: string | null;
+  dre_detalhe?: string | null;
+  dre_classificacao_origem?: string | null;
   ativo: boolean;
 };
 
@@ -308,6 +311,10 @@ export type CategoriaFinanceira = {
   nome: string;
   tipo: CategoriaFinanceiraTipo;
   plano_conta_id: string | null;
+  dre_linha: string | null;
+  dre_detalhe?: string | null;
+  dre_classificacao_origem?: string | null;
+  dre_classificacao_em?: string | null;
   cor: string | null;
   observacoes: string | null;
   ativo: boolean;
@@ -322,6 +329,8 @@ export type CategoriaFinanceiraListItem = Pick<
   | "nome"
   | "tipo"
   | "plano_conta_id"
+  | "dre_linha"
+  | "dre_detalhe"
   | "cor"
   | "ativo"
   | "created_at"
@@ -331,6 +340,9 @@ export type CategoriaFinanceiraInput = {
   nome: string;
   tipo: CategoriaFinanceiraTipo;
   plano_conta_id?: string | null;
+  dre_linha?: string | null;
+  dre_detalhe?: string | null;
+  dre_classificacao_origem?: string | null;
   cor?: string | null;
   observacoes?: string | null;
   ativo: boolean;

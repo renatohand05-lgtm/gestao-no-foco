@@ -70,11 +70,18 @@ export function splitValorParcelas(total: number, parcelas: number): number[] {
 type ContaReceberStatusInput = {
   status: ContaReceberStatus;
   data_vencimento: string;
+  valor_recebido?: number;
 };
 
 export function canEditContaReceber(conta: ContaReceberStatusInput): boolean {
   const status = resolveStatusExibicao(conta);
   return status === "aberto" || status === "vencido";
+}
+
+export function canEditDescritivoContaReceber(
+  conta: ContaReceberStatusInput,
+): boolean {
+  return conta.status === "recebido";
 }
 
 /** Permite corrigir classificação contábil (inclui títulos já recebidos). */
@@ -91,7 +98,34 @@ export function canReceberContaReceber(conta: ContaReceberStatusInput): boolean 
 
 export function canCancelarContaReceber(conta: ContaReceberStatusInput): boolean {
   const status = resolveStatusExibicao(conta);
+  if (Number(conta.valor_recebido ?? 0) > 0) return false;
   return status === "aberto" || status === "vencido";
+}
+
+export function canSoftDeleteContaReceber(
+  conta: ContaReceberStatusInput,
+): boolean {
+  if (Number(conta.valor_recebido ?? 0) > 0) return false;
+  if (conta.status === "recebido") return false;
+  const status = resolveStatusExibicao(conta);
+  return (
+    status === "aberto" ||
+    status === "vencido" ||
+    conta.status === "cancelado"
+  );
+}
+
+export function canEstornarContaReceber(
+  conta: ContaReceberStatusInput,
+): boolean {
+  if (conta.status === "cancelado") return false;
+  return (
+    Number(conta.valor_recebido ?? 0) > 0 || conta.status === "recebido"
+  );
+}
+
+export function canDuplicarContaReceber(): boolean {
+  return true;
 }
 
 export function formatContaReceberNumero(numero: number): string {

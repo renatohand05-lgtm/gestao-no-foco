@@ -74,11 +74,19 @@ export function splitValorParcelas(total: number, parcelas: number): number[] {
 type ContaPagarStatusInput = {
   status: ContaPagarStatusPersistido;
   data_vencimento: string;
+  valor_pago?: number;
 };
 
 export function canEditContaPagar(conta: ContaPagarStatusInput): boolean {
   const status = resolveStatusExibicao(conta);
-  return status === "aberto" || status === "vencido" || status === "parcial";
+  // Parcial: apenas campos seguros via formulário — edição financeira completa após estorno
+  return status === "aberto" || status === "vencido";
+}
+
+export function canEditDescritivoContaPagar(
+  conta: ContaPagarStatusInput,
+): boolean {
+  return conta.status === "pago" || conta.status === "parcial";
 }
 
 /** Permite corrigir classificação contábil (inclui títulos já pagos). */
@@ -95,7 +103,32 @@ export function canPagarContaPagar(conta: ContaPagarStatusInput): boolean {
 
 export function canCancelarContaPagar(conta: ContaPagarStatusInput): boolean {
   const status = resolveStatusExibicao(conta);
-  return status === "aberto" || status === "vencido" || status === "parcial";
+  if (Number(conta.valor_pago ?? 0) > 0) return false;
+  return status === "aberto" || status === "vencido";
+}
+
+export function canSoftDeleteContaPagar(conta: ContaPagarStatusInput): boolean {
+  if (Number(conta.valor_pago ?? 0) > 0) return false;
+  if (conta.status === "pago" || conta.status === "parcial") return false;
+  const status = resolveStatusExibicao(conta);
+  return (
+    status === "aberto" ||
+    status === "vencido" ||
+    conta.status === "cancelado"
+  );
+}
+
+export function canEstornarContaPagar(conta: ContaPagarStatusInput): boolean {
+  if (conta.status === "cancelado") return false;
+  return (
+    Number(conta.valor_pago ?? 0) > 0 ||
+    conta.status === "pago" ||
+    conta.status === "parcial"
+  );
+}
+
+export function canDuplicarContaPagar(): boolean {
+  return true;
 }
 
 export function formatContaPagarNumero(numero: number): string {

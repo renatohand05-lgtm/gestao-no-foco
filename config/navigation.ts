@@ -2,6 +2,7 @@ import {
   BarChart3,
   LayoutDashboard,
   Package,
+  Search,
   Settings,
   ShoppingCart,
   Users,
@@ -27,6 +28,12 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       href: `${base}/dashboard`,
       icon: LayoutDashboard,
       description: "Visão geral do negócio",
+    },
+    {
+      title: "Busca",
+      href: `${base}/busca`,
+      icon: Search,
+      description: "Localizar cadastros mestres",
     },
     {
       title: "Clientes",

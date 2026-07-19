@@ -52,6 +52,7 @@ export const clienteFormSchema = z
   .object({
     tipo_pessoa: z.enum(["pf", "pj"]),
     nome: z.string().trim().min(2, "Informe o nome ou razão social."),
+    razao_social: optionalText,
     documento: optionalText,
     telefone: optionalText,
     whatsapp: optionalText,
@@ -72,6 +73,9 @@ export const clienteFormSchema = z
         (value) => !value || UF_OPTIONS.includes(value as (typeof UF_OPTIONS)[number]),
         "Informe um estado válido (UF).",
       ),
+    segmento: optionalText,
+    porte: optionalText,
+    origem: optionalText,
     observacoes: optionalText,
     ativo: z.boolean(),
   })

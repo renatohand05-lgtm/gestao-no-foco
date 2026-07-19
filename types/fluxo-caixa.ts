@@ -1,3 +1,4 @@
+import type { PaginatedResult } from "@/types/pagination";
 import type { MovimentacaoBancariaTipo } from "@/types/movimentacoes-bancarias";
 
 export type FluxoCaixaStatusFilter = "all" | "realizado" | "previsto";
@@ -14,6 +15,22 @@ export type FluxoCaixaFilters = {
   categoriaId?: string;
   centroCustoId?: string;
   status?: FluxoCaixaStatusFilter;
+};
+
+/** Parâmetros de listagem paginada (tabela). Agregados ignoram page/perPage. */
+export type FluxoCaixaListParams = FluxoCaixaFilters & {
+  page?: number;
+  perPage?: number;
+  /**
+   * false = não materializa a listagem (Dashboard usa só resumo/daily).
+   * Default: true.
+   */
+  includeItens?: boolean;
+  /**
+   * true = retorna todos os itens filtrados (exportação).
+   * Não aplica teto de perPage da listagem.
+   */
+  exportAll?: boolean;
 };
 
 export type FluxoCaixaResumo = {
@@ -83,6 +100,7 @@ export type FluxoCaixaFilterOptions = {
 export type FluxoCaixaResult = {
   resumo: FluxoCaixaResumo;
   daily: FluxoCaixaDailyPoint[];
-  itens: FluxoCaixaLancamento[];
+  /** Listagem paginada (server-side). Agregados permanecem do período completo. */
+  itens: PaginatedResult<FluxoCaixaLancamento>;
   filterOptions: FluxoCaixaFilterOptions;
 };

@@ -125,6 +125,7 @@ export default async function Page({ params, searchParams }: PageProps) {
           icon={Target}
           title="Nenhum centro de custo cadastrado"
           description="Cadastre centros para alocar despesas e receitas por área."
+          impact="Centros de custo organizam filtros e análises do Dashboard."
           createLabel="Novo centro"
           hasSearch={Boolean(q)}
           hasFilters={hasFilters}

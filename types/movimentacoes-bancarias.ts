@@ -1,5 +1,7 @@
 import type { SortOrder } from "@/types/financeiro";
 
+export type { PaginatedResult } from "@/types/pagination";
+
 export type MovimentacaoBancariaTipo =
   | "entrada"
   | "saida"
@@ -108,14 +110,6 @@ export type ListMovimentacoesBancariasParams = {
   contaBancariaId?: string;
   dataDe?: string;
   dataAte?: string;
-};
-
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
 };
 
 export type { FluxoCaixaContaSaldo } from "@/types/fluxo-caixa";

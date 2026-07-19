@@ -269,6 +269,75 @@ export class PlanoContaService {
 
     if (error) throw new Error(error.message);
   }
+
+  async applySuggestedDreLinhas(): Promise<{
+    updated: number;
+    pending: Array<{ id: string; nome: string; codigo: string }>;
+  }> {
+    const { suggestDreClassificationFromName } = await import("@/lib/dre");
+    const { data, error } = await this.supabase
+      .from("plano_contas")
+      .select("id, nome, codigo, dre_linha, dre_detalhe")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .in("tipo", ["receita", "despesa"]);
+
+    if (error) throw new Error(error.message);
+
+    let updated = 0;
+    const pending: Array<{ id: string; nome: string; codigo: string }> = [];
+    const now = new Date().toISOString();
+
+    for (const row of data ?? []) {
+      if (row.dre_linha) continue;
+      const suggested = suggestDreClassificationFromName(
+        `${row.nome} ${row.codigo}`,
+      );
+      if (!suggested) {
+        pending.push({ id: row.id, nome: row.nome, codigo: row.codigo });
+        continue;
+      }
+      const { error: updError } = await this.supabase
+        .from("plano_contas")
+        .update({
+          dre_linha: suggested.linha,
+          dre_detalhe: suggested.detalhe,
+          dre_classificacao_origem: "sugestao_nome",
+          dre_classificacao_em: now,
+        } as never)
+        .eq("tenant_id", this.tenantId)
+        .eq("id", row.id)
+        .is("deleted_at", null)
+        .is("dre_linha", null);
+
+      if (updError) throw new Error(updError.message);
+      updated += 1;
+    }
+
+    return { updated, pending };
+  }
+
+  async applyClassification(input: {
+    id: string;
+    linha: string;
+    detalhe: string | null;
+    origem: "manual" | "sugestao_nome" | "lote";
+  }): Promise<void> {
+    const { error } = await this.supabase
+      .from("plano_contas")
+      .update({
+        dre_linha: input.linha,
+        dre_detalhe: input.detalhe,
+        dre_classificacao_origem: input.origem,
+        dre_classificacao_em: new Date().toISOString(),
+      } as never)
+      .eq("tenant_id", this.tenantId)
+      .eq("id", input.id)
+      .is("deleted_at", null)
+      .is("dre_linha", null);
+
+    if (error) throw new Error(error.message);
+  }
 }
 
 export async function createPlanoContaService(tenantId: string) {

@@ -57,6 +57,11 @@ export function normalizePlanoContaFormValues(
     aceita_lancamento: values.aceita_lancamento,
     ordem: values.ordem ?? 0,
     observacoes: emptyToNull(values.observacoes),
+    dre_linha: emptyToNull(values.dre_linha),
+    dre_detalhe: emptyToNull(values.dre_detalhe),
+    dre_classificacao_origem: emptyToNull(values.dre_linha)
+      ? "manual"
+      : null,
     ativo: values.ativo,
   };
 }
@@ -71,6 +76,8 @@ export function planoContaToFormValues(item: PlanoConta): PlanoContaFormValues {
     aceita_lancamento: item.aceita_lancamento,
     ordem: item.ordem,
     observacoes: item.observacoes ?? "",
+    dre_linha: item.dre_linha ?? "",
+    dre_detalhe: item.dre_detalhe ?? "",
     ativo: item.ativo,
   };
 }
@@ -85,6 +92,14 @@ export function buildPlanoContaPayload(input: CreatePlanoContaInput) {
     aceita_lancamento: input.aceita_lancamento,
     ordem: input.ordem ?? 0,
     observacoes: input.observacoes ?? null,
+    dre_linha: input.dre_linha ?? null,
+    dre_detalhe: input.dre_detalhe ?? null,
+    dre_classificacao_origem: input.dre_linha
+      ? (input.dre_classificacao_origem ?? "manual")
+      : null,
+    dre_classificacao_em: input.dre_linha
+      ? new Date().toISOString()
+      : null,
     ativo: input.ativo,
   };
 }
@@ -219,6 +234,11 @@ export function normalizeCategoriaFinanceiraFormValues(
     nome: values.nome.trim(),
     tipo: values.tipo,
     plano_conta_id: emptyToNull(values.plano_conta_id),
+    dre_linha: emptyToNull(values.dre_linha),
+    dre_detalhe: emptyToNull(values.dre_detalhe),
+    dre_classificacao_origem: emptyToNull(values.dre_linha)
+      ? "manual"
+      : null,
     cor: emptyToNull(values.cor),
     observacoes: emptyToNull(values.observacoes),
     ativo: values.ativo,
@@ -232,6 +252,8 @@ export function categoriaFinanceiraToFormValues(
     nome: item.nome,
     tipo: item.tipo,
     plano_conta_id: item.plano_conta_id ?? "",
+    dre_linha: item.dre_linha ?? "",
+    dre_detalhe: item.dre_detalhe ?? "",
     cor: item.cor ?? "",
     observacoes: item.observacoes ?? "",
     ativo: item.ativo,
@@ -245,6 +267,14 @@ export function buildCategoriaFinanceiraPayload(
     nome: input.nome,
     tipo: input.tipo,
     plano_conta_id: input.plano_conta_id ?? null,
+    dre_linha: input.dre_linha ?? null,
+    dre_detalhe: input.dre_detalhe ?? null,
+    dre_classificacao_origem: input.dre_linha
+      ? (input.dre_classificacao_origem ?? "manual")
+      : null,
+    dre_classificacao_em: input.dre_linha
+      ? new Date().toISOString()
+      : null,
     cor: input.cor ?? null,
     observacoes: input.observacoes ?? null,
     ativo: input.ativo,
@@ -350,6 +380,13 @@ export function normalizeContaPagarFormValues(
     data_vencimento: values.data_vencimento,
     parcelas: values.parcelas ?? 1,
     observacoes: emptyToNull(values.observacoes),
+    rateios: (values.rateios ?? [])
+      .filter((line) => line.centro_custo_id)
+      .map((line) => ({
+        centro_custo_id: line.centro_custo_id,
+        percentual: line.percentual,
+        descricao: emptyToNull(line.descricao),
+      })),
   };
 }
 
@@ -373,6 +410,11 @@ export function contaPagarToFormValues(
     data_vencimento: item.data_vencimento,
     parcelas: item.parcela_total,
     observacoes: item.observacoes ?? "",
+    rateios: (item.rateios ?? []).map((line) => ({
+      centro_custo_id: line.centro_custo_id,
+      percentual: line.percentual,
+      descricao: line.descricao ?? "",
+    })),
   };
 }
 

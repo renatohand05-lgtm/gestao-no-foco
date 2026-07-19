@@ -1,5 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import {
+  FINANCEIRO_DEFAULT_PER_PAGE,
+  FINANCEIRO_MAX_PER_PAGE,
+} from "@/lib/financeiro/constants";
 import { calcSaldoPendente as calcSaldoPendentePagar } from "@/lib/financeiro/conta-pagar-utils";
 import { calcSaldoPendente as calcSaldoPendenteReceber } from "@/lib/financeiro/conta-receber-utils";
 import { calcDeltaSaldo } from "@/lib/financeiro/movimentacao-bancaria-utils";
@@ -11,10 +15,12 @@ import type {
   FluxoCaixaFilterOptions,
   FluxoCaixaFilters,
   FluxoCaixaLancamento,
+  FluxoCaixaListParams,
   FluxoCaixaResult,
   FluxoCaixaResumo,
   FluxoCaixaStatusFilter,
 } from "@/types/fluxo-caixa";
+import { paginateArray, toPaginatedResult } from "@/types/pagination";
 import type { MovimentacaoBancariaTipo } from "@/types/movimentacoes-bancarias";
 
 type TituloJoin = {
@@ -215,6 +221,24 @@ function includeStatus(
   return resolved === natureza;
 }
 
+function paginateFluxoItens(
+  allItens: FluxoCaixaLancamento[],
+  params: FluxoCaixaListParams,
+) {
+  if (params.exportAll) {
+    const total = allItens.length;
+    return toPaginatedResult(allItens, total, 1, Math.max(total, 1));
+  }
+
+  const page = Number(params.page) > 0 ? Number(params.page) : 1;
+  const perPage = Math.min(
+    Math.max(params.perPage ?? FINANCEIRO_DEFAULT_PER_PAGE, 1),
+    FINANCEIRO_MAX_PER_PAGE,
+  );
+
+  return paginateArray(allItens, page, perPage);
+}
+
 export class FluxoCaixaService {
   constructor(
     private readonly supabase: SupabaseClient<Database>,
@@ -270,8 +294,9 @@ export class FluxoCaixaService {
     };
   }
 
-  async getFluxo(params: FluxoCaixaFilters): Promise<FluxoCaixaResult> {
+  async getFluxo(params: FluxoCaixaListParams): Promise<FluxoCaixaResult> {
     const status = params.status ?? "all";
+    const includeItens = params.includeItens !== false;
     const [contas, filterOptions, movimentacoesSaldo, movimentacoesPeriodo, crPrevistos, cpPrevistos] =
       await Promise.all([
         this.listContasComSaldo(),
@@ -522,15 +547,21 @@ export class FluxoCaixaService {
       saldo_atual: saldoAtual,
     };
 
-    const itens = [
-      ...(includeStatus(status, "realizado") ? realizados : []),
-      ...(includeStatus(status, "previsto") ? previstos : []),
-    ].sort((a, b) => {
-      if (a.data === b.data) {
-        return a.descricao.localeCompare(b.descricao, "pt-BR");
-      }
-      return a.data < b.data ? 1 : -1;
-    });
+    const allItens = includeItens
+      ? [
+          ...(includeStatus(status, "realizado") ? realizados : []),
+          ...(includeStatus(status, "previsto") ? previstos : []),
+        ].sort((a, b) => {
+          if (a.data === b.data) {
+            return a.descricao.localeCompare(b.descricao, "pt-BR");
+          }
+          return a.data < b.data ? 1 : -1;
+        })
+      : [];
+
+    const itens = includeItens
+      ? paginateFluxoItens(allItens, params)
+      : toPaginatedResult([], 0, 1, FINANCEIRO_DEFAULT_PER_PAGE);
 
     return {
       resumo,

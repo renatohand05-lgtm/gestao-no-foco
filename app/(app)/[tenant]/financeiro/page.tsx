@@ -7,9 +7,11 @@ import {
   FileSpreadsheet,
   Landmark,
   Receipt,
+  Repeat,
   Sparkles,
   Tags,
   Target,
+  Truck,
   Wallet,
 } from "lucide-react";
 
@@ -25,6 +27,7 @@ import { requireTenant } from "@/lib/tenants";
 export const metadata = { title: "Financeiro" };
 
 const ICONS = {
+  fornecedores: Truck,
   "plano-contas": BookOpen,
   "centros-custo": Target,
   "contas-bancarias": Landmark,
@@ -32,9 +35,14 @@ const ICONS = {
   categorias: Tags,
   "contas-receber": Receipt,
   "contas-pagar": Wallet,
+  "despesas-recorrentes": Repeat,
   "fluxo-caixa": ArrowLeftRight,
+  inteligencia: Sparkles,
   dre: FileSpreadsheet,
-} as const;
+} as const satisfies Record<
+  (typeof FINANCEIRO_HUB_ITEMS)[number]["href"],
+  typeof BookOpen
+>;
 
 export default async function FinanceiroPage({
   params,
@@ -72,7 +80,7 @@ export default async function FinanceiroPage({
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {FINANCEIRO_HUB_ITEMS.map((item) => {
-          const Icon = ICONS[item.href as keyof typeof ICONS];
+          const Icon = ICONS[item.href];
           return (
             <Link
               key={item.href}

@@ -1,29 +1,39 @@
-import { ContaPagarCancelButton } from "@/components/financeiro/conta-pagar-cancel-button";
-import { ContaPagarDeleteButton } from "@/components/financeiro/conta-pagar-delete-button";
+import type { ReactNode } from "react";
+
+import { ContaLifecycleCancelButton } from "@/components/financeiro/conta-lifecycle-cancel-button";
+import { ContaLifecycleDeleteButton } from "@/components/financeiro/conta-lifecycle-delete-button";
+import { ContaLifecycleEstornoButton } from "@/components/financeiro/conta-lifecycle-estorno-button";
+import { ContaLancamentoHistorico } from "@/components/financeiro/conta-lancamento-historico";
 import { ContaPagarPagarButton } from "@/components/financeiro/conta-pagar-pagar-button";
 import { ContaPagarStatusBadge } from "@/components/financeiro/conta-pagar-status-badge";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
 import { SectionCard } from "@/components/ui/section-card";
+import type { ContaLifecycleSnapshot } from "@/lib/financeiro/conta-lifecycle";
 import {
   calcSaldoPendente,
   calcValorLiquido,
   canCancelarContaPagar,
   canEditClassificacaoContaPagar,
   canEditContaPagar,
+  canEstornarContaPagar,
   canPagarContaPagar,
+  canSoftDeleteContaPagar,
   formatContaPagarNumero,
   resolveFornecedorNome,
+  resolveStatusExibicao,
 } from "@/lib/financeiro/conta-pagar-utils";
+import type { FinanceiroLancamentoEvent } from "@/lib/financeiro/financeiro-eventos";
 import { formatCurrency, formatDateOnly, formatFinanceiroDate } from "@/lib/financeiro/format";
-import type { ContaPagarDetail } from "@/types/contas-pagar";
+import type { ContaPagarDetail as ContaPagarDetailType } from "@/types/contas-pagar";
 
 type Props = {
   tenantSlug: string;
-  item: ContaPagarDetail;
+  item: ContaPagarDetailType;
   formasPagamento: { id: string; nome: string }[];
   contasBancarias: { id: string; nome: string }[];
+  events?: FinanceiroLancamentoEvent[];
 };
 
 function DetailItem({
@@ -31,7 +41,7 @@ function DetailItem({
   value,
 }: {
   label: string;
-  value: React.ReactNode;
+  value: ReactNode;
 }) {
   return (
     <div className="space-y-1">
@@ -43,14 +53,33 @@ function DetailItem({
   );
 }
 
+function toSnapshot(item: ContaPagarDetailType): ContaLifecycleSnapshot {
+  return {
+    id: item.id,
+    numero: item.numero,
+    descricao: item.descricao,
+    status: resolveStatusExibicao(item),
+    valor_original: item.valor_original,
+    valor_liquidado: item.valor_pago,
+    data_competencia: item.data_competencia,
+    data_vencimento: item.data_vencimento,
+    counterparty: resolveFornecedorNome(item),
+    grupo_parcelamento_id: item.grupo_parcelamento_id,
+    parcela_numero: item.parcela_numero,
+    parcela_total: item.parcela_total,
+  };
+}
+
 export function ContaPagarDetail({
   tenantSlug,
   item,
   formasPagamento,
   contasBancarias,
+  events = [],
 }: Props) {
   const valorLiquido = calcValorLiquido(item);
   const saldo = calcSaldoPendente(item);
+  const snapshot = toSnapshot(item);
 
   return (
     <div className="space-y-6">
@@ -87,18 +116,25 @@ export function ContaPagarDetail({
             href={`/${tenantSlug}/financeiro/contas-pagar/${item.id}/editar?classificacaoOnly=true`}
           />
         ) : null}
-        {canCancelarContaPagar(item) ? (
-          <ContaPagarCancelButton
+        {canEstornarContaPagar(item) ? (
+          <ContaLifecycleEstornoButton
             tenantSlug={tenantSlug}
-            id={item.id}
-            descricao={item.descricao}
+            kind="pagar"
+            snapshot={snapshot}
           />
         ) : null}
-        {item.status === "cancelado" ? (
-          <ContaPagarDeleteButton
+        {canCancelarContaPagar(item) ? (
+          <ContaLifecycleCancelButton
             tenantSlug={tenantSlug}
-            id={item.id}
-            descricao={item.descricao}
+            kind="pagar"
+            snapshot={snapshot}
+          />
+        ) : null}
+        {canSoftDeleteContaPagar(item) ? (
+          <ContaLifecycleDeleteButton
+            tenantSlug={tenantSlug}
+            kind="pagar"
+            snapshot={snapshot}
           />
         ) : null}
       </ModuleHeader>
@@ -118,6 +154,15 @@ export function ContaPagarDetail({
             <DetailItem
               label="Categoria financeira"
               value={item.categoria_financeira?.nome ?? "—"}
+            />
+            <DetailItem
+              label="Linha do DRE"
+              value={
+                item.plano_conta?.dre_linha ||
+                item.categoria_financeira?.dre_linha || (
+                  <span className="text-amber-800">Pendente de classificação</span>
+                )
+              }
             />
             <DetailItem
               label="Centro de custo"
@@ -145,6 +190,29 @@ export function ContaPagarDetail({
             />
           </FormGrid>
         </SectionCard>
+
+        {(item.rateios?.length ?? 0) > 0 ? (
+          <SectionCard title="Rateio">
+            <ul className="space-y-2 text-sm">
+              {item.rateios!.map((line) => (
+                <li
+                  key={line.id ?? `${line.centro_custo_id}-${line.percentual}`}
+                  className="flex flex-wrap justify-between gap-2 border-b border-border/50 pb-2 last:border-0"
+                >
+                  <span>
+                    {line.centro_custo
+                      ? `${line.centro_custo.codigo} · ${line.centro_custo.nome}`
+                      : line.centro_custo_id}
+                    {line.descricao ? ` — ${line.descricao}` : ""}
+                  </span>
+                  <span className="tabular-nums text-muted-foreground">
+                    {line.percentual}% · {formatCurrency(line.valor)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </SectionCard>
+        ) : null}
 
         <SectionCard title="Valores">
           <FormGrid>
@@ -194,12 +262,6 @@ export function ContaPagarDetail({
           </p>
         </SectionCard>
 
-        <SectionCard title="Anexos">
-          <p className="text-sm text-muted-foreground">
-            Estrutura preparada para anexos futuros. Upload ainda não disponível.
-          </p>
-        </SectionCard>
-
         <SectionCard title="Auditoria">
           <FormGrid>
             <DetailItem
@@ -212,6 +274,10 @@ export function ContaPagarDetail({
             />
           </FormGrid>
         </SectionCard>
+
+        <div className="lg:col-span-2">
+          <ContaLancamentoHistorico events={events} />
+        </div>
       </div>
     </div>
   );

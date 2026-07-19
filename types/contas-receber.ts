@@ -1,5 +1,7 @@
 import type { SortOrder } from "@/types/financeiro";
 
+export type { PaginatedResult } from "@/types/pagination";
+
 export type ContaReceberStatus = "aberto" | "recebido" | "vencido" | "cancelado";
 
 export type ContaReceberSortField =
@@ -66,9 +68,11 @@ export type ContaReceberListItem = Pick<
   | "multa"
   | "valor_recebido"
   | "data_emissao"
+  | "data_competencia"
   | "data_vencimento"
   | "data_recebimento"
   | "conta_bancaria_id"
+  | "grupo_parcelamento_id"
   | "parcela_numero"
   | "parcela_total"
   | "created_at"
@@ -139,14 +143,6 @@ export type ListContasReceberParams = {
   vencimentoAte?: string;
 };
 
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
-};
-
 export type ContasReceberResumo = {
   total_aberto: number;
   total_recebido: number;
@@ -162,7 +158,8 @@ export type ContaReceberSuccessMessage =
   | "updated"
   | "deleted"
   | "recebido"
-  | "cancelado";
+  | "cancelado"
+  | "estornado";
 
 export type ClienteOption = {
   id: string;

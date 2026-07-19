@@ -24,6 +24,7 @@ export const CONTAS_RECEBER_SUCCESS_MESSAGES = {
   deleted: "Conta a receber excluída com sucesso.",
   recebido: "Baixa de recebimento registrada com sucesso.",
   cancelado: "Conta a receber cancelada com sucesso.",
+  estornado: "Recebimento estornado com sucesso. Título reaberto.",
 } as const;
 
 /* ─── Plano de Contas ─────────────────────────────────────────────── */
@@ -168,6 +169,7 @@ export const CONTAS_PAGAR_SUCCESS_MESSAGES = {
   deleted: "Conta a pagar excluída com sucesso.",
   pago: "Baixa de pagamento registrada com sucesso.",
   cancelado: "Conta a pagar cancelada com sucesso.",
+  estornado: "Pagamento estornado com sucesso. Título reaberto.",
 } as const;
 
 export const CONTA_PAGAR_STATUS_OPTIONS = [
@@ -239,6 +241,13 @@ export const FLUXO_CAIXA_SUCCESS_MESSAGES = {
 
 export const FINANCEIRO_HUB_ITEMS = [
   {
+    title: "Fornecedores",
+    description:
+      "Cadastro mestre com padrões financeiros para autopreenchimento em Contas a Pagar.",
+    href: "fornecedores",
+    cta: "Gerenciar fornecedores",
+  },
+  {
     title: "Plano de Contas",
     description: "Estrutura contábil para classificação de lançamentos.",
     href: "plano-contas",
@@ -281,10 +290,24 @@ export const FINANCEIRO_HUB_ITEMS = [
     cta: "Gerenciar pagáveis",
   },
   {
+    title: "Despesas Recorrentes",
+    description:
+      "Séries mensais (aluguel, salários, utilidades) que geram Contas a Pagar.",
+    href: "despesas-recorrentes",
+    cta: "Gerenciar recorrências",
+  },
+  {
     title: "Fluxo de Caixa",
     description: "Saldo, entradas, saídas e projeção diária das contas bancárias.",
     href: "fluxo-caixa",
     cta: "Ver fluxo",
+  },
+  {
+    title: "Inteligência Financeira",
+    description:
+      "Cockpit executivo: KPIs, despesas, tendências e insights sobre o DRE e o Fluxo.",
+    href: "inteligencia",
+    cta: "Abrir cockpit",
   },
   {
     title: "DRE",
@@ -297,9 +320,9 @@ export const FINANCEIRO_HUB_ITEMS = [
 
 export const FINANCEIRO_ROADMAP_ITEMS = [
   {
-    title: "Dashboard financeiro",
+    title: "Receita por OS / mecânico / consultor",
     description:
-      "Indicadores gerenciais e visão consolidada além do DRE por período.",
+      "Depende de vínculos operacionais ainda não publicados no domínio de vendas.",
     phase: "Backlog",
   },
 ] as const;

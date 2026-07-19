@@ -1,5 +1,7 @@
 import type { SortOrder } from "@/types/financeiro";
 
+export type { PaginatedResult } from "@/types/pagination";
+
 export type ContaPagarStatus =
   | "aberto"
   | "pago"
@@ -76,6 +78,7 @@ export type ContaPagarListItem = Pick<
   | "data_competencia"
   | "data_vencimento"
   | "data_pagamento"
+  | "grupo_parcelamento_id"
   | "parcela_numero"
   | "parcela_total"
   | "created_at"
@@ -84,13 +87,32 @@ export type ContaPagarListItem = Pick<
   status_exibicao: ContaPagarStatus;
 };
 
+export type ContaPagarRateioLine = {
+  id?: string;
+  centro_custo_id: string;
+  percentual: number;
+  valor: number;
+  descricao?: string | null;
+  centro_custo?: { id: string; nome: string; codigo: string } | null;
+};
+
 export type ContaPagarDetail = ContaPagar & {
   fornecedor: ContaPagarFornecedorResumo | null;
   forma_pagamento?: { id: string; nome: string } | null;
-  categoria_financeira?: { id: string; nome: string } | null;
+  categoria_financeira?: {
+    id: string;
+    nome: string;
+    dre_linha?: string | null;
+  } | null;
   centro_custo?: { id: string; nome: string; codigo: string } | null;
-  plano_conta?: { id: string; nome: string; codigo: string } | null;
+  plano_conta?: {
+    id: string;
+    nome: string;
+    codigo: string;
+    dre_linha?: string | null;
+  } | null;
   conta_bancaria?: { id: string; nome: string } | null;
+  rateios?: ContaPagarRateioLine[];
   status_exibicao: ContaPagarStatus;
 };
 
@@ -111,6 +133,11 @@ export type ContaPagarInput = {
   data_vencimento: string;
   parcelas?: number;
   observacoes?: string | null;
+  rateios?: Array<{
+    centro_custo_id: string;
+    percentual: number;
+    descricao?: string | null;
+  }>;
 };
 
 export type CreateContaPagarInput = ContaPagarInput;
@@ -145,14 +172,6 @@ export type ListContasPagarParams = {
   vencimentoAte?: string;
 };
 
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
-};
-
 export type ContasPagarResumo = {
   total_aberto: number;
   total_pago: number;
@@ -172,7 +191,8 @@ export type ContaPagarSuccessMessage =
   | "updated"
   | "deleted"
   | "pago"
-  | "cancelado";
+  | "cancelado"
+  | "estornado";
 
 export type FornecedorOption = {
   id: string;
@@ -189,6 +209,7 @@ export type CategoriaFinanceiraOption = {
   id: string;
   nome: string;
   tipo: string;
+  dre_linha?: string | null;
 };
 
 export type CentroCustoOption = {
@@ -201,6 +222,7 @@ export type PlanoContaOption = {
   id: string;
   codigo: string;
   nome: string;
+  dre_linha?: string | null;
 };
 
 export type ContaBancariaOption = {

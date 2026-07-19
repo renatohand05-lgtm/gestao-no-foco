@@ -5,14 +5,34 @@ import { revalidatePath } from "next/cache";
 import { createClienteService } from "@/lib/clientes/cliente-service";
 import { normalizeClienteFormValues } from "@/lib/clientes/mappers";
 import { clienteFormSchema } from "@/lib/clientes/validations";
+import { toActionError } from "@/lib/supabase/friendly-error";
 import { requireTenant } from "@/lib/tenants";
+import type { ActionResult } from "@/types/action-result";
 
-type ActionResult =
-  | { success: true; id?: string }
-  | { success: false; error: string };
+export async function checkClienteDuplicatesAction(
+  tenantSlug: string,
+  input: {
+    excludeId?: string;
+    documento?: string | null;
+    email?: string | null;
+    telefone?: string | null;
+  },
+) {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const service = await createClienteService(tenant.id);
+    return { success: true as const, result: await service.checkDuplicates(input) };
+  } catch (error) {
+    return {
+      ...toActionError(error, "Erro ao verificar duplicidades.", "clientes.checkDuplicates"),
+      success: false as const,
+    };
+  }
+}
 
 function revalidateClientePaths(tenantSlug: string, clienteId?: string) {
   revalidatePath(`/${tenantSlug}/clientes`);
+  revalidatePath(`/${tenantSlug}/busca`);
 
   if (clienteId) {
     revalidatePath(`/${tenantSlug}/clientes/${clienteId}`);
@@ -33,10 +53,7 @@ export async function createClienteAction(
     revalidateClientePaths(tenantSlug, cliente.id);
     return { success: true, id: cliente.id };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao criar cliente.",
-    };
+    return toActionError(error, "Erro ao criar cliente.", "clientes.create");
   }
 }
 
@@ -54,10 +71,7 @@ export async function updateClienteAction(
     revalidateClientePaths(tenantSlug, clienteId);
     return { success: true, id: clienteId };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao atualizar cliente.",
-    };
+    return toActionError(error, "Erro ao atualizar cliente.", "clientes.update");
   }
 }
 
@@ -73,9 +87,6 @@ export async function deleteClienteAction(
     revalidateClientePaths(tenantSlug);
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao excluir cliente.",
-    };
+    return toActionError(error, "Erro ao excluir cliente.", "clientes.delete");
   }
 }

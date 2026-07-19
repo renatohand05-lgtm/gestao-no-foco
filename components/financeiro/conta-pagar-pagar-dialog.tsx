@@ -88,6 +88,7 @@ export function ContaPagarPagarDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Registrar pagamento"
+      wide
       description={
         <div className="space-y-4">
           <p>

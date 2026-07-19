@@ -1,3 +1,7 @@
+import type { SortOrder } from "@/types/pagination";
+
+export type { SortOrder, PaginatedResult } from "@/types/pagination";
+
 export type TipoPessoa = "pf" | "pj";
 
 export type ClienteSortField =
@@ -7,12 +11,11 @@ export type ClienteSortField =
   | "cidade"
   | "ativo";
 
-export type SortOrder = "asc" | "desc";
-
 export type Cliente = {
   id: string;
   tenant_id: string;
   nome: string;
+  razao_social: string | null;
   email: string | null;
   telefone: string | null;
   whatsapp: string | null;
@@ -26,6 +29,9 @@ export type Cliente = {
   bairro: string | null;
   cidade: string | null;
   estado: string | null;
+  segmento: string | null;
+  porte: string | null;
+  origem: string | null;
   observacoes: string | null;
   ativo: boolean;
   deleted_at: string | null;
@@ -51,6 +57,7 @@ export type ClienteListItem = Pick<
 
 export type ClienteInput = {
   nome: string;
+  razao_social?: string | null;
   email?: string | null;
   telefone?: string | null;
   whatsapp?: string | null;
@@ -64,6 +71,9 @@ export type ClienteInput = {
   bairro?: string | null;
   cidade?: string | null;
   estado?: string | null;
+  segmento?: string | null;
+  porte?: string | null;
+  origem?: string | null;
   observacoes?: string | null;
   ativo: boolean;
 };
@@ -77,14 +87,6 @@ export type ListClientesParams = {
   search?: string;
   sort?: ClienteSortField;
   order?: SortOrder;
-};
-
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
 };
 
 export type ClienteSuccessMessage = "created" | "updated" | "deleted";

@@ -51,6 +51,8 @@ export function FluxoCaixaFilters({
       }
     });
 
+    params.delete("page");
+
     startTransition(() => {
       const queryString = params.toString();
       router.push(

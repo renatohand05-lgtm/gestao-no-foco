@@ -61,6 +61,8 @@ export const planoContaFormSchema = z.object({
   aceita_lancamento: z.boolean(),
   ordem: z.number().int().min(0).default(0),
   observacoes: optionalText,
+  dre_linha: z.union([z.string(), z.literal("")]).default(""),
+  dre_detalhe: z.union([z.string(), z.literal("")]).default(""),
   ativo: z.boolean(),
 });
 
@@ -127,6 +129,8 @@ export const categoriaFinanceiraFormSchema = z.object({
   nome: z.string().trim().min(2, "Informe o nome da categoria."),
   tipo: z.enum(categoriaTipos),
   plano_conta_id: optionalUuid,
+  dre_linha: z.union([z.string(), z.literal("")]).default(""),
+  dre_detalhe: z.union([z.string(), z.literal("")]).default(""),
   cor: optionalText,
   observacoes: optionalText,
   ativo: z.boolean(),
@@ -223,6 +227,15 @@ export const contaPagarFormSchema = z
     data_vencimento: dateField,
     parcelas: z.number().int().min(1).max(48).default(1),
     observacoes: optionalText,
+    rateios: z
+      .array(
+        z.object({
+          centro_custo_id: z.string().uuid("Selecione o centro do rateio."),
+          percentual: z.number().gt(0).lte(100),
+          descricao: optionalText,
+        }),
+      )
+      .default([]),
   })
   .superRefine((data, ctx) => {
     if (data.data_vencimento < data.data_emissao) {
@@ -232,7 +245,61 @@ export const contaPagarFormSchema = z
         path: ["data_vencimento"],
       });
     }
+
+    if (data.rateios.length > 0) {
+      const sum = data.rateios.reduce((acc, line) => acc + line.percentual, 0);
+      if (Math.abs(sum - 100) > 0.0001) {
+        ctx.addIssue({
+          code: "custom",
+          message: `A soma dos percentuais do rateio deve ser 100% (atual: ${sum.toFixed(2)}%).`,
+          path: ["rateios"],
+        });
+      }
+      const centros = data.rateios.map((l) => l.centro_custo_id);
+      if (new Set(centros).size !== centros.length) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Não é permitido duplicar centro de custo no rateio.",
+          path: ["rateios"],
+        });
+      }
+    }
   });
+
+export const despesaRecorrenteFormSchema = z
+  .object({
+    descricao: z.string().trim().min(2, "Informe a descrição."),
+    fornecedor_id: optionalUuid,
+    fornecedor_nome: optionalText,
+    forma_pagamento_id: optionalUuid,
+    categoria_financeira_id: z
+      .string()
+      .uuid("Selecione a categoria financeira."),
+    centro_custo_id: z.string().uuid("Selecione o centro de custo."),
+    plano_conta_id: z.string().uuid("Selecione o plano de contas."),
+    valor: z.number().min(0.01, "Informe o valor."),
+    dia_vencimento: z.number().int().min(1).max(28),
+    inicia_em: dateField,
+    termina_em: optionalText,
+    max_ocorrencias: z.number().int().min(1).optional().nullable(),
+    observacoes: optionalText,
+  })
+  .superRefine((data, ctx) => {
+    if (data.termina_em && data.termina_em < data.inicia_em) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Data final não pode ser anterior ao início.",
+        path: ["termina_em"],
+      });
+    }
+  });
+
+export type DespesaRecorrenteFormInput = z.input<
+  typeof despesaRecorrenteFormSchema
+>;
+export type DespesaRecorrenteFormValues = z.output<
+  typeof despesaRecorrenteFormSchema
+>;
 
 export const pagarContaFormSchema = z.object({
   data_pagamento: dateField,

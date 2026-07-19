@@ -1,0 +1,5 @@
+/** Número genérico pt-BR (Dashboard / Qualidade Operacional). */
+
+export function formatNumber(value: number) {
+  return new Intl.NumberFormat("pt-BR").format(value);
+}

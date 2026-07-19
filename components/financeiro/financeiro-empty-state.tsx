@@ -9,6 +9,7 @@ type FinanceiroEmptyStateProps = {
   icon: LucideIcon;
   title: string;
   description: string;
+  impact?: string;
   createLabel?: string;
   createHref?: string;
   hasSearch: boolean;
@@ -21,6 +22,7 @@ export function FinanceiroEmptyState({
   icon,
   title,
   description,
+  impact,
   createLabel,
   createHref,
   hasSearch,
@@ -37,6 +39,7 @@ export function FinanceiroEmptyState({
           ? "Tente ajustar a busca ou os filtros, ou cadastre um novo registro."
           : description
       }
+      impact={filtered ? undefined : impact}
       action={
         createLabel
           ? {

@@ -7,8 +7,10 @@ import { createCentroCustoService } from "@/lib/financeiro/centro-custo-service"
 import { createContaBancariaService } from "@/lib/financeiro/conta-bancaria-service";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { createContaReceberService } from "@/lib/financeiro/conta-receber-service";
+import { createDespesaRecorrenteService } from "@/lib/financeiro/despesa-recorrente-service";
 import { createFormaPagamentoService } from "@/lib/financeiro/forma-pagamento-service";
-import { getCurrentProfile } from "@/lib/auth/session";
+import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
+import type { ParcelScope } from "@/lib/financeiro/conta-lifecycle";
 import { createMovimentacaoBancariaService } from "@/lib/financeiro/movimentacao-bancaria-service";
 import {
   normalizeCategoriaFinanceiraFormValues,
@@ -33,6 +35,7 @@ import {
   contaBancariaFormSchema,
   contaPagarFormSchema,
   contaReceberFormSchema,
+  despesaRecorrenteFormSchema,
   estornarMovimentacaoBancariaFormSchema,
   formaPagamentoFormSchema,
   movimentacaoBancariaFormSchema,
@@ -42,10 +45,12 @@ import {
   transferenciaBancariaFormSchema,
 } from "@/lib/financeiro/validations";
 import { requireTenant } from "@/lib/tenants";
+import type { ActionResult } from "@/types/action-result";
+import { toActionError } from "@/lib/supabase/friendly-error";
 
-type ActionResult =
-  | { success: true; id?: string }
-  | { success: false; error: string };
+function failAction(error: unknown, fallback: string): ActionResult {
+  return toActionError(error, fallback, "financeiro.action");
+}
 
 function revalidateFinanceiroPaths(
   tenantSlug: string,
@@ -76,11 +81,7 @@ export async function createPlanoContaAction(
     revalidateFinanceiroPaths(tenantSlug, "plano-contas", item.id);
     return { success: true, id: item.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Erro ao cadastrar conta.",
-    };
+    return failAction(error, "Erro ao cadastrar conta.");
   }
 }
 
@@ -98,11 +99,7 @@ export async function updatePlanoContaAction(
     revalidateFinanceiroPaths(tenantSlug, "plano-contas", id);
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Erro ao atualizar conta.",
-    };
+    return failAction(error, "Erro ao atualizar conta.");
   }
 }
 
@@ -118,10 +115,7 @@ export async function deletePlanoContaAction(
     revalidateFinanceiroPaths(tenantSlug, "plano-contas");
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao excluir conta.",
-    };
+    return failAction(error, "Erro ao excluir conta.");
   }
 }
 
@@ -140,13 +134,7 @@ export async function createCentroCustoAction(
     revalidateFinanceiroPaths(tenantSlug, "centros-custo", item.id);
     return { success: true, id: item.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cadastrar centro de custo.",
-    };
+    return failAction(error, "Erro ao cadastrar centro de custo.");
   }
 }
 
@@ -164,13 +152,7 @@ export async function updateCentroCustoAction(
     revalidateFinanceiroPaths(tenantSlug, "centros-custo", id);
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao atualizar centro de custo.",
-    };
+    return failAction(error, "Erro ao atualizar centro de custo.");
   }
 }
 
@@ -186,13 +168,7 @@ export async function deleteCentroCustoAction(
     revalidateFinanceiroPaths(tenantSlug, "centros-custo");
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao excluir centro de custo.",
-    };
+    return failAction(error, "Erro ao excluir centro de custo.");
   }
 }
 
@@ -213,13 +189,7 @@ export async function createContaBancariaAction(
     revalidateFinanceiroPaths(tenantSlug, "contas-bancarias", item.id);
     return { success: true, id: item.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cadastrar conta bancária.",
-    };
+    return failAction(error, "Erro ao cadastrar conta bancária.");
   }
 }
 
@@ -237,13 +207,7 @@ export async function updateContaBancariaAction(
     revalidateFinanceiroPaths(tenantSlug, "contas-bancarias", id);
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao atualizar conta bancária.",
-    };
+    return failAction(error, "Erro ao atualizar conta bancária.");
   }
 }
 
@@ -259,13 +223,7 @@ export async function deleteContaBancariaAction(
     revalidateFinanceiroPaths(tenantSlug, "contas-bancarias");
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao excluir conta bancária.",
-    };
+    return failAction(error, "Erro ao excluir conta bancária.");
   }
 }
 
@@ -286,13 +244,7 @@ export async function createFormaPagamentoAction(
     revalidateFinanceiroPaths(tenantSlug, "formas-pagamento", item.id);
     return { success: true, id: item.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cadastrar forma de pagamento.",
-    };
+    return failAction(error, "Erro ao cadastrar forma de pagamento.");
   }
 }
 
@@ -310,13 +262,7 @@ export async function updateFormaPagamentoAction(
     revalidateFinanceiroPaths(tenantSlug, "formas-pagamento", id);
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao atualizar forma de pagamento.",
-    };
+    return failAction(error, "Erro ao atualizar forma de pagamento.");
   }
 }
 
@@ -332,13 +278,7 @@ export async function deleteFormaPagamentoAction(
     revalidateFinanceiroPaths(tenantSlug, "formas-pagamento");
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao excluir forma de pagamento.",
-    };
+    return failAction(error, "Erro ao excluir forma de pagamento.");
   }
 }
 
@@ -359,13 +299,7 @@ export async function createCategoriaFinanceiraAction(
     revalidateFinanceiroPaths(tenantSlug, "categorias", item.id);
     return { success: true, id: item.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cadastrar categoria.",
-    };
+    return failAction(error, "Erro ao cadastrar categoria.");
   }
 }
 
@@ -383,13 +317,7 @@ export async function updateCategoriaFinanceiraAction(
     revalidateFinanceiroPaths(tenantSlug, "categorias", id);
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao atualizar categoria.",
-    };
+    return failAction(error, "Erro ao atualizar categoria.");
   }
 }
 
@@ -405,11 +333,7 @@ export async function deleteCategoriaFinanceiraAction(
     revalidateFinanceiroPaths(tenantSlug, "categorias");
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Erro ao excluir categoria.",
-    };
+    return failAction(error, "Erro ao excluir categoria.");
   }
 }
 
@@ -429,13 +353,7 @@ export async function createContaReceberAction(
     revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id: item.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cadastrar conta a receber.",
-    };
+    return failAction(error, "Erro ao cadastrar conta a receber.");
   }
 }
 
@@ -454,13 +372,7 @@ export async function updateContaReceberAction(
     revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao atualizar conta a receber.",
-    };
+    return failAction(error, "Erro ao atualizar conta a receber.");
   }
 }
 
@@ -479,13 +391,7 @@ export async function updateClassificacaoContaReceberAction(
     revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao corrigir classificação da conta a receber.",
-    };
+    return failAction(error, "Erro ao corrigir classificação da conta a receber.");
   }
 }
 
@@ -509,57 +415,95 @@ export async function receberContaReceberAction(
     );
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao registrar baixa de recebimento.",
-    };
+    return failAction(error, "Erro ao registrar baixa de recebimento.");
   }
 }
 
 export async function cancelarContaReceberAction(
   tenantSlug: string,
   id: string,
+  options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
     const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
     const service = await createContaReceberService(tenant.id);
-    await service.cancelar(id);
+    await service.cancelar(id, {
+      motivo: options.motivo,
+      scope: options.scope,
+      userId: user?.id ?? null,
+    });
 
     revalidateFinanceiroPaths(tenantSlug, "contas-receber", id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cancelar conta a receber.",
-    };
+    return failAction(error, "Erro ao cancelar conta a receber.");
   }
 }
 
 export async function deleteContaReceberAction(
   tenantSlug: string,
   id: string,
+  options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
     const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
     const service = await createContaReceberService(tenant.id);
-    await service.softDelete(id);
+    await service.softDelete(id, {
+      motivo: options.motivo,
+      scope: options.scope,
+      userId: user?.id ?? null,
+    });
 
     revalidateFinanceiroPaths(tenantSlug, "contas-receber");
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao excluir conta a receber.",
-    };
+    return failAction(error, "Erro ao excluir conta a receber.");
+  }
+}
+
+export async function estornarContaReceberAction(
+  tenantSlug: string,
+  id: string,
+  values: { motivo: string; data_estorno?: string },
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
+    const service = await createContaReceberService(tenant.id);
+    await service.estornarBaixas(id, {
+      motivo: values.motivo,
+      data_estorno: values.data_estorno,
+      userId: user?.id ?? null,
+    });
+
+    revalidateFinanceiroPaths(tenantSlug, "contas-receber", id);
+    revalidateFluxoCaixaPaths(tenantSlug);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, id };
+  } catch (error) {
+    return failAction(error, "Erro ao estornar recebimento.");
+  }
+}
+
+export async function duplicarContaReceberAction(
+  tenantSlug: string,
+  id: string,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
+    const service = await createContaReceberService(tenant.id);
+    const item = await service.duplicar(id, user?.id ?? null);
+
+    revalidateFinanceiroPaths(tenantSlug, "contas-receber", item.id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, id: item.id };
+  } catch (error) {
+    return failAction(error, "Erro ao duplicar conta a receber.");
   }
 }
 
@@ -579,13 +523,7 @@ export async function createContaPagarAction(
     revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id: item.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cadastrar conta a pagar.",
-    };
+    return failAction(error, "Erro ao cadastrar conta a pagar.");
   }
 }
 
@@ -604,13 +542,7 @@ export async function updateContaPagarAction(
     revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao atualizar conta a pagar.",
-    };
+    return failAction(error, "Erro ao atualizar conta a pagar.");
   }
 }
 
@@ -629,13 +561,7 @@ export async function updateClassificacaoContaPagarAction(
     revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao corrigir classificação da conta a pagar.",
-    };
+    return failAction(error, "Erro ao corrigir classificação da conta a pagar.");
   }
 }
 
@@ -654,57 +580,95 @@ export async function pagarContaPagarAction(
     revalidateFluxoCaixaPaths(tenantSlug);
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao registrar baixa de pagamento.",
-    };
+    return failAction(error, "Erro ao registrar baixa de pagamento.");
   }
 }
 
 export async function cancelarContaPagarAction(
   tenantSlug: string,
   id: string,
+  options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
     const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
     const service = await createContaPagarService(tenant.id);
-    await service.cancelar(id);
+    await service.cancelar(id, {
+      motivo: options.motivo,
+      scope: options.scope,
+      userId: user?.id ?? null,
+    });
 
     revalidateFinanceiroPaths(tenantSlug, "contas-pagar", id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true, id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao cancelar conta a pagar.",
-    };
+    return failAction(error, "Erro ao cancelar conta a pagar.");
   }
 }
 
 export async function deleteContaPagarAction(
   tenantSlug: string,
   id: string,
+  options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
     const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
     const service = await createContaPagarService(tenant.id);
-    await service.softDelete(id);
+    await service.softDelete(id, {
+      motivo: options.motivo,
+      scope: options.scope,
+      userId: user?.id ?? null,
+    });
 
     revalidateFinanceiroPaths(tenantSlug, "contas-pagar");
+    revalidateFinanceiroPaths(tenantSlug, "dre");
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao excluir conta a pagar.",
-    };
+    return failAction(error, "Erro ao excluir conta a pagar.");
+  }
+}
+
+export async function estornarContaPagarAction(
+  tenantSlug: string,
+  id: string,
+  values: { motivo: string; data_estorno?: string },
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
+    const service = await createContaPagarService(tenant.id);
+    await service.estornarBaixas(id, {
+      motivo: values.motivo,
+      data_estorno: values.data_estorno,
+      userId: user?.id ?? null,
+    });
+
+    revalidateFinanceiroPaths(tenantSlug, "contas-pagar", id);
+    revalidateFluxoCaixaPaths(tenantSlug);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, id };
+  } catch (error) {
+    return failAction(error, "Erro ao estornar pagamento.");
+  }
+}
+
+export async function duplicarContaPagarAction(
+  tenantSlug: string,
+  id: string,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
+    const service = await createContaPagarService(tenant.id);
+    const item = await service.duplicar(id, user?.id ?? null);
+
+    revalidateFinanceiroPaths(tenantSlug, "contas-pagar", item.id);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, id: item.id };
+  } catch (error) {
+    return failAction(error, "Erro ao duplicar conta a pagar.");
   }
 }
 
@@ -739,13 +703,7 @@ export async function createMovimentacaoBancariaAction(
     revalidateFluxoCaixaPaths(tenantSlug, movimentacao.id);
     return { success: true, id: movimentacao.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao registrar movimentação bancária.",
-    };
+    return failAction(error, "Erro ao registrar movimentação bancária.");
   }
 }
 
@@ -766,13 +724,7 @@ export async function createTransferenciaBancariaAction(
     revalidateFluxoCaixaPaths(tenantSlug, enviada.id);
     return { success: true, id: enviada.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao registrar transferência bancária.",
-    };
+    return failAction(error, "Erro ao registrar transferência bancária.");
   }
 }
 
@@ -795,13 +747,7 @@ export async function estornarMovimentacaoBancariaAction(
     revalidateFluxoCaixaPaths(tenantSlug, movimentacao.id);
     return { success: true, id: movimentacao.id };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao estornar movimentação bancária.",
-    };
+    return failAction(error, "Erro ao estornar movimentação bancária.");
   }
 }
 
@@ -817,12 +763,296 @@ export async function deleteMovimentacaoBancariaAction(
     revalidateFluxoCaixaPaths(tenantSlug);
     return { success: true };
   } catch (error) {
+    return failAction(error, "Erro ao excluir movimentação bancária.");
+  }
+}
+
+/* ─── DRE classification helpers ───────────────────────────────────── */
+
+export async function applySuggestedDreLinhasAction(
+  tenantSlug: string,
+): Promise<ActionResult & { updated?: number; pendingCount?: number }> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const categorias = await createCategoriaFinanceiraService(tenant.id);
+    const planos = await createPlanoContaService(tenant.id);
+    const [catResult, planoResult] = await Promise.all([
+      categorias.applySuggestedDreLinhas(),
+      planos.applySuggestedDreLinhas(),
+    ]);
+
+    revalidateFinanceiroPaths(tenantSlug, "categorias");
+    revalidateFinanceiroPaths(tenantSlug, "plano-contas");
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+
     return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao excluir movimentação bancária.",
+      success: true,
+      updated: catResult.updated + planoResult.updated,
+      pendingCount: catResult.pending.length + planoResult.pending.length,
     };
+  } catch (error) {
+    return failAction(error, "Erro ao aplicar sugestões de linha do DRE.");
+  }
+}
+
+/* ─── Despesas recorrentes ─────────────────────────────────────────── */
+
+export async function createDespesaRecorrenteAction(
+  tenantSlug: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const parsed = despesaRecorrenteFormSchema.parse(values);
+    const service = await createDespesaRecorrenteService(tenant.id);
+    const item = await service.create({
+      descricao: parsed.descricao,
+      fornecedor_id: parsed.fornecedor_id || null,
+      fornecedor_nome: parsed.fornecedor_nome || null,
+      forma_pagamento_id: parsed.forma_pagamento_id || null,
+      categoria_financeira_id: parsed.categoria_financeira_id,
+      centro_custo_id: parsed.centro_custo_id,
+      plano_conta_id: parsed.plano_conta_id,
+      valor: parsed.valor,
+      dia_vencimento: parsed.dia_vencimento,
+      inicia_em: parsed.inicia_em,
+      termina_em: parsed.termina_em || null,
+      max_ocorrencias: parsed.max_ocorrencias ?? null,
+      observacoes: parsed.observacoes || null,
+    });
+
+    revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes", item.id);
+    return { success: true, id: item.id };
+  } catch (error) {
+    return failAction(error, "Erro ao criar recorrência.");
+  }
+}
+
+export async function updateDespesaRecorrenteAction(
+  tenantSlug: string,
+  id: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const parsed = despesaRecorrenteFormSchema.parse(values);
+    const service = await createDespesaRecorrenteService(tenant.id);
+    await service.update(id, {
+      descricao: parsed.descricao,
+      fornecedor_id: parsed.fornecedor_id || null,
+      fornecedor_nome: parsed.fornecedor_nome || null,
+      forma_pagamento_id: parsed.forma_pagamento_id || null,
+      categoria_financeira_id: parsed.categoria_financeira_id,
+      centro_custo_id: parsed.centro_custo_id,
+      plano_conta_id: parsed.plano_conta_id,
+      valor: parsed.valor,
+      dia_vencimento: parsed.dia_vencimento,
+      termina_em: parsed.termina_em || null,
+      max_ocorrencias: parsed.max_ocorrencias ?? null,
+      observacoes: parsed.observacoes || null,
+    });
+
+    revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes", id);
+    return { success: true, id };
+  } catch (error) {
+    return failAction(error, "Erro ao atualizar recorrência.");
+  }
+}
+
+export async function pauseDespesaRecorrenteAction(
+  tenantSlug: string,
+  id: string,
+  pausada: boolean,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const service = await createDespesaRecorrenteService(tenant.id);
+    await service.pause(id, pausada);
+    revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes", id);
+    return { success: true, id };
+  } catch (error) {
+    return failAction(error, "Erro ao pausar/retomar recorrência.");
+  }
+}
+
+export async function encerrarDespesaRecorrenteAction(
+  tenantSlug: string,
+  id: string,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const service = await createDespesaRecorrenteService(tenant.id);
+    await service.update(id, {
+      ativo: false,
+      pausada: true,
+      termina_em: new Date().toISOString().slice(0, 10),
+    });
+    revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes", id);
+    return { success: true, id };
+  } catch (error) {
+    return failAction(error, "Erro ao encerrar recorrência.");
+  }
+}
+
+export async function deleteDespesaRecorrenteAction(
+  tenantSlug: string,
+  id: string,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const service = await createDespesaRecorrenteService(tenant.id);
+    await service.softDelete(id);
+    revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes");
+    return { success: true };
+  } catch (error) {
+    return failAction(error, "Erro ao excluir recorrência.");
+  }
+}
+
+export async function generateDespesaRecorrenteAction(
+  tenantSlug: string,
+  id: string,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const service = await createDespesaRecorrenteService(tenant.id);
+    const result = await service.generateNextOccurrence(id);
+    if (!result) {
+      return { success: false, error: "Nenhuma ocorrência gerada." };
+    }
+    revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes", id);
+    revalidateFinanceiroPaths(tenantSlug, "contas-pagar", result.contaId);
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, id: result.contaId };
+  } catch (error) {
+    return failAction(error, "Erro ao gerar próxima ocorrência.");
+  }
+}
+
+export async function duplicateDespesaRecorrenteAction(
+  tenantSlug: string,
+  id: string,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const service = await createDespesaRecorrenteService(tenant.id);
+    const current = await service.getById(id);
+    if (!current) throw new Error("Recorrência não encontrada.");
+    const item = await service.create({
+      descricao: `${current.descricao} (cópia)`,
+      fornecedor_id: current.fornecedor_id,
+      fornecedor_nome: current.fornecedor_nome,
+      forma_pagamento_id: current.forma_pagamento_id,
+      categoria_financeira_id: current.categoria_financeira_id!,
+      centro_custo_id: current.centro_custo_id!,
+      plano_conta_id: current.plano_conta_id!,
+      valor: Number(current.valor),
+      dia_vencimento: current.dia_vencimento,
+      inicia_em: current.inicia_em,
+      termina_em: current.termina_em,
+      max_ocorrencias: current.max_ocorrencias,
+      observacoes: current.observacoes,
+      pausada: true,
+      ativo: true,
+    });
+    revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes", item.id);
+    return { success: true, id: item.id };
+  } catch (error) {
+    return failAction(error, "Erro ao duplicar recorrência.");
+  }
+}
+
+export async function applyDreGapSuggestionAction(
+  tenantSlug: string,
+  input: {
+    categoriaId?: string | null;
+    planoId?: string | null;
+    linha: string;
+    detalhe: string | null;
+    origem: "sugestao_nome" | "lote";
+  },
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    if (input.categoriaId) {
+      const categorias = await createCategoriaFinanceiraService(tenant.id);
+      await categorias.applyClassification({
+        id: input.categoriaId,
+        linha: input.linha,
+        detalhe: input.detalhe,
+        origem: input.origem,
+      });
+    } else if (input.planoId) {
+      const planos = await createPlanoContaService(tenant.id);
+      await planos.applyClassification({
+        id: input.planoId,
+        linha: input.linha,
+        detalhe: input.detalhe,
+        origem: input.origem,
+      });
+    } else {
+      return {
+        success: false,
+        error: "Sem categoria/plano para aplicar a sugestão.",
+      };
+    }
+    revalidateFinanceiroPaths(tenantSlug, "categorias");
+    revalidateFinanceiroPaths(tenantSlug, "plano-contas");
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true };
+  } catch (error) {
+    return failAction(error, "Erro ao aplicar sugestão de classificação.");
+  }
+}
+
+export async function applyDreGapSuggestionsBatchAction(
+  tenantSlug: string,
+  items: Array<{
+    categoriaId?: string | null;
+    planoId?: string | null;
+    linha: string;
+    detalhe: string | null;
+  }>,
+): Promise<ActionResult & { updated?: number }> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const categorias = await createCategoriaFinanceiraService(tenant.id);
+    const planos = await createPlanoContaService(tenant.id);
+    let updated = 0;
+    const seenCat = new Set<string>();
+    const seenPlano = new Set<string>();
+
+    for (const item of items) {
+      if (item.categoriaId && !seenCat.has(item.categoriaId)) {
+        seenCat.add(item.categoriaId);
+        await categorias.applyClassification({
+          id: item.categoriaId,
+          linha: item.linha,
+          detalhe: item.detalhe,
+          origem: "lote",
+        });
+        updated += 1;
+      } else if (
+        !item.categoriaId &&
+        item.planoId &&
+        !seenPlano.has(item.planoId)
+      ) {
+        seenPlano.add(item.planoId);
+        await planos.applyClassification({
+          id: item.planoId,
+          linha: item.linha,
+          detalhe: item.detalhe,
+          origem: "lote",
+        });
+        updated += 1;
+      }
+    }
+
+    revalidateFinanceiroPaths(tenantSlug, "categorias");
+    revalidateFinanceiroPaths(tenantSlug, "plano-contas");
+    revalidateFinanceiroPaths(tenantSlug, "dre");
+    return { success: true, updated };
+  } catch (error) {
+    return failAction(error, "Erro ao aplicar lote de classificações.");
   }
 }

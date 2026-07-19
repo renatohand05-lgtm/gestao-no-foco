@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { DreClassificationSelect } from "@/components/financeiro/dre-classification-select";
 import { PlanoContaSelect } from "@/components/financeiro/plano-conta-select";
 import { CancelButton } from "@/components/ui/cancel-button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -56,6 +57,8 @@ export function CategoriaFinanceiraForm({
           nome: "",
           tipo: "receita",
           plano_conta_id: "",
+          dre_linha: "",
+          dre_detalhe: "",
           cor: "",
           observacoes: "",
           ativo: true,
@@ -125,6 +128,11 @@ export function CategoriaFinanceiraForm({
               hint="Opcional — vincule a categoria a uma conta analítica."
               options={planoContaOptions}
               error={form.formState.errors.plano_conta_id?.message}
+            />
+            <DreClassificationSelect
+              register={form.register}
+              setValue={form.setValue}
+              watch={form.watch}
             />
             <FormField label="Cor" htmlFor="cor" hint="Ex.: #0EA5E9">
               <Input id="cor" {...form.register("cor")} placeholder="#0EA5E9" />

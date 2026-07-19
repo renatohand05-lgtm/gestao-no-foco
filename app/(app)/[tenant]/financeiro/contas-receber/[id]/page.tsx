@@ -19,9 +19,10 @@ export default async function DetailPage({
   const { success, error } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const service = await createContaReceberService(tenant.id);
-  const [item, contasBancarias] = await Promise.all([
+  const [item, contasBancarias, events] = await Promise.all([
     service.getById(id),
     service.listContasBancarias(),
+    service.listEventos(id),
   ]);
 
   if (!item) {
@@ -38,6 +39,7 @@ export default async function DetailPage({
         tenantSlug={tenantSlug}
         item={item}
         contasBancarias={contasBancarias}
+        events={events}
       />
     </div>
   );

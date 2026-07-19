@@ -6,6 +6,7 @@ import {
 } from "@/lib/clientes/constants";
 import { buildClientePayload } from "@/lib/clientes/mappers";
 import { onlyDigits } from "@/lib/clientes/masks";
+import { findClienteDuplicates } from "@/lib/master-data/master-data-deduplication";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type {
@@ -116,12 +117,24 @@ export class ClienteService {
   }
 
   async create(input: CreateClienteInput): Promise<Cliente> {
+    const dup = await this.checkDuplicates({
+      documento: input.documento,
+      email: input.email,
+      telefone: input.telefone,
+    });
+    if (dup.hasDuplicates) {
+      const first = dup.matches[0];
+      throw new Error(
+        `Possível duplicidade: ${first?.label} (${first?.matchedOn.join(", ")}). Confirme antes de seguir.`,
+      );
+    }
+
     const { data, error } = await this.supabase
       .from("clientes")
       .insert({
         tenant_id: this.tenantId,
         ...buildClientePayload(input),
-      })
+      } as never)
       .select("*")
       .single();
 
@@ -135,10 +148,52 @@ export class ClienteService {
     return data as Cliente;
   }
 
-  async update(id: string, input: UpdateClienteInput): Promise<Cliente> {
+  async checkDuplicates(input: {
+    excludeId?: string;
+    documento?: string | null;
+    email?: string | null;
+    telefone?: string | null;
+  }) {
     const { data, error } = await this.supabase
       .from("clientes")
-      .update(buildClientePayload(input as CreateClienteInput))
+      .select("id, nome, documento, email, telefone")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .limit(500);
+
+    if (error) throw new Error(error.message);
+
+    return findClienteDuplicates({
+      ...input,
+      candidates: (data ?? []).map((row) => ({
+        id: row.id,
+        label: row.nome,
+        documento: row.documento,
+        email: row.email,
+        telefone: row.telefone,
+      })),
+    });
+  }
+
+  async update(id: string, input: UpdateClienteInput): Promise<Cliente> {
+    if (input.documento || input.email || input.telefone) {
+      const dup = await this.checkDuplicates({
+        excludeId: id,
+        documento: input.documento,
+        email: input.email,
+        telefone: input.telefone,
+      });
+      if (dup.hasDuplicates) {
+        const first = dup.matches[0];
+        throw new Error(
+          `Possível duplicidade: ${first?.label} (${first?.matchedOn.join(", ")}).`,
+        );
+      }
+    }
+
+    const { data, error } = await this.supabase
+      .from("clientes")
+      .update(buildClientePayload(input as CreateClienteInput) as never)
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
       .is("deleted_at", null)

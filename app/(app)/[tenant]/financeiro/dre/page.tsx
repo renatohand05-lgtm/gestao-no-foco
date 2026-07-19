@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { DreDrillPanel } from "@/components/financeiro/dre-drill-panel";
 import { DreFilters } from "@/components/financeiro/dre-filters";
 import { DreGapsPanel } from "@/components/financeiro/dre-gaps-panel";
 import { DreStatement } from "@/components/financeiro/dre-statement";
@@ -22,6 +23,8 @@ type PageProps = {
     planoConta?: string;
     dataDe?: string;
     dataAte?: string;
+    linha?: string;
+    detalhe?: string;
   }>;
 };
 
@@ -31,8 +34,15 @@ function FiltersFallback() {
 
 export default async function Page({ params, searchParams }: PageProps) {
   const { tenant: tenantSlug } = await params;
-  const { centroCusto, categoria, planoConta, dataDe, dataAte } =
-    await searchParams;
+  const {
+    centroCusto,
+    categoria,
+    planoConta,
+    dataDe,
+    dataAte,
+    linha,
+    detalhe,
+  } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const defaults = defaultDrePeriodo();
 
@@ -45,13 +55,24 @@ export default async function Page({ params, searchParams }: PageProps) {
   };
 
   const service = await createDreService(tenant.id);
-  const { resumo, linhas, gaps, filterOptions } = await service.getDre(filters);
+  const { resumo, linhas, gaps, filterOptions, drillItems } =
+    await service.getDre(filters);
+
+  const drill =
+    linha && drillItems
+      ? drillItems.filter((item) => {
+          if (item.linha !== linha) return false;
+          if (!detalhe) return true;
+          if (detalhe === "__none__") return !item.detalhe;
+          return item.detalhe === detalhe;
+        })
+      : [];
 
   return (
     <div className="space-y-6">
       <ModuleHeader
         title="DRE"
-        description={`Demonstração do Resultado por competência — ${tenant.name}`}
+        description={`Demonstração do Resultado por competência — ${tenant.name}. Pagamentos alimentam o Fluxo de Caixa, não geram nova despesa aqui.`}
         breadcrumbs={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "DRE" },
@@ -75,8 +96,30 @@ export default async function Page({ params, searchParams }: PageProps) {
       </Suspense>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <DreStatement linhas={linhas} />
-        <DreGapsPanel tenantSlug={tenantSlug} gaps={gaps} />
+        <DreStatement
+          linhas={linhas}
+          tenantSlug={tenantSlug}
+          query={{
+            dataDe: filters.dataDe,
+            dataAte: filters.dataAte,
+            centroCusto,
+            categoria,
+            planoConta,
+            linha,
+            detalhe,
+          }}
+        />
+        <div className="space-y-6">
+          {linha ? (
+            <DreDrillPanel
+              tenantSlug={tenantSlug}
+              linha={linha}
+              detalhe={detalhe}
+              items={drill}
+            />
+          ) : null}
+          <DreGapsPanel tenantSlug={tenantSlug} gaps={gaps} />
+        </div>
       </div>
     </div>
   );

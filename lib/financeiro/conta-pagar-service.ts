@@ -11,12 +11,23 @@ import {
   canCancelarContaPagar,
   canEditClassificacaoContaPagar,
   canEditContaPagar,
+  canEstornarContaPagar,
+  canSoftDeleteContaPagar,
   resolveStatusExibicao,
   splitValorParcelas,
   todayISO,
 } from "@/lib/financeiro/conta-pagar-utils";
+import type { ParcelScope } from "@/lib/financeiro/conta-lifecycle";
+import {
+  listFinanceiroLancamentoEvents,
+  recordFinanceiroLancamentoEvent,
+} from "@/lib/financeiro/financeiro-eventos";
 import { buildContaPagarPayload } from "@/lib/financeiro/mappers";
-import { baixarContaPagarAtomico } from "@/lib/financeiro/movimentacao-bancaria-rpc";
+import { normalizeRateioLines } from "@/lib/financeiro/conta-pagar-rateio";
+import {
+  baixarContaPagarAtomico,
+  estornarMovimentacaoBancariaAtomico,
+} from "@/lib/financeiro/movimentacao-bancaria-rpc";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type {
@@ -26,6 +37,7 @@ import type {
   ContaBancariaOption,
   ContaPagarDetail,
   ContaPagarListItem,
+  ContaPagarRateioLine,
   ContaPagarSortField,
   ContaPagarStatusPersistido,
   ContasPagarResumo,
@@ -56,6 +68,7 @@ const LIST_SELECT = `
   data_competencia,
   data_vencimento,
   data_pagamento,
+  grupo_parcelamento_id,
   parcela_numero,
   parcela_total,
   created_at,
@@ -66,11 +79,43 @@ const DETAIL_SELECT = `
   *,
   fornecedor:fornecedores ( id, nome, documento ),
   forma_pagamento:formas_pagamento ( id, nome ),
-  categoria_financeira:categorias_financeiras ( id, nome ),
+  categoria_financeira:categorias_financeiras ( id, nome, dre_linha ),
   centro_custo:centros_custo ( id, nome, codigo ),
-  plano_conta:plano_contas ( id, nome, codigo ),
+  plano_conta:plano_contas ( id, nome, codigo, dre_linha ),
+  conta_bancaria:contas_bancarias ( id, nome ),
+  rateios:contas_pagar_rateios ( id, centro_custo_id, percentual, valor, descricao, deleted_at, centro_custo:centros_custo ( id, nome, codigo ) )
+`;
+
+/** Fallback quando a coluna descricao ainda não existe no remoto. */
+const DETAIL_SELECT_WITHOUT_RATEIO_DESCRICAO = `
+  *,
+  fornecedor:fornecedores ( id, nome, documento ),
+  forma_pagamento:formas_pagamento ( id, nome ),
+  categoria_financeira:categorias_financeiras ( id, nome, dre_linha ),
+  centro_custo:centros_custo ( id, nome, codigo ),
+  plano_conta:plano_contas ( id, nome, codigo, dre_linha ),
+  conta_bancaria:contas_bancarias ( id, nome ),
+  rateios:contas_pagar_rateios ( id, centro_custo_id, percentual, valor, deleted_at, centro_custo:centros_custo ( id, nome, codigo ) )
+`;
+
+const DETAIL_SELECT_WITHOUT_RATEIOS = `
+  *,
+  fornecedor:fornecedores ( id, nome, documento ),
+  forma_pagamento:formas_pagamento ( id, nome ),
+  categoria_financeira:categorias_financeiras ( id, nome, dre_linha ),
+  centro_custo:centros_custo ( id, nome, codigo ),
+  plano_conta:plano_contas ( id, nome, codigo, dre_linha ),
   conta_bancaria:contas_bancarias ( id, nome )
 `;
+
+function isMissingRateioDescricaoError(message: string) {
+  const m = message.toLowerCase();
+  return m.includes("descricao") && m.includes("rateio");
+}
+
+function isMissingRateioTableError(message: string) {
+  return message.toLowerCase().includes("contas_pagar_rateios");
+}
 
 function resolveSort(
   sort?: ContaPagarSortField,
@@ -105,9 +150,33 @@ function mapListItem(
   };
 }
 
-function mapDetail(row: Omit<ContaPagarDetail, "status_exibicao">): ContaPagarDetail {
+function mapDetail(
+  row: Omit<ContaPagarDetail, "status_exibicao" | "rateios"> & {
+    rateios?: Array<{
+      id: string;
+      centro_custo_id: string;
+      percentual: number;
+      valor: number;
+      descricao: string | null;
+      deleted_at: string | null;
+      centro_custo?: { id: string; nome: string; codigo: string } | null;
+    }> | null;
+  },
+): ContaPagarDetail {
+  const rateios: ContaPagarRateioLine[] = (row.rateios ?? [])
+    .filter((r) => !r.deleted_at)
+    .map((r) => ({
+      id: r.id,
+      centro_custo_id: r.centro_custo_id,
+      percentual: Number(r.percentual),
+      valor: Number(r.valor),
+      descricao: r.descricao,
+      centro_custo: r.centro_custo ?? null,
+    }));
+
   return {
     ...row,
+    rateios,
     status_exibicao: resolveStatusExibicao({
       status: row.status as ContaPagarStatusPersistido,
       data_vencimento: row.data_vencimento,
@@ -290,25 +359,110 @@ export class ContaPagarService {
   }
 
   async getById(id: string): Promise<ContaPagarDetail | null> {
-    const { data, error } = await this.supabase
-      .from("contas_pagar")
-      .select(DETAIL_SELECT)
-      .eq("tenant_id", this.tenantId)
-      .eq("id", id)
-      .is("deleted_at", null)
-      .maybeSingle();
+    const run = (select: string) =>
+      this.supabase
+        .from("contas_pagar")
+        .select(select)
+        .eq("tenant_id", this.tenantId)
+        .eq("id", id)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+    let { data, error } = await run(DETAIL_SELECT);
+
+    if (error && isMissingRateioDescricaoError(error.message)) {
+      ({ data, error } = await run(DETAIL_SELECT_WITHOUT_RATEIO_DESCRICAO));
+    }
+
+    if (error && isMissingRateioTableError(error.message)) {
+      ({ data, error } = await run(DETAIL_SELECT_WITHOUT_RATEIOS));
+    }
 
     if (error) throw new Error(error.message);
-
     if (!data) return null;
 
-    return mapDetail(data as Omit<ContaPagarDetail, "status_exibicao">);
+    return mapDetail(data as never);
+  }
+
+  /**
+   * Substitui rateios ativos (soft-delete + insert).
+   * Linhas vazias = remove rateio (conta volta ao centro único).
+   */
+  async replaceRateios(
+    contaId: string,
+    lines: NonNullable<CreateContaPagarInput["rateios"]>,
+    valorOriginal: number,
+  ): Promise<void> {
+    const normalized = normalizeRateioLines(valorOriginal, lines ?? []);
+
+    if (normalized.length > 0) {
+      const centroIds = [...new Set(normalized.map((l) => l.centro_custo_id))];
+      const { data: centros, error: centrosError } = await this.supabase
+        .from("centros_custo")
+        .select("id")
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .eq("ativo", true)
+        .in("id", centroIds);
+
+      if (centrosError) throw new Error(centrosError.message);
+      if ((centros ?? []).length !== centroIds.length) {
+        throw new Error(
+          "Centro de custo inválido, inativo ou de outro tenant no rateio.",
+        );
+      }
+    }
+
+    const now = new Date().toISOString();
+    const { error: softError } = await this.supabase
+      .from("contas_pagar_rateios" as never)
+      .update({ deleted_at: now } as never)
+      .eq("tenant_id", this.tenantId)
+      .eq("conta_pagar_id", contaId)
+      .is("deleted_at", null);
+
+    if (softError) throw new Error(softError.message);
+
+    if (normalized.length === 0) return;
+
+    const rowsWithDescricao = normalized.map((line) => ({
+      tenant_id: this.tenantId,
+      conta_pagar_id: contaId,
+      centro_custo_id: line.centro_custo_id,
+      percentual: line.percentual,
+      valor: line.valor,
+      descricao: line.descricao,
+    }));
+
+    let { error: insertError } = await this.supabase
+      .from("contas_pagar_rateios" as never)
+      .insert(rowsWithDescricao as never);
+
+    if (
+      insertError &&
+      isMissingRateioDescricaoError(insertError.message)
+    ) {
+      ({ error: insertError } = await this.supabase
+        .from("contas_pagar_rateios" as never)
+        .insert(
+          normalized.map((line) => ({
+            tenant_id: this.tenantId,
+            conta_pagar_id: contaId,
+            centro_custo_id: line.centro_custo_id,
+            percentual: line.percentual,
+            valor: line.valor,
+          })) as never,
+        ));
+    }
+
+    if (insertError) throw new Error(insertError.message);
   }
 
   async create(input: CreateContaPagarInput): Promise<ContaPagarDetail> {
     const parcelas = Math.max(input.parcelas ?? 1, 1);
     const grupoId = parcelas > 1 ? crypto.randomUUID() : null;
     const valores = splitValorParcelas(input.valor_original, parcelas);
+    const rateios = input.rateios;
 
     const rows = valores.map((valor, index) => ({
       tenant_id: this.tenantId,
@@ -319,6 +473,10 @@ export class ContaPagarService {
           index === 0
             ? input.data_vencimento
             : addMonths(input.data_vencimento, index),
+        data_competencia:
+          index === 0
+            ? input.data_competencia
+            : addMonths(input.data_competencia, index),
       }),
       grupo_parcelamento_id: grupoId,
       parcela_numero: index + 1,
@@ -331,14 +489,25 @@ export class ContaPagarService {
     const { data, error } = await this.supabase
       .from("contas_pagar")
       .insert(rows)
-      .select("id, parcela_numero")
+      .select("id, parcela_numero, valor_original")
       .order("parcela_numero", { ascending: true });
 
     if (error) throw new Error(error.message);
 
-    const createdId = data?.[0]?.id as string | undefined;
+    const created = data ?? [];
+    const createdId = created[0]?.id as string | undefined;
     if (!createdId) {
       throw new Error("Erro ao criar conta a pagar.");
+    }
+
+    if (rateios && rateios.length > 0) {
+      for (const parcela of created) {
+        await this.replaceRateios(
+          parcela.id as string,
+          rateios,
+          Number(parcela.valor_original),
+        );
+      }
     }
 
     const detail = await this.getById(createdId);
@@ -359,22 +528,35 @@ export class ContaPagarService {
       throw new Error("Conta a pagar não encontrada.");
     }
 
+    if (current.status === "cancelado") {
+      throw new Error("Conta cancelada não admite alteração.");
+    }
+
     if (!canEditContaPagar(current)) {
       throw new Error(
         "Somente contas em aberto, vencidas ou parciais podem ser editadas.",
       );
     }
 
+    const { rateios, ...rest } = input;
     const { data, error } = await this.supabase
       .from("contas_pagar")
-      .update(buildContaPagarPayload(input as CreateContaPagarInput))
+      .update(buildContaPagarPayload(rest as CreateContaPagarInput))
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
       .is("deleted_at", null)
-      .select("id")
+      .select("id, valor_original")
       .single();
 
     if (error) throw new Error(error.message);
+
+    if (rateios !== undefined) {
+      await this.replaceRateios(
+        id,
+        rateios ?? [],
+        Number(data.valor_original),
+      );
+    }
 
     const detail = await this.getById(data.id);
     if (!detail) {
@@ -445,7 +627,14 @@ export class ContaPagarService {
     return detail;
   }
 
-  async cancelar(id: string): Promise<ContaPagarDetail> {
+  async cancelar(
+    id: string,
+    options: {
+      motivo?: string | null;
+      userId?: string | null;
+      scope?: ParcelScope;
+    } = {},
+  ): Promise<ContaPagarDetail> {
     const current = await this.getById(id);
 
     if (!current) {
@@ -453,25 +642,43 @@ export class ContaPagarService {
     }
 
     if (!canCancelarContaPagar(current)) {
+      if (canEstornarContaPagar(current)) {
+        throw new Error(
+          "Conta com pagamento não pode ser cancelada. Estorne o pagamento antes.",
+        );
+      }
       throw new Error("Esta conta não pode ser cancelada no status atual.");
     }
 
-    if (current.status === "pago") {
-      throw new Error("Conta paga não pode ser cancelada. Estorne manualmente.");
+    const ids = await this.resolveParcelIds(current, options.scope ?? "atual");
+
+    for (const parcelId of ids) {
+      const parcel = await this.getById(parcelId);
+      if (!parcel) continue;
+      if (!canCancelarContaPagar(parcel)) continue;
+
+      const { error } = await this.supabase
+        .from("contas_pagar")
+        .update({ status: "cancelado" })
+        .eq("tenant_id", this.tenantId)
+        .eq("id", parcelId)
+        .is("deleted_at", null);
+
+      if (error) throw new Error(error.message);
+
+      await recordFinanceiroLancamentoEvent(this.supabase, {
+        tenantId: this.tenantId,
+        entityType: "conta_pagar",
+        entityId: parcelId,
+        action: "cancelamento",
+        motivo: options.motivo,
+        payloadAntes: { status: parcel.status },
+        payloadDepois: { status: "cancelado" },
+        userId: options.userId,
+      });
     }
 
-    const { data, error } = await this.supabase
-      .from("contas_pagar")
-      .update({ status: "cancelado" })
-      .eq("tenant_id", this.tenantId)
-      .eq("id", id)
-      .is("deleted_at", null)
-      .select("id")
-      .single();
-
-    if (error) throw new Error(error.message);
-
-    const detail = await this.getById(data.id);
+    const detail = await this.getById(id);
     if (!detail) {
       throw new Error("Erro ao carregar conta após cancelamento.");
     }
@@ -479,25 +686,238 @@ export class ContaPagarService {
     return detail;
   }
 
-  async softDelete(id: string): Promise<void> {
+  async softDelete(
+    id: string,
+    options: {
+      motivo?: string | null;
+      userId?: string | null;
+      scope?: ParcelScope;
+    } = {},
+  ): Promise<void> {
     const current = await this.getById(id);
 
     if (!current) {
       throw new Error("Conta a pagar não encontrada.");
     }
 
-    if (current.status !== "cancelado") {
-      throw new Error("Somente contas canceladas podem ser excluídas.");
+    if (!canSoftDeleteContaPagar(current)) {
+      if (canEstornarContaPagar(current)) {
+        throw new Error(
+          "Conta com pagamento não pode ser excluída. Estorne o pagamento antes de cancelar/excluir.",
+        );
+      }
+      throw new Error("Esta conta não pode ser excluída no status atual.");
     }
 
-    const { error } = await this.supabase
+    const activeMoves = await this.countActiveBaixas(id);
+    if (activeMoves > 0) {
+      throw new Error(
+        "Existem movimentações bancárias ativas vinculadas. Estorne antes de excluir.",
+      );
+    }
+
+    const ids = await this.resolveParcelIds(current, options.scope ?? "atual");
+    const now = new Date().toISOString();
+
+    for (const parcelId of ids) {
+      const parcel = await this.getById(parcelId);
+      if (!parcel || !canSoftDeleteContaPagar(parcel)) continue;
+      if ((await this.countActiveBaixas(parcelId)) > 0) continue;
+
+      const { error } = await this.supabase
+        .from("contas_pagar")
+        .update({ deleted_at: now })
+        .eq("tenant_id", this.tenantId)
+        .eq("id", parcelId)
+        .is("deleted_at", null);
+
+      if (error) throw new Error(error.message);
+
+      await recordFinanceiroLancamentoEvent(this.supabase, {
+        tenantId: this.tenantId,
+        entityType: "conta_pagar",
+        entityId: parcelId,
+        action: "soft_delete",
+        motivo: options.motivo,
+        payloadAntes: { status: parcel.status, deleted_at: null },
+        payloadDepois: { deleted_at: now },
+        userId: options.userId,
+      });
+    }
+  }
+
+  async estornarBaixas(
+    id: string,
+    input: { motivo: string; data_estorno?: string; userId?: string | null },
+  ): Promise<ContaPagarDetail> {
+    const motivo = input.motivo?.trim();
+    if (!motivo || motivo.length < 3) {
+      throw new Error("Informe o motivo do estorno (mínimo 3 caracteres).");
+    }
+
+    const current = await this.getById(id);
+    if (!current) throw new Error("Conta a pagar não encontrada.");
+    if (!canEstornarContaPagar(current)) {
+      throw new Error("Esta conta não possui pagamento para estornar.");
+    }
+
+    const { data: moves, error } = await this.supabase
+      .from("movimentacoes_bancarias")
+      .select("id, tipo, estornada_por_id, valor")
+      .eq("tenant_id", this.tenantId)
+      .eq("conta_pagar_id", id)
+      .is("deleted_at", null)
+      .is("estornada_por_id", null)
+      .neq("tipo", "estorno");
+
+    if (error) throw new Error(error.message);
+
+    const ativos = moves ?? [];
+    if (ativos.length === 0) {
+      throw new Error("Nenhuma movimentação ativa encontrada para estornar.");
+    }
+
+    const dataEstorno = input.data_estorno || todayISO();
+
+    for (const move of ativos) {
+      await estornarMovimentacaoBancariaAtomico(this.supabase, {
+        tenantId: this.tenantId,
+        movimentacaoId: move.id,
+        dataMovimentacao: dataEstorno,
+        observacoes: `Estorno CP ${current.numero}: ${motivo}`,
+        createdBy: input.userId ?? null,
+      });
+    }
+
+    const { error: reopenError } = await this.supabase
       .from("contas_pagar")
-      .update({ deleted_at: new Date().toISOString() })
+      .update({
+        valor_pago: 0,
+        status: "aberto",
+        data_pagamento: null,
+      })
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
       .is("deleted_at", null);
 
+    if (reopenError) throw new Error(reopenError.message);
+
+    await recordFinanceiroLancamentoEvent(this.supabase, {
+      tenantId: this.tenantId,
+      entityType: "conta_pagar",
+      entityId: id,
+      action: "estorno",
+      motivo,
+      payloadAntes: {
+        status: current.status,
+        valor_pago: current.valor_pago,
+        movimentacoes: ativos.map((m) => m.id),
+      },
+      payloadDepois: { status: "aberto", valor_pago: 0 },
+      userId: input.userId,
+    });
+
+    const detail = await this.getById(id);
+    if (!detail) throw new Error("Erro ao carregar conta após estorno.");
+    return detail;
+  }
+
+  async duplicar(
+    id: string,
+    userId?: string | null,
+  ): Promise<ContaPagarDetail> {
+    const current = await this.getById(id);
+    if (!current) throw new Error("Conta a pagar não encontrada.");
+
+    const created = await this.create({
+      fornecedor_id: current.fornecedor_id,
+      fornecedor_nome: current.fornecedor_nome,
+      forma_pagamento_id: current.forma_pagamento_id,
+      categoria_financeira_id: current.categoria_financeira_id!,
+      centro_custo_id: current.centro_custo_id!,
+      plano_conta_id: current.plano_conta_id!,
+      descricao: `${current.descricao} (cópia)`,
+      valor_original: current.valor_original,
+      desconto: current.desconto,
+      juros: current.juros,
+      multa: current.multa,
+      data_emissao: todayISO(),
+      data_competencia: current.data_competencia,
+      data_vencimento: current.data_vencimento,
+      parcelas: 1,
+      observacoes: current.observacoes,
+      rateios: (current.rateios ?? []).map((r) => ({
+          centro_custo_id: r.centro_custo_id,
+          percentual: r.percentual,
+          descricao: r.descricao,
+        })),
+    });
+
+    await recordFinanceiroLancamentoEvent(this.supabase, {
+      tenantId: this.tenantId,
+      entityType: "conta_pagar",
+      entityId: created.id,
+      action: "duplicacao",
+      motivo: `Duplicado de ${current.id}`,
+      payloadAntes: { origem_id: current.id },
+      payloadDepois: { id: created.id },
+      userId,
+    });
+
+    return created;
+  }
+
+  async listEventos(id: string) {
+    return listFinanceiroLancamentoEvents(this.supabase, {
+      tenantId: this.tenantId,
+      entityType: "conta_pagar",
+      entityId: id,
+    });
+  }
+
+  private async countActiveBaixas(contaId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("movimentacoes_bancarias")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", this.tenantId)
+      .eq("conta_pagar_id", contaId)
+      .is("deleted_at", null)
+      .is("estornada_por_id", null)
+      .neq("tipo", "estorno");
+
     if (error) throw new Error(error.message);
+    return count ?? 0;
+  }
+
+  private async resolveParcelIds(
+    current: ContaPagarDetail,
+    scope: ParcelScope,
+  ): Promise<string[]> {
+    if (scope === "atual" || !current.grupo_parcelamento_id) {
+      return [current.id];
+    }
+
+    let query = this.supabase
+      .from("contas_pagar")
+      .select("id, parcela_numero, status, valor_pago")
+      .eq("tenant_id", this.tenantId)
+      .eq("grupo_parcelamento_id", current.grupo_parcelamento_id)
+      .is("deleted_at", null)
+      .order("parcela_numero", { ascending: true });
+
+    if (scope === "atual_e_proximas") {
+      query = query.gte("parcela_numero", current.parcela_numero);
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+
+    return (data ?? [])
+      .filter((row) => Number(row.valor_pago ?? 0) <= 0)
+      .filter(
+        (row) => row.status === "aberto" || row.status === "cancelado",
+      )
+      .map((row) => row.id as string);
   }
 
   async listFornecedores(): Promise<FornecedorOption[]> {
@@ -531,7 +951,7 @@ export class ContaPagarService {
   async listCategorias(): Promise<CategoriaFinanceiraOption[]> {
     const { data, error } = await this.supabase
       .from("categorias_financeiras")
-      .select("id, nome, tipo")
+      .select("id, nome, tipo, dre_linha")
       .eq("tenant_id", this.tenantId)
       .is("deleted_at", null)
       .eq("ativo", true)
@@ -560,7 +980,7 @@ export class ContaPagarService {
   async listPlanoContas(): Promise<PlanoContaOption[]> {
     const { data, error } = await this.supabase
       .from("plano_contas")
-      .select("id, codigo, nome")
+      .select("id, codigo, nome, dre_linha")
       .eq("tenant_id", this.tenantId)
       .is("deleted_at", null)
       .eq("ativo", true)

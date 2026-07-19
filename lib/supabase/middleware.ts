@@ -3,7 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getPostLoginPath, getUserTenantSlugs } from "@/lib/auth/redirect";
 import { isProtectedRoute, isTenantRoute, getTenantSlugFromPath } from "@/lib/auth/routes";
-import { AUTH_ROUTES, PUBLIC_ROUTES } from "@/lib/constants";
+import { AUTH_ROUTES, OPERATIONAL_API_ROUTES, PUBLIC_ROUTES } from "@/lib/constants";
+import {
+  isMaintenanceBypassPath,
+  isMaintenanceMode,
+} from "@/lib/platform/maintenance";
 import type { Database } from "@/types/database";
 
 function getSupabaseEnv() {
@@ -18,6 +22,22 @@ function getSupabaseEnv() {
 }
 
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (isMaintenanceMode() && !isMaintenanceBypassPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/manutencao";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
+  const isOperationalApi = OPERATIONAL_API_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+  if (isOperationalApi) {
+    return NextResponse.next({ request });
+  }
+
   const env = getSupabaseEnv();
 
   if (!env) {
@@ -47,8 +67,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
-  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname === route);
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
 
   if (!user && isProtectedRoute(pathname)) {

@@ -1,0 +1,188 @@
+{
+  "at": "2026-07-19T14:25:35.062Z",
+  "exit": 0,
+  "pass": 36,
+  "fail": 0,
+  "checks": [
+    {
+      "name": "migration base file",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "migration RPC file",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": ".env.example somente # e variáveis",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "env supabase url/anon",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SUPABASE_SERVICE_ROLE_KEY configurada",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tabela notas_fiscais_entrada",
+      "ok": true,
+      "detail": "presente"
+    },
+    {
+      "name": "tabela notas_fiscais_entrada_itens",
+      "ok": true,
+      "detail": "presente"
+    },
+    {
+      "name": "tabela notas_fiscais_entrada_eventos",
+      "ok": true,
+      "detail": "presente"
+    },
+    {
+      "name": "tabela fornecedor_produto_vinculos",
+      "ok": true,
+      "detail": "presente"
+    },
+    {
+      "name": "notas_fiscais_entrada.tenant_id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada.chave_acesso",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada.xml_hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada.fornecedor_id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada.status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada.deleted_at",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada.conta_pagar_id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.tenant_id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.destino",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.quantidade",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.quantidade_estoque",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.quantidade_os",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.produto_id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.ordem_servico_id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.custo_unitario_final",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notas_fiscais_entrada_itens.deleted_at",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "RPC processar_nfe_entrada_atomico",
+      "ok": true,
+      "detail": "responde (P0001)"
+    },
+    {
+      "name": "bucket nfe-entrada privado",
+      "ok": true,
+      "detail": "size_limit=2097152"
+    },
+    {
+      "name": "RLS notas_fiscais_entrada",
+      "ok": true,
+      "detail": "vazio/sem vazamento"
+    },
+    {
+      "name": "RLS notas_fiscais_entrada_itens",
+      "ok": true,
+      "detail": "vazio/sem vazamento"
+    },
+    {
+      "name": "RLS notas_fiscais_entrada_eventos",
+      "ok": true,
+      "detail": "vazio/sem vazamento"
+    },
+    {
+      "name": "RLS fornecedor_produto_vinculos",
+      "ok": true,
+      "detail": "vazio/sem vazamento"
+    },
+    {
+      "name": "migration docs: uq_notas_fiscais_entrada_chave_ativa",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "migration docs: uq_notas_fiscais_entrada_xml_hash_ativa",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "migration docs: quantidade_estoque + quantidade_os = quantidade",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "migration docs: deleted_at",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "migration docs: nfe-entrada",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

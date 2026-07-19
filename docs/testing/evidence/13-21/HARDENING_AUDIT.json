@@ -1,0 +1,224 @@
+{
+  "at": "2026-07-19T00:40:07.582Z",
+  "pass": 31,
+  "fail": 0,
+  "results": [
+    {
+      "area": "Estrutura",
+      "check": "lib/observability/logger.ts",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "lib/observability/perf.ts",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "lib/platform/maintenance.ts",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "lib/platform/health.ts",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "app/global-error.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "app/error.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "app/not-found.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "app/loading.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "app/manutencao/page.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "app/api/health/route.ts",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "app/api/status/route.ts",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "components/platform/toast-provider.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "components/platform/global-loader.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "components/platform/maintenance-screen.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Estrutura",
+      "check": "components/platform/app-providers.tsx",
+      "ok": true,
+      "evidence": "presente",
+      "note": ""
+    },
+    {
+      "area": "Rotas autenticadas",
+      "check": "manutencao reservado + PUBLIC_ROUTES",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "Rotas autenticadas",
+      "check": "health/status bypass no middleware",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "Rotas autenticadas",
+      "check": "isProtectedRoute cobre onboarding + tenant",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "Rotas autenticadas",
+      "check": "isolamento de slug de tenant no proxy",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "RLS",
+      "check": "Migrations com ENABLE ROW LEVEL SECURITY",
+      "ok": true,
+      "evidence": "ocorrências=10 em 3 arquivos",
+      "note": ""
+    },
+    {
+      "area": "RLS",
+      "check": "Anon sem sessão não lê clientes",
+      "ok": true,
+      "evidence": "0 rows",
+      "note": ""
+    },
+    {
+      "area": "RLS",
+      "check": "Anon sem sessão não lê vendas",
+      "ok": true,
+      "evidence": "0 rows",
+      "note": ""
+    },
+    {
+      "area": "RLS",
+      "check": "Anon sem sessão não lê ordens_servico",
+      "ok": true,
+      "evidence": "0 rows",
+      "note": ""
+    },
+    {
+      "area": "RLS",
+      "check": "Anon sem sessão não lê contas_receber",
+      "ok": true,
+      "evidence": "0 rows",
+      "note": ""
+    },
+    {
+      "area": "Performance",
+      "check": "Documento PERFORMANCE.md presente",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "Performance",
+      "check": "withTiming / slow_operation disponível",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "Performance",
+      "check": "Serviços com Promise.all (paralelismo)",
+      "ok": true,
+      "evidence": "11/30 services",
+      "note": ""
+    },
+    {
+      "area": "Queries",
+      "check": "Arquivos lib com .select('*')",
+      "ok": true,
+      "evidence": "count=16",
+      "note": "Revisar candidatos a projeção explícita (melhoria contínua)"
+    },
+    {
+      "area": "Componentes",
+      "check": "FeedbackMessage com variantes padronizadas",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "Componentes",
+      "check": "ToastProvider + AppProviders no layout",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    },
+    {
+      "area": "Observabilidade",
+      "check": "friendly-error usa logger",
+      "ok": true,
+      "evidence": "",
+      "note": ""
+    }
+  ]
+}

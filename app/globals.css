@@ -27,7 +27,15 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
   --color-accent-foreground: var(--accent-foreground);
+  --shadow-card: var(--elevation-card);
+  --shadow-raised: var(--elevation-raised);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
@@ -64,6 +72,12 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --success: oklch(0.55 0.15 155);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.75 0.15 75);
+  --warning-foreground: oklch(0.25 0.05 75);
+  --danger: oklch(0.577 0.245 27.325);
+  --danger-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -73,6 +87,8 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
+  --elevation-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --elevation-raised: 0 4px 12px -2px rgb(0 0 0 / 0.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.45 0.18 250);
@@ -99,9 +115,17 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
+  --success: oklch(0.72 0.15 155);
+  --success-foreground: oklch(0.2 0.04 155);
+  --warning: oklch(0.8 0.14 75);
+  --warning-foreground: oklch(0.25 0.05 75);
+  --danger: oklch(0.704 0.191 22.216);
+  --danger-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --elevation-card: 0 1px 2px 0 rgb(0 0 0 / 0.25);
+  --elevation-raised: 0 8px 24px -4px rgb(0 0 0 / 0.35);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -126,5 +150,24 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Sprint 10.3 — reforço a prefers-reduced-motion (além de motion-safe:) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Sprint 10.5 — shimmer para skeletons */
+@keyframes ex-shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }

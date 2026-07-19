@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "audit:schema": "node scripts/audit-schema-compatibility.mjs",
+    "audit:nfe": "node scripts/nfe-gate2-preflight.mjs",
+    "test:nfe-parser": "node --experimental-strip-types scripts/nfe-parser-tests.mjs",
+    "test:nfe-gate2": "node --experimental-strip-types scripts/nfe-gate2-live-30.mjs",
+    "audit:hardening": "node scripts/sprint-1321-hardening-audit.mjs",
+    "install:chromium": "playwright install chromium",
+    "test:login": "node scripts/playwright-login.mjs",
+    "test:walkthrough": "node scripts/oficina-walkthrough-ui.mjs",
+    "test:inspecao-gate2": "node scripts/inspecao-gate2-preflight.mjs",
+    "test:inspecao-live-30": "node scripts/inspecao-gate2-live-30.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -15,6 +25,7 @@
     "@supabase/supabase-js": "^2.110.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fast-xml-parser": "^5.10.1",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "react": "19.2.4",
@@ -32,6 +43,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "playwright": "^1.52.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

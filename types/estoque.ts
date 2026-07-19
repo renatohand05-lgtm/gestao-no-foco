@@ -1,3 +1,7 @@
+import type { SortOrder, PaginatedResult } from "@/types/pagination";
+
+export type { SortOrder, PaginatedResult };
+
 export type MovimentacaoTipo = "entrada" | "saida" | "ajuste";
 
 export type MovimentacaoSortField =
@@ -5,8 +9,6 @@ export type MovimentacaoSortField =
   | "tipo"
   | "quantidade"
   | "quantidade_nova";
-
-export type SortOrder = "asc" | "desc";
 
 export type EstoqueMovimentacao = {
   id: string;
@@ -61,6 +63,11 @@ export type CreateMovimentacaoInput = {
   motivo?: string | null;
   origem: string;
   observacoes?: string | null;
+  /**
+   * Quando tipo=entrada e informado: atualiza produtos.custo pelo médio ponderado
+   * (política NF-e / compras). Não usar em saídas.
+   */
+  custo_unitario_entrada?: number | null;
 };
 
 export type ListMovimentacoesParams = {
@@ -79,14 +86,6 @@ export type ListEstoqueProdutosParams = {
   perPage?: number;
   search?: string;
   alerta?: boolean;
-};
-
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
 };
 
 export type EstoqueSuccessMessage = "created" | "deleted";

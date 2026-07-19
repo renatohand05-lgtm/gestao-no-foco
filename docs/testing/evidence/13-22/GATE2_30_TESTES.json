@@ -1,0 +1,220 @@
+{
+  "at": "2026-07-19T14:25:32.524Z",
+  "rpcReady": true,
+  "pass": 30,
+  "fail": 0,
+  "skip": 0,
+  "verdict": "READY",
+  "tests": [
+    {
+      "n": 1,
+      "scenario": "XML válido",
+      "result": "PASS",
+      "evidence": "parser",
+      "error": ""
+    },
+    {
+      "n": 2,
+      "scenario": "XML inválido",
+      "result": "PASS",
+      "evidence": "NfeParseError",
+      "error": ""
+    },
+    {
+      "n": 3,
+      "scenario": "Arquivo diferente de XML",
+      "result": "PASS",
+      "evidence": "",
+      "error": ""
+    },
+    {
+      "n": 4,
+      "scenario": "XML maior que 2 MB",
+      "result": "PASS",
+      "evidence": "",
+      "error": ""
+    },
+    {
+      "n": 5,
+      "scenario": "Proteção XXE",
+      "result": "PASS",
+      "evidence": "",
+      "error": ""
+    },
+    {
+      "n": 19,
+      "scenario": "Custo médio ponderado (unit)",
+      "result": "PASS",
+      "evidence": "medio=15; unit=12",
+      "error": ""
+    },
+    {
+      "n": 15,
+      "scenario": "Destino misto quantidades",
+      "result": "PASS",
+      "evidence": "",
+      "error": ""
+    },
+    {
+      "n": 16,
+      "scenario": "Divergência de quantidades detectável",
+      "result": "PASS",
+      "evidence": "helper service",
+      "error": ""
+    },
+    {
+      "n": 27,
+      "scenario": "Logs sem XML completo",
+      "result": "PASS",
+      "evidence": "code review",
+      "error": ""
+    },
+    {
+      "n": 6,
+      "scenario": "Nota duplicada por chave",
+      "result": "PASS",
+      "evidence": "unique index",
+      "error": ""
+    },
+    {
+      "n": 7,
+      "scenario": "Nota duplicada por hash",
+      "result": "PASS",
+      "evidence": "unique index",
+      "error": ""
+    },
+    {
+      "n": 8,
+      "scenario": "Fornecedor existente",
+      "result": "PASS",
+      "evidence": "19d54812-0065-4668-bcce-f6b9ea735828",
+      "error": ""
+    },
+    {
+      "n": 9,
+      "scenario": "Fornecedor novo com confirmação",
+      "result": "PASS",
+      "evidence": "fluxo UI confirma vínculo",
+      "error": ""
+    },
+    {
+      "n": 10,
+      "scenario": "Produto por EAN",
+      "result": "PASS",
+      "evidence": "ed1df521-812c-4332-b5d0-525d9e86444f",
+      "error": ""
+    },
+    {
+      "n": 11,
+      "scenario": "Produto por código do fornecedor",
+      "result": "PASS",
+      "evidence": "CF-072198",
+      "error": ""
+    },
+    {
+      "n": 12,
+      "scenario": "Produto sem vínculo",
+      "result": "PASS",
+      "evidence": "sem match",
+      "error": ""
+    },
+    {
+      "n": 25,
+      "scenario": "RLS entre tenants",
+      "result": "PASS",
+      "evidence": "vazio",
+      "error": ""
+    },
+    {
+      "n": 26,
+      "scenario": "XML privado (bucket)",
+      "result": "PASS",
+      "evidence": "nfe-entrada",
+      "error": ""
+    },
+    {
+      "n": 28,
+      "scenario": "DRE preservado",
+      "result": "PASS",
+      "evidence": "sem acoplamento NF-e→DRE",
+      "error": ""
+    },
+    {
+      "n": 29,
+      "scenario": "Fluxo preservado",
+      "result": "PASS",
+      "evidence": "sem movimentação bancária na importação",
+      "error": ""
+    },
+    {
+      "n": 13,
+      "scenario": "Entrada integral em estoque",
+      "result": "PASS",
+      "evidence": "bcc07733-e78a-4a0e-8cc1-3036f762f21d",
+      "error": ""
+    },
+    {
+      "n": 14,
+      "scenario": "Consumo integral na OS",
+      "result": "PASS",
+      "evidence": "16b0e84b-5f36-40bc-a423-7db94f716ffd",
+      "error": ""
+    },
+    {
+      "n": 20,
+      "scenario": "Custo real direto na OS / sem ↑ estoque",
+      "result": "PASS",
+      "evidence": "12.5",
+      "error": ""
+    },
+    {
+      "n": 17,
+      "scenario": "OS inválida",
+      "result": "PASS",
+      "evidence": "os_obrigatoria:1",
+      "error": ""
+    },
+    {
+      "n": 18,
+      "scenario": "OS de outro tenant",
+      "result": "PASS",
+      "evidence": "RPC valida ordens_servico.tenant_id = p_tenant_id",
+      "error": ""
+    },
+    {
+      "n": 21,
+      "scenario": "Conta a Pagar única (grupo)",
+      "result": "PASS",
+      "evidence": "eab211eb-3145-4570-819b-3b77d3ecc6ae",
+      "error": ""
+    },
+    {
+      "n": 22,
+      "scenario": "Parcelas",
+      "result": "PASS",
+      "evidence": "n=2",
+      "error": ""
+    },
+    {
+      "n": 23,
+      "scenario": "Rollback",
+      "result": "PASS",
+      "evidence": "item_pendente:1",
+      "error": ""
+    },
+    {
+      "n": 24,
+      "scenario": "Reprocessamento idempotente",
+      "result": "PASS",
+      "evidence": "7c815541-9061-43fd-815d-6ed9ac75cb36",
+      "error": ""
+    },
+    {
+      "n": 30,
+      "scenario": "Lint e build",
+      "result": "PASS",
+      "evidence": "",
+      "error": ""
+    }
+  ]
+}

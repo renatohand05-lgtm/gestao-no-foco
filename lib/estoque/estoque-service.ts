@@ -6,6 +6,7 @@ import {
   ESTOQUE_PRODUTOS_RESUMO_PER_PAGE,
   PRODUTO_TIPOS_SEM_ESTOQUE,
 } from "@/lib/estoque/constants";
+import { calcCustoMedioPonderado } from "@/lib/nfe/nfe-custo";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type {
@@ -268,7 +269,7 @@ export class EstoqueService {
   ) {
     const { data: produto, error: produtoError } = await this.supabase
       .from("produtos")
-      .select("id, nome, tipo, estoque_atual")
+      .select("id, nome, tipo, estoque_atual, custo")
       .eq("tenant_id", this.tenantId)
       .eq("id", input.produto_id)
       .is("deleted_at", null)
@@ -328,9 +329,32 @@ export class EstoqueService {
       throw new Error(movimentacaoError.message);
     }
 
+    const produtoUpdate: {
+      estoque_atual: number;
+      custo?: number;
+      updated_at?: string;
+    } = {
+      estoque_atual: quantidadeNova,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Política CTO NF-e / compras: entrada com custo → médio ponderado
+    if (
+      input.tipo === "entrada" &&
+      input.custo_unitario_entrada != null &&
+      Number.isFinite(Number(input.custo_unitario_entrada))
+    ) {
+      produtoUpdate.custo = calcCustoMedioPonderado({
+        saldoAtual: estoqueAnterior,
+        custoMedioAtual: produto.custo,
+        quantidadeEntrada: input.quantidade,
+        custoUnitarioEntrada: Number(input.custo_unitario_entrada),
+      });
+    }
+
     const { error: updateError } = await this.supabase
       .from("produtos")
-      .update({ estoque_atual: quantidadeNova })
+      .update(produtoUpdate)
       .eq("tenant_id", this.tenantId)
       .eq("id", input.produto_id)
       .is("deleted_at", null);

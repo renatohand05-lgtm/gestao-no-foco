@@ -1,0 +1,41 @@
+{
+  "at": "2026-07-19T13:46:52.577Z",
+  "results": [
+    {
+      "name": "1. XML válido",
+      "ok": true
+    },
+    {
+      "name": "2. XML inválido / malformado",
+      "ok": true
+    },
+    {
+      "name": "3. Arquivo não XML",
+      "ok": true
+    },
+    {
+      "name": "4. XML acima do limite",
+      "ok": true
+    },
+    {
+      "name": "5. Campos opcionais ausentes",
+      "ok": true
+    },
+    {
+      "name": "6/7. Hash estável (mesmo conteúdo / nome indiferente)",
+      "ok": true
+    },
+    {
+      "name": "XXE bloqueado",
+      "ok": true
+    },
+    {
+      "name": "15. Rateio misto fecha quantidade (helper)",
+      "ok": true
+    },
+    {
+      "name": "16. Quantidades divergentes detectáveis",
+      "ok": true
+    }
+  ]
+}

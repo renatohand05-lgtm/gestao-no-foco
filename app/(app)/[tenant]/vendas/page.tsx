@@ -31,6 +31,9 @@ type VendasPageProps = {
     sort?: string;
     order?: string;
     status?: string;
+    dataDe?: string;
+    dataAte?: string;
+    centroCusto?: string;
     success?: string;
     error?: string;
   }>;
@@ -45,7 +48,18 @@ export default async function VendasPage({
   searchParams,
 }: VendasPageProps) {
   const { tenant: tenantSlug } = await params;
-  const { q, page, sort, order, status, success, error } = await searchParams;
+  const {
+    q,
+    page,
+    sort,
+    order,
+    status,
+    dataDe,
+    dataAte,
+    centroCusto,
+    success,
+    error,
+  } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const service = await createVendaService(tenant.id);
 
@@ -61,9 +75,17 @@ export default async function VendasPage({
     sort: sortField,
     order: sortOrder,
     status: statusFilter,
+    dataDe: dataDe || undefined,
+    dataAte: dataAte || undefined,
+    centroCustoId: centroCusto || undefined,
   });
 
-  const hasFilters = Boolean(q) || statusFilter !== "all";
+  const hasFilters =
+    Boolean(q) ||
+    statusFilter !== "all" ||
+    Boolean(dataDe) ||
+    Boolean(dataAte) ||
+    Boolean(centroCusto);
 
   return (
     <div className="space-y-6">

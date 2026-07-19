@@ -1,4 +1,7 @@
 import type { ProdutoTipo } from "@/types/produtos";
+import type { SortOrder, PaginatedResult } from "@/types/pagination";
+
+export type { SortOrder, PaginatedResult };
 
 export type VendaStatus = "orcamento" | "em_andamento" | "faturado" | "cancelado";
 
@@ -8,8 +11,6 @@ export type VendaSortField =
   | "total"
   | "status"
   | "created_at";
-
-export type SortOrder = "asc" | "desc";
 
 export type VendaItem = {
   id: string;
@@ -172,14 +173,9 @@ export type ListVendasParams = {
   order?: SortOrder;
   status?: VendaStatus | "all";
   clienteId?: string;
-};
-
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
+  dataDe?: string;
+  dataAte?: string;
+  centroCustoId?: string;
 };
 
 export type VendaSuccessMessage =

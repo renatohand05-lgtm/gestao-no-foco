@@ -1,0 +1,5 @@
+import { RouteLoading } from "@/components/layout/route-loading";
+
+export default function VendasLoading() {
+  return <RouteLoading cards={2} label="Carregando vendas…" />;
+}

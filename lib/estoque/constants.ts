@@ -17,6 +17,7 @@ export const MOVIMENTACAO_ORIGEM_OPTIONS = [
   { value: "manual", label: "Manual" },
   { value: "compra", label: "Compra" },
   { value: "venda", label: "Venda" },
+  { value: "ordem_servico", label: "Ordem de serviço" },
   { value: "devolucao", label: "Devolução" },
   { value: "inventario", label: "Inventário" },
   { value: "outro", label: "Outro" },

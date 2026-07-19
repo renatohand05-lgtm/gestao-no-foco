@@ -20,20 +20,11 @@ const variantMap: Record<
   React.ComponentProps<typeof Badge>["variant"]
 > = {
   default: "default",
-  success: "default",
-  warning: "outline",
+  success: "success",
+  warning: "warning",
   danger: "destructive",
   secondary: "secondary",
   outline: "outline",
-};
-
-const variantClassName: Record<StatusBadgeVariant, string> = {
-  default: "",
-  success: "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400",
-  warning: "border-amber-500/30 text-amber-700 dark:text-amber-400",
-  danger: "",
-  secondary: "",
-  outline: "",
 };
 
 export function StatusBadge({
@@ -42,10 +33,7 @@ export function StatusBadge({
   className,
 }: StatusBadgeProps) {
   return (
-    <Badge
-      variant={variantMap[variant]}
-      className={cn(variantClassName[variant], className)}
-    >
+    <Badge variant={variantMap[variant]} className={cn(className)}>
       {label}
     </Badge>
   );

@@ -5,11 +5,9 @@ import { revalidatePath } from "next/cache";
 import { normalizeProdutoFormValues } from "@/lib/produtos/mappers";
 import { createProdutoService } from "@/lib/produtos/produto-service";
 import { produtoFormSchema } from "@/lib/produtos/validations";
+import { toActionError } from "@/lib/supabase/friendly-error";
 import { requireTenant } from "@/lib/tenants";
-
-type ActionResult =
-  | { success: true; id?: string }
-  | { success: false; error: string };
+import type { ActionResult } from "@/types/action-result";
 
 function revalidateProdutoPaths(tenantSlug: string, produtoId?: string) {
   revalidatePath(`/${tenantSlug}/produtos`);
@@ -33,10 +31,7 @@ export async function createProdutoAction(
     revalidateProdutoPaths(tenantSlug, produto.id);
     return { success: true, id: produto.id };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao cadastrar item.",
-    };
+    return toActionError(error, "Erro ao cadastrar item.", "produtos.create");
   }
 }
 
@@ -54,10 +49,7 @@ export async function updateProdutoAction(
     revalidateProdutoPaths(tenantSlug, produtoId);
     return { success: true, id: produtoId };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao atualizar item.",
-    };
+    return toActionError(error, "Erro ao atualizar item.", "produtos.update");
   }
 }
 
@@ -73,9 +65,6 @@ export async function deleteProdutoAction(
     revalidateProdutoPaths(tenantSlug);
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erro ao excluir item.",
-    };
+    return toActionError(error, "Erro ao excluir item.", "produtos.delete");
   }
 }

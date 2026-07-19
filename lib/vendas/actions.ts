@@ -10,10 +10,7 @@ import {
   vendaFormSchema,
 } from "@/lib/vendas/validations";
 import { requireTenant } from "@/lib/tenants";
-
-type ActionResult =
-  | { success: true; id?: string }
-  | { success: false; error: string };
+import type { ActionResult } from "@/types/action-result";
 
 function revalidateVendaPaths(tenantSlug: string, vendaId?: string) {
   revalidatePath(`/${tenantSlug}/vendas`);

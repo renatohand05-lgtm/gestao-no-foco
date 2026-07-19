@@ -7,10 +7,7 @@ import { createEstoqueService } from "@/lib/estoque/estoque-service";
 import { movimentacaoFormSchema } from "@/lib/estoque/validations";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { requireTenant } from "@/lib/tenants";
-
-type ActionResult =
-  | { success: true; id?: string }
-  | { success: false; error: string };
+import type { ActionResult } from "@/types/action-result";
 
 function revalidateEstoquePaths(tenantSlug: string, movimentacaoId?: string) {
   revalidatePath(`/${tenantSlug}/estoque`);

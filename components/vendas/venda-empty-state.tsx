@@ -22,7 +22,12 @@ export function VendaEmptyState({
       description={
         filtered
           ? "Tente ajustar a busca ou os filtros, ou registre uma nova venda."
-          : "Comece registrando orçamentos e vendas para acompanhar o faturamento."
+          : "Registre a primeira venda para ver movimento real no Dashboard Executivo."
+      }
+      impact={
+        filtered
+          ? undefined
+          : "Sem vendas, faturamento, Score e projeções ficam sem base."
       }
       action={{
         label: "Nova venda",

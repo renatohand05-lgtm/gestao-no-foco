@@ -160,6 +160,18 @@ export class VendaService {
       query = query.eq("cliente_id", params.clienteId);
     }
 
+    if (params.dataDe) {
+      query = query.gte("data_venda", params.dataDe);
+    }
+
+    if (params.dataAte) {
+      query = query.lte("data_venda", params.dataAte);
+    }
+
+    if (params.centroCustoId) {
+      query = query.eq("centro_custo_id", params.centroCustoId);
+    }
+
     if (search) {
       const { data: clientes } = await this.supabase
         .from("clientes")

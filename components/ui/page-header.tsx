@@ -1,3 +1,4 @@
+import { dsGap, dsSpace, dsType } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type PageHeaderProps = {
@@ -5,6 +6,8 @@ type PageHeaderProps = {
   description?: string;
   children?: React.ReactNode;
   className?: string;
+  /** Classes for the actions slot (right/bottom area). */
+  actionsClassName?: string;
 };
 
 export function PageHeader({
@@ -12,26 +15,32 @@ export function PageHeader({
   description,
   children,
   className,
+  actionsClassName,
 }: PageHeaderProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 md:flex-row md:items-center md:justify-between",
+        "flex flex-col md:flex-row md:items-center md:justify-between",
+        dsGap.lg,
         className,
       )}
     >
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {title}
-        </h1>
+      <div className={dsSpace.stackXs}>
+        <h1 className={dsType.pageTitle}>{title}</h1>
         {description ? (
-          <p className="text-sm text-muted-foreground sm:text-base">
-            {description}
-          </p>
+          <p className={dsType.descriptionLg}>{description}</p>
         ) : null}
       </div>
       {children ? (
-        <div className="flex flex-wrap items-center gap-2">{children}</div>
+        <div
+          className={cn(
+            "flex flex-wrap items-center",
+            dsGap.sm,
+            actionsClassName,
+          )}
+        >
+          {children}
+        </div>
       ) : null}
     </div>
   );

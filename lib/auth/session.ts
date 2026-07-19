@@ -1,15 +1,17 @@
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   return user;
-}
+});
 
-export async function getCurrentProfile() {
+export const getCurrentProfile = cache(async () => {
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -29,4 +31,4 @@ export async function getCurrentProfile() {
       null,
     avatarUrl: profile?.avatar_url ?? null,
   };
-}
+});

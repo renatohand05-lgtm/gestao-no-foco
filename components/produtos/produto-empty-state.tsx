@@ -22,7 +22,12 @@ export function ProdutoEmptyState({
       description={
         filtered
           ? "Tente ajustar a busca ou os filtros, ou cadastre um novo item."
-          : "Comece cadastrando produtos e serviços para utilizar em vendas e ordens."
+          : "Cadastre produtos ou serviços para acelerar a primeira venda."
+      }
+      impact={
+        filtered
+          ? undefined
+          : "Itens do catálogo alimentam vendas e rankings de produtos."
       }
       action={{
         label: "Novo item",

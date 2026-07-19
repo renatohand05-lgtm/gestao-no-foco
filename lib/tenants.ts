@@ -1,10 +1,11 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 
 import type { TenantRole } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { Tenant, TenantWithRole } from "@/types";
 
-export async function getUserTenants(): Promise<TenantWithRole[]> {
+export const getUserTenants = cache(async (): Promise<TenantWithRole[]> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -33,16 +34,16 @@ export async function getUserTenants(): Promise<TenantWithRole[]> {
     role: memberships.find((membership) => membership.tenant_id === tenant.id)!
       .role as TenantRole,
   }));
-}
+});
 
-export async function getTenantBySlug(
-  slug: string,
-): Promise<TenantWithRole | null> {
-  const tenants = await getUserTenants();
-  return tenants.find((tenant) => tenant.slug === slug) ?? null;
-}
+export const getTenantBySlug = cache(
+  async (slug: string): Promise<TenantWithRole | null> => {
+    const tenants = await getUserTenants();
+    return tenants.find((tenant) => tenant.slug === slug) ?? null;
+  },
+);
 
-export async function requireTenant(slug: string): Promise<TenantWithRole> {
+export const requireTenant = cache(async (slug: string): Promise<TenantWithRole> => {
   const tenant = await getTenantBySlug(slug);
 
   if (!tenant) {
@@ -50,9 +51,9 @@ export async function requireTenant(slug: string): Promise<TenantWithRole> {
   }
 
   return tenant;
-}
+});
 
-export async function requireAuth() {
+export const requireAuth = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -63,4 +64,4 @@ export async function requireAuth() {
   }
 
   return user;
-}
+});

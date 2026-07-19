@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 type DeleteDialogProps = {
   open: boolean;
@@ -36,12 +37,36 @@ export function DeleteDialog({
   error,
   onConfirm,
 }: DeleteDialogProps) {
+  const isPlainText =
+    typeof description === "string" || typeof description === "number";
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (loading && !next) return;
+        onOpenChange(next);
+      }}
+    >
+      <AlertDialogContent aria-busy={loading}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          {isPlainText ? (
+            <AlertDialogDescription>{description}</AlertDialogDescription>
+          ) : (
+            <>
+              <AlertDialogDescription className="sr-only">
+                {title}
+              </AlertDialogDescription>
+              <div
+                className={cn(
+                  "w-full text-left text-sm text-muted-foreground",
+                )}
+              >
+                {description}
+              </div>
+            </>
+          )}
         </AlertDialogHeader>
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -49,7 +74,10 @@ export function DeleteDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={(event) => {
+              event.preventDefault();
+              if (!loading) onConfirm();
+            }}
             disabled={loading}
             className="bg-destructive text-white hover:bg-destructive/90"
           >

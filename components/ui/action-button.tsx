@@ -24,6 +24,7 @@ type ActionButtonProps = {
   disabled?: boolean;
   className?: string;
   size?: React.ComponentProps<typeof Button>["size"];
+  "aria-label"?: string;
 };
 
 const actionConfig: Record<
@@ -45,10 +46,12 @@ export function ActionButton({
   disabled = false,
   className,
   size = "default",
+  "aria-label": ariaLabel,
 }: ActionButtonProps) {
   const config = actionConfig[action];
   const Icon = config.icon;
   const text = label ?? config.label;
+  const accessibleName = ariaLabel ?? text;
 
   const content = loading ? (
     <>
@@ -69,6 +72,7 @@ export function ActionButton({
       <Link
         href={href}
         aria-disabled={isDisabled}
+        aria-label={accessibleName}
         tabIndex={isDisabled ? -1 : undefined}
         className={cn(
           buttonVariants({ variant: config.variant, size }),
@@ -89,6 +93,7 @@ export function ActionButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={cn(className)}
+      aria-label={accessibleName}
     >
       {content}
     </Button>

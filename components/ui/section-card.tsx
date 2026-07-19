@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { dsElevation, dsType } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type SectionCardProps = {
@@ -23,10 +24,14 @@ export function SectionCard({
   contentClassName,
 }: SectionCardProps) {
   return (
-    <Card className={cn("border-border/60 bg-card/80 shadow-sm", className)}>
+    <Card className={cn(dsElevation.section, className)}>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        {description ? <CardDescription>{description}</CardDescription> : null}
+        <CardTitle className={dsType.cardTitle}>{title}</CardTitle>
+        {description ? (
+          <CardDescription className={dsType.description}>
+            {description}
+          </CardDescription>
+        ) : null}
       </CardHeader>
       <CardContent className={contentClassName}>{children}</CardContent>
     </Card>

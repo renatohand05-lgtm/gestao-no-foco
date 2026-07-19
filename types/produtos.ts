@@ -1,3 +1,7 @@
+import type { SortOrder, PaginatedResult } from "@/types/pagination";
+
+export type { SortOrder, PaginatedResult };
+
 export type ProdutoTipo =
   | "produto"
   | "servico"
@@ -12,8 +16,6 @@ export type ProdutoSortField =
   | "estoque_atual"
   | "tipo"
   | "ativo";
-
-export type SortOrder = "asc" | "desc";
 
 export type Produto = {
   id: string;
@@ -93,14 +95,6 @@ export type ListProdutosParams = {
   tipo?: ProdutoTipo | "all";
   ativo?: boolean | "all";
   categoria?: string;
-};
-
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  totalPages: number;
 };
 
 export type ProdutoSuccessMessage = "created" | "updated" | "deleted";

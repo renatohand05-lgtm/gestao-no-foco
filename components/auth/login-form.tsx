@@ -58,7 +58,14 @@ export function LoginForm() {
       router.push(destination);
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Erro desconhecido");
+      const message = err instanceof Error ? err.message : "Erro desconhecido";
+      if (/failed to fetch/i.test(message)) {
+        setError(
+          "Falha de comunicação com o Supabase (Failed to fetch). Verifique NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local e reinicie o servidor.",
+        );
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }

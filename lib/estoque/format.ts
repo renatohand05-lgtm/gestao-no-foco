@@ -1,25 +1,7 @@
 import type { MovimentacaoTipo } from "@/types/estoque";
 
-export function formatMovimentacaoDate(date: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(date));
-}
-
-export function formatQuantity(
-  value: number | null | undefined,
-  unidade?: string | null,
-) {
-  if (value === null || value === undefined) return "—";
-
-  const formatted = new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 3,
-  }).format(value);
-
-  return unidade ? `${formatted} ${unidade}` : formatted;
-}
+export { formatQuantity } from "@/lib/format";
+export { formatDateTime as formatMovimentacaoDate } from "@/lib/format";
 
 export function getMovimentacaoTipoLabel(tipo: MovimentacaoTipo) {
   const labels: Record<MovimentacaoTipo, string> = {

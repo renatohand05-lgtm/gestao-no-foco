@@ -1,41 +1,17 @@
 import { LEGACY_FORMA_PAGAMENTO_LABELS } from "@/lib/vendas/constants";
+import { formatDateOnly } from "@/lib/format";
 import type { VendaStatus } from "@/types/vendas";
 
+export { formatCurrency, formatQuantity } from "@/lib/format";
+export { formatDateTime as formatVendaDateTime } from "@/lib/format";
+
+/** Data de venda (ISO date) — mesmo núcleo de `formatDateOnly`. */
 export function formatVendaDate(date: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-  }).format(new Date(`${date}T12:00:00`));
-}
-
-export function formatVendaDateTime(date: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(date));
-}
-
-export function formatCurrency(value: number | null | undefined) {
-  if (value === null || value === undefined) return "—";
-
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
+  return formatDateOnly(date);
 }
 
 export function formatVendaNumero(numero: number) {
   return `#${String(numero).padStart(6, "0")}`;
-}
-
-export function formatQuantity(value: number | null | undefined, unidade?: string | null) {
-  if (value === null || value === undefined) return "—";
-
-  const formatted = new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 3,
-  }).format(value);
-
-  return unidade ? `${formatted} ${unidade}` : formatted;
 }
 
 export function getStatusLabel(status: VendaStatus) {

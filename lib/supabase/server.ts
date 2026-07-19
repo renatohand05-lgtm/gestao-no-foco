@@ -1,9 +1,15 @@
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 import type { Database } from "@/types/database";
 
-export async function createClient() {
+/**
+ * Cliente Supabase memoizado por request (React.cache).
+ * Evita recriar o client em waterfalls da mesma renderização.
+ * Não compartilha estado entre tenants/requests.
+ */
+export const createClient = cache(async () => {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -20,10 +26,10 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // setAll pode falhar em Server Components — ignorado quando middleware gerencia sessão
+            // setAll pode falhar em Server Components — sessão gerenciada no proxy
           }
         },
       },
     },
   );
-}
+});

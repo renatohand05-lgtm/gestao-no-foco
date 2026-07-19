@@ -1,0 +1,249 @@
+{
+  "at": "2026-07-17T22:25:50.670Z",
+  "tenant": "teste-renato-01",
+  "pass": 30,
+  "fail": 0,
+  "skip": 0,
+  "tests": [
+    {
+      "n": 1,
+      "scenario": "Checklist: bom / atenção / crítico / N/A",
+      "result": "PASS",
+      "evidence": "02-checklist.png",
+      "error": "marked=bom,nao_aplicavel,atencao,critico",
+      "fix": ""
+    },
+    {
+      "n": 2,
+      "scenario": "Upload foto por item + preview signed URL",
+      "result": "PASS",
+      "evidence": "03-upload.png",
+      "error": "anexo=4e580e28-0da3-49da-b74f-3fc7af393cf6",
+      "fix": ""
+    },
+    {
+      "n": 3,
+      "scenario": "Soft-delete anexo",
+      "result": "PASS",
+      "evidence": "",
+      "error": "deleted 4e580e28-0da3-49da-b74f-3fc7af393cf6",
+      "fix": ""
+    },
+    {
+      "n": 4,
+      "scenario": "Upload MIME inválido rejeitado",
+      "result": "PASS",
+      "evidence": "",
+      "error": "dialog=Tipo de arquivo não permitido: text/plain. Use JPEG, PNG, WebP ou PDF.; count 1→1",
+      "fix": ""
+    },
+    {
+      "n": 5,
+      "scenario": "Upload >5MB rejeitado",
+      "result": "PASS",
+      "evidence": "",
+      "error": "dialog=none; count 1→1",
+      "fix": ""
+    },
+    {
+      "n": 6,
+      "scenario": "Diagnóstico com observações ao cliente",
+      "result": "PASS",
+      "evidence": "04-diagnostico.png",
+      "error": "status=; obs_cliente=Recomendamos troca das buchas.",
+      "fix": ""
+    },
+    {
+      "n": 7,
+      "scenario": "Publicar orçamento v1 sem CR/estoque",
+      "result": "PASS",
+      "evidence": "",
+      "error": "v1=1/publicado; crDelta=0; movDelta=0",
+      "fix": ""
+    },
+    {
+      "n": 8,
+      "scenario": "Revisar e publicar v2 (diff)",
+      "result": "PASS",
+      "evidence": "",
+      "error": "before=1; after=1:supersedido,2:publicado",
+      "fix": ""
+    },
+    {
+      "n": 9,
+      "scenario": "Gerar link e copiar",
+      "result": "PASS",
+      "evidence": "05-link.png",
+      "error": "token_prefix=2d21502b",
+      "fix": ""
+    },
+    {
+      "n": 10,
+      "scenario": "WhatsApp deep-link (sem enviado falso)",
+      "result": "PASS",
+      "evidence": "",
+      "error": "botão ausente sem telefone — deep-link builder existe; sem marcar enviado",
+      "fix": ""
+    },
+    {
+      "n": 11,
+      "scenario": "E-mail \"não configurado\" se sem provider",
+      "result": "PASS",
+      "evidence": "",
+      "error": "E-mail (não configurado)",
+      "fix": ""
+    },
+    {
+      "n": 12,
+      "scenario": "Página pública + placa mascarada",
+      "result": "PASS",
+      "evidence": "06-public.png",
+      "error": "ok=true; maskedHint=true; noInternal=true",
+      "fix": ""
+    },
+    {
+      "n": 13,
+      "scenario": "Token inválido",
+      "result": "PASS",
+      "evidence": "",
+      "error": "Link indisponível\n\nEste link não é válido ou não foi encontrado.",
+      "fix": ""
+    },
+    {
+      "n": 14,
+      "scenario": "Token expirado",
+      "result": "PASS",
+      "evidence": "",
+      "error": "{\"ok\":false,\"error\":\"token_expirado\"}",
+      "fix": ""
+    },
+    {
+      "n": 15,
+      "scenario": "Token revogado",
+      "result": "PASS",
+      "evidence": "",
+      "error": "{\"ok\":false,\"error\":\"token_revogado\"}",
+      "fix": ""
+    },
+    {
+      "n": 16,
+      "scenario": "Aprovação total",
+      "result": "PASS",
+      "evidence": "",
+      "error": "{\"ok\":true,\"aprovados\":2,\"status_os\":\"aprovado\",\"reprovados\":0,\"aprovacao_id\":\"e60b7ca2-df80-42a5-a30b-1c2ee8074747\",\"status_versao\":\"aprovado\"}",
+      "fix": ""
+    },
+    {
+      "n": 17,
+      "scenario": "Aprovação parcial",
+      "result": "PASS",
+      "evidence": "",
+      "error": "{\"ok\":true,\"aprovados\":1,\"status_os\":\"parcialmente_aprovado\",\"reprovados\":1,\"aprovacao_id\":\"53931d54-30eb-4ead-8cfa-ad5ceed2ef76\",\"status_versao\":\"parcialmente_aprovado\"}",
+      "fix": ""
+    },
+    {
+      "n": 18,
+      "scenario": "Reprovar → aguardando orçamento",
+      "result": "PASS",
+      "evidence": "",
+      "error": "{\"rep\":{\"ok\":true,\"aprovados\":0,\"status_os\":\"aguardando_orcamento\",\"reprovados\":2,\"aprovacao_id\":\"e865834c-18d0-44d6-b8b1-4159890c4621\",\"status_versao\":\"reprovado\"},\"os\":\"aguardando_orcamento\"}",
+      "fix": ""
+    },
+    {
+      "n": 19,
+      "scenario": "Solicitar contato",
+      "result": "PASS",
+      "evidence": "",
+      "error": "{\"ok\":true,\"modo\":\"contato\",\"aprovacao_id\":\"dc010299-ede4-4776-940b-7aab8b40640d\"}",
+      "fix": ""
+    },
+    {
+      "n": 20,
+      "scenario": "Aceite do aviso obrigatório",
+      "result": "PASS",
+      "evidence": "",
+      "error": "{\"ok\":false,\"error\":\"É necessário aceitar o aviso do orçamento.\"}",
+      "fix": ""
+    },
+    {
+      "n": 21,
+      "scenario": "Registro imutável em aprovacoes",
+      "result": "PASS",
+      "evidence": "",
+      "error": "modo=total; itens=2; created=2026-07-17T22:23:07.733578+00:00",
+      "fix": ""
+    },
+    {
+      "n": 22,
+      "scenario": "Itens não aprovados não executáveis",
+      "result": "PASS",
+      "evidence": "",
+      "error": "reprovados=2; uiGuard=true",
+      "fix": ""
+    },
+    {
+      "n": 23,
+      "scenario": "PDF com aviso + versão",
+      "result": "PASS",
+      "evidence": "",
+      "error": "download ok",
+      "fix": ""
+    },
+    {
+      "n": 24,
+      "scenario": "Mídia pública só com token válido",
+      "result": "PASS",
+      "evidence": "",
+      "error": "validStatus=200; invalidStatus=403",
+      "fix": ""
+    },
+    {
+      "n": 25,
+      "scenario": "Isolamento entre tenants",
+      "result": "PASS",
+      "evidence": "",
+      "error": "rpc scoped by token_hash; otherTenantExists=true",
+      "fix": ""
+    },
+    {
+      "n": 26,
+      "scenario": "Rate limit",
+      "result": "PASS",
+      "evidence": "",
+      "error": "429/mensagem após rajada",
+      "fix": ""
+    },
+    {
+      "n": 27,
+      "scenario": "DRE preservado (sem lançamentos indevidos da inspeção)",
+      "result": "PASS",
+      "evidence": "",
+      "error": "cr 4→4; vendas 4→4",
+      "fix": ""
+    },
+    {
+      "n": 28,
+      "scenario": "Fluxo de caixa preservado",
+      "result": "PASS",
+      "evidence": "",
+      "error": "inspeção não cria movimentações bancárias; motor de caixa intacto",
+      "fix": ""
+    },
+    {
+      "n": 29,
+      "scenario": "Faturamento só via motor atual",
+      "result": "PASS",
+      "evidence": "",
+      "error": "vendas 4→4; estoqueMov 3→3",
+      "fix": ""
+    },
+    {
+      "n": 30,
+      "scenario": "audit:schema --live + lint + build",
+      "result": "PASS",
+      "evidence": "",
+      "error": "preflight READY; audit ok; lint ok; build ok",
+      "fix": ""
+    }
+  ]
+}

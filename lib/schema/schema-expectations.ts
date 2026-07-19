@@ -1,0 +1,396 @@
+/**
+ * Catálogo de expectativas de schema (Release Gate 13.17).
+ * Fonte da verdade documentada — o script de auditoria usa isto.
+ * Não depende de conexão remota para listar o esperado.
+ */
+
+export type SchemaExpectation = {
+  table: string;
+  columns: string[];
+  migration: string;
+  critical: boolean;
+  notes?: string;
+};
+
+export type RpcExpectation = {
+  name: string;
+  migration: string;
+  critical: boolean;
+};
+
+export const SCHEMA_EXPECTATIONS: SchemaExpectation[] = [
+  {
+    table: "clientes",
+    columns: [
+      "razao_social",
+      "segmento",
+      "porte",
+      "origem",
+      "deleted_at",
+      "tenant_id",
+    ],
+    migration: "20260719 / 20260721",
+    critical: true,
+  },
+  {
+    table: "fornecedores",
+    columns: [
+      "nome_fantasia",
+      "tipo_pessoa",
+      "categoria_financeira_id",
+      "plano_conta_id",
+      "centro_custo_id",
+      "forma_pagamento_id",
+      "conta_bancaria_id",
+      "recorrente",
+      "frequencia",
+      "deleted_at",
+    ],
+    migration: "20260719 / 20260721",
+    critical: true,
+  },
+  {
+    table: "contas_pagar_rateios",
+    columns: [
+      "descricao",
+      "deleted_at",
+      "updated_at",
+      "percentual",
+      "valor",
+      "centro_custo_id",
+      "conta_pagar_id",
+      "tenant_id",
+    ],
+    migration: "20260717 / 20260721",
+    critical: true,
+    notes: "descricao é opcional (nullable), mas a coluna deve existir.",
+  },
+  {
+    table: "contas_pagar",
+    columns: [
+      "data_competencia",
+      "valor_pago",
+      "status",
+      "deleted_at",
+      "grupo_parcelamento_id",
+      "despesa_recorrente_id",
+    ],
+    migration: "20260708 / 20260717 / 20260722",
+    critical: true,
+  },
+  {
+    table: "contas_receber",
+    columns: [
+      "data_competencia",
+      "valor_recebido",
+      "status",
+      "deleted_at",
+      "grupo_parcelamento_id",
+      "venda_id",
+    ],
+    migration: "20260708 / 20260712",
+    critical: true,
+  },
+  {
+    table: "movimentacoes_bancarias",
+    columns: [
+      "conta_pagar_id",
+      "conta_receber_id",
+      "estornada_por_id",
+      "movimentacao_estornada_id",
+      "origem",
+      "tipo",
+    ],
+    migration: "20260708 / 20260709",
+    critical: true,
+  },
+  {
+    table: "financeiro_lancamento_eventos",
+    columns: [
+      "entity_type",
+      "entity_id",
+      "action",
+      "motivo",
+      "payload_antes",
+      "payload_depois",
+      "user_id",
+      "tenant_id",
+    ],
+    migration: "20260720 / 20260721",
+    critical: false,
+  },
+  {
+    table: "tags",
+    columns: ["nome", "slug", "cor", "ativo", "deleted_at", "tenant_id"],
+    migration: "20260719 / 20260721",
+    critical: false,
+  },
+  {
+    table: "entity_tags",
+    columns: ["tag_id", "entity_type", "entity_id", "tenant_id"],
+    migration: "20260719 / 20260721",
+    critical: false,
+  },
+  {
+    table: "centros_custo",
+    columns: ["tipo", "departamento", "unidade", "filial"],
+    migration: "20260719 / 20260721",
+    critical: false,
+  },
+  {
+    table: "categorias_financeiras",
+    columns: ["dre_linha", "dre_detalhe", "deleted_at"],
+    migration: "20260717 / 20260718",
+    critical: true,
+  },
+  {
+    table: "plano_contas",
+    columns: ["dre_linha", "dre_detalhe", "deleted_at"],
+    migration: "20260717 / 20260718",
+    critical: true,
+  },
+  {
+    table: "despesas_recorrentes",
+    columns: [
+      "proxima_competencia",
+      "ocorrencias_geradas",
+      "pausada",
+      "ativo",
+      "deleted_at",
+    ],
+    migration: "20260717 / 20260722",
+    critical: true,
+  },
+  {
+    table: "veiculos",
+    columns: [
+      "tenant_id",
+      "cliente_id",
+      "placa",
+      "marca",
+      "modelo",
+      "versao",
+      "ano",
+      "cor",
+      "combustivel",
+      "cambio",
+      "quilometragem",
+      "chassi",
+      "observacoes",
+      "ativo",
+      "deleted_at",
+    ],
+    migration: "20260713 / 20260723_fix",
+    critical: true,
+    notes: "Base OS. Criada pelo fix se 20260713 não aplicada.",
+  },
+  {
+    table: "ordens_servico",
+    columns: [
+      "tenant_id",
+      "cliente_id",
+      "veiculo_id",
+      "status",
+      "previsao_entrega",
+      "venda_id",
+      "subtotal",
+      "desconto_total",
+      "acrescimo_total",
+      "prioridade",
+      "faturado_em",
+      "deleted_at",
+    ],
+    migration: "20260713 / 20260723_fix",
+    critical: true,
+  },
+  {
+    table: "ordem_servico_itens",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "categoria_item",
+      "aprovacao_status",
+      "estoque_status",
+      "execucao_status",
+      "desconto",
+      "acrescimo",
+      "deleted_at",
+    ],
+    migration: "20260713 / 20260723_fix",
+    critical: true,
+  },
+  {
+    table: "retornos_servico",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "tipo_retorno",
+      "tipo_cobertura",
+      "deleted_at",
+    ],
+    migration: "20260713 / 20260723_fix",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_checklist",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "item_codigo",
+      "status",
+      "classificacao",
+      "categoria",
+      "etapa_inspecao",
+      "deleted_at",
+    ],
+    migration: "20260723_fix / 20260724",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_diagnosticos",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "diagnostico_tecnico",
+      "observacoes_cliente",
+      "deleted_at",
+    ],
+    migration: "20260723_fix / 20260724",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_anexos",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "etapa",
+      "tipo",
+      "checklist_item_id",
+      "diagnostico_id",
+      "legenda",
+      "storage_path",
+      "deleted_at",
+    ],
+    migration: "20260723_fix / 20260724",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_eventos",
+    columns: ["tenant_id", "ordem_servico_id", "tipo", "descricao", "created_at"],
+    migration: "20260723_fix",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_previsoes",
+    columns: ["tenant_id", "ordem_servico_id", "previsao_nova", "created_at"],
+    migration: "20260723_fix",
+    critical: false,
+  },
+  {
+    table: "oficina_textos",
+    columns: ["tenant_id", "chave", "conteudo", "versao", "deleted_at"],
+    migration: "20260724",
+    critical: false,
+    notes: "Gate 1: migration pendente de aplicação CTO.",
+  },
+  {
+    table: "ordem_servico_orcamento_versoes",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "versao",
+      "status",
+      "aviso_texto",
+      "valor_total",
+      "deleted_at",
+    ],
+    migration: "20260724",
+    critical: false,
+    notes: "Gate 1: migration pendente de aplicação CTO.",
+  },
+  {
+    table: "ordem_servico_orcamento_itens",
+    columns: [
+      "tenant_id",
+      "versao_id",
+      "descricao",
+      "categoria_item",
+      "valor_total",
+      "recomendacao",
+    ],
+    migration: "20260724",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_compartilhamentos",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "token_hash",
+      "token_prefix",
+      "expira_em",
+      "status",
+      "deleted_at",
+    ],
+    migration: "20260724",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_aprovacoes",
+    columns: [
+      "tenant_id",
+      "ordem_servico_id",
+      "versao_orcamento_id",
+      "modo",
+      "aceite_aviso",
+      "created_at",
+    ],
+    migration: "20260724",
+    critical: false,
+  },
+  {
+    table: "ordem_servico_aprovacao_itens",
+    columns: [
+      "tenant_id",
+      "aprovacao_id",
+      "orcamento_item_id",
+      "decisao",
+      "created_at",
+    ],
+    migration: "20260724",
+    critical: false,
+  },
+];
+
+export const RPC_EXPECTATIONS: RpcExpectation[] = [
+  {
+    name: "baixar_conta_pagar_atomico",
+    migration: "20260709_rpc_baixar_contas_atomico",
+    critical: true,
+  },
+  {
+    name: "baixar_conta_receber_atomico",
+    migration: "20260709_rpc_baixar_contas_atomico",
+    critical: true,
+  },
+  {
+    name: "inspecao_publica_por_token",
+    migration: "20260724_digital_vehicle_inspection",
+    critical: false,
+  },
+  {
+    name: "inspecao_publica_detalhes",
+    migration: "20260724_digital_vehicle_inspection",
+    critical: false,
+  },
+  {
+    name: "inspecao_publica_aprovar",
+    migration: "20260724_digital_vehicle_inspection",
+    critical: false,
+  },
+  {
+    name: "estornar_movimentacao_bancaria_atomico",
+    migration: "20260709_rpc_motor_transacional_financeiro",
+    critical: true,
+  },
+];

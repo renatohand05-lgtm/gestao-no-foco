@@ -1,3 +1,4 @@
+import type { CrmFunilStage } from "@/lib/crm/constants";
 import type { SortOrder } from "@/types/pagination";
 
 export type { SortOrder, PaginatedResult } from "@/types/pagination";
@@ -33,6 +34,10 @@ export type Cliente = {
   porte: string | null;
   origem: string | null;
   observacoes: string | null;
+  classificacao: string | null;
+  score: number;
+  consultor_id: string | null;
+  estagio_funil: CrmFunilStage;
   ativo: boolean;
   deleted_at: string | null;
   created_at: string;
@@ -75,6 +80,11 @@ export type ClienteInput = {
   porte?: string | null;
   origem?: string | null;
   observacoes?: string | null;
+  classificacao?: string | null;
+  score?: number;
+  consultor_id?: string | null;
+  estagio_funil?: CrmFunilStage;
+  tag_ids?: string[];
   ativo: boolean;
 };
 

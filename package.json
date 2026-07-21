@@ -16,7 +16,8 @@
     "test:login": "node scripts/playwright-login.mjs",
     "test:walkthrough": "node scripts/oficina-walkthrough-ui.mjs",
     "test:inspecao-gate2": "node scripts/inspecao-gate2-preflight.mjs",
-    "test:inspecao-live-30": "node scripts/inspecao-gate2-live-30.mjs"
+    "test:inspecao-live-30": "node scripts/inspecao-gate2-live-30.mjs",
+    "test:crm": "node scripts/crm-enterprise-preflight.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

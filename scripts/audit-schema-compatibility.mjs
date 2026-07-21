@@ -15,8 +15,19 @@ import { resolve } from "node:path";
 const SCHEMA_EXPECTATIONS = [
   {
     table: "clientes",
-    columns: ["razao_social", "segmento", "porte", "origem", "deleted_at", "tenant_id"],
-    migration: "20260719 / 20260721",
+    columns: [
+      "razao_social",
+      "segmento",
+      "porte",
+      "origem",
+      "classificacao",
+      "score",
+      "consultor_id",
+      "estagio_funil",
+      "deleted_at",
+      "tenant_id",
+    ],
+    migration: "20260719 / 20260721 / 20260726",
     critical: true,
   },
   {
@@ -116,6 +127,24 @@ const SCHEMA_EXPECTATIONS = [
     table: "entity_tags",
     columns: ["tag_id", "entity_type", "entity_id", "tenant_id"],
     migration: "20260719 / 20260721",
+    critical: false,
+  },
+  {
+    table: "cliente_eventos",
+    columns: ["tenant_id", "cliente_id", "tipo", "titulo", "created_at"],
+    migration: "20260726",
+    critical: false,
+  },
+  {
+    table: "cliente_tarefas",
+    columns: ["tenant_id", "cliente_id", "tipo", "titulo", "status", "deleted_at"],
+    migration: "20260726",
+    critical: false,
+  },
+  {
+    table: "cliente_agendamentos",
+    columns: ["tenant_id", "cliente_id", "titulo", "inicio", "status", "deleted_at"],
+    migration: "20260726",
     critical: false,
   },
   {

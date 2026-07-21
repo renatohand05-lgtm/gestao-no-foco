@@ -100,6 +100,25 @@ export class MasterDataRepository {
     if (error) throw new Error(error.message);
   }
 
+  async listEntityTagIds(
+    entityType: MasterEntityTagTarget,
+    entityId: string,
+  ): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from("entity_tags" as never)
+      .select("tag_id")
+      .eq("tenant_id", this.tenantId)
+      .eq("entity_type", entityType)
+      .eq("entity_id", entityId);
+
+    if (error) {
+      if (error.message.toLowerCase().includes("entity_tags")) return [];
+      throw new Error(error.message);
+    }
+
+    return (data ?? []).map((row) => (row as { tag_id: string }).tag_id);
+  }
+
   async listEntityTagNames(
     entityType: MasterEntityTagTarget,
     entityId: string,

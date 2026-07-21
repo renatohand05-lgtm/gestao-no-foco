@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 
-import { ClienteDetail } from "@/components/clientes/cliente-detail";
 import { ClienteFeedback } from "@/components/clientes/cliente-feedback";
+import { ClienteWorkspace } from "@/components/clientes/cliente-workspace";
+import { CrmSubnav } from "@/components/crm/crm-subnav";
+import { createCliente360Service } from "@/lib/crm/cliente-360-service";
+import { listTenantMembersForSelect } from "@/lib/crm/tenant-team-service";
 import { createClienteService } from "@/lib/clientes/cliente-service";
 import { requireTenant } from "@/lib/tenants";
 import type { ClienteSuccessMessage } from "@/types/clientes";
@@ -25,13 +28,27 @@ export default async function ClienteDetailPage({
     notFound();
   }
 
+  const [data360, consultores] = await Promise.all([
+    createCliente360Service(tenant.id).then((s) => s.load(id)),
+    listTenantMembersForSelect(tenant.id),
+  ]);
+
+  const consultorNome =
+    consultores.find((c) => c.id === cliente.consultor_id)?.nome ?? null;
+
   return (
     <div className="space-y-6">
+      <CrmSubnav tenantSlug={tenantSlug} active="clientes" />
       <ClienteFeedback
         success={success as ClienteSuccessMessage | undefined}
         error={error}
       />
-      <ClienteDetail tenantSlug={tenantSlug} cliente={cliente} />
+      <ClienteWorkspace
+        tenantSlug={tenantSlug}
+        cliente={cliente}
+        data360={data360}
+        consultorNome={consultorNome}
+      />
     </div>
   );
 }

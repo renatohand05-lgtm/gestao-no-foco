@@ -5,8 +5,10 @@ import { revalidatePath } from "next/cache";
 import { createClienteService } from "@/lib/clientes/cliente-service";
 import { normalizeClienteFormValues } from "@/lib/clientes/mappers";
 import { clienteFormSchema } from "@/lib/clientes/validations";
+import { ensureCrmDefaultTags } from "@/lib/crm/crm-tags";
 import { toActionError } from "@/lib/supabase/friendly-error";
 import { requireTenant } from "@/lib/tenants";
+import { getCurrentUser } from "@/lib/auth/session";
 import type { ActionResult } from "@/types/action-result";
 
 export async function checkClienteDuplicatesAction(
@@ -32,6 +34,10 @@ export async function checkClienteDuplicatesAction(
 
 function revalidateClientePaths(tenantSlug: string, clienteId?: string) {
   revalidatePath(`/${tenantSlug}/clientes`);
+  revalidatePath(`/${tenantSlug}/clientes/funil`);
+  revalidatePath(`/${tenantSlug}/clientes/dashboard`);
+  revalidatePath(`/${tenantSlug}/clientes/tarefas`);
+  revalidatePath(`/${tenantSlug}/clientes/agenda`);
   revalidatePath(`/${tenantSlug}/busca`);
 
   if (clienteId) {
@@ -46,9 +52,14 @@ export async function createClienteAction(
 ): Promise<ActionResult> {
   try {
     const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
+    await ensureCrmDefaultTags(tenant.id);
     const parsed = clienteFormSchema.parse(values);
     const service = await createClienteService(tenant.id);
-    const cliente = await service.create(normalizeClienteFormValues(parsed));
+    const cliente = await service.create(
+      normalizeClienteFormValues(parsed),
+      user?.id ?? null,
+    );
 
     revalidateClientePaths(tenantSlug, cliente.id);
     return { success: true, id: cliente.id };
@@ -64,9 +75,14 @@ export async function updateClienteAction(
 ): Promise<ActionResult> {
   try {
     const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
     const parsed = clienteFormSchema.parse(values);
     const service = await createClienteService(tenant.id);
-    await service.update(clienteId, normalizeClienteFormValues(parsed));
+    await service.update(
+      clienteId,
+      normalizeClienteFormValues(parsed),
+      user?.id ?? null,
+    );
 
     revalidateClientePaths(tenantSlug, clienteId);
     return { success: true, id: clienteId };

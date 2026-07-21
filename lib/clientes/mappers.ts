@@ -4,6 +4,7 @@ import {
   maskTelefone,
   onlyDigits,
 } from "@/lib/clientes/masks";
+import type { CrmFunilStage } from "@/lib/crm/constants";
 import type { ClienteFormValues } from "@/lib/clientes/validations";
 import type { Cliente, CreateClienteInput } from "@/types/clientes";
 import { toFormMaskValue, toInputDate } from "@/lib/clientes/format";
@@ -36,6 +37,11 @@ export function normalizeClienteFormValues(
     porte: values.porte?.trim() || null,
     origem: values.origem?.trim() || null,
     observacoes: values.observacoes?.trim() || null,
+    classificacao: values.classificacao?.trim() || null,
+    score: values.score ?? 0,
+    consultor_id: values.consultor_id?.trim() || null,
+    estagio_funil: values.estagio_funil as CrmFunilStage,
+    tag_ids: values.tag_ids ?? [],
     ativo: values.ativo,
   };
 }
@@ -63,6 +69,11 @@ export function clienteToFormValues(cliente: Cliente): ClienteFormValues {
     porte: cliente.porte ?? "",
     origem: cliente.origem ?? "",
     observacoes: cliente.observacoes ?? "",
+    classificacao: cliente.classificacao ?? "",
+    score: Number(cliente.score ?? 0),
+    consultor_id: cliente.consultor_id ?? "",
+    estagio_funil: (cliente.estagio_funil ?? "lead") as CrmFunilStage,
+    tag_ids: [],
     ativo: cliente.ativo,
   };
 }
@@ -88,6 +99,10 @@ export function buildClientePayload(input: CreateClienteInput) {
     porte: input.porte ?? null,
     origem: input.origem ?? null,
     observacoes: input.observacoes ?? null,
+    classificacao: input.classificacao ?? null,
+    score: input.score ?? 0,
+    consultor_id: input.consultor_id ?? null,
+    estagio_funil: input.estagio_funil ?? "lead",
     ativo: input.ativo,
   };
 }

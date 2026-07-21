@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { onlyDigits } from "@/lib/clientes/masks";
 import { UF_OPTIONS } from "@/lib/clientes/constants";
+import {
+  CRM_CLASSIFICACOES,
+  CRM_FUNIL_STAGES,
+} from "@/lib/crm/constants";
 
 function isValidCpf(cpf: string) {
   if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
@@ -77,6 +81,19 @@ export const clienteFormSchema = z
     porte: optionalText,
     origem: optionalText,
     observacoes: optionalText,
+    classificacao: z
+      .string()
+      .trim()
+      .optional()
+      .or(z.literal(""))
+      .refine(
+        (value) => !value || CRM_CLASSIFICACOES.includes(value as (typeof CRM_CLASSIFICACOES)[number]),
+        "Classificação inválida (A, B, C ou D).",
+      ),
+    score: z.number().min(0, "Score mínimo é 0.").max(100, "Score máximo é 100."),
+    consultor_id: optionalText,
+    estagio_funil: z.enum(CRM_FUNIL_STAGES),
+    tag_ids: z.array(z.string().uuid()).optional(),
     ativo: z.boolean(),
   })
   .superRefine((data, ctx) => {

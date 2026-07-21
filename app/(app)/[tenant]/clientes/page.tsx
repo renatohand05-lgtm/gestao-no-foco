@@ -6,6 +6,7 @@ import { ClientePagination } from "@/components/clientes/cliente-pagination";
 import { ClienteSearch } from "@/components/clientes/cliente-search";
 import { ClienteSort } from "@/components/clientes/cliente-sort";
 import { ClienteTable } from "@/components/clientes/cliente-table";
+import { CrmSubnav } from "@/components/crm/crm-subnav";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
@@ -56,6 +57,7 @@ export default async function ClientesPage({
 
   return (
     <div className="space-y-6">
+      <CrmSubnav tenantSlug={tenantSlug} active="clientes" />
       <ModuleHeader
         title="Clientes"
         description={`Gerencie os clientes de ${tenant.name}`}

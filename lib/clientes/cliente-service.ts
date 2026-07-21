@@ -6,7 +6,9 @@ import {
 } from "@/lib/clientes/constants";
 import { buildClientePayload } from "@/lib/clientes/mappers";
 import { onlyDigits } from "@/lib/clientes/masks";
+import { createClienteTimelineService } from "@/lib/crm/cliente-timeline-service";
 import { findClienteDuplicates } from "@/lib/master-data/master-data-deduplication";
+import { MasterDataRepository } from "@/lib/master-data/master-data-repository";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type {
@@ -44,6 +46,7 @@ export class ClienteService {
   constructor(
     private readonly supabase: SupabaseClient<Database>,
     private readonly tenantId: string,
+    private readonly master = new MasterDataRepository(supabase, tenantId),
   ) {}
 
   async list(
@@ -77,7 +80,12 @@ export class ClienteService {
       ];
 
       if (digits) {
-        filters.push(`documento.ilike.%${digits}%`, `cep.ilike.%${digits}%`);
+        filters.push(
+          `documento.ilike.%${digits}%`,
+          `cep.ilike.%${digits}%`,
+          `telefone.ilike.%${digits}%`,
+          `whatsapp.ilike.%${digits}%`,
+        );
       }
 
       query = query.or(filters.join(","));
@@ -113,10 +121,21 @@ export class ClienteService {
       throw new Error(error.message);
     }
 
-    return (data as Cliente | null) ?? null;
+    return (data as Cliente | null)
+      ? ({
+          ...(data as Cliente),
+          classificacao: (data as Cliente).classificacao ?? null,
+          score: Number((data as Cliente).score ?? 0),
+          consultor_id: (data as Cliente).consultor_id ?? null,
+          estagio_funil: (data as Cliente).estagio_funil ?? "lead",
+        } as Cliente)
+      : null;
   }
 
-  async create(input: CreateClienteInput): Promise<Cliente> {
+  async create(
+    input: CreateClienteInput,
+    userId?: string | null,
+  ): Promise<Cliente> {
     const dup = await this.checkDuplicates({
       documento: input.documento,
       email: input.email,
@@ -145,7 +164,26 @@ export class ClienteService {
       throw new Error(error.message);
     }
 
-    return data as Cliente;
+    const cliente = data as Cliente;
+
+    if (input.tag_ids?.length) {
+      await this.master.setEntityTags("cliente", cliente.id, input.tag_ids);
+    }
+
+    try {
+      const timeline = await createClienteTimelineService(this.tenantId);
+      await timeline.record({
+        clienteId: cliente.id,
+        tipo: "cadastro",
+        titulo: "Cliente cadastrado",
+        descricao: `Cadastro criado com estágio ${input.estagio_funil ?? "lead"}.`,
+        userId: userId ?? null,
+      });
+    } catch {
+      /* timeline opcional até migration aplicada */
+    }
+
+    return cliente;
   }
 
   async checkDuplicates(input: {
@@ -175,7 +213,11 @@ export class ClienteService {
     });
   }
 
-  async update(id: string, input: UpdateClienteInput): Promise<Cliente> {
+  async update(
+    id: string,
+    input: UpdateClienteInput,
+    userId?: string | null,
+  ): Promise<Cliente> {
     if (input.documento || input.email || input.telefone) {
       const dup = await this.checkDuplicates({
         excludeId: id,
@@ -205,6 +247,22 @@ export class ClienteService {
         throw new Error("Já existe um cliente com este CPF/CNPJ.");
       }
       throw new Error(error.message);
+    }
+
+    if (input.tag_ids) {
+      await this.master.setEntityTags("cliente", id, input.tag_ids);
+    }
+
+    try {
+      const timeline = await createClienteTimelineService(this.tenantId);
+      await timeline.record({
+        clienteId: id,
+        tipo: "atualizacao",
+        titulo: "Cadastro atualizado",
+        userId: userId ?? null,
+      });
+    } catch {
+      /* timeline opcional até migration aplicada */
     }
 
     return data as Cliente;

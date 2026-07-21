@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatDreHierarchyPath } from "@/lib/dre";
 import { DRE_DETALHE_DEFS, DRE_LINHA_LABELS } from "@/lib/dre";
 import type { DreLinhaEconomica } from "@/lib/dre/dre-types";
+import { onlyDigits } from "@/lib/clientes/masks";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type { MasterSearchHit } from "@/lib/master-data/master-data-types";
@@ -21,11 +22,15 @@ export class MasterDataSearchService {
     if (q.length < 2) return [];
 
     const pattern = `%${q}%`;
+    const digits = onlyDigits(q);
     const base = `/${this.tenantSlug}`;
 
     const [
       fornecedores,
       clientes,
+      clientesPorPlaca,
+      clientesPorVeiculo,
+      clientesPorTag,
       produtos,
       categorias,
       planos,
@@ -40,12 +45,46 @@ export class MasterDataSearchService {
         .or(`nome.ilike.${pattern},nome_fantasia.ilike.${pattern},documento.ilike.${pattern}`)
         .limit(LIMIT_PER_TYPE),
       this.supabase
-        .from("clientes")
-        .select("id, nome, documento, email")
+        .from("clientes" as never)
+        .select("id, nome, documento, email, telefone, whatsapp, cidade, consultor_id")
         .eq("tenant_id", this.tenantId)
         .is("deleted_at", null)
-        .or(`nome.ilike.${pattern},documento.ilike.${pattern},email.ilike.${pattern}`)
+        .or(
+          [
+            `nome.ilike.${pattern}`,
+            `documento.ilike.${pattern}`,
+            `email.ilike.${pattern}`,
+            `telefone.ilike.${pattern}`,
+            `whatsapp.ilike.${pattern}`,
+            `cidade.ilike.${pattern}`,
+            digits ? `documento.ilike.%${digits}%` : null,
+            digits ? `telefone.ilike.%${digits}%` : null,
+            digits ? `whatsapp.ilike.%${digits}%` : null,
+          ]
+            .filter(Boolean)
+            .join(","),
+        )
         .limit(LIMIT_PER_TYPE),
+      this.supabase
+        .from("veiculos")
+        .select("id, placa, cliente_id")
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .ilike("placa", pattern)
+        .limit(LIMIT_PER_TYPE),
+      this.supabase
+        .from("veiculos")
+        .select("id, placa, cliente_id, marca, modelo")
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .or(`marca.ilike.${pattern},modelo.ilike.${pattern}`)
+        .limit(LIMIT_PER_TYPE),
+      this.supabase
+        .from("entity_tags" as never)
+        .select("entity_id, tags:tags ( nome )")
+        .eq("tenant_id", this.tenantId)
+        .eq("entity_type", "cliente")
+        .limit(50),
       this.supabase
         .from("produtos")
         .select("id, nome, sku, tipo")
@@ -84,6 +123,23 @@ export class MasterDataSearchService {
     ]);
 
     const hits: MasterSearchHit[] = [];
+    const placaClienteIds = new Set<string>();
+    const placaByCliente = new Map<string, string | null>();
+    const extraClienteIds = new Set<string>();
+    const seenClienteIds = new Set<string>();
+
+    type ClienteSearchRow = {
+      id: string;
+      nome: string;
+      documento: string | null;
+      email: string | null;
+      telefone: string | null;
+      whatsapp: string | null;
+      cidade: string | null;
+      consultor_id: string | null;
+    };
+
+    const clienteRows = (clientes.data ?? []) as ClienteSearchRow[];
 
     for (const row of fornecedores.data ?? []) {
       hits.push({
@@ -94,14 +150,76 @@ export class MasterDataSearchService {
         href: `${base}/financeiro/fornecedores/${row.id}`,
       });
     }
-    for (const row of clientes.data ?? []) {
+    for (const row of clienteRows) {
+      seenClienteIds.add(row.id);
       hits.push({
         id: row.id,
         type: "cliente",
         label: row.nome,
-        subtitle: row.documento || row.email,
+        subtitle: row.documento || row.email || row.telefone || row.cidade,
         href: `${base}/clientes/${row.id}`,
       });
+    }
+    for (const row of clientesPorPlaca.data ?? []) {
+      if (!row.cliente_id) continue;
+      placaClienteIds.add(row.cliente_id);
+      placaByCliente.set(row.cliente_id, row.placa);
+    }
+    for (const row of clientesPorVeiculo.data ?? []) {
+      if (!row.cliente_id) continue;
+      extraClienteIds.add(row.cliente_id);
+    }
+    for (const row of clientesPorTag.data ?? []) {
+      const tagNome = (row as { tags?: { nome?: string } | null }).tags?.nome ?? "";
+      if (tagNome.toLowerCase().includes(q.toLowerCase())) {
+        extraClienteIds.add((row as { entity_id: string }).entity_id);
+      }
+    }
+
+    const consultorIds = clienteRows
+      .map((c) => c.consultor_id)
+      .filter(Boolean) as string[];
+
+    const consultorNames = new Map<string, string>();
+    if (consultorIds.length) {
+      const { data: profiles } = await this.supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", [...new Set(consultorIds)]);
+      for (const p of profiles ?? []) {
+        consultorNames.set(p.id, p.full_name?.trim() || p.email || p.id.slice(0, 8));
+      }
+    }
+
+    for (const row of clienteRows) {
+      const consultorId = row.consultor_id;
+      if (consultorId && consultorNames.get(consultorId)?.toLowerCase().includes(q.toLowerCase())) {
+        extraClienteIds.add(row.id);
+      }
+    }
+
+    const allExtraIds = [...new Set([...placaClienteIds, ...extraClienteIds])].filter(
+      (id) => !seenClienteIds.has(id),
+    );
+
+    if (allExtraIds.length > 0) {
+      const { data: clientesExtra } = await this.supabase
+        .from("clientes")
+        .select("id, nome")
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .in("id", allExtraIds.slice(0, LIMIT_PER_TYPE * 2));
+
+      for (const cliente of clientesExtra ?? []) {
+        const placa = placaByCliente.get(cliente.id);
+        hits.push({
+          id: cliente.id,
+          type: "cliente",
+          label: cliente.nome,
+          subtitle: placa ? `Placa ${placa}` : "Veículo / tag / consultor",
+          href: `${base}/clientes/${cliente.id}`,
+        });
+      }
     }
     for (const row of produtos.data ?? []) {
       hits.push({

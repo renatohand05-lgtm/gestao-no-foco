@@ -3,7 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
+
+import { EntityTagsField } from "@/components/crm/entity-tags-field";
 
 import { MaskedInput } from "@/components/clientes/masked-input";
 import { CancelButton } from "@/components/ui/cancel-button";
@@ -26,6 +28,14 @@ import {
   UF_OPTIONS,
 } from "@/lib/clientes/constants";
 import {
+  CRM_CLASSIFICACOES,
+  CRM_FUNIL_LABELS,
+  CRM_FUNIL_STAGES,
+  CRM_ORIGENS_SUGERIDAS,
+} from "@/lib/crm/constants";
+import type { TenantMemberOption } from "@/lib/crm/tenant-team-service";
+import type { TagRecord } from "@/lib/master-data/master-data-types";
+import {
   getDataReferenciaLabel,
   getNomeLabel,
 } from "@/lib/clientes/format";
@@ -45,12 +55,22 @@ type ClienteFormProps = {
   tenantSlug: string;
   mode: "create" | "edit";
   cliente?: Cliente;
+  consultores?: TenantMemberOption[];
+  tags?: TagRecord[];
+  initialTagIds?: string[];
 };
 
 const selectClassName =
   "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
-export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
+export function ClienteForm({
+  tenantSlug,
+  mode,
+  cliente,
+  consultores = [],
+  tags = [],
+  initialTagIds = [],
+}: ClienteFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,7 +78,7 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
   const form = useForm<ClienteFormValues>({
     resolver: zodResolver(clienteFormSchema),
     defaultValues: cliente
-      ? clienteToFormValues(cliente)
+      ? { ...clienteToFormValues(cliente), tag_ids: initialTagIds }
       : {
           tipo_pessoa: "pf",
           nome: "",
@@ -79,6 +99,11 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
           porte: "",
           origem: "",
           observacoes: "",
+          classificacao: "",
+          score: 0,
+          consultor_id: "",
+          estagio_funil: "lead",
+          tag_ids: [],
           ativo: true,
         },
   });
@@ -139,6 +164,7 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
     <div className="relative">
       <LoadingOverlay loading={loading} label="Salvando..." />
 
+      <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
@@ -229,9 +255,15 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
             <FormField label="Origem" htmlFor="origem">
               <Input
                 id="origem"
+                list="origens-sugeridas"
                 {...form.register("origem")}
-                placeholder="Indicação, Google, franquia…"
+                placeholder="Indicação, Google, parceiro…"
               />
+              <datalist id="origens-sugeridas">
+                {CRM_ORIGENS_SUGERIDAS.map((o) => (
+                  <option key={o} value={o} />
+                ))}
+              </datalist>
             </FormField>
 
             <FormField
@@ -264,6 +296,71 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
             >
               <Input id="data_referencia" type="date" {...form.register("data_referencia")} />
             </FormField>
+          </FormGrid>
+        </FormSection>
+
+        <FormSection
+          title="CRM comercial"
+          description="Classificação, funil, consultor e etiquetas."
+        >
+          <FormGrid>
+            <FormField label="Classificação" htmlFor="classificacao">
+              <select
+                id="classificacao"
+                {...form.register("classificacao")}
+                className={selectClassName}
+              >
+                <option value="">Sem classificação</option>
+                {CRM_CLASSIFICACOES.map((c) => (
+                  <option key={c} value={c}>
+                    Classe {c}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            <FormField label="Score (0–100)" htmlFor="score">
+              <Input
+                id="score"
+                type="number"
+                min={0}
+                max={100}
+                {...form.register("score", { valueAsNumber: true })}
+              />
+            </FormField>
+
+            <FormField label="Estágio no funil" htmlFor="estagio_funil">
+              <select
+                id="estagio_funil"
+                {...form.register("estagio_funil")}
+                className={selectClassName}
+              >
+                {CRM_FUNIL_STAGES.map((stage) => (
+                  <option key={stage} value={stage}>
+                    {CRM_FUNIL_LABELS[stage]}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            <FormField label="Consultor responsável" htmlFor="consultor_id">
+              <select
+                id="consultor_id"
+                {...form.register("consultor_id")}
+                className={selectClassName}
+              >
+                <option value="">Não atribuído</option>
+                {consultores.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            <div className="md:col-span-2">
+              <EntityTagsField tags={tags} />
+            </div>
           </FormGrid>
         </FormSection>
 
@@ -408,6 +505,7 @@ export function ClienteForm({ tenantSlug, mode, cliente }: ClienteFormProps) {
           </SaveButton>
         </div>
       </form>
+      </FormProvider>
     </div>
   );
 }

@@ -50,12 +50,25 @@ export const CrmDashboard = memo(function CrmDashboard({ kpis }: CrmDashboardPro
 
   const consultorChart = useMemo(
     () =>
-      kpis.receita_por_vendedor.slice(0, 8).map((row) => ({
-        data: row.consultor_id ?? "sem",
-        label: row.nome.length > 12 ? `${row.nome.slice(0, 12)}…` : row.nome,
-        value: row.receita,
+      (kpis.receita_por_consultor ?? kpis.receita_por_vendedor)
+        .slice(0, 8)
+        .map((row) => ({
+          data: row.consultor_id ?? "sem",
+          label: row.nome.length > 12 ? `${row.nome.slice(0, 12)}…` : row.nome,
+          value: row.receita,
+        })),
+    [kpis.receita_por_consultor, kpis.receita_por_vendedor],
+  );
+
+  const motivosChart = useMemo(
+    () =>
+      (kpis.motivos_perda ?? []).map((row) => ({
+        data: row.motivo,
+        label:
+          row.motivo.length > 18 ? `${row.motivo.slice(0, 18)}…` : row.motivo,
+        value: row.total,
       })),
-    [kpis.receita_por_vendedor],
+    [kpis.motivos_perda],
   );
 
   return (
@@ -65,6 +78,23 @@ export const CrmDashboard = memo(function CrmDashboard({ kpis }: CrmDashboardPro
         <KpiTile label="Clientes ativos" value={String(kpis.clientes_ativos)} />
         <KpiTile label="Clientes perdidos" value={String(kpis.clientes_perdidos)} />
         <KpiTile label="Novos (30d)" value={String(kpis.novos_clientes)} />
+        <KpiTile
+          label="Recorrentes"
+          value={String(kpis.clientes_recorrentes)}
+        />
+        <KpiTile label="Inativos" value={String(kpis.clientes_inativos)} />
+        <KpiTile
+          label="Sem retorno (90d)"
+          value={String(kpis.clientes_sem_retorno)}
+        />
+        <KpiTile
+          label="Oportunidades vencidas"
+          value={String(kpis.oportunidades_vencidas)}
+        />
+        <KpiTile
+          label="Previsão fechamento"
+          value={formatCurrency(kpis.previsao_fechamento)}
+        />
         <KpiTile label="Receita CRM (30d)" value={formatCurrency(kpis.receita_crm)} />
         <KpiTile label="Ticket médio" value={formatCurrency(kpis.ticket_medio)} />
         <KpiTile label="Conversão" value={`${kpis.taxa_conversao}%`} />
@@ -99,13 +129,22 @@ export const CrmDashboard = memo(function CrmDashboard({ kpis }: CrmDashboardPro
         />
       </div>
 
-      <DashboardBarChart
-        title="Receita por consultor"
-        description="Top vendedores (30 dias)"
-        data={consultorChart}
-        barClassName="bg-violet-500/85"
-        emptyDescription="Sem vendas faturadas no período."
-      />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DashboardBarChart
+          title="Receita por consultor"
+          description="Atribuído ao consultor do cliente (30 dias)"
+          data={consultorChart}
+          barClassName="bg-violet-500/85"
+          emptyDescription="Sem vendas faturadas no período."
+        />
+        <DashboardBarChart
+          title="Motivos de perda"
+          description="Eventos de perda registrados"
+          data={motivosChart}
+          barClassName="bg-rose-500/80"
+          emptyDescription="Sem motivos de perda registrados."
+        />
+      </div>
 
       <SectionCard title="Detalhe do funil">
         <ul className="space-y-2">

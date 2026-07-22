@@ -45,27 +45,171 @@ export const osOpenFormSchema = z.object({
   consultor_id: optionalUuid,
 });
 
+/** Abertura integrada: cliente existente ou cadastro simplificado na OS. */
+export const osOpenIntegratedSchema = z
+  .object({
+    mode: z.enum(["existente", "novo_cliente"]),
+    force_create: z.boolean().default(false),
+    cliente_id: optionalUuid,
+    veiculo_id: optionalUuid,
+    cliente: z
+      .object({
+        nome: z.string().min(1, "Informe o nome."),
+        telefone: optionalText,
+        whatsapp: optionalText,
+        documento: optionalText,
+        email: optionalText,
+        tipo_pessoa: z.enum(["pf", "pj"]).default("pf"),
+        origem: optionalText,
+      })
+      .optional(),
+    veiculo: z
+      .object({
+        placa: z.string().min(1, "Informe a placa."),
+        marca: optionalText,
+        modelo: optionalText,
+        ano: z.coerce.number().int().min(1950).max(2100).optional().nullable(),
+        quilometragem: z.coerce.number().min(0).optional().nullable(),
+      })
+      .optional(),
+    quilometragem_entrada: z.coerce.number().min(0).optional().nullable(),
+    previsao_entrega: z.string().optional().nullable(),
+    reclamacao_cliente: optionalText,
+    observacoes: optionalText,
+    nivel_combustivel: optionalText,
+    objetos_deixados: optionalText,
+    danos_aparentes: optionalText,
+    origem_atendimento: optionalText,
+    prioridade: z.enum(["baixa", "normal", "alta", "urgente"]).default("normal"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.mode === "existente") {
+      if (!data.cliente_id) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Selecione o cliente.",
+          path: ["cliente_id"],
+        });
+      }
+      if (!data.veiculo_id) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Selecione ou cadastre um veículo.",
+          path: ["veiculo_id"],
+        });
+      }
+    } else {
+      if (!data.cliente?.nome?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Informe o nome do cliente.",
+          path: ["cliente", "nome"],
+        });
+      }
+      const tel = (data.cliente?.telefone ?? "").replace(/\D/g, "");
+      const whats = (data.cliente?.whatsapp ?? "").replace(/\D/g, "");
+      if (!tel && !whats) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Informe telefone ou WhatsApp.",
+          path: ["cliente", "telefone"],
+        });
+      }
+      if (!data.veiculo?.placa?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Informe a placa.",
+          path: ["veiculo", "placa"],
+        });
+      }
+    }
+  });
+
+export type OsOpenIntegratedValues = z.output<typeof osOpenIntegratedSchema>;
+
+export const osDescontoFormSchema = z.object({
+  desconto_valor: z.coerce.number().min(0).default(0),
+  desconto_percentual: z.coerce.number().min(0).max(100).default(0),
+  desconto_motivo: z.string().min(1, "Informe o motivo do desconto."),
+  desconto_tipo: z.enum([
+    "fidelizacao",
+    "cliente_recorrente",
+    "negociacao_comercial",
+    "retrabalho",
+    "garantia",
+    "campanha",
+    "cortesia",
+    "ajuste_operacional",
+    "outro",
+  ]),
+  desconto_cliente_recorrente: z.boolean().default(false),
+  desconto_observacao: optionalText,
+});
+
 export const osVeiculoVinculoFormSchema = z.object({
   veiculo_id: z.string().uuid("Selecione o veículo."),
 });
 
-export const osItemFormSchema = z.object({
-  produto_id: optionalUuid,
-  descricao: z.string().min(1, "Informe a descrição."),
-  tipo_item: z.enum(["produto", "servico"]).default("servico"),
-  categoria_item: z.enum(["peca", "servico", "mao_obra", "outro"]).default("servico"),
-  quantidade: z.coerce.number().positive(),
-  valor_unitario: z.coerce.number().min(0),
-  desconto: z.coerce.number().min(0).default(0),
-  acrescimo: z.coerce.number().min(0).default(0),
-  custo_unitario: z.coerce.number().min(0).optional().nullable(),
-  mecanico_id: optionalUuid,
-  horas_previstas: z.coerce.number().min(0).optional().nullable(),
-  peca_origem: z
-    .enum(["estoque", "cliente", "compra", "outro"])
-    .default("estoque"),
-  fornecedor_sugerido_id: optionalUuid,
-  observacoes: optionalText,
+export const osItemFormSchema = z
+  .object({
+    produto_id: optionalUuid,
+    descricao: z.string().min(1, "Informe a descrição."),
+    tipo_item: z.enum(["produto", "servico"]).default("servico"),
+    categoria_item: z
+      .enum(["peca", "servico", "mao_obra", "outro"])
+      .default("servico"),
+    quantidade: z.coerce.number().positive("Quantidade deve ser maior que zero."),
+    valor_unitario: z.coerce.number().min(0, "Valor não pode ser negativo."),
+    desconto: z.coerce.number().min(0).default(0),
+    acrescimo: z.coerce.number().min(0).default(0),
+    custo_unitario: z.coerce.number().min(0).optional().nullable(),
+    mecanico_id: optionalUuid,
+    horas_previstas: z.coerce.number().min(0).optional().nullable(),
+    peca_origem: z
+      .enum(["estoque", "cliente", "compra", "outro"])
+      .default("estoque"),
+    fornecedor_sugerido_id: optionalUuid,
+    observacoes: optionalText,
+    is_personalizado: z.boolean().default(false),
+    personalizado_motivo: optionalText,
+  })
+  .superRefine((data, ctx) => {
+    if (!data.is_personalizado && !data.produto_id) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Selecione um produto ou serviço cadastrado.",
+        path: ["produto_id"],
+      });
+    }
+    if (data.is_personalizado && !data.descricao.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Informe a descrição do item personalizado.",
+        path: ["descricao"],
+      });
+    }
+    const total = Math.max(
+      0,
+      data.quantidade * data.valor_unitario - data.desconto + data.acrescimo,
+    );
+    if (total < 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Total inconsistente.",
+        path: ["valor_unitario"],
+      });
+    }
+  });
+
+export const osItemPersonalizadoFormSchema = osItemFormSchema;
+
+export const osConverterItemSchema = z.object({
+  produto_id: z.string().uuid("Selecione o item cadastrado."),
+  motivo: z.string().min(3, "Informe o motivo da conversão.").optional(),
+});
+
+export const osMotivoFormSchema = z.object({
+  motivo: z.string().min(3, "Informe o motivo."),
 });
 
 export const osDiagnosticoFormSchema = z.object({

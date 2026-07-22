@@ -16,6 +16,10 @@ import {
   type CommercialRankings,
   type CommercialTicketResumo,
 } from "@/types/commercial-panel";
+import {
+  civilDateInTimezone,
+  resolveTenantTimezone,
+} from "@/lib/dashboard/tenant-timezone";
 import { createDashboardService } from "@/lib/dashboard/dashboard-service";
 import {
   buildMetaProjecao,
@@ -147,7 +151,7 @@ export class CommercialPanelService {
         ? metaValor / diasUteisTotais
         : 0;
 
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = civilDateInTimezone(new Date(), resolveTenantTimezone());
     const dates = eachDate(dataDe, dataAte);
     const mediaUtil =
       projecao.dias_uteis_decorridos > 0
@@ -383,7 +387,7 @@ export class CommercialPanelService {
 
     for (const row of input.vendasMes) {
       const key = row.centro_custo_id ?? "__none__";
-      fatByCentro.set(key, (fatByCentro.get(key) ?? 0) + Number(row.subtotal));
+      fatByCentro.set(key, (fatByCentro.get(key) ?? 0) + Number(row.total));
       const ticket = ticketByCentro.get(key) ?? { count: 0, total: 0 };
       ticket.count += 1;
       ticket.total += Number(row.total);
@@ -492,7 +496,7 @@ export class CommercialPanelService {
 
     for (const row of vendas) {
       const key = String(row.data_venda).slice(0, 10);
-      map.set(key, (map.get(key) ?? 0) + Number(row.subtotal));
+      map.set(key, (map.get(key) ?? 0) + Number(row.total));
     }
     for (const row of cr) {
       const key = String(row.data_competencia ?? row.data_emissao).slice(0, 10);

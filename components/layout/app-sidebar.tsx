@@ -38,6 +38,7 @@ function groupNav(items: NavItem[]): NavGroup[] {
   const byHref = (match: string) =>
     items.filter((item) => item.href.includes(match));
 
+  const centro = items.filter((i) => i.href.endsWith("/centro-operacoes"));
   const dashboard = items.filter((i) => i.href.endsWith("/dashboard"));
   const busca = items.filter((i) => i.href.endsWith("/busca"));
   const operacao = [
@@ -51,7 +52,7 @@ function groupNav(items: NavItem[]): NavGroup[] {
   const sistema = byHref("/configuracoes");
 
   return [
-    { label: "Principal", items: [...dashboard, ...busca] },
+    { label: "Principal", items: [...centro, ...dashboard, ...busca] },
     { label: "Operação", items: operacao },
     { label: "Gestão", items: gestao },
     { label: "Sistema", items: sistema },

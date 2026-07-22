@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
+import { OsDescontoPanel } from "@/components/ordens/os-desconto-panel";
+import { OsLifecycleMenu } from "@/components/ordens/os-lifecycle-menu";
+import { OsRecursoBinder } from "@/components/ordens/os-recurso-binder";
+import { OsMecanicoBinder } from "@/components/ordens/os-mecanico-binder";
+import { OsOrcamentoItensPanel } from "@/components/ordens/os-orcamento-itens-panel";
 import {
   OsVeiculoPicker,
   useClienteVeiculos,
@@ -18,16 +23,13 @@ import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
-  addOsItemAction,
   applyOsAprovacaoAction,
   changeOsStatusAction,
   concluirOsEntregaAction,
   createOsRetornoAction,
   faturarOsAction,
-  removeOsItemAction,
   saveOsDiagnosticoAction,
   updateOsHeaderAction,
-  updateOsItemAction,
   updateOsItemExecucaoAction,
   updateOsPrevisaoAction,
   updateOsVeiculoAction,
@@ -63,6 +65,22 @@ type Props = {
   orcamentoVersoes: OrcamentoVersaoRecord[];
   compartilhamentos: ShareListItem[];
   emailConfigured: boolean;
+  recorrencia?: import("@/lib/crm/cliente-recorrencia-service").ClienteRecorrencia | null;
+  canApplyDesconto?: boolean;
+  canAddPersonalizado?: boolean;
+  canConvertPersonalizado?: boolean;
+  canCancel?: boolean;
+  canArquivar?: boolean;
+  canExcluirRascunho?: boolean;
+  canRestaurar?: boolean;
+  recursos?: import("@/lib/operacoes/recursos-service").OficinaRecurso[];
+  canBindRecurso?: boolean;
+  mecanicosCadastro?: import("@/lib/mecanicos/mecanico-service").Mecanico[];
+  osMecanicos?: import("@/lib/mecanicos/os-mecanico-service").OrdemServicoMecanico[];
+  osCustoReal?: import("@/lib/mecanicos/os-mecanico-service").OsCustoReal | null;
+  canAtribuirMecanico?: boolean;
+  canTransferirMecanico?: boolean;
+  canApontarHoras?: boolean;
 };
 
 const TABS = [
@@ -88,12 +106,6 @@ const EXEC_LABELS: Record<string, string> = {
   cancelado: "Cancelar item",
 };
 
-const APROVACAO_LABELS: Record<string, string> = {
-  pendente: "Pendente",
-  aprovado: "Aprovado",
-  reprovado: "Reprovado",
-};
-
 function canEditOs(os: OrdemServicoDetail) {
   return (
     !os.venda_id &&
@@ -106,13 +118,28 @@ function canEditOs(os: OrdemServicoDetail) {
 export function OsWorkspace({
   tenantSlug,
   os,
-  produtos,
   formasPagamento,
   veiculosIniciais,
   anexos,
   orcamentoVersoes,
   compartilhamentos,
   emailConfigured,
+  recorrencia = null,
+  canApplyDesconto = false,
+  canAddPersonalizado = false,
+  canConvertPersonalizado = false,
+  canCancel = false,
+  canArquivar = false,
+  canExcluirRascunho = false,
+  canRestaurar = false,
+  recursos = [],
+  canBindRecurso = false,
+  mecanicosCadastro = [],
+  osMecanicos = [],
+  osCustoReal = null,
+  canAtribuirMecanico = false,
+  canTransferirMecanico = false,
+  canApontarHoras = false,
 }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
@@ -122,7 +149,6 @@ export function OsWorkspace({
   const [aprovacaoCanal, setAprovacaoCanal] = useState<string>("presencial");
   const [itensParciais, setItensParciais] = useState<string[]>([]);
   const [veiculoEditId, setVeiculoEditId] = useState(os.veiculo_id ?? "");
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [execHoras, setExecHoras] = useState<Record<string, string>>({});
   const [veiculoMasterOpen, setVeiculoMasterOpen] = useState(false);
   const {
@@ -213,6 +239,9 @@ export function OsWorkspace({
         <StatusBadge
           label={OS_STATUS_LABELS[os.status as OsStatus] ?? os.status}
         />
+        {os.arquivado_em ? (
+          <StatusBadge label="Arquivada" />
+        ) : null}
         <span className="text-sm text-muted-foreground">
           #{os.numero} · {os.cliente_nome} · {os.placa ?? "sem placa"}
           {os.modelo ? ` · ${os.modelo}` : ""}
@@ -221,6 +250,44 @@ export function OsWorkspace({
           {formatCurrency(os.valor_total)}
         </span>
       </div>
+
+      <OsLifecycleMenu
+        tenantSlug={tenantSlug}
+        osId={os.id}
+        numero={os.numero}
+        clienteNome={os.cliente_nome}
+        placa={os.placa}
+        modelo={os.modelo}
+        status={os.status}
+        vendaId={os.venda_id}
+        arquivadoEm={os.arquivado_em}
+        canCancel={canCancel}
+        canArquivar={canArquivar}
+        canExcluirRascunho={canExcluirRascunho}
+        canRestaurar={canRestaurar}
+      />
+
+      <OsRecursoBinder
+        tenantSlug={tenantSlug}
+        osId={os.id}
+        recursoId={os.recurso_id}
+        recursoNome={
+          recursos.find((r) => r.id === os.recurso_id)?.nome ?? null
+        }
+        recursos={recursos}
+        canEdit={canBindRecurso && canEditOs(os)}
+      />
+
+      <OsMecanicoBinder
+        tenantSlug={tenantSlug}
+        osId={os.id}
+        alocacoes={osMecanicos}
+        mecanicos={mecanicosCadastro}
+        custoReal={osCustoReal}
+        canAtribuir={canAtribuirMecanico && canEditOs(os)}
+        canTransferir={canTransferirMecanico && canEditOs(os)}
+        canApontar={canApontarHoras}
+      />
 
       <div className="flex flex-wrap gap-1.5">
         {TABS.map((t) => (
@@ -560,329 +627,23 @@ export function OsWorkspace({
               Conclua o diagnóstico antes de montar o orçamento.
             </p>
           ) : null}
-          <ul className="space-y-2">
-            {os.itens.map((item) => (
-              <li
-                key={item.id}
-                className="space-y-2 rounded-lg border px-3 py-2 text-sm"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{item.descricao}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.categoria_item} ·{" "}
-                      {APROVACAO_LABELS[item.aprovacao_status] ??
-                        item.aprovacao_status}{" "}
-                      · estoque {item.estoque_status}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <p className="tabular-nums font-semibold">
-                      {formatCurrency(item.valor_total)}
-                    </p>
-                    {canEditOs(os) && item.aprovacao_status === "pendente" ? (
-                      <>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className={cn(
-                            buttonVariants({ variant: "outline", size: "sm" }),
-                          )}
-                          onClick={() =>
-                            setEditingItemId(
-                              editingItemId === item.id ? null : item.id,
-                            )
-                          }
-                        >
-                          {editingItemId === item.id ? "Fechar" : "Editar"}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className={cn(
-                            buttonVariants({ variant: "destructive", size: "sm" }),
-                          )}
-                          onClick={() => {
-                            if (
-                              !window.confirm(
-                                `Remover "${item.descricao}" do orçamento?`,
-                              )
-                            ) {
-                              return;
-                            }
-                            run(
-                              () =>
-                                removeOsItemAction(tenantSlug, os.id, item.id),
-                              "Item removido.",
-                            );
-                          }}
-                        >
-                          Remover
-                        </button>
-                      </>
-                    ) : null}
-                  </div>
-                </div>
-                {editingItemId === item.id ? (
-                  <form
-                    className="space-y-2 border-t pt-2"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const fd = new FormData(e.currentTarget);
-                      run(
-                        () =>
-                          updateOsItemAction(tenantSlug, os.id, item.id, {
-                            produto_id:
-                              String(fd.get("produto_id") || "") || undefined,
-                            descricao: String(fd.get("descricao") || ""),
-                            tipo_item: String(fd.get("tipo_item") || "servico"),
-                            categoria_item: String(
-                              fd.get("categoria_item") || "servico",
-                            ),
-                            quantidade: Number(fd.get("quantidade") || 1),
-                            valor_unitario: Number(fd.get("valor_unitario") || 0),
-                            desconto: Number(fd.get("desconto") || 0),
-                            acrescimo: Number(fd.get("acrescimo") || 0),
-                            peca_origem: String(fd.get("peca_origem") || "estoque"),
-                            horas_previstas: fd.get("horas_previstas")
-                              ? Number(fd.get("horas_previstas"))
-                              : null,
-                          }),
-                        "Item atualizado.",
-                      );
-                      setEditingItemId(null);
-                    }}
-                  >
-                    <select
-                      name="produto_id"
-                      defaultValue={item.produto_id ?? ""}
-                      disabled={pending}
-                      className="h-10 w-full rounded-md border px-3 text-sm"
-                    >
-                      <option value="">Produto/serviço (opcional)</option>
-                      {produtos.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.nome}
-                        </option>
-                      ))}
-                    </select>
-                    <Input
-                      name="descricao"
-                      required
-                      defaultValue={item.descricao}
-                      disabled={pending}
-                    />
-                    <div className="grid gap-2 md:grid-cols-4">
-                      <select
-                        name="tipo_item"
-                        defaultValue={item.tipo_item}
-                        disabled={pending}
-                        className="h-10 rounded-md border px-2 text-sm"
-                      >
-                        <option value="servico">Serviço</option>
-                        <option value="produto">Produto</option>
-                      </select>
-                      <select
-                        name="categoria_item"
-                        defaultValue={item.categoria_item}
-                        disabled={pending}
-                        className="h-10 rounded-md border px-2 text-sm"
-                      >
-                        <option value="peca">Peça</option>
-                        <option value="servico">Serviço</option>
-                        <option value="mao_obra">Mão de obra</option>
-                        <option value="outro">Outro</option>
-                      </select>
-                      <Input
-                        name="quantidade"
-                        type="number"
-                        step="0.001"
-                        defaultValue={item.quantidade}
-                        disabled={pending}
-                      />
-                      <Input
-                        name="valor_unitario"
-                        type="number"
-                        step="0.01"
-                        defaultValue={item.valor_unitario}
-                        disabled={pending}
-                      />
-                    </div>
-                    <div className="grid gap-2 md:grid-cols-3">
-                      <Input
-                        name="desconto"
-                        type="number"
-                        step="0.01"
-                        defaultValue={item.desconto}
-                        disabled={pending}
-                      />
-                      <Input
-                        name="acrescimo"
-                        type="number"
-                        step="0.01"
-                        defaultValue={item.acrescimo}
-                        disabled={pending}
-                      />
-                      <Input
-                        name="horas_previstas"
-                        type="number"
-                        step="0.1"
-                        defaultValue={item.horas_previstas ?? ""}
-                        disabled={pending}
-                      />
-                    </div>
-                    <select
-                      name="peca_origem"
-                      defaultValue={item.peca_origem}
-                      disabled={pending}
-                      className="h-10 w-full rounded-md border px-2 text-sm"
-                    >
-                      <option value="estoque">Estoque</option>
-                      <option value="cliente">Fornecida pelo cliente</option>
-                      <option value="compra">Compra sob demanda</option>
-                      <option value="outro">Outro</option>
-                    </select>
-                    <button
-                      type="submit"
-                      disabled={pending}
-                      className={cn(buttonVariants({ size: "sm" }))}
-                    >
-                      Salvar item
-                    </button>
-                  </form>
-                ) : null}
-              </li>
-            ))}
-            {os.itens.length === 0 ? (
-              <li className="text-sm text-muted-foreground">Nenhum item ainda.</li>
-            ) : null}
-          </ul>
-          <form
-            className="space-y-2 rounded-xl border border-dashed p-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!canEditOs(os)) {
-                setError("Orçamento bloqueado nesta OS.");
-                return;
-              }
-              const fd = new FormData(e.currentTarget);
-              run(
-                () =>
-                  addOsItemAction(tenantSlug, os.id, {
-                    produto_id: String(fd.get("produto_id") || "") || undefined,
-                    descricao: String(fd.get("descricao") || ""),
-                    tipo_item: String(fd.get("tipo_item") || "servico"),
-                    categoria_item: String(fd.get("categoria_item") || "servico"),
-                    quantidade: Number(fd.get("quantidade") || 1),
-                    valor_unitario: Number(fd.get("valor_unitario") || 0),
-                    desconto: Number(fd.get("desconto") || 0),
-                    acrescimo: Number(fd.get("acrescimo") || 0),
-                    peca_origem: String(fd.get("peca_origem") || "estoque"),
-                    horas_previstas: fd.get("horas_previstas")
-                      ? Number(fd.get("horas_previstas"))
-                      : null,
-                  }),
-                "Item incluído no orçamento.",
-              );
-              e.currentTarget.reset();
+          <OsOrcamentoItensPanel
+            tenantSlug={tenantSlug}
+            os={os}
+            canEdit={canEditOs(os) && canOrcamento}
+            canAddPersonalizado={canAddPersonalizado}
+            canConvertPersonalizado={canConvertPersonalizado}
+            onDone={(msg) => {
+              setSuccess(msg);
+              setError(null);
+              router.refresh();
             }}
-          >
-            <p className="text-xs font-medium text-muted-foreground">
-              Adicionar peça / serviço / mão de obra
-            </p>
-            <select
-              name="produto_id"
-              disabled={pending}
-              className="h-10 w-full rounded-md border px-3 text-sm"
-            >
-              <option value="">Produto/serviço (opcional para orçar texto)</option>
-              {produtos.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nome}
-                </option>
-              ))}
-            </select>
-            <Input name="descricao" required placeholder="Descrição" disabled={pending} />
-            <div className="grid gap-2 md:grid-cols-4">
-              <select
-                name="tipo_item"
-                defaultValue="servico"
-                disabled={pending}
-                className="h-10 rounded-md border px-2 text-sm"
-              >
-                <option value="servico">Serviço</option>
-                <option value="produto">Produto</option>
-              </select>
-              <select
-                name="categoria_item"
-                defaultValue="servico"
-                disabled={pending}
-                className="h-10 rounded-md border px-2 text-sm"
-              >
-                <option value="peca">Peça</option>
-                <option value="servico">Serviço</option>
-                <option value="mao_obra">Mão de obra</option>
-                <option value="outro">Outro</option>
-              </select>
-              <Input
-                name="quantidade"
-                type="number"
-                step="0.001"
-                defaultValue={1}
-                disabled={pending}
-              />
-              <Input
-                name="valor_unitario"
-                type="number"
-                step="0.01"
-                defaultValue={0}
-                disabled={pending}
-              />
-            </div>
-            <div className="grid gap-2 md:grid-cols-3">
-              <Input
-                name="desconto"
-                type="number"
-                step="0.01"
-                defaultValue={0}
-                placeholder="Desconto"
-                disabled={pending}
-              />
-              <Input
-                name="acrescimo"
-                type="number"
-                step="0.01"
-                defaultValue={0}
-                placeholder="Acréscimo"
-                disabled={pending}
-              />
-              <Input
-                name="horas_previstas"
-                type="number"
-                step="0.1"
-                placeholder="Horas previstas"
-                disabled={pending}
-              />
-            </div>
-            <select
-              name="peca_origem"
-              defaultValue="estoque"
-              disabled={pending}
-              className="h-10 w-full rounded-md border px-2 text-sm"
-            >
-              <option value="estoque">Estoque</option>
-              <option value="cliente">Fornecida pelo cliente</option>
-              <option value="compra">Compra sob demanda</option>
-              <option value="outro">Outro</option>
-            </select>
-            <button
-              type="submit"
-              disabled={pending || !canOrcamento}
-              className={cn(buttonVariants({ size: "sm" }))}
-            >
-              Incluir no orçamento
-            </button>
-          </form>
+            onError={(msg) => {
+              setError(msg);
+              setSuccess(null);
+            }}
+          />
+
           <InspecaoEnvioPanel
             tenantSlug={tenantSlug}
             osId={os.id}
@@ -893,6 +654,16 @@ export function OsWorkspace({
             onRefresh={() => router.refresh()}
             disabled={pending || !canOrcamento}
           />
+          <div className="border-t pt-4">
+            <h3 className="mb-2 text-sm font-medium">Desconto do orçamento</h3>
+            <OsDescontoPanel
+              tenantSlug={tenantSlug}
+              osId={os.id}
+              subtotal={os.subtotal}
+              recorrencia={recorrencia}
+              canApply={canApplyDesconto && canEditOs(os)}
+            />
+          </div>
         </SectionCard>
       ) : null}
 

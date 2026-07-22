@@ -95,6 +95,21 @@ export default async function VendasPage({
         breadcrumbs={[{ label: "Vendas" }]}
       >
         <ActionButton
+          action="create"
+          label="Venda rápida"
+          href={`/${tenantSlug}/vendas/rapida`}
+        />
+        <ActionButton
+          action="view"
+          label="Dashboard"
+          href={`/${tenantSlug}/vendas/dashboard`}
+        />
+        <ActionButton
+          action="view"
+          label="Descontos"
+          href={`/${tenantSlug}/descontos/dashboard`}
+        />
+        <ActionButton
           action="view"
           label="Vendas abertas"
           href={`/${tenantSlug}/vendas/abertas`}

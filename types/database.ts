@@ -113,6 +113,10 @@ export type Database = {
           porte: string | null;
           origem: string | null;
           observacoes: string | null;
+          classificacao: string | null;
+          score: number;
+          consultor_id: string | null;
+          estagio_funil: string;
           ativo: boolean;
           deleted_at: string | null;
           created_at: string;
@@ -140,6 +144,10 @@ export type Database = {
           porte?: string | null;
           origem?: string | null;
           observacoes?: string | null;
+          classificacao?: string | null;
+          score?: number;
+          consultor_id?: string | null;
+          estagio_funil?: string;
           ativo?: boolean;
           deleted_at?: string | null;
           created_at?: string;
@@ -167,6 +175,10 @@ export type Database = {
           porte?: string | null;
           origem?: string | null;
           observacoes?: string | null;
+          classificacao?: string | null;
+          score?: number;
+          consultor_id?: string | null;
+          estagio_funil?: string;
           ativo?: boolean;
           deleted_at?: string | null;
           created_at?: string;
@@ -333,6 +345,16 @@ export type Database = {
           deleted_at: string | null;
           created_at: string;
           updated_at: string;
+          consumidor_nao_identificado: boolean;
+          canal_venda: string;
+          vendedor_id: string | null;
+          desconto_percentual: number;
+          desconto_motivo: string | null;
+          desconto_tipo: string | null;
+          desconto_autorizado_por: string | null;
+          cancelamento_motivo: string | null;
+          cancelado_por: string | null;
+          cancelado_em: string | null;
         };
         Insert: {
           id?: string;
@@ -355,6 +377,16 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          consumidor_nao_identificado?: boolean;
+          canal_venda?: string;
+          vendedor_id?: string | null;
+          desconto_percentual?: number;
+          desconto_motivo?: string | null;
+          desconto_tipo?: string | null;
+          desconto_autorizado_por?: string | null;
+          cancelamento_motivo?: string | null;
+          cancelado_por?: string | null;
+          cancelado_em?: string | null;
         };
         Update: {
           id?: string;
@@ -377,6 +409,16 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          consumidor_nao_identificado?: boolean;
+          canal_venda?: string;
+          vendedor_id?: string | null;
+          desconto_percentual?: number;
+          desconto_motivo?: string | null;
+          desconto_tipo?: string | null;
+          desconto_autorizado_por?: string | null;
+          cancelamento_motivo?: string | null;
+          cancelado_por?: string | null;
+          cancelado_em?: string | null;
         };
         Relationships: [
           {
@@ -1418,6 +1460,23 @@ export type Database = {
           deleted_at: string | null;
           created_at: string;
           updated_at: string;
+          desconto_valor: number;
+          desconto_percentual: number;
+          desconto_motivo: string | null;
+          desconto_tipo: string | null;
+          desconto_cliente_recorrente: boolean;
+          desconto_solicitado_por: string | null;
+          desconto_autorizado_por: string | null;
+          desconto_autorizado_em: string | null;
+          desconto_status: string;
+          desconto_observacao: string | null;
+          cancelamento_motivo: string | null;
+          cancelado_por: string | null;
+          cancelado_em: string | null;
+          arquivado_em: string | null;
+          arquivado_por: string | null;
+          arquivado_motivo: string | null;
+          recurso_id: string | null;
         };
         Insert: {
           id?: string;
@@ -1459,6 +1518,22 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          desconto_valor?: number;
+          desconto_percentual?: number;
+          desconto_motivo?: string | null;
+          desconto_tipo?: string | null;
+          desconto_cliente_recorrente?: boolean;
+          desconto_solicitado_por?: string | null;
+          desconto_autorizado_por?: string | null;
+          desconto_autorizado_em?: string | null;
+          desconto_status?: string;
+          desconto_observacao?: string | null;
+          cancelamento_motivo?: string | null;
+          cancelado_por?: string | null;
+          cancelado_em?: string | null;
+          arquivado_em?: string | null;
+          arquivado_por?: string | null;
+          arquivado_motivo?: string | null;
         };
         Update: {
           id?: string;
@@ -1500,6 +1575,22 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          desconto_valor?: number;
+          desconto_percentual?: number;
+          desconto_motivo?: string | null;
+          desconto_tipo?: string | null;
+          desconto_cliente_recorrente?: boolean;
+          desconto_solicitado_por?: string | null;
+          desconto_autorizado_por?: string | null;
+          desconto_autorizado_em?: string | null;
+          desconto_status?: string;
+          desconto_observacao?: string | null;
+          cancelamento_motivo?: string | null;
+          cancelado_por?: string | null;
+          cancelado_em?: string | null;
+          arquivado_em?: string | null;
+          arquivado_por?: string | null;
+          arquivado_motivo?: string | null;
         };
         Relationships: [
           {
@@ -1552,6 +1643,12 @@ export type Database = {
           deleted_at: string | null;
           created_at: string;
           updated_at: string;
+          is_personalizado: boolean;
+          personalizado_motivo: string | null;
+          personalizado_criado_por: string | null;
+          personalizado_criado_em: string | null;
+          personalizado_convertido_em: string | null;
+          personalizado_convertido_por: string | null;
         };
         Insert: {
           id?: string;
@@ -1586,6 +1683,12 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          is_personalizado?: boolean;
+          personalizado_motivo?: string | null;
+          personalizado_criado_por?: string | null;
+          personalizado_criado_em?: string | null;
+          personalizado_convertido_em?: string | null;
+          personalizado_convertido_por?: string | null;
         };
         Update: {
           id?: string;
@@ -1620,6 +1723,12 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          is_personalizado?: boolean;
+          personalizado_motivo?: string | null;
+          personalizado_criado_por?: string | null;
+          personalizado_criado_em?: string | null;
+          personalizado_convertido_em?: string | null;
+          personalizado_convertido_por?: string | null;
         };
         Relationships: [];
       };
@@ -2501,9 +2610,465 @@ export type Database = {
         };
         Relationships: [];
       };
+      desconto_alcadas: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          cargo: string;
+          limite_percentual: number;
+          limite_valor: number | null;
+          margem_minima_percentual: number;
+          pode_aprovar_acima: boolean;
+          ativo: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          cargo: string;
+          limite_percentual?: number;
+          limite_valor?: number | null;
+          margem_minima_percentual?: number;
+          pode_aprovar_acima?: boolean;
+          ativo?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          cargo?: string;
+          limite_percentual?: number;
+          limite_valor?: number | null;
+          margem_minima_percentual?: number;
+          pode_aprovar_acima?: boolean;
+          ativo?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      desconto_eventos: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          entidade_tipo: string;
+          entidade_id: string;
+          cliente_id: string | null;
+          unidade: string | null;
+          solicitante_id: string | null;
+          autorizador_id: string | null;
+          cargo_autorizador: string | null;
+          valor_original: number;
+          valor_desconto: number;
+          percentual: number;
+          valor_final: number;
+          margem_antes: number | null;
+          margem_depois: number | null;
+          tipo_desconto: string | null;
+          motivo: string;
+          status: string;
+          observacao: string | null;
+          payload: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          entidade_tipo: string;
+          entidade_id: string;
+          cliente_id?: string | null;
+          unidade?: string | null;
+          solicitante_id?: string | null;
+          autorizador_id?: string | null;
+          cargo_autorizador?: string | null;
+          valor_original: number;
+          valor_desconto: number;
+          percentual?: number;
+          valor_final: number;
+          margem_antes?: number | null;
+          margem_depois?: number | null;
+          tipo_desconto?: string | null;
+          motivo: string;
+          status?: string;
+          observacao?: string | null;
+          payload?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          status?: string;
+          autorizador_id?: string | null;
+          cargo_autorizador?: string | null;
+          observacao?: string | null;
+          margem_antes?: number | null;
+          margem_depois?: number | null;
+          payload?: Json;
+        };
+        Relationships: [];
+      };
+      tenant_role_permissions: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          role: string;
+          permission_key: string;
+          allowed: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          role: string;
+          permission_key: string;
+          allowed?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          allowed?: boolean;
+        };
+        Relationships: [];
+      };
+      venda_devolucoes: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          venda_id: string;
+          motivo: string;
+          observacao: string | null;
+          valor_total: number;
+          status: string;
+          autorizado_por: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          venda_id: string;
+          motivo: string;
+          observacao?: string | null;
+          valor_total?: number;
+          status?: string;
+          autorizado_por?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          motivo?: string;
+          observacao?: string | null;
+          valor_total?: number;
+          status?: string;
+        };
+        Relationships: [];
+      };
+      venda_devolucao_itens: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          devolucao_id: string;
+          venda_item_id: string;
+          produto_id: string | null;
+          quantidade: number;
+          valor_unitario: number;
+          total: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          devolucao_id: string;
+          venda_item_id: string;
+          produto_id?: string | null;
+          quantidade: number;
+          valor_unitario?: number;
+          total?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          quantidade?: number;
+          valor_unitario?: number;
+          total?: number;
+        };
+        Relationships: [];
+      };
+      venda_pagamentos: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          venda_id: string;
+          forma_pagamento_id: string;
+          valor: number;
+          quantidade_parcelas: number;
+          taxa_percent: number;
+          data_prevista: string | null;
+          conta_bancaria_id: string | null;
+          observacao: string | null;
+          ordem: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          venda_id: string;
+          forma_pagamento_id: string;
+          valor: number;
+          quantidade_parcelas?: number;
+          taxa_percent?: number;
+          data_prevista?: string | null;
+          conta_bancaria_id?: string | null;
+          observacao?: string | null;
+          ordem?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          forma_pagamento_id?: string;
+          valor?: number;
+          quantidade_parcelas?: number;
+          taxa_percent?: number;
+          data_prevista?: string | null;
+          conta_bancaria_id?: string | null;
+          observacao?: string | null;
+          ordem?: number;
+        };
+        Relationships: [];
+      };
+      oficina_recursos: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          nome: string;
+          codigo: string | null;
+          tipo: string;
+          status: string;
+          capacidade: number | null;
+          centro_custo_id: string | null;
+          ordem_servico_id: string | null;
+          observacoes: string | null;
+          data_manutencao: string | null;
+          proxima_manutencao: string | null;
+          responsavel_id: string | null;
+          ativo: boolean;
+          utilizado: boolean;
+          arquivado_em: string | null;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          nome: string;
+          codigo?: string | null;
+          tipo: string;
+          status?: string;
+          capacidade?: number | null;
+          centro_custo_id?: string | null;
+          ordem_servico_id?: string | null;
+          observacoes?: string | null;
+          data_manutencao?: string | null;
+          proxima_manutencao?: string | null;
+          responsavel_id?: string | null;
+          ativo?: boolean;
+          utilizado?: boolean;
+          arquivado_em?: string | null;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          nome?: string;
+          codigo?: string | null;
+          tipo?: string;
+          status?: string;
+          capacidade?: number | null;
+          centro_custo_id?: string | null;
+          ordem_servico_id?: string | null;
+          observacoes?: string | null;
+          data_manutencao?: string | null;
+          proxima_manutencao?: string | null;
+          responsavel_id?: string | null;
+          ativo?: boolean;
+          utilizado?: boolean;
+          arquivado_em?: string | null;
+          deleted_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      operacao_alertas: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          tipo: string;
+          severidade: string;
+          titulo: string;
+          descricao: string | null;
+          origem_tipo: string | null;
+          origem_id: string | null;
+          responsavel_id: string | null;
+          tratado: boolean;
+          tratado_em: string | null;
+          tratado_por: string | null;
+          observacao: string | null;
+          chave_unica: string | null;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          tipo: string;
+          severidade?: string;
+          titulo: string;
+          descricao?: string | null;
+          origem_tipo?: string | null;
+          origem_id?: string | null;
+          responsavel_id?: string | null;
+          tratado?: boolean;
+          tratado_em?: string | null;
+          tratado_por?: string | null;
+          observacao?: string | null;
+          chave_unica?: string | null;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          tipo?: string;
+          severidade?: string;
+          titulo?: string;
+          descricao?: string | null;
+          origem_tipo?: string | null;
+          origem_id?: string | null;
+          tratado?: boolean;
+          tratado_em?: string | null;
+          tratado_por?: string | null;
+          observacao?: string | null;
+          responsavel_id?: string | null;
+          chave_unica?: string | null;
+          deleted_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      dashboard_usuario_preferencias: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          user_id: string;
+          dashboard_tipo: string;
+          modo: string;
+          layout: Json;
+          cards_visiveis: string[];
+          updated_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          user_id: string;
+          dashboard_tipo: string;
+          modo?: string;
+          layout?: Json;
+          cards_visiveis?: string[];
+          updated_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          modo?: string;
+          layout?: Json;
+          cards_visiveis?: string[];
+          dashboard_tipo?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
+      ensure_consumidor_balcao: {
+        Args: { p_tenant_id: string };
+        Returns: string;
+      };
+      seed_desconto_alcadas_padrao: {
+        Args: { p_tenant_id: string };
+        Returns: undefined;
+      };
+      seed_role_permissions_padrao: {
+        Args: { p_tenant_id: string };
+        Returns: undefined;
+      };
+      abrir_os_com_cliente_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_payload: Json;
+          p_created_by?: string | null;
+          p_force_create?: boolean;
+        };
+        Returns: Json;
+      };
+      faturar_venda_com_pagamentos_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_venda_id: string;
+          p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      os_excluir_rascunho_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_ordem_id: string;
+          p_motivo: string;
+          p_user_id?: string | null;
+        };
+        Returns: string;
+      };
+      os_cancelar_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_ordem_id: string;
+          p_motivo: string;
+          p_user_id?: string | null;
+        };
+        Returns: string;
+      };
+      os_arquivar_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_ordem_id: string;
+          p_motivo: string;
+          p_user_id?: string | null;
+        };
+        Returns: string;
+      };
+      os_restaurar_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_ordem_id: string;
+          p_motivo?: string | null;
+          p_user_id?: string | null;
+        };
+        Returns: string;
+      };
+      os_vincular_recurso_atomico: {
+        Args: {
+          p_tenant_id: string;
+          p_ordem_id: string;
+          p_recurso_id: string | null;
+          p_modo?: string;
+          p_created_by?: string | null;
+        };
+        Returns: string;
+      };
       assert_tenant_member: {
         Args: { p_tenant_id: string };
         Returns: undefined;

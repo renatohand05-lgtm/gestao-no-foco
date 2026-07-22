@@ -44,6 +44,8 @@ export type OrdemServicoListItem = {
   mecanico_id: string | null;
   venda_id: string | null;
   prioridade: string;
+  arquivado_em: string | null;
+  recurso_id: string | null;
 };
 
 export type OrdemServicoItem = {
@@ -68,6 +70,8 @@ export type OrdemServicoItem = {
   horas_previstas: number | null;
   horas_realizadas: number | null;
   observacoes: string | null;
+  is_personalizado: boolean;
+  personalizado_motivo: string | null;
 };
 
 export type OrdemServicoDetail = OrdemServicoListItem & {
@@ -87,6 +91,8 @@ export type OrdemServicoDetail = OrdemServicoListItem & {
   acrescimo_total: number;
   data_conclusao: string | null;
   garantia_dias: number | null;
+  arquivado_em: string | null;
+  arquivado_motivo: string | null;
   itens: OrdemServicoItem[];
   checklist: Array<{
     id: string;
@@ -162,6 +168,14 @@ export class OrdemServicoService {
     q?: string;
     page?: number;
     perPage?: number;
+    de?: string;
+    ate?: string;
+    mecanico_id?: string;
+    consultor_id?: string;
+    cliente_id?: string;
+    veiculo_id?: string;
+    centro_custo_id?: string;
+    incluir_arquivadas?: boolean;
   }): Promise<{ items: OrdemServicoListItem[]; total: number }> {
     const page = filters.page ?? 1;
     const perPage = filters.perPage ?? 20;
@@ -171,7 +185,7 @@ export class OrdemServicoService {
     let query = this.supabase
       .from("ordens_servico")
       .select(
-        "id, numero, status, cliente_id, veiculo_id, data_abertura, previsao_entrega, valor_total, mecanico_id, venda_id, prioridade, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
+        "id, numero, status, cliente_id, veiculo_id, data_abertura, previsao_entrega, valor_total, mecanico_id, venda_id, prioridade, arquivado_em, recurso_id, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
         { count: "exact" },
       )
       .eq("tenant_id", this.tenantId)
@@ -179,11 +193,54 @@ export class OrdemServicoService {
       .order("numero", { ascending: false })
       .range(from, to);
 
+    if (!filters.incluir_arquivadas) {
+      query = query.is("arquivado_em", null);
+    }
+
     if (filters.status && filters.status !== "all") {
       query = query.eq("status", filters.status);
     }
+    if (filters.de) query = query.gte("data_abertura", filters.de);
+    if (filters.ate) query = query.lte("data_abertura", filters.ate);
+    if (filters.mecanico_id) query = query.eq("mecanico_id", filters.mecanico_id);
+    if (filters.consultor_id) {
+      query = query.eq("consultor_id", filters.consultor_id);
+    }
+    if (filters.cliente_id) query = query.eq("cliente_id", filters.cliente_id);
+    if (filters.veiculo_id) query = query.eq("veiculo_id", filters.veiculo_id);
+    if (filters.centro_custo_id) {
+      query = query.eq("centro_custo_id", filters.centro_custo_id);
+    }
 
-    const { data, error, count } = await query;
+    let { data, error, count } = await query;
+    if (
+      error &&
+      /arquivado_em/i.test(error.message) &&
+      !filters.incluir_arquivadas
+    ) {
+      // Migration 20260730 ainda não aplicada — lista sem filtro de arquivo
+      let fallback = this.supabase
+        .from("ordens_servico")
+        .select(
+          "id, numero, status, cliente_id, veiculo_id, data_abertura, previsao_entrega, valor_total, mecanico_id, venda_id, prioridade, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
+          { count: "exact" },
+        )
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .order("numero", { ascending: false })
+        .range(from, to);
+      if (filters.status && filters.status !== "all") {
+        fallback = fallback.eq("status", filters.status);
+      }
+      const retry = await fallback;
+      data = (retry.data ?? []).map((row) => ({
+        ...row,
+        arquivado_em: null as string | null,
+        recurso_id: null as string | null,
+      }));
+      error = retry.error;
+      count = retry.count;
+    }
     if (error) throw new Error(error.message);
 
     let items = (data ?? []).map((row) => {
@@ -207,6 +264,10 @@ export class OrdemServicoService {
         mecanico_id: row.mecanico_id,
         venda_id: row.venda_id,
         prioridade: row.prioridade ?? "normal",
+        arquivado_em:
+          (row as { arquivado_em?: string | null }).arquivado_em ?? null,
+        recurso_id:
+          (row as { recurso_id?: string | null }).recurso_id ?? null,
       } satisfies OrdemServicoListItem;
     });
 
@@ -315,6 +376,9 @@ export class OrdemServicoService {
       acrescimo_total: Number(row.acrescimo_total ?? 0),
       data_conclusao: data.data_conclusao,
       garantia_dias: (row.garantia_dias as number | null) ?? null,
+      arquivado_em: (row.arquivado_em as string | null) ?? null,
+      arquivado_motivo: (row.arquivado_motivo as string | null) ?? null,
+      recurso_id: (row.recurso_id as string | null) ?? null,
       itens: ((itens.data ?? []) as Array<Record<string, unknown>>).map((item) => ({
         id: String(item.id),
         descricao: String(item.descricao),
@@ -340,6 +404,9 @@ export class OrdemServicoService {
         horas_realizadas:
           item.horas_realizadas == null ? null : Number(item.horas_realizadas),
         observacoes: (item.observacoes as string | null) ?? null,
+        is_personalizado: Boolean(item.is_personalizado),
+        personalizado_motivo:
+          (item.personalizado_motivo as string | null) ?? null,
       })),
       checklist: ((checklist.data ?? []) as Array<Record<string, unknown>>).map(
         (c) => {
@@ -633,15 +700,55 @@ export class OrdemServicoService {
       );
     }
 
+    const isPersonalizado = Boolean(input.is_personalizado);
+    if (!isPersonalizado && !input.produto_id) {
+      throw new Error("Selecione um produto ou serviço cadastrado.");
+    }
+
+    let descricao = input.descricao;
+    let custo = input.custo_unitario ?? null;
+    let valorUnitario = input.valor_unitario;
+    let tipoItem = input.tipo_item;
+    let categoria = input.categoria_item;
+
+    if (!isPersonalizado && input.produto_id) {
+      const { data: prod, error: pErr } = await this.supabase
+        .from("produtos")
+        .select(
+          "id, nome, tipo, preco_venda, custo, ativo, tenant_id",
+        )
+        .eq("id", input.produto_id)
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .maybeSingle();
+      if (pErr) throw new Error(pErr.message);
+      if (!prod || !prod.ativo) {
+        throw new Error("Produto/serviço inativo ou não encontrado neste tenant.");
+      }
+      descricao = descricao || prod.nome;
+      tipoItem =
+        prod.tipo === "servico" || prod.tipo === "serviço"
+          ? "servico"
+          : "produto";
+      if (categoria === "servico" && tipoItem === "produto") {
+        categoria = "peca";
+      }
+      if (valorUnitario <= 0 && prod.preco_venda != null) {
+        valorUnitario = Number(prod.preco_venda);
+      }
+      if (custo == null && prod.custo != null) custo = Number(prod.custo);
+    }
+
     const total = lineTotal(
       input.quantidade,
-      input.valor_unitario,
+      valorUnitario,
       input.desconto,
       input.acrescimo,
     );
 
-    const estoqueStatus =
-      input.tipo_item === "produto" && input.peca_origem === "estoque"
+    const estoqueStatus = isPersonalizado
+      ? "nao_aplicavel"
+      : input.tipo_item === "produto" && input.peca_origem === "estoque"
         ? "disponivel"
         : input.peca_origem === "cliente"
           ? "fornecido_cliente"
@@ -649,29 +756,41 @@ export class OrdemServicoService {
             ? "pendente_compra"
             : "nao_aplicavel";
 
-    const { error } = await this.supabase.from("ordem_servico_itens").insert({
-      tenant_id: this.tenantId,
-      ordem_servico_id: osId,
-      produto_id: emptyUuid(input.produto_id),
-      descricao: input.descricao,
-      tipo_item: input.tipo_item,
-      categoria_item: input.categoria_item,
-      quantidade: input.quantidade,
-      valor_unitario: input.valor_unitario,
-      desconto: input.desconto,
-      acrescimo: input.acrescimo,
-      valor_total: total,
-      custo_unitario: input.custo_unitario ?? null,
-      mecanico_id: emptyUuid(input.mecanico_id),
-      horas_previstas: input.horas_previstas ?? null,
-      peca_origem: input.peca_origem,
-      fornecedor_sugerido_id: emptyUuid(input.fornecedor_sugerido_id),
-      estoque_status: estoqueStatus,
-      aprovacao_status: "pendente",
-      execucao_status: "pendente",
-      observacoes: input.observacoes ?? null,
-      ordem: current.itens.length,
-    } as never);
+    const { data: inserted, error } = await this.supabase
+      .from("ordem_servico_itens")
+      .insert({
+        tenant_id: this.tenantId,
+        ordem_servico_id: osId,
+        produto_id: isPersonalizado ? null : emptyUuid(input.produto_id),
+        descricao,
+        tipo_item: tipoItem,
+        categoria_item: categoria,
+        quantidade: input.quantidade,
+        valor_unitario: valorUnitario,
+        desconto: input.desconto,
+        acrescimo: input.acrescimo,
+        valor_total: total,
+        custo_unitario: custo,
+        mecanico_id: emptyUuid(input.mecanico_id),
+        horas_previstas: input.horas_previstas ?? null,
+        peca_origem: isPersonalizado ? "outro" : input.peca_origem,
+        fornecedor_sugerido_id: emptyUuid(input.fornecedor_sugerido_id),
+        estoque_status: estoqueStatus,
+        aprovacao_status: "pendente",
+        execucao_status: "pendente",
+        observacoes: input.observacoes ?? null,
+        ordem: current.itens.length,
+        is_personalizado: isPersonalizado,
+        personalizado_motivo: isPersonalizado
+          ? input.personalizado_motivo ?? null
+          : null,
+        personalizado_criado_por: isPersonalizado ? userId : null,
+        personalizado_criado_em: isPersonalizado
+          ? new Date().toISOString()
+          : null,
+      })
+      .select("id")
+      .single();
 
     if (error) throw new Error(error.message);
 
@@ -686,9 +805,206 @@ export class OrdemServicoService {
 
     await this.recalcTotals(osId);
     await this.recordEvent(osId, userId, {
-      tipo: "orcamento",
-      descricao: `Item adicionado: ${input.descricao}`,
+      tipo: isPersonalizado
+        ? "item_personalizado_adicionado"
+        : "orcamento",
+      descricao: isPersonalizado
+        ? `Item personalizado: ${descricao}`
+        : `Item adicionado: ${descricao}`,
+      motivo: input.personalizado_motivo ?? null,
+      entidade_tipo: "ordem_servico_item",
+      entidade_id: inserted?.id ?? null,
     });
+  }
+
+  async searchCatalogoOs(q: string, tipo?: "produto" | "servico" | "all") {
+    const term = q.trim();
+    let query = this.supabase
+      .from("produtos")
+      .select(
+        "id, nome, tipo, codigo_interno, sku, codigo_barras, categoria, preco_venda, custo, estoque_atual, margem_percent, ativo",
+      )
+      .eq("tenant_id", this.tenantId)
+      .eq("ativo", true)
+      .is("deleted_at", null)
+      .order("nome")
+      .limit(30);
+
+    if (tipo === "produto") {
+      query = query.neq("tipo", "servico");
+    } else if (tipo === "servico") {
+      query = query.eq("tipo", "servico");
+    }
+
+    if (term) {
+      query = query.or(
+        `nome.ilike.%${term}%,codigo_interno.ilike.%${term}%,sku.ilike.%${term}%,codigo_barras.ilike.%${term}%,categoria.ilike.%${term}%`,
+      );
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((p) => {
+      const preco = Number(p.preco_venda ?? 0);
+      const custo = p.custo == null ? null : Number(p.custo);
+      const margem =
+        p.margem_percent != null
+          ? Number(p.margem_percent)
+          : custo != null && preco > 0
+            ? Number((((preco - custo) / preco) * 100).toFixed(2))
+            : null;
+      return {
+        id: p.id,
+        nome: p.nome,
+        tipo: p.tipo,
+        codigo_interno: p.codigo_interno,
+        sku: p.sku,
+        codigo_barras: p.codigo_barras,
+        categoria: p.categoria,
+        preco_venda: preco,
+        custo,
+        estoque_atual: Number(p.estoque_atual ?? 0),
+        margem_percent: margem,
+      };
+    });
+  }
+
+  async countPersonalizadoRecorrencia(descricao: string) {
+    const norm = descricao.trim().toLowerCase();
+    if (norm.length < 3) return 0;
+    const { count, error } = await this.supabase
+      .from("ordem_servico_itens")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", this.tenantId)
+      .eq("is_personalizado", true)
+      .is("deleted_at", null)
+      .ilike("descricao", norm);
+    if (error) throw new Error(error.message);
+    return count ?? 0;
+  }
+
+  async findCatalogoSemelhante(descricao: string) {
+    const term = descricao.trim();
+    if (term.length < 3) return [];
+    const { data, error } = await this.supabase
+      .from("produtos")
+      .select("id, nome, tipo, preco_venda")
+      .eq("tenant_id", this.tenantId)
+      .eq("ativo", true)
+      .is("deleted_at", null)
+      .ilike("nome", `%${term}%`)
+      .limit(5);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
+  async converterItemPersonalizado(
+    osId: string,
+    itemId: string,
+    produtoId: string,
+    userId: string | null,
+    motivo?: string | null,
+  ) {
+    const current = await this.getById(osId);
+    if (!current) throw new Error("OS não encontrada.");
+    const item = current.itens.find((i) => i.id === itemId);
+    if (!item) throw new Error("Item não encontrado.");
+    if (!item.is_personalizado) {
+      throw new Error("Este item já está vinculado ao cadastro.");
+    }
+
+    const { data: prod, error: pErr } = await this.supabase
+      .from("produtos")
+      .select("id, nome, tipo, custo, ativo")
+      .eq("id", produtoId)
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+    if (!prod?.ativo) throw new Error("Produto/serviço inválido.");
+
+    const tipoItem =
+      prod.tipo === "servico" || prod.tipo === "serviço"
+        ? "servico"
+        : "produto";
+
+    const { error } = await this.supabase
+      .from("ordem_servico_itens")
+      .update({
+        produto_id: produtoId,
+        is_personalizado: false,
+        personalizado_convertido_em: new Date().toISOString(),
+        personalizado_convertido_por: userId,
+        tipo_item: tipoItem,
+        estoque_status:
+          tipoItem === "produto" ? "disponivel" : "nao_aplicavel",
+        peca_origem: tipoItem === "produto" ? "estoque" : "outro",
+        custo_unitario:
+          item.custo_unitario ??
+          (prod.custo == null ? null : Number(prod.custo)),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", itemId)
+      .eq("tenant_id", this.tenantId)
+      .eq("ordem_servico_id", osId);
+
+    if (error) throw new Error(error.message);
+
+    await this.recordEvent(osId, userId, {
+      tipo: "item_personalizado_convertido",
+      descricao: `Item personalizado convertido para cadastro: ${prod.nome}`,
+      motivo: motivo ?? null,
+      entidade_tipo: "ordem_servico_item",
+      entidade_id: itemId,
+    });
+  }
+
+  async excluirRascunho(
+    osId: string,
+    motivo: string,
+    userId: string | null,
+  ) {
+    const { error } = await this.supabase.rpc("os_excluir_rascunho_atomico", {
+      p_tenant_id: this.tenantId,
+      p_ordem_id: osId,
+      p_motivo: motivo,
+      p_user_id: userId,
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async cancelarOs(osId: string, motivo: string, userId: string | null) {
+    const { error } = await this.supabase.rpc("os_cancelar_atomico", {
+      p_tenant_id: this.tenantId,
+      p_ordem_id: osId,
+      p_motivo: motivo,
+      p_user_id: userId,
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async arquivarOs(osId: string, motivo: string, userId: string | null) {
+    const { error } = await this.supabase.rpc("os_arquivar_atomico", {
+      p_tenant_id: this.tenantId,
+      p_ordem_id: osId,
+      p_motivo: motivo,
+      p_user_id: userId,
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async restaurarOs(
+    osId: string,
+    motivo: string | null,
+    userId: string | null,
+  ) {
+    const { error } = await this.supabase.rpc("os_restaurar_atomico", {
+      p_tenant_id: this.tenantId,
+      p_ordem_id: osId,
+      p_motivo: motivo,
+      p_user_id: userId,
+    });
+    if (error) throw new Error(error.message);
   }
 
   async updateItem(
@@ -794,7 +1110,9 @@ export class OrdemServicoService {
 
     await this.recalcTotals(osId);
     await this.recordEvent(osId, userId, {
-      tipo: "orcamento",
+      tipo: item.is_personalizado
+        ? "item_personalizado_removido"
+        : "orcamento",
       descricao: `Item removido: ${item.descricao}`,
       entidade_tipo: "ordem_servico_item",
       entidade_id: itemId,

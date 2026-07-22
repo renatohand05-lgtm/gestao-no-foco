@@ -25,6 +25,11 @@ type Props = {
   legacyHeader?: React.ReactNode;
   /** Conteúdo soft acima do layout (ex.: banner de onboarding). Não altera Hero/KPIs. */
   lead?: React.ReactNode;
+  /**
+   * Conteúdo fixo acima do grid reordenável (sempre visível).
+   * Usado pelo Resumo de Vendas do Mês — não passa pelo LayoutSlot.
+   */
+  aboveLayout?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
 };
@@ -42,6 +47,7 @@ export function ExecutiveWorkspace({
   updatedAtLabel,
   layoutBootstrap = null,
   lead,
+  aboveLayout,
   children,
   footer,
 }: Props) {
@@ -66,6 +72,16 @@ export function ExecutiveWorkspace({
           <DemoHide flag="onboardingLead">
             {lead ? <div className="w-full">{lead}</div> : null}
           </DemoHide>
+
+          {aboveLayout ? (
+            <div
+              className="w-full max-w-[96rem] space-y-6 xl:space-y-7"
+              data-dashboard-resumo-vendas
+              data-dashboard-version="dashboard-v2"
+            >
+              {aboveLayout}
+            </div>
+          ) : null}
 
           <ExecutiveLayoutManager
             tenantSlug={tenantSlug}

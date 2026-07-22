@@ -379,7 +379,7 @@ export class VendaService {
 
     if (vendasError) throw new Error(vendasError.message);
 
-    const vendas = (vendasData ?? []) as VendaDetail[];
+    const vendas = (vendasData ?? []) as unknown as VendaDetail[];
     const vendaIds = vendas.map((v) => v.id);
 
     if (vendaIds.length === 0) return emptyView;

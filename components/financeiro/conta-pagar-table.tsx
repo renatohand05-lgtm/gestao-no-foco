@@ -22,9 +22,16 @@ import type { ContaPagarListItem } from "@/types/contas-pagar";
 type Props = {
   tenantSlug: string;
   items: ContaPagarListItem[];
+  formasPagamento?: { id: string; nome: string }[];
+  contasBancarias?: { id: string; nome: string }[];
 };
 
-export function ContaPagarTable({ tenantSlug, items }: Props) {
+export function ContaPagarTable({
+  tenantSlug,
+  items,
+  formasPagamento = [],
+  contasBancarias = [],
+}: Props) {
   return (
     <DataTable>
       <Table>
@@ -75,7 +82,12 @@ export function ContaPagarTable({ tenantSlug, items }: Props) {
                   <ContaPagarStatusBadge status={item.status_exibicao} />
                 </TableCell>
                 <TableCell>
-                  <ContaPagarRowActions tenantSlug={tenantSlug} item={item} />
+                  <ContaPagarRowActions
+                    tenantSlug={tenantSlug}
+                    item={item}
+                    formasPagamento={formasPagamento}
+                    contasBancarias={contasBancarias}
+                  />
                 </TableCell>
               </TableRow>
             );

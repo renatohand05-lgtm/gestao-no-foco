@@ -357,11 +357,115 @@ export class CrmDashboardService {
     const taxa_conversao =
       rows.length > 0 ? Math.round((fechados / rows.length) * 1000) / 10 : 0;
 
+    // Recorrência / inatividade / sem retorno (base vendas faturadas)
+    const { data: vendasLife } = await this.supabase
+      .from("vendas")
+      .select("cliente_id, data_venda, total, status")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("status", "faturado")
+      .limit(3000);
+
+    const limiar90 = new Date();
+    limiar90.setDate(limiar90.getDate() - 90);
+    const limiar90Iso = limiar90.toISOString().slice(0, 10);
+
+    const countByCliente = new Map<string, number>();
+    const lastByCliente = new Map<string, string>();
+    for (const v of vendasLife ?? []) {
+      if (!v.cliente_id) continue;
+      const cid = v.cliente_id as string;
+      countByCliente.set(cid, (countByCliente.get(cid) ?? 0) + 1);
+      const d = String(v.data_venda ?? "");
+      const prev = lastByCliente.get(cid);
+      if (!prev || d > prev) lastByCliente.set(cid, d);
+    }
+
+    let clientes_recorrentes = 0;
+    let clientes_sem_retorno = 0;
+    let clientes_inativos = 0;
+    for (const c of rows) {
+      const cnt = countByCliente.get(c.id) ?? 0;
+      const last = lastByCliente.get(c.id);
+      if (cnt >= 2) clientes_recorrentes += 1;
+      if (!c.ativo) clientes_inativos += 1;
+      else if (last && last < limiar90Iso) clientes_sem_retorno += 1;
+      else if (!last && c.created_at < limiar90.toISOString()) {
+        clientes_inativos += 1;
+      }
+    }
+
+    // Oportunidades vencidas: etapas abertas sem update há 30d
+    const limiar30 = new Date();
+    limiar30.setDate(limiar30.getDate() - 30);
+    const limiar30Iso = limiar30.toISOString();
+    const openStages = new Set(["lead", "contato", "proposta", "negociacao"]);
+    const oportunidades_vencidas = rows.filter(
+      (c) =>
+        openStages.has(c.estagio_funil ?? "lead") &&
+        c.updated_at < limiar30Iso,
+    ).length;
+
+    const previsao_fechamento = funil
+      .filter((f) => ["proposta", "negociacao"].includes(f.estagio))
+      .reduce((a, f) => a + f.valor_total, 0);
+
+    // Motivos de perda via eventos
+    const motivosMap = new Map<string, number>();
+    const { data: perdaEv } = await this.supabase
+      .from("cliente_eventos")
+      .select("titulo, descricao, tipo")
+      .eq("tenant_id", this.tenantId)
+      .ilike("tipo", "%perda%")
+      .limit(200);
+    for (const e of perdaEv ?? []) {
+      const motivo =
+        String(e.descricao || e.titulo || "Não informado").slice(0, 60) ||
+        "Não informado";
+      motivosMap.set(motivo, (motivosMap.get(motivo) ?? 0) + 1);
+    }
+    if (motivosMap.size === 0 && perdidos > 0) {
+      motivosMap.set("Perdido (sem motivo registrado)", perdidos);
+    }
+    const motivos_perda = [...motivosMap.entries()]
+      .map(([motivo, total]) => ({ motivo, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8);
+
+    // Receita por consultor (cliente.consultor_id)
+    const consultorMap = new Map<
+      string,
+      { receita: number; clientes: Set<string> }
+    >();
+    const consultorByCliente = new Map(
+      rows.map((c) => [c.id, c.consultor_id]),
+    );
+    for (const v of vendaRows) {
+      if (!v.cliente_id) continue;
+      const cons =
+        consultorByCliente.get(v.cliente_id as string) ?? "sem_consultor";
+      if (!consultorMap.has(cons as string)) {
+        consultorMap.set(cons as string, {
+          receita: 0,
+          clientes: new Set(),
+        });
+      }
+      const entry = consultorMap.get(cons as string)!;
+      entry.receita += Number(v.total ?? 0);
+      entry.clientes.add(v.cliente_id as string);
+    }
+    const receita_por_consultor = await this.resolveVendedorStats(consultorMap);
+
     return {
       total_leads: totalLeads,
       novos_clientes: novos,
       clientes_ativos: ativos,
       clientes_perdidos: perdidos,
+      clientes_recorrentes,
+      clientes_inativos,
+      clientes_sem_retorno,
+      oportunidades_vencidas,
+      previsao_fechamento: Math.round(previsao_fechamento * 100) / 100,
       receita_crm: Math.round(receita * 100) / 100,
       ticket_medio: Math.round(ticket * 100) / 100,
       receita_por_cliente:
@@ -376,6 +480,8 @@ export class CrmDashboardService {
           ? Math.round((somaDiasFechamento / countFechamento) * 10) / 10
           : 0,
       receita_por_vendedor,
+      receita_por_consultor,
+      motivos_perda,
       funil,
       receita_mensal,
     };

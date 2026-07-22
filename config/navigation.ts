@@ -1,4 +1,5 @@
 import {
+  Activity,
   BarChart3,
   LayoutDashboard,
   Package,
@@ -23,6 +24,12 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
   const base = `/${tenantSlug}`;
 
   return [
+    {
+      title: "Centro de Operações",
+      href: `${base}/centro-operacoes`,
+      icon: Activity,
+      description: "Quadro ao vivo da oficina",
+    },
     {
       title: "Dashboard",
       href: `${base}/dashboard`,
@@ -60,16 +67,22 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       description: "Pedidos e orçamentos",
     },
     {
-      title: "Financeiro",
-      href: `${base}/financeiro`,
-      icon: Wallet,
-      description: "Fluxo de caixa e contas",
-    },
-    {
       title: "Ordens de Serviço",
       href: `${base}/ordens`,
       icon: Wrench,
       description: "Oficinas e prestadores",
+    },
+    {
+      title: "Mecânicos",
+      href: `${base}/oficina/mecanicos`,
+      icon: Users,
+      description: "Equipe, custos e produtividade",
+    },
+    {
+      title: "Financeiro",
+      href: `${base}/financeiro`,
+      icon: Wallet,
+      description: "Fluxo de caixa e contas",
     },
     {
       title: "Relatórios",

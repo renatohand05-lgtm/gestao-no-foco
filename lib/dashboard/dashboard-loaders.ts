@@ -16,6 +16,15 @@ import type { QualidadeOperacionalData } from "@/types/qualidade-operacional";
 import type { TenantSegment } from "@/types";
 import type { DashboardIntelligenceResult } from "@/types/intelligence";
 import { createCommercialPanelService } from "@/lib/metas/commercial-panel-service";
+import {
+  createVendasDiaService,
+  type DashboardHojeSnapshot,
+} from "@/lib/dashboard/vendas-dia-service";
+import {
+  createResumoVendasMesService,
+  type ResumoMesFilters,
+  type ResumoVendasMesData,
+} from "@/lib/dashboard/resumo-vendas-mes-service";
 
 /**
  * Loaders memoizados por request (React.cache).
@@ -83,6 +92,28 @@ export const loadDashboardCommercialPanel = cache(
   ): Promise<CommercialPanelData> => {
     const service = await createCommercialPanelService(tenantId);
     return service.getPanel(filters);
+  },
+);
+
+/** Snapshot de hoje — fonte única dos KPIs superiores e do rodapé. */
+export const loadDashboardHojeSnapshot = cache(
+  async (
+    tenantId: string,
+    centroCustoId: string | null,
+  ): Promise<DashboardHojeSnapshot> => {
+    const service = await createVendasDiaService(tenantId);
+    return service.getSnapshot(centroCustoId);
+  },
+);
+
+/** Resumo mensal — mesma fonte da tabela e da leitura do dia. */
+export const loadDashboardResumoMes = cache(
+  async (
+    tenantId: string,
+    filters: ResumoMesFilters,
+  ): Promise<ResumoVendasMesData> => {
+    const service = await createResumoVendasMesService(tenantId);
+    return service.getResumo(filters);
   },
 );
 

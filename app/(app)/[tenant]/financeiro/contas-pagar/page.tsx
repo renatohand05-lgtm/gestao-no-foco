@@ -71,21 +71,24 @@ export default async function Page({ params, searchParams }: PageProps) {
   const sortOrder = (order as SortOrder | undefined) ?? "asc";
   const statusFilter = (status as ContaPagarStatus | "all" | undefined) ?? "all";
 
-  const [result, resumo, fornecedores] = await Promise.all([
-    service.list({
-      search: q,
-      page: currentPage,
-      perPage: FINANCEIRO_DEFAULT_PER_PAGE,
-      sort: sortField,
-      order: sortOrder,
-      status: statusFilter,
-      fornecedorId: fornecedor,
-      vencimentoDe,
-      vencimentoAte,
-    }),
-    service.getResumo(),
-    service.listFornecedores(),
-  ]);
+  const [result, resumo, fornecedores, formasPagamento, contasBancarias] =
+    await Promise.all([
+      service.list({
+        search: q,
+        page: currentPage,
+        perPage: FINANCEIRO_DEFAULT_PER_PAGE,
+        sort: sortField,
+        order: sortOrder,
+        status: statusFilter,
+        fornecedorId: fornecedor,
+        vencimentoDe,
+        vencimentoAte,
+      }),
+      service.getResumo(),
+      service.listFornecedores(),
+      service.listFormasPagamento(),
+      service.listContasBancarias(),
+    ]);
 
   const hasFilters =
     Boolean(q) ||
@@ -164,7 +167,12 @@ export default async function Page({ params, searchParams }: PageProps) {
             {result.total} registro{result.total === 1 ? "" : "s"} encontrado
             {result.total === 1 ? "" : "s"}
           </p>
-          <ContaPagarTable tenantSlug={tenantSlug} items={result.data} />
+          <ContaPagarTable
+            tenantSlug={tenantSlug}
+            items={result.data}
+            formasPagamento={formasPagamento}
+            contasBancarias={contasBancarias}
+          />
           <Suspense fallback={null}>
             <FinanceiroPagination
               tenantSlug={tenantSlug}

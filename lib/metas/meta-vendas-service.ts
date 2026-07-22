@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { createDreService } from "@/lib/financeiro/dre-service";
+import { aggregateFaturamentoLiquido } from "@/lib/dashboard/faturamento-agregacao";
+import {
+  FINANCEIRO_DEFAULT_PER_PAGE,
+  FINANCEIRO_MAX_PER_PAGE,
+} from "@/lib/financeiro/constants";
 import {
   buildMetaProjecao,
   monthBounds,
@@ -8,10 +12,6 @@ import {
   resolveCompetenciaFromPeriod,
   toCompetenciaMonthStart,
 } from "@/lib/metas/projection";
-import {
-  FINANCEIRO_DEFAULT_PER_PAGE,
-  FINANCEIRO_MAX_PER_PAGE,
-} from "@/lib/financeiro/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type { DashboardFilters } from "@/types/dashboard-executive";
@@ -253,13 +253,62 @@ export class MetaVendasService {
     centroCustoId?: string | null,
   ): Promise<number> {
     const { dataDe, dataAte } = monthBounds(competencia);
-    const dre = await createDreService(this.tenantId);
-    const result = await dre.getDre({
+
+    let vendasQuery = this.supabase
+      .from("vendas")
+      .select("status, deleted_at, subtotal, desconto_total, total, data_venda")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .eq("status", "faturado")
+      .gte("data_venda", dataDe)
+      .lte("data_venda", dataAte);
+
+    if (centroCustoId) {
+      vendasQuery = vendasQuery.eq("centro_custo_id", centroCustoId);
+    }
+
+    let crQuery = this.supabase
+      .from("contas_receber")
+      .select(
+        "status, deleted_at, venda_id, valor_original, data_competencia, data_emissao",
+      )
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .is("venda_id", null)
+      .neq("status", "cancelado")
+      .gte("data_competencia", dataDe)
+      .lte("data_competencia", dataAte);
+
+    if (centroCustoId) {
+      crQuery = crQuery.eq("centro_custo_id", centroCustoId);
+    }
+
+    const [vendasRes, crRes] = await Promise.all([vendasQuery, crQuery]);
+    if (vendasRes.error) throw new Error(vendasRes.error.message);
+    if (crRes.error) throw new Error(crRes.error.message);
+
+    const agg = aggregateFaturamentoLiquido({
+      vendas: (vendasRes.data ?? []).map((v) => ({
+        status: v.status,
+        deleted_at: v.deleted_at,
+        subtotal: Number(v.subtotal),
+        desconto_total: Number(v.desconto_total),
+        total: Number(v.total),
+        data_venda: v.data_venda,
+      })),
+      crAvulsas: (crRes.data ?? []).map((r) => ({
+        status: r.status,
+        deleted_at: r.deleted_at,
+        venda_id: r.venda_id,
+        valor_original: Number(r.valor_original),
+        data_competencia: r.data_competencia,
+        data_emissao: r.data_emissao,
+      })),
       dataDe,
       dataAte,
-      centroCustoId: centroCustoId || undefined,
     });
-    return Number(result.resumo.receita_bruta) || 0;
+
+    return agg.liquido;
   }
 
   async getProjecaoMensal(input: {

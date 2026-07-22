@@ -135,17 +135,20 @@ export class ClienteService {
   async create(
     input: CreateClienteInput,
     userId?: string | null,
+    options?: { skipDuplicateCheck?: boolean },
   ): Promise<Cliente> {
-    const dup = await this.checkDuplicates({
-      documento: input.documento,
-      email: input.email,
-      telefone: input.telefone,
-    });
-    if (dup.hasDuplicates) {
-      const first = dup.matches[0];
-      throw new Error(
-        `Possível duplicidade: ${first?.label} (${first?.matchedOn.join(", ")}). Confirme antes de seguir.`,
-      );
+    if (!options?.skipDuplicateCheck) {
+      const dup = await this.checkDuplicates({
+        documento: input.documento,
+        email: input.email,
+        telefone: input.telefone,
+      });
+      if (dup.hasDuplicates) {
+        const first = dup.matches[0];
+        throw new Error(
+          `Possível duplicidade: ${first?.label} (${first?.matchedOn.join(", ")}). Confirme antes de seguir.`,
+        );
+      }
     }
 
     const { data, error } = await this.supabase
@@ -153,7 +156,7 @@ export class ClienteService {
       .insert({
         tenant_id: this.tenantId,
         ...buildClientePayload(input),
-      } as never)
+      })
       .select("*")
       .single();
 

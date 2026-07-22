@@ -14,10 +14,13 @@ import type { ActionResult } from "@/types/action-result";
 
 function revalidateVendaPaths(tenantSlug: string, vendaId?: string) {
   revalidatePath(`/${tenantSlug}/vendas`);
+  revalidatePath(`/${tenantSlug}/vendas/dashboard`);
+  revalidatePath(`/${tenantSlug}/dashboard`);
   revalidatePath(`/${tenantSlug}/estoque`);
   revalidatePath(`/${tenantSlug}/produtos`);
   revalidatePath(`/${tenantSlug}/financeiro/contas-receber`);
   revalidatePath(`/${tenantSlug}/financeiro/dre`);
+  revalidatePath(`/${tenantSlug}/configuracoes/metas`);
 
   if (vendaId) {
     revalidatePath(`/${tenantSlug}/vendas/${vendaId}`);

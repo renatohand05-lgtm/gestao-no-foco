@@ -1,3 +1,4 @@
+import { civilDateInTimezone, resolveTenantTimezone } from "@/lib/dashboard/tenant-timezone";
 import Link from "next/link";
 
 import {
@@ -40,7 +41,7 @@ export function ExecutiveDailyPerformance({ tenantSlug, data }: Props) {
     );
   }
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = civilDateInTimezone(new Date(), resolveTenantTimezone());
   const maxDaily = Math.max(
     ...data.daily.map((d) => Math.max(d.realizado, d.meta_diaria, d.projetado)),
     1,

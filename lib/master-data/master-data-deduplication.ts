@@ -90,7 +90,9 @@ export function findClienteDuplicates(input: {
     if (email && (c.email ?? "").trim().toLowerCase() === email) {
       matchedOn.push("email");
     }
-    if (tel && onlyDigits(c.telefone) === tel) matchedOn.push("telefone");
+    if (tel && tel.length >= 8 && onlyDigits(c.telefone) === tel) {
+      matchedOn.push("telefone");
+    }
     pushMatch(matches, "cliente", c, matchedOn);
   }
 

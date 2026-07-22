@@ -165,6 +165,11 @@ export type CrmDashboardKpis = {
   novos_clientes: number;
   clientes_ativos: number;
   clientes_perdidos: number;
+  clientes_recorrentes: number;
+  clientes_inativos: number;
+  clientes_sem_retorno: number;
+  oportunidades_vencidas: number;
+  previsao_fechamento: number;
   receita_crm: number;
   ticket_medio: number;
   receita_por_cliente: number;
@@ -177,6 +182,13 @@ export type CrmDashboardKpis = {
     receita: number;
     clientes: number;
   }>;
+  receita_por_consultor: Array<{
+    consultor_id: string | null;
+    nome: string;
+    receita: number;
+    clientes: number;
+  }>;
+  motivos_perda: Array<{ motivo: string; total: number }>;
   funil: CrmFunilColumnStats[];
   receita_mensal: Array<{ label: string; data: string; value: number }>;
 };

@@ -1,3 +1,4 @@
+import { civilDateInTimezone, resolveTenantTimezone } from "@/lib/dashboard/tenant-timezone";
 import {
   ExecutiveCard,
   ExecutiveSection,
@@ -41,7 +42,7 @@ export function ExecutiveMonthlyEvolution({ tenantSlug, data }: Props) {
     );
   }
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = civilDateInTimezone(new Date(), resolveTenantTimezone());
   const maxAcum = Math.max(
     ...data.daily.map((d) =>
       Math.max(d.acumulado_realizado, d.acumulado_meta, d.acumulado_projetado),

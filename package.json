@@ -17,7 +17,17 @@
     "test:walkthrough": "node scripts/oficina-walkthrough-ui.mjs",
     "test:inspecao-gate2": "node scripts/inspecao-gate2-preflight.mjs",
     "test:inspecao-live-30": "node scripts/inspecao-gate2-live-30.mjs",
-    "test:crm": "node scripts/crm-enterprise-preflight.mjs"
+    "test:crm": "node scripts/crm-enterprise-preflight.mjs",
+    "test:oficina": "node scripts/oficina-fluxo-preflight.mjs",
+    "test:sprint15": "node scripts/sprint15-preflight.mjs",
+    "test:mecanicos": "node scripts/mecanicos-preflight.mjs",
+    "test:mecanicos-vigencia": "node --experimental-strip-types scripts/mecanicos-vigencia-tests.mjs",
+    "test:mecanicos-classificacao": "node --experimental-strip-types scripts/mecanicos-classificacao-tests.mjs",
+    "test:dashboard": "node --experimental-strip-types scripts/dashboard-faturamento-tests.mjs",
+    "test:vendas": "node --experimental-strip-types scripts/vendas-faturamento-tests.mjs",
+    "test:metas": "node --experimental-strip-types scripts/metas-diaria-tests.mjs",
+    "seed:oficina": "node --env-file=.env.local scripts/oficina-seed-tenant.mjs",
+    "test:oficina-live": "node --env-file=.env.local scripts/oficina-live-audit.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

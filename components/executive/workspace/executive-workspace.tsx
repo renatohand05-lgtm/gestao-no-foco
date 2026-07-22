@@ -30,7 +30,7 @@ type Props = {
    * Usado pelo Resumo de Vendas do Mês — não passa pelo LayoutSlot.
    */
   aboveLayout?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   footer?: React.ReactNode;
 };
 
@@ -83,12 +83,14 @@ export function ExecutiveWorkspace({
             </div>
           ) : null}
 
-          <ExecutiveLayoutManager
-            tenantSlug={tenantSlug}
-            bootstrap={layoutBootstrap}
-          >
-            {children}
-          </ExecutiveLayoutManager>
+          {children ? (
+            <ExecutiveLayoutManager
+              tenantSlug={tenantSlug}
+              bootstrap={layoutBootstrap}
+            >
+              {children}
+            </ExecutiveLayoutManager>
+          ) : null}
 
           {footer}
         </ExecutiveDashboardShell>

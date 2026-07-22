@@ -15,7 +15,6 @@ import {
   civilDateInTimezone,
   resolveTenantTimezone,
 } from "@/lib/dashboard/tenant-timezone";
-import { bootstrapDashboardLayoutSafe } from "@/lib/dashboard-layout/persistence/layout-service";
 import { requireTenant } from "@/lib/tenants";
 import type { DashboardFilters } from "@/types/dashboard-executive";
 import type { FluxoCaixaStatusFilter } from "@/types/fluxo-caixa";
@@ -111,10 +110,6 @@ async function DashboardStreamingRoot({
 
   const greeting = getGreeting(profile?.name);
 
-  const layoutBootstrap = profile?.id
-    ? await bootstrapDashboardLayoutSafe(tenant.id, profile.id)
-    : null;
-
   // Diagnóstico de versão (somente servidor) — confirma código novo em produção.
   console.info("[dashboard-v2]", {
     tenant: tenantSlug,
@@ -122,7 +117,6 @@ async function DashboardStreamingRoot({
       process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
       process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
       "local",
-    layoutSource: layoutBootstrap?.source ?? "none",
   });
 
   const ctx: DashboardStreamCtx = {
@@ -139,7 +133,6 @@ async function DashboardStreamingRoot({
   return (
     <DashboardStreamingView
       ctx={ctx}
-      layoutBootstrap={layoutBootstrap}
       onboardingLead={
         <Suspense fallback={null}>
           <DashboardOnboardingLead tenantSlug={tenantSlug} />

@@ -10,7 +10,6 @@ import {
   ExecutiveFooter,
   ExecutiveFooterSkeleton,
 } from "@/components/dashboard/executive";
-import { ExecutiveWorkspaceFooter } from "@/components/executive/workspace/executive-workspace-footer";
 import {
   formatDateTimeInTimezone,
   resolveTenantTimezone,
@@ -19,16 +18,10 @@ import {
   buildLeituraDoDia,
   calcProjecaoFechamento,
 } from "@/lib/dashboard/resumo-vendas-mes";
-import {
-  buildFooterExecutiveItems,
-  footerStatusLabelFromHoje,
-} from "@/lib/dashboard/footer-executive-items";
-import { formatCurrency } from "@/lib/dashboard/format";
 import { ExecutiveWorkspace } from "@/components/executive/workspace";
 import {
   loadDashboardFull,
   loadDashboardHojeSnapshot,
-  loadDashboardPrimary,
   loadDashboardResumoMes,
 } from "@/lib/dashboard/dashboard-loaders";
 import { exAnimations, exRadius } from "@/lib/design-system";
@@ -81,80 +74,16 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 async function FooterBlock({ ctx }: { ctx: DashboardStreamCtx }) {
-  let primary;
-  let hojeData;
-  let resumoData;
-  const centroCustoId =
-    ctx.resumoFilters.centroCustoId ?? ctx.filters.centroCusto ?? null;
-
-  try {
-    [primary, hojeData, resumoData] = await Promise.all([
-      loadDashboardPrimary(ctx.tenantId, ctx.segment, ctx.filters),
-      loadDashboardHojeSnapshot(ctx.tenantId, centroCustoId),
-      loadDashboardResumoMes(ctx.tenantId, {
-        year: ctx.resumoFilters.year,
-        month: ctx.resumoFilters.month,
-        centroCustoId,
-        vendedorId: ctx.resumoFilters.vendedorId ?? null,
-        origem: ctx.resumoFilters.origem ?? null,
-      }),
-    ]);
-  } catch (error) {
-    return (
-      <SectionError
-        tenantSlug={ctx.tenantSlug}
-        description={errorMessage(error, "Erro ao carregar o rodapé.")}
-      />
-    );
-  }
-
-  const updatedAtLabel = hojeData.atualizado_em_label;
-  const smartItems = buildFooterExecutiveItems({
-    hoje: hojeData,
-    resumo: resumoData,
-  });
-
-  const filterChips = [
-    `Período: ${primary.periodo.label}`,
-    ctx.filters.centroCusto ? `Centro filtrado` : "Centro: todos",
-    ctx.filters.categoria ? `Categoria filtrada` : null,
-    ctx.filters.contaBancaria ? `Canal filtrado` : null,
-    ctx.filters.status ? `Status: ${ctx.filters.status}` : null,
-  ].filter(Boolean) as string[];
-
   return (
-    <div className="space-y-5">
-      <ExecutiveWorkspaceFooter
-        tenantSlug={ctx.tenantSlug}
-        updatedAtLabel={updatedAtLabel}
-        statusLabel={footerStatusLabelFromHoje(hojeData)}
-        metaDiaria={
-          hojeData.hoje.meta == null
-            ? undefined
-            : formatCurrency(hojeData.hoje.meta)
-        }
-        realizadoDia={formatCurrency(hojeData.hoje.faturamento)}
-        items={smartItems}
-        panelDetails={{
-          periodoLabel: primary.periodo.label,
-          filterChips,
-          observacao: undefined,
-          fontes:
-            "Vendas faturadas (líquido) · meta diária (override/rateio) · resumo do mês · timezone America/Sao_Paulo",
-          versao: "Gestão no Foco · v0.1.0",
-        }}
-      />
-
-      <ExecutiveFooter
-        tenantSlug={ctx.tenantSlug}
-        tenantName={ctx.tenantName}
-        exportActions={
-          <Suspense fallback={<DashboardExportActionsSkeleton />}>
-            <ExportActionsBlock ctx={ctx} />
-          </Suspense>
-        }
-      />
-    </div>
+    <ExecutiveFooter
+      tenantSlug={ctx.tenantSlug}
+      tenantName={ctx.tenantName}
+      exportActions={
+        <Suspense fallback={<DashboardExportActionsSkeleton />}>
+          <ExportActionsBlock ctx={ctx} />
+        </Suspense>
+      }
+    />
   );
 }
 

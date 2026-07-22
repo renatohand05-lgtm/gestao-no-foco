@@ -3,6 +3,7 @@ import { Suspense, type ReactNode } from "react";
 import { DashboardActions } from "@/components/dashboard/dashboard-actions";
 import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
 import { ExecutiveDashboardHeader } from "@/components/dashboard/executive/executive-dashboard-header";
+import { ExecutiveDecisionCenter } from "@/components/dashboard/executive/executive-decision-center";
 import { ResumoVendasHojeCards } from "@/components/dashboard/resumo-vendas-hoje-cards";
 import { ResumoLeituraDoDia } from "@/components/dashboard/resumo-leitura-do-dia";
 import { ResumoVendasMesTable } from "@/components/dashboard/resumo-vendas-mes-table";
@@ -18,6 +19,10 @@ import {
   buildLeituraDoDia,
   calcProjecaoFechamento,
 } from "@/lib/dashboard/resumo-vendas-mes";
+import {
+  composeExecutiveDecision,
+  loadExecutiveDecisionFeeds,
+} from "@/lib/dashboard/executive-decision-service";
 import { ExecutiveWorkspace } from "@/components/executive/workspace";
 import {
   loadDashboardFull,
@@ -132,11 +137,12 @@ type DashboardStreamingViewProps = {
 async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   let hojeData = null;
   let resumoData = null;
+  let decision = null;
   let loadError: unknown = null;
   const centroCustoId =
     ctx.resumoFilters.centroCustoId ?? ctx.filters.centroCusto ?? null;
   try {
-    [hojeData, resumoData] = await Promise.all([
+    const [hoje, resumo, feeds] = await Promise.all([
       loadDashboardHojeSnapshot(ctx.tenantId, centroCustoId),
       loadDashboardResumoMes(ctx.tenantId, {
         year: ctx.resumoFilters.year,
@@ -145,12 +151,21 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
         vendedorId: ctx.resumoFilters.vendedorId ?? null,
         origem: ctx.resumoFilters.origem ?? null,
       }),
+      loadExecutiveDecisionFeeds(ctx.tenantId, ctx.tenantSlug),
     ]);
+    hojeData = hoje;
+    resumoData = resumo;
+    decision = composeExecutiveDecision({
+      tenantSlug: ctx.tenantSlug,
+      hoje,
+      resumo,
+      feeds,
+    });
   } catch (error) {
     loadError = error;
   }
 
-  if (loadError || !hojeData || !resumoData) {
+  if (loadError || !hojeData || !resumoData || !decision) {
     return (
       <SectionError
         tenantSlug={ctx.tenantSlug}
@@ -172,6 +187,10 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
         status={hojeData.hoje.status}
       />
       <ResumoVendasHojeCards data={hojeData} />
+      <ExecutiveDecisionCenter
+        data={decision}
+        tenantSlug={ctx.tenantSlug}
+      />
       <ResumoLeituraDoDia
         insights={buildLeituraDoDia({
           metaHoje: hojeData.hoje.meta,

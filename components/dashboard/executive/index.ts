@@ -40,4 +40,8 @@ export {
   ExecutiveKpiCardSkeleton,
 } from "@/components/dashboard/executive/executive-kpi-card";
 export { ExecutiveDashboardHeader } from "@/components/dashboard/executive/executive-dashboard-header";
+export {
+  ExecutiveDecisionCenter,
+  ExecutiveDecisionCenterSkeleton,
+} from "@/components/dashboard/executive/executive-decision-center";
 export { ExecutiveSectionState } from "@/components/dashboard/executive/executive-section-state";

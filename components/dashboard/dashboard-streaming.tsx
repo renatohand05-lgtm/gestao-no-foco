@@ -2,7 +2,7 @@ import { Suspense, type ReactNode } from "react";
 
 import { DashboardActions } from "@/components/dashboard/dashboard-actions";
 import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
-import { DashboardRefreshButton } from "@/components/dashboard/dashboard-refresh-button";
+import { ExecutiveDashboardHeader } from "@/components/dashboard/executive/executive-dashboard-header";
 import { ResumoVendasHojeCards } from "@/components/dashboard/resumo-vendas-hoje-cards";
 import { ResumoLeituraDoDia } from "@/components/dashboard/resumo-leitura-do-dia";
 import { ResumoVendasMesTable } from "@/components/dashboard/resumo-vendas-mes-table";
@@ -164,7 +164,13 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
 
   return (
     <div className="space-y-6" data-dashboard-block="hoje-v2">
-      <DashboardRefreshButton updatedAtLabel={hojeData.atualizado_em_label} />
+      <ExecutiveDashboardHeader
+        greeting={ctx.greeting}
+        tenantName={ctx.tenantName}
+        dataHoje={hojeData.data_hoje}
+        updatedAtLabel={hojeData.atualizado_em_label}
+        status={hojeData.hoje.status}
+      />
       <ResumoVendasHojeCards data={hojeData} />
       <ResumoLeituraDoDia
         insights={buildLeituraDoDia({

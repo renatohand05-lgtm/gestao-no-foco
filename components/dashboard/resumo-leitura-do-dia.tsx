@@ -1,4 +1,5 @@
 import type { LeituraDiaInsight } from "@/lib/dashboard/resumo-vendas-mes";
+import { exRadius, exShadow, exTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 const TONE: Record<LeituraDiaInsight["tone"], string> = {
@@ -16,26 +17,36 @@ type Props = {
   insights: LeituraDiaInsight[];
 };
 
+/** Leitura executiva — máx. 3 insights (fonte: buildLeituraDoDia). */
 export function ResumoLeituraDoDia({ insights }: Props) {
   if (insights.length === 0) return null;
 
+  const items = insights.slice(0, 3);
+
   return (
     <section
-      className="rounded-xl border border-border/60 bg-card px-5 py-3.5 shadow-sm"
+      className={cn(
+        "border border-border/55 bg-card px-5 py-4 shadow-sm sm:px-6",
+        exRadius[16],
+        exShadow.card,
+      )}
       aria-labelledby="leitura-do-dia-titulo"
     >
       <h2
         id="leitura-do-dia-titulo"
-        className="text-[0.65rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase"
+        className={cn(
+          exTypography.label,
+          "tracking-[0.08em] text-muted-foreground uppercase",
+        )}
       >
         Leitura do dia
       </h2>
-      <ul className="mt-2.5 flex flex-wrap gap-2.5">
-        {insights.map((item) => (
+      <ul className="mt-3 flex flex-wrap gap-2.5">
+        {items.map((item) => (
           <li
             key={item.id}
             className={cn(
-              "rounded-full border px-2.5 py-1 text-[11px] leading-snug font-medium tracking-tight",
+              "rounded-full border px-3 py-1.5 text-xs leading-snug font-medium tracking-tight",
               TONE[item.tone],
             )}
           >

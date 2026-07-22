@@ -156,13 +156,13 @@ export function ResumoVendasMesTable({
   return (
     <div className="space-y-5">
       <section
-        className="overflow-hidden rounded-xl border-2 border-foreground/10 bg-card shadow-sm"
+        className="overflow-hidden rounded-2xl border border-border/55 bg-card shadow-sm"
         aria-labelledby="resumo-vendas-mes-titulo"
       >
-        <div className="border-b bg-gradient-to-r from-muted/50 to-transparent px-5 py-4 sm:px-6">
+        <div className="border-b bg-gradient-to-r from-muted/40 to-transparent px-5 py-4 sm:px-6">
           <h2
             id="resumo-vendas-mes-titulo"
-            className="text-sm font-bold uppercase tracking-wide sm:text-base"
+            className="text-sm font-semibold tracking-tight text-foreground sm:text-base"
           >
             Resumo de Vendas do Mês
           </h2>

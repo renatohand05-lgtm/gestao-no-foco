@@ -36,10 +36,10 @@ export function ResumoEvolucaoAcumulada({ rows, total, metaMensal }: Props) {
     1,
   );
 
-  const w = 640;
-  const h = 180;
-  const padX = 8;
-  const padY = 12;
+  const w = 720;
+  const h = 220;
+  const padX = 12;
+  const padY = 16;
   const chartW = w - padX * 2;
   const chartH = h - padY * 2;
 
@@ -70,14 +70,14 @@ export function ResumoEvolucaoAcumulada({ rows, total, metaMensal }: Props) {
 
   return (
     <section
-      className="rounded-xl border border-border/60 bg-card p-5 shadow-sm sm:p-6"
+      className="rounded-2xl border border-border/55 bg-card p-5 shadow-sm sm:p-6"
       aria-labelledby="evolucao-acumulada-titulo"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2
             id="evolucao-acumulada-titulo"
-            className="text-sm font-bold uppercase tracking-wide"
+            className="text-sm font-semibold tracking-tight text-foreground"
           >
             Evolução acumulada do mês
           </h2>

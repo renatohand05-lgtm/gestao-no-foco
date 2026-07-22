@@ -35,4 +35,9 @@ export {
   ExecutiveFooter,
   ExecutiveFooterSkeleton,
 } from "@/components/dashboard/executive/executive-footer";
+export {
+  ExecutiveKpiCard,
+  ExecutiveKpiCardSkeleton,
+} from "@/components/dashboard/executive/executive-kpi-card";
+export { ExecutiveDashboardHeader } from "@/components/dashboard/executive/executive-dashboard-header";
 export { ExecutiveSectionState } from "@/components/dashboard/executive/executive-section-state";

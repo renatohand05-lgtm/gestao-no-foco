@@ -4,6 +4,7 @@ import { ClienteFeedback } from "@/components/clientes/cliente-feedback";
 import { ClienteWorkspace } from "@/components/clientes/cliente-workspace";
 import { CrmSubnav } from "@/components/crm/crm-subnav";
 import { createCliente360Service } from "@/lib/crm/cliente-360-service";
+import { createCrmExecutivoService } from "@/lib/crm/crm-executivo-service";
 import { listTenantMembersForSelect } from "@/lib/crm/tenant-team-service";
 import { createClienteService } from "@/lib/clientes/cliente-service";
 import { requireTenant } from "@/lib/tenants";
@@ -28,10 +29,23 @@ export default async function ClienteDetailPage({
     notFound();
   }
 
-  const [data360, consultores] = await Promise.all([
+  const [data360, consultores, execService] = await Promise.all([
     createCliente360Service(tenant.id).then((s) => s.load(id)),
     listTenantMembersForSelect(tenant.id),
+    createCrmExecutivoService(tenant.id),
   ]);
+
+  const perfilExecutivo = await execService.loadPerfilFrom360(
+    {
+      id: cliente.id,
+      nome: cliente.nome,
+      telefone: cliente.telefone,
+      whatsapp: cliente.whatsapp,
+      ativo: cliente.ativo,
+      created_at: cliente.created_at,
+    },
+    data360,
+  );
 
   const consultorNome =
     consultores.find((c) => c.id === cliente.consultor_id)?.nome ?? null;
@@ -48,6 +62,7 @@ export default async function ClienteDetailPage({
         cliente={cliente}
         data360={data360}
         consultorNome={consultorNome}
+        perfilExecutivo={perfilExecutivo}
       />
     </div>
   );

@@ -159,6 +159,10 @@ export type VendaInput = {
   categoria_financeira_id?: string | null;
   centro_custo_id?: string | null;
   observacoes?: string | null;
+  /** Canal operacional real (`os`, `balcao`, …). Opcional. */
+  canal_venda?: string | null;
+  /** Responsável comercial confirmado. Opcional. */
+  vendedor_id?: string | null;
   itens: VendaItemInput[];
 };
 

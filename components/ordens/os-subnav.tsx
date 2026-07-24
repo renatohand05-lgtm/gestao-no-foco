@@ -10,7 +10,7 @@ type Props = {
 
 export function OsSubnav({ tenantSlug, active }: Props) {
   const items = [
-    { key: "lista" as const, href: `/${tenantSlug}/ordens`, label: "Lista" },
+    { key: "lista" as const, href: `/${tenantSlug}/ordens`, label: "Central" },
     {
       key: "dashboard" as const,
       href: `/${tenantSlug}/ordens/dashboard`,

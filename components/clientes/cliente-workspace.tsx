@@ -8,6 +8,7 @@ import { ClienteDeleteButton } from "@/components/clientes/cliente-delete-button
 import { ClienteStatusBadge } from "@/components/clientes/cliente-status-badge";
 import { ClienteDocumentosPanel } from "@/components/crm/cliente-documentos-panel";
 import { CrmAgendaList } from "@/components/crm/crm-agenda-list";
+import { CrmExecutivoPerfil } from "@/components/crm/crm-executivo-perfil";
 import { CrmRichContent, CrmRichEditor } from "@/components/crm/crm-rich-editor";
 import { CrmScoreBadges } from "@/components/crm/crm-score-badges";
 import { CrmTagBadges } from "@/components/crm/crm-tag-badges";
@@ -28,6 +29,7 @@ import {
   CRM_TAREFA_TIPOS,
   CRM_TAREFA_TIPO_LABELS,
 } from "@/lib/crm/constants";
+import type { CrmExecPerfil } from "@/lib/crm/crm-executivo-compose";
 import {
   formatClienteDate,
   formatCep,
@@ -48,9 +50,11 @@ type ClienteWorkspaceProps = {
   cliente: Cliente;
   data360: Cliente360Data;
   consultorNome?: string | null;
+  perfilExecutivo?: CrmExecPerfil | null;
 };
 
 const TABS = [
+  "executivo",
   "resumo",
   "cadastro",
   "financeiro",
@@ -67,6 +71,7 @@ const TABS = [
 type Tab = (typeof TABS)[number];
 
 const TAB_LABELS: Record<Tab, string> = {
+  executivo: "Executivo",
   resumo: "Resumo",
   cadastro: "Cadastro",
   financeiro: "Financeiro",
@@ -96,9 +101,10 @@ export function ClienteWorkspace({
   cliente,
   data360,
   consultorNome,
+  perfilExecutivo = null,
 }: ClienteWorkspaceProps) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("resumo");
+  const [tab, setTab] = useState<Tab>(perfilExecutivo ? "executivo" : "resumo");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -200,7 +206,7 @@ export function ClienteWorkspace({
       {success ? <FeedbackMessage variant="success">{success}</FeedbackMessage> : null}
 
       <div className="flex flex-wrap gap-2 border-b pb-2">
-        {TABS.map((t) => (
+        {TABS.filter((t) => t !== "executivo" || perfilExecutivo).map((t) => (
           <button
             key={t}
             type="button"
@@ -216,6 +222,10 @@ export function ClienteWorkspace({
           </button>
         ))}
       </div>
+
+      {tab === "executivo" && perfilExecutivo ? (
+        <CrmExecutivoPerfil perfil={perfilExecutivo} />
+      ) : null}
 
       {tab === "resumo" ? (
         <div className="grid gap-6 lg:grid-cols-2">

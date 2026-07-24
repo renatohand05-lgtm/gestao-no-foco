@@ -120,7 +120,7 @@ const base = {
   });
   const item = r.items.find((i) => i.id === "estoque-critico");
   assert(!!item, "estoque crítico");
-  assert(item?.href?.endsWith("/estoque"), "link estoque");
+  assert(item?.href?.includes("/estoque/dashboard"), "link estoque");
 }
 
 {

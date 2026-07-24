@@ -1,36 +1,53 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
-import { DashboardBarChart } from "@/components/dashboard/dashboard-charts";
+import { ExecutiveStockFilters } from "@/components/estoque/executive-stock-filters";
+import { ExecutiveStockKpiGrid } from "@/components/estoque/executive-stock-kpi-grid";
+import {
+  ExecutiveStockAlerts,
+  ExecutiveStockCompras,
+  ExecutiveStockCriticos,
+  ExecutiveStockDistribuicao,
+  ExecutiveStockParados,
+  ExecutiveStockRankings,
+} from "@/components/estoque/executive-stock-panels";
 import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { buttonVariants } from "@/components/ui/button";
-import { formatCurrency } from "@/lib/format";
-import { createEstoqueDashboardService } from "@/lib/estoque/estoque-dashboard-service";
+import { SectionCard } from "@/components/ui/section-card";
+import { createExecutiveStockService } from "@/lib/estoque/executive-stock-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { requireTenant } from "@/lib/tenants";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Dashboard de estoque" };
+export const metadata = { title: "Central Executiva de Estoque" };
 
-function Kpi({ label, value }: { label: string; value: string }) {
+type PageProps = {
+  params: Promise<{ tenant: string }>;
+  searchParams: Promise<{
+    categoria?: string;
+    fornecedor?: string;
+    criticidade?: string;
+    saldo?: string;
+    movimentacao?: string;
+    q?: string;
+  }>;
+};
+
+function LoadingState() {
   return (
-    <div className="rounded-lg border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums">
-        {value}
-      </p>
+    <div className="space-y-4" aria-busy="true" aria-label="Carregando">
+      <div className="h-20 animate-pulse rounded-lg bg-muted" />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+        ))}
+      </div>
     </div>
   );
 }
 
-export default async function EstoqueDashboardPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ tenant: string }>;
-  searchParams: Promise<{ de?: string; ate?: string }>;
-}) {
+async function ExecutiveStockBody({ params, searchParams }: PageProps) {
   const { tenant: tenantSlug } = await params;
   const sp = await searchParams;
   const tenant = await requireTenant(tenantSlug);
@@ -49,10 +66,10 @@ export default async function EstoqueDashboardPage({
     return (
       <div className="space-y-4">
         <ModuleHeader
-          title="Dashboard de estoque"
+          title="Central Executiva de Estoque"
           breadcrumbs={[
             { label: "Estoque", href: `/${tenantSlug}/estoque` },
-            { label: "Dashboard" },
+            { label: "Central Executiva" },
           ]}
         />
         <p className="text-sm text-muted-foreground">Sem permissão.</p>
@@ -60,21 +77,57 @@ export default async function EstoqueDashboardPage({
     );
   }
 
-  const service = await createEstoqueDashboardService(tenant.id);
-  const data = await service.getData({
-    de: sp.de,
-    ate: sp.ate,
-    tenantSlug,
-  });
+  let data;
+  let loadError: string | null = null;
+  try {
+    const service = await createExecutiveStockService(tenant.id);
+    data = await service.load(tenantSlug, {
+      categoria: sp.categoria,
+      fornecedor: sp.fornecedor,
+      criticidade: sp.criticidade,
+      saldo: sp.saldo,
+      movimentacao: sp.movimentacao,
+      q: sp.q,
+    });
+  } catch (err) {
+    loadError =
+      err instanceof Error
+        ? err.message
+        : "Falha ao carregar a Central Executiva de Estoque.";
+  }
+
+  if (loadError || !data) {
+    return (
+      <div className="space-y-4">
+        <ModuleHeader
+          title="Central Executiva de Estoque"
+          breadcrumbs={[
+            { label: "Estoque", href: `/${tenantSlug}/estoque` },
+            { label: "Central Executiva" },
+          ]}
+        />
+        <p className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+          {loadError ?? "Dados indisponíveis."}
+        </p>
+      </div>
+    );
+  }
+
+  const partial =
+    data.kpis.valorTotalEstoque.partial ||
+    data.kpis.valorComprometidoOs.partial ||
+    !data.kpis.giroMedio.available ||
+    !data.kpis.coberturaEstoque.available ||
+    !data.kpis.valorReservado.available;
 
   return (
     <div className="space-y-6">
       <ModuleHeader
-        title="Dashboard de estoque"
-        description="Saldo, giro, alertas e valor"
+        title="Central Executiva de Estoque"
+        description="Inteligência operacional com dados já existentes — sem previsão por IA."
         breadcrumbs={[
           { label: "Estoque", href: `/${tenantSlug}/estoque` },
-          { label: "Dashboard" },
+          { label: "Central Executiva" },
         ]}
       >
         <Link
@@ -83,107 +136,62 @@ export default async function EstoqueDashboardPage({
         >
           Movimentações
         </Link>
+        <Link
+          href={`/${tenantSlug}/produtos`}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          Produtos
+        </Link>
       </ModuleHeader>
 
-      <SectionCard title="Filtros" contentClassName="pt-0">
-        <form className="flex flex-wrap gap-3 text-sm">
-          <label className="space-y-1">
-            <span className="text-muted-foreground">De</span>
-            <input
-              type="date"
-              name="de"
-              defaultValue={sp.de ?? ""}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Até</span>
-            <input
-              type="date"
-              name="ate"
-              defaultValue={sp.ate ?? ""}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
-            />
-          </label>
-          <button
-            type="submit"
-            className={cn(buttonVariants({ size: "sm" }), "mt-6")}
-          >
-            Aplicar
-          </button>
-        </form>
+      <SectionCard title="Filtros">
+        <ExecutiveStockFilters
+          tenantSlug={tenantSlug}
+          categoria={sp.categoria}
+          fornecedor={sp.fornecedor}
+          criticidade={sp.criticidade}
+          saldo={sp.saldo}
+          movimentacao={sp.movimentacao}
+          q={sp.q}
+          categorias={data.filterOptions.categorias}
+          fornecedores={data.filterOptions.fornecedores}
+        />
       </SectionCard>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <Kpi label="Produtos" value={String(data.kpis.quantidadeProdutos)} />
-        <Kpi
-          label="Valor do estoque"
-          value={formatCurrency(data.kpis.valorTotal)}
-        />
-        <Kpi label="Abaixo do mínimo" value={String(data.kpis.abaixoMinimo)} />
-        <Kpi label="Zerados" value={String(data.kpis.zerados)} />
-        <Kpi label="Sem custo" value={String(data.kpis.semCusto)} />
-        <Kpi label="Sem giro (90d)" value={String(data.kpis.semGiro)} />
-        <Kpi
-          label="Entradas no período"
-          value={String(data.kpis.entradasPeriodo)}
-        />
-        <Kpi
-          label="Saídas no período"
-          value={String(data.kpis.saidasPeriodo)}
-        />
-        <Kpi
-          label="Margem potencial"
-          value={formatCurrency(data.kpis.margemPotencial)}
-        />
-      </div>
+      {partial ? (
+        <p className="rounded-lg border border-amber-300/60 bg-amber-50/50 px-3 py-2 text-sm text-amber-950 dark:bg-amber-950/20 dark:text-amber-100">
+          Dados parciais: alguns KPIs usam proxy documentado ou estão
+          Indisponíveis por falta de histórico/cadastro. Zeros só aparecem quando
+          o valor é real.
+        </p>
+      ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <DashboardBarChart
-          title="Valor por categoria"
-          description="Estoque valorizado"
-          data={data.porCategoria.map((p) => ({
-            data: p.label,
-            label: p.label,
-            value: p.valor,
-          }))}
-        />
-        <DashboardBarChart
-          title="Mais vendidos no período"
-          description="Quantidade em vendas faturadas"
-          data={data.topVendidos.map((p) => ({
-            data: p.label,
-            label: p.label,
-            value: p.valor,
-          }))}
-        />
-      </div>
-
-      <SectionCard title="Alertas de estoque">
-        {data.alertas.length === 0 ? (
+      {data.meta.totalFiltrado === 0 ? (
+        <SectionCard title="Carteira">
           <p className="text-sm text-muted-foreground">
-            Nenhum alerta crítico no momento.
+            Nenhum produto na carteira filtrada.
+            {data.meta.totalCarteira > 0
+              ? ` (${data.meta.totalCarteira} SKU(s) ativos no tenant).`
+              : ""}
           </p>
-        ) : (
-          <ul className="space-y-2 text-sm">
-            {data.alertas.map((a, i) => (
-              <li key={`${a.tipo}-${i}`} className="flex justify-between gap-2">
-                <span>
-                  <span className="text-xs uppercase text-muted-foreground">
-                    {a.tipo}
-                  </span>{" "}
-                  {a.titulo}
-                </span>
-                {a.href ? (
-                  <Link href={a.href} className="underline shrink-0">
-                    Abrir
-                  </Link>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </SectionCard>
+        </SectionCard>
+      ) : null}
+
+      <ExecutiveStockKpiGrid kpis={data.kpis} />
+      <ExecutiveStockAlerts alerts={data.alerts} />
+      <ExecutiveStockCriticos rows={data.criticos} tenantSlug={tenantSlug} />
+      <ExecutiveStockParados rows={data.parados} tenantSlug={tenantSlug} />
+      <ExecutiveStockCompras rows={data.compras} tenantSlug={tenantSlug} />
+      <ExecutiveStockRankings rankings={data.rankings} />
+      <ExecutiveStockDistribuicao distribuicao={data.distribuicao} />
     </div>
+  );
+}
+
+export default function EstoqueDashboardPage(props: PageProps) {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <ExecutiveStockBody {...props} />
+    </Suspense>
   );
 }

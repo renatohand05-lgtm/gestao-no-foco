@@ -1,43 +1,62 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
-import { DashboardBarChart } from "@/components/dashboard/dashboard-charts";
+import { CommercialActionQueue } from "@/components/vendas/commercial-action-queue";
+import { CommercialDataCoverageNote } from "@/components/vendas/commercial-data-coverage-note";
+import { CommercialDiscountPanel } from "@/components/vendas/commercial-discount-panel";
+import { CommercialFunnel } from "@/components/vendas/commercial-funnel";
+import { CommercialIntelligenceFilters } from "@/components/vendas/commercial-intelligence-filters";
+import { CommercialKpiGrid } from "@/components/vendas/commercial-kpi-grid";
+import { CommercialMetaPanel } from "@/components/vendas/commercial-meta-panel";
+import { CommercialOriginPanel } from "@/components/vendas/commercial-origin-panel";
+import { CommercialPipeline } from "@/components/vendas/commercial-pipeline";
+import { CommercialRankingPanel } from "@/components/vendas/commercial-ranking-panel";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
-import { buttonVariants } from "@/components/ui/button";
 import { SectionCard } from "@/components/ui/section-card";
-import { formatCurrency } from "@/lib/format";
+import {
+  civilDateInTimezone,
+  resolveTenantTimezone,
+} from "@/lib/dashboard/tenant-timezone";
+import { createClienteService } from "@/lib/clientes/cliente-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { requireTenant } from "@/lib/tenants";
-import { createVendasDashboardService } from "@/lib/vendas/vendas-dashboard-service";
-import { cn } from "@/lib/utils";
+import {
+  CI_CANAL_LABELS,
+  resolveCiPeriod,
+} from "@/lib/vendas/commercial-intelligence-compose";
+import { createCommercialIntelligenceService } from "@/lib/vendas/commercial-intelligence-service";
 
-export const metadata = { title: "Dashboard de vendas" };
+export const metadata = { title: "Inteligência Comercial" };
 
-function Kpi({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-export default async function VendasDashboardPage({
-  params,
-  searchParams,
-}: {
+type PageProps = {
   params: Promise<{ tenant: string }>;
   searchParams: Promise<{
     de?: string;
     ate?: string;
     preset?: string;
-    vendedor_id?: string;
-    forma?: string;
+    responsavel?: string;
+    origem?: string;
+    status?: string;
+    cliente?: string;
   }>;
-}) {
+};
+
+function LoadingState() {
+  return (
+    <div className="space-y-4" aria-busy="true" aria-label="Carregando">
+      <div className="h-24 animate-pulse rounded-lg bg-muted" />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function CommercialIntelligenceBody({ params, searchParams }: PageProps) {
   const { tenant: tenantSlug } = await params;
   const sp = await searchParams;
   const tenant = await requireTenant(tenantSlug);
@@ -56,244 +75,228 @@ export default async function VendasDashboardPage({
     return (
       <div className="space-y-4">
         <ModuleHeader
-          title="Dashboard de vendas"
+          title="Inteligência Comercial"
           breadcrumbs={[
             { label: "Vendas", href: `/${tenantSlug}/vendas` },
-            { label: "Dashboard" },
+            { label: "Inteligência Comercial" },
           ]}
         />
         <p className="text-sm text-muted-foreground">
-          Sem permissão para visualizar este dashboard.
+          Sem permissão para visualizar este painel.
         </p>
       </div>
     );
   }
 
-  const service = await createVendasDashboardService(tenant.id);
-  const data = await service.getData({
+  const tz = resolveTenantTimezone();
+  const hoje = civilDateInTimezone(new Date(), tz);
+  const period = resolveCiPeriod({
     de: sp.de,
     ate: sp.ate,
     preset: sp.preset,
-    vendedor_id: sp.vendedor_id,
-    forma: sp.forma,
+    hoje,
   });
+
+  let data;
+  let loadError: string | null = null;
+  try {
+    const service = await createCommercialIntelligenceService(tenant.id);
+    data = await service.load({
+      de: period.de,
+      ate: period.ate,
+      preset: sp.preset,
+      responsavel: sp.responsavel,
+      origem: sp.origem,
+      status: sp.status,
+      cliente: sp.cliente,
+    });
+  } catch (err) {
+    loadError =
+      err instanceof Error ? err.message : "Falha ao carregar inteligência comercial.";
+  }
+
+  if (loadError || !data) {
+    return (
+      <div className="space-y-4">
+        <ModuleHeader
+          title="Inteligência Comercial"
+          breadcrumbs={[
+            { label: "Vendas", href: `/${tenantSlug}/vendas` },
+            { label: "Inteligência Comercial" },
+          ]}
+        />
+        <p className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+          {loadError ?? "Dados indisponíveis."}
+        </p>
+      </div>
+    );
+  }
+
+  const responsavelOptions = data.rankings.responsaveisConfirmados.map(
+    (r) => ({ id: r.key, nome: r.label }),
+  );
+
+  const origemOptions = [
+    { value: "sem_origem", label: "Sem origem" },
+    ...Object.entries(CI_CANAL_LABELS).map(([value, label]) => ({
+      value,
+      label,
+    })),
+  ];
+
+  let clienteLabel: string | null = null;
+  if (sp.cliente) {
+    try {
+      const clienteSvc = await createClienteService(tenant.id);
+      const cli = await clienteSvc.getById(sp.cliente);
+      clienteLabel = cli?.nome ?? null;
+    } catch {
+      clienteLabel = null;
+    }
+  }
+
+  const semOrigemPct =
+    data.cobertura.totalAvaliadas > 0
+      ? Math.round(
+          (data.cobertura.semOrigem / data.cobertura.totalAvaliadas) * 1000,
+        ) / 10
+      : null;
+
+  const emptyPortfolio =
+    data.kpis.quantidadeFaturadas.value === 0 &&
+    data.kpis.valorEmNegociacao.value === 0 &&
+    data.kpis.vendasCanceladas.value === 0 &&
+    data.actionItems.length === 0;
 
   return (
     <div className="space-y-6">
       <ModuleHeader
-        title="Dashboard de vendas"
-        description="Balcão, margem, descontos e ranking operacional"
+        title="Inteligência Comercial"
+        description="Pipeline, conversão e ações — sem misturar OS em produção com receita."
         breadcrumbs={[
           { label: "Vendas", href: `/${tenantSlug}/vendas` },
-          { label: "Dashboard" },
+          { label: "Inteligência Comercial" },
         ]}
       >
         <ActionButton
           action="create"
-          label="Venda rápida"
-          href={`/${tenantSlug}/vendas/rapida`}
+          label="Nova venda"
+          href={`/${tenantSlug}/vendas/nova`}
         />
+        <Link
+          href={`/${tenantSlug}/vendas/abertas`}
+          className="text-sm text-primary hover:underline"
+        >
+          Orçamentos abertos
+        </Link>
       </ModuleHeader>
 
       <SectionCard title="Filtros" contentClassName="pt-0">
-        <form className="flex flex-wrap gap-3 text-sm">
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Período</span>
-            <select
-              name="preset"
-              defaultValue={sp.preset ?? "mes"}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
-            >
-              <option value="hoje">Hoje</option>
-              <option value="ontem">Ontem</option>
-              <option value="semana">Semana</option>
-              <option value="mes">Mês</option>
-              <option value="custom">Personalizado</option>
-            </select>
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">De</span>
-            <input
-              type="date"
-              name="de"
-              defaultValue={sp.de}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Até</span>
-            <input
-              type="date"
-              name="ate"
-              defaultValue={sp.ate}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Forma</span>
-            <input
-              name="forma"
-              defaultValue={sp.forma ?? ""}
-              placeholder="ex: PIX"
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
-            />
-          </label>
-          <button
-            type="submit"
-            className={cn(buttonVariants({ size: "sm" }), "mt-6")}
-          >
-            Aplicar
-          </button>
-        </form>
+        <CommercialIntelligenceFilters
+          tenantSlug={tenantSlug}
+          de={data.period.de}
+          ate={data.period.ate}
+          responsavel={sp.responsavel}
+          origem={sp.origem}
+          status={sp.status}
+          cliente={sp.cliente}
+          clienteLabel={clienteLabel}
+          responsavelOptions={responsavelOptions}
+          origemOptions={origemOptions}
+        />
       </SectionCard>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-        <Kpi label="Faturamento hoje" value={formatCurrency(data.kpis.vendasDia)} />
-        <Kpi label="Faturamento período" value={formatCurrency(data.kpis.vendasMes)} />
-        <Kpi label="Qtd. vendas" value={String(data.kpis.quantidade)} />
-        <Kpi label="Ticket médio" value={formatCurrency(data.kpis.ticketMedio)} />
-        <Kpi label="Margem bruta" value={formatCurrency(data.kpis.margemBruta)} />
-        <Kpi label="Custo vendido" value={formatCurrency(data.kpis.custoProdutos)} />
-        <Kpi label="Descontos" value={formatCurrency(data.kpis.descontos)} />
-        <Kpi label="Devoluções" value={String(data.kpis.devolucoes)} />
-        <Kpi label="Sem cliente" value={String(data.kpis.consumidorNI)} />
-        <Kpi label="Com cliente" value={String(data.kpis.comCliente)} />
-        <Kpi label="Itens vendidos" value={String(data.kpis.itensVendidos)} />
-        <Kpi label="Clientes únicos" value={String(data.kpis.clientesUnicos)} />
-        <Kpi label="Canceladas" value={String(data.kpis.canceladas)} />
-        <Kpi label="Lucro bruto" value={formatCurrency(data.kpis.lucroBruto)} />
+      <CommercialDataCoverageNote cobertura={data.cobertura} />
+
+      {emptyPortfolio ? (
+        <p className="rounded-lg border p-4 text-sm text-muted-foreground">
+          Sem vendas no período selecionado. Ajuste o filtro ou registre uma
+          venda.
+        </p>
+      ) : null}
+
+      <SectionCard title="KPIs comerciais">
+        <CommercialKpiGrid
+          tenantSlug={tenantSlug}
+          kpis={data.kpis}
+          de={data.period.de}
+          ate={data.period.ate}
+        />
+      </SectionCard>
+
+      <SectionCard title="Pipeline">
+        <CommercialPipeline pipeline={data.pipeline} oficina={data.oficina} />
+      </SectionCard>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <CommercialFunnel kpis={data.kpis} />
+        <CommercialMetaPanel tenantSlug={tenantSlug} meta={data.meta} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <DashboardBarChart
-          title="Vendas por dia"
-          description="Faturamento diário"
-          data={data.porDia.map((d) => ({
-            data: d.label,
-            label: d.label.slice(5),
-            value: d.valor,
-          }))}
-        />
-        <DashboardBarChart
-          title="Vendas por hora"
-          description="Distribuição horária (criação)"
-          data={data.porHora.map((d) => ({
-            data: d.label,
-            label: d.label,
-            value: d.valor,
-          }))}
-        />
-        <DashboardBarChart
-          title="Por forma de pagamento"
-          description="Volume por forma"
-          data={data.porForma.map((d) => ({
-            data: d.label,
-            label: d.label.slice(0, 14),
-            value: d.valor,
-          }))}
-        />
-        <DashboardBarChart
-          title="Descontos por responsável"
-          description="Valor autorizado"
-          data={data.descontosPorResponsavel.map((d) => ({
-            data: d.label,
-            label: d.label.slice(0, 14),
-            value: d.valor,
-          }))}
-        />
-      </div>
+      <CommercialActionQueue
+        tenantSlug={tenantSlug}
+        items={data.actionItems}
+      />
 
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
-        <SectionCard title="Top produtos">
-          <ul className="space-y-2 text-sm">
-            {data.topProdutos.map((p) => (
-              <li key={p.label} className="flex justify-between gap-2 border-b py-2">
-                <span>
-                  {p.label}{" "}
-                  <span className="text-muted-foreground">
-                    ({p.qtd} · margem {formatCurrency(p.margem)})
-                  </span>
-                </span>
-                <strong>{formatCurrency(p.valor)}</strong>
-              </li>
-            ))}
-            {data.topProdutos.length === 0 ? (
-              <li className="text-muted-foreground">Sem dados.</li>
-            ) : null}
-          </ul>
-        </SectionCard>
-        <SectionCard title="Top categorias">
-          <ul className="space-y-2 text-sm">
-            {data.topCategorias.map((p) => (
-              <li key={p.label} className="flex justify-between gap-2 border-b py-2">
-                <span>
-                  {p.label}{" "}
-                  <span className="text-muted-foreground">({p.qtd})</span>
-                </span>
-                <strong>{formatCurrency(p.valor)}</strong>
-              </li>
-            ))}
-            {data.topCategorias.length === 0 ? (
-              <li className="text-muted-foreground">Sem dados.</li>
-            ) : null}
-          </ul>
-        </SectionCard>
-        <SectionCard title="Top vendedores">
-          <ul className="space-y-2 text-sm">
-            {data.topVendedores.map((p) => (
-              <li key={p.label} className="flex justify-between gap-2 border-b py-2">
-                <span>{p.label}</span>
-                <strong>{formatCurrency(p.valor)}</strong>
-              </li>
-            ))}
-            {data.topVendedores.length === 0 ? (
-              <li className="text-muted-foreground">Sem dados.</li>
-            ) : null}
-          </ul>
-        </SectionCard>
-        <SectionCard title="Top clientes">
-          <ul className="space-y-2 text-sm">
-            {data.topClientes.map((p) => (
-              <li key={p.label} className="flex justify-between gap-2 border-b py-2">
-                <span>{p.label}</span>
-                <strong>{formatCurrency(p.valor)}</strong>
-              </li>
-            ))}
-            {data.topClientes.length === 0 ? (
-              <li className="text-muted-foreground">Sem dados.</li>
-            ) : null}
-          </ul>
-        </SectionCard>
-      </div>
-
-      <SectionCard title="Atalhos">
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href={`/${tenantSlug}/vendas/rapida`}
-            className="rounded-md border px-3 py-2 text-sm hover:bg-muted"
-          >
-            Venda rápida
-          </Link>
-          <Link
-            href={`/${tenantSlug}/vendas`}
-            className="rounded-md border px-3 py-2 text-sm hover:bg-muted"
-          >
-            Lista de vendas
-          </Link>
-          <Link
-            href={`/${tenantSlug}/descontos/aprovacoes`}
-            className="rounded-md border px-3 py-2 text-sm hover:bg-muted"
-          >
-            Aprovar descontos
-          </Link>
-          <Link
-            href={`/${tenantSlug}/estoque`}
-            className="rounded-md border px-3 py-2 text-sm hover:bg-muted"
-          >
-            Estoque
-          </Link>
+      <div>
+        <h2 className="mb-3 text-lg font-semibold">Rankings</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <CommercialRankingPanel
+            title="Responsáveis comerciais confirmados"
+            description="Somente vendedor_id / responsável comercial explícito."
+            rows={data.rankings.responsaveisConfirmados}
+            emptyLabel="Nenhum responsável comercial confirmado no período."
+          />
+          <CommercialRankingPanel
+            title="Registros por criador"
+            description="Fallback técnico (created_by) — não misturado com vendedores."
+            rows={data.rankings.registrosPorCriador}
+            emptyLabel="Nenhum registro apenas com criador no período."
+          />
+          <CommercialOriginPanel
+            rows={data.rankings.origens}
+            coberturaSemOrigemPct={semOrigemPct}
+            aviso={data.cobertura.avisoOrigem}
+          />
+          <CommercialRankingPanel
+            title="Clientes"
+            rows={data.rankings.clientes}
+          />
+          <CommercialRankingPanel
+            title="Produtos"
+            rows={data.rankings.produtos}
+            emptyLabel="Sem itens de produto no período."
+          />
+          <CommercialRankingPanel
+            title="Serviços"
+            rows={data.rankings.servicos}
+            emptyLabel="Sem itens de serviço no período."
+          />
+          <CommercialRankingPanel
+            title="Maiores tickets"
+            rows={data.rankings.maioresTickets}
+          />
+          <CommercialRankingPanel
+            title="Maiores descontos"
+            rows={data.rankings.maioresDescontos}
+          />
+          <CommercialRankingPanel
+            title="Maiores perdas"
+            description="Cancelados no período."
+            rows={data.rankings.maioresPerdas}
+          />
         </div>
-      </SectionCard>
+      </div>
+
+      <CommercialDiscountPanel data={data.descontos} />
     </div>
+  );
+}
+
+export default function VendasDashboardPage(props: PageProps) {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <CommercialIntelligenceBody {...props} />
+    </Suspense>
   );
 }

@@ -71,6 +71,51 @@ export class OsMecanicoService {
     return (data ?? []) as unknown as OrdemServicoMecanico[];
   }
 
+  /**
+   * Principais ativos por lote de OS — leitura auxiliar (Central 18.1.1).
+   * Não altera contratos de mutação.
+   */
+  async listPrincipaisByOsIds(
+    ordemIds: string[],
+  ): Promise<
+    Array<{
+      ordem_servico_id: string;
+      mecanico_id: string;
+      nome_completo: string | null;
+    }>
+  > {
+    const ids = [...new Set(ordemIds.filter(Boolean))];
+    if (ids.length === 0) return [];
+
+    const { data, error } = await this.supabase
+      .from("ordem_servico_mecanicos" as never)
+      .select(
+        "ordem_servico_id, mecanico_id, papel, ativo, removido_em, mecanico:mecanicos(nome_completo)",
+      )
+      .eq("tenant_id", this.tenantId)
+      .eq("papel", "principal")
+      .eq("ativo", true)
+      .is("removido_em", null)
+      .in("ordem_servico_id", ids);
+
+    if (error) {
+      if (/relation.*does not exist|Could not find/i.test(error.message)) {
+        return [];
+      }
+      throw new Error(error.message);
+    }
+
+    return ((data ?? []) as unknown as Array<{
+      ordem_servico_id: string;
+      mecanico_id: string;
+      mecanico: { nome_completo: string } | null;
+    }>).map((row) => ({
+      ordem_servico_id: row.ordem_servico_id,
+      mecanico_id: row.mecanico_id,
+      nome_completo: row.mecanico?.nome_completo ?? null,
+    }));
+  }
+
   async atribuir(params: {
     ordemId: string;
     mecanicoId: string;

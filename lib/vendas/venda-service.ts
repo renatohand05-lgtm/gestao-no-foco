@@ -672,6 +672,12 @@ export class VendaService {
         forma_pagamento_id: header.forma_pagamento_id,
         observacoes: header.observacoes,
         created_by: createdBy,
+        ...(input.canal_venda
+          ? { canal_venda: input.canal_venda }
+          : {}),
+        ...(input.vendedor_id
+          ? { vendedor_id: input.vendedor_id }
+          : {}),
       })
       .select("id")
       .single();

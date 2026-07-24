@@ -14,6 +14,10 @@ import {
   type OsStatus,
 } from "@/lib/ordens/os-status";
 import { formatVeiculoLabel } from "@/lib/ordens/veiculo-shared";
+import {
+  OS_RESPONSAVEL_FALLBACK,
+  resolveOsResponsavel,
+} from "@/lib/ordens/os-responsavel-resolver";
 import type { Database } from "@/types/database";
 import type {
   OsAprovacaoFormValues,
@@ -29,6 +33,20 @@ import type {
   OsStatusFormValues,
 } from "@/lib/ordens/validations";
 
+export type OsListResponsavelOrigem =
+  | "alocacao_principal"
+  | "mecanico_id"
+  | "profile_id"
+  | "consultor_id"
+  | "explicito"
+  | "fallback";
+
+export type OsListResponsavel = {
+  id: string | null;
+  nome: string;
+  origem: OsListResponsavelOrigem;
+};
+
 export type OrdemServicoListItem = {
   id: string;
   numero: number;
@@ -40,12 +58,29 @@ export type OrdemServicoListItem = {
   modelo: string | null;
   data_abertura: string;
   previsao_entrega: string | null;
+  /** Conclusão técnica (date). */
+  data_conclusao: string | null;
+  /** Aceite/entrega ao cliente (timestamptz). */
+  aceite_entrega_em: string | null;
   valor_total: number;
   mecanico_id: string | null;
   venda_id: string | null;
   prioridade: string;
   arquivado_em: string | null;
   recurso_id: string | null;
+  /** Responsável resolvido na query da lista (sem N+1). */
+  responsavel: OsListResponsavel;
+};
+
+export const OS_LIST_PER_PAGE_OPTIONS = [25, 50, 100] as const;
+export type OsListPerPage = (typeof OS_LIST_PER_PAGE_OPTIONS)[number];
+
+export type OrdemServicoListResult = {
+  items: OrdemServicoListItem[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
 };
 
 export type OrdemServicoItem = {
@@ -89,9 +124,7 @@ export type OrdemServicoDetail = OrdemServicoListItem & {
   subtotal: number;
   desconto_total: number;
   acrescimo_total: number;
-  data_conclusao: string | null;
   garantia_dias: number | null;
-  arquivado_em: string | null;
   arquivado_motivo: string | null;
   itens: OrdemServicoItem[];
   checklist: Array<{
@@ -130,6 +163,81 @@ function emptyUuid(value?: string | null) {
 
 function lineTotal(q: number, vu: number, desc: number, acr: number) {
   return Number(Math.max(0, q * vu - desc + acr).toFixed(2));
+}
+
+const RESPONSAVEL_FALLBACK: OsListResponsavel = {
+  id: null,
+  nome: OS_RESPONSAVEL_FALLBACK,
+  origem: "fallback",
+};
+
+/** Adapta o resolver canônico (18.1.1) ao shape da listagem. */
+function resolveListResponsavel(input: {
+  principal?: { id: string; nome: string } | null;
+  profile?: { id: string; nome: string } | null;
+  mecanicoId?: string | null;
+  consultorId?: string | null;
+  consultorNome?: string | null;
+}): OsListResponsavel {
+  const resolved = resolveOsResponsavel({
+    mecanicoId: input.mecanicoId ?? input.profile?.id ?? null,
+    consultorId: input.consultorId ?? null,
+    consultorNome: input.consultorNome ?? null,
+    principalAlocacao: input.principal
+      ? { mecanicoId: input.principal.id, nomeCompleto: input.principal.nome }
+      : null,
+    profileNomeById: input.profile
+      ? { [input.profile.id]: input.profile.nome }
+      : undefined,
+  });
+
+  if (resolved.source === "fallback") return RESPONSAVEL_FALLBACK;
+
+  const id =
+    resolved.source === "consultor_id"
+      ? (input.consultorId ?? null)
+      : resolved.source === "alocacao_principal"
+        ? (input.principal?.id ?? null)
+        : (input.mecanicoId ?? input.profile?.id ?? null);
+
+  const origem: OsListResponsavelOrigem =
+    resolved.source === "alocacao_principal" ||
+    resolved.source === "mecanico_id" ||
+    resolved.source === "profile_id" ||
+    resolved.source === "consultor_id" ||
+    resolved.source === "explicito"
+      ? resolved.source
+      : "fallback";
+
+  return { id, nome: resolved.nome, origem };
+}
+
+function normalizePerPage(value?: number): number {
+  if (value === 25 || value === 50 || value === 100) return value;
+  if (value == null) return 25;
+  if (value <= 25) return 25;
+  if (value <= 50) return 50;
+  return 100;
+}
+
+function listOrderForSort(sort?: string): {
+  column: string;
+  ascending: boolean;
+  nullsFirst?: boolean;
+} {
+  switch (sort) {
+    case "maior_valor":
+      return { column: "valor_total", ascending: false };
+    case "mais_antigas":
+      return { column: "data_abertura", ascending: true };
+    case "mais_atrasadas":
+    case "previstas_hoje":
+      return { column: "previsao_entrega", ascending: true, nullsFirst: false };
+    case "maior_prioridade":
+      return { column: "prioridade", ascending: false };
+    default:
+      return { column: "numero", ascending: false };
+  }
 }
 
 const CLASSIFICACAO_STATUS_VALUES = new Set([
@@ -176,20 +284,27 @@ export class OrdemServicoService {
     veiculo_id?: string;
     centro_custo_id?: string;
     incluir_arquivadas?: boolean;
-  }): Promise<{ items: OrdemServicoListItem[]; total: number }> {
-    const page = filters.page ?? 1;
-    const perPage = filters.perPage ?? 20;
+    prioridade?: string;
+    sort?: string;
+  }): Promise<OrdemServicoListResult> {
+    const page = Math.max(1, filters.page ?? 1);
+    const perPage = normalizePerPage(filters.perPage);
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
+    const order = listOrderForSort(filters.sort);
+
+    const selectCols =
+      "id, numero, status, cliente_id, veiculo_id, data_abertura, previsao_entrega, data_conclusao, aceite_entrega_em, valor_total, mecanico_id, venda_id, prioridade, arquivado_em, recurso_id, cliente:clientes(nome), veiculo:veiculos(placa, modelo), mecanico_profile:profiles!ordens_servico_mecanico_id_fkey(id, full_name), os_mecanicos:ordem_servico_mecanicos(mecanico_id, papel, ativo, removido_em, mecanico:mecanicos(id, nome_completo))";
 
     let query = this.supabase
       .from("ordens_servico")
-      .select(
-        "id, numero, status, cliente_id, veiculo_id, data_abertura, previsao_entrega, valor_total, mecanico_id, venda_id, prioridade, arquivado_em, recurso_id, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
-        { count: "exact" },
-      )
+      .select(selectCols, { count: "exact" })
       .eq("tenant_id", this.tenantId)
       .is("deleted_at", null)
+      .order(order.column, {
+        ascending: order.ascending,
+        nullsFirst: order.nullsFirst,
+      })
       .order("numero", { ascending: false })
       .range(from, to);
 
@@ -211,44 +326,100 @@ export class OrdemServicoService {
     if (filters.centro_custo_id) {
       query = query.eq("centro_custo_id", filters.centro_custo_id);
     }
+    if (filters.prioridade && filters.prioridade !== "all") {
+      query = query.eq("prioridade", filters.prioridade);
+    }
 
     let { data, error, count } = await query;
-    if (
-      error &&
-      /arquivado_em/i.test(error.message) &&
-      !filters.incluir_arquivadas
-    ) {
-      // Migration 20260730 ainda não aplicada — lista sem filtro de arquivo
+
+    // Fallback sem joins extras (schema parcial / cache PostgREST).
+    if (error) {
       let fallback = this.supabase
         .from("ordens_servico")
         .select(
-          "id, numero, status, cliente_id, veiculo_id, data_abertura, previsao_entrega, valor_total, mecanico_id, venda_id, prioridade, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
+          "id, numero, status, cliente_id, veiculo_id, data_abertura, previsao_entrega, data_conclusao, aceite_entrega_em, valor_total, mecanico_id, venda_id, prioridade, arquivado_em, recurso_id, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
           { count: "exact" },
         )
         .eq("tenant_id", this.tenantId)
         .is("deleted_at", null)
+        .order(order.column, {
+          ascending: order.ascending,
+          nullsFirst: order.nullsFirst,
+        })
         .order("numero", { ascending: false })
         .range(from, to);
+      if (!filters.incluir_arquivadas) {
+        fallback = fallback.is("arquivado_em", null);
+      }
       if (filters.status && filters.status !== "all") {
         fallback = fallback.eq("status", filters.status);
       }
+      if (filters.de) fallback = fallback.gte("data_abertura", filters.de);
+      if (filters.ate) fallback = fallback.lte("data_abertura", filters.ate);
+      if (filters.mecanico_id) {
+        fallback = fallback.eq("mecanico_id", filters.mecanico_id);
+      }
+      if (filters.prioridade && filters.prioridade !== "all") {
+        fallback = fallback.eq("prioridade", filters.prioridade);
+      }
       const retry = await fallback;
-      data = (retry.data ?? []).map((row) => ({
-        ...row,
-        arquivado_em: null as string | null,
-        recurso_id: null as string | null,
-      }));
+      data = retry.data as typeof data;
       error = retry.error;
       count = retry.count;
     }
     if (error) throw new Error(error.message);
 
-    let items = (data ?? []).map((row) => {
-      const cliente = row.cliente as unknown as { nome: string } | null;
-      const veiculo = row.veiculo as unknown as {
-        placa: string;
-        modelo: string | null;
-      } | null;
+    type AlocRow = {
+      mecanico_id: string;
+      papel: string;
+      ativo: boolean;
+      removido_em: string | null;
+      mecanico: { id: string; nome_completo: string } | null;
+    };
+
+    type ListRow = {
+      id: string;
+      numero: number | string;
+      status: string;
+      cliente_id: string;
+      veiculo_id: string | null;
+      data_abertura: string;
+      previsao_entrega: string | null;
+      data_conclusao?: string | null;
+      aceite_entrega_em?: string | null;
+      valor_total: number;
+      mecanico_id: string | null;
+      venda_id: string | null;
+      prioridade?: string | null;
+      arquivado_em?: string | null;
+      recurso_id?: string | null;
+      cliente?: { nome: string } | null;
+      veiculo?: { placa: string; modelo: string | null } | null;
+      mecanico_profile?: { id: string; full_name: string | null } | null;
+      os_mecanicos?: AlocRow[] | null;
+    };
+
+    let items = ((data ?? []) as unknown as ListRow[]).map((row) => {
+      const cliente = row.cliente ?? null;
+      const veiculo = row.veiculo ?? null;
+      const profile = row.mecanico_profile ?? null;
+      const alocs = (row.os_mecanicos ?? []).filter(
+        (a) => a.ativo && !a.removido_em && a.papel === "principal",
+      );
+      const principal = alocs[0];
+      const responsavel = resolveListResponsavel({
+        principal: principal?.mecanico?.nome_completo
+          ? {
+              id: principal.mecanico.id,
+              nome: principal.mecanico.nome_completo,
+            }
+          : null,
+        profile: profile?.full_name
+          ? { id: profile.id, nome: profile.full_name }
+          : null,
+        mecanicoId: row.mecanico_id,
+      });
+
       return {
         id: row.id,
         numero: Number(row.numero),
@@ -260,16 +431,82 @@ export class OrdemServicoService {
         modelo: veiculo?.modelo ?? null,
         data_abertura: row.data_abertura,
         previsao_entrega: row.previsao_entrega ?? null,
+        data_conclusao: row.data_conclusao ?? null,
+        aceite_entrega_em: row.aceite_entrega_em ?? null,
         valor_total: Number(row.valor_total),
         mecanico_id: row.mecanico_id,
         venda_id: row.venda_id,
         prioridade: row.prioridade ?? "normal",
-        arquivado_em:
-          (row as { arquivado_em?: string | null }).arquivado_em ?? null,
-        recurso_id:
-          (row as { recurso_id?: string | null }).recurso_id ?? null,
+        arquivado_em: row.arquivado_em ?? null,
+        recurso_id: row.recurso_id ?? null,
+        responsavel,
       } satisfies OrdemServicoListItem;
     });
+
+    // Fallback responsável: 1 query em lote se joins de alocação não vieram.
+    const needsPrincipal = items.filter(
+      (i) => i.responsavel.origem === "fallback" || !i.responsavel.nome,
+    );
+    if (needsPrincipal.length > 0) {
+      const ids = items.map((i) => i.id);
+      const { data: alocData } = await this.supabase
+        .from("ordem_servico_mecanicos" as never)
+        .select(
+          "ordem_servico_id, mecanico_id, papel, ativo, removido_em, mecanico:mecanicos(id, nome_completo)",
+        )
+        .eq("tenant_id", this.tenantId)
+        .eq("papel", "principal")
+        .eq("ativo", true)
+        .is("removido_em", null)
+        .in("ordem_servico_id", ids);
+
+      const byOs = new Map<string, { id: string; nome: string }>();
+      for (const row of (alocData ?? []) as unknown as Array<{
+        ordem_servico_id: string;
+        mecanico_id: string;
+        mecanico: { id: string; nome_completo: string } | null;
+      }>) {
+        if (byOs.has(row.ordem_servico_id)) continue;
+        byOs.set(row.ordem_servico_id, {
+          id: row.mecanico?.id ?? row.mecanico_id,
+          nome: row.mecanico?.nome_completo ?? "",
+        });
+      }
+
+      const profileIds = items
+        .filter((i) => i.mecanico_id && !byOs.get(i.id)?.nome)
+        .map((i) => i.mecanico_id!) ;
+      const uniqueProfiles = [...new Set(profileIds)];
+      const profileNames = new Map<string, string>();
+      if (uniqueProfiles.length > 0) {
+        const { data: profiles } = await this.supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", uniqueProfiles);
+        for (const p of profiles ?? []) {
+          if (p.full_name) profileNames.set(p.id, p.full_name);
+        }
+      }
+
+      items = items.map((item) => {
+        const principal = byOs.get(item.id);
+        const profileNome = item.mecanico_id
+          ? profileNames.get(item.mecanico_id)
+          : null;
+        return {
+          ...item,
+          responsavel: resolveListResponsavel({
+            principal: principal?.nome
+              ? principal
+              : null,
+            profile:
+              item.mecanico_id && profileNome
+                ? { id: item.mecanico_id, nome: profileNome }
+                : null,
+          }),
+        };
+      });
+    }
 
     if (filters.q?.trim()) {
       const q = filters.q.trim().toLowerCase();
@@ -278,11 +515,53 @@ export class OrdemServicoService {
           String(item.numero).includes(q) ||
           item.cliente_nome?.toLowerCase().includes(q) ||
           item.placa?.toLowerCase().includes(q) ||
-          item.modelo?.toLowerCase().includes(q),
+          item.modelo?.toLowerCase().includes(q) ||
+          item.responsavel.nome.toLowerCase().includes(q),
       );
     }
 
-    return { items, total: count ?? items.length };
+    const total = count ?? items.length;
+    const totalPages = Math.max(1, Math.ceil(total / perPage) || 1);
+
+    return {
+      items,
+      total,
+      page: Math.min(page, totalPages),
+      perPage,
+      totalPages,
+    };
+  }
+
+  /**
+   * Contagens do dia — usa data_conclusao / aceite_entrega_em (nunca updated_at).
+   */
+  async countFinalizacaoHoje(hojeIso = new Date().toISOString().slice(0, 10)): Promise<{
+    finalizadasHoje: number;
+    entreguesHoje: number;
+  }> {
+    const amanha = new Date(`${hojeIso}T00:00:00.000Z`);
+    amanha.setUTCDate(amanha.getUTCDate() + 1);
+    const amanhaIso = amanha.toISOString();
+
+    const base = () =>
+      this.supabase
+        .from("ordens_servico")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .is("arquivado_em", null);
+
+    const [fin, ent] = await Promise.all([
+      base().eq("data_conclusao", hojeIso),
+      base()
+        .gte("aceite_entrega_em", `${hojeIso}T00:00:00.000Z`)
+        .lt("aceite_entrega_em", amanhaIso),
+    ]);
+
+    return {
+      finalizadasHoje: fin.count ?? 0,
+      entreguesHoje: ent.error ? 0 : (ent.count ?? 0),
+    };
   }
 
   async getById(id: string): Promise<OrdemServicoDetail | null> {
@@ -360,6 +639,10 @@ export class OrdemServicoService {
       mecanico_id: data.mecanico_id,
       venda_id: data.venda_id,
       prioridade: (row.prioridade as string) ?? "normal",
+      data_conclusao: data.data_conclusao,
+      aceite_entrega_em:
+        (row.aceite_entrega_em as string | null) ?? null,
+      responsavel: RESPONSAVEL_FALLBACK,
       quilometragem_entrada: (row.quilometragem_entrada as number | null) ?? null,
       quilometragem_saida: (row.quilometragem_saida as number | null) ?? null,
       data_hora_entrada: (row.data_hora_entrada as string | null) ?? null,
@@ -374,7 +657,6 @@ export class OrdemServicoService {
       subtotal: Number(row.subtotal ?? 0),
       desconto_total: Number(row.desconto_total ?? 0),
       acrescimo_total: Number(row.acrescimo_total ?? 0),
-      data_conclusao: data.data_conclusao,
       garantia_dias: (row.garantia_dias as number | null) ?? null,
       arquivado_em: (row.arquivado_em as string | null) ?? null,
       arquivado_motivo: (row.arquivado_motivo as string | null) ?? null,
@@ -1479,6 +1761,8 @@ export class OrdemServicoService {
         forma_pagamento_id: input.forma_pagamento_id,
         observacoes: `OS #${current.numero}`,
         centro_custo_id: current.centro_custo_id,
+        canal_venda: "os",
+        vendedor_id: current.consultor_id ?? null,
         itens: aprovados.map((item) => ({
           produto_id: item.produto_id!,
           quantidade: item.quantidade,

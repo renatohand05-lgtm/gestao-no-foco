@@ -328,7 +328,11 @@ export function buildExecutiveDecisionItems(
       severity: "warning",
       category: "estoque",
       actionLabel: "Ver estoque",
-      href: `/${slug}/estoque`,
+      href: `/${slug}/estoque/dashboard${
+        est.zerados > 0
+          ? "?criticidade=zerado"
+          : "?criticidade=abaixo_minimo"
+      }`,
       referenceDate: dataHoje,
       source: "estoque-dashboard",
       score: scoreOf("warning", { overdue: est.zerados > 0 }),

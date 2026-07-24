@@ -16,6 +16,7 @@ import type {
   ExecutiveDecisionItem,
   ExecutiveDecisionResult,
 } from "@/lib/dashboard/executive-decision-types";
+import { EXECUTIVE_STATUS_LABEL, EXECUTIVE_BLOCK } from "@/lib/dashboard/executive-ui";
 import { formatCurrency } from "@/lib/dashboard/format";
 import {
   exAnimations,
@@ -38,14 +39,14 @@ const SEVERITY_UI: Record<
   { label: string; icon: LucideIcon; bar: string; badge: string }
 > = {
   critical: {
-    label: "Crítico",
+    label: EXECUTIVE_STATUS_LABEL.critico,
     icon: AlertTriangle,
     bar: "bg-rose-500",
     badge:
       "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300",
   },
   warning: {
-    label: "Atenção",
+    label: EXECUTIVE_STATUS_LABEL.atencao,
     icon: AlertTriangle,
     bar: "bg-orange-500",
     badge:
@@ -172,8 +173,10 @@ function SeverityBreakdown({ data }: { data: ExecutiveDecisionResult }) {
   if (totalCount === 0) return null;
 
   const parts: { label: string; count: number }[] = [];
-  if (criticalCount > 0) parts.push({ label: "Crítico", count: criticalCount });
-  if (warningCount > 0) parts.push({ label: "Atenção", count: warningCount });
+  if (criticalCount > 0)
+    parts.push({ label: EXECUTIVE_STATUS_LABEL.critico, count: criticalCount });
+  if (warningCount > 0)
+    parts.push({ label: EXECUTIVE_STATUS_LABEL.atencao, count: warningCount });
   if (opportunityCount > 0)
     parts.push({ label: "Oportunidade", count: opportunityCount });
   if (infoCount > 0) parts.push({ label: "Info", count: infoCount });
@@ -214,7 +217,7 @@ export function ExecutiveDecisionCenter({
   return (
     <section
       className={cn(
-        "border border-border/55 bg-card",
+        EXECUTIVE_BLOCK.section,
         exRadius[16],
         exShadow.card,
         exAnimations.fade,
@@ -222,12 +225,9 @@ export function ExecutiveDecisionCenter({
       aria-labelledby="centro-decisao-titulo"
       data-dashboard-block="decision-center"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/50 px-5 py-3.5 sm:px-6">
+      <div className={EXECUTIVE_BLOCK.header}>
         <div className="min-w-0">
-          <h2
-            id="centro-decisao-titulo"
-            className="text-sm font-semibold tracking-tight text-foreground"
-          >
+          <h2 id="centro-decisao-titulo" className={EXECUTIVE_BLOCK.title}>
             Centro de Decisão
           </h2>
           <p className={cn(exTypography.caption, "mt-0.5")}>
@@ -249,7 +249,7 @@ export function ExecutiveDecisionCenter({
       </div>
 
       {empty ? (
-        <div className="flex items-start gap-3.5 px-5 py-6 sm:px-6">
+        <div className={cn(EXECUTIVE_BLOCK.body, "flex items-start gap-3.5")}>
           <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
             <DsIcon icon={CheckCircle2} size="md" />
           </span>

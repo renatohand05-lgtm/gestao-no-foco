@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 const CRM_LINKS = [
   { href: "clientes", label: "Lista" },
+  { href: "clientes/central", label: "CRM Executivo" },
   { href: "clientes/funil", label: "Funil" },
   { href: "clientes/tarefas", label: "Tarefas" },
   { href: "clientes/agenda", label: "Agenda" },

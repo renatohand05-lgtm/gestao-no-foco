@@ -1,10 +1,17 @@
 import Link from "next/link";
 
 import { DashboardBarChart } from "@/components/dashboard/dashboard-charts";
-import { ModuleHeader } from "@/components/layout/module-header";
+import {
+  ExecutiveButton,
+  ExecutiveFilter,
+  ExecutiveFilterField,
+  ExecutiveHeader,
+  ExecutivePage,
+  MetricCard,
+} from "@/components/executive";
 import { OsSubnav } from "@/components/ordens/os-subnav";
-import { buttonVariants } from "@/components/ui/button";
-import { SectionCard } from "@/components/ui/section-card";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { gofControl, gofGrid } from "@/lib/design-system";
 import { formatCurrency } from "@/lib/format";
 import { createOsDashboardService } from "@/lib/ordens/os-dashboard-service";
 import { OS_STATUS, OS_STATUS_LABELS } from "@/lib/ordens/os-status";
@@ -25,13 +32,21 @@ function Kpi({
   value: string;
   href?: string;
 }) {
-  const inner = (
-    <div className="rounded-lg border bg-card p-4 transition hover:border-foreground/20">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-semibold tracking-tight">{value}</p>
-    </div>
+  const card = (
+    <MetricCard label={label} value={value} className="h-full" />
   );
-  return href ? <Link href={href}>{inner}</Link> : inner;
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="block h-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40"
+        aria-label={`${label}: ${value}`}
+      >
+        {card}
+      </Link>
+    );
+  }
+  return card;
 }
 
 function resolvePeriod(preset?: string, de?: string, ate?: string) {
@@ -90,18 +105,16 @@ export default async function OrdensDashboardPage({
 
   if (!canView) {
     return (
-      <div className="space-y-4">
-        <ModuleHeader
-          title="Dashboard de OS"
-          breadcrumbs={[
+      <ExecutivePage width="wide" spacing="default">
+        <Breadcrumbs items={[
             { label: "Ordens", href: `/${tenantSlug}/ordens` },
             { label: "Dashboard" },
-          ]}
-        />
+          ]} />
+      <ExecutiveHeader title="Dashboard de OS" />
         <p className="text-sm text-muted-foreground">
           Sem permissão para visualizar o dashboard.
         </p>
-      </div>
+      </ExecutivePage>
     );
   }
 
@@ -151,26 +164,28 @@ export default async function OrdensDashboardPage({
   };
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Dashboard de OS"
-        description="Visão gerencial do ciclo da oficina"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Ordens", href: `/${tenantSlug}/ordens` },
           { label: "Dashboard" },
-        ]}
-      >
-        <OsSubnav tenantSlug={tenantSlug} active="dashboard" />
-      </ModuleHeader>
+        ]} />
+      <ExecutiveHeader title="Dashboard de OS" description="Visão gerencial do ciclo da oficina" actions={<OsSubnav tenantSlug={tenantSlug} active="dashboard" />} />
 
-      <SectionCard title="Filtros" contentClassName="pt-0">
-        <form className="flex flex-wrap gap-3 text-sm">
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Período</span>
+      <form>
+        <ExecutiveFilter
+          label="Filtros"
+          actions={
+            <ExecutiveButton type="submit" size="sm">
+              Aplicar
+            </ExecutiveButton>
+          }
+        >
+          <ExecutiveFilterField label="Período" htmlFor="os-dash-preset">
             <select
+              id="os-dash-preset"
               name="preset"
               defaultValue={period.preset}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
+              className={cn(gofControl, "w-full")}
             >
               <option value="hoje">Hoje</option>
               <option value="ontem">Ontem</option>
@@ -178,31 +193,31 @@ export default async function OrdensDashboardPage({
               <option value="mes">Mês</option>
               <option value="custom">Personalizado</option>
             </select>
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">De</span>
+          </ExecutiveFilterField>
+          <ExecutiveFilterField label="De" htmlFor="os-dash-de">
             <input
+              id="os-dash-de"
               type="date"
               name="de"
               defaultValue={period.de}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
+              className={cn(gofControl, "w-full")}
             />
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Até</span>
+          </ExecutiveFilterField>
+          <ExecutiveFilterField label="Até" htmlFor="os-dash-ate">
             <input
+              id="os-dash-ate"
               type="date"
               name="ate"
               defaultValue={period.ate}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
+              className={cn(gofControl, "w-full")}
             />
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Status</span>
+          </ExecutiveFilterField>
+          <ExecutiveFilterField label="Status" htmlFor="os-dash-status">
             <select
+              id="os-dash-status"
               name="status"
               defaultValue={sp.status ?? "all"}
-              className="flex h-10 rounded-md border border-input bg-transparent px-3"
+              className={cn(gofControl, "w-full")}
             >
               <option value="all">Todos</option>
               {OS_STATUS.map((s) => (
@@ -211,13 +226,13 @@ export default async function OrdensDashboardPage({
                 </option>
               ))}
             </select>
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Unidade</span>
+          </ExecutiveFilterField>
+          <ExecutiveFilterField label="Unidade" htmlFor="os-dash-centro">
             <select
+              id="os-dash-centro"
               name="centro_custo_id"
               defaultValue={sp.centro_custo_id ?? ""}
-              className="flex h-10 max-w-56 rounded-md border border-input bg-transparent px-3"
+              className={cn(gofControl, "w-full max-w-56")}
             >
               <option value="">Todas</option>
               {(centros ?? []).map((c) => (
@@ -227,13 +242,13 @@ export default async function OrdensDashboardPage({
                 </option>
               ))}
             </select>
-          </label>
-          <label className="space-y-1">
-            <span className="text-muted-foreground">Cliente</span>
+          </ExecutiveFilterField>
+          <ExecutiveFilterField label="Cliente" htmlFor="os-dash-cliente">
             <select
+              id="os-dash-cliente"
               name="cliente_id"
               defaultValue={sp.cliente_id ?? ""}
-              className="flex h-10 max-w-56 rounded-md border border-input bg-transparent px-3"
+              className={cn(gofControl, "w-full max-w-56")}
             >
               <option value="">Todos</option>
               {(clientes ?? []).map((c) => (
@@ -242,17 +257,16 @@ export default async function OrdensDashboardPage({
                 </option>
               ))}
             </select>
-          </label>
-          <button
-            type="submit"
-            className={cn(buttonVariants({ size: "sm" }), "mt-6")}
-          >
-            Aplicar
-          </button>
-        </form>
-      </SectionCard>
+          </ExecutiveFilterField>
+        </ExecutiveFilter>
+      </form>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+      <div
+        className={gofGrid.kpis}
+        data-os-block="dashboard-kpis"
+        role="region"
+        aria-label="Indicadores do Dashboard de OS"
+      >
         <Kpi
           label="Abertas"
           value={String(data.kpis.abertas)}
@@ -433,6 +447,6 @@ export default async function OrdensDashboardPage({
       <p className="text-xs text-muted-foreground">
         Clique nos cards de status para abrir a listagem filtrada (drill-down).
       </p>
-    </div>
+    </ExecutivePage>
   );
 }

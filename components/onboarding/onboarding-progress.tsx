@@ -1,7 +1,7 @@
 import {
   OnboardingProgressBar,
 } from "@/components/onboarding/onboarding-progress-bar";
-import { exTypography } from "@/lib/design-system";
+import { gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type { OnboardingChecklistResult } from "@/lib/onboarding";
 
@@ -24,12 +24,10 @@ export function OnboardingProgress({
         estimatedMinutes={estimatedMinutes}
       />
       {message ? (
-        <p className={cn(exTypography.body, "text-muted-foreground")}>
-          {message}
-        </p>
+        <p className={cn(gofTypography.subtitle)}>{message}</p>
       ) : null}
       {checklist.nextItem ? (
-        <p className={exTypography.caption} aria-live="polite">
+        <p className={gofTypography.caption} aria-live="polite">
           Próximo passo: {checklist.nextItem.title}.
         </p>
       ) : null}

@@ -9,6 +9,8 @@ import {
   type ResumoDiaRow,
   type ResumoTotalGeral,
 } from "@/lib/dashboard/resumo-vendas-mes";
+import { gofCardSurface } from "@/lib/design-system/primitives";
+import { gofColors, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -70,8 +72,9 @@ export function ResumoEvolucaoAcumulada({ rows, total, metaMensal }: Props) {
 
   return (
     <section
-      className="rounded-2xl border border-border/55 bg-card p-5 shadow-sm sm:p-6"
+      className={cn(gofCardSurface, "p-5 sm:p-6")}
       aria-labelledby="evolucao-acumulada-titulo"
+      data-dashboard-block="evolucao-acumulada"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -86,12 +89,15 @@ export function ResumoEvolucaoAcumulada({ rows, total, metaMensal }: Props) {
           </p>
         </div>
         <div className="flex flex-wrap gap-3 text-xs">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-blue-600" aria-hidden /> Meta
-            acum.
+          <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+            <span
+              className="size-2 rounded-full bg-[var(--brand-info)]"
+              aria-hidden
+            />{" "}
+            Meta acum.
           </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-emerald-600" aria-hidden />{" "}
+          <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+            <span className="size-2 rounded-full bg-success" aria-hidden />{" "}
             Realizado acum.
           </span>
         </div>
@@ -147,7 +153,7 @@ export function ResumoEvolucaoAcumulada({ rows, total, metaMensal }: Props) {
             d={metaPath}
             fill="none"
             stroke="currentColor"
-            className="text-blue-600"
+            className="text-[var(--brand-info)]"
             strokeWidth="2"
           />
           {realPoints ? (
@@ -155,7 +161,7 @@ export function ResumoEvolucaoAcumulada({ rows, total, metaMensal }: Props) {
               d={realPoints}
               fill="none"
               stroke="currentColor"
-              className="text-emerald-600"
+              className="text-success"
               strokeWidth="2.5"
             />
           ) : null}
@@ -169,8 +175,8 @@ export function ResumoEvolucaoAcumulada({ rows, total, metaMensal }: Props) {
               r={hover === i ? 4.5 : 2.5}
               className={cn(
                 p.realizado_acumulado == null
-                  ? "fill-blue-600/40"
-                  : "fill-emerald-600",
+                  ? "fill-[var(--brand-info)]/40"
+                  : "fill-success",
               )}
               onMouseEnter={() => setHover(i)}
             />
@@ -207,15 +213,15 @@ function Stat({
   tone: "ok" | "bad" | "neutral";
 }) {
   return (
-    <div className="rounded-lg border bg-muted/20 px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+    <div className="rounded-lg border border-border/50 bg-muted/20 px-3 py-2.5">
+      <p className={cn(gofTypography.caption, "uppercase tracking-wide")}>
         {label}
       </p>
       <p
         className={cn(
           "mt-0.5 text-sm font-semibold tabular-nums",
-          tone === "ok" && "text-emerald-700 dark:text-emerald-400",
-          tone === "bad" && "text-rose-700 dark:text-rose-400",
+          tone === "ok" && gofColors.success.text,
+          tone === "bad" && gofColors.danger.text,
         )}
       >
         {value}

@@ -1,5 +1,10 @@
-import { RouteLoading } from "@/components/layout/route-loading";
+import { BrandSplash } from "@/components/brand";
 
 export default function DashboardLoading() {
-  return <RouteLoading cards={4} label="Carregando dashboard…" />;
+  return (
+    <BrandSplash
+      className="min-h-[70vh]"
+      label="Carregando dashboard…"
+    />
+  );
 }

@@ -1,25 +1,19 @@
-import { SkeletonCard } from "@/components/ui/skeleton-card";
-import { dsSpace } from "@/lib/design-system";
-import { cn } from "@/lib/utils";
+import { BrandSplash } from "@/components/brand";
 
 type Props = {
+  /** Mantido por compat — BrandSplash unificado (Gate 19.4.1). */
   cards?: number;
   label?: string;
+  className?: string;
 };
 
+/**
+ * Loading de rota — sempre BrandSplash (Gate 19.4.1).
+ * Mesma animação, logo, tipografia e barra Brand.
+ */
 export function RouteLoading({
-  cards = 2,
   label = "Carregando…",
+  className = "min-h-[60vh]",
 }: Props) {
-  return (
-    <div
-      className={cn(dsSpace.section)}
-      aria-busy="true"
-      aria-label={label}
-    >
-      {Array.from({ length: cards }).map((_, index) => (
-        <SkeletonCard key={index} lines={4} />
-      ))}
-    </div>
-  );
+  return <BrandSplash className={className} label={label} />;
 }

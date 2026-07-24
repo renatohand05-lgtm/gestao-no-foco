@@ -1,6 +1,12 @@
 import Link from "next/link";
 
+import {
+  ExecutiveButton,
+  ExecutiveEmptyState,
+  ExecutiveSection,
+} from "@/components/executive";
 import { formatCurrency } from "@/lib/format";
+import { gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -12,7 +18,7 @@ type Props = {
 };
 
 /**
- * Resumo compacto para o Dashboard principal — não duplica a central.
+ * Resumo compacto CI no Dashboard — DS oficial (Gate 19.1).
  */
 export function CommercialIntelligenceSummaryCard({
   tenantSlug,
@@ -22,49 +28,57 @@ export function CommercialIntelligenceSummaryCard({
   available,
 }: Props) {
   return (
-    <section
-      className={cn(
-        "rounded-lg border bg-card p-4 sm:p-5",
-        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
-      )}
+    <div
       data-dashboard-block="inteligencia-comercial"
+      className={gofMotion.fade}
     >
-      <div className="min-w-0 space-y-1">
-        <h2 className="text-base font-semibold">Inteligência Comercial</h2>
-        <p className="text-sm text-muted-foreground">
-          Pipeline, conversão e orçamentos que pedem ação.
-        </p>
+      <ExecutiveSection
+        title="Inteligência Comercial"
+        description="Pipeline, conversão e orçamentos que pedem ação."
+        panel
+        actions={
+          <ExecutiveButton
+            render={<Link href={`/${tenantSlug}/vendas/dashboard`} />}
+          >
+            Abrir Inteligência Comercial
+          </ExecutiveButton>
+        }
+      >
         {available ? (
-          <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <dl className="flex flex-wrap gap-x-6 gap-y-2">
             <div>
-              <dt className="inline text-muted-foreground">Faturamento: </dt>
+              <dt className={cn(gofTypography.caption, "inline")}>
+                Faturamento:{" "}
+              </dt>
               <dd className="inline font-medium tabular-nums">
                 {faturamento == null ? "—" : formatCurrency(faturamento)}
               </dd>
             </div>
             <div>
-              <dt className="inline text-muted-foreground">Negociação: </dt>
+              <dt className={cn(gofTypography.caption, "inline")}>
+                Negociação:{" "}
+              </dt>
               <dd className="inline font-medium tabular-nums">
                 {negociacao == null ? "—" : formatCurrency(negociacao)}
               </dd>
             </div>
             <div>
-              <dt className="inline text-muted-foreground">Conversão: </dt>
-              <dd className="inline font-medium tabular-nums">{conversaoLabel}</dd>
+              <dt className={cn(gofTypography.caption, "inline")}>
+                Conversão:{" "}
+              </dt>
+              <dd className="inline font-medium tabular-nums">
+                {conversaoLabel}
+              </dd>
             </div>
           </dl>
         ) : (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Dados parciais ou indisponíveis neste momento.
-          </p>
+          <ExecutiveEmptyState
+            title="Dados parciais"
+            description="Dados parciais ou indisponíveis neste momento."
+            className="py-6"
+          />
         )}
-      </div>
-      <Link
-        href={`/${tenantSlug}/vendas/dashboard`}
-        className="inline-flex shrink-0 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-      >
-        Abrir Inteligência Comercial
-      </Link>
-    </section>
+      </ExecutiveSection>
+    </div>
   );
 }

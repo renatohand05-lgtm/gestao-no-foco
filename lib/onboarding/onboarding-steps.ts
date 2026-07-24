@@ -7,15 +7,15 @@ import type { TenantSegment } from "@/types";
 export const ONBOARDING_STEPS: OnboardingStepDefinition[] = [
   {
     id: "welcome",
-    title: "Boas-vindas",
-    description: "Entenda o que o Gestão no Foco entrega em poucos minutos.",
+    title: "Bem-vindo ao Gestão",
+    description: "Controle, estratégia e resultados em poucos minutos.",
     required: true,
     estimatedMinutes: 1,
   },
   {
     id: "company",
-    title: "Dados da empresa",
-    description: "Nome e identificação do negócio no sistema.",
+    title: "Cadastre sua empresa",
+    description: "Nome e identificação do negócio no workspace.",
     required: true,
     estimatedMinutes: 2,
     dataBacked: true,
@@ -32,8 +32,8 @@ export const ONBOARDING_STEPS: OnboardingStepDefinition[] = [
   },
   {
     id: "bank_account",
-    title: "Conta bancária",
-    description: "Base para o financeiro e o Dashboard.",
+    title: "Configure seu financeiro",
+    description: "Uma conta bancária libera a leitura financeira.",
     required: false,
     estimatedMinutes: 3,
     dataBacked: true,
@@ -72,13 +72,13 @@ export const ONBOARDING_STEPS: OnboardingStepDefinition[] = [
   },
   {
     id: "first_sale",
-    title: "Primeira venda",
-    description: "Gera o primeiro movimento útil no Dashboard.",
+    title: "Primeira Ordem de Serviço",
+    description: "Registre a primeira OS ou venda para ativar o painel.",
     required: false,
     estimatedMinutes: 4,
     dataBacked: true,
     checklistId: "venda",
-    hrefSuffix: "/vendas/nova",
+    hrefSuffix: "/ordens/nova",
   },
   {
     id: "review",

@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { ModuleHeader } from "@/components/layout/module-header";
 import { RecursosManager } from "@/components/operacoes/recursos-manager";
 import { SectionCard } from "@/components/ui/section-card";
 import { createRecursosOcupacaoService } from "@/lib/operacoes/recursos-service";
@@ -8,6 +7,11 @@ import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Ocupação da oficina" };
 
@@ -46,25 +50,22 @@ export default async function RecursosOcupacaoPage({
     .limit(100);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Elevadores e recursos"
-        description="Cadastre e gerencie elevadores, rampas, boxes e equipamentos"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           {
             label: "Centro de Operações",
             href: `/${tenantSlug}/centro-operacoes`,
           },
           { label: "Recursos" },
-        ]}
-      >
-        <Link
+        ]} />
+      <ExecutiveHeader title="Elevadores e recursos" description="Cadastre e gerencie elevadores, rampas, boxes e equipamentos" actions={<>
+<Link
           href={`/${tenantSlug}/centro-operacoes`}
           className="text-sm underline"
         >
           Voltar
         </Link>
-      </ModuleHeader>
+</>} />
 
       {data.migrationPending ? (
         <SectionCard title="Migration pendente">
@@ -122,6 +123,6 @@ export default async function RecursosOcupacaoPage({
           </p>
         </>
       )}
-    </div>
+    </ExecutivePage>
   );
 }

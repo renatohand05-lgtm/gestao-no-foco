@@ -3,14 +3,9 @@ import Link from "next/link";
 import { ContaPagarRowActions } from "@/components/financeiro/conta-pagar-row-actions";
 import { ContaPagarStatusBadge } from "@/components/financeiro/conta-pagar-status-badge";
 import {
-  DataTable,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/data-table";
+  ExecutiveTable,
+  type ExecutiveTableColumn,
+} from "@/components/executive";
 import {
   calcSaldoPendente,
   formatContaPagarNumero,
@@ -32,68 +27,74 @@ export function ContaPagarTable({
   formasPagamento = [],
   contasBancarias = [],
 }: Props) {
-  return (
-    <DataTable>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Título</TableHead>
-            <TableHead className="hidden sm:table-cell">Fornecedor</TableHead>
-            <TableHead className="hidden md:table-cell">Vencimento</TableHead>
-            <TableHead className="hidden lg:table-cell">Valor</TableHead>
-            <TableHead className="hidden xl:table-cell">Status</TableHead>
-            <TableHead className="w-12" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => {
-            const saldo = calcSaldoPendente(item);
+  const columns: ExecutiveTableColumn<ContaPagarListItem>[] = [
+    {
+      id: "titulo",
+      header: "Título",
+      cell: (item) => (
+        <Link
+          href={`/${tenantSlug}/financeiro/contas-pagar/${item.id}`}
+          className="block hover:underline"
+        >
+          <p className="font-medium">{formatContaPagarNumero(item.numero)}</p>
+          <p className="text-xs text-muted-foreground">
+            {item.descricao}
+            {item.parcela_total > 1
+              ? ` · ${item.parcela_numero}/${item.parcela_total}`
+              : ""}
+          </p>
+        </Link>
+      ),
+    },
+    {
+      id: "fornecedor",
+      header: "Fornecedor",
+      className: "hidden sm:table-cell",
+      cell: (item) => resolveFornecedorNome(item),
+    },
+    {
+      id: "vencimento",
+      header: "Vencimento",
+      className: "hidden md:table-cell",
+      cell: (item) => formatDateOnly(item.data_vencimento),
+    },
+    {
+      id: "valor",
+      header: "Valor",
+      className: "hidden lg:table-cell",
+      cell: (item) =>
+        item.status_exibicao === "pago"
+          ? formatCurrency(item.valor_pago)
+          : formatCurrency(calcSaldoPendente(item)),
+    },
+    {
+      id: "status",
+      header: "Status",
+      className: "hidden xl:table-cell",
+      cell: (item) => <ContaPagarStatusBadge status={item.status_exibicao} />,
+    },
+    {
+      id: "actions",
+      header: "",
+      className: "w-12",
+      cell: (item) => (
+        <ContaPagarRowActions
+          tenantSlug={tenantSlug}
+          item={item}
+          formasPagamento={formasPagamento}
+          contasBancarias={contasBancarias}
+        />
+      ),
+    },
+  ];
 
-            return (
-              <TableRow key={item.id}>
-                <TableCell>
-                  <Link
-                    href={`/${tenantSlug}/financeiro/contas-pagar/${item.id}`}
-                    className="block hover:underline"
-                  >
-                    <p className="font-medium">
-                      {formatContaPagarNumero(item.numero)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.descricao}
-                      {item.parcela_total > 1
-                        ? ` · ${item.parcela_numero}/${item.parcela_total}`
-                        : ""}
-                    </p>
-                  </Link>
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  {resolveFornecedorNome(item)}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {formatDateOnly(item.data_vencimento)}
-                </TableCell>
-                <TableCell className="hidden lg:table-cell">
-                  {item.status_exibicao === "pago"
-                    ? formatCurrency(item.valor_pago)
-                    : formatCurrency(saldo)}
-                </TableCell>
-                <TableCell className="hidden xl:table-cell">
-                  <ContaPagarStatusBadge status={item.status_exibicao} />
-                </TableCell>
-                <TableCell>
-                  <ContaPagarRowActions
-                    tenantSlug={tenantSlug}
-                    item={item}
-                    formasPagamento={formasPagamento}
-                    contasBancarias={contasBancarias}
-                  />
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </DataTable>
+  return (
+    <ExecutiveTable
+      columns={columns}
+      rows={items}
+      getRowId={(row) => row.id}
+      density="comfortable"
+      stickyHeader
+    />
   );
 }

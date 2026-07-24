@@ -1,7 +1,6 @@
 import { CentroOpsKpiCards } from "@/components/operacoes/centro-ops-kpi-cards";
 import { CentroOpsLivePanel } from "@/components/operacoes/centro-ops-live-panel";
 import { DashboardPrefsEditor } from "@/components/operacoes/dashboard-prefs-editor";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { createCentroOperacoesService } from "@/lib/operacoes/centro-operacoes-service";
@@ -10,6 +9,11 @@ import type { DashboardPreferencia } from "@/lib/operacoes/dashboard-prefs-servi
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Centro de Operações" };
 
@@ -46,15 +50,13 @@ export default async function CentroOperacoesPage({
 
   if (!canView) {
     return (
-      <div className="space-y-4">
-        <ModuleHeader
-          title="Centro de Operações"
-          breadcrumbs={[{ label: "Centro de Operações" }]}
-        />
+      <ExecutivePage width="wide" spacing="default">
+        <Breadcrumbs items={[{ label: "Centro de Operações" }]} />
+      <ExecutiveHeader title="Centro de Operações" />
         <p className="text-sm text-muted-foreground">
           Sem permissão para visualizar o Centro de Operações.
         </p>
-      </div>
+      </ExecutivePage>
     );
   }
 
@@ -108,13 +110,10 @@ export default async function CentroOperacoesPage({
   }
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Centro de Operações"
-        description="Visão rápida do que está acontecendo na oficina agora"
-        breadcrumbs={[{ label: "Centro de Operações" }]}
-      >
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[{ label: "Centro de Operações" }]} />
+      <ExecutiveHeader title="Centro de Operações" description="Visão rápida do que está acontecendo na oficina agora" actions={<>
+<div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {canAlertas ? (
             <a
               href={`/${tenantSlug}/centro-operacoes/alertas`}
@@ -133,7 +132,7 @@ export default async function CentroOperacoesPage({
             Elevadores / recursos
           </a>
         </div>
-      </ModuleHeader>
+</>} />
 
       <DashboardPrefsEditor
         tenantSlug={tenantSlug}
@@ -161,6 +160,6 @@ export default async function CentroOperacoesPage({
           pollSeconds={60}
         />
       </SectionCard>
-    </div>
+    </ExecutivePage>
   );
 }

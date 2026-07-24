@@ -3,19 +3,17 @@ import { Truck } from "lucide-react";
 
 import { FinanceiroEmptyState } from "@/components/financeiro/financeiro-empty-state";
 import { FinanceiroStatusBadge } from "@/components/financeiro/financeiro-status-badge";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { ActionButton } from "@/components/ui/action-button";
 import {
-  DataTable,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/data-table";
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveTable,
+  type ExecutiveTableColumn,
+} from "@/components/executive";
+import { ActionButton } from "@/components/ui/action-button";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { createFornecedorService } from "@/lib/financeiro/fornecedor-service";
 import { requireTenant } from "@/lib/tenants";
+import type { FornecedorListItem } from "@/types/fornecedores";
 
 export const metadata = { title: "Fornecedores" };
 
@@ -31,21 +29,65 @@ export default async function Page({ params, searchParams }: PageProps) {
   const service = await createFornecedorService(tenant.id);
   const result = await service.list({ search: q, perPage: 50 });
 
+  const columns: ExecutiveTableColumn<FornecedorListItem>[] = [
+    {
+      id: "fornecedor",
+      header: "Fornecedor",
+      cell: (item) => (
+        <>
+          <Link
+            href={`/${tenantSlug}/financeiro/fornecedores/${item.id}`}
+            className="font-medium hover:underline"
+          >
+            {item.nome_fantasia || item.nome}
+          </Link>
+          {item.nome_fantasia ? (
+            <p className="text-xs text-muted-foreground">{item.nome}</p>
+          ) : null}
+        </>
+      ),
+    },
+    {
+      id: "documento",
+      header: "Documento",
+      className: "hidden sm:table-cell",
+      cell: (item) => item.documento || "—",
+    },
+    {
+      id: "cidade",
+      header: "Cidade",
+      className: "hidden md:table-cell",
+      cell: (item) =>
+        item.cidade
+          ? `${item.cidade}${item.estado ? `/${item.estado}` : ""}`
+          : "—",
+    },
+    {
+      id: "status",
+      header: "Status",
+      className: "hidden lg:table-cell",
+      cell: (item) => <FinanceiroStatusBadge ativo={item.ativo} />,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Fornecedores"
-        description={`Cadastro mestre de ${tenant.name} — padrões financeiros para autopreenchimento.`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs
+        items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Fornecedores" },
         ]}
-      >
-        <ActionButton
-          action="create"
-          href={`/${tenantSlug}/financeiro/fornecedores/novo`}
-        />
-      </ModuleHeader>
+      />
+      <ExecutiveHeader
+        title="Fornecedores"
+        description={`Cadastro mestre de ${tenant.name} — padrões financeiros para autopreenchimento.`}
+        actions={
+          <ActionButton
+            action="create"
+            href={`/${tenantSlug}/financeiro/fornecedores/novo`}
+          />
+        }
+      />
 
       {result.data.length === 0 ? (
         <FinanceiroEmptyState
@@ -59,47 +101,13 @@ export default async function Page({ params, searchParams }: PageProps) {
           hasFilters={false}
         />
       ) : (
-        <DataTable>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead className="hidden sm:table-cell">Documento</TableHead>
-                <TableHead className="hidden md:table-cell">Cidade</TableHead>
-                <TableHead className="hidden lg:table-cell">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {result.data.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <Link
-                      href={`/${tenantSlug}/financeiro/fornecedores/${item.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {item.nome_fantasia || item.nome}
-                    </Link>
-                    {item.nome_fantasia ? (
-                      <p className="text-xs text-muted-foreground">{item.nome}</p>
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {item.documento || "—"}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {item.cidade
-                      ? `${item.cidade}${item.estado ? `/${item.estado}` : ""}`
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <FinanceiroStatusBadge ativo={item.ativo} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DataTable>
+        <ExecutiveTable
+          columns={columns}
+          rows={result.data}
+          getRowId={(row) => row.id}
+          stickyHeader
+        />
       )}
-    </div>
+    </ExecutivePage>
   );
 }

@@ -1,5 +1,7 @@
-import { RouteLoading } from "@/components/layout/route-loading";
+import { BrandSplash } from "@/components/brand";
 
 export default function MetasLoading() {
-  return <RouteLoading cards={2} label="Carregando metas…" />;
+  return (
+    <BrandSplash className="min-h-[60vh]" label="Carregando metas…" />
+  );
 }

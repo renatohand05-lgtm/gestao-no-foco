@@ -1,9 +1,13 @@
 import { CategoriaFinanceiraForm } from "@/components/financeiro/categoria-financeira-form";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { buildPlanoContaSelectOptions } from "@/lib/financeiro/plano-conta-tree";
 import { createPlanoContaService } from "@/lib/financeiro/plano-conta-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Nova categoria" };
 
@@ -19,30 +23,28 @@ export default async function NovoPage({
   const planoContaOptions = buildPlanoContaSelectOptions(planoItems);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Nova categoria"
-        description={`Cadastro em ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Categorias Financeiras",
             href: `/${tenantSlug}/financeiro/categorias`,
           },
           { label: "Nova categoria" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Nova categoria" description={`Cadastro em ${tenant.name}`} />
 
-      <SectionCard
+      <ExecutiveSection
         title="Cadastro"
         description="Preencha os dados do novo registro."
+        panel
       >
         <CategoriaFinanceiraForm
           tenantSlug={tenantSlug}
           mode="create"
           planoContaOptions={planoContaOptions}
         />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

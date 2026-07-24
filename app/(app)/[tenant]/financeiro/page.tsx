@@ -15,7 +15,11 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { ModuleHeader } from "@/components/layout/module-header";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -53,11 +57,11 @@ export default async function FinanceiroPage({
   const tenant = await requireTenant(tenantSlug);
 
   return (
-    <div className="space-y-8">
-      <ModuleHeader
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[{ label: "Financeiro" }]} />
+      <ExecutiveHeader
         title="Financeiro"
         description={`Base estrutural e cadastros mestres de ${tenant.name}`}
-        breadcrumbs={[{ label: "Financeiro" }]}
       />
 
       <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 px-6 py-10 text-white shadow-sm md:px-10">
@@ -129,6 +133,6 @@ export default async function FinanceiroPage({
           ))}
         </div>
       </SectionCard>
-    </div>
+    </ExecutivePage>
   );
 }

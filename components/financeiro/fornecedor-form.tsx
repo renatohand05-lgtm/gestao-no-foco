@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
+import { gofControl } from "@/lib/design-system";
 import {
   checkFornecedorDuplicatesAction,
   createFornecedorAction,
@@ -36,9 +37,6 @@ type Props = {
   formas: Option[];
   contasBancarias: Option[];
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function FornecedorForm({
   tenantSlug,
@@ -166,7 +164,7 @@ export function FornecedorForm({
             <FormField label="Tipo" htmlFor="tipo_pessoa">
               <select
                 id="tipo_pessoa"
-                className={selectClassName}
+                className={gofControl}
                 value={values.tipo_pessoa ?? ""}
                 onChange={(e) =>
                   setField("tipo_pessoa", (e.target.value || null) as TipoPessoa)
@@ -264,7 +262,7 @@ export function FornecedorForm({
             <FormField label="Categoria padrão" htmlFor="categoria_financeira_id">
               <select
                 id="categoria_financeira_id"
-                className={selectClassName}
+                className={gofControl}
                 value={values.categoria_financeira_id ?? ""}
                 onChange={(e) =>
                   setField("categoria_financeira_id", e.target.value)
@@ -281,7 +279,7 @@ export function FornecedorForm({
             <FormField label="Plano de contas padrão" htmlFor="plano_conta_id">
               <select
                 id="plano_conta_id"
-                className={selectClassName}
+                className={gofControl}
                 value={values.plano_conta_id ?? ""}
                 onChange={(e) => setField("plano_conta_id", e.target.value)}
               >
@@ -296,7 +294,7 @@ export function FornecedorForm({
             <FormField label="Centro de custo padrão" htmlFor="centro_custo_id">
               <select
                 id="centro_custo_id"
-                className={selectClassName}
+                className={gofControl}
                 value={values.centro_custo_id ?? ""}
                 onChange={(e) => setField("centro_custo_id", e.target.value)}
               >
@@ -311,7 +309,7 @@ export function FornecedorForm({
             <FormField label="Forma de pagamento" htmlFor="forma_pagamento_id">
               <select
                 id="forma_pagamento_id"
-                className={selectClassName}
+                className={gofControl}
                 value={values.forma_pagamento_id ?? ""}
                 onChange={(e) => setField("forma_pagamento_id", e.target.value)}
               >
@@ -326,7 +324,7 @@ export function FornecedorForm({
             <FormField label="Conta bancária padrão" htmlFor="conta_bancaria_id">
               <select
                 id="conta_bancaria_id"
-                className={selectClassName}
+                className={gofControl}
                 value={values.conta_bancaria_id ?? ""}
                 onChange={(e) => setField("conta_bancaria_id", e.target.value)}
               >
@@ -355,7 +353,7 @@ export function FornecedorForm({
             <FormField label="Recorrente" htmlFor="recorrente">
               <select
                 id="recorrente"
-                className={selectClassName}
+                className={gofControl}
                 value={String(values.recorrente)}
                 onChange={(e) =>
                   setField("recorrente", e.target.value === "true")
@@ -368,7 +366,7 @@ export function FornecedorForm({
             <FormField label="Frequência" htmlFor="frequencia">
               <select
                 id="frequencia"
-                className={selectClassName}
+                className={gofControl}
                 value={values.frequencia ?? ""}
                 onChange={(e) =>
                   setField(
@@ -389,7 +387,7 @@ export function FornecedorForm({
             <FormField label="Status" htmlFor="ativo">
               <select
                 id="ativo"
-                className={selectClassName}
+                className={gofControl}
                 value={String(values.ativo)}
                 onChange={(e) => setField("ativo", e.target.value === "true")}
               >

@@ -10,19 +10,28 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import {
+  ExecutiveBadge,
+  ExecutiveCard,
+  ExecutiveEmptyState,
+  ExecutiveSection,
+  ExecutiveSkeleton,
+  type ExecutiveBadgeTone,
+} from "@/components/executive";
 import { DsIcon } from "@/components/ui/ds-icon";
 import type {
+  DecisionCategory,
   DecisionSeverity,
   ExecutiveDecisionItem,
   ExecutiveDecisionResult,
 } from "@/lib/dashboard/executive-decision-types";
-import { EXECUTIVE_STATUS_LABEL, EXECUTIVE_BLOCK } from "@/lib/dashboard/executive-ui";
+import { EXECUTIVE_STATUS_LABEL } from "@/lib/dashboard/executive-ui";
 import { formatCurrency } from "@/lib/dashboard/format";
 import {
-  exAnimations,
-  exRadius,
-  exShadow,
-  exTypography,
+  gofFocusRing,
+  gofMotion,
+  gofRadius,
+  gofTypography,
 } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
@@ -36,38 +45,79 @@ type Props = {
 
 const SEVERITY_UI: Record<
   DecisionSeverity,
-  { label: string; icon: LucideIcon; bar: string; badge: string }
+  { label: string; icon: LucideIcon; tone: ExecutiveBadgeTone; bar: string }
 > = {
   critical: {
     label: EXECUTIVE_STATUS_LABEL.critico,
     icon: AlertTriangle,
-    bar: "bg-rose-500",
-    badge:
-      "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300",
+    tone: "danger",
+    bar: "bg-danger",
   },
   warning: {
     label: EXECUTIVE_STATUS_LABEL.atencao,
     icon: AlertTriangle,
-    bar: "bg-orange-500",
-    badge:
-      "bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-200",
+    tone: "warning",
+    bar: "bg-warning",
   },
   opportunity: {
     label: "Oportunidade",
     icon: Lightbulb,
-    bar: "bg-emerald-500",
-    badge:
-      "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
+    tone: "success",
+    bar: "bg-success",
   },
   info: {
     label: "Info",
     icon: Info,
-    bar: "bg-sky-500",
-    badge: "bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-200",
+    tone: "info",
+    bar: "bg-[var(--brand-info)]",
   },
 };
 
-/** Rótulo visual do impacto — não altera o valor do payload. */
+/** Grupos premium Gate 19.3 — só apresentação; categorias do payload intactas. */
+const GROUP_ORDER = [
+  "financeiro",
+  "operacao",
+  "comercial",
+  "estoque",
+  "crm",
+  "os",
+] as const;
+
+type DecisionGroupKey = (typeof GROUP_ORDER)[number];
+
+const GROUP_LABEL: Record<DecisionGroupKey, string> = {
+  financeiro: "Financeiro",
+  operacao: "Operação",
+  comercial: "Comercial",
+  estoque: "Estoque",
+  crm: "CRM",
+  os: "Ordens de Serviço",
+};
+
+function mapCategoryToGroup(category: DecisionCategory): DecisionGroupKey {
+  if (category === "financeiro") return "financeiro";
+  if (category === "estoque") return "estoque";
+  if (category === "clientes") return "crm";
+  if (category === "oficina") return "os";
+  if (category === "vendas" || category === "metas") return "comercial";
+  if (category === "operacao" || category === "pessoas") return "operacao";
+  return "operacao";
+}
+
+function groupItems(items: ExecutiveDecisionItem[]) {
+  const map = new Map<DecisionGroupKey, ExecutiveDecisionItem[]>();
+  for (const key of GROUP_ORDER) map.set(key, []);
+  for (const item of items) {
+    const g = mapCategoryToGroup(item.category);
+    map.get(g)!.push(item);
+  }
+  return GROUP_ORDER.filter((k) => (map.get(k)?.length ?? 0) > 0).map((k) => ({
+    key: k,
+    label: GROUP_LABEL[k],
+    items: map.get(k)!,
+  }));
+}
+
 function impactLabel(item: ExecutiveDecisionItem): string {
   if (item.id === "projecao-mes-abaixo") return "Gap projetado";
   if (item.id === "meta-dia-abaixo") return "Falta para a meta";
@@ -90,37 +140,37 @@ function DecisionItemRow({ item }: { item: ExecutiveDecisionItem }) {
   const hasImpact = item.impactValue != null && item.impactValue > 0;
 
   const content = (
-    <div className="flex min-w-0 gap-3.5 px-3.5 py-3.5 sm:px-4 sm:py-4">
+    <div className="flex min-w-0 gap-3.5">
       <span
         className={cn("w-1 shrink-0 self-stretch rounded-full", ui.bar)}
         aria-hidden
       />
       <span
         className={cn(
-          "inline-flex size-10 shrink-0 items-center justify-center rounded-lg",
-          ui.badge,
+          "inline-flex size-10 shrink-0 items-center justify-center",
+          gofRadius.md,
+          ui.tone === "danger" && "bg-danger/10 text-danger",
+          ui.tone === "warning" && "bg-warning/15 text-warning-foreground",
+          ui.tone === "success" && "bg-success/10 text-success",
+          ui.tone === "info" &&
+            "bg-[var(--brand-info)]/10 text-[var(--brand-info)]",
         )}
       >
         <DsIcon icon={ui.icon} size="md" />
       </span>
       <div className="min-w-0 flex-1 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <p className={cn(exTypography.cardTitle, "min-w-0 text-[13px] sm:text-sm")}>
+          <p className={cn(gofTypography.body, "min-w-0 font-semibold")}>
             {item.title}
           </p>
-          <span
-            className={cn(
-              "inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap",
-              ui.badge,
-            )}
-          >
+          <ExecutiveBadge tone={ui.tone} variant="soft">
             {ui.label}
-          </span>
+          </ExecutiveBadge>
         </div>
 
         {hasImpact ? (
           <div className="min-w-0">
-            <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+            <p className={cn(gofTypography.caption, "uppercase tracking-wide")}>
               {impactLabel(item)}
             </p>
             <p className="mt-0.5 text-base font-semibold tracking-tight tabular-nums text-foreground sm:text-[17px]">
@@ -129,12 +179,12 @@ function DecisionItemRow({ item }: { item: ExecutiveDecisionItem }) {
           </div>
         ) : null}
 
-        <p className={cn(exTypography.caption, "line-clamp-2 text-muted-foreground")}>
+        <p className={cn(gofTypography.caption, "line-clamp-2")}>
           {item.description}
         </p>
 
         {item.actionLabel ? (
-          <span className="inline-flex items-center gap-0.5 pt-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+          <span className="inline-flex items-center gap-0.5 pt-0.5 text-xs font-medium text-muted-foreground">
             {item.actionLabel}
             <ArrowUpRight className="size-3.5" aria-hidden />
           </span>
@@ -149,20 +199,25 @@ function DecisionItemRow({ item }: { item: ExecutiveDecisionItem }) {
         <Link
           href={item.href}
           className={cn(
-            "block rounded-xl border border-border/50 bg-background/60 transition-colors hover:bg-muted/40",
-            exAnimations.focusRing,
+            "block motion-safe:transition-colors motion-safe:duration-150 hover:bg-muted/40",
+            gofRadius.lg,
+            gofFocusRing,
           )}
           aria-label={`${item.title}. ${item.actionLabel ?? "Abrir"}`}
         >
-          {content}
+          <ExecutiveCard padding={16} interactive className="border-border/50">
+            {content}
+          </ExecutiveCard>
         </Link>
       </li>
     );
   }
 
   return (
-    <li className="rounded-xl border border-border/50 bg-background/60">
-      {content}
+    <li>
+      <ExecutiveCard padding={16} className="border-border/50">
+        {content}
+      </ExecutiveCard>
     </li>
   );
 }
@@ -172,123 +227,151 @@ function SeverityBreakdown({ data }: { data: ExecutiveDecisionResult }) {
     data.summary;
   if (totalCount === 0) return null;
 
-  const parts: { label: string; count: number }[] = [];
+  const parts: { label: string; count: number; tone: ExecutiveBadgeTone }[] =
+    [];
   if (criticalCount > 0)
-    parts.push({ label: EXECUTIVE_STATUS_LABEL.critico, count: criticalCount });
+    parts.push({
+      label: EXECUTIVE_STATUS_LABEL.critico,
+      count: criticalCount,
+      tone: "danger",
+    });
   if (warningCount > 0)
-    parts.push({ label: EXECUTIVE_STATUS_LABEL.atencao, count: warningCount });
+    parts.push({
+      label: EXECUTIVE_STATUS_LABEL.atencao,
+      count: warningCount,
+      tone: "warning",
+    });
   if (opportunityCount > 0)
-    parts.push({ label: "Oportunidade", count: opportunityCount });
-  if (infoCount > 0) parts.push({ label: "Info", count: infoCount });
+    parts.push({ label: "Oportunidade", count: opportunityCount, tone: "success" });
+  if (infoCount > 0)
+    parts.push({ label: "Info", count: infoCount, tone: "info" });
 
   return (
-    <div className="border-b border-border/40 px-5 py-2.5 sm:px-6">
-      <p className="text-xs font-medium text-foreground">
-        {totalCount} alerta{totalCount === 1 ? "" : "s"} ativo
-        {totalCount === 1 ? "" : "s"}
+    <div className="flex flex-wrap items-center gap-2 border-b border-border/40 pb-3">
+      <p className={cn(gofTypography.body, "mr-1 font-medium")}>
+        {totalCount} alerta{totalCount === 1 ? "" : "s"}
       </p>
-      {parts.length > 0 ? (
-        <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
-          {parts.map((p) => (
-            <li key={p.label}>
-              · {p.count} {p.label}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {parts.map((p) => (
+        <ExecutiveBadge key={p.label} tone={p.tone} variant="soft">
+          {p.count} {p.label}
+        </ExecutiveBadge>
+      ))}
     </div>
   );
 }
 
 /**
- * Centro de Decisão — compacto, priorizado (Gate 16.2 / 16.2.1 visual).
+ * Centro de Decisão premium — agrupado por domínio (Gate 19.3).
  */
 export function ExecutiveDecisionCenter({
   data,
   tenantSlug,
-  maxItems = 5,
-  compactMaxItems = 3,
+  maxItems = 8,
+  compactMaxItems = 4,
   loading = false,
 }: Props) {
   const desktopItems = data.items.slice(0, maxItems);
+  const mobileItems = data.items.slice(0, compactMaxItems);
   const hasMore = data.items.length > compactMaxItems;
   const empty = data.items.length === 0;
+  const desktopGroups = groupItems(desktopItems);
+  const mobileGroups = groupItems(mobileItems);
 
   return (
-    <section
-      className={cn(
-        EXECUTIVE_BLOCK.section,
-        exRadius[16],
-        exShadow.card,
-        exAnimations.fade,
-      )}
-      aria-labelledby="centro-decisao-titulo"
-      data-dashboard-block="decision-center"
-    >
-      <div className={EXECUTIVE_BLOCK.header}>
-        <div className="min-w-0">
-          <h2 id="centro-decisao-titulo" className={EXECUTIVE_BLOCK.title}>
-            Centro de Decisão
-          </h2>
-          <p className={cn(exTypography.caption, "mt-0.5")}>
-            {loading ? "Carregando prioridades…" : data.summary.headline}
-          </p>
-        </div>
-        {hasMore ? (
-          <Link
-            href={`/${tenantSlug}/centro-operacoes`}
-            className={cn(
-              "inline-flex h-8 shrink-0 items-center rounded-md border border-border px-3 text-xs font-medium text-foreground hover:bg-muted/50",
-              exAnimations.focusRing,
-            )}
-            aria-label="Abrir Centro de Operações"
-          >
-            Centro de Operações →
-          </Link>
-        ) : null}
-      </div>
-
-      {empty ? (
-        <div className={cn(EXECUTIVE_BLOCK.body, "flex items-start gap-3.5")}>
-          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-            <DsIcon icon={CheckCircle2} size="md" />
-          </span>
-          <div>
-            <p className={exTypography.cardTitle}>Operação sob controle</p>
-            <p className={cn(exTypography.caption, "mt-0.5")}>
-              Nenhum ponto crítico identificado neste momento.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          {!loading ? <SeverityBreakdown data={data} /> : null}
-          <ul className="hidden space-y-2.5 p-3.5 sm:block sm:p-4">
-            {desktopItems.map((item) => (
-              <DecisionItemRow key={item.id} item={item} />
-            ))}
-          </ul>
-          <ul className="space-y-2.5 p-3.5 sm:hidden">
-            {data.items.slice(0, compactMaxItems).map((item) => (
-              <DecisionItemRow key={item.id} item={item} />
-            ))}
-          </ul>
-        </>
-      )}
-    </section>
+    <div data-dashboard-block="decision-center" className={gofMotion.fade}>
+      <ExecutiveSection
+        title="Decisões inteligentes"
+        description={loading ? "Carregando prioridades…" : data.summary.headline}
+        panel
+        actions={
+          hasMore ? (
+            <Link
+              href={`/${tenantSlug}/centro-operacoes`}
+              className={cn(
+                "inline-flex h-8 shrink-0 items-center rounded-md border border-border px-3 text-xs font-medium text-foreground hover:bg-muted/50",
+                gofFocusRing,
+              )}
+              aria-label="Abrir Centro de Operações"
+            >
+              Centro de Operações →
+            </Link>
+          ) : undefined
+        }
+      >
+        {empty ? (
+          <ExecutiveEmptyState
+            title="Operação sob controle"
+            description="Nenhum ponto crítico identificado neste momento. A GESTÃO continua monitorando metas, caixa e oficina."
+            icon={CheckCircle2}
+            className="py-8"
+          />
+        ) : (
+          <>
+            {!loading ? <SeverityBreakdown data={data} /> : null}
+            <div className="hidden space-y-6 sm:block">
+              {desktopGroups.map((group) => (
+                <section
+                  key={group.key}
+                  aria-labelledby={`decision-group-${group.key}`}
+                  className="space-y-2.5"
+                >
+                  <h3
+                    id={`decision-group-${group.key}`}
+                    className={cn(
+                      gofTypography.caption,
+                      "font-semibold uppercase tracking-[0.12em] text-muted-foreground",
+                    )}
+                  >
+                    {group.label}
+                  </h3>
+                  <ul className="space-y-2.5">
+                    {group.items.map((item) => (
+                      <DecisionItemRow key={item.id} item={item} />
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+            <div className="space-y-5 sm:hidden">
+              {mobileGroups.map((group) => (
+                <section
+                  key={group.key}
+                  aria-labelledby={`decision-group-m-${group.key}`}
+                  className="space-y-2.5"
+                >
+                  <h3
+                    id={`decision-group-m-${group.key}`}
+                    className={cn(
+                      gofTypography.caption,
+                      "font-semibold uppercase tracking-[0.12em] text-muted-foreground",
+                    )}
+                  >
+                    {group.label}
+                  </h3>
+                  <ul className="space-y-2.5">
+                    {group.items.map((item) => (
+                      <DecisionItemRow key={item.id} item={item} />
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </>
+        )}
+      </ExecutiveSection>
+    </div>
   );
 }
 
 export function ExecutiveDecisionCenterSkeleton() {
   return (
     <div
-      className={cn(
-        "h-44 border border-border/50 bg-card",
-        exRadius[16],
-        exAnimations.shimmer,
-      )}
+      className="space-y-3 rounded-xl border border-border/60 bg-card p-5"
       aria-busy="true"
       aria-label="Carregando centro de decisão"
-    />
+    >
+      <ExecutiveSkeleton heightClassName="h-5" widthClassName="w-1/3" />
+      <ExecutiveSkeleton heightClassName="h-32" widthClassName="w-full" />
+    </div>
   );
 }

@@ -18,6 +18,12 @@ export {
 } from "@/lib/onboarding/onboarding-steps";
 
 export {
+  PREMIUM_ONBOARDING_FLOW,
+  PREMIUM_STEP_COPY,
+  isPremiumFlowStep,
+} from "@/lib/onboarding/premium-flow";
+export type { PremiumOnboardingStepId } from "@/lib/onboarding/premium-flow";
+export {
   computeNextStep,
   buildProgressMessage,
   isOnboardingComplete,

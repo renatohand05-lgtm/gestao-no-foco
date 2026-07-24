@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
+import { gofControl } from "@/lib/design-system";
 import {
   createPlanoContaAction,
   updatePlanoContaAction,
@@ -39,8 +40,6 @@ type Props = {
   item?: PlanoConta;
   parentOptions: PlanoContaSelectOption[];
 };
-
-const selectClassName = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function PlanoContaForm({
   tenantSlug,
@@ -113,14 +112,14 @@ export function PlanoContaForm({
               <Input id="nome" {...form.register("nome")} placeholder="Receitas operacionais" />
             </FormField>
             <FormField label="Tipo" htmlFor="tipo" required>
-              <select id="tipo" {...form.register("tipo")} className={selectClassName}>
+              <select id="tipo" {...form.register("tipo")} className={gofControl}>
                 {PLANO_CONTA_TIPO_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
             </FormField>
             <FormField label="Natureza" htmlFor="natureza" required>
-              <select id="natureza" {...form.register("natureza")} className={selectClassName}>
+              <select id="natureza" {...form.register("natureza")} className={gofControl}>
                 {PLANO_CONTA_NATUREZA_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
@@ -138,7 +137,7 @@ export function PlanoContaForm({
             </FormField>
             <FormField label="Status" htmlFor="ativo" required>
               <Controller control={form.control} name="ativo" render={({ field }) => (
-                <select id="ativo" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={selectClassName}>
+                <select id="ativo" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={gofControl}>
                   {FINANCEIRO_STATUS_OPTIONS.map((option) => (
                     <option key={String(option.value)} value={String(option.value)}>{option.label}</option>
                   ))}
@@ -147,7 +146,7 @@ export function PlanoContaForm({
             </FormField>
             <FormField label="Aceita lançamento" htmlFor="aceita_lancamento">
               <Controller control={form.control} name="aceita_lancamento" render={({ field }) => (
-                <select id="aceita_lancamento" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={selectClassName}>
+                <select id="aceita_lancamento" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={gofControl}>
                   <option value="true">Sim</option>
                   <option value="false">Não</option>
                 </select>

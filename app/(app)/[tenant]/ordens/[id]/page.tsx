@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
 import { OsWorkspace } from "@/components/ordens/os-workspace";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { createClienteRecorrenciaService } from "@/lib/crm/cliente-recorrencia-service";
 import { createCompartilhamentoService } from "@/lib/ordens/compartilhamento-service";
 import { createInspecaoStorageService } from "@/lib/ordens/inspecao-storage-service";
@@ -15,6 +14,11 @@ import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Detalhe da OS" };
 
@@ -146,15 +150,12 @@ export default async function OsDetailPage({
   }
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={`OS #${os.numero}`}
-        description={`${os.cliente_nome ?? "Cliente"} · ${os.placa ?? "sem placa"}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Ordens", href: `/${tenantSlug}/ordens` },
           { label: `#${os.numero}` },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title={`OS #${os.numero}`} description={`${os.cliente_nome ?? "Cliente"} · ${os.placa ?? "sem placa"}`} />
       <OsWorkspace
         tenantSlug={tenantSlug}
         os={os}
@@ -185,6 +186,6 @@ export default async function OsDetailPage({
         canTransferirMecanico={canTransferirMecanico}
         canApontarHoras={canApontarHoras}
       />
-    </div>
+    </ExecutivePage>
   );
 }

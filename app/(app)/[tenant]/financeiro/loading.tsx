@@ -1,5 +1,10 @@
-import { RouteLoading } from "@/components/layout/route-loading";
+import { BrandSplash } from "@/components/brand";
 
 export default function FinanceiroLoading() {
-  return <RouteLoading cards={2} label="Carregando financeiro…" />;
+  return (
+    <BrandSplash
+      className="min-h-[60vh]"
+      label="Carregando financeiro…"
+    />
+  );
 }

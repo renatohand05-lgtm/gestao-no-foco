@@ -1,6 +1,13 @@
 import Link from "next/link";
 
 import {
+  ExecutiveBadge,
+  ExecutiveCard,
+  ExecutiveEmptyState,
+  ExecutivePanel,
+  ExecutiveSection,
+} from "@/components/executive";
+import {
   EXECUTIVE_AI_BADGE,
   EXECUTIVE_AI_HEALTH_LABEL,
   EXECUTIVE_AI_MODULE_LABEL,
@@ -12,26 +19,25 @@ import {
   formatExecutiveScore,
 } from "@/lib/ai/executive-ai-summary";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
-import { EXECUTIVE_BLOCK } from "@/lib/dashboard/executive-ui";
-import { exAnimations, exRadius, exTypography } from "@/lib/design-system";
+import { gofGrid, gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type Props = {
   data: ExecutiveAiResult;
 };
 
-const HEALTH_BADGE: Record<string, string> = {
-  excelente:
-    "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200",
-  saudavel: "bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-200",
-  atencao:
-    "bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-200",
-  critico: "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300",
-  indisponivel: "bg-muted text-muted-foreground",
-};
+function healthTone(
+  health: ExecutiveAiResult["health"],
+): "success" | "warning" | "danger" | "neutral" | "info" {
+  if (health === "excelente") return "success";
+  if (health === "saudavel") return "info";
+  if (health === "atencao") return "warning";
+  if (health === "critico") return "danger";
+  return "neutral";
+}
 
 /**
- * IA Executiva — card compacto (regras determinísticas, sem LLM).
+ * IA Executiva — Design System oficial (Gate 19.1).
  */
 export function ExecutiveAiCard({ data }: Props) {
   const partialLabel = executiveAiPartialLabel(data);
@@ -41,182 +47,221 @@ export function ExecutiveAiCard({ data }: Props) {
   });
 
   return (
-    <section
-      className={cn(
-        "border bg-card p-4 sm:p-5 space-y-4",
-        exRadius[20],
-        exAnimations.fade,
-      )}
-      data-dashboard-block="ia-executiva"
-      aria-label={EXECUTIVE_AI_TITLE}
-    >
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-1">
+    <div data-dashboard-block="ia-executiva" className={gofMotion.fade}>
+      <ExecutiveSection
+        title={EXECUTIVE_AI_TITLE}
+        description={EXECUTIVE_AI_NOTE}
+        panel
+        className="space-y-5"
+        actions={
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className={cn(exTypography.title, "text-base sm:text-lg")}>
-              {EXECUTIVE_AI_TITLE}
-            </h2>
-            <span className="rounded-md border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <ExecutiveBadge tone="neutral" variant="outline">
               {EXECUTIVE_AI_BADGE}
-            </span>
+            </ExecutiveBadge>
             {partialLabel ? (
-              <span className="rounded-md border border-amber-300/70 bg-amber-50/60 px-2 py-0.5 text-[11px] font-medium text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
+              <ExecutiveBadge tone="warning" variant="soft">
                 {partialLabel}
-              </span>
+              </ExecutiveBadge>
             ) : null}
+            <span className={gofTypography.caption}>Atualizado: {updated}</span>
           </div>
-          <p className="text-xs text-muted-foreground" title={EXECUTIVE_AI_NOTE}>
-            {EXECUTIVE_AI_NOTE}
-          </p>
-        </div>
-        <p className="text-xs text-muted-foreground shrink-0">
-          Atualizado: {updated}
-        </p>
-      </header>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border p-3">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Executive Score
-          </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums">
-            {formatExecutiveScore(data.executiveScore)}
-          </p>
-        </div>
-        <div className="rounded-lg border p-3">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Saúde Executiva
-          </p>
-          <p className="mt-1">
-            <span
+        }
+      >
+        <div className={gofGrid.threeCol}>
+          <MetricBlock
+            label="Executive Score"
+            value={formatExecutiveScore(data.executiveScore)}
+            emphasize
+          />
+          <div className="rounded-lg border border-border/60 bg-background/50 p-4 sm:p-5">
+            <p
               className={cn(
-                "inline-flex rounded-md px-2 py-0.5 text-sm font-medium",
-                HEALTH_BADGE[data.health] ?? HEALTH_BADGE.indisponivel,
+                gofTypography.caption,
+                "uppercase tracking-[0.1em] text-muted-foreground",
               )}
             >
-              {EXECUTIVE_AI_HEALTH_LABEL[data.health]}
-            </span>
-          </p>
+              Saúde Executiva
+            </p>
+            <p className="mt-3">
+              <ExecutiveBadge tone={healthTone(data.health)} variant="soft">
+                {EXECUTIVE_AI_HEALTH_LABEL[data.health]}
+              </ExecutiveBadge>
+            </p>
+          </div>
+          <MetricBlock
+            label="Cobertura"
+            value={formatExecutiveConfidence(data.confidence)}
+            compact
+          />
         </div>
-        <div className="rounded-lg border p-3">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Cobertura
-          </p>
-          <p className="mt-1 text-sm font-medium tabular-nums">
-            {formatExecutiveConfidence(data.confidence)}
-          </p>
-        </div>
-      </div>
 
-      <div className="rounded-lg border border-dashed p-3 space-y-1">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-          Prioridade máxima
-        </p>
-        <p className="text-sm font-medium">{data.priority.title}</p>
-        <p className="text-xs text-muted-foreground">{data.priority.reason}</p>
-        {data.priority.href ? (
-          <Link
-            href={data.priority.href}
-            className="text-xs text-primary underline-offset-2 hover:underline"
-          >
-            Abrir
-          </Link>
-        ) : null}
-      </div>
-
-      {data.moduleScores.length > 0 ? (
-        <ul className="flex flex-wrap gap-2 text-xs">
-          {data.moduleScores.map((m) => (
-            <li
-              key={m.module}
-              className="rounded-md border px-2 py-1 tabular-nums text-muted-foreground"
+        <ExecutivePanel
+          className="border-dashed"
+          header={<p className={gofTypography.caption}>Prioridade máxima</p>}
+        >
+          <p className={cn(gofTypography.title, "text-base")}>
+            {data.priority.title}
+          </p>
+          <p className={cn(gofTypography.subtitle, "mt-1")}>
+            {data.priority.reason}
+          </p>
+          {data.priority.href ? (
+            <Link
+              href={data.priority.href}
+              className="mt-2 inline-block text-xs font-medium text-primary underline-offset-2 hover:underline"
             >
-              {EXECUTIVE_AI_MODULE_LABEL[m.module]}:{" "}
-              {m.score == null ? "Indisponível" : Math.round(m.score)}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+              Abrir
+            </Link>
+          ) : null}
+        </ExecutivePanel>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="space-y-2 min-w-0">
-          <h3 className={cn(EXECUTIVE_BLOCK.title, "text-sm")}>
-            Diagnósticos
-          </h3>
-          {data.diagnostics.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhum diagnóstico com evidência neste momento.
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {data.diagnostics.map((d) => (
-                <li key={d.id} className="rounded-lg border p-3 space-y-1">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    {EXECUTIVE_AI_SEVERITY_LABEL[d.severity]} ·{" "}
-                    {EXECUTIVE_AI_MODULE_LABEL[d.module]}
-                  </p>
-                  <p className="text-sm font-medium">{d.title}</p>
-                  <p className="text-xs text-muted-foreground">{d.description}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Evidência: {d.evidence.join("; ")}
-                  </p>
-                  {d.href ? (
-                    <Link
-                      href={d.href}
-                      className="text-xs text-primary underline-offset-2 hover:underline"
-                    >
-                      Ver detalhes
-                    </Link>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
+        {data.moduleScores.length > 0 ? (
+          <ul className="flex flex-wrap gap-2">
+            {data.moduleScores.map((m) => (
+              <li key={m.module}>
+                <ExecutiveBadge tone="neutral" variant="outline">
+                  {EXECUTIVE_AI_MODULE_LABEL[m.module]}:{" "}
+                  {m.score == null ? "Indisponível" : Math.round(m.score)}
+                </ExecutiveBadge>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        <div className={cn(gofGrid.twoCol)}>
+          <div className="min-w-0 space-y-2">
+            <h3 className={gofTypography.title}>Diagnósticos</h3>
+            {data.diagnostics.length === 0 ? (
+              <ExecutiveEmptyState
+                title="Nenhum diagnóstico"
+                description="Nenhuma evidência crítica neste momento."
+                className="py-8"
+              />
+            ) : (
+              <ul className="space-y-2">
+                {data.diagnostics.map((d) => (
+                  <li key={d.id}>
+                <ExecutiveCard padding={16} className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ExecutiveBadge
+                          tone={
+                            d.severity === "critica" || d.severity === "alta"
+                              ? "danger"
+                              : d.severity === "media"
+                                ? "warning"
+                                : d.severity === "oportunidade"
+                                  ? "success"
+                                  : "info"
+                          }
+                          variant="soft"
+                        >
+                          {EXECUTIVE_AI_SEVERITY_LABEL[d.severity]}
+                        </ExecutiveBadge>
+                        <ExecutiveBadge tone="neutral" variant="outline">
+                          {EXECUTIVE_AI_MODULE_LABEL[d.module]}
+                        </ExecutiveBadge>
+                      </div>
+                      <p className="text-sm font-semibold">{d.title}</p>
+                      <p className={cn(gofTypography.subtitle, "line-clamp-3")}>
+                        {d.description}
+                      </p>
+                      {d.href ? (
+                        <Link
+                          href={d.href}
+                          className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+                        >
+                          Ver detalhes
+                        </Link>
+                      ) : null}
+                    </ExecutiveCard>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="min-w-0 space-y-2">
+            <h3 className={gofTypography.title}>Recomendações</h3>
+            {data.recommendations.length === 0 ? (
+              <p className={gofTypography.subtitle}>
+                Nenhuma recomendação derivada.
+              </p>
+            ) : (
+              <ol className="space-y-2">
+                {data.recommendations.map((r) => (
+                  <li key={r.id}>
+                    <ExecutiveCard padding={16} className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ExecutiveBadge tone="primary" variant="soft">
+                          Prioridade {r.priority}
+                        </ExecutiveBadge>
+                        <ExecutiveBadge tone="neutral" variant="outline">
+                          {EXECUTIVE_AI_MODULE_LABEL[r.module]}
+                        </ExecutiveBadge>
+                      </div>
+                      <p className="text-sm font-semibold">{r.action}</p>
+                      <p className={cn(gofTypography.subtitle, "line-clamp-2")}>
+                        {r.reason}
+                      </p>
+                      {r.href ? (
+                        <Link
+                          href={r.href}
+                          className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+                        >
+                          Ir para ação
+                        </Link>
+                      ) : null}
+                    </ExecutiveCard>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-2 min-w-0">
-          <h3 className={cn(EXECUTIVE_BLOCK.title, "text-sm")}>
-            Recomendações
-          </h3>
-          {data.recommendations.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhuma recomendação derivada.
-            </p>
-          ) : (
-            <ol className="space-y-2">
-              {data.recommendations.map((r) => (
-                <li key={r.id} className="rounded-lg border p-3 space-y-1">
-                  <p className="text-[11px] text-muted-foreground">
-                    Prioridade {r.priority} · {EXECUTIVE_AI_MODULE_LABEL[r.module]}
-                  </p>
-                  <p className="text-sm font-medium">{r.action}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Motivo: {r.reason}
-                  </p>
-                  {r.href ? (
-                    <Link
-                      href={r.href}
-                      className="text-xs text-primary underline-offset-2 hover:underline"
-                    >
-                      Ir para ação
-                    </Link>
-                  ) : null}
-                </li>
-              ))}
-            </ol>
-          )}
-        </div>
-      </div>
+        {data.unavailableSources.length > 0 ? (
+          <p className={gofTypography.caption}>
+            Fontes indisponíveis:{" "}
+            {data.unavailableSources
+              .map((m) => EXECUTIVE_AI_MODULE_LABEL[m])
+              .join(", ")}
+            .
+          </p>
+        ) : null}
+      </ExecutiveSection>
+    </div>
+  );
+}
 
-      {data.unavailableSources.length > 0 ? (
-        <p className="text-xs text-muted-foreground">
-          Fontes indisponíveis:{" "}
-          {data.unavailableSources
-            .map((m) => EXECUTIVE_AI_MODULE_LABEL[m])
-            .join(", ")}
-          .
-        </p>
-      ) : null}
-    </section>
+function MetricBlock({
+  label,
+  value,
+  compact,
+  emphasize,
+}: {
+  label: string;
+  value: string;
+  compact?: boolean;
+  emphasize?: boolean;
+}) {
+  return (
+    <div className="rounded-lg border border-border/60 bg-background/50 p-4 sm:p-5">
+      <p
+        className={cn(
+          gofTypography.caption,
+          "uppercase tracking-[0.1em] text-muted-foreground",
+        )}
+      >
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-2 font-semibold tabular-nums tracking-tight text-foreground",
+          compact ? "text-lg" : emphasize ? "text-3xl sm:text-4xl" : "text-2xl",
+        )}
+      >
+        {value}
+      </p>
+    </div>
   );
 }

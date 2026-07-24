@@ -1,14 +1,18 @@
 import { notFound } from "next/navigation";
 
 import { ContaReceberForm } from "@/components/financeiro/conta-receber-form";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { createContaReceberService } from "@/lib/financeiro/conta-receber-service";
 import {
   canEditClassificacaoContaReceber,
   canEditContaReceber,
 } from "@/lib/financeiro/conta-receber-utils";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Editar conta a receber" };
 
@@ -69,15 +73,8 @@ export default async function EditarPage({
     ]);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={
-          classificacaoOnly
-            ? "Corrigir classificação"
-            : "Editar conta a receber"
-        }
-        description={item.descricao}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Contas a Receber",
@@ -88,16 +85,19 @@ export default async function EditarPage({
             href: `/${tenantSlug}/financeiro/contas-receber/${item.id}`,
           },
           { label: classificacaoOnly ? "Corrigir classificação" : "Editar" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title={classificacaoOnly
+            ? "Corrigir classificação"
+            : "Editar conta a receber"} description={item.descricao} />
 
-      <SectionCard
+      <ExecutiveSection
         title={classificacaoOnly ? "Classificação contábil" : "Edição"}
         description={
           classificacaoOnly
             ? "Atualize apenas categoria, plano de contas, centro de custo e competência."
             : "Atualize os dados do título em aberto."
         }
+        panel
       >
         <ContaReceberForm
           tenantSlug={tenantSlug}
@@ -111,7 +111,7 @@ export default async function EditarPage({
           centrosCusto={centrosCusto}
           planoContas={planoContas}
         />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

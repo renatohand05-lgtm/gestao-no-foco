@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
+import { gofControl } from "@/lib/design-system";
 import {
   createContaReceberAction,
   updateClassificacaoContaReceberAction,
@@ -52,9 +53,6 @@ type Props = {
   centrosCusto: CentroCustoOption[];
   planoContas: PlanoContaOption[];
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60";
 
 const numberFieldOptions = {
   setValueAs: (value: string | number) => {
@@ -220,7 +218,7 @@ export function ContaReceberForm({
                 <select
                   id="cliente_id"
                   {...form.register("cliente_id")}
-                  className={selectClassName}
+                  className={gofControl}
                   disabled={lockFinanceiro}
                 >
                   <option value="">Selecione o cliente</option>
@@ -243,7 +241,7 @@ export function ContaReceberForm({
                     id="venda_id"
                     value={field.value ?? ""}
                     onChange={(event) => handleVendaChange(event.target.value)}
-                    className={selectClassName}
+                    className={gofControl}
                     disabled={mode === "edit" || lockFinanceiro}
                   >
                     <option value="">Sem vínculo com venda</option>
@@ -261,7 +259,7 @@ export function ContaReceberForm({
               <select
                 id="forma_pagamento_id"
                 {...form.register("forma_pagamento_id")}
-                className={selectClassName}
+                className={gofControl}
                 disabled={lockFinanceiro}
               >
                 <option value="">Não informada</option>
@@ -282,7 +280,7 @@ export function ContaReceberForm({
               <select
                 id="categoria_financeira_id"
                 {...form.register("categoria_financeira_id")}
-                className={selectClassName}
+                className={gofControl}
               >
                 <option value="">Selecione a categoria</option>
                 {categorias.map((categoria) => (
@@ -302,7 +300,7 @@ export function ContaReceberForm({
               <select
                 id="centro_custo_id"
                 {...form.register("centro_custo_id")}
-                className={selectClassName}
+                className={gofControl}
               >
                 <option value="">Selecione o centro de custo</option>
                 {centrosCusto.map((centro) => (
@@ -322,7 +320,7 @@ export function ContaReceberForm({
               <select
                 id="plano_conta_id"
                 {...form.register("plano_conta_id")}
-                className={selectClassName}
+                className={gofControl}
               >
                 <option value="">Selecione o plano de contas</option>
                 {planoContas.map((conta) => (

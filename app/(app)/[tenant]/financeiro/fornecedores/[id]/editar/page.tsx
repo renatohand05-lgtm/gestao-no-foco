@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 
 import { FornecedorForm } from "@/components/financeiro/fornecedor-form";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { createFornecedorService } from "@/lib/financeiro/fornecedor-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Editar fornecedor" };
 
@@ -28,11 +32,8 @@ export default async function Page({ params }: PageProps) {
     ]);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Editar fornecedor"
-        description="Alterações invalidam cache de opções do tenant."
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Fornecedores",
@@ -43,8 +44,8 @@ export default async function Page({ params }: PageProps) {
             href: `/${tenantSlug}/financeiro/fornecedores/${item.id}`,
           },
           { label: "Editar" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Editar fornecedor" description="Alterações invalidam cache de opções do tenant." />
       <FornecedorForm
         tenantSlug={tenantSlug}
         mode="edit"
@@ -64,6 +65,6 @@ export default async function Page({ params }: PageProps) {
           label: c.nome,
         }))}
       />
-    </div>
+    </ExecutivePage>
   );
 }

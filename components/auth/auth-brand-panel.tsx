@@ -1,58 +1,48 @@
 import Link from "next/link";
 
-import { siteConfig } from "@/config/site";
+import { BrandLogo } from "@/components/brand";
+import { brandConfig } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
 type AuthBrandPanelProps = {
   className?: string;
 };
 
-const highlights = [
-  "Multiempresa e multiusuário",
-  "Clientes, vendas e financeiro",
-  "Feito para PMEs de qualquer segmento",
-];
-
+/**
+ * Painel de marca do login — identidade oficial (Gate 19.4).
+ */
 export function AuthBrandPanel({ className }: AuthBrandPanelProps) {
   return (
     <div
       className={cn(
-        "relative hidden overflow-hidden bg-primary p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between",
+        "relative hidden overflow-hidden bg-[var(--brand-graphite)] p-10 text-white lg:flex lg:flex-col lg:justify-between",
         className,
       )}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_55%)]" />
-      <div className="absolute -right-16 -top-16 size-64 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -bottom-20 -left-10 size-72 rounded-full bg-white/10 blur-3xl" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(201,168,76,0.22),transparent_55%)]" />
+      <div className="absolute -right-16 -top-16 size-64 rounded-full bg-[var(--brand-gold)]/10 blur-3xl" />
+      <div className="absolute -bottom-20 -left-10 size-72 rounded-full bg-[var(--brand-gold)]/10 blur-3xl" />
 
       <div className="relative">
-        <Link href="/" className="inline-flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-            <span className="text-sm font-bold">GF</span>
-          </div>
-          <span className="text-lg font-semibold">{siteConfig.name}</span>
+        <Link href="/" className="inline-flex" aria-label={brandConfig.name}>
+          <BrandLogo markSize="lg" showEdition inverse />
         </Link>
       </div>
 
-      <div className="relative space-y-6">
-        <h1 className="max-w-md text-3xl font-bold leading-tight tracking-tight">
-          Gestão empresarial inteligente, no foco do que importa.
-        </h1>
-        <p className="max-w-md text-sm text-primary-foreground/80">
-          {siteConfig.description}
+      <div className="relative space-y-5">
+        <p className="text-xs font-medium tracking-[0.18em] text-[var(--brand-gold)] uppercase">
+          {brandConfig.edition}
         </p>
-        <ul className="space-y-3 text-sm text-primary-foreground/90">
-          {highlights.map((item) => (
-            <li key={item} className="flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-white" />
-              {item}
-            </li>
-          ))}
-        </ul>
+        <h1 className="max-w-md font-[family-name:var(--font-display)] text-3xl font-semibold leading-tight tracking-tight">
+          {brandConfig.slogan}
+        </h1>
+        <p className="max-w-sm text-sm text-white/70">
+          {brandConfig.subtitle}
+        </p>
       </div>
 
-      <p className="relative text-xs text-primary-foreground/70">
-        © {new Date().getFullYear()} {siteConfig.name}
+      <p className="relative text-xs text-white/55">
+        © {new Date().getFullYear()} {brandConfig.name}
       </p>
     </div>
   );

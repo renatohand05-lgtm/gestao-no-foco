@@ -1,11 +1,15 @@
-import { ModuleHeader } from "@/components/layout/module-header";
 import { CentroCustoDeleteButton } from "@/components/financeiro/centro-custo-delete-button";
 import { FinanceiroStatusBadge } from "@/components/financeiro/financeiro-status-badge";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
-import { SectionCard } from "@/components/ui/section-card";
 import { formatFinanceiroDate } from "@/lib/financeiro/format";
 import type { CentroCusto } from "@/types/financeiro";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type Props = {
   tenantSlug: string;
@@ -31,17 +35,14 @@ function DetailItem({
 
 export function CentroCustoDetail({ tenantSlug, item }: Props) {
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={item.nome}
-        description="Detalhes do registro financeiro"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Centros de Custo", href: `/${tenantSlug}/financeiro/centros-custo` },
           { label: item.nome },
-        ]}
-      >
-        <FinanceiroStatusBadge ativo={item.ativo} />
+        ]} />
+      <ExecutiveHeader title={item.nome} description="Detalhes do registro financeiro" actions={<>
+<FinanceiroStatusBadge ativo={item.ativo} />
         <ActionButton
           action="edit"
           href={`/${tenantSlug}/financeiro/centros-custo/${item.id}/editar`}
@@ -51,27 +52,27 @@ export function CentroCustoDetail({ tenantSlug, item }: Props) {
           id={item.id}
           nome={item.nome}
         />
-      </ModuleHeader>
+</>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
 
-      <SectionCard title="Identificação">
+      <ExecutiveSection title="Identificação" panel>
         <FormGrid>
           <DetailItem label="Código" value={item.codigo} />
           <DetailItem label="Responsável" value={item.responsavel || "—"} />
           <DetailItem label="Descrição" value={item.descricao || "—"} />
         </FormGrid>
-      </SectionCard>
-      <SectionCard title="Observações">
+      </ExecutiveSection>
+      <ExecutiveSection title="Observações" panel>
         <p className="text-sm whitespace-pre-wrap">{item.observacoes || "—"}</p>
-      </SectionCard>
-      <SectionCard title="Auditoria">
+      </ExecutiveSection>
+      <ExecutiveSection title="Auditoria" panel>
         <FormGrid>
           <DetailItem label="Criado em" value={formatFinanceiroDate(item.created_at)} />
           <DetailItem label="Atualizado em" value={formatFinanceiroDate(item.updated_at)} />
         </FormGrid>
-      </SectionCard>
+      </ExecutiveSection>
       </div>
-    </div>
+    </ExecutivePage>
   );
 }

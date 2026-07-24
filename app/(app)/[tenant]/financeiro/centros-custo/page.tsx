@@ -8,7 +8,6 @@ import { FinanceiroFilters } from "@/components/financeiro/financeiro-filters";
 import { FinanceiroPagination } from "@/components/financeiro/financeiro-pagination";
 import { FinanceiroSearch } from "@/components/financeiro/financeiro-search";
 import { FinanceiroSort } from "@/components/financeiro/financeiro-sort";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
@@ -23,6 +22,11 @@ import type {
   SortOrder,
   CentroCustoSortField,
 } from "@/types/financeiro";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Centros de Custo" };
 
@@ -70,21 +74,18 @@ export default async function Page({ params, searchParams }: PageProps) {
     ativoFilter !== "all";
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Centros de Custo"
-        description={`Estrutura financeira de ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Centros de Custo" },
-        ]}
-      >
-        <ActionButton
+        ]} />
+      <ExecutiveHeader title="Centros de Custo" description={`Estrutura financeira de ${tenant.name}`} actions={<>
+<ActionButton
           action="create"
           label="Novo centro"
           href={`/${tenantSlug}/financeiro/centros-custo/novo`}
         />
-      </ModuleHeader>
+</>} />
 
       <FinanceiroFeedback
         success={success as FinanceiroSuccessMessage | undefined}
@@ -147,6 +148,6 @@ export default async function Page({ params, searchParams }: PageProps) {
           </Suspense>
         </>
       )}
-    </div>
+    </ExecutivePage>
   );
 }

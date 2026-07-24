@@ -8,7 +8,6 @@ import { FinanceiroFilters } from "@/components/financeiro/financeiro-filters";
 import { FinanceiroPagination } from "@/components/financeiro/financeiro-pagination";
 import { FinanceiroSearch } from "@/components/financeiro/financeiro-search";
 import { FinanceiroSort } from "@/components/financeiro/financeiro-sort";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
@@ -24,6 +23,11 @@ import type {
   SortOrder,
   FormaPagamentoSortField,
 } from "@/types/financeiro";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Formas de Pagamento" };
 
@@ -74,21 +78,18 @@ export default async function Page({ params, searchParams }: PageProps) {
     tipoFilter !== "all";
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Formas de Pagamento"
-        description={`Estrutura financeira de ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Formas de Pagamento" },
-        ]}
-      >
-        <ActionButton
+        ]} />
+      <ExecutiveHeader title="Formas de Pagamento" description={`Estrutura financeira de ${tenant.name}`} actions={<>
+<ActionButton
           action="create"
           label="Nova forma"
           href={`/${tenantSlug}/financeiro/formas-pagamento/novo`}
         />
-      </ModuleHeader>
+</>} />
 
       <FinanceiroFeedback
         success={success as FinanceiroSuccessMessage | undefined}
@@ -151,6 +152,6 @@ export default async function Page({ params, searchParams }: PageProps) {
           </Suspense>
         </>
       )}
-    </div>
+    </ExecutivePage>
   );
 }

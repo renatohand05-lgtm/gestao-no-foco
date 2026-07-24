@@ -33,10 +33,10 @@ export const exAnimations = {
   float:
     "motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-[cubic-bezier(0.25,0.1,0.25,1)]",
   focusRing:
-    "outline-none focus-visible:ring-2 focus-visible:ring-blue-600/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef1f5] dark:focus-visible:ring-offset-background",
+    "outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--brand-gray-light)] dark:focus-visible:ring-offset-background",
   /** Em superfícies escuras (Hero) */
   focusRingInverse:
-    "outline-none focus-visible:ring-2 focus-visible:ring-sky-300/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1322]",
+    "outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--brand-graphite)]",
   elevation:
     "motion-safe:transition-shadow motion-safe:duration-160 motion-safe:ease-[cubic-bezier(0.25,0.1,0.25,1)]",
   /** Hit target mínimo acessível */

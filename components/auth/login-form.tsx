@@ -10,10 +10,27 @@ import { AuthFormShell } from "@/components/auth/auth-form-shell";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
 import { PasswordField } from "@/components/auth/password-field";
 import { Input } from "@/components/ui/input";
-import { siteConfig } from "@/config/site";
+import { brandConfig } from "@/config/brand";
 import { getPostLoginPath } from "@/lib/auth/redirect";
 import { createClient } from "@/lib/supabase/client";
 
+function humanizeLoginError(message: string): string {
+  if (/invalid login credentials/i.test(message)) {
+    return "E-mail ou senha incorretos. Verifique e tente novamente.";
+  }
+  if (/email not confirmed/i.test(message)) {
+    return "Confirme seu e-mail antes de entrar.";
+  }
+  if (/failed to fetch/i.test(message)) {
+    return "Falha de comunicação com o servidor. Verifique a conexão e tente de novo.";
+  }
+  return message;
+}
+
+/**
+ * Login premium — hierarquia, a11y e Brand (Gate 19.4).
+ * Autenticação inalterada.
+ */
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,12 +57,12 @@ export function LoginForm() {
 
       if (signInError) {
         console.error(signInError);
-        setError(signInError.message);
+        setError(humanizeLoginError(signInError.message));
         return;
       }
 
       if (!data.user) {
-        setError("Sessão não criada após o login.");
+        setError("Sessão não criada após o login. Tente novamente.");
         return;
       }
 
@@ -59,13 +76,7 @@ export function LoginForm() {
     } catch (err) {
       console.error(err);
       const message = err instanceof Error ? err.message : "Erro desconhecido";
-      if (/failed to fetch/i.test(message)) {
-        setError(
-          "Falha de comunicação com o Supabase (Failed to fetch). Verifique NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local e reinicie o servidor.",
-        );
-      } else {
-        setError(message);
-      }
+      setError(humanizeLoginError(message));
     } finally {
       setLoading(false);
     }
@@ -73,28 +84,36 @@ export function LoginForm() {
 
   return (
     <AuthFormShell
-      title="Bem-vindo de volta"
-      description={`Entre na sua conta do ${siteConfig.name}`}
+      title="Entrar"
+      description={`${brandConfig.slogan} — acesse sua conta ${brandConfig.name}.`}
       footer={
         <AuthFooterLink
           text="Não tem conta?"
-          linkText="Cadastre-se grátis"
+          linkText="Cadastre-se"
           href="/register"
         />
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error ? <AuthAlert>{error}</AuthAlert> : null}
+      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        {error ? (
+          <AuthAlert id="login-error">{error}</AuthAlert>
+        ) : null}
 
         <AuthField id="email" label="E-mail">
           <Input
             id="email"
             type="email"
             autoComplete="email"
+            autoFocus
+            inputMode="email"
             placeholder="voce@empresa.com"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "login-error" : undefined}
+            disabled={loading}
+            className="h-11"
           />
         </AuthField>
 
@@ -105,11 +124,15 @@ export function LoginForm() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            disabled={loading}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "login-error" : undefined}
+            className="h-11"
           />
         </AuthField>
 
-        <AuthSubmitButton loading={loading} loadingText="Entrando...">
-          Entrar
+        <AuthSubmitButton loading={loading} loadingText="Entrando…">
+          Entrar no {brandConfig.name}
         </AuthSubmitButton>
       </form>
     </AuthFormShell>

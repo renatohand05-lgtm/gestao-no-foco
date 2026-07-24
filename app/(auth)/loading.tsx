@@ -1,5 +1,10 @@
-import { RouteLoading } from "@/components/layout/route-loading";
+import { BrandSplash } from "@/components/brand";
 
 export default function AuthLoading() {
-  return <RouteLoading cards={1} label="Carregando autenticação…" />;
+  return (
+    <BrandSplash
+      className="min-h-screen"
+      label="Carregando autenticação…"
+    />
+  );
 }

@@ -1,5 +1,7 @@
 # Design System — Gestão no Foco
 
+> **Sprint 19 · Gate 19.0:** a fundação oficial (`gof*` + theme + componentes) está documentada em [`/DESIGN_SYSTEM.md`](../../DESIGN_SYSTEM.md). Este arquivo preserva o histórico das sprints 10.x.
+
 **Sprint 10.1 — Executive Design System** (infra)  
 **Sprint 10.2 — Painel Comercial** (primeira adoção visual)  
 **Sprint 10.3 — Refinamento visual & microinterações** (UX premium, só apresentação)  

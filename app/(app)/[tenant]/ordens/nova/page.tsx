@@ -1,10 +1,14 @@
 import { OsOpenForm } from "@/components/ordens/os-open-form";
 import { OsSubnav } from "@/components/ordens/os-subnav";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Nova OS" };
 
@@ -28,32 +32,28 @@ export default async function NovaOsPage({
   }
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Nova ordem de serviço"
-        description="Identifique o cliente e o veículo — ou cadastre na hora"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Ordens", href: `/${tenantSlug}/ordens` },
           { label: "Nova" },
-        ]}
-      >
-        <OsSubnav tenantSlug={tenantSlug} active="nova" />
-      </ModuleHeader>
+        ]} />
+      <ExecutiveHeader title="Nova ordem de serviço" description="Identifique o cliente e o veículo — ou cadastre na hora" actions={<OsSubnav tenantSlug={tenantSlug} active="nova" />} />
       {!canCreate ? (
         <p className="text-sm text-muted-foreground">
           Sem permissão para criar OS.
         </p>
       ) : (
-        <SectionCard
+        <ExecutiveSection
           title="Abertura"
           description="Cliente existente, novo cliente ou busca por placa. Orçamento e peças vêm depois."
+          panel
         >
           <OsOpenForm
             tenantSlug={tenantSlug}
             canForceDuplicate={canForceDuplicate}
           />
-        </SectionCard>
+        </ExecutiveSection>
       )}
-    </div>
+    </ExecutivePage>
   );
 }

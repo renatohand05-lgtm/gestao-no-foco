@@ -4,10 +4,12 @@ import { Check, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DsIcon } from "@/components/ui/ds-icon";
 import {
-  exAnimations,
-  exColors,
-  exRadius,
-  exTypography,
+  gofCardSurface,
+  gofColors,
+  gofFocusRing,
+  gofMotion,
+  gofRadius,
+  gofTypography,
 } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type { OnboardingChecklistResult } from "@/lib/onboarding";
@@ -23,18 +25,17 @@ export function OnboardingChecklist({ checklist }: Props) {
         <li
           key={item.id}
           className={cn(
-            "flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between",
-            item.completed
-              ? "border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-500/5"
-              : "border-slate-200/70 bg-white dark:border-white/10 dark:bg-card",
-            exAnimations.fade,
+            "flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between",
+            gofCardSurface,
+            gofMotion.fade,
           )}
         >
           <div className="flex min-w-0 items-start gap-3">
             <span
               className={cn(
-                "mt-0.5 inline-flex size-11 shrink-0 items-center justify-center rounded-xl",
-                item.completed ? exColors.success.soft : exColors.neutral.muted,
+                "mt-0.5 inline-flex size-11 shrink-0 items-center justify-center",
+                gofRadius.lg,
+                item.completed ? gofColors.success.soft : gofColors.muted.className,
               )}
               aria-hidden
             >
@@ -42,27 +43,27 @@ export function OnboardingChecklist({ checklist }: Props) {
             </span>
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className={exTypography.sectionTitle}>{item.title}</p>
+                <p className={gofTypography.title}>{item.title}</p>
                 <span
                   className={cn(
-                    "rounded-full px-2 py-0.5",
-                    exTypography.caption,
+                    "px-2 py-0.5",
+                    gofTypography.caption,
+                    gofRadius.sm,
                     item.required
-                      ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                      : "bg-slate-100 text-slate-600 dark:bg-white/10",
-                    exRadius.full,
+                      ? "bg-[var(--brand-graphite)] text-white"
+                      : "bg-muted text-muted-foreground",
                   )}
                 >
                   {item.required ? "Essencial" : "Opcional"}
                 </span>
                 {item.completed ? (
-                  <span className={cn(exTypography.caption, "text-emerald-700")}>
+                  <span className={cn(gofTypography.caption, gofColors.success.text)}>
                     Concluído
                   </span>
                 ) : null}
               </div>
-              <p className={exTypography.caption}>{item.description}</p>
-              <p className={cn(exTypography.caption, "text-foreground/80")}>
+              <p className={gofTypography.caption}>{item.description}</p>
+              <p className={cn(gofTypography.caption, "text-foreground/80")}>
                 Impacto: {item.benefit}
               </p>
             </div>
@@ -70,7 +71,7 @@ export function OnboardingChecklist({ checklist }: Props) {
           {!item.completed ? (
             <Button
               size="sm"
-              className={cn("min-h-11 shrink-0", exAnimations.focusRing)}
+              className={cn("min-h-11 shrink-0", gofFocusRing)}
               render={<Link href={item.href} />}
             >
               {item.ctaLabel}
@@ -79,7 +80,7 @@ export function OnboardingChecklist({ checklist }: Props) {
             <Button
               size="sm"
               variant="outline"
-              className={cn("min-h-11 shrink-0", exAnimations.focusRing)}
+              className={cn("min-h-11 shrink-0", gofFocusRing)}
               render={<Link href={item.href} />}
             >
               Abrir

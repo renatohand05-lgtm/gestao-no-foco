@@ -1,7 +1,15 @@
+import { brandConfig } from "@/config/brand";
+
+/**
+ * Site config — alinhado à identidade oficial (Gate 19.0.1).
+ * `name` = marca curta "Gestão".
+ */
 export const siteConfig = {
-  name: "Gestão no Foco",
-  description:
-    "Plataforma de gestão empresarial inteligente, multiempresa e multiusuário para pequenos e médios negócios.",
+  name: brandConfig.name,
+  subtitle: brandConfig.subtitle,
+  slogan: brandConfig.slogan,
+  edition: brandConfig.edition,
+  description: brandConfig.subtitle,
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   links: {
     github: "https://github.com/gestao-no-foco",

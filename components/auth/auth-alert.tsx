@@ -3,12 +3,14 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type AuthAlertProps = {
+  id?: string;
   variant?: "error" | "success";
   children: React.ReactNode;
   className?: string;
 };
 
 export function AuthAlert({
+  id,
   variant = "error",
   children,
   className,
@@ -17,6 +19,7 @@ export function AuthAlert({
 
   return (
     <div
+      id={id}
       role="alert"
       className={cn(
         "flex items-start gap-2 rounded-lg px-3 py-2 text-sm",

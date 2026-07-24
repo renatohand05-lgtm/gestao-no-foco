@@ -5,6 +5,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { buttonVariants } from "@/components/ui/button";
+import { gofControl } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type { ContaPagarFormValues } from "@/lib/financeiro/validations";
 import type { CentroCustoOption } from "@/types/contas-pagar";
@@ -13,9 +14,6 @@ type Props = {
   centrosCusto: CentroCustoOption[];
   disabled?: boolean;
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60";
 
 export function ContaPagarRateioFields({ centrosCusto, disabled }: Props) {
   const form = useFormContext<ContaPagarFormValues>();
@@ -109,7 +107,7 @@ export function ContaPagarRateioFields({ centrosCusto, disabled }: Props) {
                 <select
                   id={`rateios.${index}.centro_custo_id`}
                   {...form.register(`rateios.${index}.centro_custo_id`)}
-                  className={selectClassName}
+                  className={gofControl}
                   disabled={disabled}
                 >
                   <option value="">Selecione</option>

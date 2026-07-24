@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 
 import { DespesaRecorrenteForm } from "@/components/financeiro/despesa-recorrente-form";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { createDespesaRecorrenteService } from "@/lib/financeiro/despesa-recorrente-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Editar despesa recorrente" };
 
@@ -30,11 +34,8 @@ export default async function Page({ params }: PageProps) {
     ]);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Editar série"
-        description="Não altera Contas a Pagar já geradas."
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Despesas Recorrentes",
@@ -45,8 +46,8 @@ export default async function Page({ params }: PageProps) {
             href: `/${tenantSlug}/financeiro/despesas-recorrentes/${item.id}`,
           },
           { label: "Editar" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Editar série" description="Não altera Contas a Pagar já geradas." />
       <DespesaRecorrenteForm
         tenantSlug={tenantSlug}
         mode="edit"
@@ -57,6 +58,6 @@ export default async function Page({ params }: PageProps) {
         centrosCusto={centrosCusto}
         planoContas={planoContas}
       />
-    </div>
+    </ExecutivePage>
   );
 }

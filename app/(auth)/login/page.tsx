@@ -1,14 +1,21 @@
 import { Suspense } from "react";
 
 import { LoginForm } from "@/components/auth/login-form";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BrandSplash } from "@/components/brand";
+import { brandConfig } from "@/config/brand";
 
 export const metadata = {
   title: "Entrar",
+  description: brandConfig.subtitle,
 };
 
 function LoginFormFallback() {
-  return <Skeleton className="h-[480px] w-full rounded-xl" />;
+  return (
+    <BrandSplash
+      className="min-h-[28rem] rounded-xl border border-border/50"
+      label="Preparando acesso…"
+    />
+  );
 }
 
 export default function LoginPage() {

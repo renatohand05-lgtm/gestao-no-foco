@@ -3,7 +3,13 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import {
+  ExecutiveFilter,
+  ExecutiveFilterField,
+} from "@/components/executive";
+import { gofControl } from "@/lib/design-system";
 import { FINANCEIRO_STATUS_FILTER_OPTIONS } from "@/lib/financeiro/constants";
+import { cn } from "@/lib/utils";
 
 type FilterOption = {
   value: string;
@@ -56,25 +62,16 @@ export function FinanceiroFilters({
     });
   }
 
-  const selectClassName =
-    "flex h-9 w-full min-w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+    <ExecutiveFilter label="Filtros">
       {tipoOptions ? (
-        <div className="space-y-1.5">
-          <label
-            htmlFor="filter-tipo"
-            className="text-xs font-medium text-muted-foreground"
-          >
-            Tipo
-          </label>
+        <ExecutiveFilterField label="Tipo" htmlFor="filter-tipo">
           <select
             id="filter-tipo"
             value={currentTipo}
             disabled={isPending}
             onChange={(event) => updateParams({ tipo: event.target.value })}
-            className={selectClassName}
+            className={cn(gofControl, "w-full min-w-36")}
           >
             {tipoOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -82,17 +79,11 @@ export function FinanceiroFilters({
               </option>
             ))}
           </select>
-        </div>
+        </ExecutiveFilterField>
       ) : null}
 
       {naturezaOptions ? (
-        <div className="space-y-1.5">
-          <label
-            htmlFor="filter-natureza"
-            className="text-xs font-medium text-muted-foreground"
-          >
-            Natureza
-          </label>
+        <ExecutiveFilterField label="Natureza" htmlFor="filter-natureza">
           <select
             id="filter-natureza"
             value={currentNatureza}
@@ -100,7 +91,7 @@ export function FinanceiroFilters({
             onChange={(event) =>
               updateParams({ natureza: event.target.value })
             }
-            className={selectClassName}
+            className={cn(gofControl, "w-full min-w-36")}
           >
             {naturezaOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -108,22 +99,16 @@ export function FinanceiroFilters({
               </option>
             ))}
           </select>
-        </div>
+        </ExecutiveFilterField>
       ) : null}
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-ativo"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Status
-        </label>
+      <ExecutiveFilterField label="Status" htmlFor="filter-ativo">
         <select
           id="filter-ativo"
           value={currentAtivo}
           disabled={isPending}
           onChange={(event) => updateParams({ ativo: event.target.value })}
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           {FINANCEIRO_STATUS_FILTER_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -131,7 +116,7 @@ export function FinanceiroFilters({
             </option>
           ))}
         </select>
-      </div>
-    </div>
+      </ExecutiveFilterField>
+    </ExecutiveFilter>
   );
 }

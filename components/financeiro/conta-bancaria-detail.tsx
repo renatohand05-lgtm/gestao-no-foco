@@ -1,10 +1,8 @@
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ContaBancariaDeleteButton } from "@/components/financeiro/conta-bancaria-delete-button";
 import { ContaBancariaMovimentacoesTable } from "@/components/financeiro/conta-bancaria-movimentacoes-table";
 import { FinanceiroStatusBadge } from "@/components/financeiro/financeiro-status-badge";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
-import { SectionCard } from "@/components/ui/section-card";
 import {
   formatCurrency,
   formatFinanceiroDate,
@@ -12,6 +10,12 @@ import {
 } from "@/lib/financeiro/format";
 import type { ContaBancaria } from "@/types/financeiro";
 import type { MovimentacaoBancariaListItem } from "@/types/movimentacoes-bancarias";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type Props = {
   tenantSlug: string;
@@ -42,20 +46,17 @@ export function ContaBancariaDetail({
   movimentacoes,
 }: Props) {
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={item.nome}
-        description="Detalhes do registro financeiro"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Contas Bancárias",
             href: `/${tenantSlug}/financeiro/contas-bancarias`,
           },
           { label: item.nome },
-        ]}
-      >
-        <FinanceiroStatusBadge ativo={item.ativo} />
+        ]} />
+      <ExecutiveHeader title={item.nome} description="Detalhes do registro financeiro" actions={<>
+<FinanceiroStatusBadge ativo={item.ativo} />
         <ActionButton
           action="edit"
           href={`/${tenantSlug}/financeiro/contas-bancarias/${item.id}/editar`}
@@ -65,10 +66,10 @@ export function ContaBancariaDetail({
           id={item.id}
           nome={item.nome}
         />
-      </ModuleHeader>
+</>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard title="Dados da conta">
+        <ExecutiveSection title="Dados da conta" panel>
           <FormGrid>
             <DetailItem
               label="Tipo"
@@ -87,13 +88,13 @@ export function ContaBancariaDetail({
               value={formatCurrency(item.saldo_inicial)}
             />
           </FormGrid>
-        </SectionCard>
-        <SectionCard title="Observações">
+        </ExecutiveSection>
+        <ExecutiveSection title="Observações" panel>
           <p className="text-sm whitespace-pre-wrap">
             {item.observacoes || "—"}
           </p>
-        </SectionCard>
-        <SectionCard title="Auditoria">
+        </ExecutiveSection>
+        <ExecutiveSection title="Auditoria" panel>
           <FormGrid>
             <DetailItem
               label="Criado em"
@@ -104,15 +105,16 @@ export function ContaBancariaDetail({
               value={formatFinanceiroDate(item.updated_at)}
             />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
       </div>
 
-      <SectionCard
+      <ExecutiveSection
         title="Movimentações recentes"
         description="Últimas 20 movimentações desta conta."
+        panel
       >
         <ContaBancariaMovimentacoesTable items={movimentacoes} />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

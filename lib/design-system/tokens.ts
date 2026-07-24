@@ -196,6 +196,6 @@ export function dsTrendTone(
   return dsStatus.neutral.soft;
 }
 
-/** Controle de formulário padrão (inputs / selects) */
+/** Controle de formulário padrão (inputs / selects) — Brand Gate 19.0.2 */
 export const dsControl =
-  "flex h-9 w-full min-w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60";
+  "flex h-9 w-full min-w-36 rounded-lg border border-input bg-transparent px-3 py-1.5 text-sm shadow-xs outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50";

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { ExecutiveCard } from "@/components/executive";
-import { exAnimations, exTypography } from "@/lib/design-system";
+import { ExecutiveCard, ExecutiveSkeleton } from "@/components/executive";
+import { gofFocusRing, gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 };
 
 /**
- * Rodapé mínimo — exportações reais (Sprint 12.4).
+ * Rodapé mínimo — Design System oficial (Gate 19.1).
  * Detalhes técnicos vivem em “Informações do painel”.
  */
 export function ExecutiveFooter({
@@ -20,13 +20,10 @@ export function ExecutiveFooter({
   exportActions,
 }: Props) {
   return (
-    <footer className={cn(exAnimations.fade)} aria-label="Exportação">
-      <ExecutiveCard
-        padding={16}
-        className="border-slate-200/50 bg-white dark:border-white/10"
-      >
+    <footer className={cn(gofMotion.fade)} aria-label="Exportação">
+      <ExecutiveCard padding={16}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className={exTypography.caption}>
+          <p className={gofTypography.caption}>
             Exportar visão atual · {tenantName}
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -34,8 +31,8 @@ export function ExecutiveFooter({
             <Link
               href={`/${tenantSlug}/relatorios`}
               className={cn(
-                "text-xs font-medium text-slate-600 hover:text-slate-900",
-                exAnimations.focusRing,
+                "text-xs font-medium text-muted-foreground hover:text-foreground",
+                gofFocusRing,
               )}
             >
               Relatórios →
@@ -50,9 +47,12 @@ export function ExecutiveFooter({
 export function ExecutiveFooterSkeleton() {
   return (
     <div
-      className="h-16 animate-pulse rounded-2xl bg-white/60"
+      className="space-y-2 rounded-xl border border-border/60 bg-card p-4"
       aria-busy="true"
       aria-label="Carregando rodapé"
-    />
+    >
+      <ExecutiveSkeleton heightClassName="h-4" widthClassName="w-1/2" />
+      <ExecutiveSkeleton heightClassName="h-8" widthClassName="w-36" />
+    </div>
   );
 }

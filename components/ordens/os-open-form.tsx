@@ -18,6 +18,7 @@ import {
   type CreateOsIntegratedResult,
 } from "@/lib/ordens/actions";
 import type { OsAbrirDuplicate, OsSearchHit } from "@/lib/ordens/os-abrir-rpc";
+import { gofControl } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type Mode = "existente" | "novo_cliente";
@@ -372,7 +373,7 @@ export function OsOpenForm({
               <select
                 name="novo_tipo_pessoa"
                 disabled={pending}
-                className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                className={cn(gofControl, "h-11")}
                 defaultValue="pf"
               >
                 <option value="pf">Pessoa física</option>
@@ -432,7 +433,7 @@ export function OsOpenForm({
             name="prioridade"
             defaultValue="normal"
             disabled={pending}
-            className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+            className={cn(gofControl, "h-11")}
           >
             <option value="baixa">Baixa</option>
             <option value="normal">Normal</option>

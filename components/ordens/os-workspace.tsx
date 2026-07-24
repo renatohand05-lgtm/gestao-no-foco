@@ -20,7 +20,7 @@ import { OsVeiculoEditDialog } from "@/components/ordens/os-veiculo-edit-dialog"
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
-import { SectionCard } from "@/components/ui/section-card";
+import { ExecutiveSection } from "@/components/executive";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   applyOsAprovacaoAction,
@@ -308,7 +308,7 @@ export function OsWorkspace({
       </div>
 
       {tab === "resumo" ? (
-        <SectionCard title="Resumo" contentClassName="pt-0 space-y-3">
+        <ExecutiveSection title="Resumo" panel>
           {canEditOs(os) ? (
             <form
               className="space-y-2 rounded-lg border p-3"
@@ -514,7 +514,7 @@ export function OsWorkspace({
               ))
             )}
           </div>
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "checklist" ? (
@@ -529,10 +529,10 @@ export function OsWorkspace({
       ) : null}
 
       {tab === "diagnostico" ? (
-        <SectionCard
+        <ExecutiveSection
           title="Diagnóstico"
           description="Não gera movimentação financeira. Ao salvar a partir de Rascunho, a OS avança Rascunho → Aguardando diagnóstico → Diagnóstico concluído."
-          contentClassName="pt-0"
+          panel
         >
           {!canDiagnostico ? (
             <p className="mb-3 text-sm text-amber-700 dark:text-amber-400">
@@ -613,14 +613,14 @@ export function OsWorkspace({
               </p>
             </div>
           ) : null}
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "orcamento" ? (
-        <SectionCard
+        <ExecutiveSection
           title="Orçamento"
           description="Orçamento não gera receita nem baixa estoque. O primeiro item avança Diagnóstico concluído → Aguardando orçamento."
-          contentClassName="pt-0 space-y-4"
+          panel
         >
           {!canOrcamento ? (
             <p className="text-sm text-amber-700 dark:text-amber-400">
@@ -664,14 +664,14 @@ export function OsWorkspace({
               canApply={canApplyDesconto && canEditOs(os)}
             />
           </div>
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "aprovacao" ? (
-        <SectionCard
+        <ExecutiveSection
           title="Aprovação do cliente"
           description="Exige orçamento. A OS avança para Aguardando aprovação e só então para Aprovado / Parcialmente aprovado."
-          contentClassName="pt-0 space-y-3"
+          panel
         >
           {!canAprovar ? (
             <p className="text-sm text-amber-700 dark:text-amber-400">
@@ -779,14 +779,14 @@ export function OsWorkspace({
               Reprovar
             </button>
           </div>
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "execucao" ? (
-        <SectionCard
+        <ExecutiveSection
           title="Execução"
           description="Somente itens aprovados. Estoque físico não é baixado aqui."
-          contentClassName="pt-0"
+          panel
         >
           {aprovados.length === 0 ? (
             <p className="text-sm text-muted-foreground">
@@ -877,14 +877,14 @@ export function OsWorkspace({
               ))}
             </ul>
           )}
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "financeiro" ? (
-        <SectionCard
+        <ExecutiveSection
           title="Faturamento"
           description="Reutiliza o motor de vendas. Estoque baixa uma única vez na fatura."
-          contentClassName="pt-0 space-y-3"
+          panel
         >
           {os.venda_id ? (
             <p className="text-sm">
@@ -957,11 +957,11 @@ export function OsWorkspace({
               </form>
             </>
           )}
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "entrega" ? (
-        <SectionCard title="Entrega" contentClassName="pt-0 space-y-3">
+        <ExecutiveSection title="Entrega" panel>
           {os.previsoes.length > 0 ? (
             <div className="space-y-2 rounded-lg border p-3">
               <p className="text-xs font-medium text-muted-foreground">
@@ -1063,11 +1063,11 @@ export function OsWorkspace({
               Concluir entrega
             </button>
           </form>
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "historico" ? (
-        <SectionCard title="Histórico" contentClassName="pt-0">
+        <ExecutiveSection title="Histórico" panel>
           <ul className="space-y-2">
             {os.eventos.length === 0 ? (
               <li className="text-sm text-muted-foreground">Sem eventos.</li>
@@ -1082,7 +1082,7 @@ export function OsWorkspace({
               ))
             )}
           </ul>
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       {tab === "anexos" ? (
@@ -1096,7 +1096,7 @@ export function OsWorkspace({
       ) : null}
 
       {tab === "retorno" ? (
-        <SectionCard title="Retorno / garantia" contentClassName="pt-0">
+        <ExecutiveSection title="Retorno / garantia" panel>
           <form
             className="space-y-2"
             onSubmit={(e) => {
@@ -1147,7 +1147,7 @@ export function OsWorkspace({
               Registrar retorno
             </button>
           </form>
-        </SectionCard>
+        </ExecutiveSection>
       ) : null}
 
       <p className="text-xs text-muted-foreground">

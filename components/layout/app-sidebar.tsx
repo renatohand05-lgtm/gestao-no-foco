@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 
+import { BrandLogo, BrandMark } from "@/components/brand";
 import { getTenantNav, type NavItem } from "@/config/navigation";
-import { siteConfig } from "@/config/site";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { TenantSwitcher } from "@/components/layout/tenant-switcher";
 import { cn } from "@/lib/utils";
@@ -60,18 +61,21 @@ function groupNav(items: NavItem[]): NavGroup[] {
 }
 
 /**
- * Sidebar premium estilo Linear (Sprint 13.1) — só apresentação.
+ * Sidebar — identidade oficial Gestão (Gate 19.0.1).
+ * Só apresentação / branding.
  */
 export function AppSidebar({ tenant, tenants }: AppSidebarProps) {
   const pathname = usePathname();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
   const groups = groupNav(getTenantNav(tenant.slug));
 
   return (
     <Sidebar
       collapsible="icon"
-      className="border-r border-slate-200/50 bg-[#f4f4f5] dark:border-white/10 dark:bg-sidebar"
+      className="border-r border-[var(--brand-gray-light)] bg-[var(--brand-gray-light)] dark:border-white/10 dark:bg-sidebar"
     >
-      <SidebarHeader className="gap-3 px-3 py-4">
+      <SidebarHeader className="gap-3 px-3 py-5">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -83,64 +87,65 @@ export function AppSidebar({ tenant, tenants }: AppSidebarProps) {
               )}
               render={<Link href={`/${tenant.slug}/dashboard`} />}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900">
-                <span className="text-[11px] font-bold tracking-tight">GF</span>
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold tracking-tight">
-                  {siteConfig.name}
-                </span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {tenant.name}
-                </span>
-              </div>
+              {collapsed ? (
+                <BrandMark size="md" />
+              ) : (
+                <BrandLogo markSize="md" showEdition className="min-w-0" />
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        {!collapsed ? (
+          <p className="truncate px-3 text-[11px] text-muted-foreground">
+            {tenant.name}
+          </p>
+        ) : null}
       </SidebarHeader>
 
-      <SidebarSeparator className="mx-3 bg-slate-200/70 dark:bg-white/10" />
+      <SidebarSeparator className="mx-3 bg-[var(--brand-gray-dark)]/15 dark:bg-white/10" />
 
-      <SidebarContent className="gap-5 px-2 py-3">
+      <SidebarContent className="gap-6 px-2 py-4">
         {groups.map((group) => (
-          <SidebarGroup key={group.label} className="gap-1 p-0">
-            <SidebarGroupLabel className="px-3 text-[10px] font-medium tracking-[0.12em] text-slate-400 uppercase">
+          <SidebarGroup key={group.label} className="gap-1.5 p-0">
+            <SidebarGroupLabel className="px-3 font-[family-name:var(--font-display)] text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gray-dark)]/70 uppercase">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-0.5">
-                {group.items.map((item) => {
-                  const active =
-                    pathname === item.href ||
-                    pathname?.startsWith(`${item.href}/`) === true;
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        render={<Link href={item.href} />}
-                        isActive={active}
-                        tooltip={item.title}
-                        className={cn(
-                          "h-9 rounded-lg px-3 text-[13px] font-medium transition-all duration-150",
-                          "text-slate-600 hover:bg-white hover:text-slate-900",
-                          "dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white",
-                          "data-[active=true]:bg-white data-[active=true]:text-slate-950 data-[active=true]:shadow-[0_1px_2px_rgba(15,23,42,0.06)]",
-                          "dark:data-[active=true]:bg-white/10 dark:data-[active=true]:text-white",
-                          "focus-visible:ring-2 focus-visible:ring-blue-600/30",
-                        )}
-                      >
-                        <NavIcon icon={item.icon} active={active} />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+              <SidebarMenu className="gap-1">
+                {groups.length > 0 &&
+                  group.items.map((item) => {
+                    const active =
+                      pathname === item.href ||
+                      pathname?.startsWith(`${item.href}/`) === true;
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          render={<Link href={item.href} />}
+                          isActive={active}
+                          tooltip={item.title}
+                          className={cn(
+                            "h-9 rounded-lg px-3 text-[13px] font-medium transition-all duration-150",
+                            "text-[var(--brand-gray-dark)] hover:bg-white hover:text-[var(--brand-graphite)]",
+                            "dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white",
+                            "data-[active=true]:bg-white data-[active=true]:text-[var(--brand-graphite)] data-[active=true]:shadow-sm",
+                            "data-[active=true]:ring-1 data-[active=true]:ring-[var(--brand-gold)]/25",
+                            "dark:data-[active=true]:bg-white/10 dark:data-[active=true]:text-white",
+                            "focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
+                          )}
+                        >
+                          <NavIcon icon={item.icon} active={active} />
+                          <span>{item.title}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="gap-2 px-3 py-3">
+      <SidebarFooter className="gap-2 px-3 py-4">
         <TenantSwitcher currentTenant={tenant} tenants={tenants} />
       </SidebarFooter>
 
@@ -160,7 +165,9 @@ function NavIcon({
     <Icon
       className={cn(
         "size-4 stroke-[1.75] transition-colors duration-150",
-        active ? "text-slate-900 dark:text-white" : "text-slate-400",
+        active
+          ? "text-[var(--brand-gold)]"
+          : "text-[var(--brand-gray-dark)]/70",
       )}
       aria-hidden
     />

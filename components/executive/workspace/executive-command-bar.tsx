@@ -12,12 +12,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DsIcon } from "@/components/ui/ds-icon";
-import { exAnimations, exTypography } from "@/lib/design-system";
+import {
+  gofFocusRing,
+  gofMotion,
+  gofRadius,
+  gofTypography,
+} from "@/lib/design-system";
 import { listWorkspaceCommands } from "@/lib/workspace";
 import { cn } from "@/lib/utils";
 
 /**
- * Command bar estilo Spotlight — arquitetura apenas (Sprint 12.1).
+ * Command bar — Design System oficial (Gate 19.4.1).
  * Sem backend / sem fetch.
  */
 export function ExecutiveCommandBar() {
@@ -69,7 +74,7 @@ export function ExecutiveCommandBar() {
               placeholder="Pesquisar indicadores, centros, ações…"
               className={cn(
                 "h-10 w-full bg-transparent text-sm outline-none",
-                exAnimations.focusRing,
+                gofFocusRing,
               )}
               aria-label="Campo de comando"
             />
@@ -83,23 +88,23 @@ export function ExecutiveCommandBar() {
                 role="option"
                 aria-selected={false}
                 className={cn(
-                  "flex w-full flex-col rounded-xl px-3 py-2.5 text-left",
-                  exAnimations.hoverLift,
-                  exAnimations.focusRing,
+                  "flex w-full flex-col px-3 py-2.5 text-left",
+                  gofRadius.lg,
+                  gofFocusRing,
+                  gofMotion.hover,
                   "hover:bg-muted/50",
                 )}
                 onClick={() => {
-                  // Sem navegação dedicada — fecha o seletor
                   setCommandOpen(false);
                 }}
               >
                 <span className="text-sm font-medium">{cmd.label}</span>
-                <span className={exTypography.caption}>{cmd.hint}</span>
+                <span className={gofTypography.caption}>{cmd.hint}</span>
               </button>
             </li>
           ))}
           {filtered.length === 0 ? (
-            <li className={cn("px-3 py-6 text-center", exTypography.caption)}>
+            <li className={cn("px-3 py-6 text-center", gofTypography.caption)}>
               Nenhum resultado para esta busca.
             </li>
           ) : null}

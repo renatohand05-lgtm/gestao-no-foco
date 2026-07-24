@@ -1,8 +1,12 @@
 import Link from "next/link";
 
-import type { CiKpis, CiMetricNumber } from "@/lib/vendas/commercial-intelligence-types";
+import { MetricCard } from "@/components/executive";
+import type {
+  CiKpis,
+  CiMetricNumber,
+} from "@/lib/vendas/commercial-intelligence-types";
 import { formatCurrency } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { gofGrid } from "@/lib/design-system";
 
 type Props = {
   tenantSlug: string;
@@ -23,126 +27,113 @@ function formatMetric(
   return m.value.toLocaleString("pt-BR");
 }
 
-function KpiCard({
-  label,
-  value,
-  supporting,
-  href,
-  tone = "default",
-}: {
-  label: string;
-  value: string;
-  supporting?: string;
-  href?: string;
-  tone?: "default" | "warn" | "ok" | "muted";
-}) {
-  const body = (
-    <div
-      className={cn(
-        "min-w-0 rounded-lg border bg-card p-4 h-full",
-        tone === "warn" && "border-amber-300/80",
-        tone === "ok" && "border-emerald-300/80",
-        tone === "muted" && "opacity-90",
-        href && "transition-colors hover:bg-muted/40",
-      )}
-    >
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-2 break-words text-xl font-semibold tabular-nums sm:text-2xl">
-        {value}
-      </p>
-      {supporting ? (
-        <p className="mt-1 text-xs text-muted-foreground">{supporting}</p>
-      ) : null}
-    </div>
-  );
-  if (href) {
-    return (
-      <Link href={href} className="block h-full">
-        {body}
-      </Link>
-    );
-  }
-  return body;
-}
-
+/**
+ * Grade de KPIs comerciais — MetricCard oficial (Gate 19.1).
+ */
 export function CommercialKpiGrid({ tenantSlug, kpis, de, ate }: Props) {
   const base = `/${tenantSlug}/vendas`;
   const periodQs = `de=${de}&ate=${ate}`;
 
+  const items: Array<{
+    label: string;
+    value: string;
+    hint?: string;
+    href?: string;
+    tone?: "success" | "warning" | "danger" | "neutral" | "info";
+    emphasize?: boolean;
+  }> = [
+    {
+      label: "Faturamento do período",
+      value: formatMetric(kpis.faturamentoPeriodo, "currency"),
+      hint: "Valor líquido das vendas faturadas.",
+      href: `${base}?status=faturado&${periodQs}`,
+      tone: "success",
+      emphasize: true,
+    },
+    {
+      label: "Vendas faturadas",
+      value: formatMetric(kpis.quantidadeFaturadas, "number"),
+      href: `${base}?status=faturado&${periodQs}`,
+    },
+    {
+      label: "Ticket médio",
+      value: formatMetric(kpis.ticketMedio, "currency"),
+      hint: kpis.ticketMedio.available
+        ? "Faturamento ÷ quantidade faturada."
+        : "Sem vendas faturadas no período.",
+    },
+    {
+      label: "Valor em negociação",
+      value: formatMetric(kpis.valorEmNegociacao, "currency"),
+      hint: "Orçamentos e vendas em andamento.",
+      href: `${base}/abertas`,
+      tone: "info",
+    },
+    {
+      label: "Orçamentos aguardando",
+      value: formatMetric(kpis.orcamentosAguardando, "number"),
+      hint: "Status orçamento.",
+      href: `${base}/abertas`,
+      tone: (kpis.orcamentosAguardando.value ?? 0) > 0 ? "warning" : "neutral",
+    },
+    {
+      label: "Taxa de conversão comercial",
+      value: formatMetric(kpis.taxaConversaoComercial, "percent"),
+      hint: kpis.taxaConversaoComercial.available
+        ? `${kpis.conversaoNumerador}/${kpis.conversaoDenominador} · ${kpis.conversaoFormula}`
+        : "Indisponível — denominador zero.",
+    },
+    {
+      label: "Vendas canceladas",
+      value: formatMetric(kpis.vendasCanceladas, "number"),
+      href: `${base}?status=cancelado&${periodQs}`,
+    },
+    {
+      label: "Valor perdido",
+      value: formatMetric(kpis.valorPerdido, "currency"),
+      hint: "Negócios cancelados no período.",
+      tone: (kpis.valorPerdido.value ?? 0) > 0 ? "warning" : "neutral",
+    },
+    {
+      label: "Desconto concedido",
+      value: formatMetric(kpis.descontoConcedido, "currency"),
+      hint: "Soma de desconto_total nas faturadas.",
+      href: `/${tenantSlug}/descontos/dashboard`,
+    },
+    {
+      label: "Clientes compradores",
+      value: formatMetric(kpis.clientesCompradores, "number"),
+      hint: "Clientes distintos com venda faturada.",
+      href: `/${tenantSlug}/clientes`,
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-      <KpiCard
-        label="Faturamento do período"
-        value={formatMetric(kpis.faturamentoPeriodo, "currency")}
-        supporting="Valor líquido das vendas faturadas."
-        href={`${base}?status=faturado&${periodQs}`}
-        tone="ok"
-      />
-      <KpiCard
-        label="Vendas faturadas"
-        value={formatMetric(kpis.quantidadeFaturadas, "number")}
-        href={`${base}?status=faturado&${periodQs}`}
-      />
-      <KpiCard
-        label="Ticket médio"
-        value={formatMetric(kpis.ticketMedio, "currency")}
-        supporting={
-          kpis.ticketMedio.available
-            ? "Faturamento ÷ quantidade faturada."
-            : "Sem vendas faturadas no período."
+    <div className={gofGrid.kpis}>
+      {items.map((item) => {
+        const card = (
+          <MetricCard
+            label={item.label}
+            value={item.value}
+            hint={item.hint}
+            tone={item.tone ?? "neutral"}
+            emphasize={item.emphasize}
+            className="h-full"
+          />
+        );
+        if (item.href) {
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="block h-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40"
+            >
+              {card}
+            </Link>
+          );
         }
-        tone={kpis.ticketMedio.available ? "default" : "muted"}
-      />
-      <KpiCard
-        label="Valor em negociação"
-        value={formatMetric(kpis.valorEmNegociacao, "currency")}
-        supporting="Orçamentos e vendas em andamento."
-        href={`${base}/abertas`}
-      />
-      <KpiCard
-        label="Orçamentos aguardando"
-        value={formatMetric(kpis.orcamentosAguardando, "number")}
-        supporting="Status orçamento."
-        href={`${base}/abertas`}
-        tone={
-          (kpis.orcamentosAguardando.value ?? 0) > 0 ? "warn" : "default"
-        }
-      />
-      <KpiCard
-        label="Taxa de conversão comercial"
-        value={formatMetric(kpis.taxaConversaoComercial, "percent")}
-        supporting={
-          kpis.taxaConversaoComercial.available
-            ? `${kpis.conversaoNumerador}/${kpis.conversaoDenominador} · ${kpis.conversaoFormula}`
-            : "Indisponível — denominador zero (sem vendas elegíveis criadas no período)."
-        }
-        tone={kpis.taxaConversaoComercial.available ? "default" : "muted"}
-      />
-      <KpiCard
-        label="Vendas canceladas"
-        value={formatMetric(kpis.vendasCanceladas, "number")}
-        href={`${base}?status=cancelado&${periodQs}`}
-      />
-      <KpiCard
-        label="Valor perdido"
-        value={formatMetric(kpis.valorPerdido, "currency")}
-        supporting="Negócios cancelados no período."
-        tone={(kpis.valorPerdido.value ?? 0) > 0 ? "warn" : "default"}
-      />
-      <KpiCard
-        label="Desconto concedido"
-        value={formatMetric(kpis.descontoConcedido, "currency")}
-        supporting="Soma de desconto_total nas faturadas."
-        href={`/${tenantSlug}/descontos/dashboard`}
-      />
-      <KpiCard
-        label="Clientes compradores"
-        value={formatMetric(kpis.clientesCompradores, "number")}
-        supporting="Clientes distintos com venda faturada."
-        href={`/${tenantSlug}/clientes`}
-      />
+        return <div key={item.label}>{card}</div>;
+      })}
     </div>
   );
 }

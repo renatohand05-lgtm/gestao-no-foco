@@ -1,5 +1,6 @@
+import { brandConfig } from "@/config/brand";
 import { cn } from "@/lib/utils";
-import { exAnimations, exRadius, exShadow, exTypography } from "@/lib/design-system";
+import { gofMotion, gofRadius, gofTypography } from "@/lib/design-system";
 
 type Props = {
   title: string;
@@ -10,7 +11,7 @@ type Props = {
 };
 
 /**
- * Shell de primeira sessão / checklist (Sprint 13.12).
+ * Shell de primeiro acesso — identidade GESTÃO (Gate 19.4).
  */
 export function OnboardingShell({
   title,
@@ -23,15 +24,23 @@ export function OnboardingShell({
     <div
       className={cn(
         "mx-auto w-full max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:py-10",
-        exAnimations.fade,
+        gofMotion.fade,
         className,
       )}
     >
       <header className="space-y-2">
-        <p className={exTypography.label}>Primeiro valor</p>
-        <h1 className={exTypography.headline}>{title}</h1>
+        <p className="text-[10px] font-medium tracking-[0.16em] text-[var(--brand-gold)] uppercase">
+          {brandConfig.name} · Primeiro acesso
+        </p>
+        <h1
+          className={cn(
+            "font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-[var(--brand-graphite)]",
+          )}
+        >
+          {title}
+        </h1>
         {description ? (
-          <p className={cn(exTypography.body, "text-muted-foreground")}>
+          <p className={cn(gofTypography.subtitle, "max-w-2xl")}>
             {description}
           </p>
         ) : null}
@@ -39,9 +48,8 @@ export function OnboardingShell({
 
       <div
         className={cn(
-          "border bg-white p-5 sm:p-6 dark:bg-card",
-          exRadius[20],
-          exShadow.card,
+          "border border-border/60 bg-[var(--brand-white)] p-5 sm:p-6",
+          gofRadius.lg,
         )}
       >
         {children}

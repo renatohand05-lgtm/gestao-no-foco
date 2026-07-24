@@ -1,6 +1,20 @@
 "use client";
 
-import { ChevronDown, Download, FileSpreadsheet, FileText, Plus, Printer, Share2 } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  ChevronDown,
+  ClipboardPlus,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  PackagePlus,
+  Printer,
+  Share2,
+  ShoppingCart,
+  UserPlus,
+  Wallet,
+  CalendarPlus,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,18 +24,54 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DsIcon } from "@/components/ui/ds-icon";
-import { exAnimations, exSize } from "@/lib/design-system";
-import { listWorkspaceQuickActions } from "@/lib/workspace";
+import { gofFocusRing, gofMotion, gofRadius } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
-const CREATE_IDS = [
-  "nova_venda",
-  "nova_conta",
-  "nova_meta",
-  "novo_cliente",
-  "novo_produto",
-  "nova_categoria",
-] as const;
+type QuickCreate = {
+  id: string;
+  label: string;
+  href: (slug: string) => string;
+  icon: typeof ShoppingCart;
+};
+
+const CREATE_ITEMS: QuickCreate[] = [
+  {
+    id: "criar_os",
+    label: "Criar OS",
+    href: (s) => `/${s}/ordens/nova`,
+    icon: ClipboardPlus,
+  },
+  {
+    id: "nova_venda",
+    label: "Nova Venda",
+    href: (s) => `/${s}/vendas/nova`,
+    icon: ShoppingCart,
+  },
+  {
+    id: "novo_cliente",
+    label: "Novo Cliente",
+    href: (s) => `/${s}/clientes/novo`,
+    icon: UserPlus,
+  },
+  {
+    id: "novo_produto",
+    label: "Novo Produto",
+    href: (s) => `/${s}/produtos/novo`,
+    icon: PackagePlus,
+  },
+  {
+    id: "nova_conta",
+    label: "Nova Conta",
+    href: (s) => `/${s}/financeiro/contas-bancarias/novo`,
+    icon: Wallet,
+  },
+  {
+    id: "nova_agenda",
+    label: "Nova Agenda",
+    href: (s) => `/${s}/clientes/agenda`,
+    icon: CalendarPlus,
+  },
+];
 
 const EXPORT_ITEMS = [
   { id: "pdf", label: "PDF", icon: FileText },
@@ -31,17 +81,26 @@ const EXPORT_ITEMS = [
   { id: "compartilhar", label: "Compartilhar", icon: Share2 },
 ] as const;
 
+function resolveTenantSlug(pathname: string | null): string | null {
+  if (!pathname) return null;
+  const part = pathname.split("/").filter(Boolean)[0];
+  if (!part || part === "login" || part === "register" || part === "onboarding") {
+    return null;
+  }
+  return part;
+}
+
 /**
- * Apenas Novo + Exportar (Sprint 12.4).
+ * Ações rápidas Enterprise — Design System oficial (Gate 19.4.1).
  */
 export function ExecutiveQuickActions() {
-  const create = listWorkspaceQuickActions().filter((a) =>
-    (CREATE_IDS as readonly string[]).includes(a.id),
-  );
+  const pathname = usePathname();
+  const router = useRouter();
+  const tenantSlug = resolveTenantSlug(pathname);
 
   return (
     <div
-      className={cn("flex items-center gap-1.5", exAnimations.fade)}
+      className={cn("flex items-center gap-1.5", gofMotion.fade)}
       aria-label="Ações principais"
     >
       <DropdownMenu>
@@ -51,12 +110,11 @@ export function ExecutiveQuickActions() {
               type="button"
               size="sm"
               className={cn(
-                "rounded-xl bg-blue-600 text-white hover:bg-blue-600/90",
-                exAnimations.focusRing,
-                exAnimations.hoverPress,
+                "bg-[var(--brand-graphite)] text-white hover:bg-[var(--brand-graphite)]/90",
+                gofRadius.lg,
+                gofFocusRing,
               )}
             >
-              <DsIcon icon={Plus} size="sm" className="mr-1 text-white" />
               Novo
               <DsIcon
                 icon={ChevronDown}
@@ -66,9 +124,16 @@ export function ExecutiveQuickActions() {
             </Button>
           }
         />
-        <DropdownMenuContent align="end" className={exSize.menu}>
-          {create.map((action) => (
-            <DropdownMenuItem key={action.id} onClick={() => {}}>
+        <DropdownMenuContent align="end" className="min-w-48">
+          {CREATE_ITEMS.map((action) => (
+            <DropdownMenuItem
+              key={action.id}
+              disabled={!tenantSlug}
+              onClick={() => {
+                if (tenantSlug) router.push(action.href(tenantSlug));
+              }}
+            >
+              <DsIcon icon={action.icon} size="sm" className="mr-2 opacity-70" />
               {action.label}
             </DropdownMenuItem>
           ))}
@@ -83,8 +148,9 @@ export function ExecutiveQuickActions() {
               variant="outline"
               size="sm"
               className={cn(
-                "rounded-xl border-slate-200 bg-white dark:border-white/10",
-                exAnimations.focusRing,
+                "border-border/60 bg-[var(--brand-white)]",
+                gofRadius.lg,
+                gofFocusRing,
               )}
             >
               <DsIcon icon={Download} size="sm" className="mr-1" />
@@ -97,9 +163,16 @@ export function ExecutiveQuickActions() {
             </Button>
           }
         />
-        <DropdownMenuContent align="end" className={exSize.menu}>
+        <DropdownMenuContent align="end" className="min-w-40">
           {EXPORT_ITEMS.map((item) => (
-            <DropdownMenuItem key={item.id} onClick={() => {}}>
+            <DropdownMenuItem
+              key={item.id}
+              onClick={() => {
+                if (item.id === "imprimir" && typeof window !== "undefined") {
+                  window.print();
+                }
+              }}
+            >
               <DsIcon icon={item.icon} size="sm" className="mr-2 opacity-70" />
               {item.label}
             </DropdownMenuItem>

@@ -9,15 +9,21 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import {
+  ExecutiveCard,
+  ExecutiveEmptyState,
+  ExecutiveSection,
+  ExecutiveSkeleton,
+} from "@/components/executive";
 import { DsIcon } from "@/components/ui/ds-icon";
-import { EXECUTIVE_BLOCK } from "@/lib/dashboard/executive-ui";
 import type { ExecutiveIntelligenceData } from "@/lib/dashboard/executive-intelligence-types";
 import { formatCurrency } from "@/lib/dashboard/format";
 import {
-  exAnimations,
-  exRadius,
-  exShadow,
-  exTypography,
+  gofFocusRing,
+  gofGrid,
+  gofMotion,
+  gofRadius,
+  gofTypography,
 } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
@@ -28,9 +34,11 @@ type Props = {
 
 function Unavailable() {
   return (
-    <p className="text-sm text-muted-foreground" role="status">
-      Dados indisponíveis
-    </p>
+    <ExecutiveEmptyState
+      title="Dados indisponíveis"
+      description="Não foi possível carregar este bloco no momento."
+      className="py-6"
+    />
   );
 }
 
@@ -44,29 +52,32 @@ function CardShell({
   children: ReactNode;
 }) {
   return (
-    <article
-      className={cn(
-        "flex min-h-[11.5rem] flex-col",
-        EXECUTIVE_BLOCK.section,
-        exRadius[16],
-        exShadow.card,
-      )}
+    <ExecutiveCard
+      padding={20}
+      className="flex min-h-[11.5rem] flex-col"
+      header={
+        <div className="flex items-center gap-2.5">
+          <span
+            className={cn(
+              "inline-flex size-8 items-center justify-center bg-muted/70 text-muted-foreground",
+              gofRadius.md,
+            )}
+          >
+            <DsIcon icon={icon} size="md" />
+          </span>
+          <h3 className={gofTypography.title}>{title}</h3>
+        </div>
+      }
     >
-      <header className="flex items-center gap-2.5 border-b border-border/50 px-5 py-3.5 sm:px-6">
-        <span className="inline-flex size-8 items-center justify-center rounded-lg bg-muted/70 text-muted-foreground">
-          <DsIcon icon={icon} size="md" />
-        </span>
-        <h3 className={EXECUTIVE_BLOCK.title}>{title}</h3>
-      </header>
-      <div className={cn(EXECUTIVE_BLOCK.body, "flex flex-1 flex-col")}>{children}</div>
-    </article>
+      <div className="flex flex-1 flex-col">{children}</div>
+    </ExecutiveCard>
   );
 }
 
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <span className={cn(exTypography.caption, "min-w-0")}>{label}</span>
+      <span className={cn(gofTypography.caption, "min-w-0")}>{label}</span>
       <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
         {value}
       </span>
@@ -89,13 +100,13 @@ function ReceitaPotencialCard({
 
   return (
     <CardShell title="Receita Potencial" icon={CircleDollarSign}>
-      <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+      <p className={cn(gofTypography.caption, "uppercase tracking-wide")}>
         Valor estimado em negociação
       </p>
       <p className="mt-0.5 text-xl font-semibold tracking-tight tabular-nums text-foreground">
         {data.totalValor == null ? "Indisponível" : formatCurrency(data.totalValor)}
       </p>
-      <p className={cn(exTypography.caption, "mt-1")}>
+      <p className={cn(gofTypography.caption, "mt-1")}>
         {data.status === "partial"
           ? "Visão parcial — quantidade de OS disponível; valor em aprovação não é confiável."
           : "Estimativa baseada no valor atual das OS."}
@@ -164,8 +175,8 @@ function SaudeOperacaoCard({
       <Link
         href={`/${tenantSlug}/centro-operacoes`}
         className={cn(
-          "mt-auto inline-flex items-center gap-0.5 pt-3 text-xs font-medium text-slate-600 hover:text-foreground dark:text-slate-300",
-          exAnimations.focusRing,
+          "mt-auto inline-flex items-center gap-0.5 pt-3 text-xs font-medium text-muted-foreground hover:text-foreground",
+          gofFocusRing,
         )}
       >
         Centro de Operações
@@ -176,51 +187,42 @@ function SaudeOperacaoCard({
 }
 
 /**
- * Inteligência Executiva — panorama consolidado (Gate 17.2).
+ * Inteligência Executiva — Design System oficial (Gate 19.1).
  * Sem Prioridades (Plano) e sem Radar (Cockpit).
  */
 export function ExecutiveIntelligenceSection({ data, tenantSlug }: Props) {
   return (
-    <section
-      className={cn(exAnimations.fade)}
-      aria-labelledby="inteligencia-executiva-titulo"
+    <div
       data-dashboard-block="executive-intelligence"
+      className={gofMotion.fade}
     >
-      <div className="mb-3 flex items-end justify-between gap-3 px-0.5">
-        <div className="min-w-0">
-          <h2
-            id="inteligencia-executiva-titulo"
-            className="text-sm font-semibold tracking-tight text-foreground"
-          >
-            Inteligência Executiva
-          </h2>
-          <p className={cn(exTypography.caption, "mt-0.5")}>
-            Panorama consolidado de potencial e operação.
-          </p>
+      <ExecutiveSection
+        title="Saúde da operação"
+        description="Panorama consolidado de potencial e operação."
+        panel
+        className="space-y-5"
+      >
+        <div className={gofGrid.twoCol}>
+          <ReceitaPotencialCard data={data.receitaPotencial} />
+          <SaudeOperacaoCard
+            data={data.saudeOperacao}
+            tenantSlug={tenantSlug}
+          />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <ReceitaPotencialCard data={data.receitaPotencial} />
-        <SaudeOperacaoCard
-          data={data.saudeOperacao}
-          tenantSlug={tenantSlug}
-        />
-      </div>
-    </section>
+      </ExecutiveSection>
+    </div>
   );
 }
 
 export function ExecutiveIntelligenceSectionSkeleton() {
   return (
     <div
-      className={cn(
-        "h-52 border border-border/50 bg-card",
-        exRadius[16],
-        exAnimations.shimmer,
-      )}
+      className="space-y-3 rounded-xl border border-border/60 bg-card p-5"
       aria-busy="true"
       aria-label="Carregando inteligência executiva"
-    />
+    >
+      <ExecutiveSkeleton heightClassName="h-5" widthClassName="w-1/3" />
+      <ExecutiveSkeleton heightClassName="h-40" widthClassName="w-full" />
+    </div>
   );
 }

@@ -2,10 +2,14 @@ import { RefreshCw } from "lucide-react";
 
 import { DespesaRecorrenteTable } from "@/components/financeiro/despesa-recorrente-table";
 import { FinanceiroEmptyState } from "@/components/financeiro/financeiro-empty-state";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { createDespesaRecorrenteService } from "@/lib/financeiro/despesa-recorrente-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Despesas Recorrentes" };
 
@@ -20,20 +24,17 @@ export default async function Page({ params }: PageProps) {
   const items = await service.list();
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Despesas Recorrentes"
-        description="Séries mensais que geram Contas a Pagar por competência (água, aluguel, salários…)."
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Despesas Recorrentes" },
-        ]}
-      >
-        <ActionButton
+        ]} />
+      <ExecutiveHeader title="Despesas Recorrentes" description="Séries mensais que geram Contas a Pagar por competência (água, aluguel, salários…)." actions={<>
+<ActionButton
           action="create"
           href={`/${tenantSlug}/financeiro/despesas-recorrentes/novo`}
         />
-      </ModuleHeader>
+</>} />
 
       {items.length === 0 ? (
         <FinanceiroEmptyState
@@ -49,6 +50,6 @@ export default async function Page({ params }: PageProps) {
       ) : (
         <DespesaRecorrenteTable tenantSlug={tenantSlug} items={items} />
       )}
-    </div>
+    </ExecutivePage>
   );
 }

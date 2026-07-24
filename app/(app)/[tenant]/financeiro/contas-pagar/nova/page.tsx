@@ -1,8 +1,12 @@
 import { ContaPagarForm } from "@/components/financeiro/conta-pagar-form";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Nova conta a pagar" };
 
@@ -30,23 +34,21 @@ export default async function NovaPage({
   ]);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Nova conta a pagar"
-        description={`Cadastro em ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Contas a Pagar",
             href: `/${tenantSlug}/financeiro/contas-pagar`,
           },
           { label: "Nova conta" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Nova conta a pagar" description={`Cadastro em ${tenant.name}`} />
 
-      <SectionCard
+      <ExecutiveSection
         title="Cadastro"
         description="Preencha os dados do título a pagar."
+        panel
       >
         <ContaPagarForm
           tenantSlug={tenantSlug}
@@ -57,7 +59,7 @@ export default async function NovaPage({
           centrosCusto={centrosCusto}
           planoContas={planoContas}
         />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

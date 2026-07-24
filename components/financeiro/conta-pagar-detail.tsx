@@ -6,10 +6,8 @@ import { ContaLifecycleEstornoButton } from "@/components/financeiro/conta-lifec
 import { ContaLancamentoHistorico } from "@/components/financeiro/conta-lancamento-historico";
 import { ContaPagarPagarButton } from "@/components/financeiro/conta-pagar-pagar-button";
 import { ContaPagarStatusBadge } from "@/components/financeiro/conta-pagar-status-badge";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
-import { SectionCard } from "@/components/ui/section-card";
 import type { ContaLifecycleSnapshot } from "@/lib/financeiro/conta-lifecycle";
 import {
   calcSaldoPendente,
@@ -27,6 +25,12 @@ import {
 import type { FinanceiroLancamentoEvent } from "@/lib/financeiro/financeiro-eventos";
 import { formatCurrency, formatDateOnly, formatFinanceiroDate } from "@/lib/financeiro/format";
 import type { ContaPagarDetail as ContaPagarDetailType } from "@/types/contas-pagar";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type Props = {
   tenantSlug: string;
@@ -82,20 +86,17 @@ export function ContaPagarDetail({
   const snapshot = toSnapshot(item);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={formatContaPagarNumero(item.numero)}
-        description={item.descricao}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Contas a Pagar",
             href: `/${tenantSlug}/financeiro/contas-pagar`,
           },
           { label: formatContaPagarNumero(item.numero) },
-        ]}
-      >
-        <ContaPagarStatusBadge status={item.status_exibicao} />
+        ]} />
+      <ExecutiveHeader title={formatContaPagarNumero(item.numero)} description={item.descricao} actions={<>
+<ContaPagarStatusBadge status={item.status_exibicao} />
         {canPagarContaPagar(item) ? (
           <ContaPagarPagarButton
             tenantSlug={tenantSlug}
@@ -137,10 +138,10 @@ export function ContaPagarDetail({
             snapshot={snapshot}
           />
         ) : null}
-      </ModuleHeader>
+</>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard title="Fornecedor e vínculos">
+        <ExecutiveSection title="Fornecedor e vínculos" panel>
           <FormGrid>
             <DetailItem label="Fornecedor" value={resolveFornecedorNome(item)} />
             <DetailItem
@@ -189,10 +190,10 @@ export function ContaPagarDetail({
               value={`${item.parcela_numero} de ${item.parcela_total}`}
             />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
         {(item.rateios?.length ?? 0) > 0 ? (
-          <SectionCard title="Rateio">
+          <ExecutiveSection title="Rateio" panel>
             <ul className="space-y-2 text-sm">
               {item.rateios!.map((line) => (
                 <li
@@ -211,10 +212,10 @@ export function ContaPagarDetail({
                 </li>
               ))}
             </ul>
-          </SectionCard>
+          </ExecutiveSection>
         ) : null}
 
-        <SectionCard title="Valores">
+        <ExecutiveSection title="Valores" panel>
           <FormGrid>
             <DetailItem
               label="Valor original"
@@ -233,9 +234,9 @@ export function ContaPagarDetail({
             />
             <DetailItem label="Saldo pendente" value={formatCurrency(saldo)} />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
-        <SectionCard title="Datas">
+        <ExecutiveSection title="Datas" panel>
           <FormGrid>
             <DetailItem
               label="Emissão"
@@ -254,15 +255,15 @@ export function ContaPagarDetail({
               value={formatDateOnly(item.data_pagamento)}
             />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
-        <SectionCard title="Observações">
+        <ExecutiveSection title="Observações" panel>
           <p className="text-sm whitespace-pre-wrap">
             {item.observacoes || "—"}
           </p>
-        </SectionCard>
+        </ExecutiveSection>
 
-        <SectionCard title="Auditoria">
+        <ExecutiveSection title="Auditoria" panel>
           <FormGrid>
             <DetailItem
               label="Criado em"
@@ -273,12 +274,12 @@ export function ContaPagarDetail({
               value={formatFinanceiroDate(item.updated_at)}
             />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
         <div className="lg:col-span-2">
           <ContaLancamentoHistorico events={events} />
         </div>
       </div>
-    </div>
+    </ExecutivePage>
   );
 }

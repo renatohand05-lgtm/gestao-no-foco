@@ -5,12 +5,12 @@ import { Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DsIcon } from "@/components/ui/ds-icon";
-import { exAnimations } from "@/lib/design-system";
+import { gofFocusRing, gofMotion, gofShadow } from "@/lib/design-system";
 import { listFabActions } from "@/lib/workspace";
 import { cn } from "@/lib/utils";
 
 /**
- * FAB mínimo — só criações (Sprint 12.3). Export fica no menu da toolbar.
+ * FAB mínimo — Brand oficial (Gate 19.4.1).
  */
 export function ExecutiveFloatingActions() {
   const [open, setOpen] = useState(false);
@@ -24,7 +24,7 @@ export function ExecutiveFloatingActions() {
         <ul
           className={cn(
             "pointer-events-auto flex flex-col items-end gap-2",
-            exAnimations.scale,
+            gofMotion.fade,
           )}
         >
           {actions.map((action) => (
@@ -34,9 +34,9 @@ export function ExecutiveFloatingActions() {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "rounded-full border-slate-200 bg-white shadow-lg dark:border-white/10",
-                  exAnimations.focusRing,
-                  exAnimations.hoverLift,
+                  "rounded-full border-border/60 bg-[var(--brand-white)]",
+                  gofShadow.md,
+                  gofFocusRing,
                 )}
                 onClick={() => setOpen(false)}
               >
@@ -51,13 +51,12 @@ export function ExecutiveFloatingActions() {
         type="button"
         size="icon"
         className={cn(
-          "pointer-events-auto size-12 rounded-full bg-blue-600 text-white shadow-xl",
-          exAnimations.focusRing,
-          exAnimations.hoverGlow,
-          exAnimations.hoverPress,
+          "pointer-events-auto size-12 rounded-full bg-[var(--brand-graphite)] text-white",
+          gofShadow.lg,
+          gofFocusRing,
         )}
         aria-expanded={open}
-        aria-label={open ? "Fechar" : "Novo"}
+        aria-label={open ? "Fechar ações rápidas" : "Abrir ações rápidas"}
         onClick={() => setOpen((v) => !v)}
       >
         <DsIcon icon={open ? X : Plus} size="md" className="text-white" />

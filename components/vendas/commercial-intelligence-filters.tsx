@@ -1,8 +1,12 @@
 import Link from "next/link";
 
 import { CommercialClienteTypeahead } from "@/components/vendas/commercial-cliente-typeahead";
-import { buttonVariants } from "@/components/ui/button";
-import { ciClearHref, ciHref } from "@/lib/vendas/commercial-intelligence-compose";
+import { ExecutiveButton, ExecutiveFilterField } from "@/components/executive";
+import { gofControl } from "@/lib/design-system";
+import {
+  ciClearHref,
+  ciHref,
+} from "@/lib/vendas/commercial-intelligence-compose";
 import { VENDA_STATUS_OPTIONS } from "@/lib/vendas/constants";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +23,9 @@ type Props = {
   origemOptions: Array<{ value: string; label: string }>;
 };
 
+/**
+ * Filtros CI — controles Brand (Gate 19.1). Sem alterar lógica de URL.
+ */
 export function CommercialIntelligenceFilters({
   tenantSlug,
   de,
@@ -36,30 +43,30 @@ export function CommercialIntelligenceFilters({
       method="get"
       className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
     >
-      <label className="space-y-1 text-sm">
-        <span className="text-muted-foreground">De</span>
+      <ExecutiveFilterField label="De" htmlFor="ci-de">
         <input
+          id="ci-de"
           type="date"
           name="de"
           defaultValue={de}
-          className="block w-full rounded-md border bg-background px-3 py-2"
+          className={cn(gofControl, "w-full")}
         />
-      </label>
-      <label className="space-y-1 text-sm">
-        <span className="text-muted-foreground">Até</span>
+      </ExecutiveFilterField>
+      <ExecutiveFilterField label="Até" htmlFor="ci-ate">
         <input
+          id="ci-ate"
           type="date"
           name="ate"
           defaultValue={ate}
-          className="block w-full rounded-md border bg-background px-3 py-2"
+          className={cn(gofControl, "w-full")}
         />
-      </label>
-      <label className="space-y-1 text-sm">
-        <span className="text-muted-foreground">Responsável comercial</span>
+      </ExecutiveFilterField>
+      <ExecutiveFilterField label="Responsável comercial" htmlFor="ci-resp">
         <select
+          id="ci-resp"
           name="responsavel"
           defaultValue={responsavel ?? ""}
-          className="block w-full min-w-[10rem] rounded-md border bg-background px-3 py-2"
+          className={cn(gofControl, "min-w-[10rem]")}
         >
           <option value="">Todos</option>
           {responsavelOptions.map((o) => (
@@ -68,13 +75,13 @@ export function CommercialIntelligenceFilters({
             </option>
           ))}
         </select>
-      </label>
-      <label className="space-y-1 text-sm">
-        <span className="text-muted-foreground">Origem</span>
+      </ExecutiveFilterField>
+      <ExecutiveFilterField label="Origem" htmlFor="ci-origem">
         <select
+          id="ci-origem"
           name="origem"
           defaultValue={origem ?? ""}
-          className="block w-full min-w-[10rem] rounded-md border bg-background px-3 py-2"
+          className={cn(gofControl, "min-w-[10rem]")}
         >
           <option value="">Todas</option>
           {origemOptions.map((o) => (
@@ -83,13 +90,13 @@ export function CommercialIntelligenceFilters({
             </option>
           ))}
         </select>
-      </label>
-      <label className="space-y-1 text-sm">
-        <span className="text-muted-foreground">Status</span>
+      </ExecutiveFilterField>
+      <ExecutiveFilterField label="Status" htmlFor="ci-status">
         <select
+          id="ci-status"
           name="status"
           defaultValue={status ?? "all"}
-          className="block w-full min-w-[10rem] rounded-md border bg-background px-3 py-2"
+          className={cn(gofControl, "min-w-[10rem]")}
         >
           <option value="all">Todos</option>
           {VENDA_STATUS_OPTIONS.map((o) => (
@@ -98,31 +105,26 @@ export function CommercialIntelligenceFilters({
             </option>
           ))}
         </select>
-      </label>
+      </ExecutiveFilterField>
       <CommercialClienteTypeahead
         tenantSlug={tenantSlug}
         selectedId={cliente}
         selectedLabel={clienteLabel}
       />
       <div className="flex flex-wrap gap-2">
-        <button
-          type="submit"
-          className={cn(buttonVariants({ variant: "default" }), "text-sm")}
-        >
-          Aplicar
-        </button>
-        <Link
-          href={ciClearHref(tenantSlug)}
-          className={cn(buttonVariants({ variant: "outline" }), "text-sm")}
+        <ExecutiveButton type="submit">Aplicar</ExecutiveButton>
+        <ExecutiveButton
+          variant="outline"
+          render={<Link href={ciClearHref(tenantSlug)} />}
         >
           Limpar
-        </Link>
-        <Link
-          href={ciHref(tenantSlug, { preset: "hoje" })}
-          className={cn(buttonVariants({ variant: "ghost" }), "text-sm")}
+        </ExecutiveButton>
+        <ExecutiveButton
+          variant="ghost"
+          render={<Link href={ciHref(tenantSlug, { preset: "hoje" })} />}
         >
           Hoje
-        </Link>
+        </ExecutiveButton>
       </div>
     </form>
   );

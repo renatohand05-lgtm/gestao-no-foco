@@ -24,9 +24,14 @@ export function AuthFormShell({
   className,
 }: AuthFormShellProps) {
   return (
-    <Card className={cn("border-border/60 shadow-xl shadow-primary/5", className)}>
+    <Card
+      className={cn(
+        "border-border/60 shadow-xl shadow-[var(--brand-graphite)]/5",
+        className,
+      )}
+    >
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl font-bold tracking-tight">
+        <CardTitle className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-[var(--brand-graphite)]">
           {title}
         </CardTitle>
         <CardDescription>{description}</CardDescription>

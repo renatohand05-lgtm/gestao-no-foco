@@ -1,13 +1,17 @@
 import { notFound } from "next/navigation";
 
 import { DespesaRecorrenteActions } from "@/components/financeiro/despesa-recorrente-actions";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
 import { SectionCard } from "@/components/ui/section-card";
 import { createDespesaRecorrenteService } from "@/lib/financeiro/despesa-recorrente-service";
 import { formatCurrency, formatDateOnly } from "@/lib/financeiro/format";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Despesa recorrente" };
 
@@ -34,24 +38,21 @@ export default async function Page({ params }: PageProps) {
   if (!item) notFound();
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={item.descricao}
-        description="Série ≠ ocorrência. Edições afetam apenas futuras gerações."
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Despesas Recorrentes",
             href: `/${tenantSlug}/financeiro/despesas-recorrentes`,
           },
           { label: item.descricao },
-        ]}
-      >
-        <ActionButton
+        ]} />
+      <ExecutiveHeader title={item.descricao} description="Série ≠ ocorrência. Edições afetam apenas futuras gerações." actions={<>
+<ActionButton
           action="edit"
           href={`/${tenantSlug}/financeiro/despesas-recorrentes/${item.id}/editar`}
         />
-      </ModuleHeader>
+</>} />
 
       <DespesaRecorrenteActions
         tenantSlug={tenantSlug}
@@ -90,6 +91,6 @@ export default async function Page({ params }: PageProps) {
           />
         </FormGrid>
       </SectionCard>
-    </div>
+    </ExecutivePage>
   );
 }

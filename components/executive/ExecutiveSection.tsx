@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
-import { exAnimations } from "@/lib/design-system/animations";
-import { exColors } from "@/lib/design-system/colors";
-import { exPadding, exStack } from "@/lib/design-system/spacing";
-import { exRadius } from "@/lib/design-system/radius";
-import { exTypography } from "@/lib/design-system/typography";
+import { gofMotion, gofSpaceY, gofTypography } from "@/lib/design-system/foundation";
+import {
+  gofCardHeader,
+  gofCardPadding,
+  gofCardSurface,
+} from "@/lib/design-system/primitives";
 
 type Props = {
   title: string;
@@ -11,12 +12,12 @@ type Props = {
   actions?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
-  /** Painel com fundo suave para identidade de seção */
+  /** Envolve conteúdo na superfície canônica de card */
   panel?: boolean;
 };
 
 /**
- * Seção executiva — título discreto; conteúdo protagoniza (Sprint 13.8).
+ * Seção executiva — hierarquia Title/Subtitle + stack (Gate 19.0.2).
  */
 export function ExecutiveSection({
   title,
@@ -29,26 +30,19 @@ export function ExecutiveSection({
   return (
     <section
       className={cn(
-        exStack[16],
-        exAnimations.fade,
-        panel &&
-          cn(
-            exRadius[20],
-            "border",
-            exColors.neutral.border,
-            exColors.neutral.surface,
-            exPadding[16],
-            "sm:p-6 lg:p-8",
-          ),
+        gofSpaceY.md,
+        gofMotion.fade,
+        panel && cn(gofCardSurface, gofCardPadding),
+        "min-w-0",
         className,
       )}
       aria-label={title}
     >
-      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
+      <div className={cn(gofCardHeader, !panel && "border-b-0 pb-0")}>
         <div className="min-w-0 space-y-1">
-          <h2 className={exTypography.sectionTitle}>{title}</h2>
+          <h2 className={cn(gofTypography.title, "truncate")}>{title}</h2>
           {description ? (
-            <p className={cn(exTypography.caption, "max-w-2xl")}>
+            <p className={cn(gofTypography.subtitle, "max-w-2xl break-words")}>
               {description}
             </p>
           ) : null}
@@ -57,7 +51,7 @@ export function ExecutiveSection({
           <div className="flex flex-wrap items-center gap-2">{actions}</div>
         ) : null}
       </div>
-      {children}
+      <div className="min-w-0">{children}</div>
     </section>
   );
 }

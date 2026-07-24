@@ -1,12 +1,16 @@
 import { notFound } from "next/navigation";
 
 import { CategoriaFinanceiraForm } from "@/components/financeiro/categoria-financeira-form";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { buildPlanoContaSelectOptions } from "@/lib/financeiro/plano-conta-tree";
 import { createCategoriaFinanceiraService } from "@/lib/financeiro/categoria-financeira-service";
 import { createPlanoContaService } from "@/lib/financeiro/plano-conta-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Editar" };
 
@@ -29,11 +33,8 @@ export default async function EditarPage({
   const planoContaOptions = buildPlanoContaSelectOptions(planoItems);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={`Editar ${item.nome}`}
-        description={`Atualize o registro em ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Categorias Financeiras", href: `/${tenantSlug}/financeiro/categorias` },
           {
@@ -41,17 +42,17 @@ export default async function EditarPage({
             href: `/${tenantSlug}/financeiro/categorias/${item.id}`,
           },
           { label: "Editar" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title={`Editar ${item.nome}`} description={`Atualize o registro em ${tenant.name}`} />
 
-      <SectionCard title="Cadastro" description="Atualize os dados do registro.">
+      <ExecutiveSection title="Cadastro" description="Atualize os dados do registro." panel>
         <CategoriaFinanceiraForm
           tenantSlug={tenantSlug}
           mode="edit"
           item={item}
           planoContaOptions={planoContaOptions}
         />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

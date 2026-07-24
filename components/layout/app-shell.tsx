@@ -42,12 +42,16 @@ function DemoAwareChrome({
       ) : null}
       <SidebarInset
         className={cn(
-          "min-h-svh bg-[#eef1f5] dark:bg-background",
+          "min-h-svh bg-[var(--brand-gray-light)] dark:bg-background",
           hide.appSidebar && "md:ml-0",
         )}
       >
         {!hide.appSidebar ? (
-          <AppHeader tenantName={tenant.name} user={user} />
+          <AppHeader
+            tenantName={tenant.name}
+            tenantSlug={tenant.slug}
+            user={user}
+          />
         ) : (
           <div className="sticky top-0 z-30 border-b border-border/60 bg-background/90 px-4 py-2 backdrop-blur">
             <div className="mx-auto flex max-w-[88rem] items-center justify-between gap-3">
@@ -80,8 +84,12 @@ export function AppShell(props: AppShellProps) {
       fallback={
         <SidebarProvider>
           <AppSidebar tenant={props.tenant} tenants={props.tenants} />
-          <SidebarInset className="min-h-svh bg-[#eef1f5] dark:bg-background">
-            <AppHeader tenantName={props.tenant.name} user={props.user} />
+          <SidebarInset className="min-h-svh bg-[var(--brand-gray-light)] dark:bg-background">
+            <AppHeader
+              tenantName={props.tenant.name}
+              tenantSlug={props.tenant.slug}
+              user={props.user}
+            />
             <PageContainer>{props.children}</PageContainer>
           </SidebarInset>
         </SidebarProvider>

@@ -1,18 +1,21 @@
 import Link from "next/link";
 
+import { MetricCard } from "@/components/executive";
+import type { ExColorTone } from "@/lib/design-system/colors";
+import { gofGrid } from "@/lib/design-system";
 import type { OsCentralKpis } from "@/lib/ordens/os-central-compose";
 import { formatCurrency } from "@/lib/format";
-import { cn } from "@/lib/utils";
 
 type KpiDef = {
   key: keyof OsCentralKpis;
   label: string;
   href?: string;
   format?: "number" | "currency";
-  tone?: "default" | "warn" | "danger" | "ok";
+  tone?: ExColorTone;
   supporting?: string;
   /** Se true e valor null, o card não é renderizado. */
   hideIfNull?: boolean;
+  emphasize?: boolean;
 };
 
 type Props = {
@@ -32,7 +35,7 @@ function formatValue(
 export function OsCentralKpis({ tenantSlug, kpis }: Props) {
   const base = `/${tenantSlug}/ordens`;
   const defs: KpiDef[] = [
-    { key: "abertas", label: "OS abertas", href: base },
+    { key: "abertas", label: "OS abertas", href: base, emphasize: true },
     {
       key: "emDiagnostico",
       label: "Em diagnóstico",
@@ -42,35 +45,36 @@ export function OsCentralKpis({ tenantSlug, kpis }: Props) {
       key: "aguardandoAprovacao",
       label: "Aguardando aprovação",
       href: `${base}?status=aguardando_aprovacao`,
-      tone: "warn",
+      tone: "warning",
     },
     {
       key: "aguardandoPecas",
       label: "Aguardando peças",
       href: `${base}?status=aguardando_peca`,
-      tone: "warn",
+      tone: "warning",
     },
     {
       key: "emExecucao",
       label: "Em execução",
       href: `${base}?status=em_execucao`,
+      tone: "info",
     },
     {
       key: "finalizadasHoje",
       label: "Finalizadas hoje",
-      tone: "ok",
+      tone: "success",
     },
     {
       key: "entreguesHoje",
       label: "Entregues hoje",
-      tone: "ok",
+      tone: "success",
       hideIfNull: true,
     },
     {
       key: "atrasadas",
       label: "Atrasadas",
       href: `${base}?sort=mais_atrasadas`,
-      tone: kpis.atrasadas > 0 ? "danger" : "default",
+      tone: kpis.atrasadas > 0 ? "danger" : "neutral",
     },
     {
       key: "ticketMedio",
@@ -82,12 +86,13 @@ export function OsCentralKpis({ tenantSlug, kpis }: Props) {
       label: "Valor em produção",
       format: "currency",
       supporting: "Valor estimado das OS em andamento.",
+      tone: "info",
     },
   ];
 
   return (
     <div
-      className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5"
+      className={gofGrid.kpis}
       data-os-block="central-kpis"
       role="region"
       aria-label="Indicadores da Central de OS"
@@ -99,47 +104,31 @@ export function OsCentralKpis({ tenantSlug, kpis }: Props) {
           typeof raw === "number" ? raw : null,
           def.format ?? "number",
         );
-        const className = cn(
-          "rounded-xl border bg-card p-3.5 transition sm:p-4",
-          def.tone === "warn" && "border-amber-400/45",
-          def.tone === "danger" && "border-rose-400/55",
-          def.tone === "ok" && "border-emerald-400/45",
-          def.href && "hover:border-foreground/25",
-        );
-        const body = (
-          <>
-            <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
-              {def.label}
-            </p>
-            <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
-              {value}
-            </p>
-            {def.supporting ? (
-              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
-                {def.supporting}
-              </p>
-            ) : null}
-          </>
+        const card = (
+          <MetricCard
+            label={def.label}
+            value={value}
+            hint={def.supporting}
+            tone={def.tone ?? "neutral"}
+            emphasize={def.emphasize}
+            className="h-full"
+          />
         );
         if (def.href) {
           return (
             <Link
               key={def.key}
               href={def.href}
-              className={className}
+              className="block h-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40"
               aria-label={`${def.label}: ${value}`}
             >
-              {body}
+              {card}
             </Link>
           );
         }
         return (
-          <div
-            key={def.key}
-            className={className}
-            aria-label={`${def.label}: ${value}`}
-          >
-            {body}
+          <div key={def.key} aria-label={`${def.label}: ${value}`}>
+            {card}
           </div>
         );
       })}

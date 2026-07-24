@@ -9,11 +9,10 @@ import {
 } from "@/components/ordens/os-central-state";
 import { OsCentralTable } from "@/components/ordens/os-central-table";
 import { OsSubnav } from "@/components/ordens/os-subnav";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { buttonVariants } from "@/components/ui/button";
 import { SectionCard } from "@/components/ui/section-card";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createCentroOperacoesService } from "@/lib/operacoes/centro-operacoes-service";
+import { gofControl } from "@/lib/design-system";
 import {
   buildOsCentralPagination,
   composeOsCentralKpis,
@@ -38,6 +37,14 @@ import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { cn } from "@/lib/utils";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveButton,
+  ExecutiveFilter,
+  ExecutiveFilterField,
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Central de Ordens de Serviço" };
 
@@ -154,16 +161,11 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
     const message =
       error instanceof Error ? error.message : "Falha ao carregar dados.";
     return (
-      <div className="space-y-6">
-        <ModuleHeader
-          title="Central de Ordens de Serviço"
-          description={`Visão operacional enterprise · ${tenant.name}`}
-          breadcrumbs={[{ label: "Ordens" }]}
-        >
-          <OsSubnav tenantSlug={tenantSlug} active="lista" />
-        </ModuleHeader>
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[{ label: "Ordens" }]} />
+      <ExecutiveHeader title="Central de Ordens de Serviço" description={`Visão operacional enterprise · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" />} />
         <OsCentralErrorState tenantSlug={tenantSlug} message={message} />
-      </div>
+      </ExecutivePage>
     );
   }
 
@@ -232,147 +234,172 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
   ) as Record<number, string>;
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Central de Ordens de Serviço"
-        description={`Visão operacional enterprise · ${tenant.name}`}
-        breadcrumbs={[{ label: "Ordens" }]}
-      >
-        <OsSubnav tenantSlug={tenantSlug} active="lista" />
-      </ModuleHeader>
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[{ label: "Ordens" }]} />
+      <ExecutiveHeader title="Central de Ordens de Serviço" description={`Visão operacional enterprise · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" />} />
 
       <OsCentralKpis tenantSlug={tenantSlug} kpis={kpis} />
 
-      <SectionCard title="Filtros" contentClassName="pt-0">
-        <form
-          className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          aria-label="Filtros da Central de OS"
+      <form aria-label="Filtros da Central de OS">
+        {/* Reset page on filter submit */}
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="perPage" value={String(perPage)} />
+
+        <ExecutiveFilter
+          label="Filtros"
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <ExecutiveButton type="submit" size="sm">
+                Filtrar
+              </ExecutiveButton>
+              <ExecutiveButton
+                size="sm"
+                variant={hasFilters ? "outline" : "ghost"}
+                render={<Link href={clearHref} />}
+              >
+                Limpar filtros
+              </ExecutiveButton>
+            </div>
+          }
         >
-          {/* Reset page on filter submit */}
-          <input type="hidden" name="page" value="1" />
-          <input type="hidden" name="perPage" value={String(perPage)} />
+          <ExecutiveFilterField label="Status" htmlFor="os-filter-status">
+            <select
+              id="os-filter-status"
+              name="status"
+              defaultValue={sp.status ?? "all"}
+              className={cn(gofControl, "w-full")}
+            >
+              <option value="all">Todos os status</option>
+              {OS_STATUS.map((s) => (
+                <option key={s} value={s}>
+                  {OS_STATUS_LABELS[s]}
+                </option>
+              ))}
+            </select>
+          </ExecutiveFilterField>
 
-          <select
-            name="status"
-            defaultValue={sp.status ?? "all"}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Status"
+          <ExecutiveFilterField
+            label="Responsável"
+            htmlFor="os-filter-mecanico"
           >
-            <option value="all">Todos os status</option>
-            {OS_STATUS.map((s) => (
-              <option key={s} value={s}>
-                {OS_STATUS_LABELS[s]}
-              </option>
-            ))}
-          </select>
+            <select
+              id="os-filter-mecanico"
+              name="mecanico_id"
+              defaultValue={sp.mecanico_id ?? ""}
+              className={cn(gofControl, "w-full")}
+            >
+              <option value="">Todos os responsáveis</option>
+              {mecanicos.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nome_completo}
+                </option>
+              ))}
+            </select>
+          </ExecutiveFilterField>
 
-          <select
-            name="mecanico_id"
-            defaultValue={sp.mecanico_id ?? ""}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Responsável"
-          >
-            <option value="">Todos os responsáveis</option>
-            {mecanicos.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nome_completo}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="date"
-            name="de"
-            defaultValue={sp.de ?? ""}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Data de"
-          />
-          <input
-            type="date"
-            name="ate"
-            defaultValue={sp.ate ?? ""}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Data até"
-          />
-
-          <input
-            name="cliente"
-            defaultValue={sp.cliente ?? ""}
-            placeholder="Cliente"
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Cliente"
-          />
-          <input
-            name="veiculo"
-            defaultValue={sp.veiculo ?? ""}
-            placeholder="Veículo (placa ou modelo)"
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Veículo"
-          />
-
-          <select
-            name="prioridade"
-            defaultValue={sp.prioridade ?? "all"}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Prioridade"
-          >
-            <option value="all">Todas as prioridades</option>
-            {OS_PRIORIDADE_OPTIONS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="sort"
-            defaultValue={sort}
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            aria-label="Ordenação"
-          >
-            {OS_CENTRAL_SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-
-          <input
-            name="q"
-            defaultValue={sp.q ?? ""}
-            placeholder="Pesquisa rápida: nº, cliente, placa…"
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm sm:col-span-2"
-            aria-label="Pesquisa rápida"
-          />
-
-          <label className="flex h-9 items-center gap-2 text-sm">
+          <ExecutiveFilterField label="Data de" htmlFor="os-filter-de">
             <input
+              id="os-filter-de"
+              type="date"
+              name="de"
+              defaultValue={sp.de ?? ""}
+              className={cn(gofControl, "w-full")}
+            />
+          </ExecutiveFilterField>
+
+          <ExecutiveFilterField label="Data até" htmlFor="os-filter-ate">
+            <input
+              id="os-filter-ate"
+              type="date"
+              name="ate"
+              defaultValue={sp.ate ?? ""}
+              className={cn(gofControl, "w-full")}
+            />
+          </ExecutiveFilterField>
+
+          <ExecutiveFilterField label="Cliente" htmlFor="os-filter-cliente">
+            <input
+              id="os-filter-cliente"
+              name="cliente"
+              defaultValue={sp.cliente ?? ""}
+              placeholder="Cliente"
+              className={cn(gofControl, "w-full")}
+            />
+          </ExecutiveFilterField>
+
+          <ExecutiveFilterField label="Veículo" htmlFor="os-filter-veiculo">
+            <input
+              id="os-filter-veiculo"
+              name="veiculo"
+              defaultValue={sp.veiculo ?? ""}
+              placeholder="Veículo (placa ou modelo)"
+              className={cn(gofControl, "w-full")}
+            />
+          </ExecutiveFilterField>
+
+          <ExecutiveFilterField
+            label="Prioridade"
+            htmlFor="os-filter-prioridade"
+          >
+            <select
+              id="os-filter-prioridade"
+              name="prioridade"
+              defaultValue={sp.prioridade ?? "all"}
+              className={cn(gofControl, "w-full")}
+            >
+              <option value="all">Todas as prioridades</option>
+              {OS_PRIORIDADE_OPTIONS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </ExecutiveFilterField>
+
+          <ExecutiveFilterField label="Ordenação" htmlFor="os-filter-sort">
+            <select
+              id="os-filter-sort"
+              name="sort"
+              defaultValue={sort}
+              className={cn(gofControl, "w-full")}
+            >
+              {OS_CENTRAL_SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </ExecutiveFilterField>
+
+          <ExecutiveFilterField
+            label="Pesquisa rápida"
+            htmlFor="os-filter-q"
+            className="sm:col-span-2"
+          >
+            <input
+              id="os-filter-q"
+              name="q"
+              defaultValue={sp.q ?? ""}
+              placeholder="Pesquisa rápida: nº, cliente, placa…"
+              className={cn(gofControl, "w-full")}
+            />
+          </ExecutiveFilterField>
+
+          <ExecutiveFilterField
+            label="Incluir arquivadas"
+            htmlFor="os-filter-arquivadas"
+          >
+            <input
+              id="os-filter-arquivadas"
               type="checkbox"
               name="incluir_arquivadas"
               value="1"
               defaultChecked={sp.incluir_arquivadas === "1"}
+              className="size-4 accent-[var(--brand-graphite)]"
             />
-            Incluir arquivadas
-          </label>
-
-          <div className="flex flex-wrap items-center gap-2 sm:col-span-2 xl:col-span-1">
-            <button type="submit" className={cn(buttonVariants({ size: "sm" }))}>
-              Filtrar
-            </button>
-            <Link
-              href={clearHref}
-              className={cn(
-                buttonVariants({
-                  variant: hasFilters ? "outline" : "ghost",
-                  size: "sm",
-                }),
-              )}
-            >
-              Limpar filtros
-            </Link>
-          </div>
-        </form>
-      </SectionCard>
+          </ExecutiveFilterField>
+        </ExecutiveFilter>
+      </form>
 
       <SectionCard
         title={`Lista operacional · ${pagination.total} OS`}
@@ -394,7 +421,7 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
           perPageHrefs={perPageHrefs}
         />
       </SectionCard>
-    </div>
+    </ExecutivePage>
   );
 }
 

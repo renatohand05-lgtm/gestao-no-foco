@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
-import { Plus } from "lucide-react";
 
-import { EmptyState } from "@/components/ui/empty-state";
+import { ExecutiveEmptyState } from "@/components/executive";
 
 type FinanceiroEmptyStateProps = {
   tenantSlug: string;
@@ -29,23 +28,20 @@ export function FinanceiroEmptyState({
   hasFilters,
 }: FinanceiroEmptyStateProps) {
   const filtered = hasSearch || hasFilters;
+  const desc = filtered
+    ? "Tente ajustar a busca ou os filtros, ou cadastre um novo registro."
+    : [description, impact].filter(Boolean).join(" ");
 
   return (
-    <EmptyState
+    <ExecutiveEmptyState
       icon={icon}
       title={filtered ? "Nenhum registro encontrado" : title}
-      description={
-        filtered
-          ? "Tente ajustar a busca ou os filtros, ou cadastre um novo registro."
-          : description
-      }
-      impact={filtered ? undefined : impact}
+      description={desc}
       action={
         createLabel
           ? {
               label: createLabel,
               href: createHref ?? `/${tenantSlug}/financeiro/${basePath}/novo`,
-              icon: Plus,
             }
           : undefined
       }

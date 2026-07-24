@@ -1,15 +1,19 @@
-import { ModuleHeader } from "@/components/layout/module-header";
 import { FormaPagamentoDeleteButton } from "@/components/financeiro/forma-pagamento-delete-button";
 import { FinanceiroStatusBadge } from "@/components/financeiro/financeiro-status-badge";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
-import { SectionCard } from "@/components/ui/section-card";
 import {
   formatFinanceiroDate,
   formatPercent,
   getFormaPagamentoTipoLabel,
 } from "@/lib/financeiro/format";
 import type { FormaPagamento } from "@/types/financeiro";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type Props = {
   tenantSlug: string;
@@ -35,17 +39,14 @@ function DetailItem({
 
 export function FormaPagamentoDetail({ tenantSlug, item }: Props) {
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={item.nome}
-        description="Detalhes do registro financeiro"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Formas de Pagamento", href: `/${tenantSlug}/financeiro/formas-pagamento` },
           { label: item.nome },
-        ]}
-      >
-        <FinanceiroStatusBadge ativo={item.ativo} />
+        ]} />
+      <ExecutiveHeader title={item.nome} description="Detalhes do registro financeiro" actions={<>
+<FinanceiroStatusBadge ativo={item.ativo} />
         <ActionButton
           action="edit"
           href={`/${tenantSlug}/financeiro/formas-pagamento/${item.id}/editar`}
@@ -55,28 +56,28 @@ export function FormaPagamentoDetail({ tenantSlug, item }: Props) {
           id={item.id}
           nome={item.nome}
         />
-      </ModuleHeader>
+</>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
 
-      <SectionCard title="Parâmetros">
+      <ExecutiveSection title="Parâmetros" panel>
         <FormGrid>
           <DetailItem label="Tipo" value={getFormaPagamentoTipoLabel(item.tipo)} />
           <DetailItem label="Gera financeiro" value={item.gera_financeiro ? "Sim" : "Não"} />
           <DetailItem label="Dias de compensação" value={`${item.dias_compensacao} dia(s)`} />
           <DetailItem label="Taxa" value={formatPercent(item.taxa_percent)} />
         </FormGrid>
-      </SectionCard>
-      <SectionCard title="Observações">
+      </ExecutiveSection>
+      <ExecutiveSection title="Observações" panel>
         <p className="text-sm whitespace-pre-wrap">{item.observacoes || "—"}</p>
-      </SectionCard>
-      <SectionCard title="Auditoria">
+      </ExecutiveSection>
+      <ExecutiveSection title="Auditoria" panel>
         <FormGrid>
           <DetailItem label="Criado em" value={formatFinanceiroDate(item.created_at)} />
           <DetailItem label="Atualizado em" value={formatFinanceiroDate(item.updated_at)} />
         </FormGrid>
-      </SectionCard>
+      </ExecutiveSection>
       </div>
-    </div>
+    </ExecutivePage>
   );
 }

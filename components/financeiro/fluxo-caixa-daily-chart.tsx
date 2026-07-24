@@ -1,6 +1,6 @@
 "use client";
 
-import { SectionCard } from "@/components/ui/section-card";
+import { ExecutiveSection } from "@/components/executive";
 import { formatCurrency } from "@/lib/financeiro/format";
 import type { FluxoCaixaDailyPoint } from "@/types/fluxo-caixa";
 
@@ -18,14 +18,15 @@ function formatDayLabel(date: string) {
 export function FluxoCaixaDailyChart({ data }: Props) {
   if (data.length === 0) {
     return (
-      <SectionCard
+      <ExecutiveSection
         title="Fluxo diário"
         description="Entradas e saídas por dia no período selecionado"
+        panel
       >
         <p className="py-10 text-center text-sm text-muted-foreground">
           Nenhum dado para o período selecionado.
         </p>
-      </SectionCard>
+      </ExecutiveSection>
     );
   }
 
@@ -35,9 +36,10 @@ export function FluxoCaixaDailyChart({ data }: Props) {
   );
 
   return (
-    <SectionCard
+    <ExecutiveSection
       title="Fluxo diário"
       description="Entradas e saídas por dia no período selecionado (realizado + previsto)"
+      panel
     >
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
@@ -93,6 +95,6 @@ export function FluxoCaixaDailyChart({ data }: Props) {
           </div>
         </div>
       </div>
-    </SectionCard>
+    </ExecutiveSection>
   );
 }

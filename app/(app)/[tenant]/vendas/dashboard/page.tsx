@@ -1,6 +1,14 @@
 import { Suspense } from "react";
 import Link from "next/link";
 
+import {
+  ExecutiveButton,
+  ExecutiveEmptyState,
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+  ExecutiveSkeleton,
+} from "@/components/executive";
 import { CommercialActionQueue } from "@/components/vendas/commercial-action-queue";
 import { CommercialDataCoverageNote } from "@/components/vendas/commercial-data-coverage-note";
 import { CommercialDiscountPanel } from "@/components/vendas/commercial-discount-panel";
@@ -11,9 +19,6 @@ import { CommercialMetaPanel } from "@/components/vendas/commercial-meta-panel";
 import { CommercialOriginPanel } from "@/components/vendas/commercial-origin-panel";
 import { CommercialPipeline } from "@/components/vendas/commercial-pipeline";
 import { CommercialRankingPanel } from "@/components/vendas/commercial-ranking-panel";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { ActionButton } from "@/components/ui/action-button";
-import { SectionCard } from "@/components/ui/section-card";
 import {
   civilDateInTimezone,
   resolveTenantTimezone,
@@ -27,6 +32,7 @@ import {
   resolveCiPeriod,
 } from "@/lib/vendas/commercial-intelligence-compose";
 import { createCommercialIntelligenceService } from "@/lib/vendas/commercial-intelligence-service";
+import { gofGrid, gofTypography } from "@/lib/design-system";
 
 export const metadata = { title: "Inteligência Comercial" };
 
@@ -45,14 +51,14 @@ type PageProps = {
 
 function LoadingState() {
   return (
-    <div className="space-y-4" aria-busy="true" aria-label="Carregando">
-      <div className="h-24 animate-pulse rounded-lg bg-muted" />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <ExecutivePage width="wide" spacing="default">
+      <ExecutiveSkeleton heightClassName="h-24" />
+      <div className={gofGrid.kpis}>
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+          <ExecutiveSkeleton key={i} heightClassName="h-24" />
         ))}
       </div>
-    </div>
+    </ExecutivePage>
   );
 }
 
@@ -73,18 +79,12 @@ async function CommercialIntelligenceBody({ params, searchParams }: PageProps) {
 
   if (!canView) {
     return (
-      <div className="space-y-4">
-        <ModuleHeader
-          title="Inteligência Comercial"
-          breadcrumbs={[
-            { label: "Vendas", href: `/${tenantSlug}/vendas` },
-            { label: "Inteligência Comercial" },
-          ]}
-        />
-        <p className="text-sm text-muted-foreground">
+      <ExecutivePage>
+        <ExecutiveHeader title="Inteligência Comercial" />
+        <p className={gofTypography.subtitle}>
           Sem permissão para visualizar este painel.
         </p>
-      </div>
+      </ExecutivePage>
     );
   }
 
@@ -112,23 +112,20 @@ async function CommercialIntelligenceBody({ params, searchParams }: PageProps) {
     });
   } catch (err) {
     loadError =
-      err instanceof Error ? err.message : "Falha ao carregar inteligência comercial.";
+      err instanceof Error
+        ? err.message
+        : "Falha ao carregar inteligência comercial.";
   }
 
   if (loadError || !data) {
     return (
-      <div className="space-y-4">
-        <ModuleHeader
-          title="Inteligência Comercial"
-          breadcrumbs={[
-            { label: "Vendas", href: `/${tenantSlug}/vendas` },
-            { label: "Inteligência Comercial" },
-          ]}
+      <ExecutivePage>
+        <ExecutiveHeader title="Inteligência Comercial" />
+        <ExecutiveEmptyState
+          title="Dados indisponíveis"
+          description={loadError ?? "Não foi possível carregar o painel."}
         />
-        <p className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
-          {loadError ?? "Dados indisponíveis."}
-        </p>
-      </div>
+      </ExecutivePage>
     );
   }
 
@@ -169,29 +166,28 @@ async function CommercialIntelligenceBody({ params, searchParams }: PageProps) {
     data.actionItems.length === 0;
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
+    <ExecutivePage width="wide" spacing="loose">
+      <ExecutiveHeader
         title="Inteligência Comercial"
         description="Pipeline, conversão e ações — sem misturar OS em produção com receita."
-        breadcrumbs={[
-          { label: "Vendas", href: `/${tenantSlug}/vendas` },
-          { label: "Inteligência Comercial" },
-        ]}
-      >
-        <ActionButton
-          action="create"
-          label="Nova venda"
-          href={`/${tenantSlug}/vendas/nova`}
-        />
-        <Link
-          href={`/${tenantSlug}/vendas/abertas`}
-          className="text-sm text-primary hover:underline"
-        >
-          Orçamentos abertos
-        </Link>
-      </ModuleHeader>
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <ExecutiveButton
+              render={<Link href={`/${tenantSlug}/vendas/nova`} />}
+            >
+              Nova venda
+            </ExecutiveButton>
+            <ExecutiveButton
+              variant="ghost"
+              render={<Link href={`/${tenantSlug}/vendas/abertas`} />}
+            >
+              Orçamentos abertos
+            </ExecutiveButton>
+          </div>
+        }
+      />
 
-      <SectionCard title="Filtros" contentClassName="pt-0">
+      <ExecutiveSection title="Filtros" panel>
         <CommercialIntelligenceFilters
           tenantSlug={tenantSlug}
           de={data.period.de}
@@ -204,31 +200,31 @@ async function CommercialIntelligenceBody({ params, searchParams }: PageProps) {
           responsavelOptions={responsavelOptions}
           origemOptions={origemOptions}
         />
-      </SectionCard>
+      </ExecutiveSection>
 
       <CommercialDataCoverageNote cobertura={data.cobertura} />
 
       {emptyPortfolio ? (
-        <p className="rounded-lg border p-4 text-sm text-muted-foreground">
-          Sem vendas no período selecionado. Ajuste o filtro ou registre uma
-          venda.
-        </p>
+        <ExecutiveEmptyState
+          title="Sem vendas no período"
+          description="Ajuste o filtro ou registre uma venda."
+        />
       ) : null}
 
-      <SectionCard title="KPIs comerciais">
+      <ExecutiveSection title="KPIs comerciais" panel>
         <CommercialKpiGrid
           tenantSlug={tenantSlug}
           kpis={data.kpis}
           de={data.period.de}
           ate={data.period.ate}
         />
-      </SectionCard>
+      </ExecutiveSection>
 
-      <SectionCard title="Pipeline">
+      <ExecutiveSection title="Pipeline" panel>
         <CommercialPipeline pipeline={data.pipeline} oficina={data.oficina} />
-      </SectionCard>
+      </ExecutiveSection>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className={gofGrid.twoCol}>
         <CommercialFunnel kpis={data.kpis} />
         <CommercialMetaPanel tenantSlug={tenantSlug} meta={data.meta} />
       </div>
@@ -238,9 +234,8 @@ async function CommercialIntelligenceBody({ params, searchParams }: PageProps) {
         items={data.actionItems}
       />
 
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">Rankings</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <ExecutiveSection title="Rankings" description="Desempenho por dimensão.">
+        <div className={gofGrid.threeCol}>
           <CommercialRankingPanel
             title="Responsáveis comerciais confirmados"
             description="Somente vendedor_id / responsável comercial explícito."
@@ -286,10 +281,10 @@ async function CommercialIntelligenceBody({ params, searchParams }: PageProps) {
             rows={data.rankings.maioresPerdas}
           />
         </div>
-      </div>
+      </ExecutiveSection>
 
       <CommercialDiscountPanel data={data.descontos} />
-    </div>
+    </ExecutivePage>
   );
 }
 

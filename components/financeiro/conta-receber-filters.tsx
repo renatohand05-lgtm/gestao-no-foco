@@ -3,7 +3,13 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import {
+  ExecutiveFilter,
+  ExecutiveFilterField,
+} from "@/components/executive";
+import { gofControl } from "@/lib/design-system";
 import { CONTA_RECEBER_STATUS_FILTER_OPTIONS } from "@/lib/financeiro/constants";
+import { cn } from "@/lib/utils";
 
 type Props = {
   tenantSlug: string;
@@ -25,9 +31,6 @@ export function ContaReceberFilters({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-
-  const selectClassName =
-    "flex h-9 w-full min-w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
   function updateParams(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -53,14 +56,8 @@ export function ContaReceberFilters({
   }
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-status"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Status
-        </label>
+    <ExecutiveFilter label="Filtros">
+      <ExecutiveFilterField label="Status" htmlFor="filter-status">
         <select
           id="filter-status"
           value={currentStatus}
@@ -70,7 +67,7 @@ export function ContaReceberFilters({
               status: event.target.value === "all" ? null : event.target.value,
             })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           {CONTA_RECEBER_STATUS_FILTER_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -78,15 +75,9 @@ export function ContaReceberFilters({
             </option>
           ))}
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-cliente"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Cliente
-        </label>
+      <ExecutiveFilterField label="Cliente" htmlFor="filter-cliente">
         <select
           id="filter-cliente"
           value={currentClienteId}
@@ -94,7 +85,7 @@ export function ContaReceberFilters({
           onChange={(event) =>
             updateParams({ cliente: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="">Todos os clientes</option>
           {clientes.map((cliente) => (
@@ -103,15 +94,9 @@ export function ContaReceberFilters({
             </option>
           ))}
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-vencimento-de"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Vencimento de
-        </label>
+      <ExecutiveFilterField label="Vencimento de" htmlFor="filter-vencimento-de">
         <input
           id="filter-vencimento-de"
           type="date"
@@ -120,17 +105,14 @@ export function ContaReceberFilters({
           onChange={(event) =>
             updateParams({ vencimentoDe: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         />
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-vencimento-ate"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Vencimento até
-        </label>
+      <ExecutiveFilterField
+        label="Vencimento até"
+        htmlFor="filter-vencimento-ate"
+      >
         <input
           id="filter-vencimento-ate"
           type="date"
@@ -139,9 +121,9 @@ export function ContaReceberFilters({
           onChange={(event) =>
             updateParams({ vencimentoAte: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         />
-      </div>
-    </div>
+      </ExecutiveFilterField>
+    </ExecutiveFilter>
   );
 }

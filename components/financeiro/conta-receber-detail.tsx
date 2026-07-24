@@ -7,10 +7,8 @@ import { ContaLifecycleEstornoButton } from "@/components/financeiro/conta-lifec
 import { ContaLancamentoHistorico } from "@/components/financeiro/conta-lancamento-historico";
 import { ContaReceberReceberButton } from "@/components/financeiro/conta-receber-receber-button";
 import { ContaReceberStatusBadge } from "@/components/financeiro/conta-receber-status-badge";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
-import { SectionCard } from "@/components/ui/section-card";
 import type { ContaLifecycleSnapshot } from "@/lib/financeiro/conta-lifecycle";
 import {
   calcSaldoPendente,
@@ -27,6 +25,12 @@ import {
 import type { FinanceiroLancamentoEvent } from "@/lib/financeiro/financeiro-eventos";
 import { formatCurrency, formatDateOnly, formatFinanceiroDate } from "@/lib/financeiro/format";
 import type { ContaReceberDetail as ContaReceberDetailType } from "@/types/contas-receber";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type Props = {
   tenantSlug: string;
@@ -81,20 +85,17 @@ export function ContaReceberDetail({
   const snapshot = toSnapshot(item);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={formatContaReceberNumero(item.numero)}
-        description={item.descricao}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Contas a Receber",
             href: `/${tenantSlug}/financeiro/contas-receber`,
           },
           { label: formatContaReceberNumero(item.numero) },
-        ]}
-      >
-        <ContaReceberStatusBadge status={item.status_exibicao} />
+        ]} />
+      <ExecutiveHeader title={formatContaReceberNumero(item.numero)} description={item.descricao} actions={<>
+<ContaReceberStatusBadge status={item.status_exibicao} />
         {canReceberContaReceber(item) ? (
           <ContaReceberReceberButton
             tenantSlug={tenantSlug}
@@ -135,10 +136,10 @@ export function ContaReceberDetail({
             snapshot={snapshot}
           />
         ) : null}
-      </ModuleHeader>
+</>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard title="Cliente e vínculos">
+        <ExecutiveSection title="Cliente e vínculos" panel>
           <FormGrid>
             <DetailItem label="Cliente" value={item.cliente.nome} />
             <DetailItem
@@ -204,9 +205,9 @@ export function ContaReceberDetail({
               value={`${item.parcela_numero} de ${item.parcela_total}`}
             />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
-        <SectionCard title="Valores">
+        <ExecutiveSection title="Valores" panel>
           <FormGrid>
             <DetailItem
               label="Valor original"
@@ -225,9 +226,9 @@ export function ContaReceberDetail({
             />
             <DetailItem label="Saldo pendente" value={formatCurrency(saldo)} />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
-        <SectionCard title="Datas">
+        <ExecutiveSection title="Datas" panel>
           <FormGrid>
             <DetailItem
               label="Emissão"
@@ -246,15 +247,15 @@ export function ContaReceberDetail({
               value={formatDateOnly(item.data_recebimento)}
             />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
-        <SectionCard title="Observações">
+        <ExecutiveSection title="Observações" panel>
           <p className="text-sm whitespace-pre-wrap">
             {item.observacoes || "—"}
           </p>
-        </SectionCard>
+        </ExecutiveSection>
 
-        <SectionCard title="Auditoria">
+        <ExecutiveSection title="Auditoria" panel>
           <FormGrid>
             <DetailItem
               label="Criado em"
@@ -265,12 +266,12 @@ export function ContaReceberDetail({
               value={formatFinanceiroDate(item.updated_at)}
             />
           </FormGrid>
-        </SectionCard>
+        </ExecutiveSection>
 
         <div className="lg:col-span-2">
           <ContaLancamentoHistorico events={events} />
         </div>
       </div>
-    </div>
+    </ExecutivePage>
   );
 }

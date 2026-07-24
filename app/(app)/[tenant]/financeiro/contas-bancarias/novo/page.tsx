@@ -1,7 +1,11 @@
 import { ContaBancariaForm } from "@/components/financeiro/conta-bancaria-form";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Nova conta" };
 
@@ -14,23 +18,21 @@ export default async function NovoPage({
   const tenant = await requireTenant(tenantSlug);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Nova conta"
-        description={`Cadastro em ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Contas Bancárias", href: `/${tenantSlug}/financeiro/contas-bancarias` },
           { label: "Nova conta" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Nova conta" description={`Cadastro em ${tenant.name}`} />
 
-      <SectionCard
+      <ExecutiveSection
         title="Cadastro"
         description="Preencha os dados do novo registro."
+        panel
       >
         <ContaBancariaForm tenantSlug={tenantSlug} mode="create" />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

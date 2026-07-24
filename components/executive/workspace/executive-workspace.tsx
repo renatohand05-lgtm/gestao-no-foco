@@ -17,7 +17,6 @@ import type {
 type Props = {
   tenantSlug: string;
   tenantName: string;
-  greeting?: string;
   filters: DashboardFilters;
   filterOptions: DashboardFilterOptions;
   updatedAtLabel: string;
@@ -42,7 +41,6 @@ type Props = {
 export function ExecutiveWorkspace({
   tenantSlug,
   tenantName,
-  greeting,
   filters,
   updatedAtLabel,
   layoutBootstrap = null,
@@ -53,13 +51,12 @@ export function ExecutiveWorkspace({
 }: Props) {
   return (
     <WorkspaceProvider>
-      <div className="min-h-full bg-transparent">
+      <div className="min-h-full min-w-0 overflow-x-hidden bg-transparent">
         <ExecutiveDashboardShell className={cn("relative gap-4 pb-16 pt-1 lg:gap-5")}>
           <ExecutiveTopBar
             tenantName={tenantName}
             dataDe={filters.dataDe}
             dataAte={filters.dataAte}
-            greeting={greeting}
             updatedAtLabel={updatedAtLabel}
           />
 

@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 
-import { exAnimations, exShadow, exTypography } from "@/lib/design-system";
+import {
+  gofCardSurface,
+  gofFocusRing,
+  gofMotion,
+  gofRadius,
+  gofTypography,
+} from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type QuickLink = { href: string; label: string };
@@ -23,18 +29,14 @@ const QUICK_LINKS: (tenant: string) => QuickLink[] = (tenantSlug) => [
 ];
 
 /**
- * Links rápidos do workspace — sem duplicar “Hoje” / KPIs / Ação-Risco-Oportunidade.
+ * Links rápidos do workspace — DS oficial (Gate 19.4.1).
  */
 export function ExecutiveWorkspaceFooter({ tenantSlug }: Props) {
   const links = QUICK_LINKS(tenantSlug);
 
   return (
     <footer
-      className={cn(
-        "mt-2 rounded-2xl border border-slate-200/60 bg-white p-4 sm:p-5",
-        exShadow.card,
-        exAnimations.fade,
-      )}
+      className={cn("mt-2 p-4 sm:p-5", gofCardSurface, gofMotion.fade)}
       aria-label="Links rápidos"
     >
       <nav className="flex flex-wrap gap-1.5" aria-label="Links rápidos">
@@ -43,16 +45,16 @@ export function ExecutiveWorkspaceFooter({ tenantSlug }: Props) {
             key={link.href}
             href={link.href}
             className={cn(
-              "inline-flex min-h-11 items-center rounded-full border border-slate-200/80 bg-white px-3 text-xs font-medium text-slate-700",
-              "hover:border-slate-300 dark:border-white/10 dark:bg-transparent dark:text-white/80",
-              exAnimations.focusRing,
+              "inline-flex min-h-11 items-center border border-border/60 bg-[var(--brand-white)] px-3 text-xs font-medium",
+              gofRadius.sm,
+              gofFocusRing,
             )}
           >
             {link.label}
           </Link>
         ))}
       </nav>
-      <p className={cn(exTypography.caption, "mt-3")}>
+      <p className={cn(gofTypography.caption, "mt-3")}>
         Atalhos · {tenantSlug}
       </p>
     </footer>

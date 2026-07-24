@@ -3,6 +3,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import {
+  ExecutiveFilter,
+  ExecutiveFilterField,
+} from "@/components/executive";
+import { gofControl } from "@/lib/design-system";
+import { cn } from "@/lib/utils";
 import type {
   FluxoCaixaFilterOption,
   FluxoCaixaStatusFilter,
@@ -37,9 +43,6 @@ export function FluxoCaixaFilters({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const selectClassName =
-    "flex h-9 w-full min-w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
   function updateParams(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -64,14 +67,8 @@ export function FluxoCaixaFilters({
   }
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-conta"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Conta Bancária
-        </label>
+    <ExecutiveFilter label="Filtros">
+      <ExecutiveFilterField label="Conta Bancária" htmlFor="filter-conta">
         <select
           id="filter-conta"
           value={currentContaId}
@@ -79,7 +76,7 @@ export function FluxoCaixaFilters({
           onChange={(event) =>
             updateParams({ conta: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="">Todas as contas</option>
           {contas.map((conta) => (
@@ -88,15 +85,9 @@ export function FluxoCaixaFilters({
             </option>
           ))}
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-categoria"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Categoria
-        </label>
+      <ExecutiveFilterField label="Categoria" htmlFor="filter-categoria">
         <select
           id="filter-categoria"
           value={currentCategoriaId}
@@ -104,7 +95,7 @@ export function FluxoCaixaFilters({
           onChange={(event) =>
             updateParams({ categoria: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="">Todas as categorias</option>
           {categorias.map((categoria) => (
@@ -113,15 +104,12 @@ export function FluxoCaixaFilters({
             </option>
           ))}
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-centro-custo"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Centro de Custo
-        </label>
+      <ExecutiveFilterField
+        label="Centro de Custo"
+        htmlFor="filter-centro-custo"
+      >
         <select
           id="filter-centro-custo"
           value={currentCentroCustoId}
@@ -129,7 +117,7 @@ export function FluxoCaixaFilters({
           onChange={(event) =>
             updateParams({ centroCusto: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="">Todos os centros</option>
           {centrosCusto.map((centro) => (
@@ -138,15 +126,9 @@ export function FluxoCaixaFilters({
             </option>
           ))}
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-status"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Status
-        </label>
+      <ExecutiveFilterField label="Status" htmlFor="filter-status">
         <select
           id="filter-status"
           value={currentStatus}
@@ -157,21 +139,15 @@ export function FluxoCaixaFilters({
               status: value === "all" ? null : value,
             });
           }}
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="all">Todos</option>
           <option value="realizado">Realizado</option>
           <option value="previsto">Previsto</option>
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-data-de"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Período de
-        </label>
+      <ExecutiveFilterField label="Período de" htmlFor="filter-data-de">
         <input
           id="filter-data-de"
           type="date"
@@ -180,17 +156,11 @@ export function FluxoCaixaFilters({
           onChange={(event) =>
             updateParams({ dataDe: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         />
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="filter-data-ate"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Período até
-        </label>
+      <ExecutiveFilterField label="Período até" htmlFor="filter-data-ate">
         <input
           id="filter-data-ate"
           type="date"
@@ -199,9 +169,9 @@ export function FluxoCaixaFilters({
           onChange={(event) =>
             updateParams({ dataAte: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         />
-      </div>
-    </div>
+      </ExecutiveFilterField>
+    </ExecutiveFilter>
   );
 }

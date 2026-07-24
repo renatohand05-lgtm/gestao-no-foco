@@ -7,6 +7,7 @@ import {
   Ticket,
 } from "lucide-react";
 
+import { DashboardWorkspaceEmpty } from "@/components/dashboard/dashboard-workspace-empty";
 import { ExecutiveKpiCard } from "@/components/dashboard/executive/executive-kpi-card";
 import { ExecutiveSection } from "@/components/executive";
 import { formatCurrency, formatPercent } from "@/lib/dashboard/format";
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   data: DashboardHojeSnapshot;
+  tenantSlug: string;
 };
 
 function signedCurrency(value: number | null) {
@@ -25,15 +27,38 @@ function signedCurrency(value: number | null) {
   return abs;
 }
 
-/** KPIs do dia — usa ExecutiveKpiCard oficial (Gate 16.1). */
-export function ResumoVendasHojeCards({ data }: Props) {
+function isWorkspaceEmpty(data: DashboardHojeSnapshot): boolean {
+  const h = data.hoje;
+  return (
+    h.quantidade_vendas === 0 &&
+    h.faturamento === 0 &&
+    h.meta == null &&
+    data.mes.quantidade_vendas === 0 &&
+    data.mes.faturamento === 0
+  );
+}
+
+/** KPIs do dia — empty elegante sem parede de zeros (Gate 19.4). */
+export function ResumoVendasHojeCards({ data, tenantSlug }: Props) {
   const h = data.hoje;
   const diferenca = h.meta == null ? null : h.faturamento - h.meta;
   const excess =
     h.percentual != null && h.percentual > 100 ? h.percentual - 100 : null;
 
+  if (isWorkspaceEmpty(data)) {
+    return (
+      <ExecutiveSection
+        title="Score do dia"
+        description="Ative o cockpit com o primeiro movimento real."
+        panel
+      >
+        <DashboardWorkspaceEmpty tenantSlug={tenantSlug} />
+      </ExecutiveSection>
+    );
+  }
+
   return (
-    <ExecutiveSection title="Hoje" panel>
+    <ExecutiveSection title="Score do dia" description="Meta, realizado e ritmo comercial de hoje." panel>
       <div className="@container w-full max-w-full min-w-0 overflow-x-hidden">
         <div
           className={cn(
@@ -62,6 +87,15 @@ export function ResumoVendasHojeCards({ data }: Props) {
             tone="primary"
             title="Realizado"
             value={formatCurrency(h.faturamento)}
+            statusLabel={
+              h.status === "atingida" || h.status === "superada"
+                ? "No ritmo"
+                : h.status === "atencao"
+                  ? "Atenção"
+                  : h.status === "abaixo"
+                    ? "Abaixo"
+                    : undefined
+            }
           />
           <ExecutiveKpiCard
             icon={ArrowUpRight}

@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
+import { gofControl } from "@/lib/design-system";
 import {
   createCentroCustoAction,
   updateCentroCustoAction,
@@ -34,8 +35,6 @@ type Props = {
   mode: "create" | "edit";
   item?: CentroCusto;
 };
-
-const selectClassName = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function CentroCustoForm({ tenantSlug, mode, item }: Props) {
   const router = useRouter();
@@ -102,7 +101,7 @@ export function CentroCustoForm({ tenantSlug, mode, item }: Props) {
             </FormField>
             <FormField label="Status" htmlFor="ativo" required>
               <Controller control={form.control} name="ativo" render={({ field }) => (
-                <select id="ativo" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={selectClassName}>
+                <select id="ativo" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={gofControl}>
                   {FINANCEIRO_STATUS_OPTIONS.map((option) => (
                     <option key={String(option.value)} value={String(option.value)}>{option.label}</option>
                   ))}

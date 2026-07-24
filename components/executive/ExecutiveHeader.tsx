@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
-import { exAnimations } from "@/lib/design-system/animations";
-import { exTypography } from "@/lib/design-system/typography";
+import { gofMotion, gofTypography } from "@/lib/design-system/foundation";
 
 type Props = {
   title: string;
@@ -10,7 +9,7 @@ type Props = {
 };
 
 /**
- * Cabeçalho de página/módulo executivo (mais compacto que o Hero).
+ * Cabeçalho de módulo — tipografia canônica (Gate 19.0.2).
  */
 export function ExecutiveHeader({
   title,
@@ -22,14 +21,16 @@ export function ExecutiveHeader({
     <div
       className={cn(
         "flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
-        exAnimations.fade,
+        gofMotion.fade,
         className,
       )}
     >
       <div className="min-w-0 space-y-1">
-        <h1 className={exTypography.title}>{title}</h1>
+        <h1 className={cn(gofTypography.title, "sm:text-2xl")}>{title}</h1>
         {description ? (
-          <p className={exTypography.subtitle}>{description}</p>
+          <p className={cn(gofTypography.subtitle, "max-w-2xl break-words")}>
+            {description}
+          </p>
         ) : null}
       </div>
       {actions ? (

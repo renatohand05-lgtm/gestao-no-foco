@@ -1,7 +1,11 @@
 import { FornecedorForm } from "@/components/financeiro/fornecedor-form";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Novo fornecedor" };
 
@@ -21,19 +25,16 @@ export default async function Page({ params }: PageProps) {
     ]);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Novo fornecedor"
-        description="Defina padrões financeiros para autopreenchimento em Contas a Pagar."
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Fornecedores",
             href: `/${tenantSlug}/financeiro/fornecedores`,
           },
           { label: "Novo" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Novo fornecedor" description="Defina padrões financeiros para autopreenchimento em Contas a Pagar." />
       <FornecedorForm
         tenantSlug={tenantSlug}
         mode="create"
@@ -52,6 +53,6 @@ export default async function Page({ params }: PageProps) {
           label: c.nome,
         }))}
       />
-    </div>
+    </ExecutivePage>
   );
 }

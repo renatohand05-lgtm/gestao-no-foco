@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
 import { SectionCard } from "@/components/ui/section-card";
@@ -9,6 +8,11 @@ import { createFornecedorService } from "@/lib/financeiro/fornecedor-service";
 import { formatDreHierarchyPath } from "@/lib/dre";
 import type { DreLinhaEconomica } from "@/lib/dre";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Fornecedor" };
 
@@ -40,24 +44,21 @@ export default async function Page({ params }: PageProps) {
     null;
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={item.nome_fantasia || item.nome}
-        description={item.nome_fantasia ? item.nome : "Fornecedor mestre"}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Fornecedores",
             href: `/${tenantSlug}/financeiro/fornecedores`,
           },
           { label: item.nome_fantasia || item.nome },
-        ]}
-      >
-        <ActionButton
+        ]} />
+      <ExecutiveHeader title={item.nome_fantasia || item.nome} description={item.nome_fantasia ? item.nome : "Fornecedor mestre"} actions={<>
+<ActionButton
           action="edit"
           href={`/${tenantSlug}/financeiro/fornecedores/${item.id}/editar`}
         />
-      </ModuleHeader>
+</>} />
 
       <SectionCard title="Contato">
         <FormGrid>
@@ -126,6 +127,6 @@ export default async function Page({ params }: PageProps) {
           />
         </FormGrid>
       </SectionCard>
-    </div>
+    </ExecutivePage>
   );
 }

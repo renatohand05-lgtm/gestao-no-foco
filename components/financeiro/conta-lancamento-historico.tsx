@@ -1,4 +1,4 @@
-import { SectionCard } from "@/components/ui/section-card";
+import { ExecutiveSection } from "@/components/executive";
 import { formatFinanceiroDate } from "@/lib/financeiro/format";
 import type { FinanceiroLancamentoEvent } from "@/lib/financeiro/financeiro-eventos";
 
@@ -25,9 +25,10 @@ type Props = {
 
 export function ContaLancamentoHistorico({ events }: Props) {
   return (
-    <SectionCard
+    <ExecutiveSection
       title="Histórico"
       description="Trilha de auditoria do lançamento (criação, baixa, estorno, cancelamento)."
+      panel
     >
       <div id="historico" />
       {events.length === 0 ? (
@@ -57,6 +58,6 @@ export function ContaLancamentoHistorico({ events }: Props) {
           ))}
         </ol>
       )}
-    </SectionCard>
+    </ExecutiveSection>
   );
 }

@@ -1,12 +1,16 @@
 import Link from "next/link";
 
 import { MecanicosManager } from "@/components/mecanicos/mecanicos-manager";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Mecânicos" };
 
@@ -49,22 +53,19 @@ export default async function OficinaMecanicosPage({
   }
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Mecânicos"
-        description="Cadastro, custos, disponibilidade e vínculo com OS"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Oficina", href: `/${tenantSlug}/ordens` },
           { label: "Mecânicos" },
-        ]}
-      >
-        <Link
+        ]} />
+      <ExecutiveHeader title="Mecânicos" description="Cadastro, custos, disponibilidade e vínculo com OS" actions={<>
+<Link
           href={`/${tenantSlug}/ordens/mecanicos`}
           className="text-sm underline"
         >
           Dashboard de produtividade
         </Link>
-      </ModuleHeader>
+</>} />
 
       {migrationPending ? (
         <SectionCard title="Migration pendente">
@@ -84,6 +85,6 @@ export default async function OficinaMecanicosPage({
           canEdit={canEdit}
         />
       )}
-    </div>
+    </ExecutivePage>
   );
 }

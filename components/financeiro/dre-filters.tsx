@@ -3,6 +3,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import {
+  ExecutiveFilter,
+  ExecutiveFilterField,
+} from "@/components/executive";
+import { gofControl } from "@/lib/design-system";
+import { cn } from "@/lib/utils";
 import type { DreFilterOption } from "@/types/dre";
 
 type Props = {
@@ -32,9 +38,6 @@ export function DreFilters({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const selectClassName =
-    "flex h-9 w-full min-w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
   function updateParams(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -57,14 +60,8 @@ export function DreFilters({
   }
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-      <div className="space-y-1.5">
-        <label
-          htmlFor="dre-data-de"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Período de
-        </label>
+    <ExecutiveFilter label="Filtros">
+      <ExecutiveFilterField label="Período de" htmlFor="dre-data-de">
         <input
           id="dre-data-de"
           type="date"
@@ -73,17 +70,11 @@ export function DreFilters({
           onChange={(event) =>
             updateParams({ dataDe: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         />
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="dre-data-ate"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Período até
-        </label>
+      <ExecutiveFilterField label="Período até" htmlFor="dre-data-ate">
         <input
           id="dre-data-ate"
           type="date"
@@ -92,17 +83,11 @@ export function DreFilters({
           onChange={(event) =>
             updateParams({ dataAte: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         />
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="dre-centro-custo"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Centro de Custo
-        </label>
+      <ExecutiveFilterField label="Centro de Custo" htmlFor="dre-centro-custo">
         <select
           id="dre-centro-custo"
           value={currentCentroCustoId}
@@ -110,7 +95,7 @@ export function DreFilters({
           onChange={(event) =>
             updateParams({ centroCusto: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="">Todos os centros</option>
           {centrosCusto.map((centro) => (
@@ -119,15 +104,12 @@ export function DreFilters({
             </option>
           ))}
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="dre-categoria"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Categoria financeira
-        </label>
+      <ExecutiveFilterField
+        label="Categoria financeira"
+        htmlFor="dre-categoria"
+      >
         <select
           id="dre-categoria"
           value={currentCategoriaId}
@@ -135,7 +117,7 @@ export function DreFilters({
           onChange={(event) =>
             updateParams({ categoria: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="">Todas as categorias</option>
           {categorias.map((categoria) => (
@@ -144,15 +126,9 @@ export function DreFilters({
             </option>
           ))}
         </select>
-      </div>
+      </ExecutiveFilterField>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="dre-plano-conta"
-          className="text-xs font-medium text-muted-foreground"
-        >
-          Plano de contas
-        </label>
+      <ExecutiveFilterField label="Plano de contas" htmlFor="dre-plano-conta">
         <select
           id="dre-plano-conta"
           value={currentPlanoContaId}
@@ -160,7 +136,7 @@ export function DreFilters({
           onChange={(event) =>
             updateParams({ planoConta: event.target.value || null })
           }
-          className={selectClassName}
+          className={cn(gofControl, "w-full min-w-36")}
         >
           <option value="">Todos os planos</option>
           {planosConta.map((plano) => (
@@ -169,7 +145,7 @@ export function DreFilters({
             </option>
           ))}
         </select>
-      </div>
-    </div>
+      </ExecutiveFilterField>
+    </ExecutiveFilter>
   );
 }

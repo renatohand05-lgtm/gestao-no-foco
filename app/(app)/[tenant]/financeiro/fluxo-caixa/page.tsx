@@ -7,7 +7,6 @@ import { FluxoCaixaMovimentacoesTable } from "@/components/financeiro/fluxo-caix
 import { FluxoCaixaSummaryCards } from "@/components/financeiro/fluxo-caixa-summary-cards";
 import { FinanceiroEmptyState } from "@/components/financeiro/financeiro-empty-state";
 import { FinanceiroPagination } from "@/components/financeiro/financeiro-pagination";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { FINANCEIRO_DEFAULT_PER_PAGE } from "@/lib/financeiro/constants";
@@ -17,6 +16,11 @@ import {
 } from "@/lib/financeiro/fluxo-caixa-service";
 import { requireTenant } from "@/lib/tenants";
 import type { FluxoCaixaStatusFilter } from "@/types/fluxo-caixa";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Fluxo de Caixa" };
 
@@ -103,15 +107,12 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   if (loadError || !resumo || !daily || !itens || !filterOptions) {
     return (
-      <div className="space-y-6">
-        <ModuleHeader
-          title="Fluxo de Caixa"
-          description={`Movimentações e projeção financeira de ${tenant.name}`}
-          breadcrumbs={[
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
             { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
             { label: "Fluxo de Caixa" },
-          ]}
-        />
+          ]} />
+      <ExecutiveHeader title="Fluxo de Caixa" description={`Movimentações e projeção financeira de ${tenant.name}`} />
         <FinanceiroEmptyState
           tenantSlug={tenantSlug}
           basePath="fluxo-caixa"
@@ -121,20 +122,17 @@ export default async function Page({ params, searchParams }: PageProps) {
           hasSearch={false}
           hasFilters={false}
         />
-      </div>
+      </ExecutivePage>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Fluxo de Caixa"
-        description={`Movimentações e projeção financeira de ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Fluxo de Caixa" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Fluxo de Caixa" description={`Movimentações e projeção financeira de ${tenant.name}`} />
 
       <FluxoCaixaSummaryCards resumo={resumo} />
 
@@ -192,6 +190,6 @@ export default async function Page({ params, searchParams }: PageProps) {
           </div>
         )}
       </SectionCard>
-    </div>
+    </ExecutivePage>
   );
 }

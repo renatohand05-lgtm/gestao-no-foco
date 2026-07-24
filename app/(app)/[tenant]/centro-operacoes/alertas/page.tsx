@@ -1,12 +1,16 @@
 import Link from "next/link";
 
-import { ModuleHeader } from "@/components/layout/module-header";
 import { AlertasManager } from "@/components/operacoes/alertas-manager";
 import { SectionCard } from "@/components/ui/section-card";
 import { createAlertasOperacionaisService } from "@/lib/operacoes/alertas-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Alertas operacionais" };
 
@@ -43,19 +47,16 @@ export default async function AlertasOperacionaisPage({
   });
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Alertas operacionais"
-        description="Alertas persistidos com tratamento e histórico"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           {
             label: "Centro de Operações",
             href: `/${tenantSlug}/centro-operacoes`,
           },
           { label: "Alertas" },
-        ]}
-      >
-        <div className="flex gap-3 text-sm">
+        ]} />
+      <ExecutiveHeader title="Alertas operacionais" description="Alertas persistidos com tratamento e histórico" actions={<>
+<div className="flex gap-3 text-sm">
           <Link href={`/${tenantSlug}/centro-operacoes`} className="underline">
             Voltar
           </Link>
@@ -70,11 +71,11 @@ export default async function AlertasOperacionaisPage({
             {sp.tratados === "1" ? "Só abertos" : "Incluir tratados"}
           </Link>
         </div>
-      </ModuleHeader>
+</>} />
 
       <SectionCard title="Central de alertas">
         <AlertasManager tenantSlug={tenantSlug} alertas={alertas} />
       </SectionCard>
-    </div>
+    </ExecutivePage>
   );
 }

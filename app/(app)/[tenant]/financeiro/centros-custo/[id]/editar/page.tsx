@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 
 import { CentroCustoForm } from "@/components/financeiro/centro-custo-form";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { createCentroCustoService } from "@/lib/financeiro/centro-custo-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Editar" };
 
@@ -23,11 +27,8 @@ export default async function EditarPage({
   }
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={`Editar ${item.nome}`}
-        description={`Atualize o registro em ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Centros de Custo", href: `/${tenantSlug}/financeiro/centros-custo` },
           {
@@ -35,12 +36,12 @@ export default async function EditarPage({
             href: `/${tenantSlug}/financeiro/centros-custo/${item.id}`,
           },
           { label: "Editar" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title={`Editar ${item.nome}`} description={`Atualize o registro em ${tenant.name}`} />
 
-      <SectionCard title="Cadastro" description="Atualize os dados do registro.">
+      <ExecutiveSection title="Cadastro" description="Atualize os dados do registro." panel>
         <CentroCustoForm tenantSlug={tenantSlug} mode="edit" item={item} />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

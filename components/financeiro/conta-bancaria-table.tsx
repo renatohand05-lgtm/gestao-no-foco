@@ -3,14 +3,9 @@ import Link from "next/link";
 import { ContaBancariaRowActions } from "@/components/financeiro/conta-bancaria-row-actions";
 import { FinanceiroStatusBadge } from "@/components/financeiro/financeiro-status-badge";
 import {
-  DataTable,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/data-table";
+  ExecutiveTable,
+  type ExecutiveTableColumn,
+} from "@/components/executive";
 import {
   formatCurrency,
   getContaBancariaTipoLabel,
@@ -23,39 +18,64 @@ type Props = {
 };
 
 export function ContaBancariaTable({ tenantSlug, items }: Props) {
+  const columns: ExecutiveTableColumn<ContaBancariaListItem>[] = [
+    {
+      id: "nome",
+      header: "Conta",
+      cell: (item) => (
+        <Link
+          href={`/${tenantSlug}/financeiro/contas-bancarias/${item.id}`}
+          className="block hover:underline"
+        >
+          <p className="font-medium">{item.nome}</p>
+          <p className="text-xs text-muted-foreground">
+            {[item.agencia, item.conta].filter(Boolean).join(" · ") || "—"}
+          </p>
+        </Link>
+      ),
+    },
+    {
+      id: "tipo",
+      header: "Tipo",
+      className: "hidden sm:table-cell",
+      cell: (item) => getContaBancariaTipoLabel(item.tipo),
+    },
+    {
+      id: "banco",
+      header: "Banco",
+      className: "hidden md:table-cell",
+      cell: (item) => item.banco || "—",
+    },
+    {
+      id: "saldo",
+      header: "Saldo",
+      className: "hidden lg:table-cell",
+      cell: (item) =>
+        formatCurrency(item.saldo_atual ?? item.saldo_inicial),
+    },
+    {
+      id: "status",
+      header: "Status",
+      className: "hidden xl:table-cell",
+      cell: (item) => <FinanceiroStatusBadge ativo={item.ativo} />,
+    },
+    {
+      id: "actions",
+      header: "",
+      className: "w-12",
+      cell: (item) => (
+        <ContaBancariaRowActions tenantSlug={tenantSlug} item={item} />
+      ),
+    },
+  ];
+
   return (
-    <DataTable>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Conta</TableHead>
-            <TableHead className="hidden sm:table-cell">Tipo</TableHead>
-            <TableHead className="hidden md:table-cell">Banco</TableHead>
-            <TableHead className="hidden lg:table-cell">Saldo</TableHead>
-            <TableHead className="hidden xl:table-cell">Status</TableHead>
-            <TableHead className="w-12" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <Link href={`/${tenantSlug}/financeiro/contas-bancarias/${item.id}`} className="block hover:underline">
-                  <p className="font-medium">{item.nome}</p>
-                  <p className="text-xs text-muted-foreground">{[item.agencia, item.conta].filter(Boolean).join(" · ") || "—"}</p>
-                </Link>
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">{getContaBancariaTipoLabel(item.tipo)}</TableCell>
-              <TableCell className="hidden md:table-cell">{item.banco || "—"}</TableCell>
-              <TableCell className="hidden lg:table-cell">
-                {formatCurrency(item.saldo_atual ?? item.saldo_inicial)}
-              </TableCell>
-              <TableCell className="hidden xl:table-cell"><FinanceiroStatusBadge ativo={item.ativo} /></TableCell>
-              <TableCell><ContaBancariaRowActions tenantSlug={tenantSlug} item={item} /></TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </DataTable>
+    <ExecutiveTable
+      columns={columns}
+      rows={items}
+      getRowId={(row) => row.id}
+      density="comfortable"
+      stickyHeader
+    />
   );
 }

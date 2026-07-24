@@ -3,6 +3,14 @@
 import Link from "next/link";
 import { ArrowUpRight, CheckCircle2, ListTodo } from "lucide-react";
 
+import {
+  ExecutiveBadge,
+  ExecutiveCard,
+  ExecutiveEmptyState,
+  ExecutiveSection,
+  ExecutiveSkeleton,
+  type ExecutiveBadgeTone,
+} from "@/components/executive";
 import { DsIcon } from "@/components/ui/ds-icon";
 import type {
   ActionPlanPriority,
@@ -10,12 +18,12 @@ import type {
   ExecutiveActionPlanData,
 } from "@/lib/dashboard/executive-action-plan-types";
 import { formatCurrency } from "@/lib/dashboard/format";
-import { EXECUTIVE_BLOCK, EXECUTIVE_STATUS_LABEL } from "@/lib/dashboard/executive-ui";
+import { EXECUTIVE_STATUS_LABEL } from "@/lib/dashboard/executive-ui";
 import {
-  exAnimations,
-  exRadius,
-  exShadow,
-  exTypography,
+  gofFocusRing,
+  gofMotion,
+  gofRadius,
+  gofTypography,
 } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
@@ -25,19 +33,17 @@ type Props = {
 
 const PRIORITY_UI: Record<
   ActionPlanPriority,
-  { label: string; bar: string; badge: string }
+  { label: string; tone: ExecutiveBadgeTone; bar: string }
 > = {
   alta: {
     label: EXECUTIVE_STATUS_LABEL.critico,
-    bar: "bg-rose-500",
-    badge:
-      "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300",
+    tone: "danger",
+    bar: "bg-danger",
   },
   media: {
     label: EXECUTIVE_STATUS_LABEL.atencao,
-    bar: "bg-orange-500",
-    badge:
-      "bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-200",
+    tone: "warning",
+    bar: "bg-warning",
   },
 };
 
@@ -46,29 +52,24 @@ function ActionPlanRow({ item }: { item: ActionPlanRecommendation }) {
   const hasImpact = item.impactValue != null && item.impactValue > 0;
 
   const content = (
-    <div className="flex min-w-0 gap-3.5 px-3.5 py-3.5 sm:px-4 sm:py-3.5">
+    <div className="flex min-w-0 gap-3.5">
       <span
         className={cn("w-1 shrink-0 self-stretch rounded-full", ui.bar)}
         aria-hidden
       />
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className={cn(exTypography.cardTitle, "min-w-0 text-[13px] sm:text-sm")}>
+          <p className={cn(gofTypography.body, "min-w-0 font-semibold")}>
             {item.title}
           </p>
-          <span
-            className={cn(
-              "inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap",
-              ui.badge,
-            )}
-          >
+          <ExecutiveBadge tone={ui.tone} variant="soft">
             {ui.label}
-          </span>
+          </ExecutiveBadge>
         </div>
 
         {hasImpact ? (
           <div>
-            <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+            <p className={cn(gofTypography.caption, "uppercase tracking-wide")}>
               Impacto estimado
             </p>
             <p className="text-base font-semibold tracking-tight tabular-nums text-foreground">
@@ -77,11 +78,11 @@ function ActionPlanRow({ item }: { item: ActionPlanRecommendation }) {
           </div>
         ) : null}
 
-        <p className={cn(exTypography.caption, "line-clamp-2 text-muted-foreground")}>
+        <p className={cn(gofTypography.caption, "line-clamp-2")}>
           {item.description}
         </p>
 
-        <span className="inline-flex items-center gap-0.5 pt-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+        <span className="inline-flex items-center gap-0.5 pt-0.5 text-xs font-medium text-muted-foreground">
           {item.actionLabel}
           <ArrowUpRight className="size-3.5" aria-hidden />
         </span>
@@ -94,19 +95,22 @@ function ActionPlanRow({ item }: { item: ActionPlanRecommendation }) {
       <Link
         href={item.href}
         className={cn(
-          "block rounded-xl border border-border/50 bg-background/60 transition-colors hover:bg-muted/40",
-          exAnimations.focusRing,
+          "block transition-colors hover:bg-muted/40",
+          gofRadius.lg,
+          gofFocusRing,
         )}
         aria-label={`${item.title}. ${item.actionLabel}`}
       >
-        {content}
+        <ExecutiveCard padding={16} interactive className="border-border/50">
+          {content}
+        </ExecutiveCard>
       </Link>
     </li>
   );
 }
 
 /**
- * Plano de Ação do Dia — recomendações priorizadas (Gate 17.1).
+ * Plano de Ação do Dia — Design System oficial (Gate 19.1).
  */
 export function ExecutiveActionPlanSection({ data }: Props) {
   const items = data.recommendations;
@@ -114,67 +118,54 @@ export function ExecutiveActionPlanSection({ data }: Props) {
   const alta = items.filter((i) => i.priority === "alta").length;
 
   return (
-    <section
-      className={cn(
-        EXECUTIVE_BLOCK.section,
-        exRadius[16],
-        exShadow.card,
-        exAnimations.fade,
-      )}
-      aria-labelledby="plano-acao-dia-titulo"
-      data-dashboard-block="action-plan"
-    >
-      <div className={EXECUTIVE_BLOCK.header}>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex size-8 items-center justify-center rounded-lg bg-muted/70 text-muted-foreground">
-              <DsIcon icon={ListTodo} size="md" />
-            </span>
-            <h2 id="plano-acao-dia-titulo" className={EXECUTIVE_BLOCK.title}>
-              Plano de Ação do Dia
-            </h2>
-          </div>
-          <p className={cn(exTypography.caption, "mt-1.5")}>
-            {empty
-              ? "Nenhuma ação prioritária neste momento."
-              : `${items.length} ação${items.length === 1 ? "" : "ões"} · ${alta} ${EXECUTIVE_STATUS_LABEL.critico.toLowerCase()}${alta === 1 ? "" : "s"}`}
-          </p>
-        </div>
-      </div>
-
-      {empty ? (
-        <div className="flex items-start gap-3.5 px-5 py-6 sm:px-6">
-          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-            <DsIcon icon={CheckCircle2} size="md" />
+    <div data-dashboard-block="action-plan" className={gofMotion.fade}>
+      <ExecutiveSection
+        title="Plano de Ação do Dia"
+        description={
+          empty
+            ? "Nenhuma ação prioritária neste momento."
+            : `${items.length} ação${items.length === 1 ? "" : "ões"} · ${alta} ${EXECUTIVE_STATUS_LABEL.critico.toLowerCase()}${alta === 1 ? "" : "s"}`
+        }
+        panel
+        actions={
+          <span
+            className={cn(
+              "inline-flex size-8 items-center justify-center bg-muted/70 text-muted-foreground",
+              gofRadius.md,
+            )}
+          >
+            <DsIcon icon={ListTodo} size="md" />
           </span>
-          <div>
-            <p className={exTypography.cardTitle}>Dia sob controle</p>
-            <p className={cn(exTypography.caption, "mt-0.5")}>
-              Não há recomendações pendentes com base nos dados disponíveis.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <ul className="space-y-2.5 p-3.5 sm:p-4">
-          {items.map((item) => (
-            <ActionPlanRow key={item.id} item={item} />
-          ))}
-        </ul>
-      )}
-    </section>
+        }
+      >
+        {empty ? (
+          <ExecutiveEmptyState
+            title="Dia sob controle"
+            description="Não há recomendações pendentes com base nos dados disponíveis."
+            icon={CheckCircle2}
+            className="py-6"
+          />
+        ) : (
+          <ul className="space-y-2.5">
+            {items.map((item) => (
+              <ActionPlanRow key={item.id} item={item} />
+            ))}
+          </ul>
+        )}
+      </ExecutiveSection>
+    </div>
   );
 }
 
 export function ExecutiveActionPlanSectionSkeleton() {
   return (
     <div
-      className={cn(
-        "h-44 border border-border/50 bg-card",
-        exRadius[16],
-        exAnimations.shimmer,
-      )}
+      className="space-y-3 rounded-xl border border-border/60 bg-card p-5"
       aria-busy="true"
       aria-label="Carregando plano de ação"
-    />
+    >
+      <ExecutiveSkeleton heightClassName="h-5" widthClassName="w-1/3" />
+      <ExecutiveSkeleton heightClassName="h-32" widthClassName="w-full" />
+    </div>
   );
 }

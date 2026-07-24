@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
+import { gofControl } from "@/lib/design-system";
 import {
   createContaPagarAction,
   updateClassificacaoContaPagarAction,
@@ -60,9 +61,6 @@ type Props = {
   centrosCusto: CentroCustoOption[];
   planoContas: PlanoContaOption[];
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60";
 
 const numberFieldOptions = {
   setValueAs: (value: string | number) => {
@@ -257,7 +255,7 @@ export function ContaPagarForm({
                   onChange={(event) =>
                     void handleFornecedorChange(event.target.value)
                   }
-                  className={selectClassName}
+                  className={gofControl}
                   disabled={lockFinanceiro}
                 >
                   <option value="">Sem vínculo</option>
@@ -338,7 +336,7 @@ export function ContaPagarForm({
                 <select
                   id="forma_pagamento_id"
                   {...form.register("forma_pagamento_id")}
-                  className={selectClassName}
+                  className={gofControl}
                   disabled={lockFinanceiro}
                 >
                   <option value="">Não informada</option>
@@ -359,7 +357,7 @@ export function ContaPagarForm({
                 <select
                   id="categoria_financeira_id"
                   {...form.register("categoria_financeira_id")}
-                  className={selectClassName}
+                  className={gofControl}
                 >
                   <option value="">Selecione a categoria</option>
                   {categorias.map((categoria) => (
@@ -382,7 +380,7 @@ export function ContaPagarForm({
                 <select
                   id="centro_custo_id"
                   {...form.register("centro_custo_id")}
-                  className={selectClassName}
+                  className={gofControl}
                 >
                   <option value="">Selecione o centro de custo</option>
                   {centrosCusto.map((centro) => (
@@ -402,7 +400,7 @@ export function ContaPagarForm({
                 <select
                   id="plano_conta_id"
                   {...form.register("plano_conta_id")}
-                  className={selectClassName}
+                  className={gofControl}
                 >
                   <option value="">Selecione o plano de contas</option>
                   {planoContas.map((conta) => (

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { MecanicoDetailPanel } from "@/components/mecanicos/mecanico-detail-panel";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { createMecanicoCompetenciaService } from "@/lib/mecanicos/competencia-service";
 import { createMecanicoCustoService } from "@/lib/mecanicos/custo-service";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
@@ -10,6 +9,11 @@ import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Detalhe do mecânico" };
 
@@ -90,22 +94,19 @@ export default async function MecanicoDetailPage({
     ]);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={mecanico.nome_completo}
-        description={`${mecanico.especialidade} · ${mecanico.status}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Mecânicos", href: `/${tenantSlug}/oficina/mecanicos` },
           { label: mecanico.nome_completo },
-        ]}
-      >
-        <Link
+        ]} />
+      <ExecutiveHeader title={mecanico.nome_completo} description={`${mecanico.especialidade} · ${mecanico.status}`} actions={<>
+<Link
           href={`/${tenantSlug}/oficina/mecanicos`}
           className="text-sm underline"
         >
           Voltar
         </Link>
-      </ModuleHeader>
+</>} />
 
       <MecanicoDetailPanel
         tenantSlug={tenantSlug}
@@ -127,6 +128,6 @@ export default async function MecanicoDetailPage({
           }[]
         }
       />
-    </div>
+    </ExecutivePage>
   );
 }

@@ -3,6 +3,14 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import {
+  ExecutiveButton,
+  ExecutiveFilter,
+  ExecutiveFilterField,
+} from "@/components/executive";
+import { gofControl } from "@/lib/design-system";
+import { cn } from "@/lib/utils";
+
 type Props = {
   tenantSlug: string;
   dataDe: string;
@@ -49,65 +57,70 @@ export function FiPeriodFilters({ tenantSlug, dataDe, dataAte }: Props) {
     });
   }
 
-  const inputClass =
-    "flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/40 p-4 md:flex-row md:flex-wrap md:items-end md:justify-between">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-          onClick={() => applyPreset(7)}
+    <ExecutiveFilter
+      label="Filtros"
+      actions={
+        <div className="flex flex-wrap gap-2">
+          <ExecutiveButton
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => applyPreset(7)}
+            disabled={isPending}
+          >
+            7 dias
+          </ExecutiveButton>
+          <ExecutiveButton
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => applyPreset(30)}
+            disabled={isPending}
+          >
+            30 dias
+          </ExecutiveButton>
+          <ExecutiveButton
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={applyMonth}
+            disabled={isPending}
+          >
+            Mês atual
+          </ExecutiveButton>
+          <ExecutiveButton
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={applyYtd}
+            disabled={isPending}
+          >
+            Ano atual
+          </ExecutiveButton>
+        </div>
+      }
+    >
+      <ExecutiveFilterField label="De" htmlFor="fi-data-de">
+        <input
+          id="fi-data-de"
+          type="date"
+          className={cn(gofControl, "w-full")}
+          defaultValue={dataDe}
+          onChange={(e) => update({ dataDe: e.target.value })}
           disabled={isPending}
-        >
-          7 dias
-        </button>
-        <button
-          type="button"
-          className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-          onClick={() => applyPreset(30)}
+        />
+      </ExecutiveFilterField>
+      <ExecutiveFilterField label="Até" htmlFor="fi-data-ate">
+        <input
+          id="fi-data-ate"
+          type="date"
+          className={cn(gofControl, "w-full")}
+          defaultValue={dataAte}
+          onChange={(e) => update({ dataAte: e.target.value })}
           disabled={isPending}
-        >
-          30 dias
-        </button>
-        <button
-          type="button"
-          className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-          onClick={applyMonth}
-          disabled={isPending}
-        >
-          Mês atual
-        </button>
-        <button
-          type="button"
-          className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-          onClick={applyYtd}
-          disabled={isPending}
-        >
-          Ano atual
-        </button>
-      </div>
-      <div className="flex flex-wrap items-end gap-2">
-        <label className="space-y-1 text-xs text-muted-foreground">
-          De
-          <input
-            type="date"
-            className={inputClass}
-            defaultValue={dataDe}
-            onChange={(e) => update({ dataDe: e.target.value })}
-          />
-        </label>
-        <label className="space-y-1 text-xs text-muted-foreground">
-          Até
-          <input
-            type="date"
-            className={inputClass}
-            defaultValue={dataAte}
-            onChange={(e) => update({ dataAte: e.target.value })}
-          />
-        </label>
-      </div>
-    </div>
+        />
+      </ExecutiveFilterField>
+    </ExecutiveFilter>
   );
 }

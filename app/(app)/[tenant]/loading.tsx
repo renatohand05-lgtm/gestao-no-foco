@@ -1,5 +1,10 @@
-import { RouteLoading } from "@/components/layout/route-loading";
+import { BrandSplash } from "@/components/brand";
 
 export default function TenantLoading() {
-  return <RouteLoading cards={3} label="Carregando área da empresa…" />;
+  return (
+    <BrandSplash
+      className="min-h-[70vh]"
+      label="Carregando área da empresa…"
+    />
+  );
 }

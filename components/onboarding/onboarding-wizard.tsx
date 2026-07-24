@@ -12,6 +12,7 @@ import { OnboardingStep } from "@/components/onboarding/onboarding-step";
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour";
 import { Button } from "@/components/ui/button";
 import { DsIcon } from "@/components/ui/ds-icon";
+import { brandConfig } from "@/config/brand";
 import {
   completeOnboardingAction,
   saveOnboardingStepAction,
@@ -19,13 +20,18 @@ import {
 import {
   estimatedMinutesRemaining,
   getStepDefinition,
-  orderedStepIds,
-  personaCopy,
+  isPremiumFlowStep,
+  PREMIUM_ONBOARDING_FLOW,
+  PREMIUM_STEP_COPY,
   segmentCopy,
-  suggestedPresetForSegment,
 } from "@/lib/onboarding";
 import { humanizeOnboardingError } from "@/lib/onboarding/onboarding-validation";
-import { exAnimations, exTypography } from "@/lib/design-system";
+import {
+  gofColors,
+  gofFocusRing,
+  gofRadius,
+  gofTypography,
+} from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type {
   OnboardingSessionView,
@@ -39,6 +45,24 @@ type Props = {
   session: OnboardingSessionView;
 };
 
+function resolvePremiumStep(id: OnboardingStepId): OnboardingStepId {
+  if (isPremiumFlowStep(id)) return id;
+  if (id === "segment") return "company";
+  if (
+    id === "monthly_goal" ||
+    id === "first_client" ||
+    id === "first_product"
+  ) {
+    return "first_sale";
+  }
+  if (id === "review" || id === "dashboard") return "first_sale";
+  return "welcome";
+}
+
+/**
+ * Wizard premium — máx. 4 passos, sempre com Pular (Gate 19.4).
+ * Persistência e IDs de step inalterados no motor.
+ */
 export function OnboardingWizard({
   tenantSlug,
   tenantName,
@@ -46,34 +70,57 @@ export function OnboardingWizard({
   session,
 }: Props) {
   const router = useRouter();
-  const [step, setStep] = useState<OnboardingStepId>(session.nextStep);
+  const [step, setStep] = useState<OnboardingStepId>(
+    resolvePremiumStep(session.nextStep),
+  );
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const copy = segmentCopy(segment);
-  const persona = personaCopy(
-    session.progress?.preferredPresetKey ??
-      suggestedPresetForSegment(segment),
-  );
   const def = getStepDefinition(step);
   const estimated = estimatedMinutesRemaining(session.checklist);
-  const stepOrder = orderedStepIds();
+  const premiumCopy =
+    PREMIUM_STEP_COPY[step as keyof typeof PREMIUM_STEP_COPY];
+  const stepIndex = PREMIUM_ONBOARDING_FLOW.indexOf(
+    step as (typeof PREMIUM_ONBOARDING_FLOW)[number],
+  );
+  const flowIndex = stepIndex >= 0 ? stepIndex : 0;
 
-  function go(next: OnboardingStepId, opts?: { skip?: boolean }) {
+  function go(opts?: { skip?: boolean }) {
     setError(null);
     startTransition(async () => {
       try {
-        const result = await saveOnboardingStepAction({
+        // Marca o passo atual e avança o fluxo premium (máx. 4) na UI.
+        await saveOnboardingStepAction({
           tenantSlug,
           step,
-          skip: opts?.skip,
+          skip: opts?.skip ?? true,
         });
-        if (result.nextStep === "dashboard" || next === "dashboard") {
+
+        const nextPremium =
+          flowIndex >= 0 && flowIndex < PREMIUM_ONBOARDING_FLOW.length - 1
+            ? PREMIUM_ONBOARDING_FLOW[flowIndex + 1]
+            : null;
+
+        if (!nextPremium || step === "first_sale") {
           await completeOnboardingAction(tenantSlug);
           router.push(`/${tenantSlug}/dashboard`);
           return;
         }
-        setStep(result.nextStep);
+
+        setStep(nextPremium);
         router.refresh();
+      } catch (err) {
+        setError(humanizeOnboardingError(err));
+      }
+    });
+  }
+
+  function skipAlways() {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await saveOnboardingStepAction({ tenantSlug, step, skip: true });
+        router.push(`/${tenantSlug}/dashboard`);
       } catch (err) {
         setError(humanizeOnboardingError(err));
       }
@@ -97,42 +144,41 @@ export function OnboardingWizard({
       <Button
         type="button"
         variant="outline"
-        className={cn("min-h-11", exAnimations.focusRing)}
-        disabled={pending || step === "welcome"}
+        className={cn("min-h-11", gofFocusRing)}
+        disabled={pending || flowIndex === 0}
         onClick={() => {
-          const idx = stepOrder.indexOf(step);
-          if (idx > 0) setStep(stepOrder[idx - 1]!);
+          if (flowIndex > 0) {
+            setStep(PREMIUM_ONBOARDING_FLOW[flowIndex - 1]!);
+          }
         }}
       >
         <DsIcon icon={ArrowLeft} size="sm" className="text-current" />
         Voltar
       </Button>
-      {def && !def.required ? (
-        <Button
-          type="button"
-          variant="ghost"
-          className={cn("min-h-11", exAnimations.focusRing)}
-          disabled={pending}
-          onClick={() => go(step, { skip: true })}
-        >
-          Pular
-        </Button>
-      ) : null}
+      <Button
+        type="button"
+        variant="ghost"
+        className={cn("min-h-11", gofFocusRing)}
+        disabled={pending}
+        onClick={skipAlways}
+      >
+        Pular
+      </Button>
       <Button
         type="button"
         variant="outline"
-        className={cn("min-h-11", exAnimations.focusRing)}
+        className={cn("min-h-11", gofFocusRing)}
         disabled={pending}
         onClick={saveAndExit}
       >
         Continuar depois
       </Button>
-      {step === "review" || step === "dashboard" ? (
+      {step === "first_sale" ? (
         <Button
           type="button"
-          className={cn("min-h-11", exAnimations.focusRing)}
+          className={cn("min-h-11", gofFocusRing)}
           disabled={pending}
-          onClick={() => go("dashboard")}
+          onClick={() => go()}
         >
           Ir ao Dashboard
           <DsIcon icon={LayoutDashboard} size="sm" className="text-current" />
@@ -140,9 +186,9 @@ export function OnboardingWizard({
       ) : (
         <Button
           type="button"
-          className={cn("min-h-11", exAnimations.focusRing)}
+          className={cn("min-h-11", gofFocusRing)}
           disabled={pending}
-          onClick={() => go(step)}
+          onClick={() => go()}
         >
           {pending ? "Salvando…" : "Continuar"}
           <DsIcon icon={ArrowRight} size="sm" className="text-current" />
@@ -153,15 +199,10 @@ export function OnboardingWizard({
 
   return (
     <OnboardingShell
-      title={
-        step === "welcome"
-          ? `Bem-vindo, ${tenantName}`
-          : (def?.title ?? "Primeiro acesso")
-      }
+      title={premiumCopy?.title ?? def?.title ?? "Primeiro acesso"}
       description={
-        step === "welcome"
-          ? copy.welcomeLead
-          : (def?.description ?? session.message)
+        premiumCopy?.description ??
+        (step === "welcome" ? copy.welcomeLead : def?.description)
       }
       footer={
         <>
@@ -169,7 +210,7 @@ export function OnboardingWizard({
           <Button
             type="button"
             variant="ghost"
-            className={cn("min-h-11", exAnimations.focusRing)}
+            className={cn("min-h-11", gofFocusRing)}
             render={<Link href={`/${tenantSlug}/dashboard`} />}
           >
             Ir ao Dashboard agora
@@ -182,6 +223,11 @@ export function OnboardingWizard({
         dismissed={Boolean(session.progress?.tourDismissedAt)}
       />
 
+      <p className={cn("mb-4", gofTypography.caption)}>
+        Passo {flowIndex + 1} de {PREMIUM_ONBOARDING_FLOW.length} ·{" "}
+        {brandConfig.name} {brandConfig.edition}
+      </p>
+
       <div className="mb-6">
         <OnboardingProgress
           checklist={session.checklist}
@@ -190,13 +236,14 @@ export function OnboardingWizard({
         />
       </div>
 
-      <p className={cn("mb-4", exTypography.caption)}>
-        Foco sugerido ({persona.label}): {persona.focus}
-      </p>
-
       {error ? (
         <p
-          className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+          className={cn(
+            "mb-4 border px-3 py-2 text-sm",
+            gofRadius.lg,
+            gofColors.danger.soft,
+            gofColors.danger.border,
+          )}
           role="alert"
         >
           {error}
@@ -205,23 +252,28 @@ export function OnboardingWizard({
 
       {step === "welcome" ? (
         <OnboardingStep
-          title="O que você ativa agora"
+          title="O que vem a seguir"
           description={copy.firstValueHint}
         >
-          <ul className={cn("list-disc space-y-1 pl-5", exTypography.caption)}>
-            <li>Configure o essencial sem preencher dezenas de cadastros.</li>
-            <li>Meta ou primeira venda liberam o Dashboard útil.</li>
-            <li>Pule o opcional e retome quando quiser.</li>
-          </ul>
+          <ol className={cn("list-decimal space-y-2 pl-5", gofTypography.caption)}>
+            <li>Bem-vindo ao Gestão.</li>
+            <li>Cadastre sua empresa.</li>
+            <li>Configure seu financeiro.</li>
+            <li>Comece registrando sua primeira Ordem de Serviço.</li>
+          </ol>
+          <p className={cn("mt-3", gofTypography.caption)}>
+            Você pode pular a qualquer momento — a plataforma nunca bloqueia o
+            uso.
+          </p>
         </OnboardingStep>
       ) : null}
 
-      {step === "company" || step === "segment" ? (
+      {step === "company" ? (
         <OnboardingStep
-          title={def?.title ?? "Empresa"}
+          title="Empresa"
           description="Esses dados já foram definidos na criação. Confirme e avance."
         >
-          <p className={exTypography.caption}>
+          <p className={gofTypography.caption}>
             Empresa: <strong>{tenantName}</strong>
             {segment ? (
               <>
@@ -241,38 +293,52 @@ export function OnboardingWizard({
         </OnboardingStep>
       ) : null}
 
-      {step === "bank_account" ||
-      step === "monthly_goal" ||
-      step === "first_client" ||
-      step === "first_product" ||
-      step === "first_sale" ? (
+      {step === "bank_account" ? (
         <OnboardingStep
-          title={def?.title ?? "Etapa"}
+          title={def?.title ?? "Financeiro"}
           description={def?.description ?? ""}
-          optional={!def?.required}
+          optional
         >
-          {def?.hrefSuffix ? (
-            <Button
-              className="min-h-11"
-              render={<Link href={`/${tenantSlug}${def.hrefSuffix}`} />}
-            >
-              {session.checklist.items.find((i) => i.id === def.checklistId)
-                ?.ctaLabel ?? "Abrir cadastro"}
-            </Button>
-          ) : null}
-          <p className={cn("mt-3", exTypography.caption)}>
-            Você pode cadastrar agora ou pular e voltar depois. O status só
-            marca concluído com dados reais.
+          <Button
+            className="min-h-11"
+            render={
+              <Link
+                href={`/${tenantSlug}/financeiro/contas-bancarias/novo`}
+              />
+            }
+          >
+            Cadastrar conta
+          </Button>
+          <p className={cn("mt-3", gofTypography.caption)}>
+            Opcional agora — pule e configure depois.
           </p>
         </OnboardingStep>
       ) : null}
 
-      {step === "review" || step === "dashboard" ? (
+      {step === "first_sale" ? (
         <OnboardingStep
-          title="Revisão"
-          description="Checklist com validação real dos dados do tenant."
+          title="Primeira Ordem de Serviço"
+          description="Registre a primeira OS para ativar o painel com dados reais."
+          optional
         >
-          <OnboardingChecklist checklist={session.checklist} />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              className="min-h-11"
+              render={<Link href={`/${tenantSlug}/ordens/nova`} />}
+            >
+              Criar primeira OS
+            </Button>
+            <Button
+              variant="outline"
+              className="min-h-11"
+              render={<Link href={`/${tenantSlug}/vendas/nova`} />}
+            >
+              Registrar venda
+            </Button>
+          </div>
+          <div className="mt-6">
+            <OnboardingChecklist checklist={session.checklist} />
+          </div>
         </OnboardingStep>
       ) : null}
     </OnboardingShell>

@@ -4,7 +4,7 @@ import {
   DashboardFilterPersistence,
   DashboardFiltersBar,
 } from "@/components/dashboard/dashboard-filters";
-import { exAnimations, exShadow } from "@/lib/design-system";
+import { gofCardSurface, gofMotion } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type {
   DashboardFilterOptions,
@@ -19,7 +19,7 @@ type Props = {
 };
 
 /**
- * Toolbar premium de filtros (Sprint 12.3) — linha única, sem formulário.
+ * Toolbar de filtros — DS oficial (Gate 19.4.1).
  */
 export function ExecutiveFilters({
   tenantSlug,
@@ -32,10 +32,9 @@ export function ExecutiveFilters({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-200/60 bg-white px-4 py-3 sm:px-5",
-        "dark:border-white/10 dark:bg-card",
-        exShadow.toolbar,
-        exAnimations.fade,
+        "overflow-x-hidden px-4 py-3 sm:px-5",
+        gofCardSurface,
+        gofMotion.fade,
       )}
       aria-label="Filtros do workspace"
     >

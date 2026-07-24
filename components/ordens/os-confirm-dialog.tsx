@@ -3,9 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { buttonVariants } from "@/components/ui/button";
+import { ExecutiveButton } from "@/components/executive";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
+import { gofCardSurface } from "@/lib/design-system/primitives";
 import {
   arquivarOsAction,
   cancelarOsAction,
@@ -119,7 +120,7 @@ export function OsConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="os-confirm-title"
-        className="w-full max-w-lg space-y-4 rounded-xl border bg-background p-5 shadow-lg"
+        className={cn(gofCardSurface, "w-full max-w-lg space-y-4 p-5")}
       >
         <div>
           <h2 id="os-confirm-title" className="text-lg font-semibold">
@@ -135,9 +136,7 @@ export function OsConfirmDialog({
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Status</dt>
-            <dd>
-              {OS_STATUS_LABELS[status as OsStatus] ?? status}
-            </dd>
+            <dd>{OS_STATUS_LABELS[status as OsStatus] ?? status}</dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Cliente</dt>
@@ -184,10 +183,10 @@ export function OsConfirmDialog({
         </label>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <button
+          <ExecutiveButton
             type="button"
+            variant="outline"
             disabled={pending}
-            className={cn(buttonVariants({ variant: "outline" }))}
             onClick={() => {
               setError(null);
               setMotivo("");
@@ -196,15 +195,12 @@ export function OsConfirmDialog({
             }}
           >
             Voltar
-          </button>
-          <button
+          </ExecutiveButton>
+          <ExecutiveButton
             type="button"
             disabled={pending}
-            className={cn(
-              buttonVariants({
-                variant: mode === "excluir" ? "destructive" : "default",
-              }),
-            )}
+            loading={pending}
+            variant={mode === "excluir" ? "destructive" : "default"}
             onClick={submit}
           >
             {mode === "excluir"
@@ -214,7 +210,7 @@ export function OsConfirmDialog({
                 : mode === "arquivar"
                   ? "Confirmar arquivamento"
                   : "Confirmar restauração"}
-          </button>
+          </ExecutiveButton>
         </div>
       </div>
     </div>

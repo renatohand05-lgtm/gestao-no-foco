@@ -1,16 +1,20 @@
 import Link from "next/link";
 
-import { ModuleHeader } from "@/components/layout/module-header";
 import { CategoriaFinanceiraDeleteButton } from "@/components/financeiro/categoria-financeira-delete-button";
 import { FinanceiroStatusBadge } from "@/components/financeiro/financeiro-status-badge";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
-import { SectionCard } from "@/components/ui/section-card";
 import {
   formatFinanceiroDate,
   getCategoriaFinanceiraTipoLabel,
 } from "@/lib/financeiro/format";
 import type { CategoriaFinanceira, PlanoContaResumo } from "@/types/financeiro";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type Props = {
   tenantSlug: string;
@@ -41,17 +45,14 @@ export function CategoriaFinanceiraDetail({
   planoConta,
 }: Props) {
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={item.nome}
-        description="Detalhes do registro financeiro"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Categorias Financeiras", href: `/${tenantSlug}/financeiro/categorias` },
           { label: item.nome },
-        ]}
-      >
-        <FinanceiroStatusBadge ativo={item.ativo} />
+        ]} />
+      <ExecutiveHeader title={item.nome} description="Detalhes do registro financeiro" actions={<>
+<FinanceiroStatusBadge ativo={item.ativo} />
         <ActionButton
           action="edit"
           href={`/${tenantSlug}/financeiro/categorias/${item.id}/editar`}
@@ -61,11 +62,11 @@ export function CategoriaFinanceiraDetail({
           id={item.id}
           nome={item.nome}
         />
-      </ModuleHeader>
+</>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
 
-      <SectionCard title="Classificação">
+      <ExecutiveSection title="Classificação" panel>
         <FormGrid>
           <DetailItem label="Tipo" value={getCategoriaFinanceiraTipoLabel(item.tipo)} />
           <DetailItem
@@ -85,17 +86,17 @@ export function CategoriaFinanceiraDetail({
           />
           <DetailItem label="Cor" value={item.cor || "—"} />
         </FormGrid>
-      </SectionCard>
-      <SectionCard title="Observações">
+      </ExecutiveSection>
+      <ExecutiveSection title="Observações" panel>
         <p className="text-sm whitespace-pre-wrap">{item.observacoes || "—"}</p>
-      </SectionCard>
-      <SectionCard title="Auditoria">
+      </ExecutiveSection>
+      <ExecutiveSection title="Auditoria" panel>
         <FormGrid>
           <DetailItem label="Criado em" value={formatFinanceiroDate(item.created_at)} />
           <DetailItem label="Atualizado em" value={formatFinanceiroDate(item.updated_at)} />
         </FormGrid>
-      </SectionCard>
+      </ExecutiveSection>
       </div>
-    </div>
+    </ExecutivePage>
   );
 }

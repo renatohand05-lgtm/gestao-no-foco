@@ -1,35 +1,40 @@
 import Link from "next/link";
 
+import { MetricCard } from "@/components/executive";
+import type { ExColorTone } from "@/lib/design-system/colors";
+import { gofGrid } from "@/lib/design-system";
 import type { CentroOpsCard } from "@/lib/operacoes/centro-operacoes-service";
-import { cn } from "@/lib/utils";
 
-const toneClass: Record<NonNullable<CentroOpsCard["tone"]>, string> = {
-  default: "hover:border-foreground/25",
-  warn: "border-amber-400/50 hover:border-amber-500",
-  danger: "border-rose-400/60 hover:border-rose-500",
-  ok: "border-emerald-400/50 hover:border-emerald-500",
+const toneMap: Record<NonNullable<CentroOpsCard["tone"]>, ExColorTone> = {
+  default: "neutral",
+  warn: "warning",
+  danger: "danger",
+  ok: "success",
 };
 
 export function CentroOpsKpiCards({ cards }: { cards: CentroOpsCard[] }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+    <div
+      className={gofGrid.kpis}
+      data-ops-block="centro-kpis"
+      role="region"
+      aria-label="Indicadores do Centro de Operações"
+    >
       {cards.map((card) => (
         <Link
           key={card.key}
           href={card.hrefFilter}
-          className={cn(
-            "rounded-xl border bg-card p-4 transition",
-            toneClass[card.tone ?? "default"],
-          )}
+          className="block h-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40"
           title={`Ver lista: ${card.label}`}
+          aria-label={`${card.label}: ${card.count}`}
         >
-          <p className="text-xs text-muted-foreground">{card.label}</p>
-          <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">
-            {card.count}
-          </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            Toque para abrir a lista
-          </p>
+          <MetricCard
+            label={card.label}
+            value={card.count}
+            hint="Toque para abrir a lista"
+            tone={toneMap[card.tone ?? "default"]}
+            className="h-full"
+          />
         </Link>
       ))}
     </div>

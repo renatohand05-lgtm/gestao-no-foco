@@ -5,18 +5,18 @@ import { cn } from "@/lib/utils"
 
 /** Botões padronizados — raio, padding e hover consistentes (Sprint 13.2). */
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-blue-600/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:not-aria-[haspopup]:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 motion-reduce:transition-none motion-reduce:active:scale-100",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:not-aria-[haspopup]:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {
         default:
-          "bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-white/90",
+          "bg-[var(--brand-graphite)] text-white hover:bg-[var(--brand-graphite)]/90 dark:bg-[var(--brand-gold)] dark:text-[var(--brand-graphite)] dark:hover:bg-[var(--brand-gold)]/90",
         outline:
-          "border-slate-200/90 bg-white text-foreground hover:bg-slate-50 aria-expanded:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:hover:bg-white/5",
+          "border-[var(--brand-gray-dark)]/20 bg-white text-foreground hover:bg-[var(--brand-gray-light)] aria-expanded:bg-[var(--brand-gray-light)] dark:border-white/10 dark:bg-transparent dark:hover:bg-white/5",
         secondary:
-          "bg-slate-100 text-slate-900 hover:bg-slate-200/80 dark:bg-white/10 dark:text-white dark:hover:bg-white/15",
+          "bg-[var(--brand-gray-light)] text-[var(--brand-graphite)] hover:bg-[var(--brand-gray-dark)]/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15",
         ghost:
-          "text-slate-700 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white",
+          "text-[var(--brand-gray-dark)] hover:bg-[var(--brand-gray-light)] hover:text-[var(--brand-graphite)] dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:ring-destructive/25 dark:bg-destructive/20 dark:hover:bg-destructive/30",
         link: "rounded-md text-primary underline-offset-4 hover:underline",

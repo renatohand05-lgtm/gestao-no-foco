@@ -1,9 +1,13 @@
 import { PlanoContaForm } from "@/components/financeiro/plano-conta-form";
-import { ModuleHeader } from "@/components/layout/module-header";
-import { SectionCard } from "@/components/ui/section-card";
 import { buildPlanoContaSelectOptions } from "@/lib/financeiro/plano-conta-tree";
 import { createPlanoContaService } from "@/lib/financeiro/plano-conta-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Nova conta" };
 
@@ -21,30 +25,28 @@ export default async function NovoPage({
   });
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Nova conta"
-        description={`Cadastro em ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Plano de Contas",
             href: `/${tenantSlug}/financeiro/plano-contas`,
           },
           { label: "Nova conta" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Nova conta" description={`Cadastro em ${tenant.name}`} />
 
-      <SectionCard
+      <ExecutiveSection
         title="Cadastro"
         description="Preencha os dados do novo registro."
+        panel
       >
         <PlanoContaForm
           tenantSlug={tenantSlug}
           mode="create"
           parentOptions={parentOptions}
         />
-      </SectionCard>
-    </div>
+      </ExecutiveSection>
+    </ExecutivePage>
   );
 }

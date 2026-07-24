@@ -1,13 +1,6 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-import {
-  exAnimations,
-  exRadius,
-  exShadow,
-  exTypography,
-} from "@/lib/design-system";
-import { cn } from "@/lib/utils";
+import { ExecutiveEmptyState } from "@/components/executive";
+import type { LucideIcon } from "lucide-react";
+import { Inbox } from "lucide-react";
 
 type Props = {
   title: string;
@@ -15,10 +8,11 @@ type Props = {
   impact: string;
   href: string;
   ctaLabel: string;
+  icon?: LucideIcon;
 };
 
 /**
- * Empty state orientado a primeiro valor (Sprint 13.12).
+ * Empty state de onboarding — ExecutiveEmptyState oficial (Gate 19.4.1).
  */
 export function OnboardingEmptyState({
   title,
@@ -26,28 +20,14 @@ export function OnboardingEmptyState({
   impact,
   href,
   ctaLabel,
+  icon = Inbox,
 }: Props) {
   return (
-    <div
-      className={cn(
-        "border bg-white p-6 text-center dark:bg-card",
-        exRadius[20],
-        exShadow.card,
-        exAnimations.fade,
-      )}
-      role="status"
-    >
-      <p className={exTypography.sectionTitle}>{title}</p>
-      <p className={cn("mt-2", exTypography.caption)}>{description}</p>
-      <p className={cn("mt-2", exTypography.caption, "text-foreground")}>
-        Impacto no Dashboard: {impact}
-      </p>
-      <Button
-        className={cn("mt-4 min-h-11", exAnimations.focusRing)}
-        render={<Link href={href} />}
-      >
-        {ctaLabel}
-      </Button>
-    </div>
+    <ExecutiveEmptyState
+      icon={icon}
+      title={title}
+      description={`${description} Impacto: ${impact}`}
+      action={{ label: ctaLabel, href }}
+    />
   );
 }

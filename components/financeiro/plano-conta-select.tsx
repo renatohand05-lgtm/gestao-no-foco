@@ -3,6 +3,7 @@
 import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
 
 import { FormField } from "@/components/ui/form-field";
+import { gofControl } from "@/lib/design-system";
 import type { PlanoContaSelectOption } from "@/types/financeiro";
 
 type PlanoContaSelectProps<T extends FieldValues> = {
@@ -15,9 +16,6 @@ type PlanoContaSelectProps<T extends FieldValues> = {
   error?: string;
   onlySinteticaHint?: boolean;
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function PlanoContaSelect<T extends FieldValues>({
   control,
@@ -49,7 +47,7 @@ export function PlanoContaSelect<T extends FieldValues>({
             id={String(name)}
             value={field.value ?? ""}
             onChange={(event) => field.onChange(event.target.value)}
-            className={selectClassName}
+            className={gofControl}
           >
             <option value="">Nenhuma (conta raiz)</option>
             {options.map((option) => (

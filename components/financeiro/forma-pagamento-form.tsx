@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
+import { gofControl } from "@/lib/design-system";
 import {
   createFormaPagamentoAction,
   updateFormaPagamentoAction,
@@ -35,8 +36,6 @@ type Props = {
   mode: "create" | "edit";
   item?: FormaPagamento;
 };
-
-const selectClassName = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function FormaPagamentoForm({ tenantSlug, mode, item }: Props) {
   const router = useRouter();
@@ -97,7 +96,7 @@ export function FormaPagamentoForm({ tenantSlug, mode, item }: Props) {
               <Input id="nome" {...form.register("nome")} placeholder="PIX" />
             </FormField>
             <FormField label="Tipo" htmlFor="tipo" required>
-              <select id="tipo" {...form.register("tipo")} className={selectClassName}>
+              <select id="tipo" {...form.register("tipo")} className={gofControl}>
                 {FORMA_PAGAMENTO_TIPO_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
@@ -105,7 +104,7 @@ export function FormaPagamentoForm({ tenantSlug, mode, item }: Props) {
             </FormField>
             <FormField label="Status" htmlFor="ativo" required>
               <Controller control={form.control} name="ativo" render={({ field }) => (
-                <select id="ativo" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={selectClassName}>
+                <select id="ativo" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={gofControl}>
                   {FINANCEIRO_STATUS_OPTIONS.map((option) => (
                     <option key={String(option.value)} value={String(option.value)}>{option.label}</option>
                   ))}
@@ -114,7 +113,7 @@ export function FormaPagamentoForm({ tenantSlug, mode, item }: Props) {
             </FormField>
             <FormField label="Gera financeiro" htmlFor="gera_financeiro">
               <Controller control={form.control} name="gera_financeiro" render={({ field }) => (
-                <select id="gera_financeiro" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={selectClassName}>
+                <select id="gera_financeiro" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === "true")} className={gofControl}>
                   <option value="true">Sim</option>
                   <option value="false">Não</option>
                 </select>

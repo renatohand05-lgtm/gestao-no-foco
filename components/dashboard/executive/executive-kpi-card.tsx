@@ -1,15 +1,17 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 
+import { ExecutiveBadge, ExecutiveSkeleton } from "@/components/executive";
 import { DsIcon } from "@/components/ui/ds-icon";
 import {
-  exAnimations,
-  exColors,
-  exRadius,
-  exShadow,
-  exTypography,
-  type ExColorTone,
+  gofColors,
+  gofFocusRing,
+  gofMotion,
+  gofRadius,
+  gofTypography,
 } from "@/lib/design-system";
+import { gofCardSurface, gofInteractive } from "@/lib/design-system/primitives";
 import { cn } from "@/lib/utils";
 
 export type ExecutiveKpiTrend = {
@@ -22,34 +24,42 @@ export type ExecutiveKpiProgress = {
   label?: string;
 };
 
+type KpiTone = "primary" | "success" | "warning" | "danger" | "info" | "neutral";
+
 type Props = {
   title: string;
   value: string;
   icon: LucideIcon;
-  tone?: ExColorTone;
+  tone?: KpiTone;
   supportingText?: string;
   trend?: ExecutiveKpiTrend;
   progress?: ExecutiveKpiProgress;
+  statusLabel?: string;
   loading?: boolean;
   href?: string;
   className?: string;
 };
 
-function toneText(tone: ExColorTone) {
+function toneText(tone: KpiTone) {
   if (tone === "neutral") return "text-foreground";
-  return exColors[tone].text;
+  return gofColors[tone].text;
 }
 
-function toneSoft(tone: ExColorTone) {
+function toneSoft(tone: KpiTone) {
   if (tone === "neutral") return "bg-muted/70 text-muted-foreground";
-  return exColors[tone].soft;
+  return gofColors[tone].soft;
+}
+
+function badgeTone(
+  tone: KpiTone,
+): "success" | "warning" | "danger" | "info" | "neutral" | "primary" {
+  if (tone === "primary") return "primary";
+  return tone;
 }
 
 function ProgressBar({ progress }: { progress: ExecutiveKpiProgress }) {
   if (progress.value == null) {
-    return (
-      <div className="h-1.5 w-full rounded-full bg-muted" aria-hidden />
-    );
+    return <div className="h-1.5 w-full rounded-full bg-muted" aria-hidden />;
   }
   const pct = progress.value;
   const fill = Math.min(Math.max(pct, 0), 100);
@@ -66,28 +76,34 @@ function ProgressBar({ progress }: { progress: ExecutiveKpiProgress }) {
       >
         <div
           className={cn(
-            "h-full rounded-full motion-safe:transition-[width] motion-safe:duration-500",
+            "h-full rounded-full motion-safe:transition-[width] motion-safe:duration-200",
             pct >= 100
-              ? "bg-emerald-600"
+              ? "bg-success"
               : pct >= 80
-                ? "bg-sky-600"
-                : "bg-rose-500",
+                ? "bg-[var(--brand-info)]"
+                : "bg-danger",
           )}
           style={{ width: `${fill}%` }}
         />
       </div>
       {progress.label ? (
-        <p className="text-[0.8125rem] font-normal whitespace-nowrap text-muted-foreground">
-          {progress.label}
-        </p>
+        <p className={gofTypography.caption}>{progress.label}</p>
       ) : null}
     </div>
   );
 }
 
+function TrendIcon({ direction }: { direction?: "up" | "down" | "flat" }) {
+  if (direction === "up")
+    return <TrendingUp className="size-3.5 shrink-0" aria-hidden />;
+  if (direction === "down")
+    return <TrendingDown className="size-3.5 shrink-0" aria-hidden />;
+  return <Minus className="size-3.5 shrink-0" aria-hidden />;
+}
+
 /**
- * KPI Card oficial do Dashboard Executivo (Sprint 16 Gate 16.1).
- * Visual only — não calcula métricas.
+ * KPI Card premium — Gate 19.3 (valores maiores, títulos discretos, badge/tendência).
+ * Sem alterar dados.
  */
 export function ExecutiveKpiCard({
   title,
@@ -97,60 +113,59 @@ export function ExecutiveKpiCard({
   supportingText,
   trend,
   progress,
+  statusLabel,
   loading = false,
   href,
   className,
 }: Props) {
+  if (loading) {
+    return <ExecutiveKpiCardSkeleton className={className} />;
+  }
+
   const body = (
-    <>
-      <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-        <span
-          className={cn(
-            "inline-flex size-10 shrink-0 items-center justify-center",
-            exRadius[12],
-            toneSoft(tone),
-          )}
-        >
-          <DsIcon icon={Icon} size="md" />
-        </span>
-        <p
-          className={cn(
-            exTypography.label,
-            "min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap tracking-[0.08em] uppercase",
-          )}
-        >
-          {title}
-        </p>
+    <div className="flex h-full min-h-[10.5rem] min-w-0 flex-col gap-4">
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span
+            className={cn(
+              "inline-flex size-9 shrink-0 items-center justify-center",
+              gofRadius.md,
+              toneSoft(tone),
+            )}
+          >
+            <DsIcon icon={Icon} size="sm" />
+          </span>
+          <p
+            className={cn(
+              gofTypography.caption,
+              "min-w-0 flex-1 truncate font-medium uppercase tracking-[0.1em] text-muted-foreground",
+            )}
+          >
+            {title}
+          </p>
+        </div>
+        {statusLabel ? (
+          <ExecutiveBadge tone={badgeTone(tone)} variant="soft" className="shrink-0">
+            {statusLabel}
+          </ExecutiveBadge>
+        ) : null}
       </div>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center overflow-hidden">
-        {loading ? (
-          <div
-            className={cn(
-              "h-8 w-3/4 rounded-md bg-muted/60",
-              exAnimations.shimmer,
-            )}
-            aria-hidden
-          />
-        ) : (
-          <p
-            key={value}
-            className={cn(
-              exTypography.metricSm,
-              toneText(tone),
-              "min-w-0 overflow-hidden text-ellipsis whitespace-nowrap leading-none",
-              exAnimations.count,
-            )}
-            title={value}
-          >
-            {value}
-          </p>
-        )}
+      <div className="min-w-0 flex-1">
+        <p
+          className={cn(
+            "truncate text-3xl font-semibold tabular-nums leading-none tracking-tight sm:text-[2rem]",
+            toneText(tone),
+          )}
+          title={value}
+        >
+          {value}
+        </p>
         {supportingText ? (
           <p
             className={cn(
-              exTypography.caption,
-              "mt-1.5 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground",
+              gofTypography.caption,
+              "mt-2 truncate text-muted-foreground",
             )}
           >
             {supportingText}
@@ -159,38 +174,29 @@ export function ExecutiveKpiCard({
         {trend ? (
           <p
             className={cn(
-              exTypography.caption,
-              "mt-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap",
-              trend.direction === "up" && "text-emerald-700 dark:text-emerald-400",
-              trend.direction === "down" && "text-rose-700 dark:text-rose-400",
+              gofTypography.caption,
+              "mt-1.5 inline-flex max-w-full items-center gap-1 truncate",
+              trend.direction === "up" && "text-success",
+              trend.direction === "down" && "text-danger",
               (!trend.direction || trend.direction === "flat") &&
                 "text-muted-foreground",
             )}
           >
-            {trend.label}
+            <TrendIcon direction={trend.direction} />
+            <span className="truncate">{trend.label}</span>
           </p>
         ) : null}
       </div>
 
-      {progress ? (
-        <div className="min-w-0 shrink-0 overflow-hidden">
-          <ProgressBar progress={progress} />
-        </div>
-      ) : null}
-    </>
+      {progress ? <ProgressBar progress={progress} /> : null}
+    </div>
   );
 
   const shellClass = cn(
-    "flex h-[10.5rem] min-w-0 w-full max-w-full flex-col overflow-hidden bg-card",
-    "border border-border/40 ring-1 ring-black/[0.02] dark:border-border/50 dark:ring-white/[0.04]",
-    exRadius[16],
-    exShadow.card,
-    "px-6 py-5 sm:px-7",
-    "motion-safe:transition-[box-shadow,border-color,transform] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-    "motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-border/65",
-    exShadow.cardHover,
-    exAnimations.slide,
-    href && "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/40",
+    gofCardSurface,
+    "flex h-[11.25rem] min-w-0 w-full max-w-full flex-col overflow-hidden p-5 sm:p-6",
+    gofMotion.fade,
+    href && cn(gofFocusRing, gofInteractive),
     className,
   );
 
@@ -213,13 +219,20 @@ export function ExecutiveKpiCardSkeleton({ className }: { className?: string }) 
   return (
     <div
       className={cn(
-        "flex h-[10.5rem] min-w-0 w-full flex-col border border-border/40 bg-card px-6 py-5",
-        exRadius[16],
-        exAnimations.shimmer,
+        gofCardSurface,
+        "flex h-[11.25rem] min-w-0 w-full flex-col gap-4 p-5 sm:p-6",
         className,
       )}
       aria-busy="true"
       aria-label="Carregando indicador"
-    />
+    >
+      <ExecutiveSkeleton
+        heightClassName="h-9"
+        widthClassName="w-9"
+        rounded="md"
+      />
+      <ExecutiveSkeleton heightClassName="h-9" widthClassName="w-2/3" />
+      <ExecutiveSkeleton heightClassName="h-2" widthClassName="w-full" />
+    </div>
   );
 }

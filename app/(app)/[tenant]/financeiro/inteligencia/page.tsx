@@ -6,7 +6,11 @@ import { FiInsightsPanel } from "@/components/financeiro/inteligencia/fi-insight
 import { FiMetricGrid } from "@/components/financeiro/inteligencia/fi-metric-grid";
 import { FiPeriodFilters } from "@/components/financeiro/inteligencia/fi-period-filters";
 import { FiTrendsSection } from "@/components/financeiro/inteligencia/fi-trends-section";
-import { ModuleHeader } from "@/components/layout/module-header";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SectionCard } from "@/components/ui/section-card";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { formatCurrency } from "@/lib/format";
@@ -45,14 +49,16 @@ export default async function Page({ params, searchParams }: PageProps) {
   const snapshot = await service.getSnapshot(filters);
 
   return (
-    <div className="space-y-8">
-      <ModuleHeader
-        title="Dashboard Financeiro Enterprise"
-        description={`Cockpit de leitura executiva · ${tenant.name}. Consome DRE e Fluxo sem alterar regras.`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs
+        items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Inteligência" },
         ]}
+      />
+      <ExecutiveHeader
+        title="Dashboard Financeiro Enterprise"
+        description={`Cockpit de leitura executiva · ${tenant.name}. Consome DRE e Fluxo sem alterar regras.`}
       />
 
       <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 px-6 py-8 text-white shadow-sm md:px-10">
@@ -154,6 +160,6 @@ export default async function Page({ params, searchParams }: PageProps) {
         items={snapshot.drillPreview}
         filters={filters}
       />
-    </div>
+    </ExecutivePage>
   );
 }

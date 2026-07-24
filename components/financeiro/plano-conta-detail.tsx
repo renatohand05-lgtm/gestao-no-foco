@@ -1,17 +1,21 @@
 import Link from "next/link";
 
-import { ModuleHeader } from "@/components/layout/module-header";
 import { PlanoContaDeleteButton } from "@/components/financeiro/plano-conta-delete-button";
 import { FinanceiroStatusBadge } from "@/components/financeiro/financeiro-status-badge";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
-import { SectionCard } from "@/components/ui/section-card";
 import {
   formatFinanceiroDate,
   getPlanoContaNaturezaLabel,
   getPlanoContaTipoLabel,
 } from "@/lib/financeiro/format";
 import type { PlanoConta, PlanoContaResumo } from "@/types/financeiro";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  ExecutiveSection,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type Props = {
   tenantSlug: string;
@@ -38,17 +42,14 @@ function DetailItem({
 
 export function PlanoContaDetail({ tenantSlug, item, contaPai }: Props) {
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title={item.nome}
-        description="Detalhes do registro financeiro"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Plano de Contas", href: `/${tenantSlug}/financeiro/plano-contas` },
           { label: item.nome },
-        ]}
-      >
-        <FinanceiroStatusBadge ativo={item.ativo} />
+        ]} />
+      <ExecutiveHeader title={item.nome} description="Detalhes do registro financeiro" actions={<>
+<FinanceiroStatusBadge ativo={item.ativo} />
         <ActionButton
           action="edit"
           href={`/${tenantSlug}/financeiro/plano-contas/${item.id}/editar`}
@@ -58,11 +59,11 @@ export function PlanoContaDetail({ tenantSlug, item, contaPai }: Props) {
           id={item.id}
           nome={item.nome}
         />
-      </ModuleHeader>
+</>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
 
-      <SectionCard title="Identificação">
+      <ExecutiveSection title="Identificação" panel>
         <FormGrid>
           <DetailItem label="Código" value={item.codigo} />
           <DetailItem label="Tipo" value={getPlanoContaTipoLabel(item.tipo)} />
@@ -85,17 +86,17 @@ export function PlanoContaDetail({ tenantSlug, item, contaPai }: Props) {
             }
           />
         </FormGrid>
-      </SectionCard>
-      <SectionCard title="Observações">
+      </ExecutiveSection>
+      <ExecutiveSection title="Observações" panel>
         <p className="text-sm whitespace-pre-wrap">{item.observacoes || "—"}</p>
-      </SectionCard>
-      <SectionCard title="Auditoria">
+      </ExecutiveSection>
+      <ExecutiveSection title="Auditoria" panel>
         <FormGrid>
           <DetailItem label="Criado em" value={formatFinanceiroDate(item.created_at)} />
           <DetailItem label="Atualizado em" value={formatFinanceiroDate(item.updated_at)} />
         </FormGrid>
-      </SectionCard>
+      </ExecutiveSection>
       </div>
-    </div>
+    </ExecutivePage>
   );
 }

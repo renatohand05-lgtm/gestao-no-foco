@@ -1,9 +1,15 @@
 import Link from "next/link";
 
 import { DashboardBarChart } from "@/components/dashboard/dashboard-charts";
-import { ModuleHeader } from "@/components/layout/module-header";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+  MetricCard,
+} from "@/components/executive";
 import { OsSubnav } from "@/components/ordens/os-subnav";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SectionCard } from "@/components/ui/section-card";
+import { gofGrid } from "@/lib/design-system";
 import { formatCurrency } from "@/lib/format";
 import { createMecanicosDashboardService } from "@/lib/operacoes/mecanicos-dashboard-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
@@ -32,16 +38,14 @@ export default async function MecanicosDashboardPage({
 
   if (!canView) {
     return (
-      <div className="space-y-4">
-        <ModuleHeader
-          title="Mecânicos"
-          breadcrumbs={[
+      <ExecutivePage width="wide" spacing="default">
+        <Breadcrumbs items={[
             { label: "Ordens", href: `/${tenantSlug}/ordens` },
             { label: "Mecânicos" },
-          ]}
-        />
+          ]} />
+      <ExecutiveHeader title="Mecânicos" />
         <p className="text-sm text-muted-foreground">Sem permissão.</p>
-      </div>
+      </ExecutivePage>
     );
   }
 
@@ -49,16 +53,13 @@ export default async function MecanicosDashboardPage({
   const data = await service.getData();
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Produtividade da oficina"
-        description="Indicadores para gestão e desenvolvimento — não para punição automática"
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Ordens", href: `/${tenantSlug}/ordens` },
           { label: "Mecânicos" },
-        ]}
-      >
-        <div className="flex flex-wrap gap-2">
+        ]} />
+      <ExecutiveHeader title="Produtividade da oficina" description="Indicadores para gestão e desenvolvimento — não para punição automática" actions={<>
+<div className="flex flex-wrap gap-2">
           <OsSubnav tenantSlug={tenantSlug} active="mecanicos" />
           <Link
             href={`/${tenantSlug}/oficina/mecanicos`}
@@ -67,34 +68,46 @@ export default async function MecanicosDashboardPage({
             Cadastro de mecânicos
           </Link>
         </div>
-      </ModuleHeader>
+</>} />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <SectionCard title="Cadastro ativos">
-          <p className="text-2xl font-semibold tabular-nums">
-            {data.resumoCusto.ativosCadastro}
-          </p>
-        </SectionCard>
-        <SectionCard title="Custo competência (mês)">
-          <p className="text-2xl font-semibold tabular-nums">
-            {formatCurrency(data.resumoCusto.custoCompetencia)}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Via obrigações geradas (CAP → DRE)
-          </p>
-        </SectionCard>
-        <SectionCard title="Mês anterior">
-          <p className="text-2xl font-semibold tabular-nums">
-            {formatCurrency(data.resumoCusto.mesAnterior)}
-          </p>
-        </SectionCard>
-        <SectionCard title="Variação">
-          <p className="text-2xl font-semibold tabular-nums">
-            {data.resumoCusto.variacaoPercentual != null
+      <div
+        className={gofGrid.metrics}
+        data-os-block="mecanicos-kpis"
+        role="region"
+        aria-label="Resumo de custo de mecânicos"
+      >
+        <MetricCard
+          label="Cadastro ativos"
+          value={data.resumoCusto.ativosCadastro}
+        />
+        <MetricCard
+          label="Custo competência (mês)"
+          value={formatCurrency(data.resumoCusto.custoCompetencia)}
+          hint="Via obrigações geradas (CAP → DRE)"
+          tone="info"
+          emphasize
+        />
+        <MetricCard
+          label="Mês anterior"
+          value={formatCurrency(data.resumoCusto.mesAnterior)}
+        />
+        <MetricCard
+          label="Variação"
+          value={
+            data.resumoCusto.variacaoPercentual != null
               ? `${data.resumoCusto.variacaoPercentual}%`
-              : "—"}
-          </p>
-        </SectionCard>
+              : "—"
+          }
+          tone={
+            data.resumoCusto.variacaoPercentual == null
+              ? "neutral"
+              : data.resumoCusto.variacaoPercentual > 0
+                ? "danger"
+                : data.resumoCusto.variacaoPercentual < 0
+                  ? "success"
+                  : "neutral"
+          }
+        />
       </div>
 
       <SectionCard title="Como calculamos">
@@ -215,6 +228,6 @@ export default async function MecanicosDashboardPage({
           </div>
         </>
       )}
-    </div>
+    </ExecutivePage>
   );
 }

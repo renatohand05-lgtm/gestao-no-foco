@@ -1,7 +1,11 @@
 import { DespesaRecorrenteForm } from "@/components/financeiro/despesa-recorrente-form";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Nova despesa recorrente" };
 
@@ -23,19 +27,16 @@ export default async function Page({ params }: PageProps) {
     ]);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Nova despesa recorrente"
-        description="Série mensal — gera Conta a Pagar, não movimentação."
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           {
             label: "Despesas Recorrentes",
             href: `/${tenantSlug}/financeiro/despesas-recorrentes`,
           },
           { label: "Novo" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="Nova despesa recorrente" description="Série mensal — gera Conta a Pagar, não movimentação." />
       <DespesaRecorrenteForm
         tenantSlug={tenantSlug}
         mode="create"
@@ -45,6 +46,6 @@ export default async function Page({ params }: PageProps) {
         centrosCusto={centrosCusto}
         planoContas={planoContas}
       />
-    </div>
+    </ExecutivePage>
   );
 }

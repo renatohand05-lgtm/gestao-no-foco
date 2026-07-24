@@ -9,7 +9,6 @@ import { FinanceiroEmptyState } from "@/components/financeiro/financeiro-empty-s
 import { FinanceiroPagination } from "@/components/financeiro/financeiro-pagination";
 import { FinanceiroSearch } from "@/components/financeiro/financeiro-search";
 import { FinanceiroSort } from "@/components/financeiro/financeiro-sort";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
@@ -25,6 +24,11 @@ import type {
   ContaPagarSuccessMessage,
 } from "@/types/contas-pagar";
 import type { SortOrder } from "@/types/financeiro";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "Contas a Pagar" };
 
@@ -98,21 +102,18 @@ export default async function Page({ params, searchParams }: PageProps) {
     Boolean(vencimentoAte);
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="Contas a Pagar"
-        description={`Obrigações de ${tenant.name}`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "Contas a Pagar" },
-        ]}
-      >
-        <ActionButton
+        ]} />
+      <ExecutiveHeader title="Contas a Pagar" description={`Obrigações de ${tenant.name}`} actions={<>
+<ActionButton
           action="create"
           label="Nova conta"
           href={`/${tenantSlug}/financeiro/contas-pagar/nova`}
         />
-      </ModuleHeader>
+</>} />
 
       <ContaPagarFeedback
         success={success as ContaPagarSuccessMessage | undefined}
@@ -183,6 +184,6 @@ export default async function Page({ params, searchParams }: PageProps) {
           </Suspense>
         </>
       )}
-    </div>
+    </ExecutivePage>
   );
 }

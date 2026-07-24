@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import type { UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 
 import { FormField } from "@/components/ui/form-field";
+import { gofControl } from "@/lib/design-system";
 import {
   buildDreClassificationSelectOptions,
   encodeDreClassification,
@@ -19,9 +20,6 @@ type Props = {
   watch: UseFormWatch<any>;
   hint?: string;
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function DreClassificationSelect({
   setValue,
@@ -42,7 +40,7 @@ export function DreClassificationSelect({
     >
       <select
         id="dre_classification"
-        className={selectClassName}
+        className={gofControl}
         value={value}
         onChange={(event) => {
           const decoded = decodeDreClassification(event.target.value);

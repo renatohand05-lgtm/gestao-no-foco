@@ -5,7 +5,11 @@ import {
   DashboardFiltersBar,
 } from "@/components/dashboard/dashboard-filters";
 import { ExecutivePresetSelector } from "@/components/executive/layout/executive-preset-selector";
-import { exAnimations, exTypography } from "@/lib/design-system";
+import {
+  gofCardSurface,
+  gofMotion,
+  gofTypography,
+} from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type {
   DashboardFilterOptions,
@@ -20,7 +24,7 @@ type Props = {
 };
 
 /**
- * Controles secundários — abaixo da narrativa principal (Sprint 13.2).
+ * Controles secundários — DS oficial (Gate 19.4.1).
  */
 export function ExecutiveFoldChrome({
   tenantSlug,
@@ -31,15 +35,22 @@ export function ExecutiveFoldChrome({
   return (
     <div
       className={cn(
-        "mt-2 space-y-4 border-t border-slate-200/50 pt-6 dark:border-white/10",
-        exAnimations.fade,
+        "mt-2 space-y-4 overflow-x-hidden border-t border-border/50 pt-6",
+        gofMotion.fade,
       )}
       aria-label="Visão e filtros"
     >
       <ExecutivePresetSelector />
       <div>
-        <p className={cn("mb-1.5", exTypography.label)}>Contexto</p>
-        <div className="rounded-xl border border-slate-200/45 bg-white/90 px-2.5 py-2 dark:border-white/10 dark:bg-card/70">
+        <p
+          className={cn(
+            "mb-1.5 tracking-[0.12em] text-[var(--brand-gold)] uppercase",
+            gofTypography.caption,
+          )}
+        >
+          Contexto
+        </p>
+        <div className={cn("px-2.5 py-2", gofCardSurface)}>
           <DashboardFilterPersistence
             tenantSlug={tenantSlug}
             defaults={{

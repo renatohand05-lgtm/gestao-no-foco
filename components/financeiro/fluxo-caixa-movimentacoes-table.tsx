@@ -1,13 +1,9 @@
-import { Badge } from "@/components/ui/badge";
 import {
-  DataTable,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/data-table";
+  ExecutiveBadge,
+  ExecutiveTable,
+  type ExecutiveTableColumn,
+} from "@/components/executive";
+import { gofColors } from "@/lib/design-system/foundation";
 import {
   formatCurrency,
   formatDateOnly,
@@ -20,15 +16,15 @@ type Props = {
   items: FluxoCaixaLancamento[];
 };
 
-function getTipoBadgeVariant(tipo: MovimentacaoBancariaTipo | null) {
-  if (tipo === "entrada") return "default" as const;
-  if (tipo === "saida") return "destructive" as const;
-  return "secondary" as const;
+function getTipoBadgeTone(tipo: MovimentacaoBancariaTipo | null) {
+  if (tipo === "entrada") return "success" as const;
+  if (tipo === "saida") return "danger" as const;
+  return "neutral" as const;
 }
 
 function getValorClassName(direcao: FluxoCaixaLancamento["direcao"]) {
-  if (direcao === "entrada") return "text-emerald-700 dark:text-emerald-400";
-  return "text-rose-700 dark:text-rose-400";
+  if (direcao === "entrada") return gofColors.success.text;
+  return gofColors.danger.text;
 }
 
 function getNaturezaLabel(natureza: FluxoCaixaLancamento["natureza"]) {
@@ -43,66 +39,87 @@ function getTipoLabel(item: FluxoCaixaLancamento) {
 }
 
 export function FluxoCaixaMovimentacoesTable({ items }: Props) {
+  const columns: ExecutiveTableColumn<FluxoCaixaLancamento>[] = [
+    {
+      id: "data",
+      header: "Data",
+      className: "whitespace-nowrap",
+      cell: (item) => formatDateOnly(item.data),
+    },
+    {
+      id: "descricao",
+      header: "Descrição",
+      cell: (item) => (
+        <>
+          <p className="font-medium">{item.descricao}</p>
+          <p className="text-xs text-muted-foreground sm:hidden">
+            {item.conta_bancaria_nome ?? "—"}
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "conta",
+      header: "Conta",
+      className: "hidden sm:table-cell",
+      cell: (item) => item.conta_bancaria_nome ?? "—",
+    },
+    {
+      id: "categoria",
+      header: "Categoria",
+      className: "hidden md:table-cell",
+      cell: (item) => item.categoria_nome ?? "—",
+    },
+    {
+      id: "centro",
+      header: "Centro de Custo",
+      className: "hidden lg:table-cell",
+      cell: (item) => item.centro_custo_nome ?? "—",
+    },
+    {
+      id: "status",
+      header: "Status",
+      className: "hidden xl:table-cell",
+      cell: (item) => (
+        <ExecutiveBadge
+          tone={item.natureza === "realizado" ? "success" : "neutral"}
+          variant={item.natureza === "realizado" ? "soft" : "outline"}
+        >
+          {getNaturezaLabel(item.natureza)}
+        </ExecutiveBadge>
+      ),
+    },
+    {
+      id: "tipo",
+      header: "Tipo",
+      className: "hidden xl:table-cell",
+      cell: (item) => (
+        <ExecutiveBadge tone={getTipoBadgeTone(item.tipo)}>
+          {getTipoLabel(item)}
+        </ExecutiveBadge>
+      ),
+    },
+    {
+      id: "valor",
+      header: "Valor",
+      align: "right",
+      className: "font-medium",
+      cell: (item) => (
+        <span className={getValorClassName(item.direcao)}>
+          {item.direcao === "saida" ? "−" : "+"}
+          {formatCurrency(item.valor)}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <DataTable>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Data</TableHead>
-            <TableHead>Descrição</TableHead>
-            <TableHead className="hidden sm:table-cell">Conta</TableHead>
-            <TableHead className="hidden md:table-cell">Categoria</TableHead>
-            <TableHead className="hidden lg:table-cell">Centro de Custo</TableHead>
-            <TableHead className="hidden xl:table-cell">Status</TableHead>
-            <TableHead className="hidden xl:table-cell">Tipo</TableHead>
-            <TableHead className="text-right">Valor</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell className="whitespace-nowrap">
-                {formatDateOnly(item.data)}
-              </TableCell>
-              <TableCell>
-                <p className="font-medium">{item.descricao}</p>
-                <p className="text-xs text-muted-foreground sm:hidden">
-                  {item.conta_bancaria_nome ?? "—"}
-                </p>
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">
-                {item.conta_bancaria_nome ?? "—"}
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                {item.categoria_nome ?? "—"}
-              </TableCell>
-              <TableCell className="hidden lg:table-cell">
-                {item.centro_custo_nome ?? "—"}
-              </TableCell>
-              <TableCell className="hidden xl:table-cell">
-                <Badge
-                  variant={
-                    item.natureza === "realizado" ? "default" : "outline"
-                  }
-                >
-                  {getNaturezaLabel(item.natureza)}
-                </Badge>
-              </TableCell>
-              <TableCell className="hidden xl:table-cell">
-                <Badge variant={getTipoBadgeVariant(item.tipo)}>
-                  {getTipoLabel(item)}
-                </Badge>
-              </TableCell>
-              <TableCell
-                className={`text-right font-medium ${getValorClassName(item.direcao)}`}
-              >
-                {item.direcao === "saida" ? "−" : "+"}
-                {formatCurrency(item.valor)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </DataTable>
+    <ExecutiveTable
+      columns={columns}
+      rows={items}
+      getRowId={(row) => row.id}
+      density="comfortable"
+      stickyHeader
+    />
   );
 }

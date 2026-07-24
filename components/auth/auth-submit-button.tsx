@@ -14,11 +14,16 @@ export function AuthSubmitButton({
   children,
 }: AuthSubmitButtonProps) {
   return (
-    <Button type="submit" className="w-full" disabled={loading}>
+    <Button
+      type="submit"
+      className="h-11 w-full bg-[var(--brand-graphite)] text-white hover:bg-[var(--brand-graphite)]/90"
+      disabled={loading}
+      aria-busy={loading}
+    >
       {loading ? (
         <>
-          <Loader2 className="mr-2 size-4 animate-spin" />
-          {loadingText}
+          <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+          <span>{loadingText}</span>
         </>
       ) : (
         children

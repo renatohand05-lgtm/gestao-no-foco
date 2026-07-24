@@ -5,13 +5,17 @@ import { DreFilters } from "@/components/financeiro/dre-filters";
 import { DreGapsPanel } from "@/components/financeiro/dre-gaps-panel";
 import { DreStatement } from "@/components/financeiro/dre-statement";
 import { DreSummaryCards } from "@/components/financeiro/dre-summary-cards";
-import { ModuleHeader } from "@/components/layout/module-header";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import {
   createDreService,
   defaultDrePeriodo,
 } from "@/lib/financeiro/dre-service";
 import { requireTenant } from "@/lib/tenants";
+import {
+  ExecutiveHeader,
+  ExecutivePage,
+} from "@/components/executive";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata = { title: "DRE" };
 
@@ -69,15 +73,12 @@ export default async function Page({ params, searchParams }: PageProps) {
       : [];
 
   return (
-    <div className="space-y-6">
-      <ModuleHeader
-        title="DRE"
-        description={`Demonstração do Resultado por competência — ${tenant.name}. Pagamentos alimentam o Fluxo de Caixa, não geram nova despesa aqui.`}
-        breadcrumbs={[
+    <ExecutivePage width="wide" spacing="loose">
+      <Breadcrumbs items={[
           { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
           { label: "DRE" },
-        ]}
-      />
+        ]} />
+      <ExecutiveHeader title="DRE" description={`Demonstração do Resultado por competência — ${tenant.name}. Pagamentos alimentam o Fluxo de Caixa, não geram nova despesa aqui.`} />
 
       <DreSummaryCards resumo={resumo} />
 
@@ -121,6 +122,6 @@ export default async function Page({ params, searchParams }: PageProps) {
           <DreGapsPanel tenantSlug={tenantSlug} gaps={gaps} />
         </div>
       </div>
-    </div>
+    </ExecutivePage>
   );
 }

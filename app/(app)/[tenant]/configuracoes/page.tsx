@@ -80,6 +80,28 @@ export default async function ConfiguracoesPage({
             <Button variant="outline">Convidar membro</Button>
           </CardContent>
         </Card>
+
+        {tenant.role === "owner" || tenant.role === "admin" ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Design System</CardTitle>
+              <CardDescription>
+                Biblioteca oficial — acesso técnico interno
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Showcase de tokens e componentes. Sem dados de negócio.
+              </p>
+              <Button
+                variant="outline"
+                render={<Link href={`/${tenantSlug}/design-system`} />}
+              >
+                Abrir Design System
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </div>
   );

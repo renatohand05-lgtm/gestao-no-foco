@@ -17,6 +17,19 @@ Antes de criar:
 
 Componentes fora da biblioteca = **experimentais** até revisão.
 
+## Forms (Select / Date / Toggle)
+
+**Oficial na Sprint 19:** `gofControl` + `gofFocusRing` em controles nativos ou Input shadcn.
+
+Não existem `ExecutiveSelect`, `ExecutiveDatePicker` ou `ExecutiveToggle` — criar wrappers dedicados é **DEFERRED** (Sprint futura). Não inventar abstração incompleta.
+
+```tsx
+import { gofControl } from "@/lib/design-system/primitives";
+
+<select className={gofControl} aria-label="Período">…</select>
+<input type="date" className={gofControl} />
+```
+
 ## Oficiais (preferir)
 
 `ExecutivePage` · `ExecutiveHeader` · `ExecutiveSection` · `ExecutiveCard` · `MetricCard` · `ExecutivePanel` · `ExecutiveTable` · `ExecutiveBadge` · `ExecutiveButton` · `ExecutiveIconButton` · `ExecutiveFilter` · `ExecutiveDivider` · `ExecutiveLoading` · `ExecutiveSkeleton*` · `ExecutiveEmptyState` · `BrandSplash` · `BrandLogo` · `BrandMark`

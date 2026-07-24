@@ -82,14 +82,14 @@ export function ExecutivePresetSelector() {
                 exAnimations.focusRing,
                 exMotion.ripple,
                 active
-                  ? "border-blue-600/35 ring-2 ring-blue-600/15"
+                  ? "border-[var(--brand-gold)]/40 ring-2 ring-[var(--brand-gold)]/20"
                   : "border-slate-200/50 hover:border-slate-300/80 dark:border-white/10",
               )}
             >
               {active ? (
                 <span
                   className={cn(
-                    "absolute right-3 top-3 rounded-full bg-blue-600 px-2 py-0.5 text-white",
+                    "absolute right-3 top-3 rounded-full bg-[var(--brand-gold)] px-2 py-0.5 text-white",
                     exTypography.caption,
                     "font-medium text-white",
                   )}
@@ -102,7 +102,7 @@ export function ExecutivePresetSelector() {
                 className={cn(
                   "inline-flex size-11 items-center justify-center rounded-xl",
                   active
-                    ? "bg-blue-600 text-white"
+                    ? "bg-[var(--brand-gold)] text-[var(--brand-graphite)]"
                     : "bg-slate-100 text-slate-600 group-hover:bg-slate-200/80 dark:bg-white/5",
                   exMotion.transition,
                 )}

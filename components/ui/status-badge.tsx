@@ -1,4 +1,8 @@
-import { Badge } from "@/components/ui/badge";
+import {
+  ExecutiveBadge,
+  type ExecutiveBadgeTone,
+  type ExecutiveBadgeVariant,
+} from "@/components/executive/ExecutiveBadge";
 import { cn } from "@/lib/utils";
 
 type StatusBadgeVariant =
@@ -17,24 +21,33 @@ type StatusBadgeProps = {
 
 const variantMap: Record<
   StatusBadgeVariant,
-  React.ComponentProps<typeof Badge>["variant"]
+  { tone: ExecutiveBadgeTone; badgeVariant: ExecutiveBadgeVariant }
 > = {
-  default: "default",
-  success: "success",
-  warning: "warning",
-  danger: "destructive",
-  secondary: "secondary",
-  outline: "outline",
+  default: { tone: "primary", badgeVariant: "soft" },
+  success: { tone: "success", badgeVariant: "soft" },
+  warning: { tone: "warning", badgeVariant: "soft" },
+  danger: { tone: "danger", badgeVariant: "soft" },
+  secondary: { tone: "neutral", badgeVariant: "soft" },
+  outline: { tone: "neutral", badgeVariant: "outline" },
 };
 
+/**
+ * StatusBadge — wrapper do ExecutiveBadge oficial (Gate 19.6).
+ * Preserva API de domínio (label + variant).
+ */
 export function StatusBadge({
   label,
   variant = "default",
   className,
 }: StatusBadgeProps) {
+  const mapped = variantMap[variant];
   return (
-    <Badge variant={variantMap[variant]} className={cn(className)}>
+    <ExecutiveBadge
+      tone={mapped.tone}
+      variant={mapped.badgeVariant}
+      className={cn(className)}
+    >
       {label}
-    </Badge>
+    </ExecutiveBadge>
   );
 }

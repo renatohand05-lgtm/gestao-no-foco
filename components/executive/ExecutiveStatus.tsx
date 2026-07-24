@@ -1,34 +1,47 @@
 import { cn } from "@/lib/utils";
-import { exColors, type ExColorTone } from "@/lib/design-system/colors";
-import { exPaddingX, exPaddingY } from "@/lib/design-system/spacing";
-import { exRadius } from "@/lib/design-system/radius";
-import { exTypography } from "@/lib/design-system/typography";
+import {
+  gofColors,
+  gofRadius,
+  gofTypography,
+} from "@/lib/design-system/foundation";
+
+export type ExecutiveStatusTone =
+  | "primary"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "neutral";
 
 type Props = {
   label: string;
-  tone?: Exclude<ExColorTone, "neutral"> | "neutral";
+  tone?: ExecutiveStatusTone;
   className?: string;
 };
 
-function toneClasses(tone: Props["tone"]) {
+function toneClasses(tone: ExecutiveStatusTone) {
   switch (tone) {
     case "primary":
-      return cn(exColors.primary.soft, exColors.primary.border);
+      return cn(gofColors.primary.soft, gofColors.primary.border);
     case "success":
-      return cn(exColors.success.soft, exColors.success.border);
+      return cn(gofColors.success.soft, gofColors.success.border);
     case "warning":
-      return cn(exColors.warning.soft, exColors.warning.border);
+      return cn(gofColors.warning.soft, gofColors.warning.border);
     case "danger":
-      return cn(exColors.danger.soft, exColors.danger.border);
+      return cn(gofColors.danger.soft, gofColors.danger.border);
     case "info":
-      return cn(exColors.info.soft, exColors.info.border);
+      return cn(gofColors.info.soft, gofColors.info.border);
     default:
-      return cn(exColors.neutral.muted, exColors.neutral.border, exColors.neutral.textMuted);
+      return cn(
+        gofColors.muted.className,
+        gofColors.border.className,
+        gofColors.muted.text,
+      );
   }
 }
 
 /**
- * Status textual com tom semântico.
+ * Status textual com tom semântico (Gate 19.6 — tokens gof*).
  */
 export function ExecutiveStatus({
   label,
@@ -38,11 +51,9 @@ export function ExecutiveStatus({
   return (
     <span
       className={cn(
-        "inline-flex items-center border font-medium",
-        exRadius[12],
-        exPaddingX[12],
-        exPaddingY[8],
-        exTypography.caption,
+        "inline-flex items-center border px-2.5 py-1 font-medium",
+        gofRadius.sm,
+        gofTypography.caption,
         toneClasses(tone),
         className,
       )}

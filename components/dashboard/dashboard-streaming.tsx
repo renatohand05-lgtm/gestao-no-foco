@@ -325,7 +325,7 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   /** Gate 19.3 — hierarquia premium (cima → baixo). Sem alterar dados/compose. */
   return (
     <ExecutivePage width="full" spacing="loose" className="max-w-none px-0 py-0">
-      <div className="space-y-8" data-dashboard-block="hoje-v2">
+      <div className="space-y-6" data-dashboard-block="hoje-v2">
         {/* 1 · Header */}
         <ExecutiveDashboardHeader
           greeting={ctx.greeting}

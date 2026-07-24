@@ -44,7 +44,7 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
         <div className="hidden min-w-0 sm:block">
           <p className="truncate font-[family-name:var(--font-display)] text-sm font-semibold tracking-tight text-[var(--brand-graphite)]">
             {brandConfig.name}
-            {tenantName ? (
+            {tenantName && !isDashboard ? (
               <span className="font-normal text-muted-foreground">
                 {" "}
                 · {tenantName}

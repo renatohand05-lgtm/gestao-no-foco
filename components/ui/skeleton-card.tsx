@@ -1,4 +1,8 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { ExecutiveSkeletonBlock } from "@/components/executive/ExecutiveSkeleton";
+import {
+  gofCardPadding,
+  gofCardSurface,
+} from "@/lib/design-system/primitives";
 import { cn } from "@/lib/utils";
 
 type SkeletonCardProps = {
@@ -6,23 +10,18 @@ type SkeletonCardProps = {
   className?: string;
 };
 
+/**
+ * Compat wrapper — Suspense de bloco usa ExecutiveSkeleton* (Gate 19.6).
+ * Rotas continuam em BrandSplash via loading.tsx / RouteLoading.
+ */
 export function SkeletonCard({ lines = 3, className }: SkeletonCardProps) {
   return (
     <div
-      className={cn(
-        "space-y-4 rounded-xl border border-border/60 bg-card/50 p-4 md:p-6",
-        className,
-      )}
+      className={cn(gofCardSurface, gofCardPadding, className)}
+      aria-busy="true"
+      aria-label="Carregando"
     >
-      <div className="space-y-2">
-        <Skeleton className="h-5 w-1/3" />
-        <Skeleton className="h-4 w-2/3" />
-      </div>
-      <div className="space-y-2">
-        {Array.from({ length: lines }).map((_, index) => (
-          <Skeleton key={index} className="h-9 w-full" />
-        ))}
-      </div>
+      <ExecutiveSkeletonBlock lines={lines} />
     </div>
   );
 }

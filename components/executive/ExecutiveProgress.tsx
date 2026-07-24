@@ -1,37 +1,46 @@
 import { cn } from "@/lib/utils";
-import { exAnimations } from "@/lib/design-system/animations";
-import { exColors, type ExColorTone } from "@/lib/design-system/colors";
-import { exRadius } from "@/lib/design-system/radius";
-import { exTypography } from "@/lib/design-system/typography";
+import {
+  gofColors,
+  gofMotion,
+  gofRadius,
+  gofTypography,
+} from "@/lib/design-system/foundation";
+
+export type ExecutiveProgressTone =
+  | "primary"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info";
 
 type Props = {
   value: number;
   max?: number;
   label?: string;
-  tone?: Exclude<ExColorTone, "neutral">;
+  tone?: ExecutiveProgressTone;
   className?: string;
   showValue?: boolean;
   detail?: string;
   size?: "sm" | "md" | "lg";
 };
 
-function barColor(tone: Exclude<ExColorTone, "neutral">) {
+function barColor(tone: ExecutiveProgressTone) {
   switch (tone) {
     case "success":
-      return "bg-gradient-to-r from-emerald-600 to-emerald-500";
+      return "bg-success";
     case "warning":
-      return "bg-gradient-to-r from-orange-600 to-orange-500";
+      return "bg-warning";
     case "danger":
-      return "bg-gradient-to-r from-red-600 to-red-500";
+      return "bg-danger";
     case "info":
-      return "bg-gradient-to-r from-violet-600 to-violet-500";
+      return "bg-[var(--brand-info)]";
     default:
-      return "bg-gradient-to-r from-blue-700 to-blue-500";
+      return "bg-primary";
   }
 }
 
 /**
- * Barra de progresso premium (Sprint 10.5).
+ * Barra de progresso acessível (Gate 19.6 — tokens gof*, sem blue-*).
  */
 export function ExecutiveProgress({
   value,
@@ -52,12 +61,12 @@ export function ExecutiveProgress({
     <div className={cn("space-y-2.5", className)}>
       {(label || showValue) && (
         <div className="flex items-center justify-between gap-2">
-          {label ? <p className={exTypography.label}>{label}</p> : <span />}
+          {label ? <p className={gofTypography.caption}>{label}</p> : <span />}
           {showValue ? (
             <p
               className={cn(
                 "text-sm font-semibold tabular-nums",
-                exColors[tone].text,
+                gofColors[tone].text,
               )}
             >
               {Math.round(pct)}%
@@ -69,7 +78,7 @@ export function ExecutiveProgress({
         className={cn(
           "w-full overflow-hidden bg-muted/60 ring-1 ring-border/40",
           height,
-          exRadius.full,
+          "rounded-full",
         )}
         role="progressbar"
         aria-valuenow={Math.round(pct)}
@@ -79,14 +88,16 @@ export function ExecutiveProgress({
       >
         <div
           className={cn(
-            "h-full rounded-full",
+            "h-full rounded-full motion-safe:transition-[width] motion-safe:duration-200 motion-safe:ease-out",
             barColor(tone),
-            exAnimations.progress,
+            gofRadius.sm,
           )}
           style={{ width: `${pct}%` }}
         />
       </div>
-      {detail ? <p className={exTypography.caption}>{detail}</p> : null}
+      {detail ? (
+        <p className={cn(gofTypography.caption, gofMotion.fade)}>{detail}</p>
+      ) : null}
     </div>
   );
 }

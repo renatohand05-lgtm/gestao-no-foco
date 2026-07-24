@@ -65,7 +65,7 @@ export function ExecutiveLayoutCard({ id, children, className }: Props) {
         hiddenInEdit && "opacity-50",
         showStudioChrome &&
           cn(
-            "rounded-2xl ring-1 ring-blue-600/15",
+            "rounded-2xl ring-1 ring-[var(--brand-gold)]/20",
             "bg-white/40 p-2 backdrop-blur-[2px] dark:bg-white/[0.03]",
             exMotion.transition,
           ),

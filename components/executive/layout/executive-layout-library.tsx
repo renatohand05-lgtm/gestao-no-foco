@@ -66,7 +66,7 @@ export function ExecutiveLayoutLibrary({ open, onOpenChange }: Props) {
                   key={item.id}
                   className={cn(
                     "rounded-xl border border-slate-200/60 bg-white p-3 dark:border-white/10 dark:bg-card",
-                    active && "ring-2 ring-blue-600/20",
+                    active && "ring-2 ring-[var(--brand-gold)]/25",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -101,7 +101,7 @@ export function ExecutiveLayoutLibrary({ open, onOpenChange }: Props) {
                       </p>
                     </div>
                     {active ? (
-                      <span className={cn(exTypography.caption, "text-blue-600")}>
+                      <span className={cn(exTypography.caption, "text-[var(--brand-gold)]")}>
                         Ativo
                       </span>
                     ) : null}

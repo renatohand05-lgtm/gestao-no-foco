@@ -174,7 +174,7 @@ export function ExecutiveLayoutEditor() {
                     : "border-dashed border-slate-300/70 opacity-70",
                   !isDragging && exMotion.hoverLift,
                   isDragging &&
-                    "opacity-35 ring-2 ring-blue-500/35 shadow-lg scale-[0.99]",
+                    "opacity-35 ring-2 ring-[var(--brand-gold)]/35 shadow-lg scale-[0.99]",
                   dnd.settlingId === block.id && exMotion.dropSettle,
                   dnd.phase === "keyboard" &&
                     isActive &&
@@ -196,7 +196,7 @@ export function ExecutiveLayoutEditor() {
                       exAnimations.touchTarget,
                       exAnimations.focusRing,
                       exMotion.ripple,
-                      isDragging && "cursor-grabbing bg-blue-50 text-blue-600",
+                      isDragging && "cursor-grabbing bg-[var(--brand-gold)]/10 text-[var(--brand-gold)]",
                     )}
                     onPointerDown={(e) =>
                       dnd.onHandlePointerDown(e, block.id, index)
@@ -310,7 +310,7 @@ export function ExecutiveLayoutEditor() {
           <div
             className={cn(
               exRadius[16],
-              "border border-blue-500/30 bg-white/95 p-3 backdrop-blur-sm dark:bg-card/95",
+              "border border-[var(--brand-gold)]/35 bg-white/95 p-3 backdrop-blur-sm dark:bg-card/95",
               exShadow.ghost,
               "rotate-[1.5deg] scale-[1.02] opacity-95",
             )}
@@ -328,13 +328,13 @@ function DropLine() {
   return (
     <div
       className={cn(
-        "relative z-10 mx-1 h-0.5 rounded-full bg-blue-500",
+        "relative z-10 mx-1 h-0.5 rounded-full bg-[var(--brand-gold)]",
         exShadow.insertLine,
       )}
       aria-hidden
     >
-      <span className="absolute -left-1 top-1/2 size-2 -translate-y-1/2 rounded-full bg-blue-500" />
-      <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rounded-full bg-blue-500" />
+      <span className="absolute -left-1 top-1/2 size-2 -translate-y-1/2 rounded-full bg-[var(--brand-gold)]" />
+      <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rounded-full bg-[var(--brand-gold)]" />
     </div>
   );
 }

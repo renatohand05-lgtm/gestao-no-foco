@@ -209,7 +209,7 @@ export function DreDrillPanel({ tenantSlug, linha, detalhe, items }: Props) {
                     </p>
                     <Link
                       href={editHref(tenantSlug, item)}
-                      className="text-xs font-medium text-blue-700 underline underline-offset-2"
+                      className="text-xs font-medium text-primary underline underline-offset-2"
                     >
                       Abrir lançamento
                     </Link>

@@ -17,3 +17,8 @@ export function RouteLoading({
 }: Props) {
   return <BrandSplash className={className} label={label} />;
 }
+
+/** Alias oficial — workspace / blocos usam o mesmo BrandSplash. */
+export function WorkspaceLoading(props: Props) {
+  return <RouteLoading {...props} />;
+}

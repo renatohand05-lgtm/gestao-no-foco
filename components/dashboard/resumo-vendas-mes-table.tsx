@@ -15,6 +15,12 @@ import type {
   ResumoVendasMesData,
 } from "@/lib/dashboard/resumo-vendas-mes-service";
 import type { ResumoDiaRow } from "@/lib/dashboard/resumo-vendas-mes";
+import {
+  gofCardSurface,
+  gofControl,
+  gofFocusRing,
+} from "@/lib/design-system/primitives";
+import { gofRadius, gofTypography } from "@/lib/design-system/foundation";
 import { cn } from "@/lib/utils";
 import type { DashboardFilterOption } from "@/types/dashboard-executive";
 
@@ -154,19 +160,19 @@ export function ResumoVendasMesTable({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <section
-        className="overflow-hidden rounded-2xl border border-border/55 bg-card shadow-sm"
+        className={cn("overflow-hidden", gofCardSurface)}
         aria-labelledby="resumo-vendas-mes-titulo"
       >
-        <div className="border-b bg-gradient-to-r from-muted/40 to-transparent px-5 py-4 sm:px-6">
+        <div className="border-b border-border/50 bg-muted/20 px-4 py-3 sm:px-5">
           <h2
             id="resumo-vendas-mes-titulo"
-            className="text-sm font-semibold tracking-tight text-foreground sm:text-base"
+            className={gofTypography.title}
           >
             Resumo de Vendas do Mês
           </h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className={cn("mt-0.5", gofTypography.caption)}>
             {data.meta_fonte_padrao}
             {data.meta_mensal != null
               ? ` · meta mensal ${formatCurrency(data.meta_mensal)}`
@@ -177,7 +183,7 @@ export function ResumoVendasMesTable({
         </div>
 
         <div
-          className="flex flex-wrap items-end gap-3 border-b bg-muted/20 px-5 py-3.5 sm:px-6"
+          className="flex flex-wrap items-end gap-2.5 border-b border-border/50 bg-muted/10 px-4 py-2.5 sm:px-5"
           role="toolbar"
           aria-label="Filtros do resumo de vendas"
         >
@@ -241,56 +247,56 @@ export function ResumoVendasMesTable({
         </div>
 
         {/* Desktop table */}
-        <div className="relative hidden max-h-[min(72vh,48rem)] overflow-auto md:block">
-          <table className="w-full min-w-[1080px] table-fixed border-collapse text-sm">
+        <div className="relative hidden max-h-[min(72vh,48rem)] overflow-x-auto overflow-y-auto md:block">
+          <table className="w-full min-w-[52rem] table-fixed border-collapse text-xs sm:text-sm">
             <colgroup>
-              <col className="w-8" />
-              <col className="w-[15rem]" />
-              <col className="w-[11rem]" />
-              <col className="w-[11rem]" />
-              <col className="w-[11rem]" />
+              <col className="w-6" />
+              <col className="w-[12rem]" />
+              <col className="w-[9rem]" />
+              <col className="w-[9rem]" />
+              <col className="w-[9rem]" />
+              <col className="w-[7rem]" />
               <col className="w-[8.5rem]" />
-              <col className="w-[9.5rem]" />
-              <col className="w-10" />
+              <col className="w-8" />
             </colgroup>
-            <thead className="sticky top-0 z-[2] bg-muted/95 text-left text-[11px] uppercase tracking-wide text-muted-foreground backdrop-blur">
+            <thead className="sticky top-0 z-[2] bg-muted/95 text-left text-[10px] uppercase tracking-wide text-muted-foreground backdrop-blur">
               <tr>
-                <th className="border-b px-2 py-3" aria-hidden />
-                <th className="border-b px-4 py-3 font-semibold">Dia</th>
-                <th className="border-b px-4 py-3 text-right font-semibold">
+                <th className="border-b px-1.5 py-2" aria-hidden />
+                <th className="border-b px-2.5 py-2 font-semibold">Dia</th>
+                <th className="border-b px-2.5 py-2 text-right font-semibold">
                   Meta de vendas
                 </th>
-                <th className="border-b px-4 py-3 text-right font-semibold">
+                <th className="border-b px-2.5 py-2 text-right font-semibold">
                   Realizado de vendas
                 </th>
-                <th className="border-b px-4 py-3 text-right font-semibold">
+                <th className="border-b px-2.5 py-2 text-right font-semibold">
                   Diferença de vendas
                 </th>
-                <th className="border-b px-4 py-3 text-right font-semibold">
+                <th className="border-b px-2.5 py-2 text-right font-semibold">
                   % diferença
                 </th>
-                <th className="border-b px-4 py-3 font-semibold">Situação</th>
-                <th className="border-b px-2 py-3" aria-label="Abrir" />
+                <th className="border-b px-2.5 py-2 font-semibold">Situação</th>
+                <th className="border-b px-1.5 py-2" aria-label="Abrir" />
               </tr>
             </thead>
             <tbody>
-              <tr className="sticky top-[2.75rem] z-[1] border-y-2 border-foreground/20 bg-slate-100 font-bold shadow-sm dark:bg-slate-900">
-                <td className="px-2 py-4">
+              <tr className="sticky top-[2.25rem] z-[1] border-y border-border bg-muted font-semibold shadow-sm">
+                <td className="px-1.5 py-2">
                   <span
-                    className="block h-9 w-1 rounded-full bg-foreground/40"
+                    className="block h-7 w-1 rounded-full bg-[var(--brand-graphite)]/40"
                     aria-hidden
                   />
                 </td>
-                <td className="px-4 py-4 text-[0.9375rem]">TOTAL GERAL</td>
-                <td className="px-4 py-4 text-right text-[0.9375rem] tabular-nums whitespace-nowrap">
+                <td className="px-2.5 py-2">TOTAL GERAL</td>
+                <td className="px-2.5 py-2 text-right tabular-nums whitespace-nowrap">
                   {formatCurrency(data.total.meta_total)}
                 </td>
-                <td className="px-4 py-4 text-right text-[0.9375rem] tabular-nums whitespace-nowrap">
+                <td className="px-2.5 py-2 text-right tabular-nums whitespace-nowrap">
                   {formatCurrency(data.total.realizado_acumulado)}
                 </td>
                 <td
                   className={cn(
-                    "px-4 py-4 text-right text-[0.9375rem] tabular-nums whitespace-nowrap",
+                    "px-2.5 py-2 text-right tabular-nums whitespace-nowrap",
                     diffClass(data.total.diferenca),
                   )}
                 >
@@ -298,13 +304,13 @@ export function ResumoVendasMesTable({
                 </td>
                 <td
                   className={cn(
-                    "px-4 py-4 text-right text-[0.9375rem] tabular-nums whitespace-nowrap",
+                    "px-2.5 py-2 text-right tabular-nums whitespace-nowrap",
                     diffClass(data.total.pct_diferenca),
                   )}
                 >
                   {signedPercent(data.total.pct_diferenca)}
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-2.5 py-2">
                   <SituacaoBadge situacao={data.total.situacao} />
                 </td>
                 <td />
@@ -328,7 +334,10 @@ export function ResumoVendasMesTable({
                       "border-b border-border/50 transition-colors",
                       idx % 2 === 1 && row.kind !== "hoje" && "bg-muted/15",
                       clickable &&
-                        "cursor-pointer hover:bg-muted/40 focus-visible:bg-muted/50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-sky-500",
+                        cn(
+                          "cursor-pointer hover:bg-muted/40 focus-visible:bg-muted/50",
+                          gofFocusRing,
+                        ),
                       row.kind === "hoje" &&
                         "bg-amber-50/90 dark:bg-amber-950/25",
                       row.kind === "futuro" && "text-muted-foreground",
@@ -347,15 +356,15 @@ export function ResumoVendasMesTable({
                         : row.label_dia
                     }
                   >
-                    <td className="px-2 py-3">
+                    <td className="px-1.5 py-1.5">
                       <span
                         className={cn(
-                          "block h-8 w-1 rounded-full",
-                          row.situacao === "superou" && "bg-emerald-600",
-                          row.situacao === "atingida" && "bg-emerald-500",
-                          row.situacao === "atencao" && "bg-amber-400",
-                          row.situacao === "abaixo" && "bg-orange-400",
-                          row.situacao === "muito_abaixo" && "bg-rose-500",
+                          "block h-6 w-1 rounded-full",
+                          row.situacao === "superou" && "bg-success",
+                          row.situacao === "atingida" && "bg-success/80",
+                          row.situacao === "atencao" && "bg-warning",
+                          row.situacao === "abaixo" && "bg-warning/80",
+                          row.situacao === "muito_abaixo" && "bg-danger",
                           (row.situacao === "futuro" ||
                             row.situacao === "neutro") &&
                             "bg-border",
@@ -363,11 +372,11 @@ export function ResumoVendasMesTable({
                         aria-hidden
                       />
                     </td>
-                    <td className="px-4 py-3 capitalize">
+                    <td className="px-2.5 py-1.5 capitalize">
                       <span className="inline-flex flex-wrap items-center gap-1.5">
                         <span className="font-medium">{row.label_dia}</span>
                         {row.kind === "hoje" ? (
-                          <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-amber-800 uppercase dark:text-amber-200">
+                          <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-warning-foreground uppercase">
                             Hoje
                           </span>
                         ) : null}
@@ -383,17 +392,17 @@ export function ResumoVendasMesTable({
                         ) : null}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
+                    <td className="px-2.5 py-1.5 text-right tabular-nums whitespace-nowrap">
                       {formatCurrency(row.meta)}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
+                    <td className="px-2.5 py-1.5 text-right tabular-nums whitespace-nowrap">
                       {row.realizado == null
                         ? "—"
                         : formatCurrency(row.realizado)}
                     </td>
                     <td
                       className={cn(
-                        "px-4 py-3 text-right tabular-nums whitespace-nowrap",
+                        "px-2.5 py-1.5 text-right tabular-nums whitespace-nowrap",
                         diffClass(row.diferenca),
                       )}
                     >
@@ -401,16 +410,16 @@ export function ResumoVendasMesTable({
                     </td>
                     <td
                       className={cn(
-                        "px-4 py-3 text-right tabular-nums whitespace-nowrap",
+                        "px-2.5 py-1.5 text-right tabular-nums whitespace-nowrap",
                         diffClass(row.pct_diferenca),
                       )}
                     >
                       {signedPercent(row.pct_diferenca)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-2.5 py-1.5">
                       <SituacaoBadge situacao={row.situacao} />
                     </td>
-                    <td className="px-2 py-3 text-muted-foreground">
+                    <td className="px-1.5 py-1.5 text-muted-foreground">
                       {clickable ? (
                         <ChevronRight className="size-4" aria-hidden />
                       ) : null}
@@ -424,7 +433,7 @@ export function ResumoVendasMesTable({
 
         {/* Mobile cards */}
         <div className="space-y-2 border-t p-3 md:hidden">
-          <div className="rounded-lg border-2 border-foreground/15 bg-slate-100 p-3 dark:bg-slate-900">
+          <div className={cn("border border-border/60 bg-muted/40 p-2.5", gofRadius.md)}>
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-bold">TOTAL GERAL</p>
               <SituacaoBadge situacao={data.total.situacao} />
@@ -465,7 +474,9 @@ export function ResumoVendasMesTable({
               disabled={row.kind === "futuro"}
               onClick={() => void openDay(row)}
               className={cn(
-                "w-full rounded-lg border p-3 text-left text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500",
+                "w-full border border-border/60 p-2.5 text-left text-xs",
+                gofRadius.md,
+                gofFocusRing,
                 row.kind === "hoje" &&
                   "border-amber-400/60 bg-amber-50 dark:bg-amber-950/40",
                 row.kind === "futuro" && "opacity-60",
@@ -553,7 +564,7 @@ function FilterSelect({
     <label className="block min-w-[8.5rem] flex-1 space-y-1 text-xs sm:max-w-[11rem]">
       <span className="font-medium text-muted-foreground">{label}</span>
       <select
-        className="h-9 w-full rounded-md border bg-background px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+        className={gofControl}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >

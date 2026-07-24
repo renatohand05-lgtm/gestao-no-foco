@@ -1,10 +1,10 @@
 import { ExecutiveBadge } from "@/components/executive";
-import type { ExColorTone } from "@/lib/design-system/colors";
+import type { ExecutiveBadgeTone } from "@/components/executive/ExecutiveBadge";
 import type { MetaVendasStatus } from "@/types/metas-vendas";
 
 export type ComercialStatusPresentation = {
   label: "Excelente" | "Atenção" | "Abaixo" | "Crítico";
-  tone: Exclude<ExColorTone, "neutral">;
+  tone: Exclude<ExecutiveBadgeTone, "neutral" | "primary">;
 };
 
 /**

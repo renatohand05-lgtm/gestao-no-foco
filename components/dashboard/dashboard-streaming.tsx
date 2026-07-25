@@ -268,6 +268,7 @@ async function ExecutiveAiLazyBlock({
     <ExecutiveAiCard
       data={result}
       decision={decision}
+      tenantSlug={tenantSlug}
       greeting={greeting}
       tenantName={tenantName}
       dateLabel={dateLabel}

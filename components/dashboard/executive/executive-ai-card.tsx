@@ -5,6 +5,7 @@ import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision
 type Props = {
   data: ExecutiveAiResult;
   decision?: ExecutiveDecisionResult | null;
+  tenantSlug: string;
   greeting: string;
   tenantName: string;
   dateLabel: string;
@@ -12,11 +13,12 @@ type Props = {
 };
 
 /**
- * Compat Gate 18.5 — renderiza o Centro de Inteligência + Hero (20.1.1).
+ * Compat Gate 18.5 — Intelligence Center + Hero (20.1.1) + Copilot (20.3).
  */
 export function ExecutiveAiCard({
   data,
   decision = null,
+  tenantSlug,
   greeting,
   tenantName,
   dateLabel,
@@ -27,6 +29,7 @@ export function ExecutiveAiCard({
       <ExecutiveIntelligenceCenter
         ai={data}
         decision={decision}
+        tenantSlug={tenantSlug}
         greeting={greeting}
         tenantName={tenantName}
         dateLabel={dateLabel}

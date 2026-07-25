@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ExecutiveCopilotPanel } from "@/components/ai/executive-copilot";
 import { BusinessHealthCard } from "@/components/dashboard/business-health";
 import { ExecutiveCockpitHero } from "@/components/dashboard/executive/executive-cockpit-hero";
 import {
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   ai: ExecutiveAiResult;
   decision?: ExecutiveDecisionResult | null;
+  tenantSlug: string;
   greeting: string;
   tenantName: string;
   dateLabel: string;
@@ -67,6 +69,7 @@ function summaryLineFrom(data: ExecutiveIntelligenceCenterData): string {
 export function ExecutiveIntelligenceCenter({
   ai,
   decision = null,
+  tenantSlug,
   greeting,
   tenantName,
   dateLabel,
@@ -76,7 +79,9 @@ export function ExecutiveIntelligenceCenter({
   return (
     <ExecutiveIntelligenceCenterView
       ai={ai}
+      decision={decision}
       data={data}
+      tenantSlug={tenantSlug}
       greeting={greeting}
       tenantName={tenantName}
       dateLabel={dateLabel}
@@ -87,14 +92,18 @@ export function ExecutiveIntelligenceCenter({
 
 export function ExecutiveIntelligenceCenterView({
   ai,
+  decision = null,
   data,
+  tenantSlug,
   greeting,
   tenantName,
   dateLabel,
   updatedAtLabel,
 }: {
   ai: ExecutiveAiResult;
+  decision?: ExecutiveDecisionResult | null;
   data: ExecutiveIntelligenceCenterData;
+  tenantSlug: string;
   greeting: string;
   tenantName: string;
   dateLabel: string;
@@ -123,6 +132,13 @@ export function ExecutiveIntelligenceCenterView({
 
       {/* Gate 20.2 — Business Health abaixo do Executive Score */}
       <BusinessHealthCard ai={ai} />
+
+      {/* Gate 20.3 — Copiloto Executivo (snapshot já carregado) */}
+      <ExecutiveCopilotPanel
+        tenantSlug={tenantSlug}
+        ai={ai}
+        decision={decision}
+      />
 
       <ExecutiveSection
         title="Score por domínio"

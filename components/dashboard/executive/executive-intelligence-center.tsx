@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BusinessHealthCard } from "@/components/dashboard/business-health";
 import { ExecutiveCockpitHero } from "@/components/dashboard/executive/executive-cockpit-hero";
 import {
   ExecutiveBadge,
@@ -74,6 +75,7 @@ export function ExecutiveIntelligenceCenter({
   const data = composeExecutiveIntelligenceCenter({ ai, decision });
   return (
     <ExecutiveIntelligenceCenterView
+      ai={ai}
       data={data}
       greeting={greeting}
       tenantName={tenantName}
@@ -84,12 +86,14 @@ export function ExecutiveIntelligenceCenter({
 }
 
 export function ExecutiveIntelligenceCenterView({
+  ai,
   data,
   greeting,
   tenantName,
   dateLabel,
   updatedAtLabel,
 }: {
+  ai: ExecutiveAiResult;
   data: ExecutiveIntelligenceCenterData;
   greeting: string;
   tenantName: string;
@@ -116,6 +120,9 @@ export function ExecutiveIntelligenceCenterView({
         priorityReason={data.priorityHeadline.reason}
         priorityHref={data.priorityHeadline.href}
       />
+
+      {/* Gate 20.2 — Business Health abaixo do Executive Score */}
+      <BusinessHealthCard ai={ai} />
 
       <ExecutiveSection
         title="Score por domínio"

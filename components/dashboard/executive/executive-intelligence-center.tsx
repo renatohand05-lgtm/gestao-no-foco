@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ExecutiveCopilotPanel } from "@/components/ai/executive-copilot";
 import { BusinessHealthCard } from "@/components/dashboard/business-health";
 import { PredictiveIntelligencePanel } from "@/components/dashboard/predictive";
+import { ExecutiveTimelinePanel } from "@/components/dashboard/executive-timeline";
 import { ExecutiveCockpitHero } from "@/components/dashboard/executive/executive-cockpit-hero";
 import {
   ExecutiveBadge,
@@ -149,6 +150,14 @@ export function ExecutiveIntelligenceCenterView({
 
       {/* Gate 20.4 — Predictive Intelligence */}
       <PredictiveIntelligencePanel data={predictive} />
+
+      {/* Gate 20.5 — Executive Timeline */}
+      <ExecutiveTimelinePanel
+        tenantSlug={tenantSlug}
+        ai={ai}
+        predictive={predictive}
+        decision={decision}
+      />
 
       <ExecutiveSection
         title="Score por domínio"

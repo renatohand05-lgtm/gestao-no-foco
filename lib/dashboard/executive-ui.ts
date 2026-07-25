@@ -1,12 +1,8 @@
 /**
  * Blocos compartilhados do Dashboard Executivo — alinhados ao DS Gate 19.1.
  * Somente classes / apresentação.
+ * Tokens inline para permitir execução dos testes Node (sem alias @/).
  */
-
-import {
-  gofCardSurface,
-  gofTypography,
-} from "@/lib/design-system";
 
 export const EXECUTIVE_STATUS_LABEL = {
   critico: "Crítico",
@@ -19,10 +15,12 @@ export type ExecutiveStatusKey = keyof typeof EXECUTIVE_STATUS_LABEL;
 
 /** Classes compartilhadas dos blocos executivos (tokens oficiais). */
 export const EXECUTIVE_BLOCK = {
-  section: gofCardSurface,
+  section:
+    "border border-border/60 bg-card text-card-foreground rounded-xl shadow-sm dark:border-white/[0.08] dark:bg-card/95",
   header:
     "flex flex-wrap items-start justify-between gap-3 border-b border-border/50 px-5 py-3.5 sm:px-6",
-  title: gofTypography.title,
+  title:
+    "font-[family-name:var(--font-display)] text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl",
   body: "p-4 sm:p-5",
   badge:
     "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold",

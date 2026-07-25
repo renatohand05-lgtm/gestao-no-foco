@@ -33,6 +33,8 @@
     "test:commercial-intelligence": "node --experimental-strip-types scripts/commercial-intelligence-tests.mjs",
     "test:executive-stock": "node --experimental-strip-types scripts/executive-stock-tests.mjs",
     "test:executive-ai": "node --experimental-strip-types scripts/executive-ai-tests.mjs",
+    "test:executive-intelligence-center": "node --experimental-strip-types scripts/executive-intelligence-center-tests.mjs",
+    "test:executive-cockpit-premium": "node --experimental-strip-types scripts/executive-cockpit-premium-tests.mjs",
     "test:onboarding": "node scripts/onboarding-preflight.mjs",
     "test:workspace": "node scripts/workspace-preflight.mjs",
     "test:design-system": "node scripts/design-system-tests.mjs",

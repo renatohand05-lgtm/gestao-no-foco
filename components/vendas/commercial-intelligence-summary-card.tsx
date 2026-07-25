@@ -4,10 +4,10 @@ import {
   ExecutiveButton,
   ExecutiveEmptyState,
   ExecutiveSection,
+  MetricCard,
 } from "@/components/executive";
 import { formatCurrency } from "@/lib/format";
-import { gofMotion, gofTypography } from "@/lib/design-system";
-import { cn } from "@/lib/utils";
+import { gofGrid, gofMotion } from "@/lib/design-system";
 
 type Props = {
   tenantSlug: string;
@@ -18,7 +18,8 @@ type Props = {
 };
 
 /**
- * Resumo compacto CI no Dashboard — DS oficial (Gate 19.1).
+ * Resumo compacto CI no Dashboard — DS oficial (Gate 19.1 / 20.1.1).
+ * Sem novos dados · sem alterar fórmulas.
  */
 export function CommercialIntelligenceSummaryCard({
   tenantSlug,
@@ -34,7 +35,7 @@ export function CommercialIntelligenceSummaryCard({
     >
       <ExecutiveSection
         title="Inteligência Comercial"
-        description="Pipeline, conversão e orçamentos que pedem ação."
+        description="Faturamento, pipeline e conversão — drill-down no módulo."
         panel
         actions={
           <ExecutiveButton
@@ -45,32 +46,30 @@ export function CommercialIntelligenceSummaryCard({
         }
       >
         {available ? (
-          <dl className="flex flex-wrap gap-x-6 gap-y-2">
-            <div>
-              <dt className={cn(gofTypography.caption, "inline")}>
-                Faturamento:{" "}
-              </dt>
-              <dd className="inline font-medium tabular-nums">
-                {faturamento == null ? "—" : formatCurrency(faturamento)}
-              </dd>
-            </div>
-            <div>
-              <dt className={cn(gofTypography.caption, "inline")}>
-                Negociação:{" "}
-              </dt>
-              <dd className="inline font-medium tabular-nums">
-                {negociacao == null ? "—" : formatCurrency(negociacao)}
-              </dd>
-            </div>
-            <div>
-              <dt className={cn(gofTypography.caption, "inline")}>
-                Conversão:{" "}
-              </dt>
-              <dd className="inline font-medium tabular-nums">
-                {conversaoLabel}
-              </dd>
-            </div>
-          </dl>
+          <div className={gofGrid.threeCol}>
+            <MetricCard
+              label="Faturamento"
+              value={
+                faturamento == null ? "Indisponível" : formatCurrency(faturamento)
+              }
+              hint="Período carregado"
+              tone={faturamento == null ? "neutral" : "primary"}
+            />
+            <MetricCard
+              label="Em negociação"
+              value={
+                negociacao == null ? "Indisponível" : formatCurrency(negociacao)
+              }
+              hint="Pipeline aberto"
+              tone={negociacao == null ? "neutral" : "info"}
+            />
+            <MetricCard
+              label="Conversão"
+              value={conversaoLabel}
+              hint="Fórmula preservada do CI"
+              tone="neutral"
+            />
+          </div>
         ) : (
           <ExecutiveEmptyState
             title="Dados parciais"

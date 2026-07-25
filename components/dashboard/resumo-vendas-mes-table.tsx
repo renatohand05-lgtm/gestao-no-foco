@@ -160,7 +160,10 @@ export function ResumoVendasMesTable({
   }
 
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      data-dashboard-block="resumo-vendas-mes"
+    >
       <section
         className={cn("overflow-hidden", gofCardSurface)}
         aria-labelledby="resumo-vendas-mes-titulo"
@@ -170,7 +173,7 @@ export function ResumoVendasMesTable({
             id="resumo-vendas-mes-titulo"
             className={gofTypography.title}
           >
-            Resumo de Vendas do Mês
+            Evolução do mês
           </h2>
           <p className={cn("mt-0.5", gofTypography.caption)}>
             {data.meta_fonte_padrao}

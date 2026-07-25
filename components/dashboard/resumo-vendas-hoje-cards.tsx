@@ -48,7 +48,7 @@ export function ResumoVendasHojeCards({ data, tenantSlug }: Props) {
   if (isWorkspaceEmpty(data)) {
     return (
       <ExecutiveSection
-        title="Score do dia"
+        title="Metas e ritmo de hoje"
         description="Ative o cockpit com o primeiro movimento real."
         panel
       >
@@ -58,7 +58,7 @@ export function ResumoVendasHojeCards({ data, tenantSlug }: Props) {
   }
 
   return (
-    <ExecutiveSection title="Score do dia" description="Meta, realizado e ritmo comercial de hoje." panel>
+    <ExecutiveSection title="Metas e ritmo de hoje" description="Meta, realizado e ritmo comercial de hoje." panel>
       <div className="@container w-full max-w-full min-w-0 overflow-x-hidden">
         <div
           className={cn(

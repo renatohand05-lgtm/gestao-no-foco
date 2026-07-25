@@ -146,11 +146,31 @@ export function ExecutiveActionPlanSection({ data }: Props) {
             className="py-6"
           />
         ) : (
-          <ul className="space-y-2.5">
-            {items.map((item) => (
-              <ActionPlanRow key={item.id} item={item} />
-            ))}
-          </ul>
+          <>
+            <ul className="space-y-2.5">
+              {items.slice(0, 3).map((item) => (
+                <ActionPlanRow key={item.id} item={item} />
+              ))}
+            </ul>
+            {items.length > 3 ? (
+              <details className="mt-3">
+                <summary
+                  className={cn(
+                    "cursor-pointer list-none rounded-lg border border-border/50 bg-muted/20 px-3 py-2",
+                    gofFocusRing,
+                    gofTypography.caption,
+                  )}
+                >
+                  Ver mais {items.length - 3} ação(ões)
+                </summary>
+                <ul className="mt-2.5 space-y-2.5">
+                  {items.slice(3).map((item) => (
+                    <ActionPlanRow key={item.id} item={item} />
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+          </>
         )}
       </ExecutiveSection>
     </div>

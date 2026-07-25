@@ -196,7 +196,7 @@ function ExecutiveAiSkeleton() {
         gofRadius.xl,
       )}
       aria-busy="true"
-      aria-label="Carregando IA Executiva"
+      aria-label="Carregando Centro de Inteligência"
       data-dashboard-block="ia-executiva-loading"
     >
       <ExecutiveSkeleton heightClassName="h-5" widthClassName="w-1/3" />
@@ -208,6 +208,19 @@ function ExecutiveAiSkeleton() {
 /**
  * Soft-fetch CRM + Estoque isolado — não bloqueia Resumo/Plano/Decisão.
  */
+function formatLongDateLabel(civilDate: string) {
+  const [y, m, d] = civilDate.split("-").map(Number);
+  if (!y || !m || !d) return civilDate;
+  const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
 async function ExecutiveAiLazyBlock({
   tenantId,
   tenantSlug,
@@ -215,6 +228,11 @@ async function ExecutiveAiLazyBlock({
   execCtx,
   hoje,
   commercial,
+  decision,
+  greeting,
+  tenantName,
+  dateLabel,
+  updatedAtLabel,
 }: {
   tenantId: string;
   tenantSlug: string;
@@ -224,6 +242,13 @@ async function ExecutiveAiLazyBlock({
   execCtx: Awaited<ReturnType<typeof loadExecutiveDashboardContext>>;
   hoje: NonNullable<Awaited<ReturnType<typeof loadDashboardHojeSnapshot>>>;
   commercial: CommercialIntelligenceData | null;
+  decision: NonNullable<
+    Awaited<ReturnType<typeof composeExecutiveDecision>>
+  > | null;
+  greeting: string;
+  tenantName: string;
+  dateLabel: string;
+  updatedAtLabel: string;
 }) {
   let result: ExecutiveAiResult | null = null;
   try {
@@ -239,7 +264,16 @@ async function ExecutiveAiLazyBlock({
     result = null;
   }
   if (!result) return null;
-  return <ExecutiveAiCard data={result} />;
+  return (
+    <ExecutiveAiCard
+      data={result}
+      decision={decision}
+      greeting={greeting}
+      tenantName={tenantName}
+      dateLabel={dateLabel}
+      updatedAtLabel={updatedAtLabel}
+    />
+  );
 }
 
 async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
@@ -322,11 +356,13 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   });
   const ciTeaser = commercialTeaserFromCi(commercial);
 
-  /** Gate 19.3 — hierarquia premium (cima → baixo). Sem alterar dados/compose. */
+  /** Gate 20.1.1 — hierarquia cockpit premium. Sem alterar dados/compose. */
+  const dateLabel = formatLongDateLabel(hojeData.data_hoje);
+
   return (
     <ExecutivePage width="full" spacing="loose" className="max-w-none px-0 py-0">
       <div className="space-y-6" data-dashboard-block="hoje-v2">
-        {/* 1 · Header */}
+        {/* 1 · Faixa de contexto (saudação exclusiva do Hero) */}
         <ExecutiveDashboardHeader
           greeting={ctx.greeting}
           tenantName={ctx.tenantName}
@@ -335,13 +371,10 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
           status={hojeData.hoje.status}
         />
 
-        {/* 1b · Ações rápidas Enterprise */}
+        {/* 1b · Ações rápidas */}
         <DashboardQuickActions tenantSlug={ctx.tenantSlug} />
 
-        {/* 2 · Score do dia (KPIs) */}
-        <ResumoVendasHojeCards data={hojeData} tenantSlug={ctx.tenantSlug} />
-
-        {/* 2b · Score geral da empresa (IA) */}
+        {/* 2–4 · Hero + Score + Prioridades / Oportunidades / Riscos */}
         <Suspense fallback={<ExecutiveAiSkeleton />}>
           <ExecutiveAiLazyBlock
             tenantId={ctx.tenantId}
@@ -350,28 +383,34 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
             execCtx={execCtxLoaded}
             hoje={hojeData}
             commercial={commercial}
+            decision={decision}
+            greeting={ctx.greeting}
+            tenantName={ctx.tenantName}
+            dateLabel={dateLabel}
+            updatedAtLabel={hojeData.atualizado_em_label}
           />
         </Suspense>
 
-        {/* 3 · Saúde da operação */}
+        {/* Metas / ritmo (KPIs do dia — sem duplicar Executive Score) */}
+        <ResumoVendasHojeCards data={hojeData} tenantSlug={ctx.tenantSlug} />
+
+        {/* Operação / potencial */}
         <ExecutiveIntelligenceSection
           data={intelligence}
           tenantSlug={ctx.tenantSlug}
         />
 
-        {/* 4 · Decisões inteligentes */}
+        {/* Decisão (risco detalhado) · Plano (execução) — compactados */}
         <ExecutiveDecisionCenter data={decision} tenantSlug={ctx.tenantSlug} />
-
-        {/* 5 · Plano de ação */}
         <ExecutiveActionPlanSection data={actionPlan} />
 
-        {/* 6 · Financeiro */}
+        {/* Financeiro */}
         <ExecutiveFinancialCockpit
           data={cockpit}
           tenantSlug={ctx.tenantSlug}
         />
 
-        {/* 7 · Comercial */}
+        {/* Comercial */}
         <CommercialIntelligenceSummaryCard
           tenantSlug={ctx.tenantSlug}
           faturamento={ciTeaser.faturamento}
@@ -380,7 +419,7 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
           available={ciTeaser.available}
         />
 
-        {/* 11 · Insights (Summary + Leitura) */}
+        {/* Resumo consolidado + sinais curtos */}
         <ExecutiveSummarySection data={summary} />
         <ResumoLeituraDoDia
           insights={buildLeituraDoDia({
@@ -404,7 +443,7 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
           })}
         />
 
-        {/* Detalhe mensal (após insights) */}
+        {/* Evolução do mês */}
         <ResumoVendasMesTable
           tenantSlug={ctx.tenantSlug}
           data={resumoData}

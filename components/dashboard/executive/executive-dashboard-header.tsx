@@ -8,6 +8,7 @@ import { gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type Props = {
+  /** Mantido na API por compatibilidade; saudação exclusiva do Hero. */
   greeting: string;
   tenantName: string;
   dataHoje: string;
@@ -45,32 +46,36 @@ function statusTone(
 }
 
 /**
- * Cabeçalho do Dashboard Executivo — DS oficial (Gate 19.1).
+ * Faixa de contexto do Cockpit — sem saudação (Gate 20.1.1).
+ * Greeting / Score / saúde ficam no Hero do Intelligence Center.
  */
 export function ExecutiveDashboardHeader({
-  greeting,
+  greeting: _greeting,
   tenantName,
   dataHoje,
   updatedAtLabel,
   status,
 }: Props) {
+  void _greeting;
   const dateLabel = formatLongDate(dataHoje);
 
   return (
-    <ExecutivePanel className={cn(gofMotion.fade)}>
-      <ExecutiveHeader
-        title={greeting}
-        description={`Visão executiva de hoje · ${tenantName}`}
-        actions={
-          <div className="flex flex-col items-start gap-2 sm:items-end">
-            <ExecutiveBadge tone={statusTone(status)}>
-              Meta do dia · {META_DIA_STATUS_LABEL[status]}
-            </ExecutiveBadge>
+    <div data-dashboard-block="executive-header" className={gofMotion.fade}>
+      <ExecutivePanel>
+        <ExecutiveHeader
+          title="Cockpit Executivo"
+          description={tenantName}
+          actions={
             <DashboardRefreshButton updatedAtLabel={updatedAtLabel} />
-          </div>
-        }
-      />
-      <p className={cn(gofTypography.caption, "mt-2 capitalize")}>{dateLabel}</p>
-    </ExecutivePanel>
+          }
+        />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <p className={cn(gofTypography.caption, "capitalize")}>{dateLabel}</p>
+          <ExecutiveBadge tone={statusTone(status)} variant="outline">
+            Meta do dia · {META_DIA_STATUS_LABEL[status]}
+          </ExecutiveBadge>
+        </div>
+      </ExecutivePanel>
+    </div>
   );
 }

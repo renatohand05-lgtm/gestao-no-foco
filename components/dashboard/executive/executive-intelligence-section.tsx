@@ -197,8 +197,8 @@ export function ExecutiveIntelligenceSection({ data, tenantSlug }: Props) {
       className={gofMotion.fade}
     >
       <ExecutiveSection
-        title="Saúde da operação"
-        description="Panorama consolidado de potencial e operação."
+        title="Potencial e operação"
+        description="Receita em aprovação e ritmo de OS — panorama operacional."
         panel
         className="space-y-5"
       >

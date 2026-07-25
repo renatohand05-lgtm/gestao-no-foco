@@ -281,7 +281,11 @@ export function ExecutiveDecisionCenter({
     <div data-dashboard-block="decision-center" className={gofMotion.fade}>
       <ExecutiveSection
         title="Decisões inteligentes"
-        description={loading ? "Carregando prioridades…" : data.summary.headline}
+        description={
+          loading
+            ? "Carregando prioridades…"
+            : `${data.summary.headline} · detalhe por domínio`
+        }
         panel
         actions={
           hasMore ? (
@@ -306,7 +310,18 @@ export function ExecutiveDecisionCenter({
             className="py-8"
           />
         ) : (
-          <>
+          <details className="group">
+            <summary
+              className={cn(
+                "cursor-pointer list-none rounded-lg border border-border/50 bg-muted/20 px-3 py-2.5",
+                gofFocusRing,
+                gofTypography.caption,
+              )}
+            >
+              Ver detalhe por domínio
+              {!loading ? ` · ${data.summary.totalCount} sinal(is)` : ""}
+            </summary>
+            <div className="mt-3 space-y-4">
             {!loading ? <SeverityBreakdown data={data} /> : null}
             <div className="hidden space-y-6 sm:block">
               {desktopGroups.map((group) => (
@@ -356,7 +371,8 @@ export function ExecutiveDecisionCenter({
                 </section>
               ))}
             </div>
-          </>
+            </div>
+          </details>
         )}
       </ExecutiveSection>
     </div>

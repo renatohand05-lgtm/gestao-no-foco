@@ -369,6 +369,19 @@ export const PRODUCT_BLOCKS: CatalogComponent[] = [
     hasDemo: false,
   },
   {
+    name: "ExecutiveIntelligenceCenter",
+    path: "components/dashboard/executive/executive-intelligence-center.tsx",
+    status: "oficial",
+    category: "executive-blocks",
+    description:
+      "Centro de Inteligência Operacional — Score + Prioridades/Oportunidades/Riscos/Recomendações (Gate 20.1).",
+    whenToUse: "Dashboard HOJE · Decision Engine.",
+    whenNotToUse: "Não inventar dados nem usar LLM.",
+    tokens: ["gof*", "MetricCard", "ExecutiveSection"],
+    codeSample: `<ExecutiveIntelligenceCenter ai={result} decision={decision} />`,
+    hasDemo: false,
+  },
+  {
     name: "ExecutiveAiCard",
     path: "components/dashboard/executive/executive-ai-card.tsx",
     status: "oficial",

@@ -37,7 +37,7 @@ export function ExecutiveSummarySection({ data }: Props) {
     <div data-dashboard-block="executive-summary" className={gofMotion.fade}>
       <ExecutiveSection
         title="Resumo Executivo"
-        description="Visão consolidada do negócio — status e leitura do dia."
+        description="Consolidação do dia — status e sinais relevantes (sem repetir o Score)."
         panel
         actions={
           <div className="flex flex-col items-end gap-1">

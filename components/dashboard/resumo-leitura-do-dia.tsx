@@ -28,7 +28,7 @@ export function ResumoLeituraDoDia({ insights }: Props) {
     <div className={gofMotion.fade} data-dashboard-block="leitura-do-dia">
       <ExecutiveSection
         title="Leitura do dia"
-        description="Sinais executivos do período — sem inventar métricas."
+        description="Sinais curtos do período — complementar ao Resumo e ao Score."
         panel
       >
         <ul className="flex flex-wrap gap-2.5">

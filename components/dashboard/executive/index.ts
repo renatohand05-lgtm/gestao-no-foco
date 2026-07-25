@@ -1,4 +1,8 @@
-/** Barrel — superfície viva do Dashboard Executivo (Sprint 17). */
+export { ExecutiveAiCard } from "@/components/dashboard/executive/executive-ai-card";
+export {
+  ExecutiveIntelligenceCenter,
+  ExecutiveIntelligenceCenterView,
+} from "@/components/dashboard/executive/executive-intelligence-center";
 export { ExecutiveDashboardShell } from "@/components/dashboard/executive/executive-dashboard-shell";
 export {
   ExecutiveChartSkeleton,

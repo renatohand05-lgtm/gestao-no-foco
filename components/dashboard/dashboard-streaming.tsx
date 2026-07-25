@@ -256,6 +256,8 @@ async function ExecutiveAiLazyBlock({
 }) {
   let result: ExecutiveAiResult | null = null;
   let predictive: PredictiveIntelligenceResult | null = null;
+  let feeds: Awaited<ReturnType<typeof buildExecutiveAiBundle>>["input"] | null =
+    null;
   try {
     const bundle = await buildExecutiveAiBundle({
       tenantId,
@@ -266,6 +268,7 @@ async function ExecutiveAiLazyBlock({
       commercial,
     });
     result = bundle.result;
+    feeds = bundle.input;
     predictive = runPredictiveEngine({
       tenantSlug,
       ai: bundle.result,
@@ -280,6 +283,7 @@ async function ExecutiveAiLazyBlock({
   } catch {
     result = null;
     predictive = null;
+    feeds = null;
   }
   if (!result || !predictive) return null;
   return (
@@ -292,6 +296,7 @@ async function ExecutiveAiLazyBlock({
       dateLabel={dateLabel}
       updatedAtLabel={updatedAtLabel}
       predictive={predictive}
+      feeds={feeds}
     />
   );
 }

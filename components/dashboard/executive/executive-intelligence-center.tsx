@@ -4,6 +4,7 @@ import { ExecutiveCopilotPanel } from "@/components/ai/executive-copilot";
 import { BusinessHealthCard } from "@/components/dashboard/business-health";
 import { PredictiveIntelligencePanel } from "@/components/dashboard/predictive";
 import { ExecutiveTimelinePanel } from "@/components/dashboard/executive-timeline";
+import { DecisionCenterPanel } from "@/components/dashboard/executive-decision-center";
 import { ExecutiveCockpitHero } from "@/components/dashboard/executive/executive-cockpit-hero";
 import {
   ExecutiveBadge,
@@ -16,7 +17,10 @@ import {
   EXECUTIVE_AI_MODULE_LABEL,
   formatExecutiveScore,
 } from "@/lib/ai/executive-ai-summary";
-import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
+import type {
+  ExecutiveAiInput,
+  ExecutiveAiResult,
+} from "@/lib/ai/executive-ai-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import { composeExecutiveIntelligenceCenter } from "@/lib/dashboard/executive-intelligence-center-compose";
 import {
@@ -37,6 +41,8 @@ type Props = {
   dateLabel: string;
   updatedAtLabel: string;
   predictive: PredictiveIntelligenceResult;
+  /** Feeds do mesmo ciclo do snapshot (simulações · sem fetch). */
+  feeds?: ExecutiveAiInput | null;
 };
 
 function criticidadeTone(c: EicCriticidade): "danger" | "warning" | "info" {
@@ -79,6 +85,7 @@ export function ExecutiveIntelligenceCenter({
   dateLabel,
   updatedAtLabel,
   predictive,
+  feeds = null,
 }: Props) {
   const data = composeExecutiveIntelligenceCenter({ ai, decision });
   return (
@@ -92,6 +99,7 @@ export function ExecutiveIntelligenceCenter({
       dateLabel={dateLabel}
       updatedAtLabel={updatedAtLabel}
       predictive={predictive}
+      feeds={feeds}
     />
   );
 }
@@ -106,6 +114,7 @@ export function ExecutiveIntelligenceCenterView({
   dateLabel,
   updatedAtLabel,
   predictive,
+  feeds = null,
 }: {
   ai: ExecutiveAiResult;
   decision?: ExecutiveDecisionResult | null;
@@ -116,6 +125,7 @@ export function ExecutiveIntelligenceCenterView({
   dateLabel: string;
   updatedAtLabel: string;
   predictive: PredictiveIntelligenceResult;
+  feeds?: ExecutiveAiInput | null;
 }) {
   return (
     <div
@@ -156,6 +166,15 @@ export function ExecutiveIntelligenceCenterView({
         tenantSlug={tenantSlug}
         ai={ai}
         predictive={predictive}
+        decision={decision}
+      />
+
+      {/* Gate 20.6 — Executive Decision Center */}
+      <DecisionCenterPanel
+        tenantSlug={tenantSlug}
+        ai={ai}
+        predictive={predictive}
+        feeds={feeds}
         decision={decision}
       />
 

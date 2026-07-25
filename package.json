@@ -37,6 +37,7 @@
     "test:executive-cockpit-premium": "node --experimental-strip-types scripts/executive-cockpit-premium-tests.mjs",
     "test:business-health": "node --experimental-strip-types scripts/business-health-tests.mjs",
     "test:executive-copilot": "node --experimental-strip-types scripts/executive-copilot-tests.mjs",
+    "test:predictive": "node --experimental-strip-types scripts/predictive-tests.mjs",
     "test:onboarding": "node scripts/onboarding-preflight.mjs",
     "test:workspace": "node scripts/workspace-preflight.mjs",
     "test:design-system": "node scripts/design-system-tests.mjs",

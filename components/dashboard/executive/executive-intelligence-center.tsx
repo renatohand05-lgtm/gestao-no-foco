@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { ExecutiveCopilotPanel } from "@/components/ai/executive-copilot";
 import { BusinessHealthCard } from "@/components/dashboard/business-health";
+import { PredictiveIntelligencePanel } from "@/components/dashboard/predictive";
 import { ExecutiveCockpitHero } from "@/components/dashboard/executive/executive-cockpit-hero";
 import {
   ExecutiveBadge,
@@ -22,6 +23,7 @@ import {
   type EicCriticidade,
   type ExecutiveIntelligenceCenterData,
 } from "@/lib/dashboard/executive-intelligence-center-types";
+import type { PredictiveIntelligenceResult } from "@/lib/predictive";
 import { gofFocusRing, gofGrid, gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +35,7 @@ type Props = {
   tenantName: string;
   dateLabel: string;
   updatedAtLabel: string;
+  predictive: PredictiveIntelligenceResult;
 };
 
 function criticidadeTone(c: EicCriticidade): "danger" | "warning" | "info" {
@@ -74,6 +77,7 @@ export function ExecutiveIntelligenceCenter({
   tenantName,
   dateLabel,
   updatedAtLabel,
+  predictive,
 }: Props) {
   const data = composeExecutiveIntelligenceCenter({ ai, decision });
   return (
@@ -86,6 +90,7 @@ export function ExecutiveIntelligenceCenter({
       tenantName={tenantName}
       dateLabel={dateLabel}
       updatedAtLabel={updatedAtLabel}
+      predictive={predictive}
     />
   );
 }
@@ -99,6 +104,7 @@ export function ExecutiveIntelligenceCenterView({
   tenantName,
   dateLabel,
   updatedAtLabel,
+  predictive,
 }: {
   ai: ExecutiveAiResult;
   decision?: ExecutiveDecisionResult | null;
@@ -108,6 +114,7 @@ export function ExecutiveIntelligenceCenterView({
   tenantName: string;
   dateLabel: string;
   updatedAtLabel: string;
+  predictive: PredictiveIntelligenceResult;
 }) {
   return (
     <div
@@ -139,6 +146,9 @@ export function ExecutiveIntelligenceCenterView({
         ai={ai}
         decision={decision}
       />
+
+      {/* Gate 20.4 — Predictive Intelligence */}
+      <PredictiveIntelligencePanel data={predictive} />
 
       <ExecutiveSection
         title="Score por domínio"

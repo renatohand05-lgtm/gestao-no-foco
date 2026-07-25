@@ -289,12 +289,18 @@ export type ExecutiveAiBuildParams = {
   commercial?: CommercialIntelligenceData | null;
 };
 
+export type ExecutiveAiBundle = {
+  result: ExecutiveAiResult;
+  input: ExecutiveAiInput;
+};
+
 /**
  * Soft-fetch CRM + Executive Stock + CI (se não fornecido) em paralelo.
+ * Devolve result + feeds para Predictive Intelligence (Gate 20.4) sem fetch extra.
  */
-export async function buildExecutiveAiResult(
+export async function buildExecutiveAiBundle(
   params: ExecutiveAiBuildParams,
-): Promise<ExecutiveAiResult> {
+): Promise<ExecutiveAiBundle> {
   const { tenantId, tenantSlug, cockpit, execCtx, hoje } = params;
 
   const [ci, crm, stock] = await Promise.all([
@@ -324,5 +330,16 @@ export async function buildExecutiveAiResult(
     estoque: mapEstoqueFeed(stock, execCtx?.estoque ?? null),
   };
 
-  return runExecutiveAiEngine(input);
+  return {
+    result: runExecutiveAiEngine(input),
+    input,
+  };
+}
+
+/** Compat — apenas o result do Decision Engine. */
+export async function buildExecutiveAiResult(
+  params: ExecutiveAiBuildParams,
+): Promise<ExecutiveAiResult> {
+  const bundle = await buildExecutiveAiBundle(params);
+  return bundle.result;
 }

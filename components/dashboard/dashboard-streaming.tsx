@@ -19,8 +19,12 @@ import {
   ExecutiveFooter,
   ExecutiveFooterSkeleton,
 } from "@/components/dashboard/executive/executive-footer";
-import { buildExecutiveAiResult } from "@/lib/ai/executive-ai-snapshot";
+import { buildExecutiveAiBundle } from "@/lib/ai/executive-ai-snapshot";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
+import {
+  runPredictiveEngine,
+  type PredictiveIntelligenceResult,
+} from "@/lib/predictive";
 import {
   formatDateTimeInTimezone,
   resolveTenantTimezone,
@@ -251,8 +255,9 @@ async function ExecutiveAiLazyBlock({
   updatedAtLabel: string;
 }) {
   let result: ExecutiveAiResult | null = null;
+  let predictive: PredictiveIntelligenceResult | null = null;
   try {
-    result = await buildExecutiveAiResult({
+    const bundle = await buildExecutiveAiBundle({
       tenantId,
       tenantSlug,
       cockpit,
@@ -260,10 +265,23 @@ async function ExecutiveAiLazyBlock({
       hoje,
       commercial,
     });
+    result = bundle.result;
+    predictive = runPredictiveEngine({
+      tenantSlug,
+      ai: bundle.result,
+      feeds: bundle.input,
+      hoje: {
+        faturamentoHoje: hoje.hoje.faturamento,
+        metaHoje: hoje.hoje.meta,
+        percentualHoje: hoje.hoje.percentual,
+        projecaoFechamentoMes: hoje.mes.projecao_fechamento,
+      },
+    });
   } catch {
     result = null;
+    predictive = null;
   }
-  if (!result) return null;
+  if (!result || !predictive) return null;
   return (
     <ExecutiveAiCard
       data={result}
@@ -273,6 +291,7 @@ async function ExecutiveAiLazyBlock({
       tenantName={tenantName}
       dateLabel={dateLabel}
       updatedAtLabel={updatedAtLabel}
+      predictive={predictive}
     />
   );
 }

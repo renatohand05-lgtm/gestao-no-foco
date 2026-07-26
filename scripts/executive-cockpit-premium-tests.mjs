@@ -43,7 +43,15 @@ function blockIndex(src, marker) {
 console.log("\nExecutive Cockpit Premium — Gate 20.1.1\n");
 
 const streaming = read("components/dashboard/dashboard-streaming.tsx");
-const hero = read("components/dashboard/executive/executive-cockpit-hero.tsx");
+const eccHero = read(
+  "components/dashboard/executive-command-center/executive-header.tsx",
+);
+const ecc = read(
+  "components/dashboard/executive-command-center/executive-command-center.tsx",
+);
+const eccEmpty = read(
+  "components/dashboard/executive-command-center/executive-command-empty-state.tsx",
+);
 const eic = read(
   "components/dashboard/executive/executive-intelligence-center.tsx",
 );
@@ -62,25 +70,27 @@ const commercial = read(
 );
 const pkg = read("package.json");
 
-/* ── Hero ─────────────────────────────────────────────── */
+/* ── Hero consolidado (Command Center · RC1) ───────────── */
 assert(
-  hero.includes("data-dashboard-block=\"executive-cockpit-hero\""),
-  "Hero: data-dashboard-block presente",
+  eccHero.includes('data-ecc-block="consolidated-hero"') &&
+    ecc.includes('data-ecc-hero="consolidated"'),
+  "Hero: Command Center consolidado presente",
 );
 assert(
-  hero.includes("Executive Score") && hero.includes("Prioridade do dia"),
-  "Hero: score + prioridade do dia",
+  eccHero.includes("Score") && eccHero.includes("Morning Brief"),
+  "Hero: score + morning brief",
 );
 assert(
-  hero.includes("DashboardRefreshButton") && hero.includes("updatedAtLabel"),
-  "Hero: atualizar dados + última atualização",
+  header.includes("DashboardRefreshButton") &&
+    eccHero.includes("updatedAtLabel"),
+  "Hero: atualizar dados (header) + última atualização no Command Center",
 );
 assert(
-  hero.includes("Cobertura parcial") || hero.includes("partial"),
-  "Hero: cobertura honesta",
+  eccEmpty.includes("Cobertura") || ecc.includes("available"),
+  "Hero: cobertura honesta (indisponível / filtrado)",
 );
 assert(
-  hero.includes("gofMotion"),
+  ecc.includes("gofMotion"),
   "Hero: microinteração gofMotion",
 );
 
@@ -106,9 +116,15 @@ assert(
     aiCard.includes("ExecutiveIntelligenceCenter"),
   "AI Card: props → Intelligence Center",
 );
+const shell = read(
+  "components/dashboard/executive/executive-engines-shell.tsx",
+);
 assert(
-  eic.includes("ExecutiveCockpitHero"),
-  "EIC: monta Hero Executivo",
+  eic.includes("ExecutiveEnginesShell") &&
+    shell.includes("ExecutiveCommandCenter") &&
+    !shell.includes("ExecutiveCockpitHero") &&
+    !shell.includes("executive-cockpit-hero"),
+  "EIC: monta Command Center (sem CockpitHero órfão)",
 );
 
 /* ── Hierarquia (ordem no streaming) ───────────────────── */
@@ -209,6 +225,7 @@ const baseCom = {
   coberturaOrigemBaixa: false,
   coberturaResponsavelPct: 90,
   orcamentosAguardando: 3,
+    ticketMedio: null,
 };
 const baseCrm = {
   status: "available",
@@ -283,7 +300,9 @@ assert(
   "Streaming: sem query SQL nova",
 );
 assert(
-  !hero.includes("fetch(") && !eic.includes("fetch("),
+  !eccHero.includes("fetch(") &&
+    !ecc.includes("fetch(") &&
+    !eic.includes("fetch("),
   "Hero/EIC: sem fetch novo",
 );
 assert(
@@ -293,7 +312,7 @@ assert(
 
 /* ── A11y / motion ─────────────────────────────────────── */
 assert(
-  hero.includes("aria-labelledby") || eic.includes("aria-"),
+  eccHero.includes("aria-label") || eic.includes("aria-"),
   "A11y: landmarks / labels presentes",
 );
 assert(
@@ -301,9 +320,7 @@ assert(
   "A11y: disclosure Decision Center",
 );
 assert(
-  hero.includes("motion-safe") ||
-    hero.includes("gofMotion") ||
-    eic.includes("gofMotion"),
+  ecc.includes("gofMotion") || eic.includes("gofMotion"),
   "Motion: tokens com prefers-reduced-motion",
 );
 

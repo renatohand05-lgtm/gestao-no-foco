@@ -63,6 +63,7 @@ const feeds = {
     coberturaOrigemBaixa: false,
     coberturaResponsavelPct: 90,
     orcamentosAguardando: 3,
+    ticketMedio: null,
   },
   crm: {
     status: "available",
@@ -194,11 +195,17 @@ assert(empty.overallConfidence === "baixa", "sem dados → confiança baixa");
 
 /* Wiring */
 const eic = read("components/dashboard/executive/executive-intelligence-center.tsx");
+const shell = read("components/dashboard/executive/executive-engines-shell.tsx");
 const stream = read("components/dashboard/dashboard-streaming.tsx");
 const pkg = read("package.json");
-assert(eic.includes("PredictiveIntelligencePanel"), "EIC monta painel preditivo");
 assert(
-  eic.indexOf("ExecutiveCopilotPanel") < eic.indexOf("PredictiveIntelligencePanel"),
+  eic.includes("ExecutiveEnginesShell") &&
+    shell.includes("PredictiveIntelligencePanel"),
+  "EIC monta painel preditivo",
+);
+assert(
+  shell.indexOf("<ExecutiveCopilotPanel") <
+    shell.indexOf("<PredictiveIntelligencePanel"),
   "Predictive abaixo do Copilot",
 );
 assert(stream.includes("buildExecutiveAiBundle"), "streaming usa bundle (sem fetch extra)");

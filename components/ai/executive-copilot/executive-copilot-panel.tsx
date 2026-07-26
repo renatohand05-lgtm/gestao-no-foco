@@ -13,6 +13,8 @@ import {
   type ExecutiveCopilotResponse,
 } from "@/lib/ai/executive-copilot-engine";
 import type { ExecutiveCopilotAccess } from "@/lib/ai/executive-copilot-types";
+import type { BusinessHealthResult } from "@/lib/dashboard/business-health-engine";
+import type { ExecutiveIntelligenceCenterData } from "@/lib/dashboard/executive-intelligence-center-types";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import { gofFocusRing, gofMotion, gofTypography } from "@/lib/design-system";
@@ -30,6 +32,8 @@ type Props = {
   decision?: ExecutiveDecisionResult | null;
   access?: Partial<ExecutiveCopilotAccess>;
   defaultOpen?: boolean;
+  businessHealth?: BusinessHealthResult;
+  eic?: ExecutiveIntelligenceCenterData;
 };
 
 /**
@@ -41,6 +45,8 @@ export function ExecutiveCopilotPanel({
   decision = null,
   access,
   defaultOpen = false,
+  businessHealth,
+  eic,
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
   const [query, setQuery] = useState("");
@@ -55,8 +61,10 @@ export function ExecutiveCopilotPanel({
         ai,
         decision,
         access,
+        businessHealth,
+        eic,
       }),
-    [tenantSlug, ai, decision, access],
+    [tenantSlug, ai, decision, access, businessHealth, eic],
   );
 
   function ask(raw: string) {

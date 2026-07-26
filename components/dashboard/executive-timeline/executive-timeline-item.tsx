@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { ExecutiveTimelineEvidenceList } from "@/components/dashboard/executive-timeline/executive-timeline-evidence";
 import { ExecutiveTimelineImpact } from "@/components/dashboard/executive-timeline/executive-timeline-impact";
@@ -32,9 +32,11 @@ type Props = {
 
 export function ExecutiveTimelineItem({ event }: Props) {
   const [open, setOpen] = useState(false);
+  const reactId = useId();
+  const evidenceId = `tl-evidence-${event.id}-${reactId}`;
 
   return (
-    <li className="relative pl-6">
+    <li className="relative pl-6 min-w-0">
       <span
         className={cn(
           "absolute left-0 top-3 size-2.5 rounded-full",
@@ -45,7 +47,7 @@ export function ExecutiveTimelineItem({ event }: Props) {
         )}
         aria-hidden
       />
-      <ExecutiveCard padding={16} className="space-y-2">
+      <ExecutiveCard padding={16} className="space-y-2 min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <time dateTime={event.timestamp} className={gofTypography.caption}>
             {formatTimelineTime(event.timestamp)}
@@ -61,15 +63,17 @@ export function ExecutiveTimelineItem({ event }: Props) {
           </ExecutiveBadge>
         </div>
 
-        <p className="text-sm font-semibold text-foreground">{event.title}</p>
-        <p className={cn(gofTypography.subtitle, "text-sm")}>
+        <p className="text-sm font-semibold text-foreground break-words">
+          {event.title}
+        </p>
+        <p className={cn(gofTypography.subtitle, "text-sm break-words")}>
           {event.description}
         </p>
 
         <ExecutiveTimelineImpact event={event} />
 
         {event.recommendation ? (
-          <p className={cn(gofTypography.caption, "text-foreground")}>
+          <p className={cn(gofTypography.caption, "text-foreground break-words")}>
             <span className="font-semibold">Ação:</span> {event.recommendation}
           </p>
         ) : null}
@@ -78,10 +82,16 @@ export function ExecutiveTimelineItem({ event }: Props) {
           <button
             type="button"
             className={cn(
-              "text-xs font-medium text-primary underline-offset-2 hover:underline",
+              "min-h-9 px-1 text-xs font-medium text-primary underline-offset-2 hover:underline",
               gofFocusRing,
             )}
             aria-expanded={open}
+            aria-controls={evidenceId}
+            aria-label={
+              open
+                ? `Ocultar evidências de ${event.title}`
+                : `Ver evidências de ${event.title}`
+            }
             onClick={() => setOpen((v) => !v)}
           >
             {open ? "Ocultar evidências" : "Ver evidências"}
@@ -89,14 +99,18 @@ export function ExecutiveTimelineItem({ event }: Props) {
           {event.href ? (
             <Link
               href={event.href}
-              className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+              className="min-h-9 inline-flex items-center text-xs font-medium text-primary underline-offset-2 hover:underline"
             >
               Abrir módulo
             </Link>
           ) : null}
         </div>
 
-        {open ? <ExecutiveTimelineEvidenceList items={event.evidence} /> : null}
+        {open ? (
+          <div id={evidenceId}>
+            <ExecutiveTimelineEvidenceList items={event.evidence} />
+          </div>
+        ) : null}
       </ExecutiveCard>
     </li>
   );

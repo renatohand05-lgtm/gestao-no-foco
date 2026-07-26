@@ -55,6 +55,7 @@ const baseCom = {
   coberturaOrigemBaixa: false,
   coberturaResponsavelPct: 90,
   orcamentosAguardando: 3,
+    ticketMedio: null,
 };
 
 const baseCrm = {

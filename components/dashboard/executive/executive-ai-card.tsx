@@ -4,6 +4,7 @@ import type {
   ExecutiveAiResult,
 } from "@/lib/ai/executive-ai-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
+import type { EccHojeKpis } from "@/lib/executive-command-center";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";
 
 type Props = {
@@ -17,10 +18,11 @@ type Props = {
   predictive: PredictiveIntelligenceResult;
   /** Feeds do mesmo ciclo (simulações Decision Center · sem fetch). */
   feeds?: ExecutiveAiInput | null;
+  hoje?: EccHojeKpis | null;
 };
 
 /**
- * Compat Gate 18.5 — Intelligence Center + Hero + Copilot + Predictive + Timeline + Decision Center.
+ * Compat Gate 18.5 — Command Center + Intelligence Center + módulos 20.x.
  */
 export function ExecutiveAiCard({
   data,
@@ -32,6 +34,7 @@ export function ExecutiveAiCard({
   updatedAtLabel,
   predictive,
   feeds = null,
+  hoje = null,
 }: Props) {
   return (
     <div data-dashboard-block="ia-executiva">
@@ -45,6 +48,7 @@ export function ExecutiveAiCard({
         updatedAtLabel={updatedAtLabel}
         predictive={predictive}
         feeds={feeds}
+        hoje={hoje}
       />
     </div>
   );

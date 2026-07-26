@@ -39,6 +39,10 @@ export function buildExecutiveCopilotContext(input: {
   ai: ExecutiveAiResult;
   decision?: ExecutiveDecisionResult | null;
   access?: Partial<ExecutiveCopilotAccess>;
+  /** BH pré-computado (Command Center / EIC shell). */
+  businessHealth?: BusinessHealthResult;
+  /** EIC pré-composto. */
+  eic?: ExecutiveIntelligenceCenterData;
 }): ExecutiveCopilotContext {
   const ai = input.ai;
   const decision = input.decision ?? null;
@@ -46,8 +50,10 @@ export function buildExecutiveCopilotContext(input: {
     tenantSlug: input.tenantSlug,
     ai,
     decision,
-    eic: composeExecutiveIntelligenceCenter({ ai, decision }),
-    bh: runBusinessHealthEngine(ai),
+    eic:
+      input.eic ??
+      composeExecutiveIntelligenceCenter({ ai, decision }),
+    bh: input.businessHealth ?? runBusinessHealthEngine(ai),
     access: { ...DEFAULT_COPILOT_ACCESS, ...input.access },
     generatedAt: ai.generatedAt || new Date().toISOString(),
   };

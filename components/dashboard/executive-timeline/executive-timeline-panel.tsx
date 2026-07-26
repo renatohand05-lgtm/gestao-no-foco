@@ -11,6 +11,7 @@ import {
   type ExecutiveTimelineCategory,
   type ExecutiveTimelineSort,
 } from "@/lib/executive-timeline";
+import type { BusinessHealthResult } from "@/lib/dashboard/business-health-engine";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";
@@ -22,6 +23,8 @@ type Props = {
   ai: ExecutiveAiResult;
   predictive: PredictiveIntelligenceResult;
   decision?: ExecutiveDecisionResult | null;
+  /** BH pré-computado — evita re-run no Timeline. */
+  businessHealth?: BusinessHealthResult;
 };
 
 /**
@@ -32,6 +35,7 @@ export function ExecutiveTimelinePanel({
   ai,
   predictive,
   decision = null,
+  businessHealth,
 }: Props) {
   const [sort, setSort] = useState<ExecutiveTimelineSort>("recent");
   const [categories, setCategories] = useState<ExecutiveTimelineCategory[]>([]);
@@ -43,10 +47,11 @@ export function ExecutiveTimelinePanel({
         ai,
         predictive,
         decision,
+        businessHealth,
         sort,
         categories: categories.length > 0 ? categories : null,
       }),
-    [tenantSlug, ai, predictive, decision, sort, categories],
+    [tenantSlug, ai, predictive, decision, businessHealth, sort, categories],
   );
 
   const critical = data.events.filter((e) => e.severity === "critical").length;

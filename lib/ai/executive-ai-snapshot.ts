@@ -115,6 +115,9 @@ export function mapComercialFeed(
     orcamentosAguardando: ci.kpis.orcamentosAguardando.available
       ? ci.kpis.orcamentosAguardando.value
       : null,
+    ticketMedio: ci.kpis.ticketMedio.available
+      ? ci.kpis.ticketMedio.value
+      : null,
   };
 }
 

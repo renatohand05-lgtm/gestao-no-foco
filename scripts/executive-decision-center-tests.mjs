@@ -75,6 +75,7 @@ const feeds = {
     coberturaOrigemBaixa: false,
     coberturaResponsavelPct: 90,
     orcamentosAguardando: 3,
+    ticketMedio: null,
   },
   crm: {
     status: "available",
@@ -456,13 +457,14 @@ assert(
 );
 
 /* ——— arquivos / integração UI ——— */
-const eicSrc = read(
-  "components/dashboard/executive/executive-intelligence-center.tsx",
+const shellSrc = read(
+  "components/dashboard/executive/executive-engines-shell.tsx",
 );
 assert(
-  eicSrc.includes("DecisionCenterPanel") &&
-    eicSrc.indexOf("ExecutiveTimelinePanel") <
-      eicSrc.indexOf("DecisionCenterPanel"),
+  shellSrc.includes("<ExecutiveTimelinePanel") &&
+    shellSrc.includes("<DecisionCenterPanel") &&
+    shellSrc.indexOf("<ExecutiveTimelinePanel") <
+      shellSrc.indexOf("<DecisionCenterPanel"),
   "Decision Center abaixo da Timeline no EIC",
 );
 assert(

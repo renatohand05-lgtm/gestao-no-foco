@@ -85,6 +85,7 @@ const baseCom = {
   coberturaOrigemBaixa: false,
   coberturaResponsavelPct: 80,
   orcamentosAguardando: 0,
+    ticketMedio: null,
 };
 
 const baseCrm = {
@@ -306,6 +307,7 @@ console.log("Máximo 5 diag/rec e sem duplicidade");
         conversaoDisponivel: true,
         valorEmNegociacao: 50000,
         orcamentosAguardando: 8,
+    ticketMedio: null,
         faturamentoPeriodo: 10000,
       },
       crm: { ...baseCrm, vipSemRetorno: 3, clientesEmRisco: 10 },

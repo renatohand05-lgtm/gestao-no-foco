@@ -62,6 +62,7 @@ const baseCom = {
   coberturaOrigemBaixa: false,
   coberturaResponsavelPct: 90,
   orcamentosAguardando: 3,
+    ticketMedio: null,
 };
 const baseCrm = {
   status: "available",
@@ -244,14 +245,18 @@ assert(
 /* UI / wiring / performance contracts */
 const panel = read("components/ai/executive-copilot/executive-copilot-panel.tsx");
 const eic = read("components/dashboard/executive/executive-intelligence-center.tsx");
+const shell = read("components/dashboard/executive/executive-engines-shell.tsx");
 const engine = read("lib/ai/executive-copilot-engine.ts");
 const pkg = read("package.json");
 
 assert(panel.includes("use client"), "UI client panel");
 assert(panel.includes("aria-live") || panel.includes("ExecutiveCopilotResponseView"), "a11y response");
 assert(panel.includes("Shift+Enter") || read("components/ai/executive-copilot/executive-copilot-input.tsx").includes("Shift+Enter"), "a11y Enter/Shift+Enter");
-assert(eic.includes("ExecutiveCopilotPanel"), "EIC monta Copilot");
-assert(eic.includes("tenantSlug"), "tenantSlug no EIC");
+assert(
+  eic.includes("ExecutiveEnginesShell") && shell.includes("ExecutiveCopilotPanel"),
+  "EIC monta Copilot",
+);
+assert(shell.includes("tenantSlug"), "tenantSlug no EIC");
 assert(!engine.includes("fetch(") && !engine.includes("createClient"), "engine sem fetch/query");
 assert(!engine.includes("openai") && !engine.includes("OpenAI"), "sem API externa");
 assert(pkg.includes("test:executive-copilot"), "package.json script");

@@ -51,6 +51,7 @@ import {
 } from "@/lib/dashboard/dashboard-loaders";
 import { createCommercialIntelligenceService } from "@/lib/vendas/commercial-intelligence-service";
 import type { CommercialIntelligenceData } from "@/lib/vendas/commercial-intelligence-compose";
+import { ExecutiveCommandCenterSkeleton } from "@/components/dashboard/executive-command-center";
 import { ExecutivePage, ExecutiveSkeleton } from "@/components/executive";
 import { gofMotion, gofRadius } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
@@ -195,16 +196,21 @@ async function softLoadCommercial(tenantId: string) {
 function ExecutiveAiSkeleton() {
   return (
     <div
-      className={cn(
-        "space-y-3 border border-border/60 bg-card p-5",
-        gofRadius.xl,
-      )}
+      className="space-y-5"
       aria-busy="true"
-      aria-label="Carregando Centro de Inteligência"
+      aria-label="Carregando inteligência executiva"
       data-dashboard-block="ia-executiva-loading"
     >
-      <ExecutiveSkeleton heightClassName="h-5" widthClassName="w-1/3" />
-      <ExecutiveSkeleton heightClassName="h-32" widthClassName="w-full" />
+      <ExecutiveCommandCenterSkeleton />
+      <div
+        className={cn(
+          "space-y-3 border border-border/60 bg-card p-5",
+          gofRadius.xl,
+        )}
+      >
+        <ExecutiveSkeleton heightClassName="h-5" widthClassName="w-1/3" />
+        <ExecutiveSkeleton heightClassName="h-24" widthClassName="w-full" />
+      </div>
     </div>
   );
 }
@@ -285,7 +291,14 @@ async function ExecutiveAiLazyBlock({
     predictive = null;
     feeds = null;
   }
-  if (!result || !predictive) return null;
+  if (!result || !predictive) {
+    return (
+      <SectionError
+        tenantSlug={tenantSlug}
+        description="Não foi possível montar o snapshot de IA Executiva neste ciclo."
+      />
+    );
+  }
   return (
     <ExecutiveAiCard
       data={result}
@@ -297,6 +310,17 @@ async function ExecutiveAiLazyBlock({
       updatedAtLabel={updatedAtLabel}
       predictive={predictive}
       feeds={feeds}
+      hoje={{
+        faturamentoHoje: hoje.hoje.faturamento,
+        metaHoje: hoje.hoje.meta,
+        percentualHoje: hoje.hoje.percentual,
+        ticketMedioHoje: hoje.hoje.ticket_medio,
+        ticketMedioMes: hoje.mes.ticket_medio,
+        faturamentoMes: hoje.mes.faturamento,
+        metaMes: hoje.mes.meta,
+        percentualMes: hoje.mes.percentual,
+        projecaoFechamento: hoje.mes.projecao_fechamento,
+      }}
     />
   );
 }

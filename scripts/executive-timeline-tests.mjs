@@ -67,6 +67,7 @@ const feeds = {
     coberturaOrigemBaixa: false,
     coberturaResponsavelPct: 90,
     orcamentosAguardando: 3,
+    ticketMedio: null,
   },
   crm: {
     status: "available",
@@ -255,11 +256,16 @@ assert(JSON.stringify(again.events.map((e) => e.id)) === JSON.stringify(timeline
 
 /* Wiring / sem fetch */
 const eic = read("components/dashboard/executive/executive-intelligence-center.tsx");
+const shell = read("components/dashboard/executive/executive-engines-shell.tsx");
 const engine = read("lib/executive-timeline/engine.ts");
 const pkg = read("package.json");
-assert(eic.includes("ExecutiveTimelinePanel"), "EIC monta Timeline");
 assert(
-  eic.indexOf("PredictiveIntelligencePanel") < eic.indexOf("ExecutiveTimelinePanel"),
+  eic.includes("ExecutiveEnginesShell") && shell.includes("<ExecutiveTimelinePanel"),
+  "EIC monta Timeline",
+);
+assert(
+  shell.indexOf("<PredictiveIntelligencePanel") <
+    shell.indexOf("<ExecutiveTimelinePanel"),
   "Timeline abaixo da Predictive",
 );
 assert(!engine.includes("fetch(") && !engine.includes("createClient"), "sem fetch/SQL");

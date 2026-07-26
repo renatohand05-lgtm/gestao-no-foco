@@ -125,6 +125,8 @@ export type ExecutiveAiComercialFeed = {
   coberturaOrigemBaixa: boolean;
   coberturaResponsavelPct: number | null;
   orcamentosAguardando: number | null;
+  /** Ticket médio do CI (quando disponível). */
+  ticketMedio: number | null;
 };
 
 export type ExecutiveAiCrmFeed = {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { DecisionPriority } from "@/components/dashboard/executive-decision-center/decision-priority";
 import { ExecutiveBadge, ExecutiveCard } from "@/components/executive";
@@ -21,99 +21,113 @@ type Props = {
 
 export function DecisionCard({ decision }: Props) {
   const [open, setOpen] = useState(false);
+  const reactId = useId();
+  const evidenceId = `edc-evidence-${decision.id}-${reactId}`;
 
   return (
     <div data-decision-id={decision.id} data-priority={decision.priority}>
-    <ExecutiveCard
-      padding={16}
-      className={cn(
-        "space-y-2",
-        decision.quickWin && "ring-1 ring-success/40",
-      )}
-    >
-      <div className="flex flex-wrap items-center gap-2">
-        <DecisionPriority priority={decision.priority} />
-        <ExecutiveBadge tone="neutral" variant="outline">
-          {EDC_CATEGORY_LABEL[decision.category]}
-        </ExecutiveBadge>
-        <ExecutiveBadge tone="neutral" variant="outline">
-          Urgência {EDC_URGENCY_LABEL[decision.urgency]}
-        </ExecutiveBadge>
-        {decision.quickWin ? (
-          <ExecutiveBadge tone="success" variant="soft">
-            Quick win
+      <ExecutiveCard
+        padding={16}
+        className={cn(
+          "space-y-2",
+          decision.quickWin && "ring-1 ring-success/40",
+        )}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <DecisionPriority priority={decision.priority} />
+          <ExecutiveBadge tone="neutral" variant="outline">
+            {EDC_CATEGORY_LABEL[decision.category]}
           </ExecutiveBadge>
-        ) : null}
-      </div>
+          <ExecutiveBadge tone="neutral" variant="outline">
+            Urgência {EDC_URGENCY_LABEL[decision.urgency]}
+          </ExecutiveBadge>
+          {decision.quickWin ? (
+            <ExecutiveBadge tone="success" variant="soft">
+              Quick win
+            </ExecutiveBadge>
+          ) : null}
+        </div>
 
-      <p className="text-sm font-semibold text-foreground">{decision.title}</p>
-      <p className={cn(gofTypography.subtitle, "text-sm")}>
-        {decision.description}
-      </p>
-
-      <div className="flex flex-wrap gap-x-3 gap-y-1">
-        <span className={gofTypography.caption}>
-          Impacto {decision.impact}/100
-        </span>
-        <span className={gofTypography.caption}>
-          Confiança {EDC_CONFIDENCE_LABEL[decision.confidence]}
-        </span>
-        <span className={gofTypography.caption}>
-          Esforço {EDC_EFFORT_LABEL[decision.effort]}
-        </span>
-        <span className={gofTypography.caption}>
-          Score fila {decision.score}
-        </span>
-      </div>
-
-      {decision.financialImpactLabel ? (
-        <p className={cn(gofTypography.caption, "text-foreground")}>
-          Impacto financeiro: {decision.financialImpactLabel}
+        <p className="text-sm font-semibold text-foreground break-words">
+          {decision.title}
         </p>
-      ) : null}
+        <p className={cn(gofTypography.subtitle, "text-sm break-words")}>
+          {decision.description}
+        </p>
 
-      <p className={cn(gofTypography.caption, "text-foreground")}>
-        <span className="font-semibold">Ação:</span> {decision.suggestedAction}
-      </p>
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
+          <span className={gofTypography.caption}>
+            Impacto {decision.impact}/100
+          </span>
+          <span className={gofTypography.caption}>
+            Confiança {EDC_CONFIDENCE_LABEL[decision.confidence]}
+          </span>
+          <span className={gofTypography.caption}>
+            Esforço {EDC_EFFORT_LABEL[decision.effort]}
+          </span>
+          <span className={gofTypography.caption}>
+            Score fila {decision.score}
+          </span>
+        </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          className={cn(
-            "text-xs font-medium text-primary underline-offset-2 hover:underline",
-            gofFocusRing,
-          )}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? "Ocultar evidências" : "Ver evidências"}
-        </button>
-        {decision.href ? (
-          <Link
-            href={decision.href}
-            className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-          >
-            Abrir módulo
-          </Link>
+        {decision.financialImpactLabel ? (
+          <p className={cn(gofTypography.caption, "text-foreground")}>
+            Impacto financeiro: {decision.financialImpactLabel}
+          </p>
         ) : null}
-      </div>
 
-      {open ? (
-        <ul className="space-y-1 border-t border-border/50 pt-2">
-          {decision.evidence.length === 0 ? (
-            <li className={gofTypography.caption}>Sem evidências listadas.</li>
-          ) : (
-            decision.evidence.map((ev) => (
-              <li key={ev.id} className={gofTypography.caption}>
-                <span className="font-medium text-foreground">{ev.label}:</span>{" "}
-                {ev.value}
-                <span className="text-muted-foreground"> · {ev.source}</span>
-              </li>
-            ))
-          )}
-        </ul>
-      ) : null}
-    </ExecutiveCard>
+        <p className={cn(gofTypography.caption, "text-foreground break-words")}>
+          <span className="font-semibold">Ação:</span> {decision.suggestedAction}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className={cn(
+              "min-h-9 px-1 text-xs font-medium text-primary underline-offset-2 hover:underline",
+              gofFocusRing,
+            )}
+            aria-expanded={open}
+            aria-controls={evidenceId}
+            aria-label={
+              open
+                ? `Ocultar evidências de ${decision.title}`
+                : `Ver evidências de ${decision.title}`
+            }
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? "Ocultar evidências" : "Ver evidências"}
+          </button>
+          {decision.href ? (
+            <Link
+              href={decision.href}
+              className="min-h-9 inline-flex items-center text-xs font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Abrir módulo
+            </Link>
+          ) : null}
+        </div>
+
+        {open ? (
+          <ul
+            id={evidenceId}
+            className="space-y-1 border-t border-border/50 pt-2"
+            aria-label="Evidências da decisão"
+          >
+            {decision.evidence.length === 0 ? (
+              <li className={gofTypography.caption}>Sem evidências listadas.</li>
+            ) : (
+              decision.evidence.map((ev) => (
+                <li key={ev.id} className={gofTypography.caption}>
+                  <span className="font-medium text-foreground">{ev.label}:</span>{" "}
+                  {ev.value}
+                  <span className="text-muted-foreground"> · {ev.source}</span>
+                </li>
+              ))
+            )}
+          </ul>
+        ) : null}
+      </ExecutiveCard>
     </div>
   );
 }

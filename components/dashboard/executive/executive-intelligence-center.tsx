@@ -1,11 +1,7 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-import { ExecutiveCopilotPanel } from "@/components/ai/executive-copilot";
-import { BusinessHealthCard } from "@/components/dashboard/business-health";
-import { PredictiveIntelligencePanel } from "@/components/dashboard/predictive";
-import { ExecutiveTimelinePanel } from "@/components/dashboard/executive-timeline";
-import { DecisionCenterPanel } from "@/components/dashboard/executive-decision-center";
-import { ExecutiveCockpitHero } from "@/components/dashboard/executive/executive-cockpit-hero";
+import { ExecutiveEnginesShell } from "@/components/dashboard/executive/executive-engines-shell";
 import {
   ExecutiveBadge,
   ExecutiveCard,
@@ -15,7 +11,6 @@ import {
 } from "@/components/executive";
 import {
   EXECUTIVE_AI_MODULE_LABEL,
-  formatExecutiveScore,
 } from "@/lib/ai/executive-ai-summary";
 import type {
   ExecutiveAiInput,
@@ -28,6 +23,7 @@ import {
   type EicCriticidade,
   type ExecutiveIntelligenceCenterData,
 } from "@/lib/dashboard/executive-intelligence-center-types";
+import type { EccHojeKpis } from "@/lib/executive-command-center";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";
 import { gofFocusRing, gofGrid, gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
@@ -43,6 +39,7 @@ type Props = {
   predictive: PredictiveIntelligenceResult;
   /** Feeds do mesmo ciclo do snapshot (simulações · sem fetch). */
   feeds?: ExecutiveAiInput | null;
+  hoje?: EccHojeKpis | null;
 };
 
 function criticidadeTone(c: EicCriticidade): "danger" | "warning" | "info" {
@@ -61,17 +58,6 @@ function moduleLabel(module: string | null): string {
   return module.charAt(0).toUpperCase() + module.slice(1);
 }
 
-function summaryLineFrom(data: ExecutiveIntelligenceCenterData): string {
-  const score = formatExecutiveScore(data.score.value);
-  const health =
-    data.score.health === "indisponivel"
-      ? "saúde indisponível"
-      : data.score.health;
-  const prio = data.prioridades.length;
-  const risks = data.riscos.length;
-  return `Score ${score} · ${health} · ${prio} prioridade${prio === 1 ? "" : "s"} · ${risks} risco${risks === 1 ? "" : "s"} em evidência.`;
-}
-
 /**
  * Centro de Inteligência Operacional — cockpit premium (Gate 20.1 / 20.1.1).
  * UI only sobre compose existente · Design System Sprint 19.
@@ -86,6 +72,7 @@ export function ExecutiveIntelligenceCenter({
   updatedAtLabel,
   predictive,
   feeds = null,
+  hoje = null,
 }: Props) {
   const data = composeExecutiveIntelligenceCenter({ ai, decision });
   return (
@@ -100,6 +87,7 @@ export function ExecutiveIntelligenceCenter({
       updatedAtLabel={updatedAtLabel}
       predictive={predictive}
       feeds={feeds}
+      hoje={hoje}
     />
   );
 }
@@ -115,6 +103,7 @@ export function ExecutiveIntelligenceCenterView({
   updatedAtLabel,
   predictive,
   feeds = null,
+  hoje = null,
 }: {
   ai: ExecutiveAiResult;
   decision?: ExecutiveDecisionResult | null;
@@ -126,6 +115,7 @@ export function ExecutiveIntelligenceCenterView({
   updatedAtLabel: string;
   predictive: PredictiveIntelligenceResult;
   feeds?: ExecutiveAiInput | null;
+  hoje?: EccHojeKpis | null;
 }) {
   return (
     <div
@@ -133,49 +123,18 @@ export function ExecutiveIntelligenceCenterView({
       data-decision-engine={data.engineVersion}
       className={cn("space-y-5", gofMotion.fade)}
     >
-      <ExecutiveCockpitHero
+      {/* Gates 20.2–20.7 — engines compartilhados uma vez por paint */}
+      <ExecutiveEnginesShell
+        ai={ai}
+        decision={decision}
+        tenantSlug={tenantSlug}
         greeting={greeting}
         tenantName={tenantName}
         dateLabel={dateLabel}
         updatedAtLabel={updatedAtLabel}
-        score={data.score.value}
-        health={data.score.health}
-        confidence={data.score.confidence}
-        partial={data.score.partial}
-        summaryLine={summaryLineFrom(data)}
-        priorityTitle={data.priorityHeadline.title}
-        priorityReason={data.priorityHeadline.reason}
-        priorityHref={data.priorityHeadline.href}
-      />
-
-      {/* Gate 20.2 — Business Health abaixo do Executive Score */}
-      <BusinessHealthCard ai={ai} />
-
-      {/* Gate 20.3 — Copiloto Executivo (snapshot já carregado) */}
-      <ExecutiveCopilotPanel
-        tenantSlug={tenantSlug}
-        ai={ai}
-        decision={decision}
-      />
-
-      {/* Gate 20.4 — Predictive Intelligence */}
-      <PredictiveIntelligencePanel data={predictive} />
-
-      {/* Gate 20.5 — Executive Timeline */}
-      <ExecutiveTimelinePanel
-        tenantSlug={tenantSlug}
-        ai={ai}
-        predictive={predictive}
-        decision={decision}
-      />
-
-      {/* Gate 20.6 — Executive Decision Center */}
-      <DecisionCenterPanel
-        tenantSlug={tenantSlug}
-        ai={ai}
         predictive={predictive}
         feeds={feeds}
-        decision={decision}
+        hoje={hoje}
       />
 
       <ExecutiveSection
@@ -230,11 +189,12 @@ export function ExecutiveIntelligenceCenterView({
       <div className={cn(gofGrid.twoCol)}>
         <PanelList
           title="Prioridades do Dia"
-          description="Até 5 itens · ordenados por impacto"
+          description="Detalhamento · evidências completas (resumo no Command Center)"
           emptyTitle="Sem prioridades"
           emptyDescription="Nenhuma prioridade automática neste momento."
           count={data.prioridades.length}
-          defaultOpen
+          defaultOpen={false}
+          panelId="eic-detail-prioridades"
         >
           {data.prioridades.map((item, idx) => (
             <ItemCard
@@ -260,11 +220,12 @@ export function ExecutiveIntelligenceCenterView({
 
         <PanelList
           title="Oportunidades"
-          description="Ganhos potenciais com evidência"
+          description="Detalhamento · ganhos com evidência (resumo no Command Center)"
           emptyTitle="Sem oportunidades"
           emptyDescription="Nenhum ganho potencial evidenciado pelos dados."
           count={data.oportunidades.length}
-          defaultOpen
+          defaultOpen={false}
+          panelId="eic-detail-oportunidades"
         >
           {data.oportunidades.map((item) => (
             <ItemCard
@@ -283,11 +244,12 @@ export function ExecutiveIntelligenceCenterView({
 
         <PanelList
           title="Riscos"
-          description="Criticidade e impacto estimado"
+          description="Detalhamento · criticidade e impacto (resumo no Command Center)"
           emptyTitle="Sem riscos críticos"
           emptyDescription="Nenhum risco com evidência crítica/alta agora."
           count={data.riscos.length}
-          defaultOpen
+          defaultOpen={false}
+          panelId="eic-detail-riscos"
         >
           {data.riscos.map((item) => (
             <ItemCard
@@ -312,11 +274,12 @@ export function ExecutiveIntelligenceCenterView({
 
         <PanelList
           title="Recomendações Inteligentes"
-          description="Regras determinísticas · sem IA generativa"
+          description="Detalhamento · regras determinísticas · sem IA generativa"
           emptyTitle="Sem recomendações"
           emptyDescription="Nenhuma recomendação derivada das regras atuais."
           count={data.recomendacoes.length}
           defaultOpen={false}
+          panelId="eic-detail-recomendacoes"
         >
           {data.recomendacoes.map((item) => (
             <ItemCard
@@ -343,6 +306,7 @@ function PanelList({
   emptyDescription,
   count,
   defaultOpen,
+  panelId,
   children,
 }: {
   title: string;
@@ -351,7 +315,8 @@ function PanelList({
   emptyDescription: string;
   count: number;
   defaultOpen: boolean;
-  children: React.ReactNode;
+  panelId: string;
+  children: ReactNode;
 }) {
   return (
     <details
@@ -368,6 +333,7 @@ function PanelList({
           gofFocusRing,
           "rounded-xl",
         )}
+        aria-controls={panelId}
       >
         <span className={gofTypography.title}>{title}</span>
         <span className={cn("mt-0.5 block", gofTypography.caption)}>
@@ -375,7 +341,12 @@ function PanelList({
           {count > 0 ? ` · ${count}` : ""}
         </span>
       </summary>
-      <div className="space-y-2 border-t border-border/50 px-4 py-3 sm:px-5">
+      <div
+        id={panelId}
+        className="space-y-2 border-t border-border/50 px-4 py-3 sm:px-5"
+        role="region"
+        aria-label={title}
+      >
         {count === 0 ? (
           <ExecutiveEmptyState
             title={emptyTitle}

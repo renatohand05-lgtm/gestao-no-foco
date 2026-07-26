@@ -88,6 +88,7 @@ const baseCom = {
   coberturaOrigemBaixa: false,
   coberturaResponsavelPct: 90,
   orcamentosAguardando: 3,
+    ticketMedio: null,
 };
 const baseCrm = {
   status: "available",
@@ -234,14 +235,20 @@ assert(
 
 /* ── UI wiring ────────────────────────────────────────── */
 const eic = read("components/dashboard/executive/executive-intelligence-center.tsx");
+const shell = read("components/dashboard/executive/executive-engines-shell.tsx");
 const card = read("components/dashboard/business-health/business-health-card.tsx");
 const pkg = read("package.json");
 
-assert(eic.includes("BusinessHealthCard"), "Dashboard: BusinessHealthCard no EIC");
 assert(
-  eic.includes("Gate 20.2 — Business Health abaixo do Executive Score") ||
-    (eic.indexOf("<ExecutiveCockpitHero") >= 0 &&
-      eic.indexOf("<ExecutiveCockpitHero") < eic.indexOf("<BusinessHealthCard")),
+  eic.includes("ExecutiveEnginesShell") &&
+    shell.includes("<ExecutiveCommandCenter") &&
+    !shell.includes("ExecutiveCockpitHero"),
+  "Dashboard: BusinessHealthCard no EIC",
+);
+assert(
+  shell.indexOf("<ExecutiveCommandCenter") >= 0 &&
+    shell.indexOf("<ExecutiveCommandCenter") <
+      shell.indexOf("<BusinessHealthCard"),
   "Dashboard: Business Health abaixo do Executive Score (Hero)",
 );
 assert(card.includes('data-dashboard-block="business-health"'), "Card block id");

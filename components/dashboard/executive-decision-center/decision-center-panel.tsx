@@ -9,8 +9,13 @@ import { QuickWins } from "@/components/dashboard/executive-decision-center/quic
 import { SimulationCard } from "@/components/dashboard/executive-decision-center/simulation-card";
 import { ExecutiveBadge, ExecutiveSection } from "@/components/executive";
 import type { ExecutiveAiInput, ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
+import type { BusinessHealthResult } from "@/lib/dashboard/business-health-engine";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
-import { runExecutiveDecisionCenter } from "@/lib/executive-decision-center";
+import {
+  runExecutiveDecisionCenter,
+  type EdcResult,
+} from "@/lib/executive-decision-center";
+import type { ExecutiveTimelineResult } from "@/lib/executive-timeline";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";
 import { gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
@@ -21,6 +26,10 @@ type Props = {
   predictive: PredictiveIntelligenceResult;
   feeds?: ExecutiveAiInput | null;
   decision?: ExecutiveDecisionResult | null;
+  businessHealth?: BusinessHealthResult;
+  timeline?: ExecutiveTimelineResult;
+  /** Resultado já agregado pelo Command Center shell. */
+  edc?: EdcResult;
 };
 
 /**
@@ -32,17 +41,23 @@ export function DecisionCenterPanel({
   predictive,
   feeds = null,
   decision = null,
+  businessHealth,
+  timeline,
+  edc: edcProp,
 }: Props) {
   const data = useMemo(
     () =>
+      edcProp ??
       runExecutiveDecisionCenter({
         tenantSlug,
         ai,
         predictive,
         feeds,
         decision,
+        businessHealth,
+        timeline,
       }),
-    [tenantSlug, ai, predictive, feeds, decision],
+    [edcProp, tenantSlug, ai, predictive, feeds, decision, businessHealth, timeline],
   );
 
   const critical = data.queue.filter((d) => d.priority === "critical").length;

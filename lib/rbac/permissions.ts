@@ -1,0 +1,168 @@
+/**
+ * Sprint 21.1 — Catálogo único de permissões (modulo.acao).
+ * Fonte tipada · sem strings manuais espalhadas.
+ */
+
+import type {
+  Permission,
+  PermissionCategory,
+  PermissionModule,
+  PermissionRisk,
+} from "./types.ts";
+
+function def<K extends string>(
+  key: K,
+  module: PermissionModule,
+  action: string,
+  description: string,
+  category: PermissionCategory,
+  risk: PermissionRisk,
+): Permission & { key: K } {
+  return { key, module, action, description, category, risk };
+}
+
+/** Catálogo canônico — ordem estável por módulo. */
+export const PERMISSION_CATALOG = [
+  // Financeiro
+  def("financeiro.visualizar", "financeiro", "visualizar", "Visualizar módulo financeiro", "leitura", "baixo"),
+  def("financeiro.criar", "financeiro", "criar", "Criar lançamentos financeiros", "escrita", "medio"),
+  def("financeiro.editar", "financeiro", "editar", "Editar lançamentos financeiros", "escrita", "medio"),
+  def("financeiro.excluir", "financeiro", "excluir", "Excluir lançamentos financeiros", "exclusao", "alto"),
+  def("financeiro.aprovar", "financeiro", "aprovar", "Aprovar operações financeiras", "aprovacao", "alto"),
+  def("financeiro.exportar", "financeiro", "exportar", "Exportar dados financeiros", "exportacao", "medio"),
+  def("financeiro.conciliar", "financeiro", "conciliar", "Conciliar contas bancárias", "escrita", "alto"),
+  def("financeiro.transferir", "financeiro", "transferir", "Transferir entre contas", "escrita", "alto"),
+  def("financeiro.ver_saldos", "financeiro", "ver_saldos", "Visualizar saldos bancários", "financeiro_sensivel", "alto"),
+  def("financeiro.ver_dre", "financeiro", "ver_dre", "Visualizar DRE", "financeiro_sensivel", "alto"),
+  def("financeiro.ver_fluxo_caixa", "financeiro", "ver_fluxo_caixa", "Visualizar fluxo de caixa", "financeiro_sensivel", "alto"),
+
+  // Estoque
+  def("estoque.visualizar", "estoque", "visualizar", "Visualizar estoque", "leitura", "baixo"),
+  def("estoque.criar", "estoque", "criar", "Criar itens de estoque", "escrita", "medio"),
+  def("estoque.editar", "estoque", "editar", "Editar itens de estoque", "escrita", "medio"),
+  def("estoque.excluir", "estoque", "excluir", "Excluir itens de estoque", "exclusao", "alto"),
+  def("estoque.movimentar", "estoque", "movimentar", "Movimentar estoque", "escrita", "medio"),
+  def("estoque.ajustar", "estoque", "ajustar", "Ajustar saldos de estoque", "escrita", "alto"),
+  def("estoque.inventariar", "estoque", "inventariar", "Executar inventário", "escrita", "medio"),
+  def("estoque.aprovar_ajuste", "estoque", "aprovar_ajuste", "Aprovar ajustes de estoque", "aprovacao", "alto"),
+  def("estoque.ver_custo", "estoque", "ver_custo", "Visualizar custo de estoque", "financeiro_sensivel", "alto"),
+  def("estoque.exportar", "estoque", "exportar", "Exportar dados de estoque", "exportacao", "baixo"),
+
+  // Compras
+  def("compras.visualizar", "compras", "visualizar", "Visualizar compras", "leitura", "baixo"),
+  def("compras.criar", "compras", "criar", "Criar pedidos de compra", "escrita", "medio"),
+  def("compras.editar", "compras", "editar", "Editar pedidos de compra", "escrita", "medio"),
+  def("compras.excluir", "compras", "excluir", "Excluir pedidos de compra", "exclusao", "alto"),
+  def("compras.aprovar", "compras", "aprovar", "Aprovar pedidos de compra", "aprovacao", "alto"),
+  def("compras.receber", "compras", "receber", "Receber mercadorias", "escrita", "medio"),
+  def("compras.cancelar", "compras", "cancelar", "Cancelar pedidos de compra", "escrita", "alto"),
+
+  // Vendas
+  def("vendas.visualizar", "vendas", "visualizar", "Visualizar vendas", "leitura", "baixo"),
+  def("vendas.criar", "vendas", "criar", "Criar vendas", "escrita", "medio"),
+  def("vendas.editar", "vendas", "editar", "Editar vendas", "escrita", "medio"),
+  def("vendas.excluir", "vendas", "excluir", "Excluir vendas", "exclusao", "alto"),
+  def("vendas.aprovar_desconto", "vendas", "aprovar_desconto", "Aprovar descontos", "aprovacao", "alto"),
+  def("vendas.cancelar", "vendas", "cancelar", "Cancelar vendas", "escrita", "alto"),
+  def("vendas.exportar", "vendas", "exportar", "Exportar vendas", "exportacao", "baixo"),
+
+  // OS
+  def("os.visualizar", "os", "visualizar", "Visualizar ordens de serviço", "leitura", "baixo"),
+  def("os.criar", "os", "criar", "Criar ordens de serviço", "escrita", "medio"),
+  def("os.editar", "os", "editar", "Editar ordens de serviço", "escrita", "medio"),
+  def("os.excluir", "os", "excluir", "Excluir ordens de serviço", "exclusao", "alto"),
+  def("os.aprovar", "os", "aprovar", "Aprovar ordens de serviço", "aprovacao", "alto"),
+  def("os.cancelar", "os", "cancelar", "Cancelar ordens de serviço", "escrita", "alto"),
+  def("os.finalizar", "os", "finalizar", "Finalizar ordens de serviço", "escrita", "medio"),
+  def("os.reabrir", "os", "reabrir", "Reabrir ordens de serviço", "escrita", "alto"),
+  def("os.ver_custo", "os", "ver_custo", "Visualizar custo de OS", "financeiro_sensivel", "alto"),
+  def("os.ver_margem", "os", "ver_margem", "Visualizar margem de OS", "financeiro_sensivel", "alto"),
+
+  // CRM
+  def("crm.visualizar", "crm", "visualizar", "Visualizar CRM", "leitura", "baixo"),
+  def("crm.criar", "crm", "criar", "Criar registros de CRM", "escrita", "medio"),
+  def("crm.editar", "crm", "editar", "Editar registros de CRM", "escrita", "medio"),
+  def("crm.excluir", "crm", "excluir", "Excluir registros de CRM", "exclusao", "alto"),
+  def("crm.exportar", "crm", "exportar", "Exportar dados de CRM", "exportacao", "medio"),
+  def("crm.ver_dados_sensiveis", "crm", "ver_dados_sensiveis", "Visualizar dados sensíveis de clientes", "dados_sensiveis", "critico"),
+
+  // Dashboard
+  def("dashboard.executivo", "dashboard", "executivo", "Acessar dashboard executivo", "leitura", "medio"),
+  def("dashboard.financeiro", "dashboard", "financeiro", "Acessar dashboard financeiro", "leitura", "medio"),
+  def("dashboard.operacional", "dashboard", "operacional", "Acessar dashboard operacional", "leitura", "baixo"),
+  def("dashboard.comercial", "dashboard", "comercial", "Acessar dashboard comercial", "leitura", "baixo"),
+  def("dashboard.estoque", "dashboard", "estoque", "Acessar dashboard de estoque", "leitura", "baixo"),
+  def("dashboard.rh", "dashboard", "rh", "Acessar dashboard de RH", "leitura", "medio"),
+  def("dashboard.exportar", "dashboard", "exportar", "Exportar dashboards", "exportacao", "medio"),
+
+  // Usuários
+  def("usuarios.visualizar", "usuarios", "visualizar", "Visualizar usuários", "leitura", "medio"),
+  def("usuarios.criar", "usuarios", "criar", "Criar usuários", "administracao", "alto"),
+  def("usuarios.editar", "usuarios", "editar", "Editar usuários", "administracao", "alto"),
+  def("usuarios.desativar", "usuarios", "desativar", "Desativar usuários", "administracao", "alto"),
+  def("usuarios.excluir", "usuarios", "excluir", "Excluir usuários", "exclusao", "critico"),
+  def("usuarios.atribuir_role", "usuarios", "atribuir_role", "Atribuir papéis a usuários", "administracao", "critico"),
+  def("usuarios.atribuir_permissao", "usuarios", "atribuir_permissao", "Atribuir permissões a usuários", "administracao", "critico"),
+
+  // Configurações
+  def("configuracoes.visualizar", "configuracoes", "visualizar", "Visualizar configurações", "leitura", "medio"),
+  def("configuracoes.editar", "configuracoes", "editar", "Editar configurações do tenant", "administracao", "alto"),
+  def("configuracoes.integracoes", "configuracoes", "integracoes", "Gerenciar integrações", "administracao", "alto"),
+  def("configuracoes.faturamento", "configuracoes", "faturamento", "Gerenciar faturamento", "administracao", "critico"),
+  def("configuracoes.tenant", "configuracoes", "tenant", "Administrar tenant", "administracao", "critico"),
+
+  // Auditoria
+  def("auditoria.visualizar", "auditoria", "visualizar", "Visualizar auditoria", "leitura", "medio"),
+  def("auditoria.exportar", "auditoria", "exportar", "Exportar auditoria", "exportacao", "alto"),
+
+  // Relatórios
+  def("relatorios.visualizar", "relatorios", "visualizar", "Visualizar relatórios", "leitura", "baixo"),
+  def("relatorios.criar", "relatorios", "criar", "Criar relatórios", "escrita", "medio"),
+  def("relatorios.exportar", "relatorios", "exportar", "Exportar relatórios", "exportacao", "medio"),
+  def("relatorios.agendar", "relatorios", "agendar", "Agendar relatórios", "escrita", "medio"),
+] as const;
+
+export type PermissionKey = (typeof PERMISSION_CATALOG)[number]["key"];
+
+/** Constantes nomeadas — evita strings literais no código consumidor. */
+export const P = Object.fromEntries(
+  PERMISSION_CATALOG.map((p) => [p.key.replace(/\./g, "_").toUpperCase(), p.key]),
+) as Record<string, PermissionKey>;
+
+/** Mapa key → metadados. */
+export const PERMISSION_BY_KEY: ReadonlyMap<string, Permission> = new Map(
+  PERMISSION_CATALOG.map((p) => [p.key, p]),
+);
+
+/** Todas as chaves do catálogo (ordem estável). */
+export const ALL_PERMISSION_KEYS: readonly PermissionKey[] =
+  PERMISSION_CATALOG.map((p) => p.key);
+
+/** Agrupamento por módulo. */
+export const PERMISSIONS_BY_MODULE: Readonly<
+  Record<PermissionModule, readonly Permission[]>
+> = PERMISSION_CATALOG.reduce(
+  (acc, perm) => {
+    const list = acc[perm.module] ?? [];
+    (acc as Record<PermissionModule, Permission[]>)[perm.module] = [
+      ...list,
+      perm,
+    ];
+    return acc;
+  },
+  {} as Record<PermissionModule, Permission[]>,
+);
+
+export function isKnownPermission(key: string): key is PermissionKey {
+  return PERMISSION_BY_KEY.has(key);
+}
+
+export function getPermission(key: string): Permission | undefined {
+  return PERMISSION_BY_KEY.get(key);
+}
+
+export function listPermissionsByModule(
+  module: PermissionModule,
+): readonly Permission[] {
+  return PERMISSIONS_BY_MODULE[module] ?? [];
+}

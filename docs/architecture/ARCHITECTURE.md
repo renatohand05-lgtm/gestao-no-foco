@@ -1,8 +1,8 @@
 # Arquitetura Oficial — Gestão no Foco
 
-**Sprint de referência:** 9.7 — Architecture Freeze  
-**Status do produto:** Sprint 9 **encerrada** (RC 9.9.2) — ver [releases/SPRINT_9.md](../releases/SPRINT_9.md)  
-**Escopo deste doc:** princípios e mapa estáveis. Evoluções 9.8–9.9.2 não quebram estes princípios.
+**Sprint de referência:** 21.10 — Enterprise Release Candidate (`21.10.0-rc.1`)  
+**Status do produto:** Fase 21 Enterprise em **RC** — ver [releases/ENTERPRISE_21_10_RC1.md](../releases/ENTERPRISE_21_10_RC1.md)  
+**Escopo deste doc:** princípios e mapa estáveis. Evoluções Enterprise 21.x não quebram os princípios multi-tenant / server-first.
 
 ---
 
@@ -61,6 +61,7 @@ docs/                 # Roadmap + arquitetura
 | Dashboard | `lib/dashboard/` + `components/dashboard/` | Orquestra DRE/Fluxo/CR/CP |
 | Intelligence | `lib/intelligence/` | Health score, alertas, checklist, atividades |
 | Qualidade Operacional | `lib/qualidade-operacional/` | KPI de retornos (UI no dashboard/ordens) |
+| **Enterprise (Fase 21)** | `lib/enterprise/` + `lib/rbac/` + `lib/audit/` + `lib/workflow/` + `lib/approval/` + `lib/timeline/` + `lib/observability/` | RBAC → Audit → Workflow → Approval → Notifications → Persistence → Runtime → Timeline → Observability · [ENTERPRISE_OVERVIEW.md](./ENTERPRISE_OVERVIEW.md) |
 
 ---
 
@@ -106,6 +107,8 @@ Mutação:
 - [FORMATTERS.md](./FORMATTERS.md)
 - [PERFORMANCE.md](./PERFORMANCE.md)
 - [RANKINGS.md](./RANKINGS.md)
+- [ENTERPRISE_OVERVIEW.md](./ENTERPRISE_OVERVIEW.md) — Fase 21 Enterprise
+- [ENTERPRISE_21_10_RELEASE_CHECKLIST.md](./ENTERPRISE_21_10_RELEASE_CHECKLIST.md)
 - [../modulo-clientes.md](../modulo-clientes.md) — módulo de referência histórico
 - [../roadmap/backlog-tecnico.md](../roadmap/backlog-tecnico.md) — decisões técnicas
 
@@ -116,3 +119,4 @@ Mutação:
 - `formatPercentTaxa` (financeiro) permanece separado de `formatPercent` (pontos)
 - Completar módulos stub: Ordens CRUD, Relatórios, Configurações
 - Unificar rotas `novo` vs `nova` onde for seguro
+- Fase 22 Enterprise: unificar stacks paralelos domain↔application-services; endurecer fallback RBAC; cron SLA

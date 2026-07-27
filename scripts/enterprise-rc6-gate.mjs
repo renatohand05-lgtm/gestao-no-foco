@@ -165,12 +165,10 @@ phase(
     .limit(50);
 
   const tm = pair ?? [];
-  let userA = null;
   let tenantA = null;
   let tenantB = null;
 
   if (tm.length > 0) {
-    userA = tm[0].user_id;
     tenantA = tm[0].tenant_id;
     const { data: otherTenant } = await admin
       .from("tenants")
@@ -188,14 +186,14 @@ phase(
       "sem par tenant_members distinto — executar SQL Editor",
     );
   } else {
-    const { count: crossAsAdmin } = await admin
+    const { count: crossCount } = await admin
       .from("audit_events")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantB);
     phase(
       "1.2 auth_rls_test.sql — descoberta tenant A/B",
       "PASS",
-      `tenantA=${tenantA?.slice(0, 8)}… tenantB=${tenantB?.slice(0, 8)}…`,
+      `tenantA=${tenantA?.slice(0, 8)}… tenantB=${tenantB?.slice(0, 8)}… admin_cross_rows=${crossCount ?? 0}`,
     );
 
     const { data: anonRows, error: anonErr } = await anonSb

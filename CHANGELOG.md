@@ -2,6 +2,29 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
+## [21.10.0-rc.1] — 2026-07-27 — Enterprise Release Candidate
+
+### Added
+- Declaração oficial da Fase 21 Enterprise como Release Candidate
+- Documentação: Enterprise Overview, Sprint History, Release Checklist, ADR, Release Notes
+- Script agregado `npm run test:enterprise-rc`
+
+### Changed
+- Versão do projeto: `0.1.0` → `21.10.0-rc.1`
+- Architecture Overview e Roadmap atualizados para marco Enterprise RC
+
+### Security / Quality
+- Reviews de arquitetura, segurança, multi-tenant e performance (RC1)
+- Quality gates Fase 21: 933 PASS · lint/build PASS
+
+### Deferred (Fase 22)
+- Hardening de fallback RBAC e gate SLA cron
+- Unificação de stacks paralelos domain ↔ application-services
+
+Detalhes: [docs/releases/ENTERPRISE_21_10_RC1.md](docs/releases/ENTERPRISE_21_10_RC1.md).
+
+---
+
 ## [Sprint 9 RC] — 2026-07-13
 
 ### Added

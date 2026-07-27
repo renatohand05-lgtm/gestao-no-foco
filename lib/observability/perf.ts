@@ -3,7 +3,7 @@
  * Não altera queries; apenas mede e registra.
  */
 
-import { logger } from "@/lib/observability/logger";
+import { logger } from "./logger.ts";
 
 const DEFAULT_SLOW_MS = Number(process.env.SLOW_QUERY_MS || 800);
 

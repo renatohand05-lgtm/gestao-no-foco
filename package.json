@@ -47,6 +47,7 @@
     "test:approval": "node --experimental-strip-types scripts/approval-tests.mjs",
     "test:approval-runtime": "node --experimental-strip-types scripts/approval-runtime-tests.mjs",
     "test:timeline": "node --experimental-strip-types scripts/timeline-tests.mjs",
+    "test:observability": "node --experimental-strip-types scripts/observability-tests.mjs",
     "test:notifications": "node --experimental-strip-types scripts/notification-tests.mjs",
     "test:enterprise-persistence": "node --experimental-strip-types scripts/enterprise-persistence-tests.mjs",
     "test:onboarding": "node scripts/onboarding-preflight.mjs",

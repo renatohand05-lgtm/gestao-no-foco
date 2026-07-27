@@ -109,6 +109,8 @@ Mutação:
 - [RANKINGS.md](./RANKINGS.md)
 - [ENTERPRISE_OVERVIEW.md](./ENTERPRISE_OVERVIEW.md) — Fase 21 Enterprise
 - [ENTERPRISE_21_10_RELEASE_CHECKLIST.md](./ENTERPRISE_21_10_RELEASE_CHECKLIST.md)
+- [FINANCE_ARCHITECTURE.md](./FINANCE_ARCHITECTURE.md) — Fase 22 Finance (design)
+- [FINANCE_ROADMAP.md](./FINANCE_ROADMAP.md)
 - [../modulo-clientes.md](../modulo-clientes.md) — módulo de referência histórico
 - [../roadmap/backlog-tecnico.md](../roadmap/backlog-tecnico.md) — decisões técnicas
 

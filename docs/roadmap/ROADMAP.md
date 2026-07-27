@@ -7,6 +7,11 @@ Roadmap oficial de entregas do produto.
 
 ## Marco atual
 
+### Fase 22 — Enterprise Finance (em design)
+
+**22.0 Architecture** concluída (docs only). Implementação: sprints 22.1–22.10.  
+Docs: [FINANCE_ARCHITECTURE.md](../architecture/FINANCE_ARCHITECTURE.md) · [FINANCE_ROADMAP.md](../architecture/FINANCE_ROADMAP.md)
+
 ### Fase 21 Enterprise — RELEASE CANDIDATE (21.10 RC1)
 
 Camada transversal concluída em RC: RBAC, Audit, Workflow, Approval Engine, Notifications, Persistence, Approval Runtime, Activity Timeline, Observability.
@@ -58,16 +63,34 @@ Release notes: [docs/releases/SPRINT_9.md](../releases/SPRINT_9.md).
 
 ---
 
-## Próximo — Fase 22 (planejado)
+## Próximo — Fase 22 Finance (após 22.0 Architecture)
+
+Ver [FINANCE_ROADMAP.md](../architecture/FINANCE_ROADMAP.md):
+
+| Sprint | Foco |
+|--------|------|
+| 22.1 | Domain skeleton |
+| 22.2 | Treasury / transfer UI |
+| 22.3 | Cash flow enterprise |
+| 22.4 | CR/CP unification |
+| 22.5 | Daily closing |
+| 22.6 | Reconciliation |
+| 22.7 | Budgeting |
+| 22.8 | Forecast |
+| 22.9 | Executive dashboards |
+| 22.10 | Finance RC |
+
+### Backlog legado (Sprint 10 — ainda válido)
 
 | Item | Descrição |
 |------|-----------|
-| Hardening RBAC | Remover fallback de permissão vazia em Timeline/Observability |
-| SLA Cron | Gate admin + Vercel Cron para `processApprovalSla` |
-| Unificação stacks | Aproximar domain engines e `application-services` |
-| Observability persistence | Persistir samples/traces além do processo |
-| Notification preferences adapter | Completar contrato sem implementação Supabase |
-| Productization | Nav links, seeds de `observabilidade.visualizar`, runbooks |
+| Canal / origem de venda | Modelagem + UI (com migration aprovada) |
+| Vendedor comercial | Vínculo venda ↔ vendedor |
+| Meta de ticket | Estrutura dedicada |
+| Feriados em dias úteis | Calendário no motor de projeção |
+| Ordens / Relatórios / Fornecedores | Completar stubs |
+| Nova movimentação / UI estorno | Fluxo de Caixa operacional |
+| Agregações SQL rankings | RPC / GROUP BY |
 
 ### Regras (herdadas)
 

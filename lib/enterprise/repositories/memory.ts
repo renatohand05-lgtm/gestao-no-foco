@@ -23,6 +23,8 @@ import type {
   PersistedApprovalDefinition,
   PersistedApprovalHistory,
   PersistedApprovalRequest,
+  ApprovalListRequestsQuery,
+  ApprovalListRequestsResult,
   PersistedAuditEvent,
   PersistedDeliveryAttempt,
   PersistedNotification,
@@ -320,6 +322,63 @@ export function createMemoryApprovalRepository(
       return store.approvalDecisions.filter(
         (d) => d.tenantId === tenantId && d.approvalRequestId === requestId,
       );
+    },
+    async listRequests(query: ApprovalListRequestsQuery): Promise<ApprovalListRequestsResult> {
+      const page = Math.max(1, query.page ?? 1);
+      const limit = Math.min(100, Math.max(1, query.limit ?? 25));
+      let rows = store.approvalRequests.filter((r) => r.tenantId === query.tenantId);
+      if (query.status) rows = rows.filter((r) => r.status === query.status);
+      if (query.requesterId) {
+        rows = rows.filter((r) => r.requesterId === query.requesterId);
+      }
+      if (query.priority) {
+        rows = rows.filter(
+          (r) => String(r.metadata?.priority ?? "") === query.priority,
+        );
+      }
+      if (query.module) {
+        rows = rows.filter(
+          (r) => String(r.metadata?.category ?? "") === query.module,
+        );
+      }
+      if (query.workflowId) {
+        rows = rows.filter(
+          (r) => String(r.metadata?.workflowId ?? "") === query.workflowId,
+        );
+      }
+      if (query.dateFrom) {
+        rows = rows.filter((r) => r.createdAt >= query.dateFrom!);
+      }
+      if (query.dateTo) {
+        rows = rows.filter((r) => r.createdAt <= query.dateTo!);
+      }
+      if (query.approverId) {
+        const ids = new Set(
+          store.approvalDecisions
+            .filter(
+              (d) =>
+                d.tenantId === query.tenantId &&
+                d.approverId === query.approverId,
+            )
+            .map((d) => d.approvalRequestId),
+        );
+        rows = rows.filter((r) => ids.has(r.id));
+      }
+      const orderBy = query.orderBy ?? "createdAt";
+      const dir = query.orderDir === "asc" ? 1 : -1;
+      rows = [...rows].sort((a, b) => {
+        const av = orderBy === "updatedAt" ? a.updatedAt : a.createdAt;
+        const bv = orderBy === "updatedAt" ? b.updatedAt : b.createdAt;
+        return av.localeCompare(bv) * dir;
+      });
+      const total = rows.length;
+      const start = (page - 1) * limit;
+      return {
+        items: rows.slice(start, start + limit),
+        total,
+        page,
+        limit,
+      };
     },
   };
 }

@@ -197,6 +197,29 @@ export type PersistedApprovalHistory = {
   createdAt: string;
 };
 
+export type ApprovalListRequestsQuery = {
+  tenantId: string;
+  status?: string | null;
+  priority?: string | null;
+  approverId?: string | null;
+  requesterId?: string | null;
+  workflowId?: string | null;
+  module?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  page?: number;
+  limit?: number;
+  orderBy?: "createdAt" | "updatedAt";
+  orderDir?: "asc" | "desc";
+};
+
+export type ApprovalListRequestsResult = {
+  items: PersistedApprovalRequest[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export type ApprovalRepository = {
   saveDefinition(def: Omit<PersistedApprovalDefinition, "createdAt" | "updatedAt"> & { createdAt?: string; updatedAt?: string }): Promise<PersistedApprovalDefinition>;
   createRequest(req: Omit<PersistedApprovalRequest, "createdAt" | "updatedAt"> & { createdAt?: string; updatedAt?: string }): Promise<PersistedApprovalRequest>;
@@ -206,6 +229,14 @@ export type ApprovalRepository = {
   appendHistory(entry: Omit<PersistedApprovalHistory, "id" | "createdAt"> & { id?: string }): Promise<PersistedApprovalHistory>;
   savePendingActions(actions: PersistedPendingAction[]): Promise<PersistedPendingAction[]>;
   listDecisions(tenantId: string, requestId: string): Promise<PersistedApprovalDecision[]>;
+  getDefinition?(
+    tenantId: string | null,
+    approvalKey: string,
+    version?: string,
+  ): Promise<PersistedApprovalDefinition | null>;
+  listRequests?(
+    query: ApprovalListRequestsQuery,
+  ): Promise<ApprovalListRequestsResult>;
 };
 
 /* ── Notification ────────────────────────────────────── */

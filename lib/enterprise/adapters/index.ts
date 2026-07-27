@@ -4,6 +4,7 @@ export { createApprovalSupabaseAdapter } from "./approval-supabase-adapter.ts";
 export { createNotificationSupabaseAdapter } from "./notification-supabase-adapter.ts";
 export { createRbacSupabaseAdapter } from "./rbac-supabase-adapter.ts";
 export { createOutboxSupabaseAdapter } from "./outbox-supabase-adapter.ts";
+export { createIdempotencySupabaseAdapter } from "./idempotency-supabase-adapter.ts";
 export {
   enterpriseFrom,
   throwIfError,

@@ -11,6 +11,8 @@ import type {
   PersistedApprovalDefinition,
   PersistedApprovalHistory,
   PersistedApprovalRequest,
+  ApprovalListRequestsQuery,
+  ApprovalListRequestsResult,
 } from "../repositories/contracts.ts";
 import {
   enterpriseFrom,
@@ -24,6 +26,8 @@ type RpcClient = {
     args: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { message?: string } | null }>;
 };
+
+const MAX_LIST_LIMIT = 100;
 
 export function createApprovalSupabaseAdapter(
   client: EnterpriseSupabaseClient,
@@ -151,6 +155,104 @@ export function createApprovalSupabaseAdapter(
       return (data ?? []).map((r: Record<string, unknown>) =>
         mapKeysSnakeToCamel<PersistedApprovalDecision>(r),
       );
+    },
+    async getDefinition(tenantId, approvalKey, version = "1.0.0") {
+      let q = enterpriseFrom(client, "approval_definitions")
+        .select("*")
+        .eq("approval_key", approvalKey)
+        .eq("version", version)
+        .eq("is_active", true);
+      q =
+        tenantId == null ? q.is("tenant_id", null) : q.eq("tenant_id", tenantId);
+      const { data, error } = await q.maybeSingle();
+      throwIfError(error, "approval.getDefinition");
+      if (data) {
+        return mapKeysSnakeToCamel<PersistedApprovalDefinition>(data);
+      }
+      if (tenantId != null) {
+        const { data: globalDef, error: globalErr } = await enterpriseFrom(
+          client,
+          "approval_definitions",
+        )
+          .select("*")
+          .eq("approval_key", approvalKey)
+          .eq("version", version)
+          .eq("is_active", true)
+          .is("tenant_id", null)
+          .maybeSingle();
+        throwIfError(globalErr, "approval.getDefinition.global");
+        return globalDef
+          ? mapKeysSnakeToCamel<PersistedApprovalDefinition>(globalDef)
+          : null;
+      }
+      return null;
+    },
+    async listRequests(query: ApprovalListRequestsQuery): Promise<ApprovalListRequestsResult> {
+      const page = Math.max(1, query.page ?? 1);
+      const limit = Math.min(MAX_LIST_LIMIT, Math.max(1, query.limit ?? 25));
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+      const orderCol =
+        query.orderBy === "updatedAt" ? "updated_at" : "created_at";
+      const ascending = query.orderDir === "asc";
+
+      let approverRequestIds: string[] | null = null;
+      if (query.approverId) {
+        const { data: decisions, error: decErr } = await enterpriseFrom(
+          client,
+          "approval_decisions",
+        )
+          .select("approval_request_id")
+          .eq("tenant_id", query.tenantId)
+          .eq("approver_id", query.approverId);
+        throwIfError(decErr, "approval.listRequests.approver");
+        approverRequestIds = Array.from(
+          new Set(
+            (decisions ?? []).map(
+              (d: { approval_request_id: string }) =>
+                String(d.approval_request_id),
+            ),
+          ),
+        );
+        if (approverRequestIds.length === 0) {
+          return { items: [], total: 0, page, limit };
+        }
+      }
+
+      let q = enterpriseFrom(client, "approval_requests")
+        .select("*", { count: "exact" })
+        .eq("tenant_id", query.tenantId);
+
+      if (query.status) q = q.eq("status", query.status);
+      if (query.requesterId) q = q.eq("requester_id", query.requesterId);
+      if (query.dateFrom) q = q.gte("created_at", query.dateFrom);
+      if (query.dateTo) q = q.lte("created_at", query.dateTo);
+      if (query.priority) {
+        q = q.filter("metadata->>priority", "eq", query.priority);
+      }
+      if (query.module) {
+        q = q.filter("metadata->>category", "eq", query.module);
+      }
+      if (query.workflowId) {
+        q = q.filter("metadata->>workflowId", "eq", query.workflowId);
+      }
+      if (approverRequestIds) {
+        q = q.in("id", approverRequestIds);
+      }
+
+      const { data, error, count } = await q
+        .order(orderCol, { ascending })
+        .range(from, to);
+      throwIfError(error, "approval.listRequests");
+
+      return {
+        items: (data ?? []).map((r: Record<string, unknown>) =>
+          mapKeysSnakeToCamel<PersistedApprovalRequest>(r),
+        ),
+        total: count ?? 0,
+        page,
+        limit,
+      };
     },
   };
 }

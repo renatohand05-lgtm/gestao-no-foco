@@ -100,6 +100,7 @@ export {
   createNotificationSupabaseAdapter,
   createRbacSupabaseAdapter,
   createOutboxSupabaseAdapter,
+  createIdempotencySupabaseAdapter,
 } from "./adapters/index.ts";
 
 export {

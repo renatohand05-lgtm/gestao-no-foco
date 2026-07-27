@@ -45,6 +45,7 @@
     "test:audit": "node --experimental-strip-types scripts/audit-tests.mjs",
     "test:workflow": "node --experimental-strip-types scripts/workflow-tests.mjs",
     "test:approval": "node --experimental-strip-types scripts/approval-tests.mjs",
+    "test:approval-runtime": "node --experimental-strip-types scripts/approval-runtime-tests.mjs",
     "test:notifications": "node --experimental-strip-types scripts/notification-tests.mjs",
     "test:enterprise-persistence": "node --experimental-strip-types scripts/enterprise-persistence-tests.mjs",
     "test:onboarding": "node scripts/onboarding-preflight.mjs",

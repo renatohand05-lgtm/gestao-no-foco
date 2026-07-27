@@ -1,0 +1,95 @@
+-- =============================================================================
+-- Sprint 21.6 RC2 — Plano de rollback (DOCUMENTAÇÃO — NÃO EXECUTAR às cegas)
+-- Só use após falha parcial em STAGING, com backup, e na ordem inversa.
+-- Nunca aplicar em produção sem revisão.
+-- Assinaturas RPC alinhadas com RC1 (processor_id / actors).
+-- =============================================================================
+
+-- Detectar apply parcial:
+-- select tablename from pg_tables
+--   where schemaname = 'public'
+--     and (
+--       tablename like '%workflow%'
+--       or tablename like 'enterprise_%'
+--       or tablename like 'approval_%'
+--       or tablename like 'notification%'
+--       or tablename in ('audit_events', 'tenant_roles', 'tenant_rbac_role_permissions',
+--                        'tenant_user_roles', 'tenant_user_permission_overrides')
+--     );
+-- select proname from pg_proc p
+--   join pg_namespace n on n.oid = p.pronamespace
+--  where n.nspname = 'public' and proname like 'enterprise_%';
+
+-- ---------------------------------------------------------------------------
+-- Cenário A — Migration 1 (audit) falhou: nada criado ou tabela incompleta
+-- ---------------------------------------------------------------------------
+-- Restaurar snapshot/backup do staging.
+-- Ou: drop table if exists public.audit_events cascade;
+-- Reaplicar a partir de 20260807_enterprise_audit.sql.
+
+-- ---------------------------------------------------------------------------
+-- Cenário B — Falha intermédia (ex.: após workflow, antes de RPC)
+-- ---------------------------------------------------------------------------
+-- Preferência: restaurar snapshot pré-apply (mais seguro).
+-- Se tabelas ESTÃO VAZIAS e apply falhou no meio, dropar na ordem inversa:
+
+-- 1) RPCs (se existirem) — assinaturas RC1
+-- drop function if exists public.enterprise_commit_approval_decision(uuid, uuid, text, uuid, text, text, text, text, text, text, text, text);
+-- drop function if exists public.enterprise_save_notification_template(uuid, text, text, text, text, text, text, jsonb, jsonb, jsonb, boolean);
+-- drop function if exists public.enterprise_save_approval_definition(uuid, text, text, text, jsonb, text, text, boolean);
+-- drop function if exists public.enterprise_save_workflow_definition(uuid, text, text, text, jsonb, text, text, boolean);
+-- drop function if exists public.enterprise_resolve_idempotency(uuid, text, text, text, jsonb, integer);
+-- drop function if exists public.enterprise_release_outbox_locks(uuid, integer);
+-- drop function if exists public.enterprise_fail_outbox_event(uuid, uuid, text, text, boolean);
+-- drop function if exists public.enterprise_complete_outbox_event(uuid, uuid, text);
+-- drop function if exists public.enterprise_claim_outbox_batch(uuid, text, integer, integer);
+
+-- 2) Policies: drop policy if exists ... (ou drop table cascade remove policies)
+
+-- 3) Tabelas (ordem inversa de dependência):
+-- drop table if exists public.enterprise_idempotency_keys;
+-- drop table if exists public.enterprise_outbox;
+-- drop table if exists public.tenant_user_permission_overrides;
+-- drop table if exists public.tenant_user_roles;
+-- drop table if exists public.tenant_rbac_role_permissions;
+-- drop table if exists public.tenant_roles;
+-- NÃO dropar public.tenant_role_permissions (legado oficina).
+-- drop table if exists public.notification_delivery_attempts;
+-- drop table if exists public.notification_recipients;
+-- drop table if exists public.notification_preferences;
+-- drop table if exists public.notification_templates;
+-- drop table if exists public.notifications;
+-- drop table if exists public.approval_pending_actions;
+-- drop table if exists public.approval_history;
+-- drop table if exists public.approval_decisions;
+-- drop table if exists public.approval_requests;
+-- drop table if exists public.approval_definitions;
+-- drop table if exists public.workflow_pending_actions;
+-- drop table if exists public.workflow_history;
+-- drop table if exists public.workflow_instances;
+-- drop table if exists public.workflow_definitions;
+-- drop table if exists public.audit_events;
+
+-- ---------------------------------------------------------------------------
+-- Cenário C — Rollback parcial / recuperação forward (recomendado com dados)
+-- ---------------------------------------------------------------------------
+-- Se HÁ DADOS: NÃO dropar. Corrigir com migration forward (fix-*), nunca DROP.
+-- Falha parcial típica:
+-- - Tabelas criadas, RLS falhou → reaplicar só 20260807_enterprise_rls.sql
+-- - RLS ok, RPC falhou → reaplicar só 20260807_enterprise_rpc.sql
+-- - Claim RPC ausente → NÃO usar adapter; falha explícita (sem fallback)
+-- - Assinatura antiga de claim (sem processor_id) → reaplicar RPC RC1 completa
+
+-- ---------------------------------------------------------------------------
+-- Cenário D — Dados existentes no tenant (pré-Enterprise)
+-- ---------------------------------------------------------------------------
+-- Migrations 21.6 só CRIAM objetos novos; não ALTER de tabelas legadas.
+-- Risco a dados existentes: baixo (FKs só para tenants/profiles já presentes).
+-- Após apply: smoke A/B; se falhar, snapshot restore (não DROP se houver enqueue).
+
+-- Confirmação de apply completo:
+-- select to_regclass('public.audit_events');
+-- select to_regclass('public.enterprise_outbox');
+-- select to_regprocedure('public.enterprise_claim_outbox_batch(uuid,text,integer,integer)');
+-- select to_regprocedure('public.enterprise_complete_outbox_event(uuid,uuid,text)');
+-- select to_regprocedure('public.enterprise_resolve_idempotency(uuid,text,text,text,jsonb,integer)');

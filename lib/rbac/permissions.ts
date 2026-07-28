@@ -28,6 +28,7 @@ export const PERMISSION_CATALOG = [
   def("financeiro.criar", "financeiro", "criar", "Criar lançamentos financeiros", "escrita", "medio"),
   def("financeiro.editar", "financeiro", "editar", "Editar lançamentos financeiros", "escrita", "medio"),
   def("financeiro.excluir", "financeiro", "excluir", "Excluir lançamentos financeiros", "exclusao", "alto"),
+  def("financeiro.arquivar", "financeiro", "arquivar", "Arquivar contas e cadastros financeiros", "exclusao", "alto"),
   def("financeiro.aprovar", "financeiro", "aprovar", "Aprovar operações financeiras", "aprovacao", "alto"),
   def("financeiro.exportar", "financeiro", "exportar", "Exportar dados financeiros", "exportacao", "medio"),
   def("financeiro.conciliar", "financeiro", "conciliar", "Conciliar contas bancárias", "escrita", "alto"),

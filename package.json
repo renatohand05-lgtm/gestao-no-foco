@@ -48,6 +48,7 @@
     "test:approval-runtime": "node --experimental-strip-types scripts/approval-runtime-tests.mjs",
     "test:timeline": "node --experimental-strip-types scripts/timeline-tests.mjs",
     "test:observability": "node --experimental-strip-types scripts/observability-tests.mjs",
+    "test:finance-core": "node --experimental-strip-types scripts/finance-core-tests.mjs",
     "test:enterprise-rc": "npm run test:rbac && npm run test:audit && npm run test:workflow && npm run test:approval && npm run test:notifications && npm run test:enterprise-persistence && npm run test:approval-runtime && npm run test:timeline && npm run test:observability",
     "test:notifications": "node --experimental-strip-types scripts/notification-tests.mjs",
     "test:enterprise-persistence": "node --experimental-strip-types scripts/enterprise-persistence-tests.mjs",

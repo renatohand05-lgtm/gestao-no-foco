@@ -1,54 +1,18 @@
 import Link from "next/link";
-import {
-  ArrowLeftRight,
-  ArrowRight,
-  BookOpen,
-  CreditCard,
-  FileSpreadsheet,
-  Landmark,
-  Receipt,
-  Repeat,
-  Sparkles,
-  Tags,
-  Target,
-  Truck,
-  Wallet,
-} from "lucide-react";
 
+import { CashflowChart } from "@/components/finance/cashflow-chart";
+import { CashflowTable } from "@/components/finance/cashflow-table";
+import { FinancialSummaryCards } from "@/components/finance/financial-summary";
+import { ModuleHeader } from "@/components/layout/module-header";
 import {
-  ExecutiveHeader,
-  ExecutivePage,
-} from "@/components/executive";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { SectionCard } from "@/components/ui/section-card";
-import { StatusBadge } from "@/components/ui/status-badge";
-import {
-  FINANCEIRO_HUB_ITEMS,
-  FINANCEIRO_ROADMAP_ITEMS,
-} from "@/lib/financeiro/constants";
+  getFinancialSummary,
+  listCashFlow,
+} from "@/lib/finance/actions";
 import { requireTenant } from "@/lib/tenants";
 
 export const metadata = { title: "Financeiro" };
 
-const ICONS = {
-  fornecedores: Truck,
-  "plano-contas": BookOpen,
-  "centros-custo": Target,
-  "contas-bancarias": Landmark,
-  "formas-pagamento": CreditCard,
-  categorias: Tags,
-  "contas-receber": Receipt,
-  "contas-pagar": Wallet,
-  "despesas-recorrentes": Repeat,
-  "fluxo-caixa": ArrowLeftRight,
-  inteligencia: Sparkles,
-  dre: FileSpreadsheet,
-} as const satisfies Record<
-  (typeof FINANCEIRO_HUB_ITEMS)[number]["href"],
-  typeof BookOpen
->;
-
-export default async function FinanceiroPage({
+export default async function FinanceiroDashboardPage({
   params,
 }: {
   params: Promise<{ tenant: string }>;
@@ -56,83 +20,57 @@ export default async function FinanceiroPage({
   const { tenant: tenantSlug } = await params;
   const tenant = await requireTenant(tenantSlug);
 
+  const [summaryResult, cashFlowResult] = await Promise.all([
+    getFinancialSummary(tenantSlug),
+    listCashFlow(tenantSlug),
+  ]);
+
+  const links = [
+    { href: "contas", label: "Contas bancárias" },
+    { href: "movimentacoes", label: "Movimentações" },
+    { href: "categorias", label: "Categorias" },
+    { href: "centros-custo", label: "Centros de custo" },
+    { href: "fluxo-caixa", label: "Fluxo (legado)" },
+    { href: "contas-pagar", label: "Contas a pagar" },
+    { href: "contas-receber", label: "Contas a receber" },
+  ];
+
   return (
-    <ExecutivePage width="wide" spacing="loose">
-      <Breadcrumbs items={[{ label: "Financeiro" }]} />
-      <ExecutiveHeader
-        title="Financeiro"
-        description={`Base estrutural e cadastros mestres de ${tenant.name}`}
+    <div className="space-y-6">
+      <ModuleHeader
+        title="Financeiro Enterprise"
+        description={`Core operacional · ${tenant.name}`}
+        breadcrumbs={[{ label: "Financeiro", href: `/${tenantSlug}/financeiro` }]}
       />
 
-      <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 px-6 py-10 text-white shadow-sm md:px-10">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-emerald-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-10 size-72 rounded-full bg-cyan-400/10 blur-3xl" />
-        <div className="relative max-w-2xl space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200/80">
-            Estrutura financeira
-          </p>
-          <h2 className="font-serif text-3xl tracking-tight md:text-4xl">
-            Cadastros mestres prontos para operação financeira.
-          </h2>
-          <p className="text-sm text-slate-200/85 md:text-base">
-            Configure plano de contas, centros de custo, bancos, formas de
-            pagamento e categorias. Os módulos operacionais entram na sequência
-            planejada do roadmap.
-          </p>
-        </div>
-      </section>
+      {!summaryResult.success ? (
+        <p className="rounded-lg border border-red-500/40 px-3 py-2 text-sm text-red-700">
+          {summaryResult.error}
+        </p>
+      ) : (
+        <FinancialSummaryCards summary={summaryResult.summary} />
+      )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {FINANCEIRO_HUB_ITEMS.map((item) => {
-          const Icon = ICONS[item.href];
-          return (
-            <Link
-              key={item.href}
-              href={`/${tenantSlug}/financeiro/${item.href}`}
-              className="group"
-            >
-              <SectionCard
-                title={item.title}
-                description={item.description}
-                contentClassName="pt-0"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl border border-border/70 bg-muted/40">
-                    <Icon className="size-5 text-foreground/80" />
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 transition group-hover:gap-2 dark:text-emerald-300">
-                    {item.cta}
-                    <ArrowRight className="size-4" />
-                  </span>
-                </div>
-              </SectionCard>
-            </Link>
-          );
-        })}
-      </div>
+      <nav className="flex flex-wrap gap-2">
+        {links.map((l) => (
+          <Link
+            key={l.href}
+            href={`/${tenantSlug}/financeiro/${l.href}`}
+            className="inline-flex h-8 items-center rounded-md border border-input px-3 text-sm hover:bg-muted"
+          >
+            {l.label}
+          </Link>
+        ))}
+      </nav>
 
-      <SectionCard
-        title="Roadmap financeiro"
-        description="Próximas entregas já planejadas sobre esta base estrutural."
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          {FINANCEIRO_ROADMAP_ITEMS.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-xl border border-border/60 bg-muted/20 p-4"
-            >
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="size-4 text-emerald-600 dark:text-emerald-400" />
-                  <h3 className="text-sm font-semibold">{item.title}</h3>
-                </div>
-                <StatusBadge label={item.phase} variant="secondary" />
-              </div>
-              <p className="text-sm text-muted-foreground">{item.description}</p>
-            </div>
-          ))}
+      {cashFlowResult.success ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <CashflowChart points={cashFlowResult.cashFlow.points} />
+          <CashflowTable cashFlow={cashFlowResult.cashFlow} />
         </div>
-      </SectionCard>
-    </ExecutivePage>
+      ) : (
+        <p className="text-sm text-muted-foreground">{cashFlowResult.error}</p>
+      )}
+    </div>
   );
 }

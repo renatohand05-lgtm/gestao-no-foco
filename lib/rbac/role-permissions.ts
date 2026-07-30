@@ -80,6 +80,8 @@ const VISUALIZACAO_KEYS = unique([
   "vendas.visualizar",
   "os.visualizar",
   "crm.visualizar",
+  "clientes.visualizar",
+  "crm.dashboard.visualizar",
   "relatorios.visualizar",
   "configuracoes.visualizar",
 ]);

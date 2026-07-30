@@ -57,6 +57,8 @@ export const clienteFormSchema = z
     tipo_pessoa: z.enum(["pf", "pj"]),
     nome: z.string().trim().min(2, "Informe o nome ou razão social."),
     razao_social: optionalText,
+    nome_fantasia: optionalText,
+    ie_rg: optionalText,
     documento: optionalText,
     telefone: optionalText,
     whatsapp: optionalText,
@@ -92,12 +94,33 @@ export const clienteFormSchema = z
       ),
     score: z.number().min(0, "Score mínimo é 0.").max(100, "Score máximo é 100."),
     consultor_id: optionalText,
+    empresa_id: optionalText,
+    filial_id: optionalText,
+    valor_estimado: z
+      .number()
+      .min(0, "Valor estimado não pode ser negativo.")
+      .optional()
+      .nullable(),
+    probabilidade: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .nullable(),
+    data_prevista_fechamento: optionalText,
+    motivo_perda: optionalText,
     estagio_funil: z.enum(CRM_FUNIL_STAGES),
     tag_ids: z.array(z.string().uuid()).optional(),
     ativo: z.boolean(),
   })
   .superRefine((data, ctx) => {
     const documento = onlyDigits(data.documento ?? "");
+
+    if (data.tipo_pessoa === "pj") {
+      if (!data.nome_fantasia?.trim() && !data.razao_social?.trim()) {
+        // nome principal já cobre; razao/fantasia opcionais complementares
+      }
+    }
 
     if (!documento) return;
 
@@ -123,6 +146,17 @@ export const clienteFormSchema = z
         code: "custom",
         message: "CEP inválido.",
         path: ["cep"],
+      });
+    }
+
+    if (
+      data.estagio_funil === "perdido" &&
+      !data.motivo_perda?.trim()
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Informe o motivo da perda quando o estágio for Perdido.",
+        path: ["motivo_perda"],
       });
     }
   });

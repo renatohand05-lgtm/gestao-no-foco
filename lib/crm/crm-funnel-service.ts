@@ -142,7 +142,23 @@ export class CrmFunilService {
     return map;
   }
 
-  async moveToStage(clienteId: string, estagio: CrmFunilStage): Promise<void> {
+  async moveToStage(
+    clienteId: string,
+    estagio: CrmFunilStage,
+    userId: string | null = null,
+  ): Promise<void> {
+    const { data: current } = await this.supabase
+      .from("clientes" as never)
+      .select("estagio_funil, tenant_id")
+      .eq("tenant_id", this.tenantId)
+      .eq("id", clienteId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (!current) throw new Error("Cliente não encontrado neste tenant.");
+
+    const fromStage = (current as { estagio_funil?: string }).estagio_funil ?? null;
+
     const { error } = await this.supabase
       .from("clientes" as never)
       .update({ estagio_funil: estagio, updated_at: new Date().toISOString() } as never)
@@ -151,6 +167,15 @@ export class CrmFunilService {
       .is("deleted_at", null);
 
     if (error) throw new Error(error.message);
+
+    await this.supabase.from("crm_stage_movements" as never).insert({
+      tenant_id: this.tenantId,
+      cliente_id: clienteId,
+      from_stage: fromStage,
+      to_stage: estagio,
+      user_id: userId,
+      motivo: "funil",
+    } as never);
   }
 }
 

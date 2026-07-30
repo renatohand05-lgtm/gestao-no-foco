@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const CRM_LINKS = [
+  { href: "crm/executivo", label: "CRM Enterprise" },
   { href: "clientes", label: "Lista" },
   { href: "clientes/central", label: "CRM Executivo" },
   { href: "clientes/funil", label: "Funil" },

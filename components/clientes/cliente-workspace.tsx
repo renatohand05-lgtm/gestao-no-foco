@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { ClienteDeleteButton } from "@/components/clientes/cliente-delete-button";
+import { ClienteContatosPanel } from "@/components/clientes/cliente-contatos-panel";
 import { ClienteStatusBadge } from "@/components/clientes/cliente-status-badge";
 import { ClienteDocumentosPanel } from "@/components/crm/cliente-documentos-panel";
 import { CrmAgendaList } from "@/components/crm/crm-agenda-list";
@@ -65,6 +66,7 @@ const TABS = [
   "agenda",
   "tarefas",
   "observacoes",
+  "contatos",
   "documentos",
 ] as const;
 
@@ -82,6 +84,7 @@ const TAB_LABELS: Record<Tab, string> = {
   agenda: "Agenda",
   tarefas: "Tarefas",
   observacoes: "Observações",
+  contatos: "Contatos",
   documentos: "Documentos",
 };
 
@@ -526,6 +529,12 @@ export function ClienteWorkspace({
             )}
           </SectionCard>
         </div>
+      ) : null}
+
+      {tab === "contatos" ? (
+        <SectionCard title="Contatos">
+          <ClienteContatosPanel tenantSlug={tenantSlug} clienteId={cliente.id} />
+        </SectionCard>
       ) : null}
 
       {tab === "documentos" ? (

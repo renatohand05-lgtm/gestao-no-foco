@@ -13,9 +13,10 @@ export const CRM_FUNIL_STAGES = [
 
 export type CrmFunilStage = (typeof CRM_FUNIL_STAGES)[number];
 
+/** Labels Fase 24 — `contato` = Qualificado (chave DB preservada). */
 export const CRM_FUNIL_LABELS: Record<CrmFunilStage, string> = {
   lead: "Lead",
-  contato: "Contato",
+  contato: "Qualificado",
   proposta: "Proposta",
   negociacao: "Negociação",
   fechado: "Fechado",
@@ -87,6 +88,9 @@ export const CRM_AGENDA_TIPOS = [
   "whatsapp",
   "cobranca",
   "retorno",
+  "follow_up",
+  "lembrete",
+  "tarefa",
   "outro",
 ] as const;
 
@@ -99,6 +103,9 @@ export const CRM_AGENDA_TIPO_LABELS: Record<CrmAgendaTipo, string> = {
   whatsapp: "WhatsApp",
   cobranca: "Cobrança",
   retorno: "Retorno",
+  follow_up: "Follow-up",
+  lembrete: "Lembrete",
+  tarefa: "Tarefa",
   outro: "Outro",
 };
 

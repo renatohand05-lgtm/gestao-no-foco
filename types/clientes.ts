@@ -38,6 +38,16 @@ export type Cliente = {
   score: number;
   consultor_id: string | null;
   estagio_funil: CrmFunilStage;
+  /** Fase 24 / 24.1 */
+  empresa_id?: string | null;
+  filial_id?: string | null;
+  nome_fantasia?: string | null;
+  ie_rg?: string | null;
+  valor_estimado?: number | null;
+  probabilidade?: number | null;
+  data_prevista_fechamento?: string | null;
+  data_fechamento?: string | null;
+  motivo_perda?: string | null;
   ativo: boolean;
   deleted_at: string | null;
   created_at: string;
@@ -63,6 +73,8 @@ export type ClienteListItem = Pick<
 export type ClienteInput = {
   nome: string;
   razao_social?: string | null;
+  nome_fantasia?: string | null;
+  ie_rg?: string | null;
   email?: string | null;
   telefone?: string | null;
   whatsapp?: string | null;
@@ -83,6 +95,13 @@ export type ClienteInput = {
   classificacao?: string | null;
   score?: number;
   consultor_id?: string | null;
+  empresa_id?: string | null;
+  filial_id?: string | null;
+  valor_estimado?: number | null;
+  probabilidade?: number | null;
+  data_prevista_fechamento?: string | null;
+  data_fechamento?: string | null;
+  motivo_perda?: string | null;
   estagio_funil?: CrmFunilStage;
   tag_ids?: string[];
   ativo: boolean;

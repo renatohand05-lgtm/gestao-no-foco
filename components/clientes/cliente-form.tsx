@@ -83,6 +83,8 @@ export function ClienteForm({
           tipo_pessoa: "pf",
           nome: "",
           razao_social: "",
+          nome_fantasia: "",
+          ie_rg: "",
           documento: "",
           telefone: "",
           whatsapp: "",
@@ -102,6 +104,12 @@ export function ClienteForm({
           classificacao: "",
           score: 0,
           consultor_id: "",
+          empresa_id: "",
+          filial_id: "",
+          valor_estimado: null,
+          probabilidade: null,
+          data_prevista_fechamento: "",
+          motivo_perda: "",
           estagio_funil: "lead",
           tag_ids: [],
           ativo: true,
@@ -227,18 +235,38 @@ export function ClienteForm({
             </FormField>
 
             {tipoPessoa === "pj" ? (
-              <FormField
-                label="Razão social (complementar)"
-                htmlFor="razao_social"
-                className="md:col-span-2"
-              >
-                <Input
-                  id="razao_social"
-                  {...form.register("razao_social")}
-                  placeholder="Se diferente do nome fantasia usado acima"
-                />
-              </FormField>
+              <>
+                <FormField
+                  label="Nome fantasia"
+                  htmlFor="nome_fantasia"
+                  className="md:col-span-2"
+                >
+                  <Input
+                    id="nome_fantasia"
+                    {...form.register("nome_fantasia")}
+                    placeholder="Nome fantasia"
+                  />
+                </FormField>
+                <FormField
+                  label="Razão social (complementar)"
+                  htmlFor="razao_social"
+                  className="md:col-span-2"
+                >
+                  <Input
+                    id="razao_social"
+                    {...form.register("razao_social")}
+                    placeholder="Se diferente do nome principal"
+                  />
+                </FormField>
+              </>
             ) : null}
+
+            <FormField
+              label={tipoPessoa === "pf" ? "RG" : "Inscrição estadual"}
+              htmlFor="ie_rg"
+            >
+              <Input id="ie_rg" {...form.register("ie_rg")} />
+            </FormField>
 
             <FormField label="Segmento" htmlFor="segmento">
               <Input id="segmento" {...form.register("segmento")} />
@@ -358,6 +386,67 @@ export function ClienteForm({
               </select>
             </FormField>
 
+            <FormField
+              label="Empresa responsável (UUID)"
+              htmlFor="empresa_id"
+            >
+              <Input id="empresa_id" {...form.register("empresa_id")} placeholder="uuid opcional — allow-list no servidor" />
+            </FormField>
+
+            <FormField label="Filial responsável (UUID)" htmlFor="filial_id">
+              <Input id="filial_id" {...form.register("filial_id")} placeholder="uuid opcional" />
+            </FormField>
+
+            <FormField label="Valor estimado (oportunidade)" htmlFor="valor_estimado">
+              <Input
+                id="valor_estimado"
+                type="number"
+                min={0}
+                step="0.01"
+                {...form.register("valor_estimado", {
+                  setValueAs: (v) =>
+                    v === "" || v == null ? null : Number(v),
+                })}
+              />
+            </FormField>
+
+            <FormField label="Probabilidade (%)" htmlFor="probabilidade">
+              <Input
+                id="probabilidade"
+                type="number"
+                min={0}
+                max={100}
+                {...form.register("probabilidade", {
+                  setValueAs: (v) =>
+                    v === "" || v == null ? null : Number(v),
+                })}
+              />
+            </FormField>
+
+            <FormField
+              label="Data prevista de fechamento"
+              htmlFor="data_prevista_fechamento"
+            >
+              <Input
+                id="data_prevista_fechamento"
+                type="date"
+                {...form.register("data_prevista_fechamento")}
+              />
+            </FormField>
+
+            <FormField
+              label="Motivo da perda"
+              htmlFor="motivo_perda"
+              error={form.formState.errors.motivo_perda?.message}
+              className="md:col-span-2"
+            >
+              <Input
+                id="motivo_perda"
+                {...form.register("motivo_perda")}
+                placeholder="Obrigatório se estágio = Perdido"
+              />
+            </FormField>
+
             <div className="md:col-span-2">
               <EntityTagsField tags={tags} />
             </div>
@@ -423,7 +512,7 @@ export function ClienteForm({
         >
           <FormGrid>
             <FormField
-              label="CEP"
+              label="CEP (preenchimento manual — sem consulta externa simulada)"
               htmlFor="cep"
               error={form.formState.errors.cep?.message}
             >

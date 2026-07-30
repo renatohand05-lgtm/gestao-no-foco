@@ -92,6 +92,18 @@ export const PERMISSION_CATALOG = [
   def("crm.excluir", "crm", "excluir", "Excluir registros de CRM", "exclusao", "alto"),
   def("crm.exportar", "crm", "exportar", "Exportar dados de CRM", "exportacao", "medio"),
   def("crm.ver_dados_sensiveis", "crm", "ver_dados_sensiveis", "Visualizar dados sensíveis de clientes", "dados_sensiveis", "critico"),
+  def("crm.pipeline.visualizar", "crm", "pipeline_visualizar", "Visualizar pipeline CRM", "leitura", "baixo"),
+  def("crm.pipeline.configurar", "crm", "pipeline_configurar", "Configurar etapas do pipeline CRM", "administracao", "alto"),
+  def("crm.oportunidades.criar", "crm", "oportunidades_criar", "Criar oportunidades CRM", "escrita", "medio"),
+  def("crm.oportunidades.editar", "crm", "oportunidades_editar", "Editar oportunidades CRM", "escrita", "medio"),
+  def("crm.atividades.criar", "crm", "atividades_criar", "Criar atividades CRM", "escrita", "medio"),
+  def("crm.atividades.editar", "crm", "atividades_editar", "Editar atividades CRM", "escrita", "medio"),
+  def("crm.dashboard.visualizar", "crm", "dashboard_visualizar", "Dashboard executivo CRM", "leitura", "medio"),
+  // Alias clientes.* → mesmo módulo CRM (cadastro único)
+  def("clientes.visualizar", "crm", "clientes_visualizar", "Visualizar cadastro de clientes", "leitura", "baixo"),
+  def("clientes.criar", "crm", "clientes_criar", "Criar clientes", "escrita", "medio"),
+  def("clientes.editar", "crm", "clientes_editar", "Editar clientes", "escrita", "medio"),
+  def("clientes.excluir", "crm", "clientes_excluir", "Excluir clientes", "exclusao", "alto"),
 
   // Dashboard
   def("dashboard.executivo", "dashboard", "executivo", "Acessar dashboard executivo", "leitura", "medio"),

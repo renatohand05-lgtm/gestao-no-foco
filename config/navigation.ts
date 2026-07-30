@@ -44,10 +44,16 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       description: "Localizar cadastros mestres",
     },
     {
+      title: "CRM",
+      href: `${base}/crm`,
+      icon: Users,
+      description: "Relacionamento Enterprise e pipeline",
+    },
+    {
       title: "Clientes",
       href: `${base}/clientes`,
       icon: Users,
-      description: "Cadastro e relacionamento",
+      description: "Cadastro único de clientes",
     },
     {
       title: "Produtos & Serviços",

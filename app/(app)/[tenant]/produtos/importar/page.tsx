@@ -34,7 +34,7 @@ export default async function ProdutosImportarPage({
     <div className="space-y-6">
       <ModuleHeader
         title="Importar produtos e serviços"
-        description="Baixe o catálogo de serviços, modelos Excel e importe com preview Enterprise."
+        description="Selecione XLSX/XLS/CSV do computador, faça preview e confirme. Catálogo oficial da plataforma é opcional."
         breadcrumbs={[
           { label: "Produtos & Serviços", href: `/${tenantSlug}/produtos` },
           { label: "Importar" },

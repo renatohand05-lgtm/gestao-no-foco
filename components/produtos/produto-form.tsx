@@ -513,7 +513,7 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                       className={selectClassName}
                     >
                       <option value="false">Não</option>
-                      <option value="true">Sim (em preparação)</option>
+                      <option value="true">Sim</option>
                     </select>
                   )}
                 />
@@ -530,7 +530,7 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                       className={selectClassName}
                     >
                       <option value="false">Não</option>
-                      <option value="true">Sim (em preparação)</option>
+                      <option value="true">Sim</option>
                     </select>
                   )}
                 />
@@ -547,7 +547,7 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                       className={selectClassName}
                     >
                       <option value="false">Não</option>
-                      <option value="true">Sim (em preparação)</option>
+                      <option value="true">Sim</option>
                     </select>
                   )}
                 />

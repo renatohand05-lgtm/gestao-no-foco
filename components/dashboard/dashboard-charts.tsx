@@ -11,6 +11,7 @@ type DualBarChartProps = {
   primaryLabel?: string;
   secondaryLabel?: string;
   emptyDescription?: string;
+  embedded?: boolean;
 };
 
 export function DashboardDualBarChart({
@@ -20,19 +21,24 @@ export function DashboardDualBarChart({
   primaryLabel = "Entradas",
   secondaryLabel = "Saídas",
   emptyDescription = "Nenhum dado para o período selecionado.",
+  embedded = false,
 }: DualBarChartProps) {
   const hasValues = data.some(
     (point) => point.value !== 0 || (point.secondary ?? 0) !== 0,
   );
 
   if (data.length === 0 || !hasValues) {
+    const empty = (
+      <DashboardEmptyState
+        className="border-0 bg-transparent py-6"
+        title="Sem dados no período"
+        description={emptyDescription}
+      />
+    );
+    if (embedded) return empty;
     return (
       <DashboardSection title={title} description={description}>
-        <DashboardEmptyState
-          className="border-0 bg-transparent py-10"
-          title="Sem dados no período"
-          description={emptyDescription}
-        />
+        {empty}
       </DashboardSection>
     );
   }
@@ -42,63 +48,68 @@ export function DashboardDualBarChart({
     1,
   );
 
-  return (
-    <DashboardSection title={title} description={description}>
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-emerald-500" />
-            {primaryLabel}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-rose-500" />
-            {secondaryLabel}
-          </span>
-        </div>
+  const chart = (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-sm bg-emerald-500" />
+          {primaryLabel}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-sm bg-rose-500" />
+          {secondaryLabel}
+        </span>
+      </div>
 
-        <div className="overflow-x-auto -mx-1 px-1">
-          <div
-            className="flex min-w-[28rem] items-end gap-1.5 sm:min-w-0 sm:gap-2"
-            role="img"
-            aria-label={title}
-          >
-            {data.map((point) => {
-              const primaryHeight = (point.value / maxValue) * 100;
-              const secondaryHeight =
-                ((point.secondary ?? 0) / maxValue) * 100;
+      <div className="overflow-x-hidden -mx-1 px-1">
+        <div
+          className="flex w-full min-w-0 items-end gap-0.5 sm:gap-1.5"
+          role="img"
+          aria-label={title || "Entradas e saídas"}
+        >
+          {data.map((point) => {
+            const primaryHeight = (point.value / maxValue) * 100;
+            const secondaryHeight =
+              ((point.secondary ?? 0) / maxValue) * 100;
 
-              return (
-                <div
-                  key={point.data}
-                  className="flex min-w-0 flex-1 flex-col items-center gap-2"
-                >
-                  <div className="flex h-36 w-full items-end justify-center gap-0.5 sm:h-44 sm:gap-1">
-                    <div
-                      className="w-full max-w-4 rounded-t bg-emerald-500/85"
-                      style={{
-                        height: `${primaryHeight}%`,
-                        minHeight: point.value > 0 ? "3px" : "0",
-                      }}
-                      title={`${primaryLabel}: ${formatCurrency(point.value)}`}
-                    />
-                    <div
-                      className="w-full max-w-4 rounded-t bg-rose-500/85"
-                      style={{
-                        height: `${secondaryHeight}%`,
-                        minHeight: (point.secondary ?? 0) > 0 ? "3px" : "0",
-                      }}
-                      title={`${secondaryLabel}: ${formatCurrency(point.secondary ?? 0)}`}
-                    />
-                  </div>
-                  <span className="text-[10px] text-muted-foreground sm:text-xs">
-                    {point.label}
-                  </span>
+            return (
+              <div
+                key={point.data}
+                className="flex min-w-0 flex-1 flex-col items-center gap-2"
+              >
+                <div className="flex h-36 w-full items-end justify-center gap-0.5 sm:h-44 sm:gap-1">
+                  <div
+                    className="w-full max-w-4 rounded-t bg-emerald-500/85"
+                    style={{
+                      height: `${primaryHeight}%`,
+                      minHeight: point.value > 0 ? "3px" : "0",
+                    }}
+                    title={`${primaryLabel}: ${formatCurrency(point.value)}`}
+                  />
+                  <div
+                    className="w-full max-w-4 rounded-t bg-rose-500/85"
+                    style={{
+                      height: `${secondaryHeight}%`,
+                      minHeight: (point.secondary ?? 0) > 0 ? "3px" : "0",
+                    }}
+                    title={`${secondaryLabel}: ${formatCurrency(point.secondary ?? 0)}`}
+                  />
                 </div>
-              );
-            })}
-          </div>
+                <span className="text-[10px] text-muted-foreground sm:text-xs">
+                  {point.label}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
+    </div>
+  );
+
+  if (embedded) return chart;
+  return (
+    <DashboardSection title={title} description={description}>
+      {chart}
     </DashboardSection>
   );
 }
@@ -136,9 +147,9 @@ export function DashboardBarChart({
 
   return (
     <DashboardSection title={title} description={description}>
-      <div className="overflow-x-auto -mx-1 px-1">
+      <div className="overflow-x-hidden -mx-1 px-1">
         <div
-          className="flex min-w-[28rem] items-end gap-1.5 sm:min-w-0 sm:gap-2"
+          className="flex w-full min-w-0 items-end gap-0.5 sm:gap-1.5"
           role="img"
           aria-label={title}
         >
@@ -178,6 +189,8 @@ type LineChartProps = {
   strokeClassName?: string;
   emptyDescription?: string;
   formatValue?: (value: number) => string;
+  /** Sem SectionCard — para embutir em cards premium. */
+  embedded?: boolean;
 };
 
 export function DashboardLineChart({
@@ -187,17 +200,22 @@ export function DashboardLineChart({
   strokeClassName = "stroke-emerald-500",
   emptyDescription = "Nenhum dado para o período selecionado.",
   formatValue = formatCurrency,
+  embedded = false,
 }: LineChartProps) {
   const hasValues = data.some((point) => point.value !== 0);
 
   if (data.length === 0 || !hasValues) {
+    const empty = (
+      <DashboardEmptyState
+        className="border-0 bg-transparent py-10"
+        title="Sem dados no período"
+        description={emptyDescription}
+      />
+    );
+    if (embedded) return empty;
     return (
       <DashboardSection title={title} description={description}>
-        <DashboardEmptyState
-          className="border-0 bg-transparent py-10"
-          title="Sem dados no período"
-          description={emptyDescription}
-        />
+        {empty}
       </DashboardSection>
     );
   }
@@ -224,55 +242,60 @@ export function DashboardLineChart({
 
   const last = data[data.length - 1]!;
 
+  const chart = (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Último ponto</p>
+        <p className="text-lg font-semibold tabular-nums">
+          {formatValue(last.value)}
+        </p>
+      </div>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-40 w-full overflow-visible"
+        role="img"
+        aria-label={title || "Gráfico de linha"}
+      >
+        <polyline
+          fill="none"
+          strokeWidth="1.5"
+          vectorEffect="non-scaling-stroke"
+          points={points}
+          className={strokeClassName}
+        />
+        {data.map((point, index) => {
+          const x =
+            data.length === 1
+              ? width / 2
+              : (index / (data.length - 1)) * width;
+          const y =
+            height -
+            paddingY -
+            ((point.value - min) / range) * (height - paddingY * 2);
+          return (
+            <circle
+              key={point.data}
+              cx={x}
+              cy={y}
+              r="1.2"
+              className="fill-[var(--brand-gold)]"
+            >
+              <title>{`${point.label}: ${formatValue(point.value)}`}</title>
+            </circle>
+          );
+        })}
+      </svg>
+      <div className="flex justify-between text-[10px] text-muted-foreground sm:text-xs">
+        <span>{data[0]?.label}</span>
+        <span>{last.label}</span>
+      </div>
+    </div>
+  );
+
+  if (embedded) return chart;
   return (
     <DashboardSection title={title} description={description}>
-      <div className="space-y-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-sm text-muted-foreground">Último ponto</p>
-          <p className="text-lg font-semibold tabular-nums">
-            {formatValue(last.value)}
-          </p>
-        </div>
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          className="h-40 w-full overflow-visible"
-          role="img"
-          aria-label={title}
-        >
-          <polyline
-            fill="none"
-            strokeWidth="1.5"
-            vectorEffect="non-scaling-stroke"
-            points={points}
-            className={strokeClassName}
-          />
-          {data.map((point, index) => {
-            const x =
-              data.length === 1
-                ? width / 2
-                : (index / (data.length - 1)) * width;
-            const y =
-              height -
-              paddingY -
-              ((point.value - min) / range) * (height - paddingY * 2);
-            return (
-              <circle
-                key={point.data}
-                cx={x}
-                cy={y}
-                r="1.2"
-                className="fill-emerald-600 dark:fill-emerald-400"
-              >
-                <title>{`${point.label}: ${formatValue(point.value)}`}</title>
-              </circle>
-            );
-          })}
-        </svg>
-        <div className="flex justify-between text-[10px] text-muted-foreground sm:text-xs">
-          <span>{data[0]?.label}</span>
-          <span>{last.label}</span>
-        </div>
-      </div>
+      {chart}
     </DashboardSection>
   );
 }

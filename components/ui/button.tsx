@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[var(--brand-graphite)] text-white hover:bg-[var(--brand-graphite)]/90 dark:bg-[var(--brand-gold)] dark:text-[var(--brand-graphite)] dark:hover:bg-[var(--brand-gold)]/90",
+          "bg-[var(--brand-graphite)] text-white hover:bg-[var(--brand-graphite)]/90 shadow-[0_0_0_1px_rgb(201_168_76_/0.08)] dark:bg-[var(--brand-gold)] dark:text-[var(--brand-navy)] dark:hover:bg-[var(--brand-gold-soft)] dark:shadow-[0_0_24px_rgb(201_168_76_/0.18)]",
         outline:
           "border-[var(--brand-gray-dark)]/20 bg-white text-foreground hover:bg-[var(--brand-gray-light)] aria-expanded:bg-[var(--brand-gray-light)] dark:border-white/10 dark:bg-transparent dark:hover:bg-white/5",
         secondary:
@@ -19,6 +19,8 @@ const buttonVariants = cva(
           "text-[var(--brand-gray-dark)] hover:bg-[var(--brand-gray-light)] hover:text-[var(--brand-graphite)] dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:ring-destructive/25 dark:bg-destructive/20 dark:hover:bg-destructive/30",
+        success:
+          "bg-success/15 text-success hover:bg-success/25 focus-visible:ring-success/30 dark:bg-success/20 dark:text-success",
         link: "rounded-md text-primary underline-offset-4 hover:underline",
       },
       size: {

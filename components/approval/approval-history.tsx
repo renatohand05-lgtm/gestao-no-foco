@@ -25,7 +25,7 @@ export function ApprovalHistory({ request, className }: Props) {
       {entries.map((entry) => (
         <li
           key={entry.id}
-          className="rounded-xl border border-border/60 bg-[var(--brand-white)] px-3 py-2.5"
+          className="rounded-xl border border-border/60 bg-card px-3 py-2.5"
         >
           <p className={gofTypography.caption}>{entry.at}</p>
           <p className="text-sm font-medium text-foreground">

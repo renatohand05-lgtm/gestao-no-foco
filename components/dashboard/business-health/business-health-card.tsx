@@ -14,7 +14,6 @@ import {
   ExecutiveBadge,
   ExecutiveCard,
   ExecutiveSection,
-  MetricCard,
 } from "@/components/executive";
 import {
   BusinessHealthEngine,
@@ -36,14 +35,44 @@ function statusTone(
   return "neutral";
 }
 
-function ModuleScoreCard({ mod }: { mod: BusinessHealthModuleResult }) {
+function ModuleScoreRow({ mod }: { mod: BusinessHealthModuleResult }) {
+  const score = mod.score;
+  const pct = score == null ? 0 : Math.min(100, Math.max(0, score));
   return (
-    <MetricCard
-      label={mod.label}
-      value={mod.score == null ? "Indisponível" : String(mod.score)}
-      hint={mod.statusLabel}
-      tone={statusTone(mod.status)}
-    />
+    <div
+      data-health-domain={mod.key}
+      className="space-y-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className={cn(gofTypography.caption, "text-foreground")}>
+          {mod.label}
+        </p>
+        <span className="text-sm font-semibold tabular-nums text-foreground">
+          {score == null ? "—" : score}
+        </span>
+      </div>
+      <div
+        className="h-1.5 overflow-hidden rounded-full bg-[var(--surface-base)]"
+        role="meter"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={score ?? undefined}
+        aria-label={`Score ${mod.label}`}
+      >
+        <div
+          className={cn(
+            "h-full rounded-full transition-[width] duration-[var(--motion-normal)] ease-[var(--ease-premium)]",
+            statusTone(mod.status) === "danger" && "bg-destructive",
+            statusTone(mod.status) === "warning" && "bg-warning",
+            statusTone(mod.status) === "success" && "bg-success",
+            statusTone(mod.status) === "info" && "bg-[var(--brand-gold)]",
+            statusTone(mod.status) === "neutral" && "bg-muted-foreground/40",
+          )}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className={gofTypography.caption}>{mod.statusLabel}</p>
+    </div>
   );
 }
 
@@ -54,7 +83,7 @@ type Props = {
 };
 
 /**
- * Seção Business Health — abaixo do Executive Score (Gate 20.2).
+ * Seção Business Health — leitura visual densa (Sprint 25.7).
  * Somente interpretação determinística dos indicadores existentes.
  */
 export function BusinessHealthCard({ ai, data: dataProp }: Props) {
@@ -72,11 +101,12 @@ export function BusinessHealthCard({ ai, data: dataProp }: Props) {
     <div
       data-dashboard-block="business-health"
       data-business-health-engine={data.engineVersion}
-      className={cn("space-y-4", gofMotion.fade)}
+      data-premium-v257="business-health"
+      className={cn("space-y-4 premium-enter", gofMotion.fade)}
     >
       <ExecutiveSection
         title="Business Health"
-        description="Leitura determinística da saúde da empresa — indicadores já existentes, sem inventar métricas."
+        description="Saúde da empresa · indicadores existentes · sem métricas inventadas."
         panel
         actions={
           <ExecutiveBadge tone="neutral" variant="outline">
@@ -85,8 +115,11 @@ export function BusinessHealthCard({ ai, data: dataProp }: Props) {
         }
         className="space-y-4"
       >
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-          <ExecutiveCard padding={20} className="space-y-3">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <ExecutiveCard
+            padding={20}
+            className="space-y-3 border border-[var(--border-premium)] bg-[var(--surface-raised)]"
+          >
             <p className={gofTypography.caption}>Score geral</p>
             <BusinessHealthScore
               score={data.overallScore}
@@ -100,7 +133,10 @@ export function BusinessHealthCard({ ai, data: dataProp }: Props) {
             />
           </ExecutiveCard>
 
-          <ExecutiveCard padding={20} className="space-y-3">
+          <ExecutiveCard
+            padding={20}
+            className="space-y-3 border border-[var(--border-subtle)] bg-[var(--surface-raised)]"
+          >
             <p className={gofTypography.caption}>Prioridade nº 1</p>
             <BusinessHealthPriority priority={priority} />
           </ExecutiveCard>
@@ -109,18 +145,27 @@ export function BusinessHealthCard({ ai, data: dataProp }: Props) {
         <div>
           <p className={cn(gofTypography.caption, "mb-2")}>Scores por domínio</p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            <ModuleScoreCard mod={data.finance} />
-            <ModuleScoreCard mod={data.commercial} />
-            <ModuleScoreCard mod={data.operation} />
-            <ModuleScoreCard mod={data.crm} />
-            <ModuleScoreCard mod={data.inventory} />
+            <ModuleScoreRow mod={data.finance} />
+            <ModuleScoreRow mod={data.commercial} />
+            <ModuleScoreRow mod={data.operation} />
+            <ModuleScoreRow mod={data.crm} />
+            <ModuleScoreRow mod={data.inventory} />
           </div>
         </div>
 
-        <div>
-          <p className={cn(gofTypography.caption, "mb-2")}>Principais motivos</p>
-          <BusinessHealthReason items={topReasons} />
-        </div>
+        <details className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-raised)] open:shadow-[var(--shadow-card)]">
+          <summary
+            className={cn(
+              gofTypography.caption,
+              "cursor-pointer px-3 py-2.5 font-medium text-foreground",
+            )}
+          >
+            Ver diagnóstico · principais motivos
+          </summary>
+          <div className="border-t border-[var(--border-subtle)] px-3 py-3">
+            <BusinessHealthReason items={topReasons} />
+          </div>
+        </details>
       </ExecutiveSection>
     </div>
   );

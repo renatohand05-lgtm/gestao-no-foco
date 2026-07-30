@@ -164,7 +164,14 @@ export type ImportHistoryEntry = {
   engineVersion?: string;
   correlationId?: string | null;
   rolledBackAt?: string | null;
+  rollbackBy?: string | null;
   mappingSnapshot?: Record<string, string | null>;
+  /** Sprint 25.4.2 — lifecycle do histórico (soft). */
+  archivedAt?: string | null;
+  archivedBy?: string | null;
+  deletedAt?: string | null;
+  deletedBy?: string | null;
+  deleteReason?: string | null;
 };
 
 export type ImportFileLimits = {
@@ -172,8 +179,9 @@ export type ImportFileLimits = {
   maxRows: number;
 };
 
+/** Teto genérico — limites por formato em `import-file-limits.ts`. */
 export const DEFAULT_IMPORT_LIMITS: ImportFileLimits = {
-  maxBytes: 15 * 1024 * 1024,
+  maxBytes: 25 * 1024 * 1024,
   maxRows: 50_000,
 };
 

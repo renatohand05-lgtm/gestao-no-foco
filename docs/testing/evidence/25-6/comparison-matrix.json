@@ -1,0 +1,37 @@
+{
+  "sprint": "25.6",
+  "comparison": [
+    {
+      "tela": "Landing",
+      "status": "IGUAL OU SUPERIOR"
+    },
+    {
+      "tela": "Login",
+      "status": "IGUAL OU SUPERIOR"
+    },
+    {
+      "tela": "Dashboard KPIs",
+      "status": "IGUAL OU SUPERIOR"
+    },
+    {
+      "tela": "Tema escuro cards",
+      "status": "IGUAL OU SUPERIOR"
+    },
+    {
+      "tela": "Tema claro",
+      "status": "IGUAL OU SUPERIOR"
+    },
+    {
+      "tela": "Densidade / disclosure",
+      "status": "IGUAL OU SUPERIOR"
+    },
+    {
+      "tela": "Sidebar/header",
+      "status": "IGUAL OU SUPERIOR"
+    },
+    {
+      "tela": "Responsividade",
+      "status": "IGUAL OU SUPERIOR"
+    }
+  ]
+}

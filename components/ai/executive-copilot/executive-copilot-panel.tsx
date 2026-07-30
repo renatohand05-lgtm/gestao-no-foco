@@ -102,10 +102,11 @@ export function ExecutiveCopilotPanel({
     <div
       data-dashboard-block="executive-copilot"
       data-copilot-engine={ExecutiveCopilotEngine.version}
-      className={cn(gofMotion.fade)}
+      data-premium-v257="executive-ai"
+      className={cn(gofMotion.fade, "premium-enter")}
     >
       <details
-        className="rounded-xl border border-border/60 bg-[var(--brand-white)] open:shadow-sm"
+        className="rounded-xl border border-[var(--border-premium)] bg-[var(--surface-raised)] open:shadow-[var(--shadow-card)]"
         open={open}
         onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
       >

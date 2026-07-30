@@ -12,8 +12,13 @@ import type {
   ParsedNfe,
   ParsedNfeItem,
 } from "../../types/nfe-entrada.ts";
+import {
+  buildFileTooLargeMessage,
+  getImportMaxBytes,
+} from "../import-engine/import-file-limits.ts";
 
-export const NFE_XML_MAX_BYTES = 2 * 1024 * 1024; // 2MB
+/** Limite XML NF-e — fonte: IMPORT_MAX_XML_MB (default 10 MB). */
+export const NFE_XML_MAX_BYTES = getImportMaxBytes("xml");
 export const NFE_ALLOWED_MIME = new Set([
   "application/xml",
   "text/xml",
@@ -192,7 +197,10 @@ export function validateXmlUpload(input: {
   }
   if (input.byteLength > NFE_XML_MAX_BYTES) {
     throw new NfeParseError(
-      `Arquivo acima do limite de ${Math.round(NFE_XML_MAX_BYTES / 1024 / 1024)}MB.`,
+      buildFileTooLargeMessage({
+        fileBytes: input.byteLength,
+        format: "xml",
+      }),
     );
   }
   const name = (input.filename ?? "").toLowerCase();

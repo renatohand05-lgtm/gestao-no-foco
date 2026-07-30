@@ -107,6 +107,11 @@ export function MappingStudioClient({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [sheetName, setSheetName] = useState("");
+  const [headerRowIndex, setHeaderRowIndex] = useState(0);
+  const [decimalSep, setDecimalSep] = useState<"," | ".">(",");
+  const isStockModule =
+    adapter.moduleKey === "estoque_catalogo" || adapter.id === "stock";
 
   const fields = adapter.fields;
 
@@ -367,6 +372,76 @@ export function MappingStudioClient({
                 ))}
               </select>
             </label>
+            {isStockModule ? (
+              <div className="space-y-2 rounded-md border border-dashed p-2 text-sm">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Estoque — aba, cabeçalho e transforms BR
+                </p>
+                <label className="block space-y-1">
+                  <span className="text-muted-foreground text-xs">Aba Excel</span>
+                  <input
+                    className="w-full rounded-md border px-2 py-1.5 text-sm"
+                    value={sheetName}
+                    onChange={(e) => setSheetName(e.target.value)}
+                    placeholder="(auto)"
+                    aria-label="Nome da aba Excel"
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-muted-foreground text-xs">
+                    Linha de cabeçalho (1-based)
+                  </span>
+                  <input
+                    type="number"
+                    min={1}
+                    className="w-full rounded-md border px-2 py-1.5 text-sm"
+                    value={headerRowIndex + 1}
+                    onChange={(e) =>
+                      setHeaderRowIndex(Math.max(0, Number(e.target.value) - 1))
+                    }
+                    aria-label="Linha de cabeçalho"
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-muted-foreground text-xs">
+                    Separador decimal
+                  </span>
+                  <select
+                    className="w-full rounded-md border px-2 py-1.5 text-sm"
+                    value={decimalSep}
+                    onChange={(e) =>
+                      setDecimalSep(e.target.value as "," | ".")
+                    }
+                    aria-label="Separador decimal"
+                  >
+                    <option value=",">Brasileiro (,)</option>
+                    <option value=".">Internacional (.)</option>
+                  </select>
+                </label>
+                <p className="text-[10px] text-muted-foreground">
+                  Preferências de parse: aba=
+                  {sheetName || "auto"} · header=
+                  {headerRowIndex + 1} · decimal={decimalSep}. Salvas com o
+                  perfil via description/metadata no save.
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setMapping(
+                      Object.fromEntries(fields.map((f) => [f.key, null])),
+                    );
+                    setSheetName("");
+                    setHeaderRowIndex(0);
+                    setMessage("Mapeamento limpo (arquivo não removido).");
+                  }}
+                >
+                  Limpar mapeamento
+                </Button>
+              </div>
+            ) : null}
             <ul className="space-y-1" role="listbox" aria-label="Lista de perfis">
               {profiles.length === 0 ? (
                 <li className="text-xs text-muted-foreground">

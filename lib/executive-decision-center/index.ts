@@ -45,4 +45,8 @@ export {
   computeExecutiveDecisionScore,
   executiveScoreCaption,
 } from "./score-engine.ts";
-export { buildDecisionSimulations } from "./simulation-engine.ts";
+export {
+  applySimulationPct,
+  buildDecisionSimulations,
+  formatSimulationProjection,
+} from "./simulation-engine.ts";

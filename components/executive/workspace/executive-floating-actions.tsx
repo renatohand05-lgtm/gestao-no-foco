@@ -34,7 +34,7 @@ export function ExecutiveFloatingActions() {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "rounded-full border-border/60 bg-[var(--brand-white)]",
+                  "rounded-full border-border/60 bg-card",
                   gofShadow.md,
                   gofFocusRing,
                 )}

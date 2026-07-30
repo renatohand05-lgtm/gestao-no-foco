@@ -16,6 +16,11 @@ import type {
   ImportSecurityResult,
 } from "../types/index.ts";
 import { DEFAULT_IMPORT_LIMITS } from "../types/index.ts";
+import {
+  buildFileTooLargeMessage,
+  detectImportFormatLimitKey,
+  getImportMaxBytes,
+} from "../import-file-limits.ts";
 
 export type ValidateImportFileSecurityInput = {
   fileName: string;
@@ -232,7 +237,17 @@ function extToFormat(ext: string): ImportFormat {
 export function validateImportFileSecurity(
   input: ValidateImportFileSecurityInput,
 ): ImportSecurityResult {
-  const limits = { ...DEFAULT_IMPORT_LIMITS, ...input.limits };
+  const formatKey = detectImportFormatLimitKey(input.fileName);
+  const formatMax = getImportMaxBytes(formatKey);
+  const limits = {
+    ...DEFAULT_IMPORT_LIMITS,
+    maxBytes: formatMax,
+    ...input.limits,
+  };
+  // Prefer format-specific limit unless caller override is stricter.
+  if (!input.limits?.maxBytes) {
+    limits.maxBytes = formatMax;
+  }
   const issues: ImportSecurityIssue[] = [];
   const warnings: string[] = [];
   const ext = getExtension(input.fileName);
@@ -267,7 +282,10 @@ export function validateImportFileSecurity(
     issues.push({
       code: "size_limit_exceeded",
       severity: "error",
-      message: `Arquivo excede o limite de ${(limits.maxBytes / (1024 * 1024)).toFixed(0)} MB.`,
+      message: buildFileTooLargeMessage({
+        fileBytes: size,
+        format: formatKey,
+      }),
     });
   }
 

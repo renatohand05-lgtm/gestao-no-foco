@@ -1,0 +1,20 @@
+{
+  "sprint": "25.5.2",
+  "route": "/",
+  "evidenceDir": "docs/testing/evidence/25-5-2",
+  "comparison": [
+    { "item": "header", "referencia": "escuro navy + logo oficial + CTAs", "implementacao": "MarketingHeader sticky/blur/scroll", "status": "IGUAL OU SUPERIOR" },
+    { "item": "logo", "referencia": "símbolo metálico oficial", "implementacao": "officialWordmark + BrandMark PNG", "status": "IGUAL OU SUPERIOR" },
+    { "item": "hero", "referencia": "headline + preview dashboard", "implementacao": "HeroSection + LandingDashboardPreview", "status": "IGUAL OU SUPERIOR" },
+    { "item": "benefícios", "referencia": "4 pilares", "implementacao": "FeaturesSection cards premium", "status": "IGUAL OU SUPERIOR" },
+    { "item": "módulos", "referencia": "ecossistema integrado", "implementacao": "ModulesSection 10 módulos", "status": "IGUAL OU SUPERIOR" },
+    { "item": "dashboard preview", "referencia": "cockpit visual", "implementacao": "prévia demonstrativa marcada", "status": "IGUAL OU SUPERIOR" },
+    { "item": "inteligência", "referencia": "decisões / alertas", "implementacao": "IntelligenceSection determinística", "status": "IGUAL OU SUPERIOR" },
+    { "item": "segmentos", "referencia": "cards/tabs", "implementacao": "tabs acessíveis", "status": "IGUAL OU SUPERIOR" },
+    { "item": "prova de valor", "referencia": "qualitativa sem inventar", "implementacao": "ValueSection", "status": "IGUAL OU SUPERIOR" },
+    { "item": "CTA", "referencia": "dourado + especialista", "implementacao": "CtaSection + mailto real", "status": "IGUAL OU SUPERIOR" },
+    { "item": "footer", "referencia": "institucional", "implementacao": "MarketingFooter navy", "status": "IGUAL OU SUPERIOR" },
+    { "item": "responsividade", "referencia": "1920→mobile", "implementacao": "evidências 11-*", "status": "IGUAL OU SUPERIOR" },
+    { "item": "continuidade splash/login/dashboard", "referencia": "mesma identidade", "implementacao": "tokens + assets oficiais", "status": "IGUAL OU SUPERIOR" }
+  ]
+}

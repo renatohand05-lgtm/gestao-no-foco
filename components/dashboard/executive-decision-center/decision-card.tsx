@@ -31,6 +31,7 @@ export function DecisionCard({ decision }: Props) {
         className={cn(
           "space-y-2",
           decision.quickWin && "ring-1 ring-success/40",
+          decision.priority === "critical" && "border border-destructive/40",
         )}
       >
         <div className="flex flex-wrap items-center gap-2">

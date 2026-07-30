@@ -42,7 +42,7 @@ export function WorkflowTransitionList({
           <button
             type="button"
             className={cn(
-              "w-full rounded-xl border border-border/60 bg-[var(--brand-white)] px-3 py-2.5 text-left",
+              "w-full rounded-xl border border-border/60 bg-card px-3 py-2.5 text-left",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/35",
               onSelect && "hover:border-[var(--brand-gold)]/40",
             )}

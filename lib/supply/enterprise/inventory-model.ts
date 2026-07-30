@@ -16,6 +16,10 @@ export type InventoryCountLine = {
   produtoId: string;
   saldoSistema: number;
   contagem: number | null;
+  custoUnitario?: number | null;
+  loteId?: string | null;
+  serieId?: string | null;
+  justificativa?: string | null;
 };
 
 export type InventoryDivergence = {
@@ -23,6 +27,7 @@ export type InventoryDivergence = {
   saldoSistema: number;
   contagem: number;
   divergencia: number;
+  custoDivergencia: number | null;
 };
 
 export function computeInventoryDivergences(
@@ -33,14 +38,35 @@ export function computeInventoryDivergences(
     if (line.contagem == null || !Number.isFinite(line.contagem)) continue;
     const divergencia = line.contagem - line.saldoSistema;
     if (divergencia === 0) continue;
+    const custo =
+      line.custoUnitario != null && Number.isFinite(line.custoUnitario)
+        ? Number((divergencia * line.custoUnitario).toFixed(4))
+        : null;
     out.push({
       produtoId: line.produtoId,
       saldoSistema: line.saldoSistema,
       contagem: line.contagem,
       divergencia,
+      custoDivergencia: custo,
     });
   }
   return out;
+}
+
+/** Contagem cega: saldo esperado oculto até após contagem (quando configurado). */
+export function resolveDisplayedExpectedQty(input: {
+  contagemCega: boolean;
+  contagem: number | null;
+  saldoSistema: number;
+}): number | null {
+  if (!input.contagemCega) return input.saldoSistema;
+  if (input.contagem == null) return null;
+  return input.saldoSistema;
+}
+
+/** Estoque só muda após aprovação (ajustado) — nunca na contagem. */
+export function inventoryCountMutatesStock(status: InventoryCycleStatus): boolean {
+  return status === "ajustado" || status === "fechado";
 }
 
 export function inventoryNeedsAdjustment(

@@ -112,5 +112,71 @@ export function createSupabaseHistoryStore(
       throwIfError(error, "import.history.markRolledBack");
       return data ? mapKeysSnakeToCamel<ImportHistoryEntry>(data) : null;
     },
+
+    async archive(tenantId: string, id: string, userId: string, reason: string) {
+      const { data, error } = await enterpriseFrom(client, "import_runs")
+        .update({
+          archived_at: nowIso(),
+          archived_by: userId,
+          delete_reason: reason,
+        })
+        .eq("tenant_id", tenantId)
+        .eq("id", id)
+        .is("deleted_at", null)
+        .is("archived_at", null)
+        .select("*")
+        .maybeSingle();
+      throwIfError(error, "import.history.archive");
+      return data ? mapKeysSnakeToCamel<ImportHistoryEntry>(data) : null;
+    },
+
+    async restoreArchive(tenantId: string, id: string) {
+      const { data, error } = await enterpriseFrom(client, "import_runs")
+        .update({
+          archived_at: null,
+          archived_by: null,
+        })
+        .eq("tenant_id", tenantId)
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+      throwIfError(error, "import.history.restoreArchive");
+      return data ? mapKeysSnakeToCamel<ImportHistoryEntry>(data) : null;
+    },
+
+    async softDeleteHistory(
+      tenantId: string,
+      id: string,
+      userId: string,
+      reason: string,
+    ) {
+      const { data, error } = await enterpriseFrom(client, "import_runs")
+        .update({
+          deleted_at: nowIso(),
+          deleted_by: userId,
+          delete_reason: reason,
+        })
+        .eq("tenant_id", tenantId)
+        .eq("id", id)
+        .is("deleted_at", null)
+        .select("*")
+        .maybeSingle();
+      throwIfError(error, "import.history.softDeleteHistory");
+      return data ? mapKeysSnakeToCamel<ImportHistoryEntry>(data) : null;
+    },
+
+    async restoreSoftDelete(tenantId: string, id: string) {
+      const { data, error } = await enterpriseFrom(client, "import_runs")
+        .update({
+          deleted_at: null,
+          deleted_by: null,
+        })
+        .eq("tenant_id", tenantId)
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+      throwIfError(error, "import.history.restoreSoftDelete");
+      return data ? mapKeysSnakeToCamel<ImportHistoryEntry>(data) : null;
+    },
   };
 }

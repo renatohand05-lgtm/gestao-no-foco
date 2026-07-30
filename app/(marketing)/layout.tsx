@@ -7,7 +7,11 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-full flex-col">
+    <div
+      data-landing-shell=""
+      className="flex min-h-full flex-col bg-[var(--brand-navy)] text-white dark"
+      style={{ colorScheme: "dark" }}
+    >
       <MarketingHeader />
       <main className="flex-1">{children}</main>
       <MarketingFooter />

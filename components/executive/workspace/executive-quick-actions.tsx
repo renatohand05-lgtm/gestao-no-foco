@@ -148,7 +148,7 @@ export function ExecutiveQuickActions() {
               variant="outline"
               size="sm"
               className={cn(
-                "border-border/60 bg-[var(--brand-white)]",
+                "border-border/60 bg-card",
                 gofRadius.lg,
                 gofFocusRing,
               )}

@@ -1,0 +1,44 @@
+{
+  "sprint": "25.5.1",
+  "capturedAt": "2026-07-30T18:20:00Z",
+  "appUrl": "http://localhost:3001",
+  "tenant": "teste-renato-01",
+  "route": "/teste-renato-01/dashboard",
+  "evidenceDir": "docs/testing/evidence/25-5-1",
+  "markersVerifiedLive": [
+    "data-dashboard-premium-v251",
+    "kpi-strip",
+    "main-row",
+    "ops-strip",
+    "alerts-rail",
+    "ask-ai",
+    "atalhos"
+  ],
+  "realDataSample": {
+    "faturamentoMes": "R$ 75.682,00",
+    "lucroLiquido": "Indisponível",
+    "margemLiquida": "46,9%",
+    "ebitda": "R$ 21.872,00",
+    "caixa": "R$ 122.142,00",
+    "metaMes": "R$ 75.000,00",
+    "estoqueBaixo": "3",
+    "osAbertas": "8"
+  },
+  "comparison": [
+    { "item": "identidade", "referencia": "navy/gold premium", "implementacao": "tokens + shell", "diferenca": "alinhado", "status": "IGUAL OU SUPERIOR" },
+    { "item": "logo", "referencia": "G oficial", "implementacao": "assets brand + favicon", "diferenca": "oficial aplicado", "status": "IGUAL OU SUPERIOR" },
+    { "item": "sidebar", "referencia": "ativo dourado / colapsável", "implementacao": "app-sidebar premium", "diferenca": "alinhado", "status": "IGUAL OU SUPERIOR" },
+    { "item": "header", "referencia": "busca / avatar / tema", "implementacao": "app-header + top-bar theme tokens", "diferenca": "duplo chrome ainda denso", "status": "IGUAL OU SUPERIOR" },
+    { "item": "KPIs", "referencia": "6 KPIs topo", "implementacao": "PremiumKpiStrip dados reais", "diferenca": "lucro Indisponível (sem inventar)", "status": "IGUAL OU SUPERIOR" },
+    { "item": "gráfico principal", "referencia": "faturamento 30d + meta", "implementacao": "série diária real embedded", "diferenca": "sem overlay de meta no chart", "status": "INFERIOR" },
+    { "item": "Central de Inteligência", "referencia": "insights com origem/confiança", "implementacao": "buildPremiumInsights + drill links", "diferenca": "regras locais, sem IA externa", "status": "IGUAL OU SUPERIOR" },
+    { "item": "fluxo de caixa", "referencia": "saldo + projeção", "implementacao": "cockpit real + barras", "diferenca": "alinhado", "status": "IGUAL OU SUPERIOR" },
+    { "item": "calendário fiscal", "referencia": "obrigações", "implementacao": "estado Indisponível explícito", "diferenca": "sem fonte fiscal no ciclo", "status": "INCOMPLETO" },
+    { "item": "alertas", "referencia": "alertas inteligentes", "implementacao": "rail de danger/warning reais", "diferenca": "alinhado", "status": "IGUAL OU SUPERIOR" },
+    { "item": "IA", "referencia": "pergunte à IA", "implementacao": "ExecutiveAiCard determinística", "diferenca": "não é chat livre", "status": "INFERIOR" },
+    { "item": "rodapé", "referencia": "institucional", "implementacao": "BrandInstitutionalFooter", "diferenca": "alinhado", "status": "IGUAL OU SUPERIOR" },
+    { "item": "tema claro", "referencia": "equivalente sofisticado", "implementacao": "tokens :root + cards", "diferenca": "menos atmosfera que o escuro", "status": "INFERIOR" },
+    { "item": "tema escuro", "referencia": "navy principal", "implementacao": "default dark + glow", "diferenca": "alinhado", "status": "IGUAL OU SUPERIOR" },
+    { "item": "responsividade", "referencia": "1920→mobile", "implementacao": "grid + drawer sidebar", "diferenca": "validado em viewports", "status": "IGUAL OU SUPERIOR" }
+  ]
+}

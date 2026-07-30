@@ -1,20 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" role="img" aria-label="Gestão">
-  <rect width="64" height="64" rx="14" fill="#1A1C1E"/>
-  <text
-    x="32"
-    y="42"
-    text-anchor="middle"
-    font-family="system-ui, -apple-system, Segoe UI, sans-serif"
-    font-size="34"
-    font-weight="700"
-    fill="#C9A84C"
-  >G</text>
-  <text
-    x="80"
-    y="40"
-    font-family="system-ui, -apple-system, Segoe UI, sans-serif"
-    font-size="28"
-    font-weight="600"
-    fill="#1A1C1E"
-  >Gestão</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 72" role="img" aria-label="Gestï¿½o ï¿½ Plataforma de Gestï¿½o Inteligente">
+  <defs>
+    <linearGradient id="gGoldH" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0D78C"/>
+      <stop offset="45%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8A7028"/>
+    </linearGradient>
+    <linearGradient id="gSilver" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F5F7FA"/>
+      <stop offset="55%" stop-color="#C8CDD5"/>
+      <stop offset="100%" stop-color="#8B93A0"/>
+    </linearGradient>
+    <radialGradient id="gGlowH" cx="12%" cy="40%" r="40%">
+      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#0B0F14" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="360" height="72" rx="0" fill="none"/>
+  <g transform="translate(0,4)">
+    <rect width="64" height="64" rx="14" fill="#0B0F14"/>
+    <rect width="64" height="64" rx="14" fill="url(#gGlowH)"/>
+    <text x="32" y="44" text-anchor="middle" font-family="Space Grotesk, Inter, system-ui, sans-serif" font-size="36" font-weight="700" fill="url(#gGoldH)">G</text>
+  </g>
+  <text x="80" y="38" font-family="Space Grotesk, Inter, system-ui, sans-serif" font-size="28" font-weight="600" letter-spacing="0.08em" fill="url(#gSilver)">GESTï¿½O</text>
+  <text x="80" y="58" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" letter-spacing="0.04em" fill="#A1A8B3">Plataforma de Gestï¿½o Inteligente</text>
 </svg>

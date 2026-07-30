@@ -32,16 +32,57 @@ export interface ImportHistoryStore {
     options?: ImportHistoryListPageOptions,
   ): Promise<ImportHistoryListPageResult>;
   markRolledBack(tenantId: string, id: string): Promise<ImportHistoryEntry | null>;
+  /** Sprint 25.4.2 — opcional até migration aplicada. */
+  archive?(
+    tenantId: string,
+    id: string,
+    userId: string,
+    reason: string,
+  ): Promise<ImportHistoryEntry | null>;
+  restoreArchive?(
+    tenantId: string,
+    id: string,
+    userId?: string,
+  ): Promise<ImportHistoryEntry | null>;
+  softDeleteHistory?(
+    tenantId: string,
+    id: string,
+    userId: string,
+    reason: string,
+  ): Promise<ImportHistoryEntry | null>;
+  restoreSoftDelete?(
+    tenantId: string,
+    id: string,
+    userId?: string,
+  ): Promise<ImportHistoryEntry | null>;
 }
 
 export class MemoryImportHistoryStore implements ImportHistoryStore {
   private entries: ImportHistoryEntry[] = [];
 
+  /** Sprint 25.4.2 — mutação in-place para lifecycle. */
+  async _mutate(
+    tenantId: string,
+    id: string,
+    fn: (e: ImportHistoryEntry) => ImportHistoryEntry,
+  ) {
+    const idx = this.entries.findIndex(
+      (e) => e.tenantId === tenantId && e.id === id,
+    );
+    if (idx < 0) return null;
+    const next = fn(this.entries[idx]!);
+    this.entries[idx] = next;
+    return next;
+  }
+
   async list(tenantId: string, module?: string, limit = 20) {
     return this.entries
       .filter(
         (e) =>
-          e.tenantId === tenantId && (!module || e.module === module),
+          e.tenantId === tenantId &&
+          (!module || e.module === module) &&
+          !e.deletedAt &&
+          !e.archivedAt,
       )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, limit);

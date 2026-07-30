@@ -34,8 +34,13 @@ export const STOCK_PRODUCT_IMPORT_FIELDS: ImportFieldDef[] = [
   { key: "fornecedor_principal", label: "Fornecedor principal", required: false, type: "string" },
   { key: "lote", label: "Lote", required: false, type: "string" },
   { key: "serie", label: "Série", required: false, type: "string" },
+  { key: "fabricacao", label: "Fabricação", required: false, type: "date" },
   { key: "validade", label: "Validade", required: false, type: "date" },
+  { key: "saldo_inicial", label: "Saldo inicial", required: false, type: "number" },
   { key: "ativo", label: "Ativo", required: false, type: "enum", enumValues: ["sim", "nao", "true", "false", "1", "0"] },
   { key: "controla_estoque", label: "Controla estoque", required: false, type: "enum", enumValues: ["sim", "nao", "true", "false", "1", "0"] },
+  { key: "controla_lote", label: "Controla lote", required: false, type: "enum", enumValues: ["sim", "nao", "true", "false", "1", "0"] },
+  { key: "controla_serie", label: "Controla série", required: false, type: "enum", enumValues: ["sim", "nao", "true", "false", "1", "0"] },
+  { key: "controla_validade", label: "Controla validade", required: false, type: "enum", enumValues: ["sim", "nao", "true", "false", "1", "0"] },
   { key: "tipo", label: "Tipo", required: false, type: "string" },
 ];

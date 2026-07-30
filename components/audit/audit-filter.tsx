@@ -24,7 +24,7 @@ export function AuditFilter({ value = {}, className, onChange }: Props) {
     <fieldset
       data-audit-filter
       className={cn(
-        "grid gap-3 rounded-xl border border-border/60 bg-[var(--brand-white)] p-3 sm:grid-cols-2 lg:grid-cols-4",
+        "grid gap-3 rounded-xl border border-border/60 bg-card p-3 sm:grid-cols-2 lg:grid-cols-4",
         className,
       )}
     >

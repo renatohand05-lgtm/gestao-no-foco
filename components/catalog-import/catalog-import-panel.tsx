@@ -2,12 +2,19 @@
 
 import { useMemo, useState, useTransition } from "react";
 
+import {
+  ImportFileDropzone,
+  type SelectedImportFile,
+} from "@/components/catalog-import/import-file-dropzone";
+import { ImportRowReviewClient } from "@/components/import-engine/import-row-review-client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
+  commitCatalogFileImportAction,
   commitPlatformCatalogImportAction,
   downloadProductStockTemplateAction,
   downloadServiceCatalogAction,
+  previewCatalogFileImportAction,
   previewCatalogPriceBandAction,
   previewPlatformCatalogImportAction,
 } from "@/lib/catalog-import/catalog-import-actions";
@@ -15,12 +22,33 @@ import {
   PRICE_BAND_LABELS,
   type PriceBandId,
 } from "@/lib/catalog-import/price-bands";
+import { clearImportDraftEverywhere } from "@/lib/import-engine/delete/draft-session";
+import type {
+  ImportColumnMapping,
+  ImportReviewRow,
+} from "@/lib/import-engine";
+import {
+  confirmedNumbersFromReview,
+  fromEngineReviewRows,
+  type ImportReviewLine,
+} from "@/lib/import-engine/review/row-review";
 
 type Props = {
   tenantSlug: string;
   mode: "produtos" | "estoque";
   categorias?: string[];
   complexidades?: string[];
+};
+
+type FilePreviewState = {
+  kind: "servicos" | "produtos";
+  fileName: string;
+  format: string;
+  mapping: ImportColumnMapping;
+  reviewRows: ImportReviewRow[];
+  confirmedRowNumbers: number[];
+  summaryText: string;
+  reviewLines: ImportReviewLine[];
 };
 
 function downloadBase64(fileName: string, mimeType: string, base64: string) {
@@ -37,8 +65,7 @@ function downloadBase64(fileName: string, mimeType: string, base64: string) {
 }
 
 function parseRate(raw: string): number {
-  const n = Number(String(raw).replace(",", "."));
-  return n;
+  return Number(String(raw).replace(",", "."));
 }
 
 export function CatalogImportPanel({
@@ -63,6 +90,11 @@ export function CatalogImportPanel({
   const [duplicatePolicy, setDuplicatePolicy] = useState<
     "ignore" | "update" | "duplicate_new_code"
   >("update");
+  const [selectedFile, setSelectedFile] = useState<SelectedImportFile | null>(
+    null,
+  );
+  const [fileKind, setFileKind] = useState<"servicos" | "produtos">("servicos");
+  const [filePreview, setFilePreview] = useState<FilePreviewState | null>(null);
 
   const rates = useMemo(
     () => ({
@@ -116,10 +148,174 @@ export function CatalogImportPanel({
       <div>
         <h2 className="text-base font-semibold">Central de importação</h2>
         <p className="text-sm text-muted-foreground">
-          Catálogo de serviços, modelos Excel e importação com preview — reutiliza
-          a Import Engine Enterprise.
+          Selecione um arquivo do computador (XLSX, XLS ou CSV), faça preview e
+          confirme. O catálogo oficial da plataforma permanece como atalho
+          opcional.
         </p>
       </div>
+
+      {mode === "produtos" ? (
+        <section className="space-y-3 rounded-md border p-3">
+          <h3 className="text-sm font-semibold">Upload do computador</h3>
+          <div className="space-y-2">
+            <Label htmlFor="file-kind">Tipo de importação</Label>
+            <select
+              id="file-kind"
+              className="flex h-10 max-w-md rounded-md border bg-background px-3 text-sm"
+              value={fileKind}
+              onChange={(e) =>
+                setFileKind(e.target.value as "servicos" | "produtos")
+              }
+              aria-label="Tipo de importação do arquivo"
+            >
+              <option value="servicos">Catálogo de serviços (Excel/CSV)</option>
+              <option value="produtos">Produtos (Excel/CSV)</option>
+            </select>
+          </div>
+          <ImportFileDropzone
+            accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+            disabled={pending}
+            formatsHint="Formatos: XLSX, XLS, CSV"
+            selected={selectedFile}
+            onFile={(f) => {
+              setSelectedFile(f);
+              setFilePreview(null);
+              setPreviewText(null);
+            }}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              disabled={pending || !selectedFile}
+              onClick={() =>
+                run(async () => {
+                  if (!selectedFile) throw new Error("Selecione um arquivo.");
+                  const fd = new FormData();
+                  fd.set("file", selectedFile.file);
+                  fd.set("kind", fileKind);
+                  const res = await previewCatalogFileImportAction(
+                    tenantSlug,
+                    fd,
+                  );
+                  const reviewLines = fromEngineReviewRows(res.reviewRows).map(
+                    (l) => ({
+                      ...l,
+                      selected: res.confirmedRowNumbers.includes(l.rowNumber),
+                    }),
+                  );
+                  setFilePreview({
+                    kind: res.kind,
+                    fileName: res.fileMeta.name,
+                    format: res.format,
+                    mapping: res.mapping,
+                    reviewRows: res.reviewRows,
+                    confirmedRowNumbers: res.confirmedRowNumbers,
+                    summaryText: `Preview: ${res.summary.totalRows} linhas · novos ${res.summary.newServices || res.summary.newProducts || 0} · duplicidades ${res.summary.duplicates} · erros ${res.summary.errors} · total ${res.summary.financialTotal ?? "—"} (nada gravado).`,
+                    reviewLines,
+                  });
+                  setPreviewText(
+                    `Arquivo ${res.fileMeta.name} (${res.fileMeta.format}) validado.`,
+                  );
+                })
+              }
+            >
+              Preview do arquivo
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={pending || !filePreview}
+              onClick={() => {
+                if (!filePreview) return;
+                const ok = window.confirm(
+                  `Confirmar importação de ${filePreview.fileName}? Nenhuma gravação ocorre sem esta confirmação.`,
+                );
+                if (!ok) return;
+                run(async () => {
+                  const confirmed = confirmedNumbersFromReview(
+                    filePreview.reviewLines,
+                  );
+                  const res = await commitCatalogFileImportAction(tenantSlug, {
+                    kind: filePreview.kind,
+                    fileName: filePreview.fileName,
+                    format: filePreview.format,
+                    mapping: filePreview.mapping,
+                    rows: filePreview.reviewRows,
+                    confirmedRowNumbers: confirmed,
+                    duplicatePolicy,
+                    confirmed: true,
+                  });
+                  setInfo(
+                    `Importação concluída: ${res.imported} ok · ${res.rejected} rejeitados · ${res.skipped} ignorados.`,
+                  );
+                  setFilePreview(null);
+                  setSelectedFile(null);
+                });
+              }}
+            >
+              Confirmar importação do arquivo
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => {
+                setSelectedFile(null);
+                setFilePreview(null);
+                setPreviewText(null);
+                setError(null);
+                setInfo(null);
+                if (typeof window !== "undefined") {
+                  clearImportDraftEverywhere({
+                    sessionStorage: window.sessionStorage,
+                    localStorage: window.localStorage,
+                  });
+                }
+                setInfo("Importação atual limpa (rascunho apenas).");
+              }}
+            >
+              Limpar importação atual
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => {
+                setSelectedFile(null);
+                setFilePreview(null);
+                setPreviewText(null);
+                setError(null);
+                setInfo(null);
+              }}
+            >
+              Cancelar
+            </Button>
+          </div>
+          {filePreview ? (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground" role="status">
+                {filePreview.summaryText}
+              </p>
+              <ImportRowReviewClient
+                lines={filePreview.reviewLines}
+                onChange={(reviewLines) =>
+                  setFilePreview((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          reviewLines,
+                          confirmedRowNumbers: reviewLines
+                            .filter((l) => l.selected && l.action !== "ignore")
+                            .map((l) => l.rowNumber),
+                        }
+                      : prev,
+                  )
+                }
+              />
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {mode === "produtos" ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -353,12 +549,12 @@ export function CatalogImportPanel({
                     { band, rates, prioridade },
                   );
                   setPreviewText(
-                    `Faixa ${PRICE_BAND_LABELS[band]} @ ${recalc.hourRateLabel} · ${recalc.affectedCount} serviços · duplicidades ${preview.summary.duplicates} · total ${preview.summary.financialTotal ?? "—"} (nada gravado).`,
+                    `Catálogo plataforma · Faixa ${PRICE_BAND_LABELS[band]} @ ${recalc.hourRateLabel} · ${recalc.affectedCount} serviços · duplicidades ${preview.summary.duplicates} · total ${preview.summary.financialTotal ?? "—"} (nada gravado).`,
                   );
                 })
               }
             >
-              Preview / recalcular
+              Preview catálogo plataforma
             </Button>
             <Button
               type="button"
@@ -366,7 +562,7 @@ export function CatalogImportPanel({
               disabled={pending}
               onClick={() => {
                 const ok = window.confirm(
-                  "Confirmar importação do catálogo de serviços? Nenhum preço será gravado sem esta confirmação. Serviços não movimentam estoque.",
+                  "Confirmar importação do catálogo oficial da plataforma? Nenhum preço será gravado sem esta confirmação. Serviços não movimentam estoque.",
                 );
                 if (!ok) return;
                 run(async () => {
@@ -383,12 +579,12 @@ export function CatalogImportPanel({
                     },
                   );
                   setInfo(
-                    `Importação concluída: ${res.imported} ok · ${res.rejected} rejeitados · ${res.skipped} ignorados.`,
+                    `Importação plataforma: ${res.imported} ok · ${res.rejected} rejeitados · ${res.skipped} ignorados.`,
                   );
                 });
               }}
             >
-              Importar catálogo (confirmar)
+              Importar catálogo oficial (confirmar)
             </Button>
           </>
         ) : null}

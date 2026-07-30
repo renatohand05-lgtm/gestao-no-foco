@@ -45,4 +45,24 @@ export {
   type CatalogImportPreviewSummary,
 } from "./preview-summary.ts";
 
+export {
+  catalogImportPermissionSatisfied,
+  expandCatalogImportPermissions,
+  mapMembershipRoleToEnterpriseRoles,
+  resolveCatalogImportEffectivePermissions,
+  type CatalogImportEffectiveAuth,
+} from "./rbac-compat.ts";
+
+export {
+  assertCatalogImportFeatureEnabled,
+  assertNfeXmlImportEnabled,
+  assertStockSpreadsheetImportEnabled,
+  isCatalogImportEnabled,
+  isNfeXmlImportEnabled,
+  isPdfOcrImportEnabled,
+  isPdfSearchableImportEnabled,
+  isStockCsvImportEnabled,
+  isStockExcelImportEnabled,
+} from "./catalog-upload-flags.ts";
+
 /* invoice-bridge: importar de ./invoice-bridge.ts (parser NF-e) */

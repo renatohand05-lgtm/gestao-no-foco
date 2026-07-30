@@ -1,0 +1,40 @@
+{
+  "at": "2026-07-30T21:48:17.020Z",
+  "baseUrl": "http://localhost:3001",
+  "checks": [
+    {
+      "page": "landing",
+      "status": 200,
+      "overlay": false
+    },
+    {
+      "page": "dashboard",
+      "url": "http://localhost:3001/teste-renato-01/dashboard",
+      "overlay": false,
+      "sidebarKeysMarker": true,
+      "reportsMenuCount": 1,
+      "analyticsMenuCount": 1
+    },
+    {
+      "page": "analytics",
+      "status": 200,
+      "url": "http://localhost:3001/teste-renato-01/analytics"
+    },
+    {
+      "page": "analytics-relatorios",
+      "url": "http://localhost:3001/teste-renato-01/analytics/relatorios"
+    }
+  ],
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "fatal": false,
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-2\\landing.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-2\\dashboard-sidebar.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-2\\sidebar-collapsed.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-2\\analytics.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-2\\analytics-relatorios.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-2\\theme-toggled.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-2\\dashboard-dark-final.png"
+  ]
+}

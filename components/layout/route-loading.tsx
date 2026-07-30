@@ -1,24 +1,25 @@
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand/premium-global-loader";
 
 type Props = {
-  /** Mantido por compat — BrandSplash unificado (Gate 19.4.1). */
+  /** Mantido por compat — não controla layout de skeleton. */
   cards?: number;
   label?: string;
   className?: string;
 };
 
 /**
- * Loading de rota — sempre BrandSplash (Gate 19.4.1).
- * Mesma animação, logo, tipografia e barra Brand.
+ * Loading de rota — PremiumGlobalLoader (Sprint 25.6.2).
  */
 export function RouteLoading({
-  label = "Carregando…",
+  label = "Carregando conteúdo",
   className = "min-h-[60vh]",
 }: Props) {
-  return <BrandSplash className={className} label={label} />;
+  return (
+    <PremiumGlobalLoader className={className} label={label} variant="embed" />
+  );
 }
 
-/** Alias oficial — workspace / blocos usam o mesmo BrandSplash. */
+/** Alias — workspace / blocos de rota usam o mesmo loader global. */
 export function WorkspaceLoading(props: Props) {
   return <RouteLoading {...props} />;
 }

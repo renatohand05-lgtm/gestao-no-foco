@@ -39,7 +39,7 @@ export function TransferDialog({
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="w-full max-w-md rounded-xl border border-border bg-[var(--brand-white)] p-4 shadow-lg"
+        className="w-full max-w-md rounded-xl border border-border bg-card p-4 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex justify-end">

@@ -7,6 +7,7 @@ import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { buttonVariants } from "@/components/ui/button";
 import { uploadNfeXmlAction } from "@/lib/nfe/actions";
 import { useOptionalToast } from "@/components/platform/toast-provider";
+import { IMPORT_LIMIT_MB_CLIENT_DEFAULTS } from "@/lib/import-engine/import-file-limits";
 import { cn } from "@/lib/utils";
 
 export function NfeUploadForm({ tenantSlug }: { tenantSlug: string }) {
@@ -45,7 +46,9 @@ export function NfeUploadForm({ tenantSlug }: { tenantSlug: string }) {
     >
       {error ? <FeedbackMessage>{error}</FeedbackMessage> : null}
       <label className="block space-y-2 text-sm">
-        <span className="text-muted-foreground">Arquivo XML da NF-e (máx. 2MB)</span>
+        <span className="text-muted-foreground">
+          Arquivo XML da NF-e (máx. {IMPORT_LIMIT_MB_CLIENT_DEFAULTS.xml} MB)
+        </span>
         <input
           type="file"
           name="xml"

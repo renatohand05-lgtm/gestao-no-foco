@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { DecisionCard } from "@/components/dashboard/executive-decision-center/decision-card";
 import { DecisionEmptyState } from "@/components/dashboard/executive-decision-center/decision-empty-state";
 import { ExecutiveScoreCard } from "@/components/dashboard/executive-decision-center/executive-score";
+import { ImpactEffortMatrix } from "@/components/dashboard/executive-decision-center/impact-effort-matrix";
 import { QuickWins } from "@/components/dashboard/executive-decision-center/quick-wins";
 import { SimulationCard } from "@/components/dashboard/executive-decision-center/simulation-card";
 import { ExecutiveBadge, ExecutiveSection } from "@/components/executive";
@@ -66,7 +67,8 @@ export function DecisionCenterPanel({
     <div
       data-dashboard-block="executive-decision-center"
       data-edc-engine={data.engineVersion}
-      className={cn("space-y-4", gofMotion.fade)}
+      data-premium-v257="decision-center"
+      className={cn("space-y-4 premium-enter", gofMotion.fade)}
     >
       <ExecutiveSection
         title="Executive Decision Center"
@@ -95,6 +97,8 @@ export function DecisionCenterPanel({
         <ExecutiveScoreCard score={data.executiveScore} />
 
         <QuickWins items={data.quickWins} />
+
+        <ImpactEffortMatrix decisions={data.queue} />
 
         <div className="space-y-2">
           <h3 className={cn(gofTypography.title, "text-sm")}>

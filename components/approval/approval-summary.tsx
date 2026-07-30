@@ -17,7 +17,7 @@ export function ApprovalSummary({ request, className }: Props) {
     <div
       data-approval-summary
       className={cn(
-        "space-y-2 rounded-xl border border-border/60 bg-[var(--brand-white)] p-3",
+        "space-y-2 rounded-xl border border-border/60 bg-card p-3",
         className,
       )}
     >

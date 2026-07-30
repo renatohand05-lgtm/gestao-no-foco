@@ -33,6 +33,10 @@ import type {
   MetricFilter,
 } from "@/lib/analytics/core/metric-types";
 import { loadAnalyticsDomainSnapshot } from "@/lib/analytics/snapshot-loader";
+import {
+  analyticsRbacPermissionSatisfied,
+  resolveAnalyticsEffectivePermissions,
+} from "@/lib/analytics/rbac-compat";
 
 async function resolveAnalyticsAuth(
   tenantSlug: string,
@@ -48,19 +52,34 @@ async function resolveAnalyticsAuth(
   const client = await createClient();
   const rbac = createRbacSupabaseAdapter(client);
   const snap = await rbac.resolveAuthorizationSnapshot(tenant.id, profile.id);
-  const permissions = snap.permissions ?? [];
+  const effective = resolveAnalyticsEffectivePermissions({
+    membershipRole: tenant.role,
+    snapshotRoles: snap.roles,
+    snapshotPermissions: snap.permissions,
+  });
+  const permissions = effective.permissions;
 
   const need = Array.isArray(required) ? required : [required];
-  if (!need.some((p) => analyticsPermissionSatisfied(permissions, p))) {
+  if (
+    !need.some(
+      (p) =>
+        analyticsPermissionSatisfied(permissions, p) ||
+        analyticsRbacPermissionSatisfied(permissions, p),
+    )
+  ) {
     throw new Error(`Sem permissão: ${need.join(" | ")}`);
   }
 
   const context = createEnterpriseContext({
     tenantId: tenant.id,
     userId: profile.id,
-    roles: snap.roles ?? [],
+    roles: effective.roles,
     permissions,
     source: "server_action",
+    metadata: {
+      analyticsAuthSource: effective.source,
+      membershipRole: tenant.role,
+    },
   });
 
   return { tenant, profile, client, context, permissions, tenantSlug };

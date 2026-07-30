@@ -1,0 +1,24 @@
+{
+  "at": "2026-07-30T18:23:02.130Z",
+  "baseUrl": "http://localhost:3001",
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\00-splash-or-login-early.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\01-login.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\02-dashboard-dark-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\03-sidebar-collapsed.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\04-sidebar-expanded.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\05-inteligencia-cash.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\06-alertas-fiscal.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\07-pergunte-ia.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\08-dashboard-light-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\09-desktop-1920.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\09-notebook-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\09-notebook-1366.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\09-tablet-768.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\09-mobile-390.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\10-loading-or-early.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-1\\11-empty-or-ready.png"
+  ],
+  "errors": [],
+  "tenant": "teste-renato-01"
+}

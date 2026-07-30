@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gest�o">
+  <defs>
+    <linearGradient id="gGoldLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C76A"/>
+      <stop offset="50%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#9A7B2E"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#F4F4F5" stroke="#E4E4E7"/>
+  <text
+    x="32"
+    y="44"
+    text-anchor="middle"
+    font-family="Space Grotesk, Inter, system-ui, sans-serif"
+    font-size="36"
+    font-weight="700"
+    fill="url(#gGoldLight)"
+  >G</text>
+</svg>

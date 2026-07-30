@@ -16,6 +16,8 @@ export type ParseFileInput = {
   mimeType?: string | null;
   bytes: Buffer | ArrayBuffer | Uint8Array;
   limits?: Partial<ImportFileLimits>;
+  /** Excel: aba e linha de cabeçalho (Mapping Studio estoque). */
+  excel?: { sheetName?: string; headerRowIndex?: number };
 };
 
 export function parseImportFile(input: ParseFileInput): ImportParseResult {
@@ -47,6 +49,7 @@ export function parseImportFile(input: ParseFileInput): ImportParseResult {
       input.bytes,
       input.fileName,
       format as "xlsx" | "xls",
+      input.excel,
     );
   }
 

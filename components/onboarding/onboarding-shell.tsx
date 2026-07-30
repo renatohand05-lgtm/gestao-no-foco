@@ -48,7 +48,7 @@ export function OnboardingShell({
 
       <div
         className={cn(
-          "border border-border/60 bg-[var(--brand-white)] p-5 sm:p-6",
+          "border border-border/60 bg-card p-5 sm:p-6",
           gofRadius.lg,
         )}
       >

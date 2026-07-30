@@ -95,3 +95,10 @@ export {
   gofInteractive,
   gofCardPaddingFromEx,
 } from "@/lib/design-system/primitives";
+
+/** Sprint 25.7 — motion + surfaces premium */
+export {
+  premiumMotion,
+  premiumSurfaces,
+  premiumType,
+} from "@/lib/design-system/premium-motion";

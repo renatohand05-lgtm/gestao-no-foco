@@ -25,7 +25,7 @@ type DashboardFiltersBarProps = {
 };
 
 const chip = cn(
-  "h-8 max-w-[8.5rem] truncate rounded-lg border border-slate-200/70 bg-white px-2.5 text-xs font-medium text-foreground",
+  "h-8 max-w-[8.5rem] truncate rounded-lg border border-border/70 bg-card px-2.5 text-xs font-medium text-foreground",
   "transition-colors duration-150 hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/25",
   "disabled:opacity-60 dark:border-white/10 dark:bg-transparent",
 );

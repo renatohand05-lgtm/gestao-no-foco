@@ -36,7 +36,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center border border-border/50 bg-[var(--brand-white)] px-6 py-12 text-center",
+        "flex flex-col items-center justify-center border border-border/50 bg-card px-6 py-12 text-center",
         gofRadius.lg,
         gofMotion.fade,
         className,

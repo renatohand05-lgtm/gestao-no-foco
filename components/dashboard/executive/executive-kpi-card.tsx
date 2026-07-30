@@ -102,8 +102,7 @@ function TrendIcon({ direction }: { direction?: "up" | "down" | "flat" }) {
 }
 
 /**
- * KPI Card premium — Gate 19.3 (valores maiores, títulos discretos, badge/tendência).
- * Sem alterar dados.
+ * KPI Card premium — Sprint 25.6: sem corte de título/valor; altura fluida.
  */
 export function ExecutiveKpiCard({
   title,
@@ -123,9 +122,9 @@ export function ExecutiveKpiCard({
   }
 
   const body = (
-    <div className="flex h-full min-h-[10.5rem] min-w-0 flex-col gap-4">
+    <div className="flex h-full min-h-[9.5rem] min-w-0 flex-col gap-3">
       <div className="flex min-w-0 items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex min-w-0 flex-1 items-start gap-2.5">
           <span
             className={cn(
               "inline-flex size-9 shrink-0 items-center justify-center",
@@ -138,8 +137,9 @@ export function ExecutiveKpiCard({
           <p
             className={cn(
               gofTypography.caption,
-              "min-w-0 flex-1 truncate font-medium uppercase tracking-[0.1em] text-muted-foreground",
+              "min-w-0 flex-1 font-medium uppercase tracking-[0.08em] text-muted-foreground text-balance",
             )}
+            title={title}
           >
             {title}
           </p>
@@ -154,7 +154,7 @@ export function ExecutiveKpiCard({
       <div className="min-w-0 flex-1">
         <p
           className={cn(
-            "truncate text-3xl font-semibold tabular-nums leading-none tracking-tight sm:text-[2rem]",
+            "text-[1.65rem] font-semibold tabular-nums leading-tight tracking-tight break-words sm:text-[1.85rem] xl:text-[2rem]",
             toneText(tone),
           )}
           title={value}
@@ -165,8 +165,9 @@ export function ExecutiveKpiCard({
           <p
             className={cn(
               gofTypography.caption,
-              "mt-2 truncate text-muted-foreground",
+              "mt-2 text-muted-foreground text-pretty",
             )}
+            title={supportingText}
           >
             {supportingText}
           </p>
@@ -175,15 +176,16 @@ export function ExecutiveKpiCard({
           <p
             className={cn(
               gofTypography.caption,
-              "mt-1.5 inline-flex max-w-full items-center gap-1 truncate",
+              "mt-1.5 inline-flex max-w-full items-center gap-1 text-pretty",
               trend.direction === "up" && "text-success",
               trend.direction === "down" && "text-danger",
               (!trend.direction || trend.direction === "flat") &&
                 "text-muted-foreground",
             )}
+            title={trend.label}
           >
             <TrendIcon direction={trend.direction} />
-            <span className="truncate">{trend.label}</span>
+            <span>{trend.label}</span>
           </p>
         ) : null}
       </div>
@@ -194,7 +196,7 @@ export function ExecutiveKpiCard({
 
   const shellClass = cn(
     gofCardSurface,
-    "flex h-[11.25rem] min-w-0 w-full max-w-full flex-col overflow-hidden p-5 sm:p-6",
+    "flex min-h-[10.5rem] min-w-0 w-full max-w-full flex-col p-4 sm:p-5",
     gofMotion.fade,
     href && cn(gofFocusRing, gofInteractive),
     className,
@@ -220,7 +222,7 @@ export function ExecutiveKpiCardSkeleton({ className }: { className?: string }) 
     <div
       className={cn(
         gofCardSurface,
-        "flex h-[11.25rem] min-w-0 w-full flex-col gap-4 p-5 sm:p-6",
+        "flex min-h-[10.5rem] min-w-0 w-full flex-col gap-4 p-4 sm:p-5",
         className,
       )}
       aria-busy="true"

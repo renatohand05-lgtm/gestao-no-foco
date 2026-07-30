@@ -325,3 +325,62 @@ export function createMemoryImportEngine(
     getGlobalMemoryHistoryStore(),
   );
 }
+
+/* ————————————————— Delete / lifecycle (Sprint 25.4.2) ————————————————— */
+export {
+  evaluateProductUndo,
+  evaluateServiceUndo,
+  evaluateStockMovementUndo,
+  evaluateNfeUndo,
+  summarizeUndoDecisions,
+  stockReversalIdempotencyKey,
+  assertReasonRequired,
+  assertTypedConfirmation,
+  applyHistoryLifecycle,
+  isHistoryVisible,
+  historySoftDeleteAffectsOperationalData,
+  clearImportDraftStorage,
+  clearImportDraftEverywhere,
+  createEmptyImportDraft,
+  buildUndoImpactPreview,
+  IMPORT_DRAFT_STORAGE_PREFIXES,
+} from "./delete/index.ts";
+
+/* ————————————————— Review / volume / OCR / transforms (25.4.3) ————————————————— */
+export {
+  filterReviewLines,
+  selectAllReviewLines,
+  toggleReviewLine,
+  ignoreReviewLine,
+  assertNoSilentErrorCommit,
+  paginateReviewLines,
+  applyChangeToSimilarLines,
+  editReviewLine,
+  fromEngineReviewRows,
+  confirmedNumbersFromReview,
+} from "./review/row-review.ts";
+export type {
+  ImportReviewLine,
+  ImportReviewLineStatus,
+  ImportReviewFilter,
+} from "./review/row-review.ts";
+export {
+  getImportVolumeLimits,
+  assertWithinVolumeLimits,
+  chunkRows,
+  createCancellableBatchRunner,
+} from "./import-volume-limits.ts";
+export {
+  parseBrazilianNumber,
+  parseFlexibleDateBr,
+  normalizeUnit,
+  applyStockFieldTransform,
+  DEFAULT_STOCK_TRANSFORM,
+} from "./mapping/stock-transforms.ts";
+export {
+  resolveOcrProvider,
+  assertOcrAllowed,
+  mockOcrExtractText,
+} from "./ocr/ocr-provider-contract.ts";
+export { listExcelSheetNames } from "./parsers/excel-parser.ts";
+export type { ParseExcelOptions } from "./parsers/excel-parser.ts";

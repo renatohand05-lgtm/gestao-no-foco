@@ -1,10 +1,10 @@
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand/premium-global-loader";
 
 export default function FinanceiroLoading() {
   return (
-    <BrandSplash
+    <PremiumGlobalLoader
       className="min-h-[60vh]"
-      label="Carregando financeiro…"
+      label="Carregando conteúdo"
     />
   );
 }

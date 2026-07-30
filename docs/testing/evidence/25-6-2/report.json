@@ -1,0 +1,49 @@
+{
+  "at": "2026-07-30T20:14:13.650Z",
+  "baseUrl": "http://localhost:3001",
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-2\\loader-desktop-1920.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-2\\loader-notebook-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-2\\loader-notebook-1366.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-2\\loader-tablet-767.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-2\\loader-mobile-390.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-2\\loader-reduced-motion.png"
+  ],
+  "checks": [
+    {
+      "viewport": "desktop-1920",
+      "hasMark": true,
+      "markSrc": "/brand/icon-192.png",
+      "visibleText": "Carregando conteúdo",
+      "hasBar": false
+    },
+    {
+      "viewport": "notebook-1440",
+      "hasMark": true,
+      "markSrc": "/brand/icon-192.png",
+      "visibleText": "Carregando conteúdo",
+      "hasBar": false
+    },
+    {
+      "viewport": "notebook-1366",
+      "hasMark": true,
+      "markSrc": "/brand/icon-192.png",
+      "visibleText": "Carregando conteúdo",
+      "hasBar": false
+    },
+    {
+      "viewport": "tablet-767",
+      "hasMark": true,
+      "markSrc": "/brand/icon-192.png",
+      "visibleText": "Carregando conteúdo",
+      "hasBar": false
+    },
+    {
+      "viewport": "mobile-390",
+      "hasMark": true,
+      "markSrc": "/brand/icon-192.png",
+      "visibleText": "Carregando conteúdo",
+      "hasBar": false
+    }
+  ]
+}

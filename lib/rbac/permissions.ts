@@ -61,9 +61,14 @@ export const PERMISSION_CATALOG = [
   def("produtos.visualizar", "estoque", "produtos_visualizar", "Visualizar produtos e serviços", "leitura", "baixo"),
   def("produtos.criar", "estoque", "produtos_criar", "Criar produtos e serviços", "escrita", "medio"),
   def("produtos.editar", "estoque", "produtos_editar", "Editar produtos e serviços", "escrita", "medio"),
+  def("produtos.excluir", "estoque", "produtos_excluir", "Excluir produtos sem uso", "exclusao", "alto"),
   def("produtos.importar", "estoque", "produtos_importar", "Importar catálogo de produtos", "escrita", "alto"),
   def("servicos.importar", "estoque", "servicos_importar", "Importar catálogo de serviços", "escrita", "alto"),
+  def("servicos.excluir", "estoque", "servicos_excluir", "Excluir serviços sem uso", "exclusao", "alto"),
+  def("importacoes.visualizar", "estoque", "importacoes_visualizar", "Visualizar histórico de importações", "leitura", "baixo"),
   def("importacoes.rollback", "estoque", "importacoes_rollback", "Reverter importações de catálogo/estoque", "aprovacao", "critico"),
+  def("importacoes.arquivar", "estoque", "importacoes_arquivar", "Arquivar histórico de importações", "escrita", "medio"),
+  def("importacoes.excluir_historico", "estoque", "importacoes_excluir_historico", "Ocultar/soft-delete do histórico visual", "exclusao", "alto"),
 
   // Compras
   def("compras.visualizar", "compras", "visualizar", "Visualizar compras", "leitura", "baixo"),

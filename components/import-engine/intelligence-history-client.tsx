@@ -36,6 +36,7 @@ import {
 } from "@/lib/import-engine/intelligence/intelligence-actions";
 import type { ImportHistoryEntry, ImportRunItem } from "@/lib/import-engine";
 import { cn } from "@/lib/utils";
+import { ImportHistoryRowActions } from "./import-history-row-actions";
 import { IntelligenceTimelinePanel } from "./intelligence-timeline-panel";
 import {
   buildRunTimeline,
@@ -69,12 +70,13 @@ export function IntelligenceHistoryClient({
   initialRuns,
   total,
 }: Props) {
-  const [runs] = useState(initialRuns);
+  const [runs, setRuns] = useState(initialRuns);
   const [selected, setSelected] = useState<ImportHistoryEntry | null>(null);
   const [items, setItems] = useState<ImportRunItem[]>([]);
   const [planMsg, setPlanMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [showArchived, setShowArchived] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [moduleFilter, setModuleFilter] = useState("all");
@@ -98,6 +100,8 @@ export function IntelligenceHistoryClient({
   const filtered = useMemo(() => {
     const q = deferredQuery.trim().toLowerCase();
     return runs.filter((r) => {
+      if (!showArchived && (r.archivedAt || r.deletedAt)) return false;
+      if (showArchived && !r.archivedAt && !r.deletedAt) return false;
       if (statusFilter !== "all" && r.status !== statusFilter) return false;
       if (moduleFilter !== "all" && r.module !== moduleFilter) return false;
       if (
@@ -122,6 +126,7 @@ export function IntelligenceHistoryClient({
     });
   }, [
     runs,
+    showArchived,
     statusFilter,
     moduleFilter,
     userFilter,
@@ -253,6 +258,20 @@ export function IntelligenceHistoryClient({
               }}
               aria-label="Data final"
             />
+          </ExecutiveFilterField>
+          <ExecutiveFilterField label="Visibilidade">
+            <select
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={showArchived ? "archived" : "active"}
+              onChange={(e) => {
+                setShowArchived(e.target.value === "archived");
+                setPage(0);
+              }}
+              aria-label="Filtrar arquivados"
+            >
+              <option value="active">Ativos</option>
+              <option value="archived">Arquivados / excluídos</option>
+            </select>
           </ExecutiveFilterField>
           <ExecutiveFilterField label="Status">
             <select
@@ -438,14 +457,25 @@ export function IntelligenceHistoryClient({
                       )}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => inspect(r)}
-                      >
-                        Detalhe
-                      </Button>
+                      <ImportHistoryRowActions
+                        tenantSlug={tenantSlug}
+                        run={r}
+                        canRollback={canRollback}
+                        onInspect={() => inspect(r)}
+                        onChanged={(next) => {
+                          setRuns((prev) =>
+                            prev.map((x) => (x.id === next.id ? next : x)),
+                          );
+                          setSelected(next);
+                        }}
+                        onRetry={
+                          r.status === "failed" || r.status === "partial"
+                            ? () => {
+                                window.location.href = `/${tenantSlug}/integracoes/importar`;
+                              }
+                            : undefined
+                        }
+                      />
                     </TableCell>
                   </TableRow>
                 );

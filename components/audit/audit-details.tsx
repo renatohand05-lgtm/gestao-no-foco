@@ -28,7 +28,7 @@ export function AuditDetails({ event, className }: Props) {
       data-audit-details
       aria-label={formatAuditEventTitle(event)}
       className={cn(
-        "space-y-4 rounded-xl border border-border/60 bg-[var(--brand-white)] p-4 sm:p-5",
+        "space-y-4 rounded-xl border border-border/60 bg-card p-4 sm:p-5",
         className,
       )}
     >

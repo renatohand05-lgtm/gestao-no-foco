@@ -11,6 +11,7 @@ export const SUPPLY_ENTERPRISE_LINKS = [
   { href: "compras/executivo", label: "Executivo" },
   { href: "compras/pedidos", label: "Pedidos" },
   { href: "compras/almoxarifado", label: "Almoxarifado" },
+  { href: "compras/cotacoes", label: "Cotações" },
   { href: "compras/inventario", label: "Inventário" },
   { href: "compras/indicadores", label: "Indicadores" },
   { href: "compras/inteligencia", label: "Inteligência" },

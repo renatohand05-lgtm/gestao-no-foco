@@ -1,10 +1,11 @@
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand/premium-global-loader";
 
 export default function RootLoading() {
   return (
-    <BrandSplash
+    <PremiumGlobalLoader
       className="min-h-screen"
-      label="Carregando aplicação…"
+      label="Carregando conteúdo"
+      variant="embed"
     />
   );
 }

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { LoginForm } from "@/components/auth/login-form";
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand";
 import { brandConfig } from "@/config/brand";
 
 export const metadata = {
@@ -11,9 +11,9 @@ export const metadata = {
 
 function LoginFormFallback() {
   return (
-    <BrandSplash
-      className="min-h-[28rem] rounded-xl border border-border/50"
-      label="Preparando acesso…"
+    <PremiumGlobalLoader
+      className="min-h-[28rem] rounded-xl border border-white/10"
+      label="Carregando conteúdo"
     />
   );
 }

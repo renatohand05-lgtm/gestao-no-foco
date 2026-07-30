@@ -1,40 +1,60 @@
+"use client";
+
+import Image from "next/image";
+
 import { cn } from "@/lib/utils";
-import { brandConfig } from "@/config/brand";
+import { brandAssets, brandConfig } from "@/config/brand";
 
 type BrandMarkProps = {
   className?: string;
-  /** Tamanho do quadrado (classe Tailwind size-*) */
+  /** Tamanho do quadrado */
   size?: "sm" | "md" | "lg" | "xl";
   title?: string;
+  /** Fundo claro: usa marca com contraste adequado */
+  variant?: "dark" | "light" | "auto";
 };
 
 const sizeMap = {
-  sm: "size-7 text-[11px]",
-  md: "size-8 text-xs",
-  lg: "size-10 text-sm",
-  xl: "size-12 text-base",
+  sm: { className: "size-7", px: 28 },
+  md: { className: "size-8", px: 32 },
+  lg: { className: "size-10", px: 40 },
+  xl: { className: "size-12", px: 48 },
 } as const;
 
 /**
- * Marca reduzida — monograma "G" (sidebar recolhida, mobile, favicon UI).
+ * Símbolo oficial G (PNG) — sem monograma genérico em texto.
  */
 export function BrandMark({
   className,
   size = "md",
   title = brandConfig.name,
+  variant = "auto",
 }: BrandMarkProps) {
+  const dim = sizeMap[size];
+  const src =
+    variant === "light" ? brandAssets.markTransparent : brandAssets.markPng;
+
   return (
     <span
       role="img"
       aria-label={title}
       title={title}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-lg bg-[var(--brand-graphite)] font-[family-name:var(--font-display)] font-bold tracking-tight text-[var(--brand-gold)] shadow-sm",
-        sizeMap[size],
+        "relative inline-flex shrink-0 overflow-hidden rounded-lg shadow-sm ring-1 ring-white/10",
+        dim.className,
         className,
       )}
+      data-brand-mark=""
+      data-variant={variant}
     >
-      G
+      <Image
+        src={src}
+        alt=""
+        width={dim.px}
+        height={dim.px}
+        className="size-full object-cover"
+        priority={size === "xl" || size === "lg"}
+      />
     </span>
   );
 }

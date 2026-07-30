@@ -25,7 +25,7 @@ export function ApprovalOverdueCard({ items, className, limit = 5 }: Props) {
     <section
       data-approval-overdue-card
       className={cn(
-        "space-y-2 rounded-xl border border-destructive/30 bg-[var(--brand-white)] p-3",
+        "space-y-2 rounded-xl border border-destructive/30 bg-card p-3",
         className,
       )}
     >

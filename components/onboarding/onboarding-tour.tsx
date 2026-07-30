@@ -68,7 +68,7 @@ export function OnboardingTour({ tenantSlug, dismissed }: Props) {
   return (
     <div
       className={cn(
-        "mb-5 border border-border/60 bg-[var(--brand-white)] p-4",
+        "mb-5 border border-border/60 bg-card p-4",
         gofRadius.lg,
         gofMotion.fade,
       )}

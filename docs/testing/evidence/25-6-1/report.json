@@ -1,0 +1,117 @@
+{
+  "at": "2026-07-30T19:37:17.421Z",
+  "baseUrl": "http://localhost:3001",
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\landing-1920.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\landing-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\landing-1366.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\landing-tablet.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\landing-mobile.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\dashboard-1440-dark.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\dashboard-1440-light.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\dashboard-1920-dark.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\dashboard-1440-dark.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\dashboard-1366-dark.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\dashboard-tablet-dark.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6-1\\dashboard-mobile-dark.png"
+  ],
+  "checks": [
+    {
+      "page": "landing-1920",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1920,
+      "clientW": 1920
+    },
+    {
+      "page": "landing-1440",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "page": "landing-1366",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1366,
+      "clientW": 1366
+    },
+    {
+      "page": "landing-tablet",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 767,
+      "clientW": 767
+    },
+    {
+      "page": "landing-mobile",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 390,
+      "clientW": 390
+    },
+    {
+      "page": "dashboard-1440-dark",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "page": "dashboard-1440-light",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "page": "dashboard-1920-dark",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1920,
+      "clientW": 1920
+    },
+    {
+      "page": "dashboard-1440-dark",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "page": "dashboard-1366-dark",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 1366,
+      "clientW": 1366
+    },
+    {
+      "page": "dashboard-tablet-dark",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 767,
+      "clientW": 767
+    },
+    {
+      "page": "dashboard-mobile-dark",
+      "pageOverflow": false,
+      "cashOverflow": false,
+      "kpiBroken": false,
+      "scrollW": 390,
+      "clientW": 390
+    }
+  ],
+  "errors": []
+}

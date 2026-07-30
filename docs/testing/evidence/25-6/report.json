@@ -1,0 +1,14 @@
+{
+  "at": "2026-07-30T19:03:06.656Z",
+  "baseUrl": "http://localhost:3001",
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6\\01-landing.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6\\02-login.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6\\03-dashboard-dark.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6\\04-dashboard-notebook.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6\\05-dashboard-mobile.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6\\06-dashboard-light.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-6\\07-disclosure-open.png"
+  ],
+  "errors": []
+}

@@ -5,7 +5,7 @@
  * Módulos de domínio reexportam aliases para não quebrar imports existentes.
  */
 
-export { formatCurrency } from "@/lib/format/currency";
+export { formatCurrency, formatCurrencyCompact, formatCurrencyChartLabel } from "@/lib/format/currency";
 export { formatNumber } from "@/lib/format/number";
 export {
   formatPercent,

@@ -168,6 +168,9 @@ export const gofMotion = {
   loading: "motion-safe:animate-pulse",
   skeleton:
     "relative overflow-hidden bg-muted/40 before:absolute before:inset-0 before:-translate-x-full before:animate-[ex-shimmer_1.6s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent dark:before:via-white/10 motion-reduce:before:animate-none",
+  /** Sprint 25.7 */
+  enter: "premium-enter",
+  kpiLift: "premium-kpi-lift",
 } as const;
 
 export type GofMotionKey = keyof typeof gofMotion;

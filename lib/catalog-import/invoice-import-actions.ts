@@ -6,6 +6,9 @@
 
 import { getCurrentProfile } from "@/lib/auth/session";
 import {
+  assertNfeXmlImportEnabled,
+} from "@/lib/catalog-import/catalog-upload-flags";
+import {
   buildInvoiceItemRows,
   canAutoCreateProductFromInvoice,
   parseInvoiceXmlSafe,
@@ -13,10 +16,15 @@ import {
 } from "@/lib/catalog-import/invoice-bridge";
 import { buildCatalogPreviewSummary } from "@/lib/catalog-import/preview-summary";
 import {
+  catalogImportPermissionSatisfied,
+  resolveCatalogImportEffectivePermissions,
+} from "@/lib/catalog-import/rbac-compat";
+import {
   createEnterpriseContext,
   createRbacSupabaseAdapter,
 } from "@/lib/enterprise";
 import { INVOICE_IMPORT_ADAPTER } from "@/lib/import-engine/adapters/invoice/adapter";
+import { assertImportFileWithinLimit } from "@/lib/import-engine/import-file-limits";
 import { createProductionImportEngine } from "@/lib/import-engine";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
@@ -28,17 +36,26 @@ async function resolveInvoiceAuth(tenantSlug: string) {
   const client = await createClient();
   const rbac = createRbacSupabaseAdapter(client);
   const snap = await rbac.resolveAuthorizationSnapshot(tenant.id, profile.id);
-  const permissions = snap.permissions ?? [];
+  const effective = resolveCatalogImportEffectivePermissions({
+    membershipRole: tenant.role,
+    snapshotRoles: snap.roles,
+    snapshotPermissions: snap.permissions,
+  });
+  const permissions = effective.permissions;
   const needed = ["compras.receber", "estoque.importar", "estoque.movimentar"];
-  if (!needed.some((p) => permissions.includes(p))) {
+  if (!catalogImportPermissionSatisfied(permissions, needed)) {
     throw new Error(`Sem permissão (${needed.join(" | ")}).`);
   }
   createEnterpriseContext({
     tenantId: tenant.id,
     userId: profile.id,
-    roles: snap.roles ?? [],
+    roles: effective.roles,
     permissions,
     source: "server_action",
+    metadata: {
+      invoiceAuthSource: effective.source,
+      membershipRole: tenant.role,
+    },
   });
   return { tenant, profile, client };
 }
@@ -47,10 +64,15 @@ export async function previewInvoiceXmlImportAction(
   tenantSlug: string,
   formData: FormData,
 ) {
+  assertNfeXmlImportEnabled();
   const auth = await resolveInvoiceAuth(tenantSlug);
   const file = formData.get("file");
   if (!(file instanceof File)) throw new Error("Arquivo XML obrigatório.");
   const bytes = new Uint8Array(await file.arrayBuffer());
+  assertImportFileWithinLimit({
+    fileName: file.name,
+    byteLength: bytes.byteLength,
+  });
   const parsed = parseInvoiceXmlSafe({
     fileName: file.name,
     mimeType: file.type,

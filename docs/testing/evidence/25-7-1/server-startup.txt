@@ -1,0 +1,30 @@
+---
+pid: 12484
+cwd: "C:\\Users\\renat\\gestao-no-foco"
+command: "npm run dev -- --port 3001"
+title: "Restart Next.js for validation cycle 2"
+status: running  
+started_at: 2026-07-30T21:24:03.998Z
+running_for_ms: 65135    
+---
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 predev
+> node scripts/assert-package-json.mjs
+
+[assert-package-json] OK (12192 bytes)
+
+> gestao-no-foco@21.10.0-rc.1 dev
+> node scripts/assert-package-json.mjs && next dev --port 3001
+
+[assert-package-json] OK (12192 bytes)
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.15.47:3001
+- Environments: .env.local
+✓ Ready in 958ms
+
+○ Compiling / ...
+ GET / 200 in 5.0s (next.js: 4.0s, proxy.ts: 235ms, application-code: 779ms)
+ GET /login 200 in 1272ms (next.js: 1023ms, proxy.ts: 8ms, application-code: 240ms)
+[dashboard-v2] { tenant: 'teste-renato-01', sha: 'local' }

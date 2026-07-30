@@ -23,7 +23,7 @@ export function LatencyCard({ latency, className }: Props) {
     <section
       data-latency-card
       className={cn(
-        "space-y-2 rounded-xl border border-border/60 bg-[var(--brand-white)] p-4",
+        "space-y-2 rounded-xl border border-border/60 bg-card p-4",
         className,
       )}
     >

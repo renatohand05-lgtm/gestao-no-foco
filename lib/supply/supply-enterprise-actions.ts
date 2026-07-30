@@ -523,3 +523,180 @@ export async function createSupplyInventoryCycleAction(
     kind,
   });
 }
+
+export async function upsertSupplyInventoryCountAction(
+  tenantSlug: string,
+  input: {
+    inventarioId: string;
+    produtoId: string;
+    saldoSistema: number;
+    contagem: number;
+    custoUnitario?: number | null;
+    justificativa?: string | null;
+  },
+) {
+  const auth = await resolveSupplyAuth(tenantSlug, [
+    "estoque.inventariar",
+    "estoque.ajustar",
+  ]);
+  const { upsertInventoryCountLine } = await import(
+    "./enterprise/inventory-service"
+  );
+  return upsertInventoryCountLine(auth.client, {
+    tenantId: auth.tenant.id,
+    inventarioId: input.inventarioId,
+    produtoId: input.produtoId,
+    saldoSistema: input.saldoSistema,
+    contagem: input.contagem,
+    custoUnitario: input.custoUnitario,
+    justificativa: input.justificativa,
+    userId: auth.profile.id,
+  });
+}
+
+export async function listSupplyInventoryCountAction(
+  tenantSlug: string,
+  inventarioId: string,
+) {
+  const auth = await resolveSupplyAuth(tenantSlug, ["estoque.visualizar"]);
+  const { listInventoryCountLines } = await import(
+    "./enterprise/inventory-service"
+  );
+  return listInventoryCountLines(auth.client, auth.tenant.id, inventarioId);
+}
+
+/** Comparação de cotações — dados reais, sem inventar frete/imposto. */
+export async function listSupplyQuotationCompareAction(tenantSlug: string) {
+  const auth = await resolveSupplyAuth(tenantSlug, [
+    "compras.visualizar",
+    "estoque.visualizar",
+  ]);
+
+  const empty = {
+    ready: false as boolean,
+    lines: [] as Array<{
+      produtoId: string | null;
+      descricao: string;
+      fornecedorId: string;
+      fornecedorNome: string;
+      precoUnitario: number;
+      quantidade: number;
+      desconto: number;
+      freteInformado: number | null;
+      impostosInformados: number | null;
+      prazoDias: number | null;
+      leadTimeDias: number | null;
+      validadeProposta: string | null;
+      qualidadeHistorica: number | null;
+      entregaNoPrazoHistorica: number | null;
+    }>,
+    error: null as string | null,
+  };
+
+  const { data: cotacoes, error: cErr } = await auth.client
+    .from("compras_cotacoes" as never)
+    .select("id, fornecedor_id")
+    .eq("tenant_id", auth.tenant.id)
+    .is("deleted_at", null)
+    .limit(100);
+
+  if (cErr) {
+    return { ...empty, error: cErr.message };
+  }
+
+  const cotacaoRows = (cotacoes ?? []) as Array<{
+    id: string;
+    fornecedor_id: string | null;
+  }>;
+  const cotacaoIds = cotacaoRows.map((c) => c.id);
+  if (!cotacaoIds.length) {
+    return { ...empty, ready: true };
+  }
+
+  const fornecedorIds = [
+    ...new Set(
+      cotacaoRows.map((c) => c.fornecedor_id).filter(Boolean) as string[],
+    ),
+  ];
+  const fornNome = new Map<string, string>();
+  if (fornecedorIds.length) {
+    const { data: forns } = await auth.client
+      .from("fornecedores")
+      .select("id, nome")
+      .eq("tenant_id", auth.tenant.id)
+      .in("id", fornecedorIds);
+    for (const f of forns ?? []) {
+      fornNome.set(f.id, f.nome);
+    }
+  }
+
+  const { data: itens, error: iErr } = await auth.client
+    .from("compras_cotacao_itens" as never)
+    .select(
+      "cotacao_id, produto_id, quantidade, preco_unitario, prazo_dias, frete, impostos, observacoes",
+    )
+    .eq("tenant_id", auth.tenant.id)
+    .in("cotacao_id", cotacaoIds)
+    .limit(2000);
+
+  if (iErr) {
+    return { ...empty, error: iErr.message };
+  }
+
+  const produtoIds = [
+    ...new Set(
+      ((itens ?? []) as Array<{ produto_id: string }>)
+        .map((i) => i.produto_id)
+        .filter(Boolean),
+    ),
+  ];
+  const prodNome = new Map<string, string>();
+  if (produtoIds.length) {
+    const { data: prods } = await auth.client
+      .from("produtos")
+      .select("id, nome")
+      .eq("tenant_id", auth.tenant.id)
+      .in("id", produtoIds);
+    for (const p of prods ?? []) {
+      prodNome.set(p.id, p.nome);
+    }
+  }
+
+  const fornByCotacao = new Map(
+    cotacaoRows.map((c) => [
+      c.id,
+      {
+        id: c.fornecedor_id ?? "",
+        nome: c.fornecedor_id
+          ? (fornNome.get(c.fornecedor_id) ?? c.fornecedor_id)
+          : "—",
+      },
+    ]),
+  );
+
+  const lines = ((itens ?? []) as Array<Record<string, unknown>>).map((row) => {
+    const forn = fornByCotacao.get(String(row.cotacao_id)) ?? {
+      id: "",
+      nome: "—",
+    };
+    const pid = row.produto_id as string | null;
+    return {
+      produtoId: pid,
+      descricao: (pid && prodNome.get(pid)) || String(row.observacoes ?? "Item"),
+      fornecedorId: forn.id,
+      fornecedorNome: forn.nome,
+      precoUnitario: Number(row.preco_unitario ?? 0),
+      quantidade: Number(row.quantidade ?? 0),
+      desconto: 0,
+      freteInformado: row.frete == null ? null : Number(row.frete),
+      impostosInformados: row.impostos == null ? null : Number(row.impostos),
+      prazoDias: row.prazo_dias == null ? null : Number(row.prazo_dias),
+      leadTimeDias: null,
+      validadeProposta: null,
+      qualidadeHistorica: null,
+      entregaNoPrazoHistorica: null,
+    };
+  });
+
+  return { ready: true, lines, error: null as string | null };
+}

@@ -1,24 +1,14 @@
 import { Suspense, type ReactNode } from "react";
 
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand";
 import { DashboardActions } from "@/components/dashboard/dashboard-actions";
 import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
 import { ExecutiveAiCard } from "@/components/dashboard/executive/executive-ai-card";
-import { ExecutiveDashboardHeader } from "@/components/dashboard/executive/executive-dashboard-header";
-import { ExecutiveDecisionCenter } from "@/components/dashboard/executive/executive-decision-center";
-import { ExecutiveActionPlanSection } from "@/components/dashboard/executive/executive-action-plan-section";
-import { ExecutiveIntelligenceSection } from "@/components/dashboard/executive/executive-intelligence-section";
-import { ExecutiveFinancialCockpit } from "@/components/dashboard/executive/executive-financial-cockpit";
-import { ExecutiveSummarySection } from "@/components/dashboard/executive/executive-summary-section";
-import { DashboardQuickActions } from "@/components/dashboard/dashboard-quick-actions";
-import { ResumoVendasHojeCards } from "@/components/dashboard/resumo-vendas-hoje-cards";
-import { ResumoLeituraDoDia } from "@/components/dashboard/resumo-leitura-do-dia";
-import { ResumoVendasMesTable } from "@/components/dashboard/resumo-vendas-mes-table";
-import { CommercialIntelligenceSummaryCard } from "@/components/vendas/commercial-intelligence-summary-card";
 import {
   ExecutiveFooter,
   ExecutiveFooterSkeleton,
 } from "@/components/dashboard/executive/executive-footer";
+import { PremiumDashboardView } from "@/components/dashboard/premium/premium-dashboard-view";
 import { buildExecutiveAiBundle } from "@/lib/ai/executive-ai-snapshot";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
 import {
@@ -29,24 +19,20 @@ import {
   formatDateTimeInTimezone,
   resolveTenantTimezone,
 } from "@/lib/dashboard/tenant-timezone";
-import {
-  buildLeituraDoDia,
-  calcProjecaoFechamento,
-} from "@/lib/dashboard/resumo-vendas-mes";
 import { composeExecutiveDecision } from "@/lib/dashboard/executive-decision-service";
 import { buildExecutiveIntelligence } from "@/lib/dashboard/executive-intelligence-loader";
-import { composeExecutiveActionPlan } from "@/lib/dashboard/executive-action-plan-compose";
 import {
   loadExecutiveDashboardContext,
   toDecisionFeeds,
   toIntelligenceFeeds,
 } from "@/lib/dashboard/executive-dashboard-context-service";
 import { composeExecutiveFinancialCockpit } from "@/lib/dashboard/executive-financial-cockpit-service";
-import { composeExecutiveSummary } from "@/lib/dashboard/executive-summary-compose";
 import { ExecutiveWorkspace } from "@/components/executive/workspace";
 import {
+  loadDashboardCharts,
   loadDashboardFull,
   loadDashboardHojeSnapshot,
+  loadDashboardPrimary,
   loadDashboardResumoMes,
 } from "@/lib/dashboard/dashboard-loaders";
 import { createCommercialIntelligenceService } from "@/lib/vendas/commercial-intelligence-service";
@@ -158,36 +144,34 @@ type DashboardStreamingViewProps = {
   onboardingLead?: ReactNode;
 };
 
-function commercialTeaserFromCi(ci: CommercialIntelligenceData | null): {
-  faturamento: number | null;
-  negociacao: number | null;
-  conversaoLabel: string;
-  available: boolean;
-} {
-  if (!ci) {
-    return {
-      faturamento: null,
-      negociacao: null,
-      conversaoLabel: "Indisponível",
-      available: false,
-    };
-  }
-  const conv = ci.kpis.taxaConversaoComercial;
-  return {
-    faturamento: ci.kpis.faturamentoPeriodo.value,
-    negociacao: ci.kpis.valorEmNegociacao.value,
-    conversaoLabel:
-      conv.available && conv.value != null
-        ? `${conv.value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`
-        : "Indisponível",
-    available: true,
-  };
-}
-
 async function softLoadCommercial(tenantId: string) {
   try {
     const service = await createCommercialIntelligenceService(tenantId);
     return await service.load({ preset: "mes" });
+  } catch {
+    return null;
+  }
+}
+
+async function softLoadPrimary(
+  tenantId: string,
+  segment: TenantSegment | null,
+  filters: DashboardFilters,
+) {
+  try {
+    return await loadDashboardPrimary(tenantId, segment, filters);
+  } catch {
+    return null;
+  }
+}
+
+async function softLoadCharts(
+  tenantId: string,
+  segment: TenantSegment | null,
+  filters: DashboardFilters,
+) {
+  try {
+    return await loadDashboardCharts(tenantId, segment, filters);
   } catch {
     return null;
   }
@@ -215,9 +199,6 @@ function ExecutiveAiSkeleton() {
   );
 }
 
-/**
- * Soft-fetch CRM + Estoque isolado — não bloqueia Resumo/Plano/Decisão.
- */
 function formatLongDateLabel(civilDate: string) {
   const [y, m, d] = civilDate.split("-").map(Number);
   if (!y || !m || !d) return civilDate;
@@ -327,12 +308,12 @@ async function ExecutiveAiLazyBlock({
 
 async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   let hojeData = null;
-  let resumoData = null;
   let decision = null;
   let intelligence = null;
-  let actionPlan = null;
   let cockpit = null;
   let commercial: CommercialIntelligenceData | null = null;
+  let primary = null;
+  let charts = null;
   let execCtxLoaded: Awaited<
     ReturnType<typeof loadExecutiveDashboardContext>
   > | null = null;
@@ -340,21 +321,25 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   const centroCustoId =
     ctx.resumoFilters.centroCustoId ?? ctx.filters.centroCusto ?? null;
   try {
-    const [hoje, resumo, execCtx, ci] = await Promise.all([
-      loadDashboardHojeSnapshot(ctx.tenantId, centroCustoId),
-      loadDashboardResumoMes(ctx.tenantId, {
-        year: ctx.resumoFilters.year,
-        month: ctx.resumoFilters.month,
-        centroCustoId,
-        vendedorId: ctx.resumoFilters.vendedorId ?? null,
-        origem: ctx.resumoFilters.origem ?? null,
-      }),
-      loadExecutiveDashboardContext(ctx.tenantId, ctx.tenantSlug),
-      softLoadCommercial(ctx.tenantId),
-    ]);
+    const [hoje, resumo, execCtx, ci, primaryData, chartsData] =
+      await Promise.all([
+        loadDashboardHojeSnapshot(ctx.tenantId, centroCustoId),
+        loadDashboardResumoMes(ctx.tenantId, {
+          year: ctx.resumoFilters.year,
+          month: ctx.resumoFilters.month,
+          centroCustoId,
+          vendedorId: ctx.resumoFilters.vendedorId ?? null,
+          origem: ctx.resumoFilters.origem ?? null,
+        }),
+        loadExecutiveDashboardContext(ctx.tenantId, ctx.tenantSlug),
+        softLoadCommercial(ctx.tenantId),
+        softLoadPrimary(ctx.tenantId, ctx.segment, ctx.filters),
+        softLoadCharts(ctx.tenantId, ctx.segment, ctx.filters),
+      ]);
     hojeData = hoje;
-    resumoData = resumo;
     commercial = ci;
+    primary = primaryData;
+    charts = chartsData;
     execCtxLoaded = execCtx;
     decision = composeExecutiveDecision({
       tenantSlug: ctx.tenantSlug,
@@ -366,12 +351,6 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
       feeds: toIntelligenceFeeds(execCtx),
     });
     cockpit = composeExecutiveFinancialCockpit(execCtx);
-    actionPlan = composeExecutiveActionPlan({
-      tenantSlug: ctx.tenantSlug,
-      decisionItems: decision.items,
-      intelligence,
-      cockpit,
-    });
   } catch (error) {
     loadError = error;
   }
@@ -379,10 +358,8 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   if (
     loadError ||
     !hojeData ||
-    !resumoData ||
     !decision ||
     !intelligence ||
-    !actionPlan ||
     !cockpit ||
     !execCtxLoaded
   ) {
@@ -391,120 +368,50 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
         tenantSlug={ctx.tenantSlug}
         description={errorMessage(
           loadError,
-          "Não foi possível carregar o faturamento de hoje.",
+          "Não foi possível carregar o dashboard premium.",
         )}
       />
     );
   }
 
-  const summary = composeExecutiveSummary({
-    decision,
-    actionPlan,
-    intelligence,
-    cockpit,
-  });
-  const ciTeaser = commercialTeaserFromCi(commercial);
-
-  /** Gate 20.1.1 — hierarquia cockpit premium. Sem alterar dados/compose. */
   const dateLabel = formatLongDateLabel(hojeData.data_hoje);
+  const periodoLabel =
+    primary?.periodo.label ??
+    `${ctx.filters.dataDe} → ${ctx.filters.dataAte}`;
+  const estoqueAbaixoMinimo = execCtxLoaded.estoque?.abaixoMinimo ?? null;
 
   return (
     <ExecutivePage width="full" spacing="loose" className="max-w-none px-0 py-0">
-      <div className="space-y-6" data-dashboard-block="hoje-v2">
-        {/* 1 · Faixa de contexto (saudação exclusiva do Hero) */}
-        <ExecutiveDashboardHeader
-          greeting={ctx.greeting}
-          tenantName={ctx.tenantName}
-          dataHoje={hojeData.data_hoje}
-          updatedAtLabel={hojeData.atualizado_em_label}
-          status={hojeData.hoje.status}
-        />
-
-        {/* 1b · Ações rápidas */}
-        <DashboardQuickActions tenantSlug={ctx.tenantSlug} />
-
-        {/* 2–4 · Hero + Score + Prioridades / Oportunidades / Riscos */}
-        <Suspense fallback={<ExecutiveAiSkeleton />}>
-          <ExecutiveAiLazyBlock
-            tenantId={ctx.tenantId}
-            tenantSlug={ctx.tenantSlug}
-            cockpit={cockpit}
-            execCtx={execCtxLoaded}
-            hoje={hojeData}
-            commercial={commercial}
-            decision={decision}
-            greeting={ctx.greeting}
-            tenantName={ctx.tenantName}
-            dateLabel={dateLabel}
-            updatedAtLabel={hojeData.atualizado_em_label}
-          />
-        </Suspense>
-
-        {/* Metas / ritmo (KPIs do dia — sem duplicar Executive Score) */}
-        <ResumoVendasHojeCards data={hojeData} tenantSlug={ctx.tenantSlug} />
-
-        {/* Operação / potencial */}
-        <ExecutiveIntelligenceSection
-          data={intelligence}
-          tenantSlug={ctx.tenantSlug}
-        />
-
-        {/* Decisão (risco detalhado) · Plano (execução) — compactados */}
-        <ExecutiveDecisionCenter data={decision} tenantSlug={ctx.tenantSlug} />
-        <ExecutiveActionPlanSection data={actionPlan} />
-
-        {/* Financeiro */}
-        <ExecutiveFinancialCockpit
-          data={cockpit}
-          tenantSlug={ctx.tenantSlug}
-        />
-
-        {/* Comercial */}
-        <CommercialIntelligenceSummaryCard
-          tenantSlug={ctx.tenantSlug}
-          faturamento={ciTeaser.faturamento}
-          negociacao={ciTeaser.negociacao}
-          conversaoLabel={ciTeaser.conversaoLabel}
-          available={ciTeaser.available}
-        />
-
-        {/* Resumo consolidado + sinais curtos */}
-        <ExecutiveSummarySection data={summary} />
-        <ResumoLeituraDoDia
-          insights={buildLeituraDoDia({
-            metaHoje: hojeData.hoje.meta,
-            realizadoHoje: hojeData.hoje.faturamento,
-            diferencaHoje:
-              hojeData.hoje.meta == null
-                ? null
-                : hojeData.hoje.faturamento - hojeData.hoje.meta,
-            ticketHoje: hojeData.hoje.ticket_medio,
-            ticketMedioMes: hojeData.mes.ticket_medio,
-            projecaoFechamento:
-              calcProjecaoFechamento({
-                realizadoAcumulado: resumoData.total.realizado_acumulado,
-                diasDecorridos: resumoData.rows.filter(
-                  (r) => r.kind !== "futuro",
-                ).length,
-                diasTotais: resumoData.rows.length,
-              }) ?? hojeData.mes.projecao_fechamento,
-            metaMensal: resumoData.meta_mensal,
-          })}
-        />
-
-        {/* Evolução do mês */}
-        <ResumoVendasMesTable
-          tenantSlug={ctx.tenantSlug}
-          data={resumoData}
-          centrosCusto={ctx.filterOptions.centrosCusto}
-          initialFilters={{
-            year: ctx.resumoFilters.year,
-            month: ctx.resumoFilters.month,
-            centroCustoId: ctx.resumoFilters.centroCustoId,
-            origem: ctx.resumoFilters.origem,
-          }}
-        />
-      </div>
+      <PremiumDashboardView
+        tenantSlug={ctx.tenantSlug}
+        tenantName={ctx.tenantName}
+        greeting={ctx.greeting}
+        hoje={hojeData}
+        primary={primary}
+        charts={charts}
+        cockpit={cockpit}
+        intelligence={intelligence}
+        decision={decision}
+        estoqueAbaixoMinimo={estoqueAbaixoMinimo}
+        periodoLabel={periodoLabel}
+        aiSlot={
+          <Suspense fallback={<ExecutiveAiSkeleton />}>
+            <ExecutiveAiLazyBlock
+              tenantId={ctx.tenantId}
+              tenantSlug={ctx.tenantSlug}
+              cockpit={cockpit}
+              execCtx={execCtxLoaded}
+              hoje={hojeData}
+              commercial={commercial}
+              decision={decision}
+              greeting={ctx.greeting}
+              tenantName={ctx.tenantName}
+              dateLabel={dateLabel}
+              updatedAtLabel={hojeData.atualizado_em_label}
+            />
+          </Suspense>
+        }
+      />
     </ExecutivePage>
   );
 }
@@ -529,11 +436,12 @@ export function DashboardStreamingView({
           fallback={
             <div
               className={cn(
-                "h-72 border border-border/60 bg-card",
+                "h-72 border border-[var(--brand-gold)]/20 bg-card/60",
                 gofRadius.lg,
                 gofMotion.skeleton,
               )}
-              aria-label="Carregando resumo de vendas"
+              aria-label="Carregando dashboard premium"
+              data-premium-block="loading"
             />
           }
         >
@@ -551,9 +459,9 @@ export function DashboardStreamingView({
 
 export function DashboardExecutiveLoading() {
   return (
-    <BrandSplash
+    <PremiumGlobalLoader
       className="min-h-[70vh]"
-      label="Carregando dashboard…"
+      label="Carregando conteúdo"
     />
   );
 }

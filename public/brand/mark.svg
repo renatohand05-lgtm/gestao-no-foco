@@ -1,12 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gestão">
-  <rect width="64" height="64" rx="14" fill="#1A1C1E"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gestï¿½o">
+  <defs>
+    <linearGradient id="gGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0D78C"/>
+      <stop offset="45%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8A7028"/>
+    </linearGradient>
+    <radialGradient id="gGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0B0F14" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0B0F14"/>
+  <rect width="64" height="64" rx="14" fill="url(#gGlow)"/>
   <text
     x="32"
-    y="42"
+    y="44"
     text-anchor="middle"
-    font-family="system-ui, -apple-system, Segoe UI, sans-serif"
-    font-size="34"
+    font-family="Space Grotesk, Inter, system-ui, sans-serif"
+    font-size="36"
     font-weight="700"
-    fill="#C9A84C"
+    fill="url(#gGold)"
   >G</text>
 </svg>

@@ -9,7 +9,7 @@ type AuthSplitLayoutProps = {
 
 export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
   return (
-    <div className="grid min-h-full bg-[var(--brand-white)] lg:grid-cols-2">
+    <div className="grid min-h-full bg-card lg:grid-cols-2">
       <AuthBrandPanel />
       <div className="flex flex-col justify-center px-4 py-10 sm:px-8 lg:px-12">
         <div className="mb-8 flex items-center justify-between lg:hidden">

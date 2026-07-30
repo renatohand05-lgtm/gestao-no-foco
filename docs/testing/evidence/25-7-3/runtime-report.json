@@ -1,0 +1,55 @@
+{
+  "at": "2026-07-30T22:02:43.330Z",
+  "baseUrl": "http://localhost:3001",
+  "tenant": "teste-renato-01",
+  "checks": [
+    {
+      "page": "dashboard",
+      "url": "http://localhost:3001/teste-renato-01/dashboard",
+      "ok": true,
+      "denied": false,
+      "detail": "sem bloqueio executivo"
+    },
+    {
+      "page": "analytics-redirect",
+      "url": "http://localhost:3001/teste-renato-01/analytics/executivo",
+      "ok": true,
+      "denied": false,
+      "hasAlert": false,
+      "hasExecUi": false,
+      "detail": "dashboard executivo carregou sem bloqueio RBAC"
+    },
+    {
+      "page": "analytics-executivo",
+      "url": "http://localhost:3001/teste-renato-01/analytics/executivo",
+      "ok": true,
+      "denied": false,
+      "hasAlert": false,
+      "hasExecUi": true,
+      "detail": "acesso liberado para Owner"
+    }
+  ],
+  "consoleErrors": [],
+  "fatal": false,
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-3\\dashboard.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-3\\analytics-executivo.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-3\\analytics-executivo-direct.png"
+  ],
+  "tree": {
+    "user": "authenticated (playwright .auth/user.json)",
+    "membership": "tenant_members.role → owner (esperado)",
+    "enterpriseRole": "owner → proprietario (compat)",
+    "required": [
+      "analytics.visualizar",
+      "analytics.executivo",
+      "dashboard.executivo"
+    ],
+    "outcome": "ALLOW (compat Owner)"
+  },
+  "summary": {
+    "pass": 3,
+    "fail": 0,
+    "fatal": false
+  }
+}

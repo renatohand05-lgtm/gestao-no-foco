@@ -18,7 +18,7 @@ export default async function EstoqueImportarPage({
     <div className="space-y-6">
       <ModuleHeader
         title="Importar estoque e notas"
-        description="Produtos, saldo inicial e NF-e XML com preview, duplicidades e rastreabilidade."
+        description="Central: Excel, CSV, saldo, preços, custos, NF-e XML e PDF auxiliar — com preview e confirmação."
         breadcrumbs={[
           { label: "Estoque", href: `/${tenantSlug}/estoque` },
           { label: "Importar" },

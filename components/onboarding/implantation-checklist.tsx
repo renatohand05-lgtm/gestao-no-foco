@@ -42,7 +42,7 @@ export function ImplantationChecklist({ tenantSlug, checklist }: Props) {
   return (
     <section
       className={cn(
-        "border border-border/60 bg-[var(--brand-white)] p-4 sm:p-5",
+        "border border-border/60 bg-card p-4 sm:p-5",
         gofRadius.lg,
         gofMotion.fade,
       )}

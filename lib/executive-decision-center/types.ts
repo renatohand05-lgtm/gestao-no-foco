@@ -83,6 +83,11 @@ export type EdcSimulation = {
   description: string;
   /** Percentual aplicado (determinístico, declarado). */
   deltaPct: number;
+  /**
+   * Baseline numérico quando a simulação tem fonte (para preview interativo local).
+   * null quando indisponível — não inventar.
+   */
+  baselineAmount: number | null;
   baselineLabel: string;
   baselineValue: string;
   projectedLabel: string;

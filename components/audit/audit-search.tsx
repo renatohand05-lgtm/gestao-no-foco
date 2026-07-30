@@ -44,7 +44,7 @@ export function AuditSearch({
         value={text}
         placeholder={placeholder}
         className={cn(
-          "min-h-10 w-full flex-1 rounded-xl border border-border bg-[var(--brand-white)] px-3 text-sm text-foreground",
+          "min-h-10 w-full flex-1 rounded-xl border border-border bg-card px-3 text-sm text-foreground",
           "outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/35",
           gofTypography.subtitle,
         )}

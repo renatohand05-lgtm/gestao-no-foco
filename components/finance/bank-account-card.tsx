@@ -19,7 +19,7 @@ export function BankAccountCard({ account, className, onArchive }: Props) {
     <article
       data-bank-account-card
       className={cn(
-        "rounded-xl border border-border/60 bg-[var(--brand-white)] p-4",
+        "rounded-xl border border-border/60 bg-card p-4",
         className,
       )}
     >

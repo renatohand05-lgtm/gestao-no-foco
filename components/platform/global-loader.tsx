@@ -1,41 +1,74 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
+import { PremiumGlobalLoader } from "@/components/brand/premium-global-loader";
 import { cn } from "@/lib/utils";
 
 type Props = {
   active?: boolean;
   label?: string;
   className?: string;
+  /** Mínimo visual anti-flicker (ms). Sem máximo artificial. */
+  minVisibleMs?: number;
 };
 
 /**
- * Loader de navegação/app — overlay de tela cheia.
- * Diferente de LoadingOverlay (escopo de formulário).
+ * Overlay fullscreen com G oficial + fade-out curto (Sprint 25.6.2).
  */
 export function GlobalLoader({
   active = false,
-  label = "Carregando…",
+  label = "Carregando conteúdo",
   className,
+  minVisibleMs = 250,
 }: Props) {
-  if (!active) return null;
+  const shownAt = useRef<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [exiting, setExiting] = useState(false);
+
+  useEffect(() => {
+    const timers: number[] = [];
+
+    if (active) {
+      shownAt.current = performance.now();
+      timers.push(
+        window.setTimeout(() => {
+          setExiting(false);
+          setMounted(true);
+        }, 0),
+      );
+    } else {
+      const elapsed =
+        shownAt.current != null
+          ? performance.now() - shownAt.current
+          : minVisibleMs;
+      const wait = Math.max(0, minVisibleMs - elapsed);
+      timers.push(
+        window.setTimeout(() => {
+          setExiting(true);
+          timers.push(
+            window.setTimeout(() => {
+              setMounted(false);
+              setExiting(false);
+            }, 200),
+          );
+        }, wait),
+      );
+    }
+
+    return () => {
+      for (const id of timers) window.clearTimeout(id);
+    };
+  }, [active, minVisibleMs]);
+
+  if (!mounted) return null;
 
   return (
-    <div
-      className={cn(
-        "fixed inset-0 z-[90] flex items-center justify-center bg-background/60 backdrop-blur-[2px]",
-        className,
-      )}
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-      aria-label={label}
-    >
-      <div className="flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
-        <Loader2 className="size-4 animate-spin" />
-        {label}
-      </div>
-    </div>
+    <PremiumGlobalLoader
+      variant="fullscreen"
+      label={label}
+      className={cn(className)}
+      rootClassName={exiting ? "premium-loader-exit" : undefined}
+    />
   );
 }

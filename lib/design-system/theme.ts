@@ -1,10 +1,10 @@
 /**
- * Theme oficial — Gestão (Sprint 19 · Gate 19.0 / 19.0.1).
+ * Theme oficial — Gestão (Sprint 25.5 · Premium).
  *
- * Modo claro: ativo (padrão da plataforma).
- * Dark Mode: arquitetura preparada — NÃO ativar ainda.
+ * Modo escuro: experiência principal.
+ * Modo claro: equivalente elegante com mesma identidade.
  *
- * Tokens mapeiam para CSS variables em `app/globals.css` (paleta Brand Guide).
+ * Tokens mapeiam para CSS variables em `app/globals.css`.
  * Não altera regras de negócio.
  */
 
@@ -12,11 +12,11 @@ import { gofColors } from "./foundation";
 
 export type GofThemeMode = "light" | "dark";
 
-/** Modo oficial atual. Dark permanece reservado. */
-export const GOF_THEME_DEFAULT: GofThemeMode = "light";
+/** Experiência principal pós Sprint 25.5 */
+export const GOF_THEME_DEFAULT: GofThemeMode = "dark";
 
-/** Flag de produto — Dark Mode ainda não é feature. */
-export const GOF_DARK_MODE_ENABLED = false as const;
+/** Dark Mode liberado (toggle + system preference). */
+export const GOF_DARK_MODE_ENABLED = true as const;
 
 /**
  * Contrato de theme — valores semânticos.
@@ -71,8 +71,7 @@ export const gofThemeLight: GofThemeTokens = {
 };
 
 /**
- * Theme escuro — preparado para Gate futuro.
- * Não aplicar em runtime enquanto `GOF_DARK_MODE_ENABLED === false`.
+ * Theme escuro — experiência principal (Sprint 25.5).
  */
 export const gofThemeDark: GofThemeTokens = {
   mode: "dark",
@@ -83,8 +82,8 @@ export const gofThemeDark: GofThemeTokens = {
     warning: "#fbbf24",
     danger: "#f87171",
     info: "#5B6B7A",
-    background: "#1A1C1E",
-    surface: "#242628",
+    background: "#0B0F14",
+    surface: "#151A22",
     border: "rgba(255,255,255,0.10)",
     muted: "#3F3F46",
     foreground: "#FFFFFF",
@@ -97,7 +96,7 @@ export const gofThemeDark: GofThemeTokens = {
   },
 };
 
-/** Theme ativo da plataforma (sempre light até Dark Mode ser liberado). */
+/** Theme ativo da plataforma. */
 export function getGofTheme(mode: GofThemeMode = GOF_THEME_DEFAULT): GofThemeTokens {
   if (mode === "dark" && GOF_DARK_MODE_ENABLED) {
     return gofThemeDark;
@@ -106,7 +105,7 @@ export function getGofTheme(mode: GofThemeMode = GOF_THEME_DEFAULT): GofThemeTok
 }
 
 /**
- * Atributo HTML reservado para Dark Mode futuro.
- * Ex.: `<html data-gof-theme="light">` — não trocar para "dark" ainda.
+ * Atributo HTML para tema.
+ * Ex.: `<html data-gof-theme="dark">`
  */
 export const GOF_THEME_HTML_ATTR = "data-gof-theme" as const;

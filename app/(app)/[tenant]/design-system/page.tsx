@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { DesignSystemShowcase } from "@/components/design-system/showcase/design-system-showcase";
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand";
 import { Suspense } from "react";
 import {
   SHOWCASE_ACCESS_ROLES,
@@ -39,9 +39,9 @@ export default async function DesignSystemPage({
   return (
     <Suspense
       fallback={
-        <BrandSplash
+        <PremiumGlobalLoader
           className="min-h-[60vh]"
-          label="Carregando Design System…"
+          label="Carregando conteúdo"
         />
       }
     >

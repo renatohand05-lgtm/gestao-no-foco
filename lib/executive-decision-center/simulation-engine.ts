@@ -13,8 +13,21 @@ function money(n: number | null | undefined): string {
   return formatPredictiveMoney(n ?? null);
 }
 
-function applyPct(base: number, deltaPct: number): number {
+/** Projeção linear local — mesma fórmula do motor (sem persistir). */
+export function applySimulationPct(base: number, deltaPct: number): number {
   return base * (1 + deltaPct / 100);
+}
+
+export function formatSimulationProjection(
+  baseline: number,
+  deltaPct: number,
+): { projectedValue: string; deltaLabel: string } {
+  const projected = applySimulationPct(baseline, deltaPct);
+  const delta = projected - baseline;
+  return {
+    projectedValue: money(projected),
+    deltaLabel: `${delta >= 0 ? "+" : ""}${money(delta)} (${deltaPct > 0 ? "+" : ""}${deltaPct}%)`,
+  };
 }
 
 function simUnavailable(
@@ -29,6 +42,7 @@ function simUnavailable(
     title,
     description: reason,
     deltaPct,
+    baselineAmount: null,
     baselineLabel: "Baseline",
     baselineValue: "Indisponível",
     projectedLabel: "Projetado",
@@ -53,19 +67,22 @@ function simFromBase(params: {
   evidenceLabel: string;
   evidenceSource: string;
 }): EdcSimulation {
-  const projected = applyPct(params.baseline, params.deltaPct);
-  const delta = projected - params.baseline;
+  const { projectedValue, deltaLabel } = formatSimulationProjection(
+    params.baseline,
+    params.deltaPct,
+  );
   return {
     id: `sim:${params.kind}`,
     kind: params.kind,
     title: params.title,
     description: params.description,
     deltaPct: params.deltaPct,
+    baselineAmount: params.baseline,
     baselineLabel: params.baselineLabel,
     baselineValue: money(params.baseline),
     projectedLabel: params.projectedLabel,
-    projectedValue: money(projected),
-    deltaLabel: `${delta >= 0 ? "+" : ""}${money(delta)} (${params.deltaPct > 0 ? "+" : ""}${params.deltaPct}%)`,
+    projectedValue,
+    deltaLabel,
     confidence: params.confidence,
     available: true,
     unavailableReason: null,

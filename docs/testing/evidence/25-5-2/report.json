@@ -1,0 +1,22 @@
+{
+  "at": "2026-07-30T18:36:33.485Z",
+  "baseUrl": "http://localhost:3001",
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\01-landing-top.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\02-header-top.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\03-header-scrolled.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\04-hero.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\05-pillars.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\06-modules.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\07-preview.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\08-intelligence.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\09-cta.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\10-footer.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\11-desktop-1920.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\11-notebook-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\11-notebook-1366.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\11-tablet-768.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-5-2\\11-mobile-390.png"
+  ],
+  "errors": []
+}

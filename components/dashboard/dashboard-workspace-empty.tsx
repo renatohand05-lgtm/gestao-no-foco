@@ -20,7 +20,7 @@ export function DashboardWorkspaceEmpty({ tenantSlug }: Props) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-5 border border-border/60 bg-[var(--brand-white)] px-6 py-12 text-center",
+        "flex flex-col items-center justify-center gap-5 border border-border/60 bg-card px-6 py-12 text-center",
         gofRadius.lg,
         gofMotion.fade,
       )}

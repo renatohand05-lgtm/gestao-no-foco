@@ -110,8 +110,42 @@ export {
   canTransitionInventory,
   assertInventoryTransition,
   INVENTORY_STATUS_TRANSITIONS,
+  resolveDisplayedExpectedQty,
+  inventoryCountMutatesStock,
 } from "./enterprise/inventory-model.ts";
 
+export {
+  applyLotQuantityDelta,
+  pickLotsFefo,
+  assertLotLedgerCloses,
+  lotMovementIdempotencyKey,
+} from "./enterprise/lot-ledger.ts";
+
+export {
+  canTransitionSerial,
+  assertSerialTransition,
+  assertSerialUnique,
+  assertSerialNotDoubleSold,
+  assertSerialSingleLocation,
+} from "./enterprise/serial-ledger.ts";
+
+export {
+  daysUntilExpiry,
+  classifyValidityAlert,
+  assertNotExpiredForSale,
+} from "./enterprise/validity-control.ts";
+
+export {
+  buildQuotationComparison,
+  assertHumanWinnerDecision,
+} from "./enterprise/quotation-comparison.ts";
+
+export {
+  resolveSupplierFinanceFlow,
+  isClassificationComplete,
+} from "./enterprise/supplier-finance-flow.ts";
+
+/* lot-serial-service e inventory-service: importar direto (server/Supabase). */
 export {
   resolveAverageCost,
   AVERAGE_COST_METHODOLOGY,

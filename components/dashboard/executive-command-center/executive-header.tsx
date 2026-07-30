@@ -101,10 +101,10 @@ export function ExecutiveHeader({
           {brief.greetingLine}
         </p>
         <div className="space-y-2">
-          {brief.paragraphs.map((p, i) => (
+          {brief.paragraphs.slice(0, 2).map((p, i) => (
             <p
               key={`brief-${i}`}
-              className={cn(gofTypography.subtitle, "text-sm sm:text-[15px]")}
+              className={cn(gofTypography.subtitle, "text-sm sm:text-[15px] line-clamp-3")}
             >
               {p}
             </p>
@@ -121,13 +121,13 @@ export function ExecutiveHeader({
           {highlightKpis.slice(0, 4).map((kpi) => (
             <div
               key={kpi.key}
-              className="min-w-0 rounded-xl border border-border/60 bg-[var(--brand-white)] px-3 py-2.5"
+              className="min-w-0 rounded-xl border border-border/60 bg-card px-3 py-2.5"
               title={kpi.hint ?? undefined}
             >
-              <p className={cn(gofTypography.caption, "truncate")}>
+              <p className={cn(gofTypography.caption, "text-pretty")}>
                 {kpi.label}
               </p>
-              <p className="truncate text-sm font-semibold tabular-nums text-foreground sm:text-base">
+              <p className="text-sm font-semibold tabular-nums break-words text-foreground sm:text-base">
                 {kpi.value}
               </p>
             </div>

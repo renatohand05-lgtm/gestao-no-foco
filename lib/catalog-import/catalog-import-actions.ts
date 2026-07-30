@@ -13,6 +13,12 @@ import {
   buildServiceCatalogExport,
 } from "@/lib/catalog-import/catalog-export";
 import {
+  assertCatalogImportFeatureEnabled,
+  assertStockSpreadsheetImportEnabled,
+  isPdfOcrImportEnabled,
+  isPdfSearchableImportEnabled,
+} from "@/lib/catalog-import/catalog-upload-flags";
+import {
   filterCatalogServices,
   loadPlatformServiceCatalog,
   materializeCatalogPrices,
@@ -37,6 +43,10 @@ import {
   type PriceBandRates,
 } from "@/lib/catalog-import/price-bands";
 import {
+  catalogImportPermissionSatisfied,
+  resolveCatalogImportEffectivePermissions,
+} from "@/lib/catalog-import/rbac-compat";
+import {
   createEnterpriseContext,
   createRbacSupabaseAdapter,
 } from "@/lib/enterprise";
@@ -48,6 +58,7 @@ import {
   type ImportColumnMapping,
   type ImportReviewRow,
 } from "@/lib/import-engine";
+import { assertImportFileWithinLimit } from "@/lib/import-engine/import-file-limits";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -62,19 +73,27 @@ async function resolveCatalogAuth(
   const client = await createClient();
   const rbac = createRbacSupabaseAdapter(client);
   const snap = await rbac.resolveAuthorizationSnapshot(tenant.id, profile.id);
-  const permissions = snap.permissions ?? [];
-  const ok = needed.some((p) => permissions.includes(p));
-  if (!ok) {
+  const effective = resolveCatalogImportEffectivePermissions({
+    membershipRole: tenant.role,
+    snapshotRoles: snap.roles,
+    snapshotPermissions: snap.permissions,
+  });
+  const permissions = effective.permissions;
+  if (!catalogImportPermissionSatisfied(permissions, needed)) {
     throw new Error(`Sem permissão (${needed.join(" | ")}).`);
   }
   createEnterpriseContext({
     tenantId: tenant.id,
     userId: profile.id,
-    roles: snap.roles ?? [],
+    roles: effective.roles,
     permissions,
     source: "server_action",
+    metadata: {
+      catalogAuthSource: effective.source,
+      membershipRole: tenant.role,
+    },
   });
-  return { tenant, profile, client, permissions };
+  return { tenant, profile, client, permissions, roles: effective.roles };
 }
 
 function mergeRates(partial?: Partial<PriceBandRates>): PriceBandRates {
@@ -99,6 +118,7 @@ export async function downloadServiceCatalogAction(
     rates?: Partial<PriceBandRates>;
   },
 ) {
+  assertCatalogImportFeatureEnabled();
   await resolveCatalogAuth(tenantSlug, [
     "produtos.visualizar",
     "servicos.importar",
@@ -192,7 +212,11 @@ export async function previewPlatformCatalogImportAction(
     prioridade?: "A" | "AB" | "all";
   },
 ) {
-  const auth = await resolveCatalogAuth(tenantSlug, ["servicos.importar"]);
+  assertCatalogImportFeatureEnabled();
+  const auth = await resolveCatalogAuth(tenantSlug, [
+    "servicos.importar",
+    "produtos.criar",
+  ]);
   const rates = mergeRates(input.rates);
   assertValidHourRates(rates, input.band);
   const catalog = loadPlatformServiceCatalog();
@@ -254,6 +278,7 @@ export async function commitPlatformCatalogImportAction(
     duplicatePolicy: DuplicateDecision;
   },
 ) {
+  assertCatalogImportFeatureEnabled();
   const auth = await resolveCatalogAuth(tenantSlug, [
     "servicos.importar",
     "produtos.criar",
@@ -407,10 +432,16 @@ export async function previewStockFileImportAction(
   const auth = await resolveCatalogAuth(tenantSlug, [
     "estoque.importar",
     "produtos.importar",
+    "produtos.criar",
   ]);
   const file = formData.get("file");
   if (!(file instanceof File)) throw new Error("Arquivo obrigatório.");
+  assertStockSpreadsheetImportEnabled(file.name);
   const bytes = new Uint8Array(await file.arrayBuffer());
+  assertImportFileWithinLimit({
+    fileName: file.name,
+    byteLength: bytes.byteLength,
+  });
   const bundle = createProductionImportEngine(auth.client);
   const parsed = await bundle.engine.parseFile({
     fileName: file.name,
@@ -462,6 +493,25 @@ export async function previewStockFileImportAction(
     return Number.isFinite(q) && Number.isFinite(c) ? q * c : null;
   });
 
+  const reviewRows: ImportReviewRow[] = normalized.map((r) => ({
+    rowNumber: r.rowNumber,
+    description: String(r.values.nome ?? `Linha ${r.rowNumber}`),
+    values: r.values,
+    issues: r.issues ?? [],
+    classification: {
+      rowNumber: r.rowNumber,
+      status: "confirmed",
+      categorySuggested:
+        r.values.categoria != null ? String(r.values.categoria) : null,
+      subcategorySuggested:
+        r.values.subcategoria != null ? String(r.values.subcategoria) : null,
+      costCenterSuggested: null,
+      dreGroupSuggested: null,
+      confidence: 0.85,
+      reason: "Arquivo de estoque/produtos — aguarda confirmação",
+    },
+  }));
+
   const summary = buildCatalogPreviewSummary({
     fileName: file.name,
     detectedType: parsed.format,
@@ -482,7 +532,10 @@ export async function previewStockFileImportAction(
     duplicates,
     mapping: preview.mapping,
     columns: parsed.columns,
+    format: parsed.format,
     sampleRows: normalized.slice(0, 30),
+    reviewRows,
+    confirmedRowNumbers: reviewRows.map((r) => r.rowNumber),
   };
 }
 
@@ -500,8 +553,16 @@ export async function commitStockFileImportAction(
   const auth = await resolveCatalogAuth(tenantSlug, [
     "estoque.importar",
     "produtos.criar",
+    "produtos.importar",
     "estoque.movimentar",
   ]);
+  if (!input.rows?.length) {
+    throw new Error("Nenhuma linha para confirmar. Execute o preview com um arquivo.");
+  }
+  if (!input.confirmedRowNumbers?.length) {
+    throw new Error("Confirmação humana obrigatória: selecione linhas válidas.");
+  }
+  assertStockSpreadsheetImportEnabled(input.fileName || input.format);
   const bundle = createProductionImportEngine(auth.client);
 
   const { data: existing } = await auth.client
@@ -659,6 +720,357 @@ export async function commitStockFileImportAction(
   revalidatePath(`/${tenantSlug}/produtos`);
   revalidatePath(`/${tenantSlug}/estoque`);
   return result;
+}
+
+/**
+ * Preview de arquivo real (XLSX/XLS/CSV) selecionado pelo usuário —
+ * catálogo de serviços / produtos.
+ */
+export async function previewCatalogFileImportAction(
+  tenantSlug: string,
+  formData: FormData,
+) {
+  assertCatalogImportFeatureEnabled();
+  const auth = await resolveCatalogAuth(tenantSlug, [
+    "servicos.importar",
+    "produtos.importar",
+    "produtos.criar",
+  ]);
+  const file = formData.get("file");
+  if (!(file instanceof File)) throw new Error("Arquivo obrigatório.");
+  const kind = String(formData.get("kind") ?? "servicos").toLowerCase();
+  const target =
+    kind === "produtos" || kind === "estoque"
+      ? ("produtos" as const)
+      : ("servicos" as const);
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  assertImportFileWithinLimit({
+    fileName: file.name,
+    byteLength: bytes.byteLength,
+  });
+  assertStockSpreadsheetImportEnabled(file.name);
+
+  const bundle = createProductionImportEngine(auth.client);
+  const parsed = await bundle.engine.parseFile({
+    fileName: file.name,
+    mimeType: file.type,
+    bytes,
+  });
+
+  const adapter =
+    target === "servicos" ? CATALOG_IMPORT_ADAPTER : STOCK_IMPORT_ADAPTER;
+
+  const preview = await bundle.engine.buildPreview({
+    tenantId: auth.tenant.id,
+    module: adapter.moduleKey,
+    targetEntity: adapter.targetEntity,
+    parsed,
+    targetFields: adapter.fields,
+  });
+
+  const normalized = bundle.engine.normalize(
+    parsed,
+    preview.mapping,
+    adapter.fields,
+  );
+
+  const { data: existing } = await auth.client
+    .from("produtos")
+    .select("id, sku, codigo_interno, codigo_barras, nome, tipo")
+    .eq("tenant_id", auth.tenant.id)
+    .is("deleted_at", null)
+    .limit(5000);
+
+  let duplicatesCount = 0;
+  if (target === "servicos") {
+    const byCode = new Map<string, string>();
+    for (const e of existing ?? []) {
+      if (e.tipo && e.tipo !== "servico") continue;
+      const code = (e.codigo_interno ?? e.sku ?? "").toUpperCase();
+      if (code) byCode.set(code, e.id);
+    }
+    duplicatesCount = findServiceDuplicates({
+      rows: normalized.map((r) => ({
+        rowNumber: r.rowNumber,
+        codigo: String(r.values.codigo_servico ?? ""),
+        nome: String(r.values.nome_servico ?? ""),
+      })),
+      existingByCode: byCode,
+    }).length;
+  } else {
+    const bySku = new Map<string, string>();
+    const byBarcode = new Map<string, string>();
+    for (const e of existing ?? []) {
+      if (e.sku) bySku.set(e.sku.toUpperCase(), e.id);
+      if (e.codigo_barras) byBarcode.set(e.codigo_barras, e.id);
+    }
+    duplicatesCount = findProductDuplicates({
+      rows: normalized.map((r) => ({
+        rowNumber: r.rowNumber,
+        sku: r.values.sku != null ? String(r.values.sku) : null,
+        barcode:
+          r.values.codigo_barras != null
+            ? String(r.values.codigo_barras)
+            : null,
+        nome: String(r.values.nome ?? ""),
+      })),
+      existingBySku: bySku,
+      existingByBarcode: byBarcode,
+    }).length;
+  }
+
+  const reviewRows: ImportReviewRow[] = normalized.map((r) => ({
+    rowNumber: r.rowNumber,
+    description: String(
+      r.values.nome_servico ?? r.values.nome ?? `Linha ${r.rowNumber}`,
+    ),
+    values: r.values,
+    issues: r.issues ?? [],
+    classification: {
+      rowNumber: r.rowNumber,
+      status: "confirmed",
+      categorySuggested:
+        r.values.categoria != null ? String(r.values.categoria) : null,
+      subcategorySuggested:
+        r.values.subcategoria != null ? String(r.values.subcategoria) : null,
+      costCenterSuggested: null,
+      dreGroupSuggested: null,
+      confidence: 0.85,
+      reason: "Arquivo do computador — aguarda confirmação",
+    },
+  }));
+
+  const prices = normalized.map((r) =>
+    Number(r.values.preco_venda ?? r.values.custo_medio ?? 0),
+  );
+
+  const summary = buildCatalogPreviewSummary({
+    fileName: file.name,
+    detectedType: parsed.format,
+    totalRows: parsed.totalRows,
+    newServices: target === "servicos" ? Math.max(0, normalized.length - duplicatesCount) : 0,
+    newProducts: target !== "servicos" ? Math.max(0, normalized.length - duplicatesCount) : 0,
+    duplicates: duplicatesCount,
+    errors: preview.issues.filter((i) => i.severity === "error").length,
+    financialTotal: sumFinite(prices.map((p) => (Number.isFinite(p) ? p : null))),
+    notes: [
+      `Tipo: ${target === "servicos" ? "catálogo de serviços" : "produtos/estoque"}.`,
+      "Arquivo selecionado do computador.",
+      "Nenhuma gravação ocorreu neste preview.",
+    ],
+  });
+
+  return {
+    summary,
+    kind: target,
+    mapping: preview.mapping,
+    columns: parsed.columns,
+    format: parsed.format,
+    sampleRows: normalized.slice(0, 30),
+    reviewRows,
+    confirmedRowNumbers: reviewRows.map((r) => r.rowNumber),
+    fileMeta: {
+      name: file.name,
+      size: bytes.byteLength,
+      mimeType: file.type || null,
+      format: parsed.format,
+    },
+  };
+}
+
+export async function commitCatalogFileImportAction(
+  tenantSlug: string,
+  input: {
+    kind: "servicos" | "produtos";
+    fileName: string;
+    format: string;
+    mapping: ImportColumnMapping;
+    rows: ImportReviewRow[];
+    confirmedRowNumbers: number[];
+    duplicatePolicy: DuplicateDecision;
+    confirmed: true;
+  },
+) {
+  assertCatalogImportFeatureEnabled();
+  if (!input.confirmed) throw new Error("Confirmação humana obrigatória.");
+  if (!input.rows?.length) {
+    throw new Error("Nenhuma linha para confirmar. Execute o preview com um arquivo.");
+  }
+
+  if (input.kind === "servicos") {
+    const auth = await resolveCatalogAuth(tenantSlug, [
+      "servicos.importar",
+      "produtos.criar",
+    ]);
+    const bundle = createProductionImportEngine(auth.client);
+    const { data: existing } = await auth.client
+      .from("produtos")
+      .select("id, codigo_interno, sku")
+      .eq("tenant_id", auth.tenant.id)
+      .eq("tipo", "servico")
+      .is("deleted_at", null)
+      .limit(5000);
+    const byCode = new Map<string, string>();
+    for (const e of existing ?? []) {
+      const code = (e.codigo_interno ?? e.sku ?? "").toUpperCase();
+      if (code) byCode.set(code, e.id);
+    }
+    const createdItems: Array<{
+      tenantId: string;
+      rowNumber: number;
+      targetType: string;
+      targetId: string;
+      operation: string;
+    }> = [];
+
+    const result = await bundle.engine.commit({
+      request: {
+        tenantId: auth.tenant.id,
+        userId: auth.profile.id,
+        module: CATALOG_IMPORT_ADAPTER.moduleKey,
+        targetEntity: CATALOG_IMPORT_ADAPTER.targetEntity,
+        fileName: input.fileName,
+        format: input.format as never,
+        mapping: input.mapping,
+        rows: input.rows,
+        confirmedRowNumbers: input.confirmedRowNumbers,
+      },
+      userLabel: auth.profile.name ?? auth.profile.email,
+      onCommitRow: async (row) => {
+        const code = String(row.values.codigo_servico ?? "").toUpperCase();
+        const existingId = byCode.get(code) ?? null;
+        const res = await commitServiceImportRow(auth.client, {
+          tenantId: auth.tenant.id,
+          userId: auth.profile.id,
+          values: {
+            codigo_servico: String(row.values.codigo_servico ?? ""),
+            nome_servico: String(row.values.nome_servico ?? ""),
+            categoria: (row.values.categoria as string | null) ?? null,
+            subcategoria: (row.values.subcategoria as string | null) ?? null,
+            descricao_curta:
+              (row.values.descricao_curta as string | null) ?? null,
+            preco_venda:
+              row.values.preco_venda != null
+                ? Number(row.values.preco_venda)
+                : null,
+            garantia_dias:
+              row.values.garantia_dias != null
+                ? Number(row.values.garantia_dias)
+                : null,
+            status: (row.values.status as string | null) ?? null,
+            observacao_tecnica:
+              (row.values.observacao_tecnica as string | null) ?? null,
+            tempo_padrao_h:
+              row.values.tempo_padrao_h != null
+                ? Number(row.values.tempo_padrao_h)
+                : null,
+            unidade: (row.values.unidade as string | null) ?? "UN",
+          },
+          decision: existingId ? input.duplicatePolicy : "update",
+          existingId,
+          importRunId: null,
+        });
+        if (res.action === "ignored") return;
+        if (res.productId && res.action === "created") {
+          byCode.set(code, res.productId);
+        }
+        createdItems.push({
+          tenantId: auth.tenant.id,
+          rowNumber: row.rowNumber,
+          targetType: "produto",
+          targetId: res.productId,
+          operation: res.action,
+        });
+      },
+    });
+
+    if (createdItems.length && result.logId) {
+      await bundle.runItems.appendMany(
+        createdItems.map((it) => ({ ...it, runId: result.logId })),
+      );
+    }
+    revalidatePath(`/${tenantSlug}/produtos`);
+    return result;
+  }
+
+  return commitStockFileImportAction(tenantSlug, {
+    fileName: input.fileName,
+    format: input.format,
+    mapping: input.mapping,
+    rows: input.rows,
+    confirmedRowNumbers: input.confirmedRowNumbers,
+    duplicatePolicy: input.duplicatePolicy,
+  });
+}
+
+/**
+ * Análise honesta de PDF auxiliar (estoque/produtos).
+ * Sem OCR — image-only é rejeitado com mensagem clara.
+ */
+export async function previewPdfAssistDocumentAction(
+  tenantSlug: string,
+  formData: FormData,
+) {
+  await resolveCatalogAuth(tenantSlug, [
+    "estoque.visualizar",
+    "produtos.visualizar",
+    "estoque.importar",
+  ]);
+  if (!isPdfSearchableImportEnabled()) {
+    throw new Error(
+      "Análise de PDF pesquisável desativada (IMPORT_PDF_SEARCHABLE_ENABLED=0).",
+    );
+  }
+  const file = formData.get("file");
+  if (!(file instanceof File)) throw new Error("Arquivo PDF obrigatório.");
+  if (!file.name.toLowerCase().endsWith(".pdf")) {
+    throw new Error("Formato inválido. Envie um arquivo PDF.");
+  }
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  assertImportFileWithinLimit({
+    fileName: file.name,
+    byteLength: bytes.byteLength,
+  });
+
+  const { extractPdfText } = await import(
+    "@/lib/import-engine/parsers/pdf-text-extractor"
+  );
+  let extraction;
+  try {
+    extraction = extractPdfText(Buffer.from(bytes));
+  } catch (err) {
+    throw new Error(
+      err instanceof Error
+        ? `PDF inválido ou corrompido: ${err.message}`
+        : "PDF inválido ou corrompido.",
+    );
+  }
+
+  if (extraction.status === "image_only") {
+    if (isPdfOcrImportEnabled()) {
+      throw new Error(
+        "PDF imagem detectado. OCR está sinalizado mas sem provider seguro nesta sprint — use XML NF-e, Excel ou CSV.",
+      );
+    }
+    throw new Error(
+      "PDF sem texto pesquisável (imagem/scan). OCR está desligado. Exporte como Excel/CSV ou use XML oficial da NF-e.",
+    );
+  }
+
+  return {
+    ok: true as const,
+    fileName: file.name,
+    size: bytes.byteLength,
+    pageCount: extraction.pageCount,
+    textChars: extraction.text.length,
+    previewText: extraction.text.slice(0, 800),
+    notes: [
+      "PDF usado apenas como documento auxiliar / análise assistida.",
+      "Não substitui o XML oficial da NF-e.",
+      "Nenhum produto foi inventado ou gravado.",
+    ],
+  };
 }
 
 export async function listCatalogImportHistoryAction(tenantSlug: string) {

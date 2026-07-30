@@ -24,7 +24,7 @@ export function ApprovalPendingCard({ items, className, limit = 5 }: Props) {
     <section
       data-approval-pending-card
       className={cn(
-        "space-y-2 rounded-xl border border-border/60 bg-[var(--brand-white)] p-3",
+        "space-y-2 rounded-xl border border-border/60 bg-card p-3",
         className,
       )}
     >

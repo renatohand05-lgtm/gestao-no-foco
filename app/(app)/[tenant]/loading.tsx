@@ -1,10 +1,11 @@
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand/premium-global-loader";
 
 export default function TenantLoading() {
   return (
-    <BrandSplash
+    <PremiumGlobalLoader
       className="min-h-[70vh]"
-      label="Carregando área da empresa…"
+      label="Carregando conteúdo"
+      variant="embed"
     />
   );
 }

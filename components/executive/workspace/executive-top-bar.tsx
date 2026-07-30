@@ -39,8 +39,8 @@ export function ExecutiveTopBar({
     <header
       className={cn(
         "sticky top-0 z-40 -mx-4 overflow-x-hidden px-4 py-1.5 sm:-mx-5 sm:px-5 lg:-mx-8 lg:px-8 xl:-mx-10 xl:px-10",
-        "border-b border-border/40 bg-[var(--brand-white)]/90 backdrop-blur-md",
-        "supports-[backdrop-filter]:bg-[var(--brand-white)]/75",
+        "border-b border-border/40 bg-background/90 backdrop-blur-md",
+        "supports-[backdrop-filter]:bg-background/75",
         gofMotion.fade,
       )}
     >
@@ -81,7 +81,7 @@ export function ExecutiveTopBar({
               variant="outline"
               size="sm"
               className={cn(
-                "hidden border-border/60 bg-[var(--brand-white)] sm:inline-flex",
+                "hidden border-border/60 bg-card sm:inline-flex",
                 gofRadius.lg,
                 gofFocusRing,
               )}
@@ -122,7 +122,7 @@ export function ExecutiveTopBar({
               className={cn(
                 "min-h-11",
                 gofRadius.lg,
-                !focusMode && "border-border/60 bg-[var(--brand-white)]",
+                !focusMode && "border-border/60 bg-card",
                 gofFocusRing,
               )}
               onClick={toggleFocusMode}

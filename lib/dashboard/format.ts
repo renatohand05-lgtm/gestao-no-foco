@@ -5,6 +5,8 @@
 
 export {
   formatCurrency,
+  formatCurrencyCompact,
+  formatCurrencyChartLabel,
   formatNumber,
   formatPercent,
   formatVariationPct,

@@ -45,7 +45,7 @@ export function ExecutiveWorkspaceFooter({ tenantSlug }: Props) {
             key={link.href}
             href={link.href}
             className={cn(
-              "inline-flex min-h-11 items-center border border-border/60 bg-[var(--brand-white)] px-3 text-xs font-medium",
+              "inline-flex min-h-11 items-center border border-border/60 bg-card px-3 text-xs font-medium",
               gofRadius.sm,
               gofFocusRing,
             )}

@@ -1,0 +1,53 @@
+{
+  "at": "2026-07-30T21:24:26.474Z",
+  "baseUrl": "http://localhost:3001",
+  "checks": [
+    {
+      "page": "landing",
+      "status": 200,
+      "overlay": false,
+      "rendered": true
+    },
+    {
+      "page": "login",
+      "status": 200,
+      "overlay": false,
+      "rendered": true
+    },
+    {
+      "page": "dashboard-dark",
+      "url": "http://localhost:3001/teste-renato-01/dashboard",
+      "overlay": false,
+      "kpi": 6,
+      "chartLabels": 0,
+      "hasCockpit": true,
+      "reactRendered": true
+    },
+    {
+      "page": "dashboard-light",
+      "overlay": false
+    }
+  ],
+  "consoleErrors": [
+    "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. /teste-renato-01/analytics/relatorios",
+    "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. /teste-renato-01/analytics/relatorios",
+    "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. /teste-renato-01/analytics/relatorios",
+    "pageerror: Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- In",
+    "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. /teste-renato-01/analytics/relatorios"
+  ],
+  "consoleWarnings": [],
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\landing-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\login-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\loader-or-early.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\dashboard-1440-dark.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\dashboard-1440-light.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\command-center-open.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\business-health.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\decision-center.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\simulator.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\header-1440.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-1\\sidebar-1440.png"
+  ],
+  "fatal": false
+}

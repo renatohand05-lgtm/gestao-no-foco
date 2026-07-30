@@ -6,6 +6,7 @@ import { DemoModeProvider } from "@/components/demo/demo-mode-provider";
 import { DemoModeControls } from "@/components/demo/demo-mode-controls";
 import { DemoNavRail } from "@/components/demo/demo-nav-rail";
 import { useDemoMode } from "@/components/demo/demo-mode-provider";
+import { BrandInstitutionalFooter } from "@/components/brand/brand-institutional-footer";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { PageContainer } from "@/components/layout/page-container";
@@ -42,7 +43,7 @@ function DemoAwareChrome({
       ) : null}
       <SidebarInset
         className={cn(
-          "min-h-svh bg-[var(--brand-gray-light)] dark:bg-background",
+          "min-h-svh bg-background",
           hide.appSidebar && "md:ml-0",
         )}
       >
@@ -73,6 +74,9 @@ function DemoAwareChrome({
           </div>
           {children}
         </PageContainer>
+        {!hide.appSidebar ? (
+          <BrandInstitutionalFooter compact className="mt-auto" />
+        ) : null}
       </SidebarInset>
     </SidebarProvider>
   );
@@ -84,7 +88,7 @@ export function AppShell(props: AppShellProps) {
       fallback={
         <SidebarProvider>
           <AppSidebar tenant={props.tenant} tenants={props.tenants} />
-          <SidebarInset className="min-h-svh bg-[var(--brand-gray-light)] dark:bg-background">
+          <SidebarInset className="min-h-svh bg-background">
             <AppHeader
               tenantName={props.tenant.name}
               tenantSlug={props.tenant.slug}

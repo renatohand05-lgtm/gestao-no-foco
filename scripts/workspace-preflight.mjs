@@ -111,8 +111,8 @@ const routeLoading = readFileSync(
   resolve(root, "components/layout/route-loading.tsx"),
   "utf8",
 );
-if (routeLoading.includes("BrandSplash")) ok("RouteLoading = BrandSplash");
-else bad("RouteLoading not unified to BrandSplash");
+if (routeLoading.includes("PremiumGlobalLoader")) ok("RouteLoading = PremiumGlobalLoader");
+else bad("RouteLoading not unified to PremiumGlobalLoader");
 if (!routeLoading.includes("SkeletonCard")) ok("RouteLoading without SkeletonCard");
 else bad("RouteLoading still uses SkeletonCard");
 

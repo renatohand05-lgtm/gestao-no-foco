@@ -50,6 +50,15 @@ export {
   getAnalyticsFeatureFlags,
 } from "./analytics-feature-flags.ts";
 export {
+  MEMBERSHIP_TO_ENTERPRISE_ROLES,
+  mapMembershipRoleToEnterpriseRoles,
+  isAnalyticsPermissionKey,
+  expandAnalyticsPermissions,
+  analyticsRbacPermissionSatisfied,
+  resolveAnalyticsEffectivePermissions,
+} from "./rbac-compat.ts";
+export type { AnalyticsEffectiveAuth } from "./rbac-compat.ts";
+export {
   createDefaultAnalyticsLayout,
   mergeAnalyticsLayout,
   DEFAULT_EXECUTIVE_WIDGETS,

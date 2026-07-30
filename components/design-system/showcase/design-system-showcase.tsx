@@ -146,7 +146,7 @@ function SectionShell({
     <details
       id={id}
       className={cn(
-        "scroll-mt-24 border border-border/60 bg-[var(--brand-white)]",
+        "scroll-mt-24 border border-border/60 bg-card",
         gofRadius.lg,
         gofMotion.fade,
       )}
@@ -218,7 +218,7 @@ export function DesignSystemShowcase({ tenantSlug, tenantName }: Props) {
         <section
           aria-label="Playground"
           className={cn(
-            "sticky top-14 z-20 space-y-3 border border-border/60 bg-[var(--brand-white)]/95 p-3 backdrop-blur sm:p-4",
+            "sticky top-14 z-20 space-y-3 border border-border/60 bg-card/95 p-3 backdrop-blur sm:p-4",
             gofRadius.lg,
           )}
           data-showcase-playground=""
@@ -415,7 +415,7 @@ export function DesignSystemShowcase({ tenantSlug, tenantName }: Props) {
                 <div
                   key={k}
                   className={cn(
-                    "border border-border/40 bg-[var(--brand-white)] p-4 text-xs",
+                    "border border-border/40 bg-card p-4 text-xs",
                     gofRadius.lg,
                     v,
                   )}

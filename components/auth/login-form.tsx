@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 
 import { AuthAlert } from "@/components/auth/auth-alert";
@@ -85,7 +86,7 @@ export function LoginForm() {
   return (
     <AuthFormShell
       title="Entrar"
-      description={`${brandConfig.slogan} — acesse sua conta ${brandConfig.name}.`}
+      description={brandConfig.positioning}
       footer={
         <AuthFooterLink
           text="Não tem conta?"
@@ -130,6 +131,24 @@ export function LoginForm() {
             className="h-11"
           />
         </AuthField>
+
+        <div className="flex items-center justify-between gap-3 text-sm">
+          <label className="flex items-center gap-2 text-muted-foreground">
+            <input
+              type="checkbox"
+              className="size-4 rounded border-border accent-[var(--brand-gold)]"
+              name="remember"
+              disabled={loading}
+            />
+            Lembrar acesso
+          </label>
+          <Link
+            href="/login?recuperar=1"
+            className="text-[var(--brand-gold)] underline-offset-4 hover:underline"
+          >
+            Recuperar senha
+          </Link>
+        </div>
 
         <AuthSubmitButton loading={loading} loadingText="Entrando…">
           Entrar no {brandConfig.name}

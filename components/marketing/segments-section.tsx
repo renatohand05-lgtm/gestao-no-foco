@@ -1,68 +1,137 @@
-import { Briefcase, ShoppingBag, UtensilsCrossed, Wrench } from "lucide-react";
+"use client";
 
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Briefcase,
+  Building2,
+  ShoppingBag,
+  Store,
+  UtensilsCrossed,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 
-const segments = [
+import { cn } from "@/lib/utils";
+
+const segments: Array<{
+  id: string;
+  icon: LucideIcon;
+  title: string;
+  focus: string;
+  body: string;
+}> = [
   {
+    id: "oficinas",
     icon: Wrench,
-    title: "Oficinas mecânicas",
-    description: "Ordens de serviço, peças, clientes e histórico de veículos.",
-    badge: "Oficina",
+    title: "Oficinas",
+    focus: "OS · peças · entrega",
+    body: "Ordens de serviço, estoque de peças e ritmo da oficina no mesmo cockpit.",
   },
   {
+    id: "restaurantes",
     icon: UtensilsCrossed,
     title: "Restaurantes",
-    description: "Controle de vendas, insumos, fornecedores e movimento diário.",
-    badge: "Food",
+    focus: "Vendas · insumos · caixa",
+    body: "Movimento diário, custos e previsibilidade de caixa para food service.",
   },
   {
+    id: "comercio",
     icon: ShoppingBag,
-    title: "Comércios",
-    description: "Estoque, PDV, clientes fiéis e gestão de margem.",
-    badge: "Varejo",
+    title: "Comércio",
+    focus: "Estoque · margem · PDV",
+    body: "Controle de estoque, margem e vendas com visão consolidada.",
   },
   {
+    id: "consultorias",
     icon: Briefcase,
-    title: "Consultorias & serviços",
-    description: "Projetos, contratos, faturamento e acompanhamento de clientes.",
-    badge: "Serviços",
+    title: "Consultorias",
+    focus: "Projetos · faturamento",
+    body: "Contratos, clientes e financeiro alinhados à operação de serviços.",
+  },
+  {
+    id: "servicos",
+    icon: Store,
+    title: "Serviços",
+    focus: "Agenda · CRM · OS",
+    body: "Atendimento, retorno de clientes e operação sem perder o fio.",
+  },
+  {
+    id: "pme",
+    icon: Building2,
+    title: "Pequenas e médias",
+    focus: "Centro de comando",
+    body: "Uma plataforma Enterprise adaptável — do balcão ao escritório.",
   },
 ];
 
+/**
+ * Segmentos com tabs refinadas (Sprint 25.5.2).
+ */
 export function SegmentsSection() {
+  const [active, setActive] = useState(segments[0]!.id);
+  const current = segments.find((s) => s.id === active) ?? segments[0]!;
+
   return (
-    <section id="segmentos" className="py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto mb-16 max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Feito para o seu segmento
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            Uma base sólida que se adapta a diferentes tipos de negócio.
+    <section
+      id="segmentos"
+      data-landing-block="segments"
+      className="relative border-b border-white/5 py-20 sm:py-24"
+    >
+      <div className="mx-auto max-w-[96rem] px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 max-w-2xl">
+          <p className="text-[10px] font-medium tracking-[0.18em] text-[var(--brand-gold)] uppercase">
+            Segmentos
           </p>
+          <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Adaptada ao seu tipo de negócio
+          </h2>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {segments.map((segment) => (
-            <Card key={segment.title} className="transition-shadow hover:shadow-md">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <segment.icon className="size-5" />
-                  </div>
-                  <Badge variant="outline">{segment.badge}</Badge>
-                </div>
-                <CardTitle className="text-xl">{segment.title}</CardTitle>
-                <CardDescription>{segment.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+        <div
+          role="tablist"
+          aria-label="Segmentos"
+          className="mb-6 flex gap-2 overflow-x-auto pb-1"
+        >
+          {segments.map((s) => {
+            const selected = s.id === active;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                id={`seg-tab-${s.id}`}
+                aria-controls={`seg-panel-${s.id}`}
+                onClick={() => setActive(s.id)}
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-sm transition",
+                  selected
+                    ? "border-[var(--brand-gold)]/45 bg-[var(--brand-gold)]/15 text-[var(--brand-gold-soft)]"
+                    : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:text-white",
+                )}
+              >
+                <s.icon className="size-4" aria-hidden />
+                {s.title}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          role="tabpanel"
+          id={`seg-panel-${current.id}`}
+          aria-labelledby={`seg-tab-${current.id}`}
+          className="rounded-2xl border border-[var(--brand-gold)]/20 bg-[var(--brand-graphite)]/70 p-6 sm:p-8"
+        >
+          <p className="text-[10px] tracking-[0.16em] text-[var(--brand-gold)] uppercase">
+            {current.focus}
+          </p>
+          <h3 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold text-white">
+            {current.title}
+          </h3>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base">
+            {current.body}
+          </p>
         </div>
       </div>
     </section>

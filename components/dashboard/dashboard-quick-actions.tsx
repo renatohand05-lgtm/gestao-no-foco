@@ -81,7 +81,7 @@ export function DashboardQuickActions({ tenantSlug, className }: Props) {
             key={action.id}
             href={action.href(tenantSlug)}
             className={cn(
-              "group flex min-h-11 flex-col items-start gap-2 border border-border/60 bg-[var(--brand-white)] px-3 py-3",
+              "group flex min-h-11 flex-col items-start gap-2 border border-border/60 bg-card px-3 py-3",
               "transition-colors hover:border-[var(--brand-gold)]/50 hover:bg-[var(--brand-gray-light)]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
               gofRadius.md,

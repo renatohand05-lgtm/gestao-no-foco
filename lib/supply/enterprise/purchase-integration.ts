@@ -46,6 +46,9 @@ export async function integratePurchaseOrderSideEffects(
     tenantId: string;
     userId: string;
     pedidoId: string;
+    /** Fluxo guiado 25.4.3 — não inventa classificação. */
+    classificationMode?: import("./supplier-finance-flow.ts").ClassificationMode;
+    classificationOverride?: import("./supplier-finance-flow.ts").SupplierFinanceClassification | null;
   },
 ): Promise<PurchaseIntegrationResult> {
   const { data: pedido, error } = await db(client)
@@ -169,13 +172,99 @@ export async function integratePurchaseOrderSideEffects(
 
     if (fornErr) throw new Error(fornErr.message);
 
-    if (
+    const { resolveSupplierFinanceFlow } = await import(
+      "./supplier-finance-flow.ts"
+    );
+    const classificationFlow = resolveSupplierFinanceFlow({
+      hasExistingConfig: Boolean(
+        forn?.categoria_financeira_id &&
+          forn.centro_custo_id &&
+          forn.plano_conta_id,
+      ),
+      existing: forn
+        ? {
+            categoriaFinanceiraId: forn.categoria_financeira_id,
+            subcategoriaId: null,
+            centroCustoId: forn.centro_custo_id,
+            grupoDre: null,
+            contaContabil: forn.plano_conta_id,
+            condicaoPagamento: null,
+            formaPagamento: forn.forma_pagamento_id,
+            vencimentoPadraoDias: forn.prazo_medio_dias,
+            rateio: null,
+            empresaId: null,
+            filialId: null,
+          }
+        : null,
+      provided: args.classificationOverride ?? null,
+      mode: args.classificationMode ?? "pendente",
+    });
+
+    if (classificationFlow.apGeneration === "pendente_classificacao") {
+      finance.skippedReason = classificationFlow.message;
+      const { error: pendErr } = await client
+        .from("compras_pedidos")
+        .update({
+          classificacao_financeira_status: "pendente_classificacao",
+        } as never)
+        .eq("id", args.pedidoId)
+        .eq("tenant_id", args.tenantId);
+      if (pendErr && !/column|does not exist/i.test(pendErr.message)) {
+        finance.skippedReason = `${classificationFlow.message} (aviso: ${pendErr.message})`;
+      }
+    } else if (classificationFlow.apGeneration === "blocked") {
+      finance.skippedReason = classificationFlow.message;
+    } else if (
       !forn?.categoria_financeira_id ||
       !forn.centro_custo_id ||
       !forn.plano_conta_id
     ) {
-      finance.skippedReason =
-        "Fornecedor sem classificação financeira (categoria/centro/plano). Cadastre no Finance Core antes de integrar AP.";
+      // Override desta compra
+      const override = classificationFlow.classification;
+      if (
+        !override?.categoriaFinanceiraId ||
+        !override.centroCustoId ||
+        !override.contaContabil
+      ) {
+        finance.skippedReason =
+          "Classificação financeira incompleta — use o fluxo guiado ou marque como pendente.";
+      } else {
+        const valor =
+          pedido.valor_total != null && Number.isFinite(Number(pedido.valor_total))
+            ? Number(pedido.valor_total)
+            : lines.reduce((s, l) => {
+                const p = l.preco_unitario == null ? 0 : Number(l.preco_unitario);
+                return s + p * Number(l.quantidade);
+              }, 0);
+        if (!(valor > 0)) {
+          finance.skippedReason =
+            "Valor do pedido indisponível — AP não criada (não inventar valor).";
+        } else {
+          const prazo = override.vencimentoPadraoDias ?? 30;
+          const apSvc = new ContaPagarService(client, args.tenantId);
+          const created = await apSvc.create({
+            fornecedor_id: forn!.id,
+            fornecedor_nome: forn!.nome,
+            forma_pagamento_id: override.formaPagamento,
+            categoria_financeira_id: override.categoriaFinanceiraId,
+            centro_custo_id: override.centroCustoId,
+            plano_conta_id: override.contaContabil,
+            descricao: `Pedido de compra #${pedido.numero ?? pedido.id.slice(0, 8)}`,
+            valor_original: valor,
+            data_emissao: todayIsoDate(),
+            data_competencia: todayIsoDate(),
+            data_vencimento: addDaysIso(Math.max(0, prazo)),
+            observacoes: `Origem Supply: compra_pedido_id=${pedido.id} (classificação desta compra)`,
+          });
+          await client
+            .from("contas_pagar")
+            .update({ compra_pedido_id: pedido.id } as never)
+            .eq("id", created.id)
+            .eq("tenant_id", args.tenantId);
+          finance.created = true;
+          finance.contaPagarId = created.id;
+        }
+      }
     } else {
       const valor =
         pedido.valor_total != null && Number.isFinite(Number(pedido.valor_total))

@@ -121,8 +121,58 @@ export function ExecutiveIntelligenceCenterView({
     <div
       data-dashboard-block="intelligence-center"
       data-decision-engine={data.engineVersion}
-      className={cn("space-y-5", gofMotion.fade)}
+      data-premium-v257="command-intelligence"
+      className={cn("space-y-5", gofMotion.fade, "premium-enter")}
     >
+      <div
+        className="rounded-2xl border border-[var(--border-premium)] bg-[var(--surface-raised)]/90 p-4 shadow-[var(--shadow-card)]"
+        data-premium-block="executive-briefing"
+      >
+        <p className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight">
+          {greeting}
+        </p>
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          {tenantName} · {dateLabel}
+        </p>
+        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div>
+            <dt className="text-[10px] tracking-wide text-[var(--text-muted)] uppercase">
+              Prioridades
+            </dt>
+            <dd className="mt-0.5 text-xl font-semibold tabular-nums">
+              {data.prioridades.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] tracking-wide text-[var(--text-muted)] uppercase">
+              Riscos
+            </dt>
+            <dd className="mt-0.5 text-xl font-semibold tabular-nums">
+              {data.riscos.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] tracking-wide text-[var(--text-muted)] uppercase">
+              Oportunidades
+            </dt>
+            <dd className="mt-0.5 text-xl font-semibold tabular-nums">
+              {data.oportunidades.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] tracking-wide text-[var(--text-muted)] uppercase">
+              Domínios
+            </dt>
+            <dd className="mt-0.5 text-xl font-semibold tabular-nums">
+              {data.score.modules.filter((m) => m.score != null).length}
+            </dd>
+          </div>
+        </dl>
+        <p className="mt-3 text-[11px] text-[var(--text-muted)]">
+          Análise baseada em regras, métricas e histórico do tenant.
+        </p>
+      </div>
+
       {/* Gates 20.2–20.7 — engines compartilhados uma vez por paint */}
       <ExecutiveEnginesShell
         ai={ai}
@@ -321,7 +371,7 @@ function PanelList({
   return (
     <details
       className={cn(
-        "min-w-0 border border-border/60 bg-[var(--brand-white)]",
+        "min-w-0 border border-border/60 bg-card",
         "rounded-xl open:shadow-sm",
         gofMotion.fade,
       )}

@@ -1,10 +1,11 @@
-import { BrandSplash } from "@/components/brand";
+import { PremiumGlobalLoader } from "@/components/brand/premium-global-loader";
 
 export default function AuthLoading() {
   return (
-    <BrandSplash
+    <PremiumGlobalLoader
       className="min-h-screen"
-      label="Carregando autenticação…"
+      label="Carregando conteúdo"
+      variant="embed"
     />
   );
 }

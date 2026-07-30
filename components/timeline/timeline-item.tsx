@@ -37,7 +37,7 @@ export function TimelineItem({
       data-source={event.source}
       onClick={() => onSelect?.(event)}
       className={cn(
-        "w-full rounded-xl border border-border/50 bg-[var(--brand-white)] p-3 text-left transition-colors hover:bg-muted/40",
+        "w-full rounded-xl border border-border/50 bg-card p-3 text-left transition-colors hover:bg-muted/40",
         selected && "ring-2 ring-primary/40",
         className,
       )}

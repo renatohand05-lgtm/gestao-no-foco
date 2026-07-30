@@ -31,7 +31,7 @@ export function TimelineDetailsPanel({ details, className, onClose }: Props) {
     <aside
       data-timeline-details
       className={cn(
-        "space-y-3 rounded-xl border border-border/60 bg-[var(--brand-white)] p-4",
+        "space-y-3 rounded-xl border border-border/60 bg-card p-4",
         className,
       )}
     >

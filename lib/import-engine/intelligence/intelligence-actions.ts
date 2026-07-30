@@ -253,6 +253,23 @@ export async function executeImportRollback(tenantSlug: string, runId: string) {
       return result;
     }
 
+    const catalogModules = new Set([
+      "catalogo_servicos",
+      "estoque_catalogo",
+      "notas_fiscais",
+    ]);
+    if (catalogModules.has(run.module)) {
+      const { executeImportUndoAction } = await import(
+        "@/lib/import-engine/delete/import-history-actions"
+      );
+      return executeImportUndoAction(tenantSlug, {
+        runId,
+        mode: "all_eligible",
+        reason: "Rollback via histórico Enterprise",
+        confirmed: true,
+      });
+    }
+
     // Vendas / Ordens de Serviço — sem persistência definitiva ligada à
     // engine ainda: nada para reverter além do próprio staging.
     const plan = await bundle.rollback.executeRollback(

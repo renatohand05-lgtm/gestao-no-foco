@@ -1,6 +1,12 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+/*
+ * Tailwind 4 — explicit CSS paths (Sprint 25.7.1).
+ * Avoids bare-package resolution that re-reads root package.json
+ * (Windows transient truncated reads caused false CssSyntaxError at globals.css:1:1).
+ * Design System / motion tokens from Sprint 25.7 remain below.
+ */
+@import "../node_modules/tailwindcss/index.css";
+@import "../node_modules/tw-animate-css/dist/tw-animate.css";
+@import "../node_modules/shadcn/dist/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -57,13 +63,19 @@
 }
 
 /**
- * Brand palette — Gestão (Gate 19.0.1)
- * Preto Grafite · Dourado Premium · Branco · Cinza Claro · Cinza Escuro
- * + Success · Warning · Danger · Info
+ * Brand palette — Gestão (Sprint 25.5 Premium)
+ * Navy · Grafite · Dourado · Prata · Branco
  */
 :root {
+  --brand-black: #05070a;
+  --brand-navy: #0b0f14;
   --brand-graphite: #1a1c1e;
+  --brand-graphite-elevated: #242628;
   --brand-gold: #c9a84c;
+  --brand-gold-soft: #f0d78c;
+  --brand-gold-deep: #8a7028;
+  --brand-silver: #c8cdd5;
+  --brand-silver-muted: #8b93a0;
   --brand-white: #ffffff;
   --brand-gray-light: #f4f4f5;
   --brand-gray-dark: #3f3f46;
@@ -72,20 +84,20 @@
   --brand-danger: #dc2626;
   --brand-info: #5b6b7a;
 
-  --background: #ffffff;
-  --foreground: #1a1c1e;
+  /* Tema claro sofisticado — cinza frio + dourado (sem cream genérico) */
+  --background: #eef1f5;
+  --foreground: #12151a;
   --card: #ffffff;
-  --card-foreground: #1a1c1e;
+  --card-foreground: #12151a;
   --popover: #ffffff;
-  --popover-foreground: #1a1c1e;
-  /* Primary = Dourado Premium */
+  --popover-foreground: #12151a;
   --primary: #c9a84c;
-  --primary-foreground: #1a1c1e;
-  --secondary: #f4f4f5;
+  --primary-foreground: #0b0f14;
+  --secondary: #e4e8ee;
   --secondary-foreground: #1a1c1e;
-  --muted: #f4f4f5;
-  --muted-foreground: #3f3f46;
-  --accent: #f4f4f5;
+  --muted: #e4e8ee;
+  --muted-foreground: #4a5562;
+  --accent: #e4e8ee;
   --accent-foreground: #1a1c1e;
   --destructive: #dc2626;
   --success: #16a34a;
@@ -94,67 +106,102 @@
   --warning-foreground: #1a1c1e;
   --danger: #dc2626;
   --danger-foreground: #ffffff;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
+  --border: #d5dbe3;
+  --input: #d5dbe3;
   --ring: #c9a84c;
   --chart-1: #c9a84c;
   --chart-2: #3f3f46;
   --chart-3: #5b6b7a;
   --chart-4: #16a34a;
   --chart-5: #d97706;
-  --radius: 0.625rem;
-  --elevation-card: 0 1px 2px 0 rgb(26 28 30 / 0.05);
-  --elevation-raised: 0 4px 12px -2px rgb(26 28 30 / 0.08);
-  --sidebar: #f4f4f5;
-  --sidebar-foreground: #1a1c1e;
+  --radius: 0.75rem;
+  --elevation-card: 0 1px 2px 0 rgb(11 15 20 / 0.05),
+    0 10px 28px -14px rgb(11 15 20 / 0.12);
+  --elevation-raised: 0 10px 32px -10px rgb(11 15 20 / 0.15);
+  --sidebar: #f7f8fa;
+  --sidebar-foreground: #12151a;
   --sidebar-primary: #c9a84c;
-  --sidebar-primary-foreground: #1a1c1e;
-  --sidebar-accent: #ffffff;
+  --sidebar-primary-foreground: #0b0f14;
+  --sidebar-accent: #e4e8ee;
   --sidebar-accent-foreground: #1a1c1e;
-  --sidebar-border: #e4e4e7;
+  --sidebar-border: #d5dbe3;
   --sidebar-ring: #c9a84c;
+  --premium-glow: 0 0 36px rgb(201 168 76 / 0.1);
+
+  /* Sprint 25.6.1 — dashboard layout tokens */
+  --dashboard-max-width: 1760px;
+  --dashboard-gutter: 1.5rem;
+  --dashboard-gap: 1rem;
+  --kpi-min-width: 11.5rem;
+  --panel-min-height: 22rem;
+  --gold-primary: var(--brand-gold);
+  --surface-1: var(--background);
+  --surface-2: var(--card);
+  --surface-3: var(--muted);
+
+  /* Sprint 25.7 — Design System definitivo */
+  --brand-gold-muted: rgb(201 168 76 / 0.45);
+  --surface-base: var(--background);
+  --surface-raised: var(--card);
+  --surface-overlay: var(--popover);
+  --surface-interactive: var(--muted);
+  --border-subtle: var(--border);
+  --border-premium: rgb(201 168 76 / 0.28);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--muted-foreground);
+  --text-muted: var(--brand-silver-muted);
+  --shadow-card: var(--elevation-card);
+  --shadow-elevated: var(--elevation-raised);
+  --glow-gold: var(--premium-glow);
+  --motion-fast: 150ms;
+  --motion-normal: 250ms;
+  --motion-slow: 450ms;
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dark {
-  --background: #1a1c1e;
-  --foreground: #ffffff;
-  --card: #242628;
-  --card-foreground: #ffffff;
-  --popover: #242628;
-  --popover-foreground: #ffffff;
+  --background: #0b0f14;
+  --foreground: #f5f7fa;
+  --card: #151a22;
+  --card-foreground: #f5f7fa;
+  --popover: #151a22;
+  --popover-foreground: #f5f7fa;
   --primary: #c9a84c;
-  --primary-foreground: #1a1c1e;
-  --secondary: #3f3f46;
-  --secondary-foreground: #ffffff;
-  --muted: #3f3f46;
-  --muted-foreground: #a1a1aa;
-  --accent: #3f3f46;
-  --accent-foreground: #ffffff;
+  --primary-foreground: #0b0f14;
+  --secondary: #1a1c1e;
+  --secondary-foreground: #f5f7fa;
+  --muted: #1e2430;
+  --muted-foreground: #a1a8b3;
+  --accent: #1e2430;
+  --accent-foreground: #f5f7fa;
   --destructive: #f87171;
   --success: #4ade80;
-  --success-foreground: #1a1c1e;
+  --success-foreground: #0b0f14;
   --warning: #fbbf24;
-  --warning-foreground: #1a1c1e;
+  --warning-foreground: #0b0f14;
   --danger: #f87171;
-  --danger-foreground: #1a1c1e;
+  --danger-foreground: #0b0f14;
   --border: rgb(255 255 255 / 10%);
-  --input: rgb(255 255 255 / 15%);
+  --input: rgb(255 255 255 / 12%);
   --ring: #c9a84c;
-  --elevation-card: 0 1px 2px 0 rgb(0 0 0 / 0.25);
-  --elevation-raised: 0 8px 24px -4px rgb(0 0 0 / 0.35);
+  --elevation-card: 0 1px 2px 0 rgb(0 0 0 / 0.35),
+    0 0 0 1px rgb(201 168 76 / 0.06);
+  --elevation-raised: 0 12px 40px -12px rgb(0 0 0 / 0.55),
+    0 0 32px rgb(201 168 76 / 0.08);
   --chart-1: #c9a84c;
-  --chart-2: #a1a1aa;
+  --chart-2: #c8cdd5;
   --chart-3: #5b6b7a;
   --chart-4: #4ade80;
   --chart-5: #fbbf24;
-  --sidebar: #242628;
-  --sidebar-foreground: #ffffff;
+  --sidebar: #0f141c;
+  --sidebar-foreground: #f5f7fa;
   --sidebar-primary: #c9a84c;
-  --sidebar-primary-foreground: #1a1c1e;
-  --sidebar-accent: #3f3f46;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgb(255 255 255 / 10%);
+  --sidebar-primary-foreground: #0b0f14;
+  --sidebar-accent: #1a2230;
+  --sidebar-accent-foreground: #f5f7fa;
+  --sidebar-border: rgb(255 255 255 / 8%);
   --sidebar-ring: #c9a84c;
+  --premium-glow: 0 0 48px rgb(201 168 76 / 0.16);
 }
 
 @layer base {
@@ -199,7 +246,7 @@
   }
 }
 
-/* Brand splash — barra discreta (~1s, faixa 800–1200ms) */
+/* Brand splash legado — mantido se algum estilo residual referenciar */
 @keyframes brand-progress {
   0% {
     transform: translateX(-100%);
@@ -211,3 +258,210 @@
     transform: translateX(200%);
   }
 }
+
+/* Sprint 25.6.2 — PremiumGlobalLoader */
+@keyframes premium-loader-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes premium-loader-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes premium-loader-mark-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes premium-loader-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+    opacity: 1;
+  }
+  50% {
+    filter: brightness(1.08);
+    opacity: 0.92;
+  }
+}
+
+@keyframes premium-loader-halo {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.premium-loader-enter {
+  animation: premium-loader-enter 0.35s ease-out both;
+}
+
+.premium-loader-exit {
+  animation: premium-loader-exit 0.2s ease-in both;
+}
+
+.premium-loader-mark {
+  animation:
+    premium-loader-mark-in 0.45s ease-out both,
+    premium-loader-pulse 1.7s ease-in-out 0.45s infinite;
+}
+
+.premium-loader-halo {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgb(201 168 76 / 0.22) 40deg,
+    transparent 90deg,
+    transparent 360deg
+  );
+  mask-image: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  -webkit-mask-image: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2px),
+    #000 calc(100% - 1px)
+  );
+  animation: premium-loader-halo 8s linear infinite;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-loader-enter,
+  .premium-loader-exit {
+    animation: premium-loader-enter 0.2s ease-out both;
+  }
+  .premium-loader-mark {
+    animation: premium-loader-mark-in 0.25s ease-out both;
+  }
+  .premium-loader-halo {
+    animation: none;
+    opacity: 0.35;
+  }
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe\:animate-\[landing-fade-up_0\.7s_ease-out\] {
+    animation: none !important;
+  }
+}
+
+/* Sprint 25.7 — Premium motion system */
+@keyframes premium-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes premium-chart-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes premium-label-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.premium-enter {
+  animation: premium-enter var(--motion-normal) var(--ease-premium) both;
+}
+
+.premium-enter-delay-1 {
+  animation-delay: 40ms;
+}
+.premium-enter-delay-2 {
+  animation-delay: 90ms;
+}
+.premium-enter-delay-3 {
+  animation-delay: 140ms;
+}
+.premium-enter-delay-4 {
+  animation-delay: 200ms;
+}
+.premium-enter-delay-5 {
+  animation-delay: 280ms;
+}
+
+.premium-kpi-lift {
+  transition:
+    transform var(--motion-fast) var(--ease-premium),
+    box-shadow var(--motion-fast) var(--ease-premium),
+    border-color var(--motion-fast) var(--ease-premium);
+}
+.premium-kpi-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.premium-chart-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: premium-chart-draw var(--motion-slow) var(--ease-premium) 120ms both;
+}
+
+.premium-chart-label-enter {
+  animation: premium-label-in var(--motion-normal) var(--ease-premium) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-enter,
+  .premium-enter-delay-1,
+  .premium-enter-delay-2,
+  .premium-enter-delay-3,
+  .premium-enter-delay-4,
+  .premium-enter-delay-5,
+  .premium-chart-line,
+  .premium-chart-label-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .premium-kpi-lift:hover {
+    transform: none;
+  }
+}
+

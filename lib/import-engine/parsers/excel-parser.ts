@@ -82,10 +82,31 @@ function pickImportSheet(workbook: XLSX.WorkBook): string {
   return best;
 }
 
+export type ParseExcelOptions = {
+  /** Nome da aba; se omitido, escolhe automaticamente. */
+  sheetName?: string;
+  /** Índice 0-based da linha de cabeçalho (default 0). */
+  headerRowIndex?: number;
+};
+
+export function listExcelSheetNames(
+  buffer: Buffer | ArrayBuffer | Uint8Array,
+): string[] {
+  const data =
+    Buffer.isBuffer(buffer)
+      ? buffer
+      : Buffer.from(
+          buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer,
+        );
+  const workbook = XLSX.read(data, { type: "buffer", bookSheets: true });
+  return workbook.SheetNames.slice();
+}
+
 export function parseExcelBuffer(
   buffer: Buffer | ArrayBuffer | Uint8Array,
   fileName: string,
   format: Extract<ImportFormat, "xlsx" | "xls">,
+  options: ParseExcelOptions = {},
 ): ImportParseResult {
   const data =
     Buffer.isBuffer(buffer)
@@ -107,7 +128,10 @@ export function parseExcelBuffer(
     );
   }
 
-  const sheetName = pickImportSheet(workbook);
+  const sheetName =
+    options.sheetName && workbook.SheetNames.includes(options.sheetName)
+      ? options.sheetName
+      : pickImportSheet(workbook);
   const sheet = workbook.Sheets[sheetName];
   const matrix = XLSX.utils.sheet_to_json<(string | number | boolean | Date | null)[]>(
     sheet,
@@ -123,10 +147,11 @@ export function parseExcelBuffer(
     throw new Error("A planilha Excel está vazia.");
   }
 
-  const headerRow = (matrix[0] ?? []).map((c) => normalizeText(c));
+  const headerIdx = Math.max(0, Math.min(options.headerRowIndex ?? 0, matrix.length - 1));
+  const headerRow = (matrix[headerIdx] ?? []).map((c) => normalizeText(c));
   if (headerRow.every((h) => !h)) {
     throw new Error(
-      "Não foi possível identificar o cabeçalho da planilha. A primeira linha deve conter os nomes das colunas.",
+      "Não foi possível identificar o cabeçalho da planilha. Selecione a linha de cabeçalho correta.",
     );
   }
 
@@ -145,11 +170,14 @@ export function parseExcelBuffer(
 
   if (workbook.SheetNames.length > 1) {
     warnings.push(
-      `Arquivo com ${workbook.SheetNames.length} abas (${workbook.SheetNames.join(", ")}) — lida a aba "${sheetName}" (melhor candidata a importação).`,
+      `Arquivo com ${workbook.SheetNames.length} abas (${workbook.SheetNames.join(", ")}) — lida a aba "${sheetName}"${options.sheetName ? " (selecionada)" : " (melhor candidata)"}.`,
     );
   }
+  if (headerIdx > 0) {
+    warnings.push(`Cabeçalho na linha ${headerIdx + 1}.`);
+  }
 
-  for (let r = 1; r < matrix.length; r++) {
+  for (let r = headerIdx + 1; r < matrix.length; r++) {
     const line = matrix[r] ?? [];
     const mapped: ImportRawRow = {};
     for (let i = 0; i < keys.length; i++) {

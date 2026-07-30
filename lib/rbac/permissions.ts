@@ -51,6 +51,7 @@ export const PERMISSION_CATALOG = [
   def("estoque.movimentar", "estoque", "movimentar", "Movimentar estoque", "escrita", "medio"),
   def("estoque.ajustar", "estoque", "ajustar", "Ajustar saldos de estoque", "escrita", "alto"),
   def("estoque.inventariar", "estoque", "inventariar", "Executar inventário", "escrita", "medio"),
+  def("estoque.transferir", "estoque", "transferir", "Transferir estoque entre depósitos/localizações", "escrita", "medio"),
   def("estoque.aprovar_ajuste", "estoque", "aprovar_ajuste", "Aprovar ajustes de estoque", "aprovacao", "alto"),
   def("estoque.ver_custo", "estoque", "ver_custo", "Visualizar custo de estoque", "financeiro_sensivel", "alto"),
   def("estoque.exportar", "estoque", "exportar", "Exportar dados de estoque", "exportacao", "baixo"),
@@ -63,6 +64,15 @@ export const PERMISSION_CATALOG = [
   def("compras.aprovar", "compras", "aprovar", "Aprovar pedidos de compra", "aprovacao", "alto"),
   def("compras.receber", "compras", "receber", "Receber mercadorias", "escrita", "medio"),
   def("compras.cancelar", "compras", "cancelar", "Cancelar pedidos de compra", "escrita", "alto"),
+
+  // Fornecedores (cadastro reutilizado — chaves explícitas Sprint 25.1)
+  def("fornecedores.visualizar", "compras", "fornecedores_visualizar", "Visualizar fornecedores", "leitura", "baixo"),
+  def("fornecedores.criar", "compras", "fornecedores_criar", "Criar fornecedores", "escrita", "medio"),
+  def("fornecedores.editar", "compras", "fornecedores_editar", "Editar fornecedores", "escrita", "medio"),
+
+  // Supply Chain Enterprise (dashboard / configuração)
+  def("supply.dashboard.visualizar", "compras", "supply_dashboard", "Dashboard Supply Chain Enterprise", "leitura", "medio"),
+  def("supply.configurar", "compras", "supply_configurar", "Configurar Supply Chain Enterprise", "administracao", "alto"),
 
   // Vendas
   def("vendas.visualizar", "vendas", "visualizar", "Visualizar vendas", "leitura", "baixo"),

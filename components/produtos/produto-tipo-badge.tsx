@@ -15,6 +15,9 @@ const tipoVariantMap: Record<
   kit: "warning",
   combo: "success",
   materia_prima: "secondary",
+  peca: "default",
+  composto: "warning",
+  ativo_consumo: "secondary",
 };
 
 export function ProdutoTipoBadge({ tipo }: ProdutoTipoBadgeProps) {

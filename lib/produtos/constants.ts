@@ -3,10 +3,13 @@ export const PRODUTOS_MAX_PER_PAGE = 50;
 
 export const PRODUTO_TIPO_OPTIONS = [
   { value: "produto", label: "Produto" },
+  { value: "peca", label: "Peça" },
   { value: "servico", label: "Serviço" },
   { value: "kit", label: "Kit" },
   { value: "combo", label: "Combo" },
   { value: "materia_prima", label: "Matéria-prima" },
+  { value: "composto", label: "Produto composto" },
+  { value: "ativo_consumo", label: "Ativo de consumo" },
 ] as const;
 
 export const PRODUTO_STATUS_OPTIONS = [
@@ -56,7 +59,10 @@ export const PRODUTO_SUCCESS_MESSAGES = {
 
 export const PRODUTO_TIPOS_COM_ESTOQUE = [
   "produto",
+  "peca",
   "kit",
   "combo",
   "materia_prima",
+  "composto",
+  "ativo_consumo",
 ] as const;

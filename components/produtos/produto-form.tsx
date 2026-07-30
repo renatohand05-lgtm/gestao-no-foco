@@ -76,14 +76,33 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
           categoria: "",
           subcategoria: "",
           marca: "",
+          fabricante: "",
+          descricao_resumida: "",
           unidade_medida: "UN",
+          ncm: "",
+          cest: "",
+          origem_mercadoria: "",
+          peso_kg: null,
+          dimensoes: "",
+          altura_cm: null,
+          largura_cm: null,
+          comprimento_cm: null,
           custo: null,
+          custo_reposicao: null,
           preco_venda: null,
+          preco_minimo: null,
+          margem_alvo: null,
           estoque_atual: 0,
           estoque_minimo: null,
           estoque_maximo: null,
+          estoque_seguranca: null,
           localizacao: "",
           fornecedor_principal: "",
+          fornecedor_alternativo: "",
+          controla_estoque: true,
+          controla_lote: false,
+          controla_serie: false,
+          controla_validade: false,
           observacoes: "",
           ativo: true,
         },
@@ -224,6 +243,18 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
               <Input id="marca" {...form.register("marca")} />
             </FormField>
 
+            <FormField label="Fabricante" htmlFor="fabricante">
+              <Input id="fabricante" {...form.register("fabricante")} />
+            </FormField>
+
+            <FormField label="Descrição resumida" htmlFor="descricao_resumida" className="md:col-span-2">
+              <Input
+                id="descricao_resumida"
+                {...form.register("descricao_resumida")}
+                placeholder="Resumo curto do item"
+              />
+            </FormField>
+
             <FormField label="Unidade de medida" htmlFor="unidade_medida" required>
               <select
                 id="unidade_medida"
@@ -241,12 +272,76 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
         </FormSection>
 
         <FormSection
+          title="Fiscal e dimensões"
+          description="Campos opcionais para Tax Intelligence (NCM/CEST) e logística. Sem inventar impostos."
+        >
+          <FormGrid>
+            <FormField
+              label="NCM"
+              htmlFor="ncm"
+              error={form.formState.errors.ncm?.message}
+            >
+              <Input id="ncm" {...form.register("ncm")} placeholder="8 dígitos" />
+            </FormField>
+            <FormField label="CEST" htmlFor="cest">
+              <Input id="cest" {...form.register("cest")} />
+            </FormField>
+            <FormField label="Origem" htmlFor="origem_mercadoria">
+              <Input
+                id="origem_mercadoria"
+                {...form.register("origem_mercadoria")}
+                placeholder="Ex.: 0 nacional"
+              />
+            </FormField>
+            <FormField label="Peso (kg)" htmlFor="peso_kg">
+              <Input
+                id="peso_kg"
+                type="number"
+                step="0.001"
+                min="0"
+                {...form.register("peso_kg", numberFieldOptions)}
+              />
+            </FormField>
+            <FormField label="Altura (cm)" htmlFor="altura_cm">
+              <Input
+                id="altura_cm"
+                type="number"
+                step="0.01"
+                min="0"
+                {...form.register("altura_cm", numberFieldOptions)}
+              />
+            </FormField>
+            <FormField label="Largura (cm)" htmlFor="largura_cm">
+              <Input
+                id="largura_cm"
+                type="number"
+                step="0.01"
+                min="0"
+                {...form.register("largura_cm", numberFieldOptions)}
+              />
+            </FormField>
+            <FormField label="Comprimento (cm)" htmlFor="comprimento_cm">
+              <Input
+                id="comprimento_cm"
+                type="number"
+                step="0.01"
+                min="0"
+                {...form.register("comprimento_cm", numberFieldOptions)}
+              />
+            </FormField>
+            <FormField label="Dimensões (texto)" htmlFor="dimensoes">
+              <Input id="dimensoes" {...form.register("dimensoes")} />
+            </FormField>
+          </FormGrid>
+        </FormSection>
+
+        <FormSection
           title="Precificação"
           description="Custo, preço de venda e margem calculada automaticamente."
         >
           <FormGrid>
             <FormField
-              label="Custo"
+              label="Custo médio"
               htmlFor="custo"
               error={form.formState.errors.custo?.message}
             >
@@ -256,6 +351,20 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                 step="0.01"
                 min="0"
                 {...form.register("custo", numberFieldOptions)}
+              />
+            </FormField>
+
+            <FormField
+              label="Custo de reposição"
+              htmlFor="custo_reposicao"
+              error={form.formState.errors.custo_reposicao?.message}
+            >
+              <Input
+                id="custo_reposicao"
+                type="number"
+                step="0.01"
+                min="0"
+                {...form.register("custo_reposicao", numberFieldOptions)}
               />
             </FormField>
 
@@ -273,6 +382,35 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
               />
             </FormField>
 
+            <FormField
+              label="Preço mínimo"
+              htmlFor="preco_minimo"
+              error={form.formState.errors.preco_minimo?.message}
+            >
+              <Input
+                id="preco_minimo"
+                type="number"
+                step="0.01"
+                min="0"
+                {...form.register("preco_minimo", numberFieldOptions)}
+              />
+            </FormField>
+
+            <FormField
+              label="Margem alvo (0–1)"
+              htmlFor="margem_alvo"
+              error={form.formState.errors.margem_alvo?.message}
+            >
+              <Input
+                id="margem_alvo"
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                {...form.register("margem_alvo", numberFieldOptions)}
+              />
+            </FormField>
+
             <FormField label="Margem automática" htmlFor="margem">
               <Input
                 id="margem"
@@ -287,7 +425,7 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
         {showEstoque ? (
           <FormSection
             title="Estoque"
-            description="Controle de quantidade e localização."
+            description="Controle de quantidade, segurança e localização."
           >
             <FormGrid>
               <FormField
@@ -318,16 +456,23 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                 />
               </FormField>
 
-              <FormField
-                label="Estoque máximo"
-                htmlFor="estoque_maximo"
-              >
+              <FormField label="Estoque máximo" htmlFor="estoque_maximo">
                 <Input
                   id="estoque_maximo"
                   type="number"
                   step="0.001"
                   min="0"
                   {...form.register("estoque_maximo", numberFieldOptions)}
+                />
+              </FormField>
+
+              <FormField label="Estoque de segurança" htmlFor="estoque_seguranca">
+                <Input
+                  id="estoque_seguranca"
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  {...form.register("estoque_seguranca", numberFieldOptions)}
                 />
               </FormField>
 
@@ -338,17 +483,97 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                   placeholder="Corredor, prateleira, depósito"
                 />
               </FormField>
+
+              <FormField label="Controla estoque" htmlFor="controla_estoque">
+                <Controller
+                  control={form.control}
+                  name="controla_estoque"
+                  render={({ field }) => (
+                    <select
+                      id="controla_estoque"
+                      value={String(field.value)}
+                      onChange={(e) => field.onChange(e.target.value === "true")}
+                      className={selectClassName}
+                    >
+                      <option value="true">Sim</option>
+                      <option value="false">Não</option>
+                    </select>
+                  )}
+                />
+              </FormField>
+              <FormField label="Controla lote" htmlFor="controla_lote">
+                <Controller
+                  control={form.control}
+                  name="controla_lote"
+                  render={({ field }) => (
+                    <select
+                      id="controla_lote"
+                      value={String(field.value)}
+                      onChange={(e) => field.onChange(e.target.value === "true")}
+                      className={selectClassName}
+                    >
+                      <option value="false">Não</option>
+                      <option value="true">Sim (em preparação)</option>
+                    </select>
+                  )}
+                />
+              </FormField>
+              <FormField label="Controla série" htmlFor="controla_serie">
+                <Controller
+                  control={form.control}
+                  name="controla_serie"
+                  render={({ field }) => (
+                    <select
+                      id="controla_serie"
+                      value={String(field.value)}
+                      onChange={(e) => field.onChange(e.target.value === "true")}
+                      className={selectClassName}
+                    >
+                      <option value="false">Não</option>
+                      <option value="true">Sim (em preparação)</option>
+                    </select>
+                  )}
+                />
+              </FormField>
+              <FormField label="Controla validade" htmlFor="controla_validade">
+                <Controller
+                  control={form.control}
+                  name="controla_validade"
+                  render={({ field }) => (
+                    <select
+                      id="controla_validade"
+                      value={String(field.value)}
+                      onChange={(e) => field.onChange(e.target.value === "true")}
+                      className={selectClassName}
+                    >
+                      <option value="false">Não</option>
+                      <option value="true">Sim (em preparação)</option>
+                    </select>
+                  )}
+                />
+              </FormField>
             </FormGrid>
           </FormSection>
         ) : null}
 
         <FormSection title="Fornecimento">
-          <FormField label="Fornecedor principal" htmlFor="fornecedor_principal">
-            <Input
-              id="fornecedor_principal"
-              {...form.register("fornecedor_principal")}
-            />
-          </FormField>
+          <FormGrid>
+            <FormField label="Fornecedor principal" htmlFor="fornecedor_principal">
+              <Input
+                id="fornecedor_principal"
+                {...form.register("fornecedor_principal")}
+              />
+            </FormField>
+            <FormField
+              label="Fornecedor alternativo"
+              htmlFor="fornecedor_alternativo"
+            >
+              <Input
+                id="fornecedor_alternativo"
+                {...form.register("fornecedor_alternativo")}
+              />
+            </FormField>
+          </FormGrid>
         </FormSection>
 
         <FormSection title="Observações">

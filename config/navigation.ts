@@ -7,6 +7,7 @@ import {
   Search,
   Settings,
   ShoppingCart,
+  Truck,
   Users,
   Wallet,
   Warehouse,
@@ -66,6 +67,12 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       href: `${base}/estoque`,
       icon: Warehouse,
       description: "Movimentações e saldos",
+    },
+    {
+      title: "Compras",
+      href: `${base}/compras`,
+      icon: Truck,
+      description: "Supply Chain Enterprise",
     },
     {
       title: "Vendas",

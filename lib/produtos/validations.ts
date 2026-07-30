@@ -11,10 +11,13 @@ const nullableNumber = z.union([z.number(), z.null()]).default(null);
 
 const produtoTipos = PRODUTO_TIPO_OPTIONS.map((option) => option.value) as [
   "produto",
+  "peca",
   "servico",
   "kit",
   "combo",
   "materia_prima",
+  "composto",
+  "ativo_consumo",
 ];
 
 const unidades = UNIDADE_MEDIDA_OPTIONS.map((option) => option.value);
@@ -29,6 +32,8 @@ export const produtoFormSchema = z
     categoria: optionalText,
     subcategoria: optionalText,
     marca: optionalText,
+    fabricante: optionalText,
+    descricao_resumida: optionalText,
     unidade_medida: z
       .string()
       .trim()
@@ -37,17 +42,44 @@ export const produtoFormSchema = z
         (value) => unidades.includes(value as (typeof unidades)[number]),
         "Informe uma unidade de medida válida.",
       ),
+    ncm: optionalText,
+    cest: optionalText,
+    origem_mercadoria: optionalText,
+    peso_kg: nullableNumber,
+    dimensoes: optionalText,
+    altura_cm: nullableNumber,
+    largura_cm: nullableNumber,
+    comprimento_cm: nullableNumber,
     custo: nullableNumber,
+    custo_reposicao: nullableNumber,
     preco_venda: nullableNumber,
+    preco_minimo: nullableNumber,
+    margem_alvo: nullableNumber,
     estoque_atual: z.number().min(0, "Estoque não pode ser negativo.").default(0),
     estoque_minimo: nullableNumber,
     estoque_maximo: nullableNumber,
+    estoque_seguranca: nullableNumber,
     localizacao: optionalText,
     fornecedor_principal: optionalText,
+    fornecedor_alternativo: optionalText,
+    controla_estoque: z.boolean().default(true),
+    controla_lote: z.boolean().default(false),
+    controla_serie: z.boolean().default(false),
+    controla_validade: z.boolean().default(false),
     observacoes: optionalText,
     ativo: z.boolean(),
   })
   .superRefine((data, ctx) => {
+    if (data.tipo === "servico") {
+      if (data.controla_estoque) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Serviço não controla estoque.",
+          path: ["controla_estoque"],
+        });
+      }
+    }
+
     if (
       data.estoque_minimo !== null &&
       data.estoque_maximo !== null &&
@@ -62,27 +94,56 @@ export const produtoFormSchema = z
       });
     }
 
+    for (const [key, label] of [
+      ["custo", "Custo"],
+      ["custo_reposicao", "Custo de reposição"],
+      ["preco_venda", "Preço de venda"],
+      ["preco_minimo", "Preço mínimo"],
+      ["peso_kg", "Peso"],
+      ["altura_cm", "Altura"],
+      ["largura_cm", "Largura"],
+      ["comprimento_cm", "Comprimento"],
+      ["estoque_seguranca", "Estoque de segurança"],
+    ] as const) {
+      const v = data[key];
+      if (v !== null && v !== undefined && v < 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${label} não pode ser negativo.`,
+          path: [key],
+        });
+      }
+    }
+
     if (
-      data.custo !== null &&
-      data.custo !== undefined &&
-      data.custo < 0
+      data.margem_alvo !== null &&
+      data.margem_alvo !== undefined &&
+      (data.margem_alvo < 0 || data.margem_alvo > 1)
     ) {
       ctx.addIssue({
         code: "custom",
-        message: "Custo não pode ser negativo.",
-        path: ["custo"],
+        message: "Margem alvo deve estar entre 0 e 1 (ex.: 0,35 = 35%).",
+        path: ["margem_alvo"],
       });
     }
 
     if (
-      data.preco_venda !== null &&
-      data.preco_venda !== undefined &&
-      data.preco_venda < 0
+      data.preco_venda != null &&
+      data.preco_minimo != null &&
+      data.preco_venda < data.preco_minimo
     ) {
       ctx.addIssue({
         code: "custom",
-        message: "Preço de venda não pode ser negativo.",
+        message: "Preço de venda abaixo do preço mínimo.",
         path: ["preco_venda"],
+      });
+    }
+
+    if (data.ncm && data.ncm.trim() !== "" && !/^\d{8}$/.test(data.ncm.trim())) {
+      ctx.addIssue({
+        code: "custom",
+        message: "NCM deve ter 8 dígitos quando informado.",
+        path: ["ncm"],
       });
     }
   });

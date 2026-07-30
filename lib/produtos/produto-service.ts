@@ -142,16 +142,49 @@ export class ProdutoService {
   }
 
   async create(input: CreateProdutoInput): Promise<Produto> {
+    const payload = buildProdutoPayload(input);
     const { data, error } = await this.supabase
       .from("produtos")
       .insert({
         tenant_id: this.tenantId,
-        ...buildProdutoPayload(input),
+        ...payload,
       })
       .select("*")
       .single();
 
     if (error) {
+      const msg = error.message.toLowerCase();
+      // Antes da migration 20260813: retry só com campos legados
+      if (msg.includes("column") || msg.includes("schema cache")) {
+        const legacy = {
+          nome: payload.nome,
+          tipo: payload.tipo,
+          codigo_interno: payload.codigo_interno,
+          sku: payload.sku,
+          codigo_barras: payload.codigo_barras,
+          categoria: payload.categoria,
+          subcategoria: payload.subcategoria,
+          marca: payload.marca,
+          unidade_medida: payload.unidade_medida,
+          custo: payload.custo,
+          preco_venda: payload.preco_venda,
+          margem_percent: payload.margem_percent,
+          estoque_atual: payload.estoque_atual,
+          estoque_minimo: payload.estoque_minimo,
+          estoque_maximo: payload.estoque_maximo,
+          localizacao: payload.localizacao,
+          fornecedor_principal: payload.fornecedor_principal,
+          observacoes: payload.observacoes,
+          ativo: payload.ativo,
+        };
+        const retry = await this.supabase
+          .from("produtos")
+          .insert({ tenant_id: this.tenantId, ...legacy })
+          .select("*")
+          .single();
+        if (retry.error) throw new Error(mapUniqueViolation(retry.error));
+        return retry.data as Produto;
+      }
       throw new Error(mapUniqueViolation(error));
     }
 
@@ -159,9 +192,10 @@ export class ProdutoService {
   }
 
   async update(id: string, input: UpdateProdutoInput): Promise<Produto> {
+    const payload = buildProdutoPayload(input as CreateProdutoInput);
     const { data, error } = await this.supabase
       .from("produtos")
-      .update(buildProdutoPayload(input as CreateProdutoInput))
+      .update(payload)
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
       .is("deleted_at", null)
@@ -169,6 +203,40 @@ export class ProdutoService {
       .single();
 
     if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("column") || msg.includes("schema cache")) {
+        const legacy = {
+          nome: payload.nome,
+          tipo: payload.tipo,
+          codigo_interno: payload.codigo_interno,
+          sku: payload.sku,
+          codigo_barras: payload.codigo_barras,
+          categoria: payload.categoria,
+          subcategoria: payload.subcategoria,
+          marca: payload.marca,
+          unidade_medida: payload.unidade_medida,
+          custo: payload.custo,
+          preco_venda: payload.preco_venda,
+          margem_percent: payload.margem_percent,
+          estoque_atual: payload.estoque_atual,
+          estoque_minimo: payload.estoque_minimo,
+          estoque_maximo: payload.estoque_maximo,
+          localizacao: payload.localizacao,
+          fornecedor_principal: payload.fornecedor_principal,
+          observacoes: payload.observacoes,
+          ativo: payload.ativo,
+        };
+        const retry = await this.supabase
+          .from("produtos")
+          .update(legacy)
+          .eq("tenant_id", this.tenantId)
+          .eq("id", id)
+          .is("deleted_at", null)
+          .select("*")
+          .single();
+        if (retry.error) throw new Error(mapUniqueViolation(retry.error));
+        return retry.data as Produto;
+      }
       throw new Error(mapUniqueViolation(error));
     }
 

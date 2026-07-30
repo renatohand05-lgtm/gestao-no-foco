@@ -7,7 +7,10 @@ export type ProdutoTipo =
   | "servico"
   | "kit"
   | "combo"
-  | "materia_prima";
+  | "materia_prima"
+  | "peca"
+  | "composto"
+  | "ativo_consumo";
 
 export type ProdutoSortField =
   | "nome"
@@ -42,6 +45,30 @@ export type Produto = {
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
+  /** Enterprise — migration 20260813 */
+  descricao_resumida: string | null;
+  fabricante: string | null;
+  ncm: string | null;
+  cest: string | null;
+  origem_mercadoria: string | null;
+  peso_kg: number | null;
+  dimensoes: string | null;
+  altura_cm: number | null;
+  largura_cm: number | null;
+  comprimento_cm: number | null;
+  custo_reposicao: number | null;
+  preco_minimo: number | null;
+  margem_alvo: number | null;
+  estoque_seguranca: number | null;
+  fornecedor_alternativo: string | null;
+  fornecedor_principal_id: string | null;
+  fornecedor_alternativo_id: string | null;
+  empresa_id: string | null;
+  filial_id: string | null;
+  controla_estoque: boolean;
+  controla_lote: boolean;
+  controla_serie: boolean;
+  controla_validade: boolean;
 };
 
 export type ProdutoListItem = Pick<
@@ -81,6 +108,29 @@ export type ProdutoInput = {
   fornecedor_principal?: string | null;
   observacoes?: string | null;
   ativo: boolean;
+  descricao_resumida?: string | null;
+  fabricante?: string | null;
+  ncm?: string | null;
+  cest?: string | null;
+  origem_mercadoria?: string | null;
+  peso_kg?: number | null;
+  dimensoes?: string | null;
+  altura_cm?: number | null;
+  largura_cm?: number | null;
+  comprimento_cm?: number | null;
+  custo_reposicao?: number | null;
+  preco_minimo?: number | null;
+  margem_alvo?: number | null;
+  estoque_seguranca?: number | null;
+  fornecedor_alternativo?: string | null;
+  fornecedor_principal_id?: string | null;
+  fornecedor_alternativo_id?: string | null;
+  empresa_id?: string | null;
+  filial_id?: string | null;
+  controla_estoque?: boolean;
+  controla_lote?: boolean;
+  controla_serie?: boolean;
+  controla_validade?: boolean;
 };
 
 export type CreateProdutoInput = ProdutoInput;

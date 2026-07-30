@@ -10,6 +10,9 @@ export function getTipoLabel(tipo: ProdutoTipo) {
     kit: "Kit",
     combo: "Combo",
     materia_prima: "Matéria-prima",
+    peca: "Peça",
+    composto: "Produto composto",
+    ativo_consumo: "Ativo de consumo",
   };
 
   return labels[tipo];

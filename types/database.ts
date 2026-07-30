@@ -789,6 +789,29 @@ export type Database = {
           deleted_at: string | null;
           created_at: string;
           updated_at: string;
+          descricao_resumida: string | null;
+          fabricante: string | null;
+          ncm: string | null;
+          cest: string | null;
+          origem_mercadoria: string | null;
+          peso_kg: number | null;
+          dimensoes: string | null;
+          custo_reposicao: number | null;
+          preco_minimo: number | null;
+          margem_alvo: number | null;
+          estoque_seguranca: number | null;
+          fornecedor_alternativo: string | null;
+          fornecedor_principal_id: string | null;
+          fornecedor_alternativo_id: string | null;
+          empresa_id: string | null;
+          filial_id: string | null;
+          altura_cm: number | null;
+          largura_cm: number | null;
+          comprimento_cm: number | null;
+          controla_estoque: boolean;
+          controla_lote: boolean;
+          controla_serie: boolean;
+          controla_validade: boolean;
         };
         Insert: {
           id?: string;
@@ -815,6 +838,29 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          descricao_resumida?: string | null;
+          fabricante?: string | null;
+          ncm?: string | null;
+          cest?: string | null;
+          origem_mercadoria?: string | null;
+          peso_kg?: number | null;
+          dimensoes?: string | null;
+          custo_reposicao?: number | null;
+          preco_minimo?: number | null;
+          margem_alvo?: number | null;
+          estoque_seguranca?: number | null;
+          fornecedor_alternativo?: string | null;
+          fornecedor_principal_id?: string | null;
+          fornecedor_alternativo_id?: string | null;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          altura_cm?: number | null;
+          largura_cm?: number | null;
+          comprimento_cm?: number | null;
+          controla_estoque?: boolean;
+          controla_lote?: boolean;
+          controla_serie?: boolean;
+          controla_validade?: boolean;
         };
         Update: {
           id?: string;
@@ -841,6 +887,29 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          descricao_resumida?: string | null;
+          fabricante?: string | null;
+          ncm?: string | null;
+          cest?: string | null;
+          origem_mercadoria?: string | null;
+          peso_kg?: number | null;
+          dimensoes?: string | null;
+          custo_reposicao?: number | null;
+          preco_minimo?: number | null;
+          margem_alvo?: number | null;
+          estoque_seguranca?: number | null;
+          fornecedor_alternativo?: string | null;
+          fornecedor_principal_id?: string | null;
+          fornecedor_alternativo_id?: string | null;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          altura_cm?: number | null;
+          largura_cm?: number | null;
+          comprimento_cm?: number | null;
+          controla_estoque?: boolean;
+          controla_lote?: boolean;
+          controla_serie?: boolean;
+          controla_validade?: boolean;
         };
         Relationships: [];
       };
@@ -859,6 +928,15 @@ export type Database = {
           created_by: string | null;
           deleted_at: string | null;
           created_at: string;
+          kind_enterprise: string | null;
+          deposito_origem_id: string | null;
+          deposito_destino_id: string | null;
+          localizacao_id: string | null;
+          documento_ref: string | null;
+          empresa_id: string | null;
+          filial_id: string | null;
+          correlation_id: string | null;
+          idempotency_key: string | null;
         };
         Insert: {
           id?: string;
@@ -874,6 +952,15 @@ export type Database = {
           created_by?: string | null;
           deleted_at?: string | null;
           created_at?: string;
+          kind_enterprise?: string | null;
+          deposito_origem_id?: string | null;
+          deposito_destino_id?: string | null;
+          localizacao_id?: string | null;
+          documento_ref?: string | null;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          correlation_id?: string | null;
+          idempotency_key?: string | null;
         };
         Update: {
           id?: string;
@@ -889,6 +976,15 @@ export type Database = {
           created_by?: string | null;
           deleted_at?: string | null;
           created_at?: string;
+          kind_enterprise?: string | null;
+          deposito_origem_id?: string | null;
+          deposito_destino_id?: string | null;
+          localizacao_id?: string | null;
+          documento_ref?: string | null;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          correlation_id?: string | null;
+          idempotency_key?: string | null;
         };
         Relationships: [
           {
@@ -1540,6 +1636,12 @@ export type Database = {
           deleted_at: string | null;
           created_at: string;
           updated_at: string;
+          lead_time_dias: number | null;
+          sla_dias: number | null;
+          ranking_interno: string | null;
+          qualidade_score: number | null;
+          empresa_id: string | null;
+          filial_id: string | null;
         };
         Insert: {
           id?: string;
@@ -1570,6 +1672,12 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          lead_time_dias?: number | null;
+          sla_dias?: number | null;
+          ranking_interno?: string | null;
+          qualidade_score?: number | null;
+          empresa_id?: string | null;
+          filial_id?: string | null;
         };
         Update: {
           id?: string;
@@ -1600,6 +1708,12 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          lead_time_dias?: number | null;
+          sla_dias?: number | null;
+          ranking_interno?: string | null;
+          qualidade_score?: number | null;
+          empresa_id?: string | null;
+          filial_id?: string | null;
         };
         Relationships: [
           {
@@ -1670,6 +1784,7 @@ export type Database = {
           deleted_at: string | null;
           created_at: string;
           updated_at: string;
+          compra_pedido_id: string | null;
         };
         Insert: {
           id?: string;
@@ -1701,6 +1816,7 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          compra_pedido_id?: string | null;
         };
         Update: {
           id?: string;
@@ -1732,6 +1848,7 @@ export type Database = {
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          compra_pedido_id?: string | null;
         };
         Relationships: [
           {
@@ -4262,7 +4379,6 @@ export type Database = {
         };
         Relationships: [];
       };
-    };
 
       // —— Sprint 22.10.1 — Import Intelligence + Bank Reconciliation (migrations 20260809/10)
       import_runs: {
@@ -4701,6 +4817,587 @@ export type Database = {
         Relationships: [];
       };
 
+      /* Fase 25 — Supply Chain Enterprise */
+      estoque_depositos: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          empresa_id: string | null;
+          filial_id: string | null;
+          codigo: string;
+          nome: string;
+          ativo: boolean;
+          observacoes: string | null;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          codigo: string;
+          nome: string;
+          ativo?: boolean;
+          observacoes?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          codigo?: string;
+          nome?: string;
+          ativo?: boolean;
+          observacoes?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      estoque_almoxarifados: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          deposito_id: string;
+          codigo: string;
+          nome: string;
+          ativo: boolean;
+          observacoes: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          deposito_id: string;
+          codigo: string;
+          nome: string;
+          ativo?: boolean;
+          observacoes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          deposito_id?: string;
+          codigo?: string;
+          nome?: string;
+          ativo?: boolean;
+          observacoes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      estoque_localizacoes: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          deposito_id: string;
+          almoxarifado_id: string | null;
+          rua: string | null;
+          corredor: string | null;
+          prateleira: string | null;
+          posicao: string | null;
+          codigo: string;
+          ativo: boolean;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          deposito_id: string;
+          almoxarifado_id?: string | null;
+          rua?: string | null;
+          corredor?: string | null;
+          prateleira?: string | null;
+          posicao?: string | null;
+          codigo: string;
+          ativo?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          deposito_id?: string;
+          almoxarifado_id?: string | null;
+          rua?: string | null;
+          corredor?: string | null;
+          prateleira?: string | null;
+          posicao?: string | null;
+          codigo?: string;
+          ativo?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      compras_pedidos: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          empresa_id: string | null;
+          filial_id: string | null;
+          numero: number | null;
+          status: string;
+          fornecedor_id: string | null;
+          solicitante_id: string | null;
+          aprovador_id: string | null;
+          data_necessidade: string | null;
+          valor_total: number | null;
+          observacoes: string | null;
+          motivo_cancelamento: string | null;
+          integrado_financeiro_em: string | null;
+          integrado_estoque_em: string | null;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          numero?: number | null;
+          status?: string;
+          fornecedor_id?: string | null;
+          solicitante_id?: string | null;
+          aprovador_id?: string | null;
+          data_necessidade?: string | null;
+          valor_total?: number | null;
+          observacoes?: string | null;
+          motivo_cancelamento?: string | null;
+          integrado_financeiro_em?: string | null;
+          integrado_estoque_em?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          numero?: number | null;
+          status?: string;
+          fornecedor_id?: string | null;
+          solicitante_id?: string | null;
+          aprovador_id?: string | null;
+          data_necessidade?: string | null;
+          valor_total?: number | null;
+          observacoes?: string | null;
+          motivo_cancelamento?: string | null;
+          integrado_financeiro_em?: string | null;
+          integrado_estoque_em?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      compras_pedido_itens: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          pedido_id: string;
+          produto_id: string;
+          quantidade: number;
+          quantidade_recebida: number;
+          preco_unitario: number | null;
+          observacoes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          pedido_id: string;
+          produto_id: string;
+          quantidade: number;
+          quantidade_recebida?: number;
+          preco_unitario?: number | null;
+          observacoes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          pedido_id?: string;
+          produto_id?: string;
+          quantidade?: number;
+          quantidade_recebida?: number;
+          preco_unitario?: number | null;
+          observacoes?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      compras_cotacoes: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          pedido_id: string;
+          fornecedor_id: string | null;
+          valor_total: number | null;
+          prazo_dias: number | null;
+          escolhida: boolean;
+          observacoes: string | null;
+          created_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          pedido_id: string;
+          fornecedor_id?: string | null;
+          valor_total?: number | null;
+          prazo_dias?: number | null;
+          escolhida?: boolean;
+          observacoes?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          pedido_id?: string;
+          fornecedor_id?: string | null;
+          valor_total?: number | null;
+          prazo_dias?: number | null;
+          escolhida?: boolean;
+          observacoes?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      compras_eventos: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          pedido_id: string;
+          from_status: string | null;
+          to_status: string;
+          nota: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          pedido_id: string;
+          from_status?: string | null;
+          to_status: string;
+          nota?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          pedido_id?: string;
+          from_status?: string | null;
+          to_status?: string;
+          nota?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      estoque_inventarios: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          empresa_id: string | null;
+          filial_id: string | null;
+          deposito_id: string | null;
+          kind: string;
+          status: string;
+          observacoes: string | null;
+          created_by: string | null;
+          closed_at: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          deposito_id?: string | null;
+          kind?: string;
+          status?: string;
+          observacoes?: string | null;
+          created_by?: string | null;
+          closed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          empresa_id?: string | null;
+          filial_id?: string | null;
+          deposito_id?: string | null;
+          kind?: string;
+          status?: string;
+          observacoes?: string | null;
+          created_by?: string | null;
+          closed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      estoque_inventario_itens: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          inventario_id: string;
+          produto_id: string;
+          saldo_sistema: number;
+          contagem: number | null;
+          divergencia: number | null;
+          ajustado: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          inventario_id: string;
+          produto_id: string;
+          saldo_sistema: number;
+          contagem?: number | null;
+          divergencia?: number | null;
+          ajustado?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          inventario_id?: string;
+          produto_id?: string;
+          saldo_sistema?: number;
+          contagem?: number | null;
+          divergencia?: number | null;
+          ajustado?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      compras_cotacao_itens: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          cotacao_id: string;
+          produto_id: string;
+          quantidade: number;
+          preco_unitario: number | null;
+          prazo_dias: number | null;
+          frete: number | null;
+          impostos: number | null;
+          observacoes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          cotacao_id: string;
+          produto_id: string;
+          quantidade: number;
+          preco_unitario?: number | null;
+          prazo_dias?: number | null;
+          frete?: number | null;
+          impostos?: number | null;
+          observacoes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          cotacao_id?: string;
+          produto_id?: string;
+          quantidade?: number;
+          preco_unitario?: number | null;
+          prazo_dias?: number | null;
+          frete?: number | null;
+          impostos?: number | null;
+          observacoes?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      compras_recebimentos: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          pedido_id: string;
+          deposito_id: string | null;
+          localizacao_id: string | null;
+          status: string;
+          nota_fiscal_ref: string | null;
+          divergencia: boolean;
+          observacoes: string | null;
+          created_by: string | null;
+          created_at: string;
+          confirmed_at: string | null;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          pedido_id: string;
+          deposito_id?: string | null;
+          localizacao_id?: string | null;
+          status?: string;
+          nota_fiscal_ref?: string | null;
+          divergencia?: boolean;
+          observacoes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          confirmed_at?: string | null;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          pedido_id?: string;
+          deposito_id?: string | null;
+          localizacao_id?: string | null;
+          status?: string;
+          nota_fiscal_ref?: string | null;
+          divergencia?: boolean;
+          observacoes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          confirmed_at?: string | null;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      compras_recebimento_itens: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          recebimento_id: string;
+          pedido_item_id: string | null;
+          produto_id: string;
+          quantidade_pedida: number;
+          quantidade_recebida: number;
+          lote: string | null;
+          serie: string | null;
+          validade: string | null;
+          avaria: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          recebimento_id: string;
+          pedido_item_id?: string | null;
+          produto_id: string;
+          quantidade_pedida: number;
+          quantidade_recebida: number;
+          lote?: string | null;
+          serie?: string | null;
+          validade?: string | null;
+          avaria?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          recebimento_id?: string;
+          pedido_item_id?: string | null;
+          produto_id?: string;
+          quantidade_pedida?: number;
+          quantidade_recebida?: number;
+          lote?: string | null;
+          serie?: string | null;
+          validade?: string | null;
+          avaria?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      estoque_reservas: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          produto_id: string;
+          quantidade: number;
+          origem: string;
+          origem_id: string | null;
+          status: string;
+          expires_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          released_at: string | null;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          produto_id: string;
+          quantidade: number;
+          origem: string;
+          origem_id?: string | null;
+          status?: string;
+          expires_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          released_at?: string | null;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          produto_id?: string;
+          quantidade?: number;
+          origem?: string;
+          origem_id?: string | null;
+          status?: string;
+          expires_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          released_at?: string | null;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Views: Record<string, never>;
     Functions: {
       ensure_consumidor_balcao: {

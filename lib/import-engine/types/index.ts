@@ -191,7 +191,13 @@ export const SUPPORTED_FORMATS: readonly ImportFormat[] = [
  * Cada módulo define seus próprios campos-alvo e regras de classificação,
  * mas compartilha parsing, segurança, mapeamento, revisão e histórico.
  */
-export type ImportModuleId = "finance" | "sales" | "service-orders";
+export type ImportModuleId =
+  | "finance"
+  | "sales"
+  | "service-orders"
+  | "catalog"
+  | "stock"
+  | "invoice";
 
 /* ————————————————— Segurança (Sprint 22.5.1) ————————————————— */
 

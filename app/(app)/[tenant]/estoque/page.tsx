@@ -85,6 +85,11 @@ export default async function EstoquePage({
       >
         <ActionButton
           action="create"
+          label="Central de importação"
+          href={`/${tenantSlug}/estoque/importar`}
+        />
+        <ActionButton
+          action="create"
           label="Importar NF-e"
           href={`/${tenantSlug}/estoque/notas-fiscais`}
         />

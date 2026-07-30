@@ -52,9 +52,18 @@ export const PERMISSION_CATALOG = [
   def("estoque.ajustar", "estoque", "ajustar", "Ajustar saldos de estoque", "escrita", "alto"),
   def("estoque.inventariar", "estoque", "inventariar", "Executar inventário", "escrita", "medio"),
   def("estoque.transferir", "estoque", "transferir", "Transferir estoque entre depósitos/localizações", "escrita", "medio"),
+  def("estoque.importar", "estoque", "importar", "Importar produtos, saldo e catálogo de estoque", "escrita", "alto"),
   def("estoque.aprovar_ajuste", "estoque", "aprovar_ajuste", "Aprovar ajustes de estoque", "aprovacao", "alto"),
   def("estoque.ver_custo", "estoque", "ver_custo", "Visualizar custo de estoque", "financeiro_sensivel", "alto"),
   def("estoque.exportar", "estoque", "exportar", "Exportar dados de estoque", "exportacao", "baixo"),
+
+  // Produtos / Serviços (Sprint 25.3)
+  def("produtos.visualizar", "estoque", "produtos_visualizar", "Visualizar produtos e serviços", "leitura", "baixo"),
+  def("produtos.criar", "estoque", "produtos_criar", "Criar produtos e serviços", "escrita", "medio"),
+  def("produtos.editar", "estoque", "produtos_editar", "Editar produtos e serviços", "escrita", "medio"),
+  def("produtos.importar", "estoque", "produtos_importar", "Importar catálogo de produtos", "escrita", "alto"),
+  def("servicos.importar", "estoque", "servicos_importar", "Importar catálogo de serviços", "escrita", "alto"),
+  def("importacoes.rollback", "estoque", "importacoes_rollback", "Reverter importações de catálogo/estoque", "aprovacao", "critico"),
 
   // Compras
   def("compras.visualizar", "compras", "visualizar", "Visualizar compras", "leitura", "baixo"),

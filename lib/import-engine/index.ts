@@ -287,6 +287,24 @@ export {
   SERVICE_ORDERS_IMPORT_ENTITY,
   SERVICE_ORDERS_IMPORT_FIELDS,
 } from "./adapters/service-orders/fields.ts";
+export { CATALOG_IMPORT_ADAPTER } from "./adapters/catalog/adapter.ts";
+export {
+  CATALOG_IMPORT_MODULE,
+  CATALOG_IMPORT_ENTITY,
+  CATALOG_SERVICE_IMPORT_FIELDS,
+} from "./adapters/catalog/fields.ts";
+export { STOCK_IMPORT_ADAPTER } from "./adapters/stock/adapter.ts";
+export {
+  STOCK_IMPORT_MODULE,
+  STOCK_IMPORT_ENTITY,
+  STOCK_PRODUCT_IMPORT_FIELDS,
+} from "./adapters/stock/fields.ts";
+export { INVOICE_IMPORT_ADAPTER } from "./adapters/invoice/adapter.ts";
+export {
+  INVOICE_IMPORT_MODULE,
+  INVOICE_IMPORT_ENTITY,
+  INVOICE_IMPORT_FIELDS,
+} from "./adapters/invoice/fields.ts";
 export { getImportAdapter, listImportAdapters } from "./adapters/registry.ts";
 
 /* ————————————————— Serviço orquestrador ————————————————— */

@@ -608,10 +608,13 @@ assert(
 );
 
 /* ——— Sprint 22.5.1 — Registry ——— */
-assert(listImportAdapters().length === 3, "Registry: 3 adapters registados");
+assert(listImportAdapters().length === 6, "Registry: 6 adapters registados");
 assert(getImportAdapter("finance").moduleKey === "financeiro", "Registry: finance");
 assert(getImportAdapter("sales").id === "sales", "Registry: sales");
 assert(getImportAdapter("service-orders").id === "service-orders", "Registry: service-orders");
+assert(getImportAdapter("catalog").id === "catalog", "Registry: catalog");
+assert(getImportAdapter("stock").id === "stock", "Registry: stock");
+assert(getImportAdapter("invoice").id === "invoice", "Registry: invoice");
 
 /* ——— Sprint 22.5.1 — Classificação multi-domínio ——— */
 assert(

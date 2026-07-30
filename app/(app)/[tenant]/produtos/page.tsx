@@ -85,6 +85,11 @@ export default async function ProdutosPage({
       >
         <ActionButton
           action="create"
+          label="Importar / catálogo"
+          href={`/${tenantSlug}/produtos/importar`}
+        />
+        <ActionButton
+          action="create"
           label="Novo item"
           href={`/${tenantSlug}/produtos/novo`}
         />

@@ -11,7 +11,7 @@ import type {
   NfeEmitenteEndereco,
   ParsedNfe,
   ParsedNfeItem,
-} from "@/types/nfe-entrada";
+} from "../../types/nfe-entrada.ts";
 
 export const NFE_XML_MAX_BYTES = 2 * 1024 * 1024; // 2MB
 export const NFE_ALLOWED_MIME = new Set([

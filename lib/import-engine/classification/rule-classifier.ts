@@ -209,6 +209,10 @@ const RULES_BY_DOMAIN: Record<ClassificationDomain, ClassificationRule[]> = {
   finance: FINANCE_CLASSIFICATION_RULES,
   sales: SALES_CLASSIFICATION_RULES,
   "service-orders": SERVICE_ORDERS_CLASSIFICATION_RULES,
+  /* Catálogo / estoque / NF reutilizam regras de OS / vendas como baseline */
+  catalog: SERVICE_ORDERS_CLASSIFICATION_RULES,
+  stock: SALES_CLASSIFICATION_RULES,
+  invoice: SALES_CLASSIFICATION_RULES,
 };
 
 export function rulesForDomain(

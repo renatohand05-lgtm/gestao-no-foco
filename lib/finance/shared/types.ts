@@ -10,8 +10,16 @@ export type FinancePermission =
   | "financeiro.arquivar"
   | "financeiro.transferir"
   | "financeiro.aprovar"
+  | "financeiro.conciliar"
   | "financeiro.ver_saldos"
-  | "financeiro.ver_fluxo_caixa";
+  | "financeiro.ver_fluxo_caixa"
+  | "financeiro.ver_dre"
+  | "financeiro.movimentacoes.visualizar"
+  | "financeiro.contas.visualizar"
+  | "financeiro.alertas.visualizar"
+  | "financeiro.tributos.visualizar"
+  | "financeiro.tributos.simular"
+  | "financeiro.tributos.configurar";
 
 export type BankAccountType =
   | "corrente"

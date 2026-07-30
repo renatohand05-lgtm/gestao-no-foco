@@ -1,76 +1,187 @@
-import Link from "next/link";
+import { Suspense } from "react";
 
-import { CashflowChart } from "@/components/finance/cashflow-chart";
-import { CashflowTable } from "@/components/finance/cashflow-table";
-import { FinancialSummaryCards } from "@/components/finance/financial-summary";
-import { ModuleHeader } from "@/components/layout/module-header";
+import { FinancePageHeader } from "@/components/finance/finance-page-header";
+import { TreasuryDashboardClient } from "@/components/finance/treasury-dashboard-client";
 import {
-  getFinancialSummary,
-  listCashFlow,
+  getTreasuryAccounts,
+  getTreasuryAlerts,
+  getTreasuryBalanceEvolution,
+  getTreasuryInsights,
+  getTreasurySummary,
 } from "@/lib/finance/actions";
-import { requireTenant } from "@/lib/tenants";
+import type { TreasuryPeriodKey } from "@/lib/finance";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 
-export const metadata = { title: "Financeiro" };
+export const metadata = { title: "Dashboard Enterprise" };
+
+function parsePeriod(raw: string | undefined): TreasuryPeriodKey {
+  const allowed: TreasuryPeriodKey[] = [
+    "today",
+    "7d",
+    "30d",
+    "60d",
+    "90d",
+    "12m",
+    "this_month",
+    "last_month",
+    "this_year",
+    "custom",
+  ];
+  if (raw && allowed.includes(raw as TreasuryPeriodKey)) {
+    return raw as TreasuryPeriodKey;
+  }
+  return "30d";
+}
+
+function isPermissionError(result: {
+  success: boolean;
+  error?: string;
+  code?: string;
+}) {
+  if (result.success) return false;
+  return (
+    result.code === "FINANCE_PERMISSION_DENIED" ||
+    result.code === "FINANCE_CONFIG_PENDING" ||
+    /permiss|RBAC|autoriz/i.test(result.error ?? "")
+  );
+}
 
 export default async function FinanceiroDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenant: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenant: tenantSlug } = await params;
-  const tenant = await requireTenant(tenantSlug);
+  const sp = await searchParams;
 
-  const [summaryResult, cashFlowResult] = await Promise.all([
-    getFinancialSummary(tenantSlug),
-    listCashFlow(tenantSlug),
-  ]);
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+      "financeiro.ver_saldos",
+      "financeiro.contas.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Dashboard"
+          description="Posição consolidada de caixa, evolução, insights e alertas."
+          breadcrumbs={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            { label: "Dashboard" },
+          ]}
+        />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </div>
+    );
+  }
 
-  const links = [
-    { href: "contas", label: "Contas bancárias" },
-    { href: "movimentacoes", label: "Movimentações" },
-    { href: "categorias", label: "Categorias" },
-    { href: "centros-custo", label: "Centros de custo" },
-    { href: "fluxo-caixa", label: "Fluxo (legado)" },
-    { href: "contas-pagar", label: "Contas a pagar" },
-    { href: "contas-receber", label: "Contas a receber" },
-  ];
+  const { tenant } = auth;
+  const periodKey = parsePeriod(
+    typeof sp.period === "string" ? sp.period : undefined,
+  );
+  const custom =
+    periodKey === "custom"
+      ? {
+          from: typeof sp.from === "string" ? sp.from : undefined,
+          to: typeof sp.to === "string" ? sp.to : undefined,
+        }
+      : undefined;
+
+  const [summaryR, evolutionR, accountsR, insightsR, alertsR] =
+    await Promise.all([
+      getTreasurySummary(tenantSlug, periodKey, custom),
+      getTreasuryBalanceEvolution(tenantSlug, periodKey, null, custom),
+      getTreasuryAccounts(tenantSlug),
+      getTreasuryInsights(tenantSlug, periodKey),
+      getTreasuryAlerts(tenantSlug, periodKey),
+    ]);
+
+  const permissionDenied =
+    isPermissionError(summaryR) ||
+    isPermissionError(evolutionR) ||
+    isPermissionError(accountsR);
+
+  const loadError =
+    !permissionDenied &&
+    ((!summaryR.success && summaryR.error) ||
+      (!evolutionR.success && evolutionR.error) ||
+      (!accountsR.success && accountsR.error) ||
+      null);
+
+  const summary = summaryR.success ? summaryR.summary : null;
+  const accounts = accountsR.success ? accountsR.accounts : [];
+
+  let state:
+    | "ok"
+    | "permission_denied"
+    | "load_error"
+    | "empty_accounts"
+    | "empty_period" = "ok";
+  if (permissionDenied) state = "permission_denied";
+  else if (loadError) state = "load_error";
+  else if (summary && accounts.length === 0) state = "empty_accounts";
+  else if (summary && summary.inflows === 0 && summary.outflows === 0) {
+    state = "empty_period";
+  }
+
+  const permissionMessage = permissionDenied
+    ? (!summaryR.success ? summaryR.error : undefined) ||
+      (!accountsR.success ? accountsR.error : undefined) ||
+      "Sem permissão para a tesouraria."
+    : null;
+
+  const loadErrorMessage = typeof loadError === "string" ? loadError : null;
 
   return (
     <div className="space-y-6">
-      <ModuleHeader
-        title="Financeiro Enterprise"
-        description={`Core operacional · ${tenant.name}`}
-        breadcrumbs={[{ label: "Financeiro", href: `/${tenantSlug}/financeiro` }]}
+      <FinancePageHeader
+        tenantSlug={tenantSlug}
+        tenantName={tenant.name}
+        title="Dashboard"
+        description="Posição consolidada de caixa, evolução, insights e alertas."
+        breadcrumbs={[
+          { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+          { label: "Dashboard" },
+        ]}
       />
 
-      {!summaryResult.success ? (
-        <p className="rounded-lg border border-red-500/40 px-3 py-2 text-sm text-red-700">
-          {summaryResult.error}
-        </p>
-      ) : (
-        <FinancialSummaryCards summary={summaryResult.summary} />
-      )}
-
-      <nav className="flex flex-wrap gap-2">
-        {links.map((l) => (
-          <Link
-            key={l.href}
-            href={`/${tenantSlug}/financeiro/${l.href}`}
-            className="inline-flex h-8 items-center rounded-md border border-input px-3 text-sm hover:bg-muted"
-          >
-            {l.label}
-          </Link>
-        ))}
-      </nav>
-
-      {cashFlowResult.success ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <CashflowChart points={cashFlowResult.cashFlow.points} />
-          <CashflowTable cashFlow={cashFlowResult.cashFlow} />
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">{cashFlowResult.error}</p>
-      )}
+      <Suspense
+        fallback={<p className="text-sm text-muted-foreground">A carregar…</p>}
+      >
+        <TreasuryDashboardClient
+          tenantSlug={tenantSlug}
+          periodKey={periodKey}
+          summary={summary}
+          evolution={evolutionR.success ? evolutionR.evolution : null}
+          accounts={accounts}
+          insights={insightsR.success ? insightsR.insights : []}
+          alerts={alertsR.success ? alertsR.alerts : []}
+          error={permissionMessage ?? loadErrorMessage}
+          errorCode={
+            !summaryR.success
+              ? summaryR.code
+              : !accountsR.success
+                ? accountsR.code
+                : null
+          }
+          state={state}
+        />
+      </Suspense>
     </div>
   );
 }

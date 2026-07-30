@@ -6,7 +6,10 @@ import {
   canEditClassificacaoContaPagar,
   canEditContaPagar,
 } from "@/lib/financeiro/conta-pagar-utils";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import {
   ExecutiveHeader,
   ExecutivePage,
@@ -41,7 +44,37 @@ export default async function EditarPage({
 }) {
   const { tenant: tenantSlug, id } = await params;
   const query = await searchParams;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            {
+              label: "Contas a Pagar",
+              href: `/${tenantSlug}/financeiro/contas-pagar`,
+            },
+            { label: "Editar" },
+          ]} />
+        <ExecutiveHeader title="Editar conta a pagar" description="Edição" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createContaPagarService(tenant.id);
   const item = await service.getById(id);
 

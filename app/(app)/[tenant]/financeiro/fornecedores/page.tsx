@@ -12,7 +12,10 @@ import {
 import { ActionButton } from "@/components/ui/action-button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { createFornecedorService } from "@/lib/financeiro/fornecedor-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import type { FornecedorListItem } from "@/types/fornecedores";
 
 export const metadata = { title: "Fornecedores" };
@@ -25,7 +28,35 @@ type PageProps = {
 export default async function Page({ params, searchParams }: PageProps) {
   const { tenant: tenantSlug } = await params;
   const { q } = await searchParams;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs
+          items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            { label: "Fornecedores" },
+          ]}
+        />
+        <ExecutiveHeader title="Fornecedores" description="Cadastro mestre" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createFornecedorService(tenant.id);
   const result = await service.list({ search: q, perPage: 50 });
 

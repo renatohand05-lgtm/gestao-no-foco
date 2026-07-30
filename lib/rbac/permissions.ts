@@ -36,6 +36,12 @@ export const PERMISSION_CATALOG = [
   def("financeiro.ver_saldos", "financeiro", "ver_saldos", "Visualizar saldos bancários", "financeiro_sensivel", "alto"),
   def("financeiro.ver_dre", "financeiro", "ver_dre", "Visualizar DRE", "financeiro_sensivel", "alto"),
   def("financeiro.ver_fluxo_caixa", "financeiro", "ver_fluxo_caixa", "Visualizar fluxo de caixa", "financeiro_sensivel", "alto"),
+  def("financeiro.movimentacoes.visualizar", "financeiro", "movimentacoes.visualizar", "Visualizar histórico de movimentações", "leitura", "baixo"),
+  def("financeiro.contas.visualizar", "financeiro", "contas.visualizar", "Visualizar contas bancárias e posição de caixa", "leitura", "baixo"),
+  def("financeiro.alertas.visualizar", "financeiro", "alertas.visualizar", "Visualizar alertas financeiros", "leitura", "medio"),
+  def("financeiro.tributos.visualizar", "financeiro", "tributos.visualizar", "Visualizar Inteligência Tributária Enterprise", "financeiro_sensivel", "alto"),
+  def("financeiro.tributos.simular", "financeiro", "tributos.simular", "Simular cenários tributários", "financeiro_sensivel", "alto"),
+  def("financeiro.tributos.configurar", "financeiro", "tributos.configurar", "Configurar regras tributárias versionadas", "aprovacao", "critico"),
 
   // Estoque
   def("estoque.visualizar", "estoque", "visualizar", "Visualizar estoque", "leitura", "baixo"),
@@ -95,6 +101,17 @@ export const PERMISSION_CATALOG = [
   def("dashboard.estoque", "dashboard", "estoque", "Acessar dashboard de estoque", "leitura", "baixo"),
   def("dashboard.rh", "dashboard", "rh", "Acessar dashboard de RH", "leitura", "medio"),
   def("dashboard.exportar", "dashboard", "exportar", "Exportar dashboards", "exportacao", "medio"),
+
+  // Analytics / BI (Fase 23)
+  def("analytics.visualizar", "analytics", "visualizar", "Visualizar Analytics Enterprise", "leitura", "medio"),
+  def("analytics.executivo", "analytics", "executivo", "Dashboard executivo de Analytics", "leitura", "medio"),
+  def("analytics.financeiro", "analytics", "financeiro", "Analytics financeiro", "financeiro_sensivel", "alto"),
+  def("analytics.vendas", "analytics", "vendas", "Analytics comercial", "leitura", "medio"),
+  def("analytics.operacional", "analytics", "operacional", "Analytics operacional e clientes", "leitura", "medio"),
+  def("analytics.estoque", "analytics", "estoque", "Analytics de estoque", "leitura", "medio"),
+  def("analytics.tributario", "analytics", "tributario", "Analytics tributário", "financeiro_sensivel", "alto"),
+  def("analytics.configurar", "analytics", "configurar", "Configurar dashboards Analytics", "administracao", "alto"),
+  def("analytics.exportar", "analytics", "exportar", "Exportar Analytics", "exportacao", "medio"),
 
   // Usuários
   def("usuarios.visualizar", "usuarios", "visualizar", "Visualizar usuários", "leitura", "medio"),

@@ -1,6 +1,9 @@
 import { ContaReceberForm } from "@/components/financeiro/conta-receber-form";
 import { createContaReceberService } from "@/lib/financeiro/conta-receber-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import {
   ExecutiveHeader,
   ExecutivePage,
@@ -16,7 +19,37 @@ export default async function NovaPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            {
+              label: "Contas a Receber",
+              href: `/${tenantSlug}/financeiro/contas-receber`,
+            },
+            { label: "Nova conta" },
+          ]} />
+        <ExecutiveHeader title="Nova conta a receber" description="Cadastro" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createContaReceberService(tenant.id);
 
   const [clientes, vendas, formasPagamento, categorias, centrosCusto, planoContas] =

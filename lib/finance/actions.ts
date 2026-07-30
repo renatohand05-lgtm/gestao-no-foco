@@ -6,25 +6,46 @@ import { getCurrentProfile } from "@/lib/auth/session";
 import {
   createAuditSupabaseAdapter,
   createApprovalSupabaseAdapter,
+  createIdempotencySupabaseAdapter,
   createNotificationSupabaseAdapter,
   createOutboxSupabaseAdapter,
   createRbacSupabaseAdapter,
   createWorkflowSupabaseAdapter,
   createEnterpriseContext,
+  createMemoryIdempotencyRepository,
+  MemoryEnterpriseStore,
 } from "@/lib/enterprise";
 import {
   FinanceError,
   FINANCE_ERROR_CODES,
   createSupabaseFinanceCore,
+  resolveFinanceEffectivePermissions,
+  assertFinanceAccess,
   type CreateBankAccountInput,
   type CreateCategoryInput,
   type CreateCostCenterInput,
   type CreateMovementInput,
+  type TreasuryMovementFilters,
+  type TreasuryPeriodKey,
   type UpdateBankAccountInput,
   type UpdateMovementInput,
 } from "@/lib/finance";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
+
+async function resolveIdempotency() {
+  try {
+    const { isAdminClientAvailable, createAdminClient } = await import(
+      "@/lib/supabase/admin"
+    );
+    if (isAdminClientAvailable()) {
+      return createIdempotencySupabaseAdapter(createAdminClient());
+    }
+  } catch {
+    /* fall through */
+  }
+  return createMemoryIdempotencyRepository(new MemoryEnterpriseStore());
+}
 
 async function resolveFinance(tenantSlug: string) {
   const tenant = await requireTenant(tenantSlug);
@@ -43,27 +64,27 @@ async function resolveFinance(tenantSlug: string) {
   const workflow = createWorkflowSupabaseAdapter(client);
   const approval = createApprovalSupabaseAdapter(client);
   const rbac = createRbacSupabaseAdapter(client);
+  const idempotency = await resolveIdempotency();
 
   const snap = await rbac.resolveAuthorizationSnapshot(tenant.id, profile.id);
-  const permissions = snap.permissions.length
-    ? snap.permissions
-    : [
-        "financeiro.visualizar",
-        "financeiro.criar",
-        "financeiro.editar",
-        "financeiro.excluir",
-        "financeiro.arquivar",
-        "financeiro.transferir",
-        "financeiro.ver_saldos",
-        "financeiro.ver_fluxo_caixa",
-      ];
+  const effective = resolveFinanceEffectivePermissions({
+    membershipRole: tenant.role,
+    snapshotRoles: snap.roles,
+    snapshotPermissions: snap.permissions,
+  });
+
+  assertFinanceAccess(effective.permissions);
 
   const context = createEnterpriseContext({
     tenantId: tenant.id,
     userId: profile.id,
-    roles: snap.roles,
-    permissions,
+    roles: effective.roles,
+    permissions: effective.permissions,
     source: "server_action",
+    metadata: {
+      financeAuthSource: effective.source,
+      membershipRole: tenant.role,
+    },
   });
 
   const kit = createSupabaseFinanceCore(client, {
@@ -72,12 +93,14 @@ async function resolveFinance(tenantSlug: string) {
     notification,
     workflow,
     approval,
+    idempotency,
+    tenantSlug,
   });
 
   return { tenant, context, kit, tenantSlug };
 }
 
-function toError(error: unknown): { success: false; error: string } {
+function toError(error: unknown): { success: false; error: string; code?: string } {
   return {
     success: false,
     error:
@@ -86,6 +109,7 @@ function toError(error: unknown): { success: false; error: string } {
         : error instanceof Error
           ? error.message
           : "Erro financeiro.",
+    code: error instanceof FinanceError ? error.code : undefined,
   };
 }
 
@@ -93,8 +117,10 @@ function revalidateFinance(tenantSlug: string) {
   revalidatePath(`/${tenantSlug}/financeiro`);
   revalidatePath(`/${tenantSlug}/financeiro/contas`);
   revalidatePath(`/${tenantSlug}/financeiro/movimentacoes`);
+  revalidatePath(`/${tenantSlug}/financeiro/transferencias`);
   revalidatePath(`/${tenantSlug}/financeiro/categorias`);
   revalidatePath(`/${tenantSlug}/financeiro/centros-custo`);
+  revalidatePath(`/${tenantSlug}/financeiro/importar`);
 }
 
 export async function createBankAccount(
@@ -180,7 +206,8 @@ export async function deleteMovement(tenantSlug: string, id: string) {
 export async function transferBetweenAccounts(
   tenantSlug: string,
   input: {
-    bankAccountId: string;
+    fromAccountId?: string;
+    bankAccountId?: string;
     toAccountId: string;
     amount: number;
     movementDate: string;
@@ -188,13 +215,35 @@ export async function transferBetweenAccounts(
     categoryId?: string | null;
     costCenterId?: string | null;
     notes?: string | null;
+    currency?: "BRL";
+    idempotencyKey?: string;
   },
 ) {
   try {
     const { context, kit } = await resolveFinance(tenantSlug);
-    const movement = await kit.movements.transfer(context, input);
+    const fromAccountId = input.fromAccountId ?? input.bankAccountId;
+    if (!fromAccountId) {
+      throw new FinanceError(
+        "Conta de origem obrigatória.",
+        FINANCE_ERROR_CODES.VALIDATION,
+      );
+    }
+    const transfer = await kit.treasury.transferBetweenAccounts(context, {
+      fromAccountId,
+      toAccountId: input.toAccountId,
+      amount: input.amount,
+      movementDate: input.movementDate,
+      description: input.description,
+      categoryId: input.categoryId,
+      costCenterId: input.costCenterId,
+      notes: input.notes,
+      currency: input.currency ?? "BRL",
+      idempotencyKey:
+        input.idempotencyKey?.trim() ||
+        `xfer_${context.correlationId}_${fromAccountId}_${input.toAccountId}_${input.amount}`,
+    });
     revalidateFinance(tenantSlug);
-    return { success: true as const, movement };
+    return { success: true as const, transfer, movement: transfer.outMovement };
   } catch (error) {
     return toError(error);
   }
@@ -218,6 +267,93 @@ export async function getFinancialSummary(tenantSlug: string) {
     const { context, kit } = await resolveFinance(tenantSlug);
     const summary = await kit.summary.getFinancialSummary(context);
     return { success: true as const, summary };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function getTreasurySummary(
+  tenantSlug: string,
+  periodKey: TreasuryPeriodKey = "30d",
+  custom?: { from?: string; to?: string },
+) {
+  try {
+    const { context, kit } = await resolveFinance(tenantSlug);
+    const summary = await kit.treasury.getTreasurySummary(
+      context,
+      periodKey,
+      custom,
+    );
+    return { success: true as const, summary };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function getTreasuryAccounts(tenantSlug: string) {
+  try {
+    const { context, kit } = await resolveFinance(tenantSlug);
+    const accounts = await kit.treasury.getTreasuryAccounts(context);
+    return { success: true as const, accounts };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function getTreasuryBalanceEvolution(
+  tenantSlug: string,
+  periodKey: TreasuryPeriodKey = "30d",
+  accountId?: string | null,
+  custom?: { from?: string; to?: string },
+) {
+  try {
+    const { context, kit } = await resolveFinance(tenantSlug);
+    const evolution = await kit.treasury.getTreasuryBalanceEvolution(
+      context,
+      periodKey,
+      accountId,
+      custom,
+    );
+    return { success: true as const, evolution };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function listTreasuryMovements(
+  tenantSlug: string,
+  filters: TreasuryMovementFilters = {},
+) {
+  try {
+    const { context, kit } = await resolveFinance(tenantSlug);
+    const page = await kit.treasury.listTreasuryMovements(context, filters);
+    return { success: true as const, page };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function getTreasuryInsights(
+  tenantSlug: string,
+  periodKey: TreasuryPeriodKey = "30d",
+) {
+  try {
+    const { context, kit } = await resolveFinance(tenantSlug);
+    const insights = await kit.treasury.getTreasuryInsights(context, periodKey);
+    return { success: true as const, insights };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function getTreasuryAlerts(
+  tenantSlug: string,
+  periodKey: TreasuryPeriodKey = "30d",
+) {
+  try {
+    const { context, kit } = await resolveFinance(tenantSlug);
+    const alerts = await kit.treasury.getTreasuryAlerts(context, periodKey);
+    return { success: true as const, alerts };
   } catch (error) {
     return toError(error);
   }

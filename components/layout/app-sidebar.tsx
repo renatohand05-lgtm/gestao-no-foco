@@ -49,7 +49,11 @@ function groupNav(items: NavItem[]): NavGroup[] {
     ...byHref("/vendas"),
     ...byHref("/ordens"),
   ];
-  const gestao = [...byHref("/financeiro"), ...byHref("/relatorios")];
+  const gestao = [
+    ...byHref("/financeiro"),
+    ...byHref("/integracoes"),
+    ...byHref("/relatorios"),
+  ];
   const sistema = byHref("/configuracoes");
 
   return [

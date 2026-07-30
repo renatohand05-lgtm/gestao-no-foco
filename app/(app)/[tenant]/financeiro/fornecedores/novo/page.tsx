@@ -1,6 +1,9 @@
 import { FornecedorForm } from "@/components/financeiro/fornecedor-form";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import {
   ExecutiveHeader,
   ExecutivePage,
@@ -13,7 +16,37 @@ type PageProps = { params: Promise<{ tenant: string }> };
 
 export default async function Page({ params }: PageProps) {
   const { tenant: tenantSlug } = await params;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            {
+              label: "Fornecedores",
+              href: `/${tenantSlug}/financeiro/fornecedores`,
+            },
+            { label: "Novo" },
+          ]} />
+        <ExecutiveHeader title="Novo fornecedor" description="Cadastro" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const cp = await createContaPagarService(tenant.id);
   const [categorias, planos, centros, formas, contasBancarias] =
     await Promise.all([

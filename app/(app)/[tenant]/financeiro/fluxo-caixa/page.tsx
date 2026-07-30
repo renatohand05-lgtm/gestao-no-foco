@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { ArrowLeftRight } from "lucide-react";
 
+import { FinancePageHeader } from "@/components/finance/finance-page-header";
+import { CashflowChart } from "@/components/finance/cashflow-chart";
+import { CashflowTable } from "@/components/finance/cashflow-table";
 import { FluxoCaixaDailyChart } from "@/components/financeiro/fluxo-caixa-daily-chart";
 import { FluxoCaixaFilters } from "@/components/financeiro/fluxo-caixa-filters";
 import { FluxoCaixaMovimentacoesTable } from "@/components/financeiro/fluxo-caixa-movimentacoes-table";
@@ -14,15 +17,15 @@ import {
   createFluxoCaixaService,
   defaultFluxoCaixaPeriodo,
 } from "@/lib/financeiro/fluxo-caixa-service";
-import { requireTenant } from "@/lib/tenants";
-import type { FluxoCaixaStatusFilter } from "@/types/fluxo-caixa";
+import { listCashFlow } from "@/lib/finance/actions";
 import {
-  ExecutiveHeader,
-  ExecutivePage,
-} from "@/components/executive";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
+import type { FluxoCaixaStatusFilter } from "@/types/fluxo-caixa";
+import { ExecutivePage } from "@/components/executive";
 
-export const metadata = { title: "Fluxo de Caixa" };
+export const metadata = { title: "Fluxo de Caixa Enterprise" };
 
 type PageProps = {
   params: Promise<{ tenant: string }>;
@@ -50,7 +53,10 @@ function resolveStatus(status?: string): FluxoCaixaStatusFilter {
   return "all";
 }
 
-export default async function Page({ params, searchParams }: PageProps) {
+export default async function FluxoCaixaEnterprisePage({
+  params,
+  searchParams,
+}: PageProps) {
   const { tenant: tenantSlug } = await params;
   const {
     conta,
@@ -61,7 +67,33 @@ export default async function Page({ params, searchParams }: PageProps) {
     dataAte,
     page: pageParam,
   } = await searchParams;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.ver_fluxo_caixa",
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Fluxo de caixa"
+          description="Movimentações e projeção financeira."
+        />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </div>
+    );
+  }
+
   const defaults = defaultFluxoCaixaPeriodo();
   const status = resolveStatus(statusParam);
   const currentPage = Number(pageParam) > 0 ? Number(pageParam) : 1;
@@ -85,6 +117,12 @@ export default async function Page({ params, searchParams }: PageProps) {
     Boolean(dataDe) ||
     Boolean(dataAte);
 
+  const coreCashFlow = await listCashFlow(tenantSlug, {
+    from: filters.dataDe,
+    to: filters.dataAte,
+    accountId: conta || undefined,
+  });
+
   let resumo;
   let daily;
   let itens;
@@ -92,7 +130,7 @@ export default async function Page({ params, searchParams }: PageProps) {
   let loadError: string | null = null;
 
   try {
-    const service = await createFluxoCaixaService(tenant.id);
+    const service = await createFluxoCaixaService(auth.tenant.id);
     const result = await service.getFluxo(filters);
     resumo = result.resumo;
     daily = result.daily;
@@ -108,11 +146,12 @@ export default async function Page({ params, searchParams }: PageProps) {
   if (loadError || !resumo || !daily || !itens || !filterOptions) {
     return (
       <ExecutivePage width="wide" spacing="loose">
-        <Breadcrumbs items={[
-            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
-            { label: "Fluxo de Caixa" },
-          ]} />
-      <ExecutiveHeader title="Fluxo de Caixa" description={`Movimentações e projeção financeira de ${tenant.name}`} />
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          tenantName={auth.tenant.name}
+          title="Fluxo de caixa"
+          description="Movimentações e projeção financeira."
+        />
         <FinanceiroEmptyState
           tenantSlug={tenantSlug}
           basePath="fluxo-caixa"
@@ -128,13 +167,24 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   return (
     <ExecutivePage width="wide" spacing="loose">
-      <Breadcrumbs items={[
-          { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
-          { label: "Fluxo de Caixa" },
-        ]} />
-      <ExecutiveHeader title="Fluxo de Caixa" description={`Movimentações e projeção financeira de ${tenant.name}`} />
+      <FinancePageHeader
+        tenantSlug={tenantSlug}
+        tenantName={auth.tenant.name}
+        title="Fluxo de caixa"
+        description="Finance Core + projeção de caixa."
+      />
 
       <FluxoCaixaSummaryCards resumo={resumo} />
+
+      {coreCashFlow.success &&
+      !categoria &&
+      !centroCusto &&
+      status === "all" ? (
+        <div className="grid gap-4 lg:grid-cols-2" data-enterprise-cashflow-core>
+          <CashflowChart points={coreCashFlow.cashFlow.points} />
+          <CashflowTable cashFlow={coreCashFlow.cashFlow} />
+        </div>
+      ) : null}
 
       <Suspense fallback={<FiltersFallback />}>
         <FluxoCaixaFilters

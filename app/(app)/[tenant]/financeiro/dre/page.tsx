@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { DreDrillPanel } from "@/components/financeiro/dre-drill-panel";
 import { DreFilters } from "@/components/financeiro/dre-filters";
 import { DreGapsPanel } from "@/components/financeiro/dre-gaps-panel";
@@ -10,14 +11,13 @@ import {
   createDreService,
   defaultDrePeriodo,
 } from "@/lib/financeiro/dre-service";
-import { requireTenant } from "@/lib/tenants";
 import {
-  ExecutiveHeader,
-  ExecutivePage,
-} from "@/components/executive";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
+import { ExecutivePage } from "@/components/executive";
 
-export const metadata = { title: "DRE" };
+export const metadata = { title: "DRE Enterprise" };
 
 type PageProps = {
   params: Promise<{ tenant: string }>;
@@ -36,7 +36,10 @@ function FiltersFallback() {
   return <SkeletonCard lines={2} />;
 }
 
-export default async function Page({ params, searchParams }: PageProps) {
+export default async function DreEnterprisePage({
+  params,
+  searchParams,
+}: PageProps) {
   const { tenant: tenantSlug } = await params;
   const {
     centroCusto,
@@ -47,9 +50,34 @@ export default async function Page({ params, searchParams }: PageProps) {
     linha,
     detalhe,
   } = await searchParams;
-  const tenant = await requireTenant(tenantSlug);
-  const defaults = defaultDrePeriodo();
 
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.ver_dre",
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="DRE"
+          description="Demonstração do Resultado por competência."
+        />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </div>
+    );
+  }
+
+  const defaults = defaultDrePeriodo();
   const filters = {
     centroCustoId: centroCusto || undefined,
     categoriaId: categoria || undefined,
@@ -58,7 +86,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     dataAte: dataAte ?? defaults.dataAte,
   };
 
-  const service = await createDreService(tenant.id);
+  const service = await createDreService(auth.tenant.id);
   const { resumo, linhas, gaps, filterOptions, drillItems } =
     await service.getDre(filters);
 
@@ -74,11 +102,12 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   return (
     <ExecutivePage width="wide" spacing="loose">
-      <Breadcrumbs items={[
-          { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
-          { label: "DRE" },
-        ]} />
-      <ExecutiveHeader title="DRE" description={`Demonstração do Resultado por competência — ${tenant.name}. Pagamentos alimentam o Fluxo de Caixa, não geram nova despesa aqui.`} />
+      <FinancePageHeader
+        tenantSlug={tenantSlug}
+        tenantName={auth.tenant.name}
+        title="DRE"
+        description="Demonstração do Resultado por competência. Pagamentos alimentam o Fluxo de Caixa."
+      />
 
       <DreSummaryCards resumo={resumo} />
 

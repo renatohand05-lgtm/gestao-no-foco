@@ -4,7 +4,10 @@ import { CategoriaFinanceiraForm } from "@/components/financeiro/categoria-finan
 import { buildPlanoContaSelectOptions } from "@/lib/financeiro/plano-conta-tree";
 import { createCategoriaFinanceiraService } from "@/lib/financeiro/categoria-financeira-service";
 import { createPlanoContaService } from "@/lib/financeiro/plano-conta-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import {
   ExecutiveHeader,
   ExecutivePage,
@@ -20,7 +23,34 @@ export default async function EditarPage({
   params: Promise<{ tenant: string; id: string }>;
 }) {
   const { tenant: tenantSlug, id } = await params;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            { label: "Categorias Financeiras", href: `/${tenantSlug}/financeiro/categorias` },
+            { label: "Editar" },
+          ]} />
+        <ExecutiveHeader title="Editar" description="Atualize o registro" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createCategoriaFinanceiraService(tenant.id);
   const planoService = await createPlanoContaService(tenant.id);
   const item = await service.getById(id);

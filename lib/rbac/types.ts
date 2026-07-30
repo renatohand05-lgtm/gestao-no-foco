@@ -37,6 +37,7 @@ export type PermissionModule =
   | "os"
   | "crm"
   | "dashboard"
+  | "analytics"
   | "usuarios"
   | "configuracoes"
   | "auditoria"

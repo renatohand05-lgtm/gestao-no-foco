@@ -7,7 +7,10 @@ import { SectionCard } from "@/components/ui/section-card";
 import { createFornecedorService } from "@/lib/financeiro/fornecedor-service";
 import { formatDreHierarchyPath } from "@/lib/dre";
 import type { DreLinhaEconomica } from "@/lib/dre";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import {
   ExecutiveHeader,
   ExecutivePage,
@@ -31,7 +34,37 @@ function Item({ label, value }: { label: string; value: ReactNode }) {
 
 export default async function Page({ params }: PageProps) {
   const { tenant: tenantSlug, id } = await params;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            {
+              label: "Fornecedores",
+              href: `/${tenantSlug}/financeiro/fornecedores`,
+            },
+            { label: "Detalhes" },
+          ]} />
+        <ExecutiveHeader title="Fornecedor" description="Detalhes" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createFornecedorService(tenant.id);
   const item = await service.getById(id);
   if (!item) notFound();

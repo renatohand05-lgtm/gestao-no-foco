@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { DespesaRecorrenteForm } from "@/components/financeiro/despesa-recorrente-form";
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { createDespesaRecorrenteService } from "@/lib/financeiro/despesa-recorrente-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import {
   ExecutiveHeader,
   ExecutivePage,
@@ -18,7 +21,37 @@ type PageProps = {
 
 export default async function Page({ params }: PageProps) {
   const { tenant: tenantSlug, id } = await params;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            {
+              label: "Despesas Recorrentes",
+              href: `/${tenantSlug}/financeiro/despesas-recorrentes`,
+            },
+            { label: "Editar" },
+          ]} />
+        <ExecutiveHeader title="Editar série" description="Edição" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createDespesaRecorrenteService(tenant.id);
   const item = await service.getById(id);
   if (!item) notFound();

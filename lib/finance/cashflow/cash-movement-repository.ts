@@ -94,7 +94,21 @@ function mapRow(row: {
 export function createMemoryCashMovementRepository(
   store: CashMovement[] = [],
   balances: Map<string, number> = new Map(),
+  accounts?: { id: string; currentBalance: number }[],
 ): CashMovementRepository {
+  function syncBalance(accountId: string, value: number) {
+    balances.set(accountId, value);
+    const acc = accounts?.find((a) => a.id === accountId);
+    if (acc) acc.currentBalance = value;
+  }
+
+  function getBalance(accountId: string) {
+    if (!balances.has(accountId)) {
+      const acc = accounts?.find((a) => a.id === accountId);
+      balances.set(accountId, acc?.currentBalance ?? 0);
+    }
+    return balances.get(accountId) ?? 0;
+  }
   return {
     async list(tenantId, opts = {}) {
       return store
@@ -117,10 +131,10 @@ export function createMemoryCashMovementRepository(
         const outId = `mv_${Date.now().toString(36)}_o`;
         const inId = `mv_${Date.now().toString(36)}_i`;
         const group = `tg_${Date.now().toString(36)}`;
-        const balOut = (balances.get(input.bankAccountId) ?? 0) - input.amount;
-        const balIn = (balances.get(input.toAccountId) ?? 0) + input.amount;
-        balances.set(input.bankAccountId, balOut);
-        balances.set(input.toAccountId, balIn);
+        const balOut = getBalance(input.bankAccountId) - input.amount;
+        const balIn = getBalance(input.toAccountId) + input.amount;
+        syncBalance(input.bankAccountId, balOut);
+        syncBalance(input.toAccountId, balIn);
         const base = {
           tenantId,
           kind: "transferencia" as const,
@@ -166,10 +180,10 @@ export function createMemoryCashMovementRepository(
               ? original.amount
               : 0;
         // simplify: reverse sign based on kind
-        let next = balances.get(original.bankAccountId) ?? 0;
+        let next = getBalance(original.bankAccountId);
         if (original.kind === "entrada") next -= original.amount;
         else if (original.kind === "saida") next += original.amount;
-        balances.set(original.bankAccountId, next);
+        syncBalance(original.bankAccountId, next);
         const row: CashMovement = {
           id: `mv_est_${Date.now().toString(36)}`,
           tenantId,
@@ -192,10 +206,10 @@ export function createMemoryCashMovementRepository(
         return row;
       }
 
-      let next = balances.get(input.bankAccountId) ?? 0;
+      let next = getBalance(input.bankAccountId);
       if (input.kind === "entrada") next += input.amount;
       else if (input.kind === "saida") next -= input.amount;
-      balances.set(input.bankAccountId, next);
+      syncBalance(input.bankAccountId, next);
       const row: CashMovement = {
         id: `mv_${Date.now().toString(36)}`,
         tenantId,

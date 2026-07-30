@@ -1,0 +1,6 @@
+export {
+  SERVICE_ORDERS_IMPORT_MODULE,
+  SERVICE_ORDERS_IMPORT_ENTITY,
+  SERVICE_ORDERS_IMPORT_FIELDS,
+} from "./fields.ts";
+export { SERVICE_ORDERS_IMPORT_ADAPTER } from "./adapter.ts";

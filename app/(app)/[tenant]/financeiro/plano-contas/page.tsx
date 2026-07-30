@@ -20,7 +20,10 @@ import {
 } from "@/lib/financeiro/constants";
 import { buildPlanoContaTree } from "@/lib/financeiro/plano-conta-tree";
 import { createPlanoContaService } from "@/lib/financeiro/plano-conta-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import type {
   FinanceiroSuccessMessage,
   SortOrder,
@@ -57,7 +60,33 @@ export default async function Page({ params, searchParams }: PageProps) {
   const { tenant: tenantSlug } = await params;
   const { q, page, sort, order, ativo, tipo, natureza, success, error } =
     await searchParams;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (authError) {
+    const err = financePageAuthError(authError);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            { label: "Plano de Contas" },
+          ]} />
+        <ExecutiveHeader title="Plano de Contas" description="Estrutura hierárquica" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createPlanoContaService(tenant.id);
 
   const currentPage = Number(page) > 0 ? Number(page) : 1;

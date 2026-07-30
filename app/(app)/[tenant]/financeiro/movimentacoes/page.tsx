@@ -1,57 +1,122 @@
+import { Suspense } from "react";
+
+import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { MovimentacoesClient } from "@/components/finance/movimentacoes-client";
-import { ModuleHeader } from "@/components/layout/module-header";
 import {
   listBankAccounts,
   listCategories,
   listCostCenters,
-  listMovements,
+  listTreasuryMovements,
 } from "@/lib/finance/actions";
-import { requireTenant } from "@/lib/tenants";
+import { resolveTreasuryPeriod } from "@/lib/finance";
+import type { TreasuryPeriodKey } from "@/lib/finance";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 
 export const metadata = { title: "Movimentações" };
 
 export default async function MovimentacoesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenant: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenant: tenantSlug } = await params;
-  await requireTenant(tenantSlug);
+  const sp = await searchParams;
 
-  const [accounts, movements, categories, costCenters] = await Promise.all([
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.movimentacoes.visualizar",
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Movimentações"
+          description="Histórico com filtros, totais e paginação."
+        />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </div>
+    );
+  }
+
+  const { tenant } = auth;
+
+  const periodKey = (typeof sp.period === "string"
+    ? sp.period
+    : "30d") as TreasuryPeriodKey;
+  const period = resolveTreasuryPeriod(periodKey, {
+    from: typeof sp.from === "string" ? sp.from : undefined,
+    to: typeof sp.to === "string" ? sp.to : undefined,
+  });
+
+  const [accounts, page, categories, costCenters] = await Promise.all([
     listBankAccounts(tenantSlug),
-    listMovements(tenantSlug),
+    listTreasuryMovements(tenantSlug, {
+      from: period.from,
+      to: period.to,
+      accountId: typeof sp.account === "string" ? sp.account : null,
+      kind:
+        typeof sp.kind === "string"
+          ? (sp.kind as "entrada" | "saida" | "transferencia" | "all")
+          : "all",
+      categoryId: typeof sp.category === "string" ? sp.category : null,
+      costCenterId: typeof sp.cc === "string" ? sp.cc : null,
+      minAmount: typeof sp.min === "string" ? Number(sp.min) : null,
+      maxAmount: typeof sp.max === "string" ? Number(sp.max) : null,
+      search: typeof sp.q === "string" ? sp.q : null,
+      status:
+        typeof sp.status === "string"
+          ? (sp.status as "all" | "normal" | "estornada")
+          : "all",
+      sort:
+        typeof sp.sort === "string" ? (sp.sort as "date_desc") : "date_desc",
+      page: typeof sp.page === "string" ? Number(sp.page) : 1,
+      perPage: 25,
+    }),
     listCategories(tenantSlug),
     listCostCenters(tenantSlug),
   ]);
 
   const error =
     (!accounts.success && accounts.error) ||
-    (!movements.success && movements.error) ||
+    (!page.success && page.error) ||
     (!categories.success && categories.error) ||
     (!costCenters.success && costCenters.error);
 
   return (
     <div className="space-y-6">
-      <ModuleHeader
+      <FinancePageHeader
+        tenantSlug={tenantSlug}
+        tenantName={tenant.name}
         title="Movimentações"
-        description="Entradas, saídas, transferências, ajustes e estornos"
-        breadcrumbs={[
-          { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
-          { label: "Movimentações" },
-        ]}
+        description="Histórico com filtros, totais e paginação."
       />
-      {error ? (
-        <p className="text-sm text-red-600">{error}</p>
-      ) : (
+      <Suspense
+        fallback={<p className="text-sm text-muted-foreground">A carregar…</p>}
+      >
         <MovimentacoesClient
           tenantSlug={tenantSlug}
           accounts={accounts.success ? accounts.accounts : []}
-          movements={movements.success ? movements.movements : []}
           categories={categories.success ? categories.categories : []}
           costCenters={costCenters.success ? costCenters.costCenters : []}
+          initialPage={page.success ? page.page : null}
+          error={error || null}
         />
-      )}
+      </Suspense>
     </div>
   );
 }

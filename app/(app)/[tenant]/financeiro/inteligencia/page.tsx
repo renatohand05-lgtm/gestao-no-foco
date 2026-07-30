@@ -1,16 +1,13 @@
 import { Suspense } from "react";
 
+import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { FiDrillPreview } from "@/components/financeiro/inteligencia/fi-drill-preview";
 import { FiExpenseBreakdown } from "@/components/financeiro/inteligencia/fi-expense-breakdown";
 import { FiInsightsPanel } from "@/components/financeiro/inteligencia/fi-insights-panel";
 import { FiMetricGrid } from "@/components/financeiro/inteligencia/fi-metric-grid";
 import { FiPeriodFilters } from "@/components/financeiro/inteligencia/fi-period-filters";
 import { FiTrendsSection } from "@/components/financeiro/inteligencia/fi-trends-section";
-import {
-  ExecutiveHeader,
-  ExecutivePage,
-} from "@/components/executive";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { ExecutivePage } from "@/components/executive";
 import { SectionCard } from "@/components/ui/section-card";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { formatCurrency } from "@/lib/format";
@@ -18,7 +15,10 @@ import {
   createFinancialIntelligenceService,
   defaultDrePeriodo,
 } from "@/lib/financial-intelligence";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 
 export const metadata = { title: "Inteligência Financeira" };
 
@@ -34,7 +34,34 @@ function FiltersFallback() {
 export default async function Page({ params, searchParams }: PageProps) {
   const { tenant: tenantSlug } = await params;
   const { dataDe, dataAte } = await searchParams;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.ver_dre",
+      "financeiro.ver_fluxo_caixa",
+      "financeiro.visualizar",
+    ]);
+  } catch (error) {
+    const err = financePageAuthError(error);
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Inteligência"
+          description="Cockpit de leitura executiva sobre DRE e Fluxo."
+        />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </div>
+    );
+  }
+
   const defaults = defaultDrePeriodo();
 
   const filters = {
@@ -43,22 +70,18 @@ export default async function Page({ params, searchParams }: PageProps) {
   };
 
   const service = await createFinancialIntelligenceService(
-    tenant.id,
+    auth.tenant.id,
     tenantSlug,
   );
   const snapshot = await service.getSnapshot(filters);
 
   return (
     <ExecutivePage width="wide" spacing="loose">
-      <Breadcrumbs
-        items={[
-          { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
-          { label: "Inteligência" },
-        ]}
-      />
-      <ExecutiveHeader
-        title="Dashboard Financeiro Enterprise"
-        description={`Cockpit de leitura executiva · ${tenant.name}. Consome DRE e Fluxo sem alterar regras.`}
+      <FinancePageHeader
+        tenantSlug={tenantSlug}
+        tenantName={auth.tenant.name}
+        title="Inteligência"
+        description={`Cockpit de leitura executiva · ${auth.tenant.name}. Consome DRE e Fluxo sem alterar regras.`}
       />
 
       <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 px-6 py-8 text-white shadow-sm md:px-10">

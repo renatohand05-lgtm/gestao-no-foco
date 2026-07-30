@@ -17,7 +17,10 @@ import {
   FINANCEIRO_DEFAULT_PER_PAGE,
 } from "@/lib/financeiro/constants";
 import { createContaReceberService } from "@/lib/financeiro/conta-receber-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import type {
   ContaReceberSortField,
   ContaReceberStatus,
@@ -66,7 +69,33 @@ export default async function Page({ params, searchParams }: PageProps) {
     success,
     error,
   } = await searchParams;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (authError) {
+    const err = financePageAuthError(authError);
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            { label: "Contas a Receber" },
+          ]} />
+        <ExecutiveHeader title="Contas a Receber" description="Recebíveis" />
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </ExecutivePage>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createContaReceberService(tenant.id);
 
   const currentPage = Number(page) > 0 ? Number(page) : 1;

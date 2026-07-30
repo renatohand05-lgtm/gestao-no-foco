@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { FormaPagamentoDetail } from "@/components/financeiro/forma-pagamento-detail";
 import { FinanceiroFeedback } from "@/components/financeiro/financeiro-feedback";
 import { createFormaPagamentoService } from "@/lib/financeiro/forma-pagamento-service";
-import { requireTenant } from "@/lib/tenants";
+import {
+  financePageAuthError,
+  requireFinancePagePermission,
+} from "@/lib/finance/page-auth";
 import type { FinanceiroSuccessMessage } from "@/types/financeiro";
 
 export const metadata = { title: "Detalhes" };
@@ -17,7 +20,28 @@ export default async function DetailPage({
 }) {
   const { tenant: tenantSlug, id } = await params;
   const { success, error } = await searchParams;
-  const tenant = await requireTenant(tenantSlug);
+
+  let auth;
+  try {
+    auth = await requireFinancePagePermission(tenantSlug, [
+      "financeiro.visualizar",
+    ]);
+  } catch (authError) {
+    const err = financePageAuthError(authError);
+    return (
+      <div className="space-y-6">
+        <p
+          className="rounded-lg border border-amber-600/40 px-3 py-3 text-sm"
+          role="alert"
+          data-finance-rbac="denied"
+        >
+          {err.message}
+        </p>
+      </div>
+    );
+  }
+
+  const { tenant } = auth;
   const service = await createFormaPagamentoService(tenant.id);
   const item = await service.getById(id);
 

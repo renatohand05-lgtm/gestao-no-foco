@@ -1,5 +1,5 @@
 /**
- * Sprint 22.1 — Factory do Finance Core (memory + supabase).
+ * Sprint 22.1 / 22.2 — Factory do Finance Core + Treasury (memory + supabase).
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -7,9 +7,12 @@ import type { Database } from "../../types/database.ts";
 import type {
   ApprovalRepository,
   AuditRepository,
+  IdempotencyRepository,
   NotificationRepository,
   WorkflowRepository,
 } from "../enterprise/repositories/contracts.ts";
+import { createMemoryIdempotencyRepository } from "../enterprise/repositories/idempotency-repository.ts";
+import { MemoryEnterpriseStore } from "../enterprise/repositories/memory.ts";
 import type { OutboxRepository } from "../enterprise/repositories/outbox-repository.ts";
 import {
   createBankAccountService,
@@ -52,6 +55,10 @@ import {
   type FinanceEnterpriseBridge,
 } from "./shared/enterprise-bridge.ts";
 import type { BankAccount, CashMovement, Category, CostCenter } from "./shared/types.ts";
+import {
+  createTreasuryService,
+  type TreasuryService,
+} from "./treasury/treasury-service.ts";
 
 export type FinanceCoreKit = {
   bridge: FinanceEnterpriseBridge;
@@ -61,6 +68,7 @@ export type FinanceCoreKit = {
   summary: FinancialSummaryService;
   categories: CategoryService;
   costCenters: CostCenterService;
+  treasury: TreasuryService;
   repos: {
     bankAccounts: BankAccountRepository;
     movements: CashMovementRepository;
@@ -73,7 +81,28 @@ export type FinanceCoreEnterpriseDeps = {
   notification?: Pick<NotificationRepository, "create" | "saveRecipients">;
   workflow?: Pick<WorkflowRepository, "listInstances">;
   approval?: Pick<ApprovalRepository, "listRequests">;
+  idempotency?: IdempotencyRepository;
+  tenantSlug?: string;
+  lowBalanceThreshold?: number;
 };
+
+function buildTreasury(
+  bankRepo: BankAccountRepository,
+  moveRepo: CashMovementRepository,
+  bridge: FinanceEnterpriseBridge,
+  enterprise: FinanceCoreEnterpriseDeps,
+): TreasuryService {
+  return createTreasuryService({
+    accounts: bankRepo,
+    movements: moveRepo,
+    bridge,
+    idempotency:
+      enterprise.idempotency ??
+      createMemoryIdempotencyRepository(new MemoryEnterpriseStore()),
+    tenantSlug: enterprise.tenantSlug,
+    lowBalanceThreshold: enterprise.lowBalanceThreshold,
+  });
+}
 
 export function createMemoryFinanceCore(
   enterprise: FinanceCoreEnterpriseDeps,
@@ -84,18 +113,21 @@ export function createMemoryFinanceCore(
     costCenters?: CostCenter[];
   },
 ): FinanceCoreKit {
+  const accountsSeed = seed?.accounts ?? [];
   const balances = new Map<string, number>();
-  for (const a of seed?.accounts ?? []) {
+  for (const a of accountsSeed) {
     balances.set(a.id, a.currentBalance);
   }
-  const bankRepo = createMemoryBankAccountRepository(seed?.accounts ?? []);
+  const bankRepo = createMemoryBankAccountRepository(accountsSeed);
   const moveRepo = createMemoryCashMovementRepository(
     seed?.movements ?? [],
     balances,
+    accountsSeed,
   );
   const catRepo = createMemoryCategoryRepository(seed?.categories ?? []);
   const ccRepo = createMemoryCostCenterRepository(seed?.costCenters ?? []);
   const bridge = createFinanceEnterpriseBridge(enterprise);
+  const treasury = buildTreasury(bankRepo, moveRepo, bridge, enterprise);
 
   return {
     bridge,
@@ -108,6 +140,7 @@ export function createMemoryFinanceCore(
     }),
     categories: createCategoryService({ repo: catRepo, bridge }),
     costCenters: createCostCenterService({ repo: ccRepo, bridge }),
+    treasury,
     repos: { bankAccounts: bankRepo, movements: moveRepo },
   };
 }
@@ -121,6 +154,7 @@ export function createSupabaseFinanceCore(
   const catRepo = createSupabaseCategoryRepository(client);
   const ccRepo = createSupabaseCostCenterRepository(client);
   const bridge = createFinanceEnterpriseBridge(enterprise);
+  const treasury = buildTreasury(bankRepo, moveRepo, bridge, enterprise);
 
   return {
     bridge,
@@ -133,6 +167,7 @@ export function createSupabaseFinanceCore(
     }),
     categories: createCategoryService({ repo: catRepo, bridge }),
     costCenters: createCostCenterService({ repo: ccRepo, bridge }),
+    treasury,
     repos: { bankAccounts: bankRepo, movements: moveRepo },
   };
 }

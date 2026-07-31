@@ -14,6 +14,10 @@ import type { OportunidadeInput } from "@/lib/crm/enterprise/oportunidade-servic
 import type { PipelineStageInput } from "@/lib/crm/enterprise/pipeline-stage-service";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
+import {
+  crmPermissionSatisfied,
+  resolveCrmEffectivePermissions,
+} from "@/lib/crm/rbac-compat";
 
 async function resolveAuth(tenantSlug: string, need: string[]) {
   const tenant = await requireTenant(tenantSlug);
@@ -22,21 +26,30 @@ async function resolveAuth(tenantSlug: string, need: string[]) {
   const client = await createClient();
   const rbac = createRbacSupabaseAdapter(client);
   const snap = await rbac.resolveAuthorizationSnapshot(tenant.id, profile.id);
-  const permissions = snap.permissions ?? [];
-  const ok = need.some(
-    (p) =>
-      permissions.includes(p) ||
-      permissions.includes("crm.visualizar") ||
-      permissions.includes("crm.editar") ||
-      permissions.includes("crm.criar"),
-  );
+  const effective = resolveCrmEffectivePermissions({
+    membershipRole: tenant.role,
+    snapshotRoles: snap.roles,
+    snapshotPermissions: snap.permissions,
+  });
+  const permissions = effective.permissions;
+  const ok =
+    crmPermissionSatisfied(permissions, need) ||
+    crmPermissionSatisfied(permissions, [
+      "crm.visualizar",
+      "crm.editar",
+      "crm.criar",
+    ]);
   if (!ok) throw new Error(`Sem permissão: ${need.join(" | ")}`);
   createEnterpriseContext({
     tenantId: tenant.id,
     userId: profile.id,
-    roles: snap.roles ?? [],
+    roles: effective.roles,
     permissions,
     source: "server_action",
+    metadata: {
+      crmAuthSource: effective.source,
+      membershipRole: tenant.role,
+    },
   });
   return { tenant, profile, permissions };
 }

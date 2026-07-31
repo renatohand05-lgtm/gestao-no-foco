@@ -84,8 +84,8 @@
   --brand-danger: #dc2626;
   --brand-info: #5b6b7a;
 
-  /* Tema claro sofisticado — cinza frio + dourado (sem cream genérico) */
-  --background: #eef1f5;
+  /* Tema claro sofisticado — Sprint 26.1: wash frio + painéis brancos */
+  --background: #f0f2f6;
   --foreground: #12151a;
   --card: #ffffff;
   --card-foreground: #12151a;
@@ -93,11 +93,11 @@
   --popover-foreground: #12151a;
   --primary: #c9a84c;
   --primary-foreground: #0b0f14;
-  --secondary: #e4e8ee;
+  --secondary: #e6eaef;
   --secondary-foreground: #1a1c1e;
-  --muted: #e4e8ee;
-  --muted-foreground: #4a5562;
-  --accent: #e4e8ee;
+  --muted: #e6eaef;
+  --muted-foreground: #3f4754;
+  --accent: #e6eaef;
   --accent-foreground: #1a1c1e;
   --destructive: #dc2626;
   --success: #16a34a;
@@ -464,4 +464,210 @@
     transform: none;
   }
 }
+
+/* Sprint 26.1 — Cockpit executivo · superfícies gf-* · profundidade · continuidade */
+:root {
+  --gf-radius: 1.25rem;
+  --gf-depth-1: 0 1px 2px rgb(11 15 20 / 0.04), 0 0 0 1px rgb(201 168 76 / 0.06);
+  --gf-depth-2: 0 8px 28px -12px rgb(11 15 20 / 0.14),
+    0 0 0 1px rgb(201 168 76 / 0.1);
+  --gf-depth-3: 0 16px 48px -18px rgb(11 15 20 / 0.2),
+    0 0 40px rgb(201 168 76 / 0.08);
+  --gf-light-wash: #f6f7f9;
+  --gf-light-panel: #ffffff;
+  --gf-light-ink: #12151a;
+  --surface-1: var(--gf-light-wash);
+  --surface-2: var(--gf-light-panel);
+}
+
+.dark {
+  --gf-depth-1: 0 1px 2px rgb(0 0 0 / 0.35), 0 0 0 1px rgb(201 168 76 / 0.08);
+  --gf-depth-2: 0 12px 36px -14px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(201 168 76 / 0.12);
+  --gf-depth-3: 0 20px 56px -20px rgb(0 0 0 / 0.65),
+    0 0 48px rgb(201 168 76 / 0.12);
+  --surface-1: var(--background);
+  --surface-2: var(--card);
+}
+
+.gf-surface {
+  border-radius: var(--gf-radius);
+}
+
+.gf-surface-base {
+  background: var(--surface-base);
+  box-shadow: none;
+}
+
+.gf-surface-raised {
+  background: var(--surface-raised);
+  box-shadow: var(--gf-depth-1);
+}
+
+.gf-surface-overlay {
+  background: var(--surface-overlay);
+  box-shadow: var(--gf-depth-2);
+}
+
+.gf-surface-authorial,
+.gf-surface-brief {
+  box-shadow: var(--gf-depth-2);
+  background-image: linear-gradient(
+    165deg,
+    rgb(201 168 76 / 0.08),
+    transparent 48%
+  );
+}
+
+.gf-kpi[data-kpi-featured="1"] {
+  box-shadow: var(--gf-depth-2);
+}
+
+.gf-chart-line {
+  filter: drop-shadow(0 0 6px rgb(201 168 76 / 0.35));
+}
+
+.gf-cta {
+  transition:
+    background-color var(--motion-fast) var(--ease-premium),
+    border-color var(--motion-fast) var(--ease-premium),
+    transform var(--motion-fast) var(--ease-premium);
+}
+
+.gf-cta:hover {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-cta:hover {
+    transform: none;
+  }
+  .gf-chart-line {
+    filter: none;
+  }
+}
+
+[data-brand-continuity="landing"],
+[data-brand-continuity="login"],
+[data-brand-continuity="loader"],
+[data-brand-continuity="dashboard"] {
+  --continuity-gold: var(--brand-gold);
+  --continuity-navy: var(--brand-navy);
+}
+
+/* Sprint 26.2 estrutura + Sprint 26.2.1 restaura paleta 26.1 (sem marfim) */
+:root {
+  --gf-space-section: 1.5rem;
+  --gf-space-block: 1rem;
+  --gf-space-inline: 0.75rem;
+  --gf-space-tight: 0.5rem;
+  /* Superfícies alinhadas ao tema claro frio aprovado (26.1) */
+  --gf-surface-shell: var(--background);
+  --gf-surface-base: var(--background);
+  --gf-surface-raised: var(--card);
+  --gf-surface-elevated: var(--card);
+  --gf-surface-interactive: var(--muted);
+  --gf-surface-overlay: var(--popover);
+  --gf-surface-intelligence: var(--card);
+  --gf-surface-critical: color-mix(in oklab, var(--danger) 6%, var(--card));
+  --gf-border-subtle: var(--border);
+  --gf-border-active: rgb(201 168 76 / 0.45);
+  --gf-shadow-soft: var(--elevation-card);
+  --gf-shadow-elevated: var(--elevation-raised);
+  --gf-glow-gold: var(--premium-glow);
+  --gf-glow-success: 0 0 24px rgb(22 163 74 / 0.12);
+  --gf-glow-danger: 0 0 24px rgb(220 38 38 / 0.12);
+  --gf-motion-micro: 150ms;
+  --gf-motion-component: 220ms;
+  --gf-motion-section: 360ms;
+  --gf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Contraste tipográfico mínimo (light) */
+  --text-primary: #12151a;
+  --text-secondary: #3f4754;
+  --text-muted: #5a6572;
+}
+
+.dark {
+  --gf-surface-shell: var(--background);
+  --gf-surface-base: var(--background);
+  --gf-surface-raised: var(--card);
+  --gf-surface-elevated: var(--brand-graphite-elevated);
+  --gf-surface-interactive: var(--muted);
+  --gf-surface-overlay: var(--popover);
+  --gf-surface-intelligence: var(--card);
+  --gf-surface-critical: color-mix(in oklab, var(--danger) 12%, var(--card));
+  --gf-border-subtle: var(--border);
+  --gf-border-active: rgb(201 168 76 / 0.5);
+  --gf-shadow-soft: var(--elevation-card);
+  --gf-shadow-elevated: var(--elevation-raised);
+  --gf-glow-gold: var(--premium-glow);
+  --gf-glow-success: 0 0 28px rgb(74 222 128 / 0.12);
+  --gf-glow-danger: 0 0 28px rgb(248 113 113 / 0.14);
+  --text-primary: #f5f7fa;
+  --text-secondary: #c8cdd5;
+  --text-muted: #a1a8b3;
+}
+
+.gf-display,
+.gf-page-title,
+.gf-section-title {
+  letter-spacing: -0.02em;
+}
+
+.gf-metric-xl,
+.gf-metric-lg {
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.gf-brand-word {
+  letter-spacing: 0.06em;
+}
+
+.gf-kpi-cockpit {
+  isolation: isolate;
+}
+
+.gf-kpi-cockpit-cell {
+  transition: background-color var(--gf-motion-micro) var(--gf-ease);
+}
+
+.gf-kpi-cockpit-cell:hover {
+  background: rgb(201 168 76 / 0.04);
+}
+
+.gf-enter {
+  animation: premium-enter var(--gf-motion-section) var(--gf-ease) both;
+}
+
+.gf-enter-delay-1 {
+  animation-delay: 40ms;
+}
+.gf-enter-delay-2 {
+  animation-delay: 90ms;
+}
+.gf-enter-delay-3 {
+  animation-delay: 150ms;
+}
+.gf-enter-delay-4 {
+  animation-delay: 210ms;
+}
+.gf-enter-delay-5 {
+  animation-delay: 280ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-enter,
+  .gf-enter-delay-1,
+  .gf-enter-delay-2,
+  .gf-enter-delay-3,
+  .gf-enter-delay-4,
+  .gf-enter-delay-5 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+
 

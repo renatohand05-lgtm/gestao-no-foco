@@ -101,4 +101,17 @@ export {
   premiumMotion,
   premiumSurfaces,
   premiumType,
+  gfMotion,
+  gfSpace,
+  gfSurface,
+  gfType,
+  SIGNATURE_SPRINT,
 } from "@/lib/design-system/premium-motion";
+
+export {
+  gfMotion as signatureMotion,
+  gfSpace as signatureSpace,
+  gfSurface as signatureSurface,
+  gfType as signatureType,
+} from "@/lib/design-system/signature";
+

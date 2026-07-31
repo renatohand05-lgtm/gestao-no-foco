@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { ExecutiveBadge, ExecutiveCard } from "@/components/executive";
+import { GFButton } from "@/components/gf/gf-button";
+import { GFStatusPill } from "@/components/gf/gf-status-pill";
 import type {
   EccExecutiveScore,
   EccKpiItem,
@@ -6,7 +9,7 @@ import type {
   EccOpportunityItem,
   EccRiskItem,
 } from "@/lib/executive-command-center";
-import { gofTypography } from "@/lib/design-system";
+import { gfType } from "@/lib/design-system/signature";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -19,7 +22,6 @@ type Props = {
   summaryLine: string;
   criticalDecisionsCount: number;
   pendingDecisionsCount: number;
-  /** KPIs disponíveis (já filtrados) — faixa compacta do hero. */
   highlightKpis: EccKpiItem[];
   topRisk: EccRiskItem | null;
   topOpportunity: EccOpportunityItem | null;
@@ -35,8 +37,8 @@ function scoreTone(
 }
 
 /**
- * Hero consolidado do Command Center (RC1).
- * Única superfície de destaque no topo · sem Hero paralelo.
+ * Hero cinematográfico do Command Center (Sprint 26.2).
+ * Leitura de ~5 segundos — sem blocos longos.
  */
 export function ExecutiveHeader({
   greeting,
@@ -52,123 +54,87 @@ export function ExecutiveHeader({
   topRisk,
   topOpportunity,
 }: Props) {
+  const lines = brief.paragraphs.slice(0, 3);
+
   return (
     <header
-      className="space-y-4"
+      className="space-y-3"
       data-ecc-block="consolidated-hero"
+      data-ecc-cinematic="1"
+      data-sprint="26.2"
       aria-label="Executive Command Center"
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 space-y-1">
-          <p className={gofTypography.caption}>Executive Command Center</p>
-          <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl md:text-3xl break-words">
-            <span className="block sm:inline">{greeting}</span>{" "}
-            <span className="text-foreground">{tenantName}</span>
+          <p className={gfType.overline}>Command Center</p>
+          <h2 className={cn(gfType.pageTitle, "break-words")}>
+            {greeting}
           </h2>
-          <p className={cn(gofTypography.caption, "break-words")}>
-            {dateLabel} · atualizado {updatedAtLabel}
+          <p className={cn(gfType.caption, "break-words")}>
+            {tenantName} · {dateLabel} · {updatedAtLabel}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <ExecutiveBadge tone={scoreTone(score.value)} variant="soft">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <GFStatusPill tone={scoreTone(score.value)}>
             Score {score.value == null ? "—" : score.value}
-          </ExecutiveBadge>
-          <ExecutiveBadge tone="neutral" variant="outline">
-            {score.healthLabel}
-          </ExecutiveBadge>
-          <ExecutiveBadge tone="neutral" variant="outline">
-            Confiança {score.confidence}
-          </ExecutiveBadge>
+          </GFStatusPill>
+          <GFStatusPill tone="neutral">{score.healthLabel}</GFStatusPill>
           {criticalDecisionsCount > 0 ? (
-            <ExecutiveBadge tone="danger" variant="soft">
+            <GFStatusPill tone="danger">
               {criticalDecisionsCount} crítica
               {criticalDecisionsCount === 1 ? "" : "s"}
-            </ExecutiveBadge>
+            </GFStatusPill>
           ) : (
-            <ExecutiveBadge tone="info" variant="outline">
+            <GFStatusPill tone="info">
               {pendingDecisionsCount} pendente
               {pendingDecisionsCount === 1 ? "" : "s"}
-            </ExecutiveBadge>
+            </GFStatusPill>
           )}
         </div>
       </div>
 
-      <ExecutiveCard padding={20} className="space-y-3">
-        <p className={cn(gofTypography.caption, "uppercase tracking-[0.12em]")}>
-          Morning Brief
-        </p>
-        <p className="text-base font-medium text-foreground sm:text-lg">
-          {brief.greetingLine}
-        </p>
-        <div className="space-y-2">
-          {brief.paragraphs.slice(0, 2).map((p, i) => (
-            <p
+      <ExecutiveCard
+        padding={16}
+        className="space-y-2 border border-[var(--border)] bg-[var(--card)]"
+      >
+        <ul className="space-y-1.5">
+          {lines.map((p, i) => (
+            <li
               key={`brief-${i}`}
-              className={cn(gofTypography.subtitle, "text-sm sm:text-[15px] line-clamp-3")}
+              className={cn(gfType.body, "text-[var(--text-primary)]")}
             >
               {p}
-            </p>
+            </li>
           ))}
-        </div>
-        <p className={gofTypography.caption}>{summaryLine}</p>
-      </ExecutiveCard>
-
-      {highlightKpis.length > 0 ? (
-        <div
-          className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
-          aria-label="KPIs em destaque"
-        >
-          {highlightKpis.slice(0, 4).map((kpi) => (
-            <div
-              key={kpi.key}
-              className="min-w-0 rounded-xl border border-border/60 bg-card px-3 py-2.5"
-              title={kpi.hint ?? undefined}
+        </ul>
+        <p className={gfType.caption}>{summaryLine}</p>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {topRisk?.href ? (
+            <GFButton
+              size="sm"
+              variant="default"
+              render={<Link href={topRisk.href} />}
+              nativeButton={false}
             >
-              <p className={cn(gofTypography.caption, "text-pretty")}>
-                {kpi.label}
-              </p>
-              <p className="text-sm font-semibold tabular-nums break-words text-foreground sm:text-base">
-                {kpi.value}
-              </p>
-            </div>
-          ))}
+              {topRisk.title}
+            </GFButton>
+          ) : null}
+          {topOpportunity?.href ? (
+            <GFButton
+              size="sm"
+              variant="outline"
+              render={<Link href={topOpportunity.href} />}
+              nativeButton={false}
+            >
+              Ver oportunidades
+            </GFButton>
+          ) : null}
+          <ExecutiveBadge tone="neutral" variant="outline">
+            {highlightKpis.length} KPI
+            {highlightKpis.length === 1 ? "" : "s"}
+          </ExecutiveBadge>
         </div>
-      ) : null}
-
-      <div className="grid gap-2 sm:grid-cols-2">
-        <ExecutiveCard padding={16} className="min-w-0 space-y-1.5">
-          <p className={gofTypography.caption}>Principal risco</p>
-          {topRisk ? (
-            <>
-              <p className="text-sm font-semibold text-foreground line-clamp-2">
-                {topRisk.title}
-              </p>
-              <p className={cn(gofTypography.subtitle, "text-xs line-clamp-2")}>
-                {topRisk.description}
-              </p>
-            </>
-          ) : (
-            <p className={gofTypography.caption}>Nenhum risco priorizado.</p>
-          )}
-        </ExecutiveCard>
-        <ExecutiveCard padding={16} className="min-w-0 space-y-1.5">
-          <p className={gofTypography.caption}>Principal oportunidade</p>
-          {topOpportunity ? (
-            <>
-              <p className="text-sm font-semibold text-foreground line-clamp-2">
-                {topOpportunity.title}
-              </p>
-              <p className={cn(gofTypography.subtitle, "text-xs line-clamp-2")}>
-                {topOpportunity.description}
-              </p>
-            </>
-          ) : (
-            <p className={gofTypography.caption}>
-              Nenhuma oportunidade evidenciada.
-            </p>
-          )}
-        </ExecutiveCard>
-      </div>
+      </ExecutiveCard>
     </header>
   );
 }

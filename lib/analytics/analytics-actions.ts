@@ -37,10 +37,18 @@ import {
   analyticsRbacPermissionSatisfied,
   resolveAnalyticsEffectivePermissions,
 } from "@/lib/analytics/rbac-compat";
+import {
+  ANALYTICS_VIEW_ANY_OF,
+  EXECUTIVE_DASHBOARD_ANY_OF,
+  buildAnalyticsAuthContext,
+  requireAnalyticsPermission,
+} from "@/lib/rbac/executive-access";
+import { AccessDeniedError } from "@/lib/rbac/errors";
 
 async function resolveAnalyticsAuth(
   tenantSlug: string,
   required: string | string[],
+  options?: { executive?: boolean },
 ) {
   if (!isAnalyticsEnabled()) {
     throw new Error("Analytics desabilitado por feature flag.");
@@ -60,14 +68,37 @@ async function resolveAnalyticsAuth(
   const permissions = effective.permissions;
 
   const need = Array.isArray(required) ? required : [required];
-  if (
-    !need.some(
-      (p) =>
-        analyticsPermissionSatisfied(permissions, p) ||
-        analyticsRbacPermissionSatisfied(permissions, p),
-    )
-  ) {
-    throw new Error(`Sem permissão: ${need.join(" | ")}`);
+  const authz = buildAnalyticsAuthContext({
+    userId: profile.id,
+    tenantId: tenant.id,
+    roles: effective.roles,
+    permissions,
+  });
+
+  try {
+    if (options?.executive) {
+      // Fonte única: executivo exige analytics.executivo | dashboard.executivo
+      requireAnalyticsPermission(authz, [...EXECUTIVE_DASHBOARD_ANY_OF]);
+    } else if (
+      !need.some(
+        (p) =>
+          analyticsPermissionSatisfied(permissions, p) ||
+          analyticsRbacPermissionSatisfied(permissions, p),
+      )
+    ) {
+      requireAnalyticsPermission(
+        authz,
+        need.length ? need : [...ANALYTICS_VIEW_ANY_OF],
+      );
+    }
+  } catch (error) {
+    if (error instanceof AccessDeniedError) {
+      const label = options?.executive
+        ? EXECUTIVE_DASHBOARD_ANY_OF.join(" | ")
+        : need.join(" | ");
+      throw new Error(`Sem permissão: ${label}`);
+    }
+    throw error;
   }
 
   const context = createEnterpriseContext({
@@ -121,11 +152,11 @@ export async function getExecutiveAnalyticsDashboard(
 ) {
   try {
     assertNoCrossTenantPayload(options as Record<string, unknown> | undefined);
-    const auth = await resolveAnalyticsAuth(tenantSlug, [
-      "analytics.visualizar",
-      "analytics.executivo",
-      "dashboard.executivo",
-    ]);
+    const auth = await resolveAnalyticsAuth(
+      tenantSlug,
+      [...EXECUTIVE_DASHBOARD_ANY_OF],
+      { executive: true },
+    );
     const period = resolveSafePeriod(options);
     const filters = sanitizeMetricFilter({
       period,

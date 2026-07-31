@@ -19,6 +19,14 @@ export function assertFinancePermission(
   }
 }
 
+/** Alias canónico (Sprint 25.7.4) — mesma regra que assertFinancePermission. */
+export function requireFinancePermission(
+  permissions: readonly string[],
+  required: FinancePermission | FinancePermission[],
+) {
+  assertFinancePermission(permissions, required);
+}
+
 /** Arquivar: aceita financeiro.arquivar ou financeiro.excluir (legado). */
 export function assertArchivePermission(permissions: readonly string[]) {
   assertFinancePermission(permissions, [

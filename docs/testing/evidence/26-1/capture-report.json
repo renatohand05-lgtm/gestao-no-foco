@@ -1,0 +1,108 @@
+{
+  "at": "2026-07-31T04:21:20.965Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "26.1",
+  "shots": [
+    "landing",
+    "login",
+    "loader",
+    "dashboard-dark-desktop",
+    "dashboard-light-desktop",
+    "executive-brief",
+    "kpis",
+    "chart",
+    "dashboard-main-row",
+    "central-inteligencia",
+    "fluxo-caixa-panel",
+    "command-center",
+    "business-health",
+    "decision-center",
+    "simulador",
+    "dashboard-desktop",
+    "dashboard-notebook",
+    "dashboard-tablet",
+    "dashboard-mobile",
+    "tema-claro",
+    "tema-escuro"
+  ],
+  "consoleErrors": [],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "landing continuity marker"
+    },
+    {
+      "ok": true,
+      "detail": "login continuity marker"
+    },
+    {
+      "ok": true,
+      "detail": "loader frame captured"
+    },
+    {
+      "ok": true,
+      "detail": "executive brief loaded"
+    },
+    {
+      "ok": true,
+      "detail": "cockpit hierarchy marker"
+    },
+    {
+      "ok": true,
+      "detail": "crop executive-brief"
+    },
+    {
+      "ok": true,
+      "detail": "crop kpis"
+    },
+    {
+      "ok": true,
+      "detail": "crop chart"
+    },
+    {
+      "ok": true,
+      "detail": "crop dashboard-main-row"
+    },
+    {
+      "ok": true,
+      "detail": "crop central-inteligencia"
+    },
+    {
+      "ok": true,
+      "detail": "crop fluxo-caixa-panel"
+    },
+    {
+      "ok": true,
+      "detail": "crop command-center"
+    },
+    {
+      "ok": true,
+      "detail": "crop business-health"
+    },
+    {
+      "ok": true,
+      "detail": "crop decision-center"
+    },
+    {
+      "ok": true,
+      "detail": "crop simulador"
+    },
+    {
+      "ok": true,
+      "detail": "no horizontal overflow @ desktop"
+    },
+    {
+      "ok": true,
+      "detail": "no horizontal overflow @ notebook"
+    },
+    {
+      "ok": true,
+      "detail": "no horizontal overflow @ tablet"
+    },
+    {
+      "ok": true,
+      "detail": "no horizontal overflow @ mobile"
+    }
+  ]
+}

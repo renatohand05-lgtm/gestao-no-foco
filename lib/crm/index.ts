@@ -66,3 +66,13 @@ export {
   validateOportunidadeTransition,
   ensureSinglePrincipalContatos,
 } from "./enterprise/filter-engine.ts";
+export {
+  MEMBERSHIP_TO_ENTERPRISE_ROLES,
+  mapMembershipRoleToEnterpriseRoles,
+  isCrmPermissionKey,
+  expandCrmPermissions,
+  crmPermissionSatisfied,
+  hasCrmViewAccess,
+  resolveCrmEffectivePermissions,
+} from "./rbac-compat.ts";
+export type { CrmEffectiveAuth } from "./rbac-compat.ts";

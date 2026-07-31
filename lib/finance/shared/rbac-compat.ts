@@ -10,6 +10,7 @@
  */
 
 import type { TenantRole } from "../../constants.ts";
+import { ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES } from "../../rbac/membership.ts";
 import { getPermissionsForRoles } from "../../rbac/role-permissions.ts";
 import { FINANCE_ERROR_CODES, FinanceError } from "./errors.ts";
 
@@ -17,8 +18,8 @@ import { FINANCE_ERROR_CODES, FinanceError } from "./errors.ts";
 export const MEMBERSHIP_TO_ENTERPRISE_ROLES: Readonly<
   Record<TenantRole, readonly string[]>
 > = {
-  owner: ["proprietario"],
-  admin: ["diretor"],
+  owner: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.owner,
+  admin: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.admin,
   manager: ["financeiro"],
   member: ["visualizacao"],
 };

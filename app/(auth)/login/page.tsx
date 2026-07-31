@@ -20,8 +20,10 @@ function LoginFormFallback() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LoginFormFallback />}>
-      <LoginForm />
-    </Suspense>
+    <div data-brand-continuity="login" data-sprint="26.1">
+      <Suspense fallback={<LoginFormFallback />}>
+        <LoginForm />
+      </Suspense>
+    </div>
   );
 }

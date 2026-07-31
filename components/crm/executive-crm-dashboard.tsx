@@ -131,8 +131,12 @@ export function ExecutiveCrmDashboard({ tenantSlug, initialBundle }: Props) {
 
       {bundle.empty ? (
         <ExecutiveEmptyState
-          title="Sem dados CRM suficientes"
-          description="Cadastre clientes, mova o funil ou registre vendas/OS para popular o dashboard."
+          title="Nenhum dado CRM para exibir"
+          description="Cadastre clientes ou configure o pipeline. Nenhuma métrica inventada."
+          action={{
+            label: "Novo cliente",
+            href: `/${tenantSlug}/clientes/novo`,
+          }}
         />
       ) : null}
 

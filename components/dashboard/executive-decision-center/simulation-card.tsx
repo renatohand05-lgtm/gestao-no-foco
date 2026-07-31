@@ -41,12 +41,15 @@ export function SimulationCard({ simulation }: Props) {
       data-sim-kind={simulation.kind}
       data-sim-available={simulation.available ? "1" : "0"}
       data-premium-v257="simulation-card"
+      data-sim-interactive={canInteract ? "1" : "0"}
+      data-sprint="26.1"
       className="h-full premium-enter"
     >
       <ExecutiveCard
         padding={16}
         className={cn(
-          "h-full space-y-2 border border-[var(--border-subtle)] bg-[var(--surface-raised)]",
+          "gf-surface gf-surface-raised h-full space-y-3",
+          "border border-[var(--border-premium)] bg-[var(--surface-raised)]",
           !simulation.available && "opacity-80",
         )}
       >
@@ -70,7 +73,7 @@ export function SimulationCard({ simulation }: Props) {
         </p>
 
         {simulation.available ? (
-          <dl className="grid gap-1 text-xs">
+          <dl className="grid gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-interactive)]/60 p-2.5 text-xs">
             <div className="flex justify-between gap-2">
               <dt className="text-muted-foreground">
                 {simulation.baselineLabel}
@@ -83,13 +86,16 @@ export function SimulationCard({ simulation }: Props) {
               <dt className="text-muted-foreground">
                 {simulation.projectedLabel}
               </dt>
-              <dd className="font-medium tabular-nums">
+              <dd
+                className="font-semibold tabular-nums text-[var(--brand-gold-deep)] dark:text-[var(--brand-gold-soft)]"
+                data-sim-projected=""
+              >
                 {preview?.projectedValue ?? simulation.projectedValue}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-muted-foreground">Delta</dt>
-              <dd className="font-semibold tabular-nums text-foreground">
+              <dd className="font-semibold tabular-nums text-foreground" data-sim-delta="">
                 {preview?.deltaLabel ?? simulation.deltaLabel}
               </dd>
             </div>
@@ -101,7 +107,7 @@ export function SimulationCard({ simulation }: Props) {
         )}
 
         {canInteract ? (
-          <div className="space-y-2 border-t border-[var(--border-subtle)] pt-2">
+          <div className="space-y-2 border-t border-[var(--border-subtle)] pt-3">
             <label
               htmlFor={sliderId}
               className={cn(gofTypography.caption, "block")}
@@ -117,11 +123,23 @@ export function SimulationCard({ simulation }: Props) {
               step={1}
               value={pct}
               onChange={(e) => setPct(Number(e.target.value))}
-              className="h-2 w-full cursor-pointer accent-[var(--brand-gold)]"
+              className="h-2.5 w-full cursor-pointer accent-[var(--brand-gold)]"
               aria-valuemin={min}
               aria-valuemax={max}
               aria-valuenow={pct}
+              data-sim-slider=""
             />
+            <div
+              className="h-1.5 overflow-hidden rounded-full bg-[var(--surface-base)]"
+              aria-hidden
+            >
+              <div
+                className="h-full rounded-full bg-[var(--brand-gold)] transition-[width] duration-[var(--motion-fast)]"
+                style={{
+                  width: `${Math.min(100, Math.max(4, ((pct - min) / Math.max(1, max - min)) * 100))}%`,
+                }}
+              />
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
@@ -131,6 +149,15 @@ export function SimulationCard({ simulation }: Props) {
                 onClick={() => setPct(declared)}
               >
                 Reset
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPct(Math.round((min + max) / 2))}
+              >
+                Meio
               </Button>
               <span className={gofTypography.caption}>
                 Declarado: {declared > 0 ? "+" : ""}

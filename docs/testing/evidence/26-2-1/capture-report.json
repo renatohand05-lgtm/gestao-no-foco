@@ -1,0 +1,83 @@
+{
+  "at": "2026-07-31T11:38:57.518Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "26.2.1",
+  "shots": [
+    "dashboard-dark",
+    "header",
+    "kpis-desktop",
+    "grafico",
+    "tooltip",
+    "central-inteligencia-dark",
+    "dashboard-light",
+    "central-inteligencia-light",
+    "kpis-notebook",
+    "kpis-mobile",
+    "analytics-dark",
+    "analytics-light",
+    "crm-dark",
+    "crm-light",
+    "financeiro-dark",
+    "financeiro-light"
+  ],
+  "consoleErrors": [],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "kpi cockpit estrutural"
+    },
+    {
+      "ok": true,
+      "detail": "executive header estrutural"
+    },
+    {
+      "ok": true,
+      "detail": "revenue chart estrutural"
+    },
+    {
+      "ok": true,
+      "detail": "sem badges técnicos na UI"
+    },
+    {
+      "ok": true,
+      "detail": "crop header"
+    },
+    {
+      "ok": true,
+      "detail": "crop kpis-desktop"
+    },
+    {
+      "ok": true,
+      "detail": "crop grafico"
+    },
+    {
+      "ok": true,
+      "detail": "crop tooltip"
+    },
+    {
+      "ok": true,
+      "detail": "crop central-inteligencia-dark"
+    },
+    {
+      "ok": true,
+      "detail": "crop central-inteligencia-light"
+    },
+    {
+      "ok": true,
+      "detail": "crop kpis-notebook"
+    },
+    {
+      "ok": true,
+      "detail": "crop kpis-mobile"
+    },
+    {
+      "ok": true,
+      "detail": "analytics page"
+    },
+    {
+      "ok": true,
+      "detail": "kpi values not clipped (6 metrics)"
+    }
+  ]
+}

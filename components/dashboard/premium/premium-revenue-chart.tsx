@@ -93,21 +93,22 @@ export function PremiumRevenueChart({
       ref={shellRef}
       className="space-y-3 overflow-x-hidden"
       data-chart-revenue=""
+      data-chart-authorial=""
       data-chart-breakpoint={breakpoint}
     >
       <div className="flex items-baseline justify-between gap-3">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[var(--text-secondary)]">
           Último ponto · {periodoLabel}
         </p>
-        <p className="whitespace-nowrap text-lg font-semibold tabular-nums">
+        <p className="whitespace-nowrap font-[family-name:var(--font-display)] text-xl font-semibold tabular-nums tracking-tight sm:text-2xl">
           {formatCurrencyCompact(lastMeaningful.point.value)}
         </p>
       </div>
 
-      <div className="relative min-h-[min(18rem,42vh)] w-full">
+      <div className="relative min-h-[min(19rem,44vh)] w-full rounded-xl bg-[linear-gradient(180deg,rgb(201_168_76_/0.06),transparent_42%)] p-1">
         <svg
           viewBox={`0 0 ${w} ${h}`}
-          className="h-[min(18rem,42vh)] w-full"
+          className="h-[min(19rem,44vh)] w-full"
           role="img"
           aria-label="Faturamento diário com valores principais"
           preserveAspectRatio="none"
@@ -117,7 +118,12 @@ export function PremiumRevenueChart({
               <stop
                 offset="0%"
                 stopColor="var(--brand-gold)"
-                stopOpacity="0.28"
+                stopOpacity="0.38"
+              />
+              <stop
+                offset="55%"
+                stopColor="var(--brand-gold)"
+                stopOpacity="0.12"
               />
               <stop
                 offset="100%"
@@ -125,16 +131,23 @@ export function PremiumRevenueChart({
                 stopOpacity="0"
               />
             </linearGradient>
+            <linearGradient id="revStroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="var(--brand-gold-soft)" />
+              <stop offset="55%" stopColor="var(--brand-gold)" />
+              <stop offset="100%" stopColor="var(--brand-gold-deep)" />
+            </linearGradient>
           </defs>
-          <polygon fill="url(#revFill)" points={area} />
+          <polygon fill="url(#revFill)" points={area} className="gf-chart-area" />
           <polyline
             fill="none"
-            stroke="var(--brand-gold)"
-            strokeWidth="1.6"
+            stroke="url(#revStroke)"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
             points={polyline}
             pathLength={1}
-            className="premium-chart-line"
+            className="premium-chart-line gf-chart-line"
             data-chart-line=""
           />
         </svg>
@@ -261,6 +274,9 @@ export function PremiumRevenueChart({
                     : "no alvo"}
               </p>
             ) : null}
+            <p className="mt-2 border-t border-white/10 pt-1.5 text-[10px] text-white/50">
+              Origem · Dashboard · vendas · confiança Alta
+            </p>
           </div>
         ) : null}
       </div>

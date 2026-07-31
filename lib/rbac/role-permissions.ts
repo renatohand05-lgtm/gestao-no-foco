@@ -139,7 +139,7 @@ const COMERCIAL_KEYS = unique([
 const OPERACOES_KEYS = unique([
   ...byPrefix(["os"]),
   "dashboard.operacional",
-  "dashboard.executivo",
+  // Sprint 25.7.4 — operacional NÃO tem Dashboard Executivo
   "analytics.visualizar",
   "analytics.operacional",
   "analytics.estoque",

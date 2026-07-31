@@ -16,6 +16,21 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+/**
+ * Alinhado a lib/rbac/executive-access (EXECUTIVE_DASHBOARD_ANY_OF).
+ * Strings literais — config não importa @/lib (testes Node / sidebar-core).
+ */
+export const NAV_ANALYTICS_EXECUTIVE_ANY_OF = [
+  "analytics.executivo",
+  "dashboard.executivo",
+] as const;
+
+export const NAV_ANALYTICS_VIEW_ANY_OF = [
+  "analytics.visualizar",
+  "analytics.executivo",
+  "dashboard.executivo",
+] as const;
+
 export type NavGroupId =
   | "principal"
   | "operacao"
@@ -30,6 +45,11 @@ export type NavItem = {
   icon: LucideIcon;
   group: NavGroupId;
   description?: string;
+  /**
+   * Permissões any-of (fonte: lib/rbac/executive-access).
+   * Metadata de alinhamento RBAC — o guard server-side é a autoridade.
+   */
+  requiredAnyPermissions?: readonly string[];
 };
 
 export const NAV_GROUP_LABEL: Record<NavGroupId, string> = {
@@ -161,6 +181,7 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       icon: BarChart3,
       group: "inteligencia",
       description: "BI e indicadores Enterprise",
+      requiredAnyPermissions: NAV_ANALYTICS_EXECUTIVE_ANY_OF,
     },
     {
       id: "analytics-reports",
@@ -169,6 +190,7 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       icon: FileBarChart,
       group: "inteligencia",
       description: "Indicadores e análises",
+      requiredAnyPermissions: NAV_ANALYTICS_VIEW_ANY_OF,
     },
     {
       id: "settings",

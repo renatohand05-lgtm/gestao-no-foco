@@ -11,14 +11,15 @@
  */
 
 import type { TenantRole } from "../constants.ts";
+import { ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES } from "../rbac/membership.ts";
 import { getPermissionsForRoles } from "../rbac/role-permissions.ts";
 
 /** Membership legado → papéis Enterprise do catálogo. */
 export const MEMBERSHIP_TO_ENTERPRISE_ROLES: Readonly<
   Record<TenantRole, readonly string[]>
 > = {
-  owner: ["proprietario"],
-  admin: ["diretor"],
+  owner: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.owner,
+  admin: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.admin,
   /** manager/member: só herdam via snapshot Enterprise (não over-grant). */
   manager: [],
   member: ["visualizacao"],

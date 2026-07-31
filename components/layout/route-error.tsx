@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,18 +22,20 @@ export function RouteError({
   description = "Não foi possível carregar esta página. Tente novamente.",
 }: Props) {
   useEffect(() => {
-    console.error(
-      JSON.stringify({
-        level: "error",
-        message: "route_error",
-        at: new Date().toISOString(),
-        context: {
-          digest: error.digest,
-          name: error.name,
-          message: error.message,
-        },
-      }),
-    );
+    const payload = {
+      level: "error",
+      message: "route_error",
+      at: new Date().toISOString(),
+      context: {
+        digest: error.digest,
+        name: error.name,
+        message: error.message,
+      },
+    };
+    console.error(JSON.stringify(payload));
+    if (process.env.NODE_ENV === "development") {
+      console.error("[route_error:dev]", error.name, error.message, error.stack);
+    }
   }, [error]);
 
   return (
@@ -48,9 +51,24 @@ export function RouteError({
       <AlertCircle className="size-10 text-destructive" aria-hidden />
       <h2 className={cn("mt-4", dsType.sectionTitle)}>{title}</h2>
       <p className={cn("mt-2", dsType.description)}>{description}</p>
-      <Button type="button" className="mt-6" onClick={reset} aria-label="Tentar novamente">
-        Tentar novamente
-      </Button>
+      {error.digest ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Referência: {error.digest}
+        </p>
+      ) : null}
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+        <Button type="button" onClick={reset} aria-label="Tentar novamente">
+          Tentar novamente
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          render={<Link href="/" />}
+          nativeButton={false}
+        >
+          Voltar ao início
+        </Button>
+      </div>
     </div>
   );
 }

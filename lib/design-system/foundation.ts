@@ -146,10 +146,10 @@ export const gofTypography = {
   title:
     "font-[family-name:var(--font-display)] text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl",
   subtitle:
-    "text-sm font-normal leading-snug tracking-normal text-muted-foreground sm:text-[0.9375rem]",
-  body: "text-sm font-normal leading-relaxed tracking-normal text-foreground/90",
+    "text-sm font-normal leading-snug tracking-normal text-[var(--text-secondary)] sm:text-[0.9375rem]",
+  body: "text-sm font-normal leading-relaxed tracking-normal text-foreground",
   caption:
-    "text-xs font-medium leading-snug tracking-[0.01em] text-muted-foreground",
+    "text-xs font-medium leading-snug tracking-[0.01em] text-[var(--text-secondary)]",
   mono: "font-mono text-sm font-normal leading-normal tracking-normal tabular-nums text-foreground",
 } as const;
 

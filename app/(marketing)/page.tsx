@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <>
+    <div data-brand-continuity="landing" data-sprint="26.1">
       <HeroSection />
       <FeaturesSection />
       <ModulesSection />
@@ -37,6 +37,6 @@ export default function HomePage() {
       <SegmentsSection />
       <ValueSection />
       <CtaSection />
-    </>
+    </div>
   );
 }

@@ -12,6 +12,7 @@ export {
 export {
   assertFinancePermission,
   assertArchivePermission,
+  requireFinancePermission,
 } from "./shared/rbac.ts";
 export {
   resolveFinanceEffectivePermissions,

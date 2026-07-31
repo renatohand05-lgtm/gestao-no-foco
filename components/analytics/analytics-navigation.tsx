@@ -27,7 +27,7 @@ export function AnalyticsNavigation({ tenantSlug }: { tenantSlug: string }) {
   return (
     <nav
       aria-label="Analytics"
-      className="flex flex-wrap gap-1 border-b border-border/60 pb-2"
+      className="flex flex-wrap gap-1 border-b border-border pb-2"
     >
       {LINKS.map((l) => {
         const href = `${base}/${l.href}`;
@@ -39,11 +39,11 @@ export function AnalyticsNavigation({ tenantSlug }: { tenantSlug: string }) {
             key={l.href}
             href={href}
             className={cn(
-              "rounded-md px-2.5 py-1.5 text-xs transition-colors",
+              "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
               gofTypography.caption,
               active
                 ? "bg-foreground text-background"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                : "text-[var(--text-secondary)] hover:bg-muted hover:text-foreground",
             )}
           >
             {l.label}

@@ -7,22 +7,9 @@ import type { PremiumInsightCard } from "@/lib/dashboard/premium-dashboard-map";
 import type { DashboardChartPoint } from "@/types/dashboard-executive";
 import type { ExecutiveFinancialCockpitData } from "@/lib/dashboard/executive-financial-cockpit-types";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/dashboard/format";
-import { PremiumRevenueChart } from "@/components/dashboard/premium/premium-revenue-chart";
+import { GFInsightCard } from "@/components/gf/gf-insight-card";
+import { GFRevenueChart } from "@/components/gf/gf-revenue-chart";
 import { cn } from "@/lib/utils";
-
-function severityClass(s: PremiumInsightCard["severity"]) {
-  if (s === "danger") return "border-danger/30 bg-danger/5";
-  if (s === "warning") return "border-warning/30 bg-warning/5";
-  if (s === "success") return "border-success/30 bg-success/5";
-  return "border-border/50 bg-muted/20";
-}
-
-function severityDot(s: PremiumInsightCard["severity"]) {
-  if (s === "danger") return "bg-danger";
-  if (s === "warning") return "bg-warning";
-  if (s === "success") return "bg-success";
-  return "bg-muted-foreground";
-}
 
 /** Mini sparkline de fluxo — sem min-width que causa overflow. */
 function CashSpark({
@@ -86,7 +73,7 @@ function CashSpark({
 }
 
 /**
- * Segunda linha — gráfico 7 · inteligência 3 · fluxo 2 (Sprint 25.6.1).
+ * Segunda linha — gráfico autoral · inteligência sem scroll interno · fluxo (Sprint 26.1).
  */
 export function PremiumMainRow({
   faturamentoDiario,
@@ -110,105 +97,93 @@ export function PremiumMainRow({
     <section
       data-premium-block="main-row"
       data-dashboard-layout="main-row"
+      data-authorial-charts=""
       className="grid grid-cols-1 gap-[var(--dashboard-gap)] lg:grid-cols-5 2xl:grid-cols-12"
     >
-      {/* Gráfico — full no lg/xl notebook; 7 cols no 2xl */}
+      {/* Gráfico autoral — full no lg; 7 cols no 2xl */}
       <div
         className={cn(
-          "min-w-0 overflow-hidden rounded-2xl border border-[var(--brand-gold)]/15 bg-[var(--surface-2)] p-4 shadow-[var(--elevation-card)]",
-          "dark:bg-[var(--brand-graphite-elevated)]/80",
+          "gf-surface min-w-0 overflow-hidden rounded-2xl p-4",
+          "border border-border bg-card shadow-[var(--elevation-card)]",
+          "dark:bg-[var(--brand-graphite-elevated)]",
           "lg:col-span-5 2xl:col-span-7",
         )}
+        data-chart-panel="revenue"
       >
         <div className="mb-3">
-          <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight">
+          <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight text-[var(--text-primary)]">
             Faturamento
           </h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-[var(--text-secondary)]">
             Série diária · {periodoLabel}
           </p>
         </div>
-        <PremiumRevenueChart
+        <GFRevenueChart
           data={faturamentoDiario}
           periodoLabel={periodoLabel}
+          origem="Dashboard · vendas"
+          confianca="Alta"
         />
       </div>
 
-      {/* Inteligência — 3/5 no lg (~60%), 3/12 no xl */}
+      {/* Inteligência — três níveis: top 3 · ver todos · detalhes */}
       <div
         className={cn(
-          "min-w-0 overflow-hidden rounded-2xl border border-border/50 bg-[var(--surface-2)] p-4 shadow-[var(--elevation-card)]",
-          "dark:bg-[var(--brand-graphite-elevated)]/80",
+          "min-w-0 overflow-hidden rounded-2xl border border-[var(--border)]",
+          "bg-[var(--card)] p-4 shadow-[var(--elevation-card)]",
           "lg:col-span-3 2xl:col-span-3",
         )}
         data-intel-panel=""
+        data-intel-no-scroll=""
+        data-intel-levels="3"
       >
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-2 flex items-center gap-2">
           <Sparkles className="size-4 shrink-0 text-[var(--brand-gold)]" aria-hidden />
-          <h2 className="font-[family-name:var(--font-display)] text-base font-semibold">
+          <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)]">
             Central de Inteligência
           </h2>
         </div>
-        <p className="mb-3 text-[11px] text-muted-foreground">
-          Análise baseada em regras, métricas e histórico do tenant.
+        <p className="mb-2 text-[11px] text-[var(--text-secondary)]">
+          Top 3 · Análise baseada em regras, métricas e histórico do tenant.
         </p>
-        <ul className="space-y-2">
+        <ul className="space-y-2 overflow-visible">
           {topInsights.map((card) => (
             <li key={card.id}>
-              <Link
+              <GFInsightCard
+                title={card.title}
+                body={card.body}
+                confianca={card.confianca}
+                origem={card.origem}
                 href={card.href ?? `/${tenantSlug}/dashboard`}
-                className={cn(
-                  "block rounded-xl border p-3 transition-colors hover:border-[var(--brand-gold)]/35",
-                  severityClass(card.severity),
-                )}
-              >
-                <div className="flex items-start gap-2">
-                  <span
-                    className={cn(
-                      "mt-1.5 size-1.5 shrink-0 rounded-full",
-                      severityDot(card.severity),
-                    )}
-                    aria-hidden
-                  />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">
-                      {card.title}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                      {card.body}
-                    </p>
-                    <p className="mt-2 text-[10px] tracking-wide text-muted-foreground/80 uppercase">
-                      {card.confianca} · {card.origem}
-                    </p>
-                  </div>
-                </div>
-              </Link>
+                severity={card.severity}
+              />
             </li>
           ))}
         </ul>
         {moreCount > 0 ? (
           <Link
             href={`#premium-trigger-alertas`}
-            className="mt-3 inline-flex text-xs font-medium text-[var(--brand-gold)] hover:underline"
+            className="mt-2 inline-flex text-xs font-medium text-[var(--brand-gold)] hover:underline"
           >
             Ver todos ({insights.length})
           </Link>
         ) : null}
       </div>
 
-      {/* Fluxo — 2/5 no lg (~40%), 2/12 no xl — SEM overflow-x */}
+      {/* Fluxo — SEM overflow-x */}
       <div
         className={cn(
-          "min-w-0 overflow-x-hidden rounded-2xl border border-border/50 bg-[var(--surface-2)] p-4 shadow-[var(--elevation-card)]",
-          "dark:bg-[var(--brand-graphite-elevated)]/80",
+          "min-w-0 overflow-x-hidden rounded-2xl border border-border",
+          "bg-card p-4 shadow-[var(--elevation-card)]",
+          "dark:bg-[var(--brand-graphite-elevated)]",
           "lg:col-span-2 2xl:col-span-2",
         )}
         data-cash-panel=""
       >
-        <h2 className="font-[family-name:var(--font-display)] text-base font-semibold">
+        <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)]">
           Fluxo de caixa
         </h2>
-        <p className="mt-1 text-xs text-muted-foreground text-pretty">
+        <p className="mt-1 text-xs text-[var(--text-secondary)] text-pretty">
           {cockpit.saudeLabel}
         </p>
         <dl className="mt-4 space-y-3 text-sm">

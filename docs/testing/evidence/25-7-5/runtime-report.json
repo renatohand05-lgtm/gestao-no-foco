@@ -1,0 +1,62 @@
+{
+  "at": "2026-07-31T03:58:21.976Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "checks": [
+    {
+      "page": "crm-hub",
+      "url": "http://localhost:3000/teste-renato-01/crm/executivo",
+      "ok": true,
+      "boundary": false,
+      "deniedPerm": false,
+      "detail": "CRM carregou"
+    },
+    {
+      "page": "crm-executivo",
+      "url": "http://localhost:3000/teste-renato-01/crm/executivo",
+      "ok": true,
+      "boundary": false,
+      "deniedPerm": false,
+      "detail": "CRM carregou"
+    },
+    {
+      "page": "crm-pipeline",
+      "url": "http://localhost:3000/teste-renato-01/crm/pipeline",
+      "ok": true,
+      "boundary": false,
+      "deniedPerm": false,
+      "detail": "CRM carregou"
+    },
+    {
+      "page": "crm-agenda",
+      "url": "http://localhost:3000/teste-renato-01/crm/agenda",
+      "ok": true,
+      "boundary": false,
+      "deniedPerm": false,
+      "detail": "CRM carregou"
+    },
+    {
+      "page": "crm-indicadores",
+      "url": "http://localhost:3000/teste-renato-01/crm/indicadores",
+      "ok": true,
+      "boundary": false,
+      "deniedPerm": false,
+      "detail": "CRM carregou"
+    }
+  ],
+  "consoleErrors": [],
+  "fatal": false,
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-5\\crm-hub.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-5\\crm-executivo.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-5\\crm-pipeline.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-5\\crm-agenda.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-5\\crm-indicadores.png",
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-5\\crm-theme-toggled.png"
+  ],
+  "summary": {
+    "pass": 5,
+    "fail": 0,
+    "consoleErrors": 0
+  }
+}

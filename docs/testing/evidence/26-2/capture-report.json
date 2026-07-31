@@ -1,0 +1,104 @@
+{
+  "at": "2026-07-31T11:15:20.642Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "26.2",
+  "shots": [
+    "landing",
+    "login",
+    "loader",
+    "dashboard-completo",
+    "header",
+    "executive-brief",
+    "kpi-cockpit",
+    "grafico",
+    "tooltip",
+    "command-center",
+    "central-inteligencia",
+    "business-health",
+    "decision-center",
+    "acoes-rapidas",
+    "analytics",
+    "tema-claro",
+    "tema-escuro",
+    "dashboard-desktop",
+    "dashboard-notebook",
+    "dashboard-tablet",
+    "dashboard-mobile"
+  ],
+  "consoleErrors": [],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "landing"
+    },
+    {
+      "ok": true,
+      "detail": "login"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard signature loaded"
+    },
+    {
+      "ok": true,
+      "detail": "crop header"
+    },
+    {
+      "ok": true,
+      "detail": "crop executive-brief"
+    },
+    {
+      "ok": true,
+      "detail": "crop kpi-cockpit"
+    },
+    {
+      "ok": true,
+      "detail": "crop grafico"
+    },
+    {
+      "ok": true,
+      "detail": "crop tooltip"
+    },
+    {
+      "ok": true,
+      "detail": "crop command-center"
+    },
+    {
+      "ok": true,
+      "detail": "crop central-inteligencia"
+    },
+    {
+      "ok": true,
+      "detail": "crop business-health"
+    },
+    {
+      "ok": true,
+      "detail": "crop decision-center"
+    },
+    {
+      "ok": true,
+      "detail": "crop acoes-rapidas"
+    },
+    {
+      "ok": true,
+      "detail": "analytics page"
+    },
+    {
+      "ok": true,
+      "detail": "no overflow @ desktop"
+    },
+    {
+      "ok": true,
+      "detail": "no overflow @ notebook"
+    },
+    {
+      "ok": true,
+      "detail": "no overflow @ tablet"
+    },
+    {
+      "ok": true,
+      "detail": "no overflow @ mobile"
+    }
+  ]
+}

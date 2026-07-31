@@ -100,13 +100,15 @@ export function ExecutiveCommandCenter({
       data-dashboard-block="executive-command-center"
       data-ecc-engine={data.engineVersion}
       data-ecc-hero="consolidated"
-      className={cn("space-y-5 min-w-0", gofMotion.fade)}
+      data-command-center-compact="1"
+      data-sprint="26.1"
+      className={cn("space-y-3 min-w-0", gofMotion.fade)}
     >
       <ExecutiveSection
         title="Command Center"
-        description="Resumo executivo · detalhes e evidências nos módulos abaixo"
+        description="Resumo acionável · evidências nos módulos abaixo"
         panel
-        className="space-y-5"
+        className="space-y-3"
       >
         <ExecutiveHeader
           greeting={greeting}
@@ -125,36 +127,40 @@ export function ExecutiveCommandCenter({
           }
         />
 
-        <ExecutiveKpis items={data.kpis} />
+        <ExecutiveKpis items={data.kpis.slice(0, 4)} />
 
-        <p className={cn(gofTypography.caption, "px-0.5")}>
-          Destaques (máx. 5 por lista) · abrir painéis abaixo para evidências
-          completas.
-        </p>
-
-        <div className={cn(gofGrid.twoCol, "min-w-0")}>
-          <ExecutivePriorityList items={data.priorities} />
-          <ExecutiveRiskPanel items={data.risks} />
+        <div className={cn(gofGrid.twoCol, "min-w-0 gap-3")}>
+          <ExecutivePriorityList items={data.priorities.slice(0, 3)} />
+          <ExecutiveRiskPanel items={data.risks.slice(0, 3)} />
           <ExecutiveOpportunityPanel
-            items={data.opportunities}
-            quickWins={data.quickWins}
+            items={data.opportunities.slice(0, 3)}
+            quickWins={data.quickWins.slice(0, 2)}
           />
-          <ExecutiveAlertCenter items={data.alerts} />
+          <ExecutiveAlertCenter items={data.alerts.slice(0, 3)} />
         </div>
 
-        <ExecutiveGoalsPanel goals={data.goals} />
-
-        <ExecutiveForecastPanel
-          cashflow={data.cashflowForecast}
-          financial={data.financialForecast}
-          operational={data.operationalForecast}
-        />
-
-        <ExecutiveActionCenter items={data.actions} />
+        <details className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-raised)] open:shadow-[var(--shadow-card)]">
+          <summary
+            className={cn(
+              gofTypography.caption,
+              "cursor-pointer px-3 py-2 font-medium text-foreground",
+            )}
+          >
+            Metas, forecast e ações ({data.actions.length})
+          </summary>
+          <div className="space-y-3 border-t border-[var(--border-subtle)] p-3">
+            <ExecutiveGoalsPanel goals={data.goals} />
+            <ExecutiveForecastPanel
+              cashflow={data.cashflowForecast}
+              financial={data.financialForecast}
+              operational={data.operationalForecast}
+            />
+            <ExecutiveActionCenter items={data.actions} />
+          </div>
+        </details>
 
         <p className={gofTypography.caption}>
-          Motor local {data.engineVersion} · consome Business Health, Copilot
-          context, Predictive, Timeline e Decision Center · sem IA generativa.
+          Motor local {data.engineVersion} · sem IA generativa.
         </p>
       </ExecutiveSection>
     </div>

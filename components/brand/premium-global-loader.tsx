@@ -46,6 +46,8 @@ export function PremiumGlobalLoader({
       data-premium-global-loader=""
       data-brand-splash=""
       data-brand-splash-premium=""
+      data-brand-continuity="loader"
+      data-sprint="26.1"
       data-loader-variant={variant}
     >
       <span className="sr-only">{label}</span>

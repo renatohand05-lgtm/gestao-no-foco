@@ -15,7 +15,12 @@ function assert(cond, msg) {
 console.log("\nLight Theme Contract — Sprint 25.6\n");
 
 const globals = readFileSync(join(root, "app/globals.css"), "utf8");
-assert(globals.includes("--background: #eef1f5"), "fundo claro sofisticado");
+assert(
+  globals.includes("--background: #f0f2f6") ||
+    globals.includes("--background: #eef1f5"),
+  "fundo claro frio (26.1)",
+);
+assert(!globals.includes("#ebe6df"), "sem marfim");
 assert(globals.includes("--primary: #c9a84c"), "dourado no claro");
 assert(globals.includes("--sidebar: #f7f8fa"), "sidebar clara");
 assert(!globals.includes("--background: #f4f1ea"), "evita cream genérico");

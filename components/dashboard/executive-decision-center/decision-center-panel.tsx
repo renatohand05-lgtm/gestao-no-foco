@@ -61,18 +61,22 @@ export function DecisionCenterPanel({
     [edcProp, tenantSlug, ai, predictive, feeds, decision, businessHealth, timeline],
   );
 
-  const critical = data.queue.filter((d) => d.priority === "critical").length;
+  const criticalItems = data.queue.filter((d) => d.priority === "critical");
+  const trackingItems = data.queue.filter((d) => d.priority !== "critical");
+  const critical = criticalItems.length;
 
   return (
     <div
       data-dashboard-block="executive-decision-center"
       data-edc-engine={data.engineVersion}
       data-premium-v257="decision-center"
+      data-decision-center-layout="v262"
+      data-sprint="26.2"
       className={cn("space-y-4 premium-enter", gofMotion.fade)}
     >
       <ExecutiveSection
         title="Executive Decision Center"
-        description="Fila priorizada de decisões · impacto × urgência × confiança × esforço."
+        description="Críticas · Quick Wins · Em acompanhamento."
         panel
         actions={
           <div className="flex flex-wrap gap-1.5">
@@ -94,42 +98,75 @@ export function DecisionCenterPanel({
         }
         className="space-y-4"
       >
-        <ExecutiveScoreCard score={data.executiveScore} />
-
-        <QuickWins items={data.quickWins} />
-
-        <ImpactEffortMatrix decisions={data.queue} />
-
-        <div className="space-y-2">
-          <h3 className={cn(gofTypography.title, "text-sm")}>
-            Fila de decisões
-          </h3>
-          {data.queue.length === 0 ? (
-            <DecisionEmptyState />
-          ) : (
-            <ol className="space-y-2">
-              {data.queue.map((d, idx) => (
-                <li key={d.id} className="space-y-1">
-                  <p className={gofTypography.caption}>#{idx + 1}</p>
-                  <DecisionCard decision={d} />
-                </li>
-              ))}
-            </ol>
-          )}
+        <div
+          className="grid gap-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+          data-decision-top=""
+        >
+          <ExecutiveScoreCard score={data.executiveScore} />
+          <QuickWins items={data.quickWins} />
         </div>
 
-        <div className="space-y-2">
-          <h3 className={cn(gofTypography.title, "text-sm")}>
-            Simulador “E se?”
-          </h3>
-          <p className={gofTypography.caption}>
-            Cenários determinísticos sobre valores reais do snapshot · Predictive
-            local · sem IA generativa.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {data.simulations.map((s) => (
-              <SimulationCard key={s.id} simulation={s} />
-            ))}
+        <div
+          className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
+          data-decision-body=""
+        >
+          <div className="space-y-4 min-w-0">
+            <div className="space-y-2" data-decision-group="critical">
+              <h3 className={cn(gofTypography.title, "text-sm")}>Críticas</h3>
+              {criticalItems.length === 0 ? (
+                <p className={gofTypography.caption}>Nenhuma crítica agora.</p>
+              ) : (
+                <ol className="space-y-2">
+                  {criticalItems.map((d, idx) => (
+                    <li key={d.id} className="space-y-1">
+                      <p className={gofTypography.caption}>#{idx + 1}</p>
+                      <DecisionCard decision={d} />
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+            <div className="space-y-2" data-decision-group="tracking">
+              <h3 className={cn(gofTypography.title, "text-sm")}>
+                Em acompanhamento
+              </h3>
+              {trackingItems.length === 0 ? (
+                data.queue.length === 0 ? (
+                  <DecisionEmptyState />
+                ) : (
+                  <p className={gofTypography.caption}>
+                    Sem itens em acompanhamento.
+                  </p>
+                )
+              ) : (
+                <ol className="space-y-2">
+                  {trackingItems.map((d, idx) => (
+                    <li key={d.id} className="space-y-1">
+                      <p className={gofTypography.caption}>#{idx + 1}</p>
+                      <DecisionCard decision={d} />
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-3 min-w-0">
+            <ImpactEffortMatrix decisions={data.queue} />
+            <div className="space-y-2" data-simulator-block="">
+              <h3 className={cn(gofTypography.title, "text-sm")}>
+                Simulador “E se?”
+              </h3>
+              <p className={gofTypography.caption}>
+                Interativo sobre baseline real · Predictive local · sem IA
+                generativa.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-1">
+                {data.simulations.map((s) => (
+                  <SimulationCard key={s.id} simulation={s} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

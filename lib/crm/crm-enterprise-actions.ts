@@ -28,6 +28,10 @@ import type { CrmKpiId } from "@/lib/crm/enterprise/types";
 import { describeCrmIntegrationArchitecture } from "@/lib/crm/enterprise/integration-architecture";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
+import {
+  hasCrmViewAccess,
+  resolveCrmEffectivePermissions,
+} from "@/lib/crm/rbac-compat";
 
 async function resolveCrmAuth(tenantSlug: string) {
   if (!isCrmEnterpriseEnabled()) {
@@ -40,22 +44,27 @@ async function resolveCrmAuth(tenantSlug: string) {
   const client = await createClient();
   const rbac = createRbacSupabaseAdapter(client);
   const snap = await rbac.resolveAuthorizationSnapshot(tenant.id, profile.id);
-  const permissions = snap.permissions ?? [];
+  const effective = resolveCrmEffectivePermissions({
+    membershipRole: tenant.role,
+    snapshotRoles: snap.roles,
+    snapshotPermissions: snap.permissions,
+  });
+  const permissions = effective.permissions;
 
-  if (
-    !permissions.includes("crm.visualizar") &&
-    !permissions.includes("crm.editar") &&
-    !permissions.includes("crm.criar")
-  ) {
+  if (!hasCrmViewAccess(permissions)) {
     throw new Error("Sem permissão crm.visualizar.");
   }
 
   const context = createEnterpriseContext({
     tenantId: tenant.id,
     userId: profile.id,
-    roles: snap.roles ?? [],
+    roles: effective.roles,
     permissions,
     source: "server_action",
+    metadata: {
+      crmAuthSource: effective.source,
+      membershipRole: tenant.role,
+    },
   });
 
   return { tenant, profile, client, context, permissions, tenantSlug };

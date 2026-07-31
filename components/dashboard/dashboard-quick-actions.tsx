@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   CalendarPlus,
@@ -8,9 +10,9 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { ExecutiveSection } from "@/components/executive";
-import { DsIcon } from "@/components/ui/ds-icon";
-import { gofMotion, gofRadius, gofTypography } from "@/lib/design-system";
+import { GFIcon } from "@/components/gf/gf-icon";
+import { GFSection } from "@/components/gf/gf-section";
+import { gfType } from "@/lib/design-system/signature";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -22,86 +24,101 @@ const ACTIONS = [
   {
     id: "os",
     label: "Criar OS",
+    description: "Abrir uma nova ordem de serviço",
     href: (slug: string) => `/${slug}/ordens/nova`,
     icon: ClipboardPlus,
+    shortcut: "O",
   },
   {
     id: "venda",
-    label: "Nova Venda",
+    label: "Nova venda",
+    description: "Registrar uma nova venda",
     href: (slug: string) => `/${slug}/vendas/nova`,
     icon: ShoppingCart,
+    shortcut: "V",
   },
   {
     id: "cliente",
-    label: "Novo Cliente",
+    label: "Novo cliente",
+    description: "Cadastrar novo cliente",
     href: (slug: string) => `/${slug}/clientes/novo`,
     icon: UserPlus,
+    shortcut: "C",
   },
   {
     id: "produto",
-    label: "Novo Produto",
+    label: "Novo produto",
+    description: "Incluir produto no catálogo",
     href: (slug: string) => `/${slug}/produtos/novo`,
     icon: PackagePlus,
+    shortcut: "P",
   },
   {
     id: "conta",
-    label: "Nova Conta",
+    label: "Nova conta",
+    description: "Conta bancária no tesouro",
     href: (slug: string) => `/${slug}/financeiro/contas-bancarias/novo`,
     icon: Wallet,
+    shortcut: "B",
   },
   {
     id: "agenda",
-    label: "Nova Agenda",
+    label: "Nova agenda",
+    description: "Compromisso comercial",
     href: (slug: string) => `/${slug}/clientes/agenda`,
     icon: CalendarPlus,
+    shortcut: "A",
   },
 ] as const;
 
 /**
- * Ações rápidas Enterprise — bloco inicial (Gate 19.4).
- * Sem queries; apenas links de navegação.
+ * Launcher executivo — ações rápidas com contexto (Sprint 26.2).
  */
 export function DashboardQuickActions({ tenantSlug, className }: Props) {
   return (
-    <ExecutiveSection
-      title="Ações rápidas"
-      description="Comece pelo essencial sem perder o foco."
-      panel
+    <GFSection
+      title="Launcher executivo"
+      description="Atalhos do dia · sem inventar atalhos de teclado globais."
       className={className}
+      surface="elevated"
     >
       <nav
         aria-label="Ações rápidas"
-        className={cn(
-          "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6",
-          gofMotion.fade,
-        )}
+        data-gf-launcher=""
+        data-sprint="26.2"
+        className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
       >
         {ACTIONS.map((action) => (
           <Link
             key={action.id}
             href={action.href(tenantSlug)}
             className={cn(
-              "group flex min-h-11 flex-col items-start gap-2 border border-border/60 bg-card px-3 py-3",
-              "transition-colors hover:border-[var(--brand-gold)]/50 hover:bg-[var(--brand-gray-light)]",
+              "group flex min-h-11 items-start gap-3 rounded-xl border border-[var(--gf-border-subtle)]",
+              "bg-[var(--gf-surface-raised)] p-3 transition-colors",
+              "hover:border-[var(--gf-border-active)] hover:bg-[var(--gf-surface-interactive)]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
-              gofRadius.md,
             )}
           >
-            <span
-              className={cn(
-                "inline-flex size-8 items-center justify-center bg-[var(--brand-gray-light)] text-[var(--brand-graphite)]",
-                "group-hover:bg-[var(--brand-gold)]/15 group-hover:text-[var(--brand-graphite)]",
-                gofRadius.sm,
-              )}
-            >
-              <DsIcon icon={action.icon} size="sm" />
-            </span>
-            <span className={cn(gofTypography.caption, "font-medium text-foreground")}>
-              {action.label}
+            <GFIcon icon={action.icon} size="md" variant="primary" />
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center justify-between gap-2">
+                <span className={cn(gfType.cardTitle)}>{action.label}</span>
+                <kbd
+                  className={cn(
+                    gfType.caption,
+                    "hidden rounded border border-[var(--gf-border-subtle)] px-1.5 py-0.5 sm:inline",
+                  )}
+                >
+                  {action.shortcut}
+                </kbd>
+              </span>
+              <span className={cn(gfType.caption, "mt-0.5 block text-pretty")}>
+                {action.description}
+              </span>
             </span>
           </Link>
         ))}
       </nav>
-    </ExecutiveSection>
+    </GFSection>
   );
 }

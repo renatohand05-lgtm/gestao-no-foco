@@ -170,10 +170,16 @@ export function ExecutiveAnalyticsDashboard({
   }
 
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      data-analytics-legible=""
+      data-sprint="26.2.1"
+    >
       <div className="space-y-1">
-        <h1 className={gofTypography.title}>{title}</h1>
-        <p className={gofTypography.subtitle}>{description}</p>
+        <h1 className={cn(gofTypography.title, "text-foreground")}>{title}</h1>
+        <p className={cn(gofTypography.subtitle, "text-muted-foreground")}>
+          {description}
+        </p>
       </div>
 
       <AnalyticsNavigation tenantSlug={tenantSlug} />
@@ -228,26 +234,45 @@ export function ExecutiveAnalyticsDashboard({
       ) : null}
 
       {sourceEntries.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className={gofTypography.title}>Fontes</CardTitle>
-            <CardDescription>
+        <details
+          className="rounded-[var(--gf-radius)] border border-border bg-card shadow-[var(--elevation-card)] open:shadow-[var(--elevation-raised)]"
+          data-analytics-sources-panel=""
+          data-sprint="26.2.1"
+        >
+          <summary className="cursor-pointer list-none px-4 py-3">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <p className={cn(gofTypography.caption, "text-muted-foreground")}>
+                  Cobertura de dados
+                </p>
+                <p className={cn(gofTypography.title, "text-base text-foreground")}>
+                  {
+                    sourceEntries.filter(([, h]) => h.status === "ok")
+                      .length
+                  }{" "}
+                  de {sourceEntries.length} fontes ativas
+                </p>
+              </div>
+              <Badge variant="outline">Ver fontes</Badge>
+            </div>
+            <p className={cn(gofTypography.caption, "mt-1 text-muted-foreground")}>
+              Confiança consolidada no provider · detalhes técnicos sob demanda
+            </p>
+          </summary>
+          <div className="border-t border-border px-4 py-3">
+            <p className={cn(gofTypography.caption, "mb-2 text-muted-foreground")}>
               Falha de uma fatia não derruba o dashboard. Persistência de período via
-              URL (?period=) — leve, não permanente.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {sourceEntries.map(([key, h]) => (
-              <Badge
-                key={key}
-                variant="outline"
-                title={h.message}
-              >
-                {key}: {h.status}
-              </Badge>
-            ))}
-          </CardContent>
-        </Card>
+              URL (?period=).
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {sourceEntries.map(([key, h]) => (
+                <Badge key={key} variant="outline" title={h.message}>
+                  {key}: {h.status}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </details>
       ) : null}
 
       {bundle.empty ? (
@@ -274,7 +299,15 @@ export function ExecutiveAnalyticsDashboard({
               <MetricCard
                 label={k.name}
                 value={k.formatted}
-                hint={`${k.confidence} · ${k.source.split(" ")[0]}`}
+                hint={
+                  k.confidence === "high"
+                    ? "Confiança alta"
+                    : k.confidence === "medium"
+                      ? "Confiança média"
+                      : k.confidence === "low"
+                        ? "Confiança baixa"
+                        : `Confiança ${k.confidence}`
+                }
                 tone={toneFromComparison(k.definitionId, bundle.comparisons)}
               />
             </button>
@@ -298,12 +331,12 @@ export function ExecutiveAnalyticsDashboard({
                   <Badge variant="outline">{a.severity}</Badge>
                   <span className="font-medium">{a.title}</span>
                 </div>
-                <p className="mt-1 text-muted-foreground">{a.description}</p>
-                <p className="mt-1 text-xs">{a.recommendation}</p>
+                <p className="mt-1 text-[var(--text-secondary)]">{a.description}</p>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">{a.recommendation}</p>
               </div>
             ))}
             {!bundle.alerts.length ? (
-              <p className="text-sm text-muted-foreground">Nenhum alerta no período.</p>
+              <p className="text-sm text-[var(--text-secondary)]">Nenhum alerta no período.</p>
             ) : null}
           </CardContent>
         </Card>
@@ -320,8 +353,8 @@ export function ExecutiveAnalyticsDashboard({
             {bundle.insights.slice(0, 6).map((i) => (
               <div key={i.id} className="rounded-md border p-3 text-sm">
                 <p className="font-medium">{i.title}</p>
-                <p className="mt-1 text-muted-foreground">{i.summary}</p>
-                <p className="mt-1 text-xs">
+                <p className="mt-1 text-[var(--text-secondary)]">{i.summary}</p>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">
                   Confiança {i.confidence} · {i.limitations[0]}
                 </p>
               </div>
@@ -346,7 +379,7 @@ export function ExecutiveAnalyticsDashboard({
                   atingimento {t.attainment ?? "n/d"} · {t.probabilityLabel ?? ""}
                 </p>
               ) : (
-                <p className="text-muted-foreground">
+                <p className="text-[var(--text-secondary)]">
                   {t.definitionId}: {t.unavailableReason}
                 </p>
               )}
@@ -382,7 +415,7 @@ export function ExecutiveAnalyticsDashboard({
             .map((m) => (
               <div key={m.definitionId} className="flex justify-between gap-2">
                 <span>{m.name}</span>
-                <span className="text-muted-foreground">
+                <span className="text-[var(--text-secondary)]">
                   {m.unavailableReason}
                 </span>
               </div>
@@ -406,7 +439,7 @@ export function ExecutiveAnalyticsDashboard({
         </Card>
       ) : null}
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-[var(--text-secondary)]">
         Layout widgets: {bundle.layout.widgets.filter((w) => w.visible).length}{" "}
         visíveis · flags analytics=
         {String(bundle.flags.analytics)}

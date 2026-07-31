@@ -40,7 +40,8 @@ const decision = readFileSync(
 assert(decision.includes("data-premium-v257"), "decision marker");
 
 const css = readFileSync(join(root, "app/globals.css"), "utf8");
-assert(css.includes("--background: #eef1f5"), "tema claro sofisticado");
+assert(css.includes("--background: #f0f2f6") || css.includes("--background: #eef1f5"), "tema claro sofisticado frio");
+assert(!css.includes("#ebe6df"), "sem marfim 26.2");
 assert(css.includes(".dark"), "tema escuro");
 assert(!css.includes("#F4F1EA"), "sem cream genérico");
 

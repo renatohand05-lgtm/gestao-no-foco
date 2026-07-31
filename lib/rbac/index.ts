@@ -95,6 +95,23 @@ export {
 } from "./guards.ts";
 
 export {
+  ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES,
+  isElevatedMembershipRole,
+  mapElevatedMembershipToEnterpriseRoles,
+} from "./membership.ts";
+
+export {
+  ANALYTICS_VIEW_ANY_OF,
+  EXECUTIVE_DASHBOARD_ANY_OF,
+  LEGACY_EXECUTIVE_PERMISSION_ALIASES,
+  buildAnalyticsAuthContext,
+  expandExecutivePermissionAliases,
+  hasAnalyticsViewAccess,
+  hasExecutiveDashboardAccess,
+  requireAnalyticsPermission,
+} from "./executive-access.ts";
+
+export {
   createAuthorizationContext,
   isValidAuthorizationContext,
   withPlatformScope,

@@ -17,14 +17,14 @@ export const exTypography = {
   sectionTitle:
     "text-[0.9375rem] font-semibold tracking-tight text-foreground sm:text-base",
   cardTitle: "text-sm font-medium tracking-tight text-foreground",
-  subtitle: "text-sm leading-snug text-muted-foreground sm:text-[0.9375rem]",
-  body: "text-sm leading-relaxed text-foreground/90 sm:text-[0.9375rem]",
-  caption: "text-xs leading-snug text-muted-foreground",
+  subtitle: "text-sm leading-snug text-[var(--text-secondary)] sm:text-[0.9375rem]",
+  body: "text-sm leading-relaxed text-foreground sm:text-[0.9375rem]",
+  caption: "text-xs leading-snug text-[var(--text-secondary)]",
   /** Micro — eixos de gráfico / legendas densas / kbd */
   micro:
-    "text-[0.625rem] leading-tight text-muted-foreground sm:text-[0.65rem]",
+    "text-[0.625rem] leading-tight text-[var(--text-secondary)] sm:text-[0.65rem]",
   label:
-    "text-[0.65rem] font-medium tracking-[0.04em] text-slate-400 dark:text-muted-foreground",
+    "text-[0.65rem] font-medium tracking-[0.04em] text-[var(--text-secondary)]",
   /** Metric cockpit — protagonista do Hero (Sprint 13.10) */
   scoreHero:
     "text-[3.25rem] font-semibold tracking-tight tabular-nums text-foreground sm:text-6xl lg:text-[4.25rem]",

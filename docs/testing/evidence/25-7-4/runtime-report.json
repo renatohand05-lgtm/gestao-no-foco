@@ -1,0 +1,26 @@
+{
+  "at": "2026-07-31T03:22:29.691Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "checks": [
+    {
+      "page": "owner-executive",
+      "url": "http://localhost:3000/teste-renato-01/analytics/executivo",
+      "ok": true,
+      "denied": false,
+      "hasAlert": false,
+      "hasExecUi": true,
+      "ownerBadge": true,
+      "detail": "Owner com Dashboard Executivo liberado"
+    }
+  ],
+  "consoleErrors": [],
+  "fatal": false,
+  "shots": [
+    "C:\\Users\\renat\\gestao-no-foco\\docs\\testing\\evidence\\25-7-4\\owner-executive.png"
+  ],
+  "summary": {
+    "pass": 1,
+    "fail": 0
+  }
+}

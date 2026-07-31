@@ -36,14 +36,17 @@ function DemoAwareChrome({
   return (
     <SidebarProvider
       defaultOpen={!hide.appSidebar}
-      className={cn(hide.appSidebar && "demo-fullscreen-shell")}
+      className={cn(
+        "overflow-x-hidden",
+        hide.appSidebar && "demo-fullscreen-shell",
+      )}
     >
       {!hide.appSidebar ? (
         <AppSidebar tenant={tenant} tenants={tenants} />
       ) : null}
       <SidebarInset
         className={cn(
-          "min-h-svh bg-background",
+          "min-h-svh min-w-0 overflow-x-hidden bg-background",
           hide.appSidebar && "md:ml-0",
         )}
       >

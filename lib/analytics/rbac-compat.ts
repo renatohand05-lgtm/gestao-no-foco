@@ -1,5 +1,5 @@
 /**
- * Sprint 25.7.3 — Compatibilidade RBAC do Analytics / Dashboard Executivo.
+ * Sprint 25.7.3 / 25.7.4 — Compatibilidade RBAC do Analytics / Dashboard Executivo.
  *
  * Bridge controlada entre:
  * - snapshot Enterprise (`tenant_user_roles` / tenant_rbac_role_permissions)
@@ -15,14 +15,22 @@
  */
 
 import type { TenantRole } from "../constants.ts";
+import {
+  ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES,
+  mapElevatedMembershipToEnterpriseRoles,
+} from "../rbac/membership.ts";
+import {
+  expandExecutivePermissionAliases,
+  hasExecutiveDashboardAccess,
+} from "../rbac/executive-access.ts";
 import { getPermissionsForRoles } from "../rbac/role-permissions.ts";
 
 /** Membership legado → papéis Enterprise do catálogo. */
 export const MEMBERSHIP_TO_ENTERPRISE_ROLES: Readonly<
   Record<TenantRole, readonly string[]>
 > = {
-  owner: ["proprietario"],
-  admin: ["diretor"],
+  owner: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.owner,
+  admin: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.admin,
   /** manager/member: só herdam via snapshot Enterprise (não over-grant). */
   manager: [],
   member: [],
@@ -30,14 +38,26 @@ export const MEMBERSHIP_TO_ENTERPRISE_ROLES: Readonly<
 
 /**
  * Permissões de Analytics / Dashboard Executivo implicadas por equivalentes.
- * Alinhado a `analyticsPermissionSatisfied` (aliases dashboard.*).
  */
 const IMPLIED_BY_LEGACY: Readonly<Record<string, readonly string[]>> = {
-  "analytics.visualizar": ["dashboard.executivo", "analytics.executivo"],
-  "analytics.executivo": ["dashboard.executivo"],
-  "dashboard.executivo": ["analytics.executivo"],
+  "analytics.visualizar": [
+    "dashboard.executivo",
+    "analytics.executivo",
+    "dashboard.visualizar_executivo",
+  ],
+  "analytics.executivo": [
+    "dashboard.executivo",
+    "dashboard.visualizar_executivo",
+  ],
+  "dashboard.executivo": [
+    "analytics.executivo",
+    "dashboard.visualizar_executivo",
+  ],
   "analytics.exportar": ["dashboard.exportar", "relatorios.exportar"],
-  "analytics.configurar": ["dashboard.executivo"],
+  "analytics.configurar": [
+    "dashboard.executivo",
+    "dashboard.visualizar_executivo",
+  ],
 };
 
 const ANALYTICS_MODULE_PREFIXES = ["analytics.", "dashboard."] as const;
@@ -45,14 +65,18 @@ const ANALYTICS_MODULE_PREFIXES = ["analytics.", "dashboard."] as const;
 export function mapMembershipRoleToEnterpriseRoles(
   membershipRole: string | null | undefined,
 ): string[] {
+  const elevated = mapElevatedMembershipToEnterpriseRoles(membershipRole);
+  if (elevated.length > 0) return elevated;
   if (!membershipRole?.trim()) return [];
   const key = membershipRole.trim() as TenantRole;
   return [...(MEMBERSHIP_TO_ENTERPRISE_ROLES[key] ?? [])];
 }
 
 export function isAnalyticsPermissionKey(permission: string): boolean {
-  return ANALYTICS_MODULE_PREFIXES.some(
-    (p) => permission === p.slice(0, -1) || permission.startsWith(p),
+  return (
+    ANALYTICS_MODULE_PREFIXES.some(
+      (p) => permission === p.slice(0, -1) || permission.startsWith(p),
+    ) || permission === "dashboard.visualizar_executivo"
   );
 }
 
@@ -63,7 +87,7 @@ export function isAnalyticsPermissionKey(permission: string): boolean {
 export function expandAnalyticsPermissions(
   permissions: readonly string[],
 ): string[] {
-  const set = new Set(permissions);
+  const set = new Set(expandExecutivePermissionAliases(permissions));
   for (const [granular, legacy] of Object.entries(IMPLIED_BY_LEGACY)) {
     if (set.has(granular)) continue;
     if (legacy.some((p) => set.has(p))) set.add(granular);
@@ -79,7 +103,8 @@ export function analyticsRbacPermissionSatisfied(
   required: string | readonly string[],
 ): boolean {
   const need = Array.isArray(required) ? required : [required];
-  const set = new Set(permissions);
+  const expanded = expandAnalyticsPermissions(permissions);
+  const set = new Set(expanded);
   return need.some((p) => {
     if (set.has(p)) return true;
     const impliedBy = IMPLIED_BY_LEGACY[p];
@@ -152,3 +177,5 @@ export function resolveAnalyticsEffectivePermissions(input: {
 
   return { roles, permissions: expanded, source };
 }
+
+export { hasExecutiveDashboardAccess };

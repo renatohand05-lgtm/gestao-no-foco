@@ -41,18 +41,18 @@ function ModuleScoreRow({ mod }: { mod: BusinessHealthModuleResult }) {
   return (
     <div
       data-health-domain={mod.key}
-      className="space-y-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3"
+      className="space-y-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3 shadow-[var(--shadow-card)]"
     >
       <div className="flex items-center justify-between gap-2">
         <p className={cn(gofTypography.caption, "text-foreground")}>
           {mod.label}
         </p>
-        <span className="text-sm font-semibold tabular-nums text-foreground">
+        <span className="text-base font-semibold tabular-nums text-foreground">
           {score == null ? "—" : score}
         </span>
       </div>
       <div
-        className="h-1.5 overflow-hidden rounded-full bg-[var(--surface-base)]"
+        className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-base)]"
         role="meter"
         aria-valuemin={0}
         aria-valuemax={100}
@@ -102,11 +102,13 @@ export function BusinessHealthCard({ ai, data: dataProp }: Props) {
       data-dashboard-block="business-health"
       data-business-health-engine={data.engineVersion}
       data-premium-v257="business-health"
+      data-business-health-visual="v261"
+      data-sprint="26.1"
       className={cn("space-y-4 premium-enter", gofMotion.fade)}
     >
       <ExecutiveSection
         title="Business Health"
-        description="Saúde da empresa · indicadores existentes · sem métricas inventadas."
+        description="Saúde visual da empresa · indicadores existentes · sem métricas inventadas."
         panel
         actions={
           <ExecutiveBadge tone="neutral" variant="outline">
@@ -115,23 +117,32 @@ export function BusinessHealthCard({ ai, data: dataProp }: Props) {
         }
         className="space-y-4"
       >
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <ExecutiveCard
-            padding={20}
-            className="space-y-3 border border-[var(--border-premium)] bg-[var(--surface-raised)]"
-          >
-            <p className={gofTypography.caption}>Score geral</p>
-            <BusinessHealthScore
-              score={data.overallScore}
-              status={data.overallStatus}
-              emphasize
-            />
-            <BusinessHealthConfidence
-              level={data.confidence}
-              coveragePct={data.coveragePct}
-              modulesAvailable={data.modulesAvailable}
-            />
-          </ExecutiveCard>
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div data-health-hero="">
+            <ExecutiveCard
+              padding={20}
+              className={cn(
+                "gf-surface gf-surface-authorial relative overflow-hidden space-y-3",
+                "border border-[var(--border-premium)] bg-[var(--surface-raised)]",
+              )}
+            >
+              <div
+                className="pointer-events-none absolute -right-6 -top-8 h-28 w-28 rounded-full bg-[radial-gradient(circle,rgb(201_168_76_/0.22),transparent_70%)]"
+                aria-hidden
+              />
+              <p className={gofTypography.caption}>Score geral</p>
+              <BusinessHealthScore
+                score={data.overallScore}
+                status={data.overallStatus}
+                emphasize
+              />
+              <BusinessHealthConfidence
+                level={data.confidence}
+                coveragePct={data.coveragePct}
+                modulesAvailable={data.modulesAvailable}
+              />
+            </ExecutiveCard>
+          </div>
 
           <ExecutiveCard
             padding={20}
@@ -143,8 +154,11 @@ export function BusinessHealthCard({ ai, data: dataProp }: Props) {
         </div>
 
         <div>
-          <p className={cn(gofTypography.caption, "mb-2")}>Scores por domínio</p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          <p className={cn(gofTypography.caption, "mb-2")}>Mapa de saúde</p>
+          <div
+            className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5"
+            data-health-radar=""
+          >
             <ModuleScoreRow mod={data.finance} />
             <ModuleScoreRow mod={data.commercial} />
             <ModuleScoreRow mod={data.operation} />

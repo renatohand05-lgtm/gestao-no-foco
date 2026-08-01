@@ -164,6 +164,23 @@ export const PERMISSION_CATALOG = [
   def("inteligencia.ver_custos", "inteligencia", "ver_custos", "Ver custos/uso de inteligência", "financeiro_sensivel", "alto"),
   def("inteligencia.feedback", "inteligencia", "feedback", "Enviar feedback sobre respostas", "escrita", "baixo"),
 
+  // Tributário Enterprise (Fase 26.8+)
+  def("tax.visualizar", "tax", "visualizar", "Visualizar hub tributário", "leitura", "alto"),
+  def("tax.executivo", "tax", "executivo", "Cockpit tributário executivo", "financeiro_sensivel", "alto"),
+  def("tax.configurar", "tax", "configurar", "Configurar tributário", "administracao", "critico"),
+  def("tax.criar_regra", "tax", "criar_regra", "Criar regras tributárias", "escrita", "critico"),
+  def("tax.editar_draft", "tax", "editar_draft", "Editar drafts tributários", "escrita", "alto"),
+  def("tax.revisar", "tax", "revisar", "Revisar regras tributárias", "aprovacao", "alto"),
+  def("tax.aprovar", "tax", "aprovar", "Aprovar regras tributárias", "aprovacao", "critico"),
+  def("tax.publicar", "tax", "publicar", "Publicar regras tributárias", "aprovacao", "critico"),
+  def("tax.suspender", "tax", "suspender", "Suspender regras publicadas", "aprovacao", "critico"),
+  def("tax.versionar", "tax", "versionar", "Versionar regras tributárias", "escrita", "alto"),
+  def("tax.simular", "tax", "simular", "Simular cenários tributários", "financeiro_sensivel", "alto"),
+  def("tax.comparar_regimes", "tax", "comparar_regimes", "Comparar regimes tributários", "financeiro_sensivel", "alto"),
+  def("tax.ver_auditoria", "tax", "ver_auditoria", "Ver auditoria tributária", "leitura", "alto"),
+  def("tax.exportar", "tax", "exportar", "Exportar relatórios tributários", "exportacao", "alto"),
+  def("tax.configurar_integracao", "tax", "configurar_integracao", "Configurar integrações fiscais", "administracao", "critico"),
+
   // Usuários
   def("usuarios.visualizar", "usuarios", "visualizar", "Visualizar usuários", "leitura", "medio"),
   def("usuarios.criar", "usuarios", "criar", "Criar usuários", "administracao", "alto"),

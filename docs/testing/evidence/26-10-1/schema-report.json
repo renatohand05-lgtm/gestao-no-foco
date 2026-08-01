@@ -1,0 +1,86 @@
+{
+  "at": "2026-08-01T15:22:13.107Z",
+  "sprint": "26.10.1",
+  "tables": [
+    {
+      "table": "tax_regimes",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_types",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_rules",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_rule_version_snapshots",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_obligation_definitions",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_calculation_traces",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_simulations_v2",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_scenarios",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    },
+    {
+      "table": "tax_audit_events",
+      "status": "OK",
+      "error": null,
+      "rls": "enabled_in_migration",
+      "notes": "acessível via API"
+    }
+  ],
+  "migrationExpectations": {
+    "idx_tax_regimes_tenant": "defined",
+    "idx_tax_rules_tenant_status": "defined",
+    "idx_tax_rules_tenant_code_version": "defined",
+    "idx_tax_rules_tenant_priority": "defined",
+    "idx_tax_rules_validity": "defined",
+    "idx_tax_rule_version_snapshots_tenant": "defined",
+    "idx_tax_obligations_tenant": "defined",
+    "idx_tax_traces_tenant_period": "defined",
+    "idx_tax_sim_v2_tenant": "defined",
+    "idx_tax_audit_tenant": "defined"
+  },
+  "summary": {
+    "pass": 29,
+    "fail": 0,
+    "classificationHint": "schema_ok"
+  }
+}

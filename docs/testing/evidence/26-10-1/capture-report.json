@@ -1,0 +1,110 @@
+{
+  "at": "2026-08-01T15:58:01.822Z",
+  "sprint": "26.10.1",
+  "shots": [
+    "hub",
+    "lista-regras",
+    "nova-regra",
+    "nova-regra-erro",
+    "workflow",
+    "workflow-status",
+    "diff-versoes",
+    "auditoria",
+    "simulador",
+    "comparacao-cenarios",
+    "comparacao-regimes",
+    "cockpit",
+    "calendario",
+    "alertas",
+    "projecoes",
+    "inteligencia",
+    "viewport-desktop",
+    "viewport-notebook",
+    "viewport-tablet",
+    "viewport-mobile",
+    "theme-dark",
+    "theme-light",
+    "permissao-negada"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "hub"
+    },
+    {
+      "ok": true,
+      "detail": "schema ready UI"
+    },
+    {
+      "ok": true,
+      "detail": "lista regras"
+    },
+    {
+      "ok": true,
+      "detail": "regras listadas"
+    },
+    {
+      "ok": true,
+      "detail": "nova regra page"
+    },
+    {
+      "ok": false,
+      "detail": "draft UI falhou (sem alerta) — usando regra do workflow-repos"
+    },
+    {
+      "ok": true,
+      "detail": "detalhe regra"
+    },
+    {
+      "ok": true,
+      "detail": "status atual superseded"
+    },
+    {
+      "ok": true,
+      "detail": "workflow visualizado status=superseded"
+    },
+    {
+      "ok": true,
+      "detail": "versoes"
+    },
+    {
+      "ok": true,
+      "detail": "auditoria"
+    },
+    {
+      "ok": true,
+      "detail": "audit events"
+    },
+    {
+      "ok": true,
+      "detail": "simulador"
+    },
+    {
+      "ok": true,
+      "detail": "sim não muta oficial"
+    },
+    {
+      "ok": true,
+      "detail": "comparar regimes"
+    },
+    {
+      "ok": true,
+      "detail": "cockpit"
+    },
+    {
+      "ok": true,
+      "detail": "inteligência"
+    },
+    {
+      "ok": true,
+      "detail": "permissão negada / auth"
+    }
+  ],
+  "ruleId": "d100d5f8-ccf3-4085-9f60-39b162e55fa2",
+  "source": "browser+repos",
+  "summary": {
+    "pass": 17,
+    "fail": 1,
+    "shots": 23
+  }
+}

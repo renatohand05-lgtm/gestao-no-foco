@@ -1,0 +1,25 @@
+{
+  "at": "2026-08-01T15:22:16.503Z",
+  "checks": [],
+  "ids": {
+    "ruleId": "d100d5f8-ccf3-4085-9f60-39b162e55fa2",
+    "newVersionId": "6967d56b-61da-451b-a27b-195b1af6f671"
+  },
+  "precedence": {
+    "winner": "d85c97aa-0f15-4809-a438-7a504c942ae0",
+    "reason": "Vencedora por prioridade=10, especificidade=1, versão=1",
+    "candidates": 2,
+    "decisionOrder": [
+      "environment_status",
+      "vigencia",
+      "scope_match",
+      "priority_desc",
+      "specificity_desc",
+      "version_desc"
+    ]
+  },
+  "summary": {
+    "pass": 20,
+    "fail": 0
+  }
+}

@@ -3,6 +3,7 @@ import {
   BarChart3,
   Brain,
   FileBarChart,
+  Landmark,
   LayoutDashboard,
   Package,
   Plug,
@@ -105,6 +106,19 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       requiredAnyPermissions: [
         "inteligencia.visualizar",
         "inteligencia.executivo",
+        "dashboard.executivo",
+      ],
+    },
+    {
+      id: "tax-hub",
+      title: "Tributário",
+      href: `${base}/tributario`,
+      icon: Landmark,
+      group: "inteligencia",
+      description: "Regras, simulações e cockpit fiscal",
+      requiredAnyPermissions: [
+        "tax.visualizar",
+        "financeiro.tributos.visualizar",
         "dashboard.executivo",
       ],
     },

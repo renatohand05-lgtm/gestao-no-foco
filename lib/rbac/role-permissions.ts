@@ -75,6 +75,8 @@ const VISUALIZACAO_KEYS = unique([
   "analytics.visualizar",
   "analytics.executivo",
   "inteligencia.visualizar",
+  "tax.visualizar",
+  "tax.executivo",
   "financeiro.visualizar",
   "estoque.visualizar",
   "compras.visualizar",
@@ -112,6 +114,7 @@ const DIRETOR_KEYS = unique([
 
 const FINANCEIRO_KEYS = unique([
   ...byPrefix(["financeiro"]),
+  ...byPrefix(["tax"]),
   ...byPrefix(["inteligencia"], (k) =>
     [
       "inteligencia.visualizar",

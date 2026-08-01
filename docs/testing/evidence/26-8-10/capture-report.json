@@ -1,0 +1,79 @@
+{
+  "at": "2026-08-01T14:23:31.888Z",
+  "sprint": "26.8-10",
+  "shots": [
+    "hub",
+    "regras",
+    "editor",
+    "versoes",
+    "obrigacoes",
+    "auditoria",
+    "configuracoes",
+    "simulador",
+    "comparacao",
+    "cockpit",
+    "hub-persistence-status",
+    "viewport-desktop",
+    "viewport-notebook",
+    "viewport-tablet",
+    "viewport-mobile",
+    "theme-dark",
+    "theme-light"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "hub page"
+    },
+    {
+      "ok": true,
+      "detail": "regras page"
+    },
+    {
+      "ok": true,
+      "detail": "editor page"
+    },
+    {
+      "ok": true,
+      "detail": "versoes page"
+    },
+    {
+      "ok": true,
+      "detail": "obrigacoes page"
+    },
+    {
+      "ok": true,
+      "detail": "auditoria page"
+    },
+    {
+      "ok": true,
+      "detail": "configuracoes page"
+    },
+    {
+      "ok": true,
+      "detail": "simulador page"
+    },
+    {
+      "ok": true,
+      "detail": "comparacao page"
+    },
+    {
+      "ok": true,
+      "detail": "cockpit page"
+    },
+    {
+      "ok": true,
+      "detail": "hub persistence status explícito (ready=1)"
+    },
+    {
+      "ok": true,
+      "detail": "hub shows schema ready"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 12,
+    "fail": 0,
+    "shots": 17
+  }
+}

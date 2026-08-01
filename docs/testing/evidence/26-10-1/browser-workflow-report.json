@@ -1,0 +1,77 @@
+{
+  "at": "2026-08-01T16:13:30.856Z",
+  "sprint": "26.10.1-browser-continue",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "draft criado UI TESTE-FIN-1785600811118 → 0e9ac361-dc48-4e6d-9ac4-86776426ac31"
+    },
+    {
+      "ok": true,
+      "detail": "edit draft"
+    },
+    {
+      "ok": true,
+      "detail": "under_review"
+    },
+    {
+      "ok": true,
+      "detail": "approved"
+    },
+    {
+      "ok": true,
+      "detail": "published"
+    },
+    {
+      "ok": true,
+      "detail": "bloqueio edição"
+    },
+    {
+      "ok": true,
+      "detail": "nova versão ad0606a6-1613-4add-9011-0e32d4b8363c"
+    },
+    {
+      "ok": true,
+      "detail": "nova versão published"
+    },
+    {
+      "ok": true,
+      "detail": "suspended"
+    },
+    {
+      "ok": true,
+      "detail": "archived"
+    },
+    {
+      "ok": true,
+      "detail": "parent superseded (superseded)"
+    },
+    {
+      "ok": true,
+      "detail": "auditoria"
+    },
+    {
+      "ok": true,
+      "detail": "seed published acessível no tenant"
+    }
+  ],
+  "shots": [
+    "workflow-draft",
+    "workflow",
+    "workflow-published",
+    "versao-publicada",
+    "bloqueio-edicao",
+    "diff-versoes",
+    "auditoria"
+  ],
+  "ids": {
+    "seedPublished": "f062f627-2c08-4869-ad8d-cfc1b3852a84",
+    "ruleId": "0e9ac361-dc48-4e6d-9ac4-86776426ac31",
+    "newVersionId": "ad0606a6-1613-4add-9011-0e32d4b8363c"
+  },
+  "summary": {
+    "pass": 13,
+    "fail": 0,
+    "shots": 7
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "at": "2026-08-01T11:13:37.068Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "27.6.2",
+  "stage": "B_POST_MIGRATION",
+  "shots": [
+    "config-provider-off-persistence-ready",
+    "provider-off",
+    "copiloto-deterministic",
+    "q-caixa",
+    "evidencia",
+    "confianca",
+    "feedback",
+    "q-vendas",
+    "q-clientes",
+    "q-os",
+    "q-estoque-min",
+    "q-estoque",
+    "q-risco",
+    "q-prioridade",
+    "historico",
+    "sessao-reaberta",
+    "auditoria",
+    "viewport-desktop-light",
+    "viewport-notebook-light",
+    "viewport-tablet-light",
+    "viewport-mobile-light",
+    "theme-dark",
+    "theme-light"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "config page"
+    },
+    {
+      "ok": true,
+      "detail": "persistence ready (post-migration)"
+    },
+    {
+      "ok": true,
+      "detail": "provider OFF visible"
+    },
+    {
+      "ok": true,
+      "detail": "copilot mounted"
+    },
+    {
+      "ok": true,
+      "detail": "q-caixa resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-caixa persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "q-vendas resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-vendas persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "q-clientes resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-clientes persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "q-os resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-os persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "q-estoque-min resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-estoque-min persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "q-estoque resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-estoque persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "q-risco resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-risco persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "q-prioridade resposta+confiança"
+    },
+    {
+      "ok": true,
+      "detail": "q-prioridade persistência gravada"
+    },
+    {
+      "ok": true,
+      "detail": "ao menos uma pergunta canônica respondida"
+    },
+    {
+      "ok": true,
+      "detail": "historico page"
+    },
+    {
+      "ok": true,
+      "detail": "historico persistence ativa"
+    },
+    {
+      "ok": true,
+      "detail": "historico tem sessões (8)"
+    },
+    {
+      "ok": false,
+      "detail": "sessão reaberta com mensagens"
+    },
+    {
+      "ok": true,
+      "detail": "auditoria page"
+    },
+    {
+      "ok": true,
+      "detail": "auditoria com eventos persistidos"
+    },
+    {
+      "ok": true,
+      "detail": "módulo acessível: financeiro caixa"
+    },
+    {
+      "ok": true,
+      "detail": "módulo acessível: vendas"
+    },
+    {
+      "ok": true,
+      "detail": "módulo acessível: crm clientes"
+    },
+    {
+      "ok": true,
+      "detail": "módulo acessível: operacoes OS"
+    },
+    {
+      "ok": true,
+      "detail": "módulo acessível: estoque"
+    }
+  ],
+  "consoleErrors": [],
+  "sessionId": "33627809-cae8-4dd6-b5ef-9b403cd155ac",
+  "restart": {
+    "attempted": false,
+    "preserved": null
+  },
+  "crossModule": [
+    {
+      "path": "financeiro/caixa",
+      "ok": true
+    },
+    {
+      "path": "vendas",
+      "ok": true
+    },
+    {
+      "path": "clientes",
+      "ok": true
+    },
+    {
+      "path": "ordens",
+      "ok": true
+    },
+    {
+      "path": "estoque",
+      "ok": true
+    }
+  ],
+  "summary": {
+    "pass": 31,
+    "fail": 1,
+    "shots": 23
+  }
+}

@@ -24,7 +24,7 @@ const dash = readFileSync(
   "utf8",
 );
 assert(dash.includes("data-analytics-legible"), "marker legible");
-assert(dash.includes("data-sprint=\"26.2.1\""), "sprint 26.2.1");
+assert(dash.includes("data-sprint=\"26.7\"") || dash.includes("data-sprint=\"26.2.1\""), "sprint refine");
 assert(dash.includes("data-analytics-sources-panel"), "painel fontes estrutural");
 assert(dash.includes("bg-card"), "fontes em card");
 assert(dash.includes("text-foreground"), "título foreground");

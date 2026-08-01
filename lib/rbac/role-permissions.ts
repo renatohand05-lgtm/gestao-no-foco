@@ -74,6 +74,7 @@ const VISUALIZACAO_KEYS = unique([
   ...byPrefix(["dashboard"], (k) => k !== "dashboard.rh"),
   "analytics.visualizar",
   "analytics.executivo",
+  "inteligencia.visualizar",
   "financeiro.visualizar",
   "estoque.visualizar",
   "compras.visualizar",
@@ -111,6 +112,19 @@ const DIRETOR_KEYS = unique([
 
 const FINANCEIRO_KEYS = unique([
   ...byPrefix(["financeiro"]),
+  ...byPrefix(["inteligencia"], (k) =>
+    [
+      "inteligencia.visualizar",
+      "inteligencia.executivo",
+      "inteligencia.perguntar",
+      "inteligencia.explicar",
+      "inteligencia.recomendar",
+      "inteligencia.criar_plano",
+      "inteligencia.feedback",
+      "inteligencia.ver_auditoria",
+      "inteligencia.simular",
+    ].includes(k),
+  ),
   "dashboard.financeiro",
   "dashboard.executivo",
   "analytics.visualizar",
@@ -126,6 +140,10 @@ const FINANCEIRO_KEYS = unique([
 const COMERCIAL_KEYS = unique([
   ...byPrefix(["vendas"]),
   ...byPrefix(["crm"]),
+  "inteligencia.visualizar",
+  "inteligencia.perguntar",
+  "inteligencia.recomendar",
+  "inteligencia.feedback",
   "dashboard.comercial",
   "dashboard.executivo",
   "analytics.visualizar",
@@ -138,6 +156,9 @@ const COMERCIAL_KEYS = unique([
 
 const OPERACOES_KEYS = unique([
   ...byPrefix(["os"]),
+  "inteligencia.visualizar",
+  "inteligencia.perguntar",
+  "inteligencia.recomendar",
   "dashboard.operacional",
   // Sprint 25.7.4 — operacional NÃO tem Dashboard Executivo
   "analytics.visualizar",
@@ -163,6 +184,9 @@ const OFICINA_KEYS = unique([
 
 const ESTOQUE_KEYS = unique([
   ...byPrefix(["estoque"]),
+  "inteligencia.visualizar",
+  "inteligencia.perguntar",
+  "inteligencia.recomendar",
   "dashboard.estoque",
   "compras.visualizar",
   "compras.receber",
@@ -184,6 +208,9 @@ const ESTOQUE_KEYS = unique([
 
 const COMPRAS_KEYS = unique([
   ...byPrefix(["compras"]),
+  "inteligencia.visualizar",
+  "inteligencia.perguntar",
+  "inteligencia.recomendar",
   "estoque.visualizar",
   "compras.receber",
   "fornecedores.visualizar",

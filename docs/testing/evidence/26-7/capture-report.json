@@ -1,0 +1,60 @@
+{
+  "at": "2026-07-31T21:38:29.579Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "26.3-26.7",
+  "shots": [
+    "dashboard-dark-desktop",
+    "dashboard-light-desktop",
+    "dashboard-dark-tablet",
+    "dashboard-dark-mobile",
+    "launcher-atalhos",
+    "analytics-dark",
+    "analytics-light",
+    "crm-dark",
+    "crm-light",
+    "financeiro-dark",
+    "financeiro-light",
+    "estoque-dark",
+    "estoque-light",
+    "vendas-dark",
+    "vendas-light",
+    "compras-dark",
+    "compras-light",
+    "clientes-dark",
+    "clientes-light",
+    "ordens-dark",
+    "ordens-light",
+    "configuracoes-dark",
+    "configuracoes-light"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "kpi structure"
+    },
+    {
+      "ok": true,
+      "detail": "header structure"
+    },
+    {
+      "ok": true,
+      "detail": "launcher shortcuts"
+    },
+    {
+      "ok": true,
+      "detail": "no overflow @ desktop"
+    },
+    {
+      "ok": true,
+      "detail": "no overflow @ mobile"
+    }
+  ],
+  "consoleErrors": [
+    "%o\n\n%s Error: Sem permissão (estoque.visualizar | compras.visualizar | dashboard.estoque | supply.dashboard.visualizar).\n    at resolveSupplyAuth (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C_0-m4vi1._.js?91:5242:15)\n    at  getExecutiveSupplyDashboard (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C_0-m4vi1._.js?92:5366:18)\n    at  ComprasExecutivoPage (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C%5Broot-of-the-server%5D__1m7-7-o._.js?93:79:20)\n    at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:1919:150)\n    at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2434:29)\n    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2393:9)\n    at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2502:221)\n    at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2689:13) The above error occurred in the <ComprasExecutivoPage> component. It was handled by the <ErrorBoundaryHandler> error boundary.",
+    "{\"level\":\"error\",\"message\":\"route_error\",\"at\":\"2026-07-31T21:39:06.458Z\",\"context\":{\"digest\":\"2081197950\",\"name\":\"Error\",\"message\":\"Sem permissão (estoque.visualizar | compras.visualizar | dashboard.estoque | supply.dashboard.visualizar).\"}}",
+    "[route_error:dev] Error Sem permissão (estoque.visualizar | compras.visualizar | dashboard.estoque | supply.dashboard.visualizar). Error: Sem permissão (estoque.visualizar | compras.visualizar | dashboard.estoque | supply.dashboard.visualizar).\n    at resolveSupplyAuth (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C_0-m4vi1._.js?91:5242:15)\n    at  getExecutiveSupplyDashboard (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C_0-m4vi1._.js?92:5366:18)\n    at  ComprasExecutivoPage (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C%5Broot-of-the-server%5D__1m7-7-o._.js?93:79:20)\n    at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:1919:150)\n    at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2434:29)\n    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2393:9)\n    at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2502:221)\n    at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2689:13)",
+    "{\"level\":\"error\",\"message\":\"route_error\",\"at\":\"2026-07-31T21:39:06.461Z\",\"context\":{\"digest\":\"2081197950\",\"name\":\"Error\",\"message\":\"Sem permissão (estoque.visualizar | compras.visualizar | dashboard.estoque | supply.dashboard.visualizar).\"}}",
+    "[route_error:dev] Error Sem permissão (estoque.visualizar | compras.visualizar | dashboard.estoque | supply.dashboard.visualizar). Error: Sem permissão (estoque.visualizar | compras.visualizar | dashboard.estoque | supply.dashboard.visualizar).\n    at resolveSupplyAuth (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C_0-m4vi1._.js?91:5242:15)\n    at  getExecutiveSupplyDashboard (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C_0-m4vi1._.js?92:5366:18)\n    at  ComprasExecutivoPage (about://React/Server/C:%5CUsers%5Crenat%5Cgestao-no-foco%5C.next%5Cdev%5Cserver%5Cchunks%5Cssr%5C%5Broot-of-the-server%5D__1m7-7-o._.js?93:79:20)\n    at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:1919:150)\n    at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2434:29)\n    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2393:9)\n    at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2502:221)\n    at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2689:13)"
+  ]
+}

@@ -6,6 +6,8 @@ import { AlertTriangle, Download, Sparkles } from "lucide-react";
 
 import { ExecutiveEmptyState, MetricCard } from "@/components/executive";
 import { AnalyticsNavigation } from "@/components/analytics/analytics-navigation";
+import { GFFilterBar } from "@/components/gf/gf-filter-bar";
+import { GFSkeletonBlock } from "@/components/gf/gf-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   exportAnalyticsCsv,
   getAnalyticsDrillDown,
@@ -166,25 +167,26 @@ export function ExecutiveAnalyticsDashboard({
   }
 
   if (pending && !bundle.metrics.length) {
-    return <Skeleton className="h-96 w-full" />;
+    return <GFSkeletonBlock lines={6} className="min-h-96" />;
   }
 
   return (
     <div
       className="space-y-4"
       data-analytics-legible=""
-      data-sprint="26.2.1"
+      data-sprint="26.7"
+      data-page-transition=""
     >
       <div className="space-y-1">
         <h1 className={cn(gofTypography.title, "text-foreground")}>{title}</h1>
-        <p className={cn(gofTypography.subtitle, "text-muted-foreground")}>
+        <p className={cn(gofTypography.subtitle, "text-[var(--text-secondary)]")}>
           {description}
         </p>
       </div>
 
       <AnalyticsNavigation tenantSlug={tenantSlug} />
 
-      <div className="flex flex-wrap items-center gap-2">
+      <GFFilterBar title="Período e exportação">
         {PERIODS.map((p) => (
           <Button
             key={p.id}
@@ -222,10 +224,10 @@ export function ExecutiveAnalyticsDashboard({
           PDF (Em preparação)
         </Button>
         <Badge variant="outline">{bundle.provider.label}</Badge>
-        <span className={cn(gofTypography.caption, "text-muted-foreground")}>
-          Atualizado: {bundle.updatedAt ?? bundle.context.asOf}
-        </span>
-      </div>
+      </GFFilterBar>
+      <p className={cn(gofTypography.caption, "text-[var(--text-secondary)]")}>
+        Atualizado: {bundle.updatedAt ?? bundle.context.asOf}
+      </p>
 
       {error ? (
         <p className="text-sm text-destructive" role="alert">

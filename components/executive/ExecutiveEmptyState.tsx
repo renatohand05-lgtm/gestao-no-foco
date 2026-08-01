@@ -5,13 +5,12 @@ import { Inbox } from "lucide-react";
 import { ExecutiveButton } from "@/components/executive/ExecutiveButton";
 import { DsIcon } from "@/components/ui/ds-icon";
 import { brandConfig } from "@/config/brand";
-import { cn } from "@/lib/utils";
 import {
   gofMotion,
   gofRadius,
   gofTypography,
 } from "@/lib/design-system/foundation";
-import { gofSurface } from "@/lib/design-system/layout";
+import { cn } from "@/lib/utils";
 
 type Action = {
   label: string;
@@ -40,12 +39,14 @@ export function ExecutiveEmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center px-6 py-12 text-center",
-        gofSurface.muted,
+        "flex flex-col items-center justify-center border border-border bg-card px-6 py-12 text-center shadow-[var(--elevation-card)]",
+        gofRadius.lg,
         gofMotion.fade,
         className,
       )}
       role="status"
+      data-executive-empty=""
+      data-sprint="26.6"
     >
       <p className="mb-3 text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
         {brandConfig.name}

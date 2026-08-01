@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 
+import { FeedbackSuspenseFallback } from "@/components/ui/feedback-suspense-fallback";
+
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PRODUTO_SUCCESS_MESSAGES } from "@/lib/produtos/constants";
 import type { ProdutoSuccessMessage } from "@/types/produtos";
@@ -29,7 +31,7 @@ export function ProdutoFeedback(props: ProdutoFeedbackProps) {
   if (!props.success && !props.error) return null;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<FeedbackSuspenseFallback />}>
       <ProdutoFeedbackContent {...props} />
     </Suspense>
   );

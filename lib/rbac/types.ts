@@ -38,6 +38,7 @@ export type PermissionModule =
   | "crm"
   | "dashboard"
   | "analytics"
+  | "inteligencia"
   | "usuarios"
   | "configuracoes"
   | "auditoria"

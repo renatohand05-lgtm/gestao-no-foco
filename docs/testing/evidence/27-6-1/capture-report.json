@@ -1,0 +1,58 @@
+{
+  "at": "2026-08-01T11:03:21.120Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "27.6.1",
+  "stage": "A_BEFORE_MIGRATION",
+  "shots": [
+    "config-provider-off-schema-pending",
+    "historico-pending",
+    "auditoria-pending",
+    "copiloto-deterministic-vazio",
+    "copiloto-caixa-live",
+    "evidencias-live",
+    "copiloto-vendas",
+    "copiloto-estoque",
+    "copiloto-os"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "config page"
+    },
+    {
+      "ok": true,
+      "detail": "schema pending visible"
+    },
+    {
+      "ok": true,
+      "detail": "provider OFF visible"
+    },
+    {
+      "ok": true,
+      "detail": "historico page"
+    },
+    {
+      "ok": true,
+      "detail": "historico pending"
+    },
+    {
+      "ok": true,
+      "detail": "auditoria page"
+    },
+    {
+      "ok": true,
+      "detail": "copilot mounted"
+    },
+    {
+      "ok": true,
+      "detail": "copilot response deterministic"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 8,
+    "fail": 0,
+    "shots": 9
+  }
+}

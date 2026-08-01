@@ -1,0 +1,280 @@
+{
+  "at": "2026-08-01T11:13:35.491Z",
+  "sprint": "27.6.2",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "table intelligence_sessions accessible"
+    },
+    {
+      "ok": true,
+      "detail": "table intelligence_messages accessible"
+    },
+    {
+      "ok": true,
+      "detail": "table intelligence_evidence accessible"
+    },
+    {
+      "ok": true,
+      "detail": "table intelligence_audit_events accessible"
+    },
+    {
+      "ok": true,
+      "detail": "table intelligence_feedback accessible"
+    },
+    {
+      "ok": true,
+      "detail": "table intelligence_action_plans accessible"
+    },
+    {
+      "ok": true,
+      "detail": "table intelligence_automation_drafts accessible"
+    },
+    {
+      "ok": true,
+      "detail": "probeIntelligenceSchema ready"
+    },
+    {
+      "ok": true,
+      "detail": "tenant resolved"
+    },
+    {
+      "ok": true,
+      "detail": "user resolved"
+    },
+    {
+      "ok": true,
+      "detail": "create session"
+    },
+    {
+      "ok": true,
+      "detail": "insert user message"
+    },
+    {
+      "ok": true,
+      "detail": "insert assistant message"
+    },
+    {
+      "ok": true,
+      "detail": "insert evidence"
+    },
+    {
+      "ok": true,
+      "detail": "insert audit"
+    },
+    {
+      "ok": true,
+      "detail": "insert feedback"
+    },
+    {
+      "ok": true,
+      "detail": "insert action plan"
+    },
+    {
+      "ok": true,
+      "detail": "insert automation draft"
+    },
+    {
+      "ok": true,
+      "detail": "list sessions contains homolog"
+    },
+    {
+      "ok": true,
+      "detail": "list messages"
+    },
+    {
+      "ok": true,
+      "detail": "list evidence"
+    },
+    {
+      "ok": true,
+      "detail": "cross-tenant list empty for random tenant"
+    },
+    {
+      "ok": true,
+      "detail": "archive session"
+    },
+    {
+      "ok": true,
+      "detail": "soft delete session"
+    },
+    {
+      "ok": true,
+      "detail": "soft-deleted hidden from list"
+    },
+    {
+      "ok": true,
+      "detail": "CHECK constraint mode rejects invalid value"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_sessions_tenant_user_created"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_sessions_tenant_status"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_messages_tenant_session_created"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_messages_correlation"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_messages_intent"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_evidence_tenant_message"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_evidence_module"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_audit_tenant_correlation"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_audit_tenant_created"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_audit_module"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_audit_intent"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_feedback_tenant_message"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_action_plans_tenant_status"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines index idx_intel_automation_drafts_tenant_status"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_sessions_select"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_sessions_insert"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_sessions_update"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_messages_select"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_messages_insert"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_messages_update"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_evidence_select"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_evidence_insert"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_audit_select"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_audit_insert"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_feedback_select"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_feedback_insert"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_action_plans_select"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_action_plans_insert"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_action_plans_update"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_automation_select"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_automation_insert"
+    },
+    {
+      "ok": true,
+      "detail": "migration defines policy intel_automation_update"
+    },
+    {
+      "ok": true,
+      "detail": "migration enables RLS on intelligence_sessions"
+    },
+    {
+      "ok": true,
+      "detail": "migration enables RLS on intelligence_messages"
+    },
+    {
+      "ok": true,
+      "detail": "migration enables RLS on intelligence_evidence"
+    },
+    {
+      "ok": true,
+      "detail": "migration enables RLS on intelligence_audit_events"
+    },
+    {
+      "ok": true,
+      "detail": "migration enables RLS on intelligence_feedback"
+    },
+    {
+      "ok": true,
+      "detail": "migration enables RLS on intelligence_action_plans"
+    },
+    {
+      "ok": true,
+      "detail": "migration enables RLS on intelligence_automation_drafts"
+    }
+  ],
+  "schema": {
+    "ready": true,
+    "missing": [],
+    "message": "Schema de Inteligência disponível."
+  },
+  "ids": {
+    "sessionId": "c6931f6e-ad26-4ef8-b7f5-cc0e2c587cda",
+    "messageId": "cbfce7e3-6d7b-4f27-a300-85452b3bed1b"
+  },
+  "catalogNote": "Índices/policies confirmados no SQL aplicado; runtime proveu tabelas+CRUD+CHECK. Sem DATABASE_URL, pg_catalog não foi consultado.",
+  "summary": {
+    "pass": 65,
+    "fail": 0
+  }
+}

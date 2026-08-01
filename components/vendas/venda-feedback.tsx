@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 
+import { FeedbackSuspenseFallback } from "@/components/ui/feedback-suspense-fallback";
+
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { VENDA_SUCCESS_MESSAGES } from "@/lib/vendas/constants";
 import type { VendaSuccessMessage } from "@/types/vendas";
@@ -29,7 +31,7 @@ export function VendaFeedback(props: VendaFeedbackProps) {
   if (!props.success && !props.error) return null;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<FeedbackSuspenseFallback />}>
       <VendaFeedbackContent {...props} />
     </Suspense>
   );

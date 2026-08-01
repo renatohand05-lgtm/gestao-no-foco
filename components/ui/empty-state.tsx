@@ -23,7 +23,7 @@ type EmptyStateProps = {
 };
 
 /**
- * Empty state padronizado — identidade GESTÃO (Gate 19.4).
+ * Empty state padronizado — identidade GESTÃO (Gate 19.4 · refinado 26.3).
  */
 export function EmptyState({
   icon: Icon,
@@ -36,12 +36,14 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center border border-border/50 bg-card px-6 py-12 text-center",
+        "flex flex-col items-center justify-center border border-border bg-card px-6 py-12 text-center shadow-[var(--elevation-card)]",
         gofRadius.lg,
         gofMotion.fade,
         className,
       )}
       role="status"
+      data-empty-state=""
+      data-sprint="26.3"
     >
       <p className="mb-3 text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
         {brandConfig.name}

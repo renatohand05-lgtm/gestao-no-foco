@@ -61,3 +61,5 @@ export const gfMotion = {
 } as const;
 
 export const SIGNATURE_SPRINT = "26.2" as const;
+/** Ciclo de refinamento enterprise contínuo */
+export const ENTERPRISE_REFINE_SPRINT = "26.7" as const;

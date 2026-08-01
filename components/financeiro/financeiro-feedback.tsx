@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 
+import { FeedbackSuspenseFallback } from "@/components/ui/feedback-suspense-fallback";
+
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FINANCEIRO_SUCCESS_MESSAGES } from "@/lib/financeiro/constants";
 import type { FinanceiroSuccessMessage } from "@/types/financeiro";
@@ -32,7 +34,7 @@ export function FinanceiroFeedback(props: FinanceiroFeedbackProps) {
   if (!props.success && !props.error) return null;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<FeedbackSuspenseFallback />}>
       <FinanceiroFeedbackContent {...props} />
     </Suspense>
   );

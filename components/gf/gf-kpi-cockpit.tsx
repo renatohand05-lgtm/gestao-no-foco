@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import {
   Banknote,
@@ -42,7 +43,7 @@ type CellProps = {
   featured?: boolean;
 };
 
-function KpiCell({ item, featured = false }: CellProps) {
+function KpiCellImpl({ item, featured = false }: CellProps) {
   const Icon = ICONS[item.id] ?? CircleDollarSign;
   const body = (
     <>
@@ -119,6 +120,8 @@ function KpiCell({ item, featured = false }: CellProps) {
     </article>
   );
 }
+
+const KpiCell = memo(KpiCellImpl);
 
 type Props = {
   items: PremiumKpiItem[];

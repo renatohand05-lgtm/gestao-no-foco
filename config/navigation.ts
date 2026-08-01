@@ -1,6 +1,7 @@
 import {
   Activity,
   BarChart3,
+  Brain,
   FileBarChart,
   LayoutDashboard,
   Package,
@@ -93,6 +94,19 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       icon: Search,
       group: "principal",
       description: "Localizar cadastros mestres",
+    },
+    {
+      id: "intelligence-hub",
+      title: "Inteligência",
+      href: `${base}/inteligencia`,
+      icon: Brain,
+      group: "inteligencia",
+      description: "Copiloto Executivo e insights com evidências",
+      requiredAnyPermissions: [
+        "inteligencia.visualizar",
+        "inteligencia.executivo",
+        "dashboard.executivo",
+      ],
     },
     {
       id: "crm",

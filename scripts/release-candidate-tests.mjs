@@ -328,6 +328,7 @@ const allowedPostRc = new Set([
   "20260813_supply_chain_enterprise_fase25.sql", // Fase 25 Supply Chain
   "20260814_import_history_lifecycle_fase2542.sql", // Sprint 25.4.2 Import history
   "20260815_inventory_ledger_lote_serie_fase2543.sql", // Sprint 25.4.3 Ledger lote/série
+  "20260816_intelligence_persistence_phase27_6_1.sql", // Sprint 27.6.1 Intelligence persistence
 ]);
 const unexpected = migrations.filter((f) => {
   if (f.includes("22_10")) return true;

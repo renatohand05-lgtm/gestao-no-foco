@@ -134,14 +134,15 @@ export const dsIconBox = {
     "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums shadow-sm",
 } as const;
 
-/** Estados de interação */
+/** Estados de interação — focus alinhado ao dourado aprovado (Sprint 26.3) */
 export const dsInteractive = {
   focus:
-    "outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+    "outline-none focus-visible:border-[var(--brand-gold)]/50 focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
   focusCard:
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
   disabled: "disabled:pointer-events-none disabled:opacity-50",
-  hoverLift: "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md",
+  hoverLift:
+    "transition-[transform,box-shadow] duration-[var(--gf-motion-micro,150ms)] ease-[var(--gf-ease,ease)] motion-safe:hover:-translate-y-0.5 hover:shadow-md",
 } as const;
 
 /** Cores semânticas de status (success / warning / danger / neutral) */

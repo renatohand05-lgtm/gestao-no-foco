@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "ok": true,
+      "detail": "caixa: resposta honesta com limitações (sem inventar)"
+    },
+    {
+      "ok": true,
+      "detail": "plano de ação: screenshot da resposta (actions podem estar vazios)"
+    }
+  ],
+  "values": {
+    "copilotCaixa": [],
+    "copilotSnippet": "CONFIANÇA MEDIA · 58%\nModo: deterministic · status: ok\nPersistência: gravada\n\nAnálise determinística da pergunta: \"Quanto tenho em caixa?\". Contexto: Snapshot dd30e73f · 11 métricas · cobertura 92% · fontes: cash, vendas, crm, ordens.. Prioridade atual: Caixa com saldo positivo (Saldo consolidado informado: 122142.)\n\nResposta baseada em regras e fontes canônicas — não é IA generativa.\nPrompt natural_language_query@27.2.0\nChurn não calculado — base insuficiente (não inventado).\nSupply/estoque indisponível ou sem permissão.\nModo Determinístico: análise baseada em dados, regras e métricas da empr",
+    "financeiroCaixa": [
+      "R$ 122.142,00",
+      "R$ 122.142,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 119.722,80",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 119.722,80",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 0,00",
+      "R$ 2.419,20"
+    ],
+    "financeiroSnippet": "Apresentação\n\nNormal\nExecutivo\nComercial\nTela Cheia\nFinanceiro\nCentral Enterprise de Caixa e Tesouraria\nCentral Enterprise de Caixa e Tesouraria\n\nSaldo consolidado, realizado / previsto / projetado, alertas, capital de giro e simulações — sem misturar camadas.\n\nTESOURARIA\n\nDashboard\nContas bancárias\nMovimentações\nTransferências\nFluxo de caixa\nCaixa & Projeção\nConciliação\n\nOPERAÇÕES\n\nContas a pagar\nContas a receber\n\nPLANEJAMENTO\n\nCategorias\nCentros de custo\nPlano de contas\n\nRELATÓRIOS\n\nDRE\nTributos Enterprise\nInteligência\n\nCONFIGURAÇÕES\n\nFornecedores\nFormas de pagamento\nDespesas recorrentes\nImp"
+  },
+  "summary": {
+    "pass": 2,
+    "fail": 0
+  }
+}

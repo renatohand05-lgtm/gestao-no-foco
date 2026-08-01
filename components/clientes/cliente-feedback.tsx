@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 
+import { FeedbackSuspenseFallback } from "@/components/ui/feedback-suspense-fallback";
+
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { CLIENTE_SUCCESS_MESSAGES } from "@/lib/clientes/constants";
 import type { ClienteSuccessMessage } from "@/types/clientes";
@@ -29,7 +31,7 @@ export function ClienteFeedback(props: ClienteFeedbackProps) {
   if (!props.success && !props.error) return null;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<FeedbackSuspenseFallback />}>
       <ClienteFeedbackContent {...props} />
     </Suspense>
   );

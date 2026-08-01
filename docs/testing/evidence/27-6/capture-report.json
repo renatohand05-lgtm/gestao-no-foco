@@ -1,0 +1,117 @@
+{
+  "at": "2026-07-31T22:38:54.747Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "27.6",
+  "shots": [
+    "hub-dark-desktop",
+    "hub-light-desktop",
+    "copiloto-vazio-dark",
+    "copiloto-vazio-light",
+    "copiloto-respondendo-deterministic",
+    "copiloto-dark-tablet",
+    "copiloto-dark-mobile",
+    "historico-dark",
+    "historico-light",
+    "auditoria-dark",
+    "auditoria-light",
+    "configuracoes-dark",
+    "configuracoes-light",
+    "regressao-dashboard-dark",
+    "regressao-financeiro-dark",
+    "regressao-crm-dark"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "hub inteligencia"
+    },
+    {
+      "ok": true,
+      "detail": "hub url"
+    },
+    {
+      "ok": true,
+      "detail": "hub title"
+    },
+    {
+      "ok": true,
+      "detail": "copilot mounted"
+    },
+    {
+      "ok": true,
+      "detail": "copilot url"
+    },
+    {
+      "ok": true,
+      "detail": "provider status visible"
+    },
+    {
+      "ok": true,
+      "detail": "copilot response UI"
+    }
+  ],
+  "consoleErrors": [],
+  "urls": [
+    {
+      "path": "dashboard",
+      "final": "http://localhost:3000/teste-renato-01/dashboard",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "inteligencia",
+      "final": "http://localhost:3000/teste-renato-01/inteligencia",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "inteligencia/copiloto",
+      "final": "http://localhost:3000/teste-renato-01/inteligencia/copiloto",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "inteligencia/historico",
+      "final": "http://localhost:3000/teste-renato-01/inteligencia/historico",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "inteligencia/auditoria",
+      "final": "http://localhost:3000/teste-renato-01/inteligencia/auditoria",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "inteligencia/configuracoes",
+      "final": "http://localhost:3000/teste-renato-01/inteligencia/configuracoes",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "dashboard",
+      "final": "http://localhost:3000/teste-renato-01/dashboard",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "financeiro",
+      "final": "http://localhost:3000/teste-renato-01/financeiro",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "crm",
+      "final": "http://localhost:3000/teste-renato-01/crm/executivo",
+      "status": 200,
+      "ok": true
+    }
+  ],
+  "summary": {
+    "pass": 7,
+    "fail": 0,
+    "shots": 16,
+    "consoleErrors": 0
+  }
+}

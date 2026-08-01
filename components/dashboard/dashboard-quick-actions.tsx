@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   CalendarPlus,
@@ -71,21 +73,54 @@ const ACTIONS = [
   },
 ] as const;
 
+function isTypingTarget(el: EventTarget | null) {
+  if (!(el instanceof HTMLElement)) return false;
+  const tag = el.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+  if (el.isContentEditable) return true;
+  return Boolean(el.closest("[role='textbox'], [contenteditable='true']"));
+}
+
 /**
- * Launcher executivo — ações rápidas com contexto (Sprint 26.2).
+ * Launcher executivo — atalhos reais quando o painel está aberto (Sprint 26.4).
  */
 export function DashboardQuickActions({ tenantSlug, className }: Props) {
+  const router = useRouter();
+  const rootRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target)) return;
+      const root = rootRef.current;
+      if (!root) return;
+      // Só ativa se o launcher estiver no DOM visível (painel aberto)
+      if (root.offsetParent === null && getComputedStyle(root).display === "none") {
+        return;
+      }
+      const key = e.key.toUpperCase();
+      const action = ACTIONS.find((a) => a.shortcut === key);
+      if (!action) return;
+      e.preventDefault();
+      router.push(action.href(tenantSlug));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [router, tenantSlug]);
+
   return (
     <GFSection
       title="Launcher executivo"
-      description="Atalhos do dia · sem inventar atalhos de teclado globais."
+      description="Atalhos do dia · teclas O V C P B A quando este painel está aberto."
       className={className}
       surface="elevated"
     >
       <nav
+        ref={rootRef}
         aria-label="Ações rápidas"
         data-gf-launcher=""
-        data-sprint="26.2"
+        data-sprint="26.4"
+        data-launcher-shortcuts="1"
         className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
       >
         {ACTIONS.map((action) => (
@@ -94,8 +129,10 @@ export function DashboardQuickActions({ tenantSlug, className }: Props) {
             href={action.href(tenantSlug)}
             className={cn(
               "group flex min-h-11 items-start gap-3 rounded-xl border border-[var(--gf-border-subtle)]",
-              "bg-[var(--gf-surface-raised)] p-3 transition-colors",
+              "bg-[var(--gf-surface-raised)] p-3",
+              "transition-[border-color,background-color,transform] duration-[var(--gf-motion-micro)] ease-[var(--gf-ease)]",
               "hover:border-[var(--gf-border-active)] hover:bg-[var(--gf-surface-interactive)]",
+              "motion-safe:hover:-translate-y-px",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
             )}
           >
@@ -108,6 +145,7 @@ export function DashboardQuickActions({ tenantSlug, className }: Props) {
                     gfType.caption,
                     "hidden rounded border border-[var(--gf-border-subtle)] px-1.5 py-0.5 sm:inline",
                   )}
+                  title={`Atalho ${action.shortcut}`}
                 >
                   {action.shortcut}
                 </kbd>

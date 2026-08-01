@@ -1,0 +1,34 @@
+{
+  "at": "2026-08-01T11:17:28.842Z",
+  "sprint": "27.6.2",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "historico carregou pós-restart"
+    },
+    {
+      "ok": true,
+      "detail": "sessão alvo presente na URL/lista"
+    },
+    {
+      "ok": true,
+      "detail": "detalhe da sessão renderizado"
+    },
+    {
+      "ok": true,
+      "detail": "mensagens preservadas após restart"
+    },
+    {
+      "ok": true,
+      "detail": "evidências preservadas após restart"
+    }
+  ],
+  "sessionId": "33627809-cae8-4dd6-b5ef-9b403cd155ac",
+  "shots": [
+    "restart-sessao-preservada"
+  ],
+  "summary": {
+    "pass": 5,
+    "fail": 0
+  }
+}

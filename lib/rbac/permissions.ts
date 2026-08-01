@@ -149,6 +149,21 @@ export const PERMISSION_CATALOG = [
   def("analytics.configurar", "analytics", "configurar", "Configurar dashboards Analytics", "administracao", "alto"),
   def("analytics.exportar", "analytics", "exportar", "Exportar Analytics", "exportacao", "medio"),
 
+  // Inteligência Enterprise (Fase 27)
+  def("inteligencia.visualizar", "inteligencia", "visualizar", "Visualizar Inteligência Enterprise", "leitura", "medio"),
+  def("inteligencia.executivo", "inteligencia", "executivo", "Copiloto e briefing executivo", "leitura", "alto"),
+  def("inteligencia.perguntar", "inteligencia", "perguntar", "Perguntar ao Copiloto", "leitura", "alto"),
+  def("inteligencia.explicar", "inteligencia", "explicar", "Solicitar explicações (DRE, métricas)", "leitura", "alto"),
+  def("inteligencia.simular", "inteligencia", "simular", "Executar simulações", "escrita", "alto"),
+  def("inteligencia.recomendar", "inteligencia", "recomendar", "Receber recomendações", "leitura", "medio"),
+  def("inteligencia.criar_plano", "inteligencia", "criar_plano", "Criar planos de ação (rascunho)", "escrita", "alto"),
+  def("inteligencia.aprovar_plano", "inteligencia", "aprovar_plano", "Aprovar planos de ação", "aprovacao", "critico"),
+  def("inteligencia.executar_acao", "inteligencia", "executar_acao", "Executar ações aprovadas", "aprovacao", "critico"),
+  def("inteligencia.configurar_provider", "inteligencia", "configurar_provider", "Configurar providers de inteligência", "administracao", "critico"),
+  def("inteligencia.ver_auditoria", "inteligencia", "ver_auditoria", "Ver auditoria de inteligência", "leitura", "alto"),
+  def("inteligencia.ver_custos", "inteligencia", "ver_custos", "Ver custos/uso de inteligência", "financeiro_sensivel", "alto"),
+  def("inteligencia.feedback", "inteligencia", "feedback", "Enviar feedback sobre respostas", "escrita", "baixo"),
+
   // Usuários
   def("usuarios.visualizar", "usuarios", "visualizar", "Visualizar usuários", "leitura", "medio"),
   def("usuarios.criar", "usuarios", "criar", "Criar usuários", "administracao", "alto"),

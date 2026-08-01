@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 
+import { FeedbackSuspenseFallback } from "@/components/ui/feedback-suspense-fallback";
+
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { CONTAS_RECEBER_SUCCESS_MESSAGES } from "@/lib/financeiro/constants";
 import type { ContaReceberSuccessMessage } from "@/types/contas-receber";
@@ -32,7 +34,7 @@ export function ContaReceberFeedback(props: ContaReceberFeedbackProps) {
   if (!props.success && !props.error) return null;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<FeedbackSuspenseFallback />}>
       <ContaReceberFeedbackContent {...props} />
     </Suspense>
   );

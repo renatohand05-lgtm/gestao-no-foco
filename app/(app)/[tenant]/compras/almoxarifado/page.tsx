@@ -21,7 +21,7 @@ export default async function ComprasAlmoxarifadoPage({
   const { tenant: tenantSlug } = await params;
   await requireTenant(tenantSlug);
 
-  let ready = false;
+  let ready: boolean | null = null;
   let rows: Awaited<ReturnType<typeof listSupplyDepositosAction>>["rows"] = [];
   let error: string | null = null;
 
@@ -47,7 +47,7 @@ export default async function ComprasAlmoxarifadoPage({
         </p>
       </div>
 
-      {!ready ? (
+      {ready === false ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Schema pendente</CardTitle>
@@ -68,7 +68,7 @@ export default async function ComprasAlmoxarifadoPage({
 
       <WarehouseDepositosClient
         tenantSlug={tenantSlug}
-        ready={ready}
+        ready={ready === true}
         initialRows={rows.map((d) => ({
           id: d.id,
           nome: d.nome,

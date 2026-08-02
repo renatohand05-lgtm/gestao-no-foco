@@ -24,7 +24,7 @@ export default async function ComprasPedidosPage({
   const { tenant: tenantSlug } = await params;
   await requireTenant(tenantSlug);
 
-  let ready = false;
+  let ready: boolean | null = null;
   let rows: Awaited<ReturnType<typeof listSupplyPurchaseOrdersAction>>["rows"] =
     [];
   let error: string | null = null;
@@ -58,7 +58,7 @@ export default async function ComprasPedidosPage({
         </Link>
       </div>
 
-      {!ready ? (
+      {ready === false ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Schema pendente</CardTitle>
@@ -76,7 +76,7 @@ export default async function ComprasPedidosPage({
       ) : (
         <PurchaseOrdersClient
           tenantSlug={tenantSlug}
-          ready={ready}
+          ready={ready === true}
           initialRows={rows.map((r) => ({
             id: r.id,
             status: r.status,

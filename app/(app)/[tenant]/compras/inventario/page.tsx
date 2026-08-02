@@ -21,7 +21,7 @@ export default async function ComprasInventarioPage({
   const { tenant: tenantSlug } = await params;
   await requireTenant(tenantSlug);
 
-  let ready = false;
+  let ready: boolean | null = null;
   let rows: Awaited<
     ReturnType<typeof listSupplyInventoryCyclesAction>
   >["rows"] = [];
@@ -49,7 +49,7 @@ export default async function ComprasInventarioPage({
         </p>
       </div>
 
-      {!ready ? (
+      {ready === false ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Schema pendente</CardTitle>
@@ -70,7 +70,7 @@ export default async function ComprasInventarioPage({
 
       <InventoryCyclesClient
         tenantSlug={tenantSlug}
-        ready={ready}
+        ready={ready === true}
         initialRows={rows.map((c) => ({
           id: c.id,
           kind: c.kind,

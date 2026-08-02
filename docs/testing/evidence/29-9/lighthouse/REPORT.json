@@ -1,0 +1,220 @@
+{
+  "at": "2026-08-02T16:30:06.049Z",
+  "baseUrl": "http://localhost:3001",
+  "machine": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.18.0"
+  },
+  "browser": "Chromium (Playwright) + Lighthouse CLI when possible",
+  "auth": true,
+  "runs": [
+    {
+      "route": "/login",
+      "formFactor": "desktop",
+      "cold": true,
+      "authenticated": false,
+      "scores": {
+        "performance": 0.72,
+        "accessibility": 0.95,
+        "bestPractices": 0.96,
+        "seo": 0.92
+      },
+      "metrics": {
+        "lcp": 8266.743149999998,
+        "cls": 0,
+        "tbt": 51,
+        "fcp": 1061.1621,
+        "si": 1422.1227119183209,
+        "ttfb": 15
+      }
+    },
+    {
+      "route": "/login",
+      "formFactor": "mobile",
+      "cold": true,
+      "authenticated": false,
+      "scores": {
+        "performance": 0.76,
+        "accessibility": 0.95,
+        "bestPractices": 0.96,
+        "seo": 0.92
+      },
+      "metrics": {
+        "lcp": 8488.129799999999,
+        "cls": 0,
+        "tbt": 54,
+        "fcp": 1058.7532,
+        "si": 1390.5439979026803,
+        "ttfb": 4
+      }
+    },
+    {
+      "route": "/teste-renato-01/dashboard",
+      "formFactor": "desktop",
+      "cold": false,
+      "warm": true,
+      "authenticated": true,
+      "source": "PerformanceAPI",
+      "elapsedMs": 7753,
+      "scores": null,
+      "metrics": {
+        "lcp": null,
+        "cls": 0,
+        "tbt": null,
+        "inp": null,
+        "fcp": 1560,
+        "si": null,
+        "ttfb": 1249.0999999996275,
+        "load": 2740.5999999996275
+      }
+    },
+    {
+      "route": "/teste-renato-01/crm",
+      "formFactor": "desktop",
+      "cold": false,
+      "warm": true,
+      "authenticated": true,
+      "source": "PerformanceAPI",
+      "elapsedMs": 6785,
+      "scores": null,
+      "metrics": {
+        "lcp": null,
+        "cls": 0,
+        "tbt": null,
+        "inp": null,
+        "fcp": 452,
+        "si": null,
+        "ttfb": 283.7000000011176,
+        "load": 955.0999999996275
+      }
+    },
+    {
+      "route": "/teste-renato-01/financeiro",
+      "formFactor": "desktop",
+      "cold": false,
+      "warm": true,
+      "authenticated": true,
+      "source": "PerformanceAPI",
+      "elapsedMs": 7954,
+      "scores": null,
+      "metrics": {
+        "lcp": null,
+        "cls": 0,
+        "tbt": null,
+        "inp": null,
+        "fcp": 456,
+        "si": null,
+        "ttfb": 274.40000000037253,
+        "load": 725.7000000011176
+      }
+    },
+    {
+      "route": "/teste-renato-01/analytics",
+      "formFactor": "desktop",
+      "cold": false,
+      "warm": true,
+      "authenticated": true,
+      "source": "PerformanceAPI",
+      "elapsedMs": 7225,
+      "scores": null,
+      "metrics": {
+        "lcp": null,
+        "cls": 0,
+        "tbt": null,
+        "inp": null,
+        "fcp": 500,
+        "si": null,
+        "ttfb": 335.09999999962747,
+        "load": 2106.199999999255
+      }
+    },
+    {
+      "route": "/teste-renato-01/financeiro/dre",
+      "formFactor": "desktop",
+      "cold": false,
+      "warm": true,
+      "authenticated": true,
+      "source": "PerformanceAPI",
+      "elapsedMs": 8079,
+      "scores": null,
+      "metrics": {
+        "lcp": null,
+        "cls": 0,
+        "tbt": null,
+        "inp": null,
+        "fcp": 492,
+        "si": null,
+        "ttfb": 321,
+        "load": 764.5999999996275
+      }
+    },
+    {
+      "route": "/teste-renato-01/dashboard",
+      "formFactor": "mobile",
+      "cold": false,
+      "warm": true,
+      "authenticated": true,
+      "source": "PerformanceAPI",
+      "elapsedMs": 4429,
+      "scores": null,
+      "metrics": {
+        "lcp": null,
+        "cls": 0,
+        "tbt": null,
+        "inp": null,
+        "fcp": 428,
+        "si": null,
+        "ttfb": 274.3999999985099,
+        "load": 1191
+      }
+    }
+  ],
+  "limitations": [
+    "Lighthouse auth cookie header falhou (code=1): pode redirecionar para login",
+    "INP não disponível via Lighthouse aggregate nesta versão em todos os runs; TBT usado quando presente.",
+    "Scores Lighthouse em rotas autenticadas dependem de cookie injection; Performance API é a fonte confiável quando LH redireciona."
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "login: perf=0.72 a11y=0.95"
+    },
+    {
+      "ok": true,
+      "detail": "login-mobile: perf=0.76 a11y=0.95"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard (desktop): FCP=1560 LCP=n/a TTFB=1249"
+    },
+    {
+      "ok": true,
+      "detail": "crm (desktop): FCP=452 LCP=n/a TTFB=284"
+    },
+    {
+      "ok": true,
+      "detail": "financeiro (desktop): FCP=456 LCP=n/a TTFB=274"
+    },
+    {
+      "ok": true,
+      "detail": "analytics (desktop): FCP=500 LCP=n/a TTFB=335"
+    },
+    {
+      "ok": true,
+      "detail": "dre (desktop): FCP=492 LCP=n/a TTFB=321"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard-mobile (mobile): FCP=428 LCP=n/a TTFB=274"
+    },
+    {
+      "ok": true,
+      "detail": "Lighthouse auth: limitação registrada (fallback Performance API OK)"
+    }
+  ],
+  "summary": {
+    "pass": 9,
+    "fail": 0
+  }
+}

@@ -303,7 +303,15 @@
     "test:phase28-conversion-rollback": "node --experimental-strip-types scripts/phase28-tests.mjs conversion-rollback",
     "test:phase28-types-contract": "node --experimental-strip-types scripts/phase28-tests.mjs types-contract",
     "test:phase28-runtime-final": "node --experimental-strip-types scripts/phase28-tests.mjs runtime-final",
-    "test:phase29": "node --experimental-strip-types scripts/phase29-tests.mjs"
+    "test:phase29": "node --experimental-strip-types scripts/phase29-tests.mjs",
+    "test:homolog-29-9": "node scripts/homolog-29-9-browser.mjs",
+    "test:homolog-29-9-lighthouse": "node scripts/homolog-29-9-lighthouse.mjs",
+    "test:phase29-crm-schema": "node scripts/phase29-crm-schema-tests.mjs",
+    "test:phase29-purchases-schema": "node scripts/phase29-purchases-schema-tests.mjs",
+    "test:phase29-migrations-contract": "node scripts/phase29-migrations-contract-tests.mjs",
+    "test:phase29-tenant-isolation": "node scripts/phase29-tenant-isolation-tests.mjs",
+    "test:phase29-rbac": "node scripts/phase29-rbac-tests.mjs",
+    "test:homolog-29-10-1": "node scripts/homolog-29-10-1-browser.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

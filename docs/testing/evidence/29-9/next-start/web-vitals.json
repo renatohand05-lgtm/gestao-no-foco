@@ -1,0 +1,52 @@
+[
+  {
+    "route": "/dashboard",
+    "ttfb": 275.19999999925494,
+    "domContentLoaded": 1211.9000000003725,
+    "load": 1212.0999999996275,
+    "fcp": 432,
+    "lcp": null,
+    "transferSize": 77006,
+    "at": "2026-08-02T16:28:10.845Z"
+  },
+  {
+    "route": "/crm",
+    "ttfb": 258.5,
+    "domContentLoaded": 835.6999999992549,
+    "load": 842.9000000003725,
+    "fcp": 416,
+    "lcp": null,
+    "transferSize": 33892,
+    "at": "2026-08-02T16:28:12.236Z"
+  },
+  {
+    "route": "/financeiro",
+    "ttfb": 290.09999999962747,
+    "domContentLoaded": 595.7000000011176,
+    "load": 596.2000000011176,
+    "fcp": 444,
+    "lcp": null,
+    "transferSize": 38860,
+    "at": "2026-08-02T16:28:13.823Z"
+  },
+  {
+    "route": "/analytics",
+    "ttfb": 291.5,
+    "domContentLoaded": 0,
+    "load": 0,
+    "fcp": 488,
+    "lcp": null,
+    "transferSize": 300,
+    "at": "2026-08-02T16:28:15.225Z"
+  },
+  {
+    "route": "/financeiro/dre",
+    "ttfb": 389.30000000074506,
+    "domContentLoaded": 737.7000000011176,
+    "load": 738,
+    "fcp": 532,
+    "lcp": null,
+    "transferSize": 42709,
+    "at": "2026-08-02T16:28:16.957Z"
+  }
+]

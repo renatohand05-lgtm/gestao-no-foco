@@ -39,6 +39,7 @@ import {
   createDeposito,
   listDepositos,
 } from "@/lib/supply/enterprise/warehouse-service";
+import { resolveSupplyEffectivePermissions } from "@/lib/supply/rbac-compat";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -56,7 +57,12 @@ async function resolveSupplyAuth(
   const client = await createClient();
   const rbac = createRbacSupabaseAdapter(client);
   const snap = await rbac.resolveAuthorizationSnapshot(tenant.id, profile.id);
-  const permissions = snap.permissions ?? [];
+  const effective = resolveSupplyEffectivePermissions({
+    membershipRole: tenant.role,
+    snapshotRoles: snap.roles,
+    snapshotPermissions: snap.permissions,
+  });
+  const permissions = effective.permissions;
 
   const ok = needed.some((p) => permissions.includes(p));
   if (!ok) {
@@ -66,9 +72,13 @@ async function resolveSupplyAuth(
   const context = createEnterpriseContext({
     tenantId: tenant.id,
     userId: profile.id,
-    roles: snap.roles ?? [],
+    roles: effective.roles,
     permissions,
     source: "server_action",
+    metadata: {
+      supplyAuthSource: effective.source,
+      membershipRole: tenant.role,
+    },
   });
 
   return { tenant, profile, client, context, permissions, tenantSlug };

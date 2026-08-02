@@ -79,9 +79,40 @@ create index if not exists idx_cliente_contatos_cliente
   on public.cliente_contatos (tenant_id, cliente_id)
   where deleted_at is null;
 
-create unique index if not exists idx_cliente_contatos_one_principal
-  on public.cliente_contatos (tenant_id, cliente_id)
-  where deleted_at is null and principal = true and ativo = true;
+-- Índice único de principal: exige coluna `ativo` canônica.
+-- Se a tabela já existia sem `ativo` (CREATE TABLE IF NOT EXISTS pulou),
+-- ADD COLUMN IF NOT EXISTS antes do índice — evita ERROR 42703.
+do $$
+begin
+  if to_regclass('public.cliente_contatos') is null then
+    raise notice '60812: cliente_contatos ausente — pulando índice principal.';
+    return;
+  end if;
+
+  alter table public.cliente_contatos
+    add column if not exists ativo boolean not null default true;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'cliente_contatos'
+      and column_name = 'ativo'
+  ) then
+    raise notice '60812: coluna ativo indisponível — índice principal sem predicado ativo.';
+    execute $idx$
+      create unique index if not exists idx_cliente_contatos_one_principal
+        on public.cliente_contatos (tenant_id, cliente_id)
+        where deleted_at is null and principal = true
+    $idx$;
+    return;
+  end if;
+
+  execute $idx$
+    create unique index if not exists idx_cliente_contatos_one_principal
+      on public.cliente_contatos (tenant_id, cliente_id)
+      where deleted_at is null and principal = true and ativo = true
+  $idx$;
+end $$;
 
 alter table public.cliente_contatos enable row level security;
 

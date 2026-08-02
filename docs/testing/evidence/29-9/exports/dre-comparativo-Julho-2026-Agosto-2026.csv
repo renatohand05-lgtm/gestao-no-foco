@@ -1,0 +1,24 @@
+﻿DRE — Comparativo Mensal
+Empresa,teste-renato-01
+Período A,Julho 2026
+Período B,Agosto 2026
+Emitido em,2026-08-02T16:29:41.330Z
+
+Conta,Julho 2026 (R$),Julho 2026 (% receita),Agosto 2026 (R$),Agosto 2026 (% receita),Diferença (R$),Variação (%),Semântica
+Receita bruta,75482.00,100.07,6721.50,100.00,'-68760.50,'-91.10,Piora
+(-) Deduções da receita,50.00,0.07,0.00,0.00,'-50.00,'-100.00,Melhora
+Receita líquida,75432.00,100.00,6721.50,100.00,'-68710.50,'-91.09,Piora
+(-) CMV / custos variáveis,40020.00,53.05,3035.00,45.15,'-36985.00,'-92.42,Melhora
+Margem de contribuição,35412.00,46.95,3686.50,54.85,'-31725.50,'-89.59,Piora
+(-) Despesas com pessoal,9500.00,12.59,0.00,0.00,'-9500.00,'-100.00,Melhora
+(-) Despesas operacionais,4040.00,5.36,0.00,0.00,'-4040.00,'-100.00,Melhora
+  Sem detalhe gerencial,4040.00,5.36,Indisponível,Indisponível,Indisponível,Indisponível,Indisponível
+(-) Despesas comerciais,0.00,0.00,0.00,0.00,0.00,0.00,Estável
+EBITDA,21872.00,29.00,3686.50,54.85,'-18185.50,'-83.15,Piora
+(-) Depreciação e amortização,0.00,0.00,0.00,0.00,0.00,0.00,Estável
+EBIT,21872.00,29.00,3686.50,54.85,'-18185.50,'-83.15,Piora
+(+) Receitas financeiras,0.00,0.00,0.00,0.00,0.00,0.00,Estável
+(-) Despesas financeiras,0.00,0.00,0.00,0.00,0.00,0.00,Estável
+Resultado antes dos impostos,21872.00,29.00,3686.50,54.85,'-18185.50,'-83.15,Piora
+(-) Impostos sobre o lucro,0.00,0.00,0.00,0.00,0.00,0.00,Estável
+Resultado líquido,21872.00,29.00,3686.50,54.85,'-18185.50,'-83.15,Piora

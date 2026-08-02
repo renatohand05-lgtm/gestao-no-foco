@@ -1,0 +1,99 @@
+{
+  "at": "2026-08-02T17:10:46.458Z",
+  "sprint": "29.10.1",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "auth": true,
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "/crm status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/crm/leads status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/crm/oportunidades status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/crm/pipeline status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/crm/follow-ups status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/clientes status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/clientes/funil status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/clientes/novo status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/compras status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/compras/pedidos status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "compras/pedidos sem 'Schema pendente'"
+    },
+    {
+      "ok": true,
+      "detail": "/compras/cotacoes status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/estoque status=200 login=false schemaErr=false console=0"
+    },
+    {
+      "ok": true,
+      "detail": "HTTP 500 count=0"
+    },
+    {
+      "ok": true,
+      "detail": "console.error bloqueantes=0"
+    },
+    {
+      "ok": true,
+      "detail": "UUID hits=0"
+    }
+  ],
+  "consoleErrors": [],
+  "httpIssues": [],
+  "uuidHits": [],
+  "shots": [
+    "screenshots/crm-hub.png",
+    "screenshots/crm-leads.png",
+    "screenshots/crm-oportunidades.png",
+    "screenshots/crm-pipeline.png",
+    "screenshots/crm-follow-ups.png",
+    "screenshots/clientes.png",
+    "screenshots/kanban.png",
+    "screenshots/cliente-novo.png",
+    "screenshots/compras-hub.png",
+    "screenshots/compras-pedidos.png",
+    "screenshots/compras-cotacoes.png",
+    "screenshots/estoque.png"
+  ],
+  "summary": {
+    "pass": 17,
+    "fail": 0,
+    "shots": 12
+  }
+}

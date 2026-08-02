@@ -1,0 +1,214 @@
+{
+  "consoleErrors": [
+    {
+      "text": "O cadastro está temporariamente desatualizado no servidor (coluna ausente). Peça ao administrador para aplicar as migrations pendentes e recarregar o schema.",
+      "url": "http://localhost:3001/teste-renato-01/clientes/novo"
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [
+    {
+      "url": "http://localhost:3001/teste-renato-01/crm?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/oficina/mecanicos?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/inteligencia?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/relatorios?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/agenda?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/estoque?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/clientes?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/busca?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/centro-operacoes?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/configuracoes/metas?_rsc=70-u6oKEJZtSeQlj",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro/fluxo-caixa?_rsc=KZFX_ESr8-IdA8ro",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro/dre?_rsc=gPEDJhmr7MmPNaWb",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/relatorios?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/vendas?_rsc=ssIcYwracfk29Miq",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/crm?_rsc=2yac2cCHzc6bqXUS",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/dashboard?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/dashboard?_rsc=vpMhpUR-EF35QZoy",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/inteligencia?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/oficina/mecanicos?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/configuracoes/metas?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/compras?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/centro-operacoes?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/configuracoes/metas?_rsc=70-u6oKEJZtSeQlj",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro/fluxo-caixa?_rsc=KZFX_ESr8-IdA8ro",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/vendas?_rsc=ssIcYwracfk29Miq",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/crm?_rsc=2yac2cCHzc6bqXUS",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/relatorios?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/tributario?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/dashboard?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/inteligencia?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/crm?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/tributario?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/relatorios?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro/fluxo-caixa?_rsc=hDjId7nFRukXJryR",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/configuracoes/metas?_rsc=70-u6oKEJZtSeQlj",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro/fluxo-caixa?_rsc=KZFX_ESr8-IdA8ro",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro?_rsc=shjw6apvuX328X4k",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/financeiro/dre?_rsc=gPEDJhmr7MmPNaWb",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/vendas?_rsc=ssIcYwracfk29Miq",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/relatorios?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/dashboard?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/inteligencia?_rsc=6ozKKt220XVdPixc",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/tributario?_rsc=0jFHCcWcZlUFzbqL",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/crm?_rsc=2yac2cCHzc6bqXUS",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/inteligencia?_rsc=D_upYA0xLVBDuIWq",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/agenda?_rsc=D_upYA0xLVBDuIWq",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/vendas?_rsc=D_upYA0xLVBDuIWq",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/oficina/mecanicos?_rsc=D_upYA0xLVBDuIWq",
+      "method": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3001/teste-renato-01/tributario?_rsc=D_upYA0xLVBDuIWq",
+      "method": "net::ERR_ABORTED"
+    }
+  ],
+  "httpIssues": [],
+  "uuidHits": [],
+  "valid404Sample": []
+}

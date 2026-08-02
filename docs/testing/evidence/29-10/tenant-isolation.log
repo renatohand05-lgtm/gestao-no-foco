@@ -1,0 +1,27 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> gestao-no-foco@21.10.0-rc.1 test:phase29-tenant-isolation
+> node scripts/phase29-tenant-isolation-tests.mjs
+
+
+Phase 29.10 ÔÇö Tenant isolation contract
+
+  PASS  create cliente seta tenant_id
+  PASS  update/list filtra tenant_id
+  PASS  compras filtra tenant_id
+  PASS  tabelas ensure com tenant_id NOT NULL
+  PASS  RLS via tenant_members
+  PASS  RLS auth.uid()
+  PASS  60813 RLS
+  PASS  60813 policy tenant compras
+  PASS  60802 policy tenant oportunidades
+
+Resultado: 9 PASS ┬À 0 FAIL
+

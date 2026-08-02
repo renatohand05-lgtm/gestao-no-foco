@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, updateTag } from "next/cache";
 import { ZodError } from "zod";
 
 import { getCurrentProfile } from "@/lib/auth/session";
@@ -9,6 +9,7 @@ import {
   normalizeMetaVendasUpdateValues,
 } from "@/lib/metas/mappers";
 import { createMetaVendasService } from "@/lib/metas/meta-vendas-service";
+import { METAS_VENDAS_CACHE_TAG } from "@/lib/metas/resolve-meta-mensal";
 import {
   formatMetaVendasZodError,
   metaVendasFormSchema,
@@ -19,11 +20,17 @@ import type { ActionResult } from "@/types/action-result";
 
 function revalidateMetasPaths(tenantSlug: string, id?: string) {
   revalidatePath(`/${tenantSlug}/dashboard`);
+  revalidatePath(`/${tenantSlug}/analytics`);
+  revalidatePath(`/${tenantSlug}/analytics/metas`);
+  revalidatePath(`/${tenantSlug}/inteligencia`);
   revalidatePath(`/${tenantSlug}/configuracoes`);
   revalidatePath(`/${tenantSlug}/configuracoes/metas`);
   if (id) {
     revalidatePath(`/${tenantSlug}/configuracoes/metas/${id}/editar`);
   }
+  // Invalidação de tag + read-your-own-writes (Next 16)
+  updateTag(METAS_VENDAS_CACHE_TAG);
+  revalidateTag(METAS_VENDAS_CACHE_TAG, "max");
 }
 
 function toActionError(error: unknown, fallback: string): string {

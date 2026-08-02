@@ -1,0 +1,37 @@
+{
+  "tenant": {
+    "id": "30fd2055-b14e-4922-a239-94a291869f94",
+    "slug": "teste-renato-01",
+    "name": "teste-renato-01"
+  },
+  "hoje": "2026-08-01",
+  "competencia": "2026-08-01",
+  "serviceRoleGeral": {
+    "ok": true,
+    "valor": 132500,
+    "row": {
+      "valor_meta": 132500,
+      "centro_custo_id": null,
+      "updated_at": "2026-08-01T11:17:35.326243+00:00",
+      "competencia": "2026-08-01"
+    },
+    "via": "exact"
+  },
+  "serviceRoleWithCentro": {
+    "ok": true,
+    "valor": 132500,
+    "row": {
+      "valor_meta": 132500,
+      "centro_custo_id": null,
+      "updated_at": "2026-08-01T11:17:35.326243+00:00",
+      "competencia": "2026-08-01"
+    },
+    "via": "fallback_geral"
+  },
+  "authProbe": {
+    "ok": false,
+    "error": "JWT expired",
+    "rows": null,
+    "count": 0
+  }
+}

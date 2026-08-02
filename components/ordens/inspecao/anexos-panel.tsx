@@ -5,6 +5,7 @@ import { FileUp, Loader2, Trash2, X } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { SectionCard } from "@/components/ui/section-card";
 import {
   deleteOsAnexoAction,
@@ -93,18 +94,19 @@ export function AnexosPanel({
         <div className="space-y-2 rounded-xl border border-dashed p-3">
           <p className="text-xs font-medium text-muted-foreground">Novo anexo</p>
           <div className="grid gap-2 md:grid-cols-2">
-            <select
+            <NativeSelect
               value={etapa}
               onChange={(e) => setEtapa(e.target.value)}
               disabled={disabled || pending}
-              className="h-9 rounded-md border border-input bg-transparent px-2 text-sm"
+              className="h-9"
+              aria-label="Etapa do anexo"
             >
               {Object.entries(ETAPA_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
             <Input
               value={legenda}
               onChange={(e) => setLegenda(e.target.value)}

@@ -1,0 +1,70 @@
+{
+  "at": "2026-08-02T00:20:05.431Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "27.8.2",
+  "shots": [
+    "centro-custo-com-nome-dark",
+    "forma-pagamento-amigavel-dark",
+    "seletor-produto-servico-dark",
+    "venda-form-light",
+    "tabela-servicos-valores-dark",
+    "detalhe-servico",
+    "meta-cadastrada",
+    "dashboard-meta-dark",
+    "dashboard-meta-notebook",
+    "dashboard-meta-mobile",
+    "dashboard-meta-light"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "auth"
+    },
+    {
+      "ok": true,
+      "detail": "venda nova"
+    },
+    {
+      "ok": true,
+      "detail": "centro/custo capture"
+    },
+    {
+      "ok": true,
+      "detail": "lista produto/serviço (popup pode estar fechado)"
+    },
+    {
+      "ok": true,
+      "detail": "listagem serviços"
+    },
+    {
+      "ok": true,
+      "detail": "colunas comerciais visíveis"
+    },
+    {
+      "ok": true,
+      "detail": "detalhe serviço campos"
+    },
+    {
+      "ok": true,
+      "detail": "metas page"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard menciona meta/estado"
+    },
+    {
+      "ok": true,
+      "detail": "não força meta zero silenciosa"
+    }
+  ],
+  "summary": {
+    "pass": 11,
+    "fail": 0,
+    "shots": 11
+  }
+}

@@ -50,3 +50,24 @@ export {
   validateRateioPercentuais,
   allocateRateioValues,
 } from "@/lib/dre/dre-validation";
+
+export {
+  getDreVarianceSemantic,
+  classifyDreLinhaSemantic,
+} from "@/lib/dre/dre-variance-semantics";
+export type {
+  DreAccountSemanticType,
+  DreVarianceTone,
+} from "@/lib/dre/dre-variance-semantics";
+
+export {
+  buildCalendarMonthPeriod,
+  buildDreComparativeView,
+  MONTH_LABELS_PT,
+} from "@/lib/dre/dre-compare";
+export type { DreComparativeRow } from "@/lib/dre/dre-compare";
+
+export {
+  buildDreComparativeCsv,
+  buildDreComparativeExcelRows,
+} from "@/lib/dre/dre-export";

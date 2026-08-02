@@ -58,14 +58,18 @@ export function buildExecutiveBrief(input: {
   narrativeParts.push(
     `${tenantName} · ciclo de ${hoje.data_hoje}. Caixa ${cockpit.saudeLabel.toLowerCase()}.`,
   );
-  if (metaPct != null) {
+  if (hoje.mes.meta != null && hoje.mes.meta > 0) {
     narrativeParts.push(
-      `Meta do mês em ${formatPercent(metaPct)}${
+      `Meta do mês ${formatCurrencyCompact(hoje.mes.meta)}${
+        metaPct != null ? ` · ${formatPercent(metaPct)} atingido` : ""
+      }${
         hoje.mes.faturamento != null
           ? ` com ${formatCurrencyCompact(hoje.mes.faturamento)} realizados`
           : ""
       }.`,
     );
+  } else {
+    narrativeParts.push("Meta do mês não cadastrada.");
   }
   if (topAlert) {
     narrativeParts.push(`Foco: ${topAlert.title}.`);
@@ -100,12 +104,29 @@ export function buildExecutiveBrief(input: {
           : "success",
     });
   }
-  if (metaPct != null) {
+  if (hoje.mes.meta != null && hoje.mes.meta > 0) {
     chips.push({
       id: "meta",
       label: "Meta mês",
-      value: formatPercent(metaPct),
-      tone: metaPct >= 100 ? "success" : metaPct >= 70 ? "info" : "warning",
+      value:
+        metaPct != null
+          ? `${formatCurrencyCompact(hoje.mes.meta)} · ${formatPercent(metaPct)}`
+          : formatCurrencyCompact(hoje.mes.meta),
+      tone:
+        metaPct == null
+          ? "info"
+          : metaPct >= 100
+            ? "success"
+            : metaPct >= 70
+              ? "info"
+              : "warning",
+    });
+  } else {
+    chips.push({
+      id: "meta",
+      label: "Meta mês",
+      value: "Não cadastrada",
+      tone: "neutral",
     });
   }
 

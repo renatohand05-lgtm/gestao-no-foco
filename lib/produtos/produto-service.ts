@@ -20,7 +20,7 @@ import type {
 } from "@/types/produtos";
 
 const LIST_SELECT =
-  "id, nome, tipo, codigo_interno, sku, categoria, marca, unidade_medida, preco_venda, estoque_atual, ativo, created_at, updated_at";
+  "id, nome, tipo, codigo_interno, sku, categoria, marca, unidade_medida, preco_venda, estoque_atual, ativo, created_at, updated_at, custo, preco_sugerido, tempo_estimado_minutos, unidade_cobranca";
 
 function resolveSort(
   sort?: ProdutoSortField,
@@ -33,6 +33,9 @@ function resolveSort(
     "estoque_atual",
     "tipo",
     "ativo",
+    "custo",
+    "preco_sugerido",
+    "categoria",
   ];
   const column = allowed.includes(sort ?? "nome") ? (sort ?? "nome") : "nome";
   const ascending = order === "asc" || !order;
@@ -106,6 +109,13 @@ export class ProdutoService {
 
     if (params.categoria?.trim()) {
       query = query.ilike("categoria", `%${params.categoria.trim()}%`);
+    }
+
+    if (params.custoZerado) {
+      query = query.or("custo.is.null,custo.eq.0");
+    }
+    if (params.precoZerado) {
+      query = query.or("preco_venda.is.null,preco_venda.eq.0");
     }
 
     const { data, error, count } = await query.range(from, to);

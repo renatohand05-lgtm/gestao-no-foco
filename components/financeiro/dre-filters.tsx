@@ -7,6 +7,7 @@ import {
   ExecutiveFilter,
   ExecutiveFilterField,
 } from "@/components/executive";
+import { GFSelect } from "@/components/gf/gf-select";
 import { gofControl } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type { DreFilterOption } from "@/types/dre";
@@ -88,63 +89,60 @@ export function DreFilters({
       </ExecutiveFilterField>
 
       <ExecutiveFilterField label="Centro de Custo" htmlFor="dre-centro-custo">
-        <select
+        <GFSelect
           id="dre-centro-custo"
-          value={currentCentroCustoId}
+          value={currentCentroCustoId || undefined}
           disabled={isPending}
-          onChange={(event) =>
-            updateParams({ centroCusto: event.target.value || null })
+          onValueChange={(value) =>
+            updateParams({ centroCusto: value || null })
           }
-          className={cn(gofControl, "w-full min-w-36")}
-        >
-          <option value="">Todos os centros</option>
-          {centrosCusto.map((centro) => (
-            <option key={centro.id} value={centro.id}>
-              {centro.nome}
-            </option>
-          ))}
-        </select>
+          placeholder="Todos os centros"
+          aria-label="Centro de Custo"
+          triggerClassName="min-w-36"
+          options={centrosCusto.map((centro) => ({
+            value: centro.id,
+            label: centro.nome,
+          }))}
+        />
       </ExecutiveFilterField>
 
       <ExecutiveFilterField
         label="Categoria financeira"
         htmlFor="dre-categoria"
       >
-        <select
+        <GFSelect
           id="dre-categoria"
-          value={currentCategoriaId}
+          value={currentCategoriaId || undefined}
           disabled={isPending}
-          onChange={(event) =>
-            updateParams({ categoria: event.target.value || null })
+          onValueChange={(value) =>
+            updateParams({ categoria: value || null })
           }
-          className={cn(gofControl, "w-full min-w-36")}
-        >
-          <option value="">Todas as categorias</option>
-          {categorias.map((categoria) => (
-            <option key={categoria.id} value={categoria.id}>
-              {categoria.nome}
-            </option>
-          ))}
-        </select>
+          placeholder="Todas as categorias"
+          aria-label="Categoria financeira"
+          triggerClassName="min-w-36"
+          options={categorias.map((categoria) => ({
+            value: categoria.id,
+            label: categoria.nome,
+          }))}
+        />
       </ExecutiveFilterField>
 
       <ExecutiveFilterField label="Plano de contas" htmlFor="dre-plano-conta">
-        <select
+        <GFSelect
           id="dre-plano-conta"
-          value={currentPlanoContaId}
+          value={currentPlanoContaId || undefined}
           disabled={isPending}
-          onChange={(event) =>
-            updateParams({ planoConta: event.target.value || null })
+          onValueChange={(value) =>
+            updateParams({ planoConta: value || null })
           }
-          className={cn(gofControl, "w-full min-w-36")}
-        >
-          <option value="">Todos os planos</option>
-          {planosConta.map((plano) => (
-            <option key={plano.id} value={plano.id}>
-              {plano.nome}
-            </option>
-          ))}
-        </select>
+          placeholder="Todos os planos"
+          aria-label="Plano de contas"
+          triggerClassName="min-w-36"
+          options={planosConta.map((plano) => ({
+            value: plano.id,
+            label: plano.nome,
+          }))}
+        />
       </ExecutiveFilterField>
     </ExecutiveFilter>
   );

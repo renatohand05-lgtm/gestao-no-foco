@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
+  civilDateInTimezone,
+  DEFAULT_TENANT_TIMEZONE,
+} from "@/lib/dashboard/tenant-timezone";
+import {
   buildDreStatementLines,
   buildOpexHierarchyNodes,
   composeDreTotals,
@@ -931,11 +935,13 @@ export function defaultDrePeriodo(now = new Date()): {
   dataDe: string;
   dataAte: string;
 } {
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  // America/Sao_Paulo — evita UTC virar mês anterior/seguinte na virada.
+  const hoje = civilDateInTimezone(now, DEFAULT_TENANT_TIMEZONE);
+  const year = Number(hoje.slice(0, 4));
+  const month = Number(hoje.slice(5, 7));
   const pad = (value: number) => String(value).padStart(2, "0");
-  const dataDe = `${year}-${pad(month + 1)}-01`;
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const dataAte = `${year}-${pad(month + 1)}-${pad(lastDay)}`;
+  const dataDe = `${year}-${pad(month)}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const dataAte = `${year}-${pad(month)}-${pad(lastDay)}`;
   return { dataDe, dataAte };
 }

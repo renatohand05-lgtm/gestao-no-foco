@@ -19,15 +19,21 @@ Componentes fora da biblioteca = **experimentais** até revisão.
 
 ## Forms (Select / Date / Toggle)
 
-**Oficial na Sprint 19:** `gofControl` + `gofFocusRing` em controles nativos ou Input shadcn.
+**Oficial na Sprint 27.8:** `GFSelect` / `GFCombobox` (Base UI, painel `bg-popover`) em áreas críticas.
 
-Não existem `ExecutiveSelect`, `ExecutiveDatePicker` ou `ExecutiveToggle` — criar wrappers dedicados é **DEFERRED** (Sprint futura). Não inventar abstração incompleta.
+Fallback nativo: `NativeSelect` + `gofNativeSelect` + CSS `color-scheme` / `option` em `globals.css` — o dropdown do SO ainda pode variar por browser.
 
 ```tsx
-import { gofControl } from "@/lib/design-system/primitives";
+import { GFSelect } from "@/components/gf/gf-select";
+import { NativeSelect } from "@/components/ui/native-select";
 
-<select className={gofControl} aria-label="Período">…</select>
-<input type="date" className={gofControl} />
+<GFSelect
+  aria-label="Forma de pagamento"
+  options={[{ value: "pix", label: "PIX" }]}
+  value={formaId}
+  onValueChange={setFormaId}
+/>
+<NativeSelect aria-label="Período">…</NativeSelect>
 ```
 
 ## Oficiais (preferir)

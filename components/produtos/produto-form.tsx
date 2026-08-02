@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { CancelButton } from "@/components/ui/cancel-button";
+import { NativeSelect } from "@/components/ui/native-select";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormField } from "@/components/ui/form-field";
 import { FormGrid } from "@/components/ui/form-grid";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
+import type { ProdutoTipo } from "@/types/produtos";
 import {
   createProdutoAction,
   updateProdutoAction,
@@ -37,6 +39,7 @@ type ProdutoFormProps = {
   tenantSlug: string;
   mode: "create" | "edit";
   produto?: Produto;
+  defaultTipo?: ProdutoTipo;
 };
 
 const numberFieldOptions = {
@@ -55,13 +58,16 @@ const estoqueFieldOptions = {
   },
 };
 
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
-export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
+export function ProdutoForm({
+  tenantSlug,
+  mode,
+  produto,
+  defaultTipo = "produto",
+}: ProdutoFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const initialTipo = defaultTipo === "servico" ? "servico" : defaultTipo;
 
   const form = useForm<ProdutoFormInput, unknown, ProdutoFormValues>({
     resolver: zodResolver(produtoFormSchema),
@@ -69,7 +75,7 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
       ? produtoToFormValues(produto)
       : {
           nome: "",
-          tipo: "produto",
+          tipo: initialTipo,
           codigo_interno: "",
           sku: "",
           codigo_barras: "",
@@ -99,12 +105,17 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
           localizacao: "",
           fornecedor_principal: "",
           fornecedor_alternativo: "",
-          controla_estoque: true,
+          controla_estoque: initialTipo !== "servico",
           controla_lote: false,
           controla_serie: false,
           controla_validade: false,
           observacoes: "",
           ativo: true,
+          tempo_estimado_minutos: null,
+          preco_sugerido: null,
+          especialidade: "",
+          equipe_ou_profissional: "",
+          unidade_cobranca: "",
         },
   });
 
@@ -170,36 +181,34 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                 control={form.control}
                 name="ativo"
                 render={({ field }) => (
-                  <select
+                  <NativeSelect
                     id="ativo"
                     value={String(field.value)}
                     onChange={(event) =>
                       field.onChange(event.target.value === "true")
                     }
-                    className={selectClassName}
                   >
                     {PRODUTO_STATUS_OPTIONS.map((option) => (
                       <option key={String(option.value)} value={String(option.value)}>
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 )}
               />
             </FormField>
 
             <FormField label="Tipo" htmlFor="tipo" required>
-              <select
+              <NativeSelect
                 id="tipo"
                 {...form.register("tipo")}
-                className={selectClassName}
               >
                 {PRODUTO_TIPO_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </FormField>
 
             <FormField
@@ -256,17 +265,16 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
             </FormField>
 
             <FormField label="Unidade de medida" htmlFor="unidade_medida" required>
-              <select
+              <NativeSelect
                 id="unidade_medida"
                 {...form.register("unidade_medida")}
-                className={selectClassName}
               >
                 {UNIDADE_MEDIDA_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </FormField>
           </FormGrid>
         </FormSection>
@@ -337,11 +345,15 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
 
         <FormSection
           title="Precificação"
-          description="Custo, preço de venda e margem calculada automaticamente."
+          description={
+            tipo === "servico"
+              ? "Custo de mão de obra, preço atual e preço sugerido."
+              : "Custo, preço de venda e margem calculada automaticamente."
+          }
         >
           <FormGrid>
             <FormField
-              label="Custo médio"
+              label={tipo === "servico" ? "Custo de mão de obra" : "Custo médio"}
               htmlFor="custo"
               error={form.formState.errors.custo?.message}
             >
@@ -369,7 +381,7 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
             </FormField>
 
             <FormField
-              label="Preço de venda"
+              label={tipo === "servico" ? "Preço atual" : "Preço de venda"}
               htmlFor="preco_venda"
               error={form.formState.errors.preco_venda?.message}
             >
@@ -381,6 +393,55 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                 {...form.register("preco_venda", numberFieldOptions)}
               />
             </FormField>
+
+            {tipo === "servico" ? (
+              <>
+                <FormField
+                  label="Preço sugerido"
+                  htmlFor="preco_sugerido"
+                  error={form.formState.errors.preco_sugerido?.message}
+                >
+                  <Input
+                    id="preco_sugerido"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    {...form.register("preco_sugerido", numberFieldOptions)}
+                  />
+                </FormField>
+                <FormField
+                  label="Tempo estimado (minutos)"
+                  htmlFor="tempo_estimado_minutos"
+                >
+                  <Input
+                    id="tempo_estimado_minutos"
+                    type="number"
+                    min="0"
+                    step="1"
+                    {...form.register("tempo_estimado_minutos", numberFieldOptions)}
+                  />
+                </FormField>
+                <FormField label="Especialidade" htmlFor="especialidade">
+                  <Input id="especialidade" {...form.register("especialidade")} />
+                </FormField>
+                <FormField
+                  label="Profissional / equipe"
+                  htmlFor="equipe_ou_profissional"
+                >
+                  <Input
+                    id="equipe_ou_profissional"
+                    {...form.register("equipe_ou_profissional")}
+                  />
+                </FormField>
+                <FormField label="Unidade de cobrança" htmlFor="unidade_cobranca">
+                  <Input
+                    id="unidade_cobranca"
+                    {...form.register("unidade_cobranca")}
+                    placeholder="UN, HORA…"
+                  />
+                </FormField>
+              </>
+            ) : null}
 
             <FormField
               label="Preço mínimo"
@@ -489,15 +550,14 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                   control={form.control}
                   name="controla_estoque"
                   render={({ field }) => (
-                    <select
+                    <NativeSelect
                       id="controla_estoque"
                       value={String(field.value)}
                       onChange={(e) => field.onChange(e.target.value === "true")}
-                      className={selectClassName}
                     >
                       <option value="true">Sim</option>
                       <option value="false">Não</option>
-                    </select>
+                    </NativeSelect>
                   )}
                 />
               </FormField>
@@ -506,15 +566,14 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                   control={form.control}
                   name="controla_lote"
                   render={({ field }) => (
-                    <select
+                    <NativeSelect
                       id="controla_lote"
                       value={String(field.value)}
                       onChange={(e) => field.onChange(e.target.value === "true")}
-                      className={selectClassName}
                     >
                       <option value="false">Não</option>
                       <option value="true">Sim</option>
-                    </select>
+                    </NativeSelect>
                   )}
                 />
               </FormField>
@@ -523,15 +582,14 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                   control={form.control}
                   name="controla_serie"
                   render={({ field }) => (
-                    <select
+                    <NativeSelect
                       id="controla_serie"
                       value={String(field.value)}
                       onChange={(e) => field.onChange(e.target.value === "true")}
-                      className={selectClassName}
                     >
                       <option value="false">Não</option>
                       <option value="true">Sim</option>
-                    </select>
+                    </NativeSelect>
                   )}
                 />
               </FormField>
@@ -540,15 +598,14 @@ export function ProdutoForm({ tenantSlug, mode, produto }: ProdutoFormProps) {
                   control={form.control}
                   name="controla_validade"
                   render={({ field }) => (
-                    <select
+                    <NativeSelect
                       id="controla_validade"
                       value={String(field.value)}
                       onChange={(e) => field.onChange(e.target.value === "true")}
-                      className={selectClassName}
                     >
                       <option value="false">Não</option>
                       <option value="true">Sim</option>
-                    </select>
+                    </NativeSelect>
                   )}
                 />
               </FormField>

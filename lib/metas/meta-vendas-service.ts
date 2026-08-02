@@ -12,6 +12,8 @@ import {
   resolveCompetenciaFromPeriod,
   toCompetenciaMonthStart,
 } from "@/lib/metas/projection";
+import { currentCompetenciaInTimezone } from "@/lib/metas/meta-timezone";
+import { resolveMetaMensalVigente } from "@/lib/metas/resolve-meta-mensal";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import type { DashboardFilters } from "@/types/dashboard-executive";
@@ -133,21 +135,22 @@ export class MetaVendasService {
     competencia: string,
     centroCustoId?: string | null,
   ): Promise<MetaVendasMensal | null> {
-    const comp = toCompetenciaMonthStart(competencia);
-    let query = this.supabase
+    const resolved = await resolveMetaMensalVigente(
+      this.supabase,
+      this.tenantId,
+      competencia,
+      centroCustoId,
+    );
+    if (!resolved.id || resolved.valor == null) return null;
+
+    const { data, error } = await this.supabase
       .from("metas_vendas_mensais")
       .select(DETAIL_SELECT)
       .eq("tenant_id", this.tenantId)
-      .eq("competencia", comp)
-      .is("deleted_at", null);
+      .eq("id", resolved.id)
+      .is("deleted_at", null)
+      .maybeSingle();
 
-    if (centroCustoId) {
-      query = query.eq("centro_custo_id", centroCustoId);
-    } else {
-      query = query.is("centro_custo_id", null);
-    }
-
-    const { data, error } = await query.maybeSingle();
     if (error) throw new Error(error.message);
     return data ? mapMeta(data as unknown as MetaRow) : null;
   }
@@ -316,10 +319,8 @@ export class MetaVendasService {
     centroCustoId?: string | null;
     includeComparacao?: boolean;
   }): Promise<MetaProjecaoMensal> {
-    const now = new Date();
     const competencia = toCompetenciaMonthStart(
-      input.competencia ??
-        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`,
+      input.competencia ?? currentCompetenciaInTimezone(),
     );
     const centroCustoId = input.centroCustoId ?? null;
 

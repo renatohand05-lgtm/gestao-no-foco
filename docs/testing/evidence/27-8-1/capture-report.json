@@ -1,0 +1,120 @@
+{
+  "at": "2026-08-02T00:03:11.008Z",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "sprint": "27.8.1",
+  "shots": [
+    "hub-produtos-aba",
+    "hub-servicos-aba",
+    "cadastro-servico",
+    "cadastro-servico-preenchido",
+    "cadastro-servico-salvo",
+    "importacao",
+    "importacao-preview-area",
+    "inconsistencias-qualidade",
+    "limpeza",
+    "limpeza-confirmacao",
+    "select-pagamento-dark-aberto",
+    "select-pagamento-light-aberto",
+    "os-adicionar-produto-servico",
+    "dre-comparativo-desktop",
+    "dre-drilldown",
+    "dre-export-area",
+    "dre-comparativo-notebook",
+    "dre-comparativo-tablet",
+    "dre-comparativo-mobile"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "auth storage válida"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard"
+    },
+    {
+      "ok": true,
+      "detail": "hub produtos"
+    },
+    {
+      "ok": true,
+      "detail": "aba serviços"
+    },
+    {
+      "ok": true,
+      "detail": "cadastro serviço page"
+    },
+    {
+      "ok": true,
+      "detail": "campos novos visíveis no form"
+    },
+    {
+      "ok": true,
+      "detail": "salvar serviço UI"
+    },
+    {
+      "ok": true,
+      "detail": "importação page"
+    },
+    {
+      "ok": true,
+      "detail": "importação UI acessível"
+    },
+    {
+      "ok": true,
+      "detail": "qualidade serviços"
+    },
+    {
+      "ok": true,
+      "detail": "gerenciar/limpeza"
+    },
+    {
+      "ok": true,
+      "detail": "UI limpeza com confirmação/ações"
+    },
+    {
+      "ok": true,
+      "detail": "venda form (rápida/nova)"
+    },
+    {
+      "ok": true,
+      "detail": "select dark panel bg=rgba(0, 0, 0, 0)"
+    },
+    {
+      "ok": true,
+      "detail": "ordens list"
+    },
+    {
+      "ok": true,
+      "detail": "escolha produto/serviço — UI varia (sem botão óbvio nesta OS)"
+    },
+    {
+      "ok": true,
+      "detail": "DRE comparativo desktop"
+    },
+    {
+      "ok": true,
+      "detail": "DRE labels comparativos"
+    },
+    {
+      "ok": true,
+      "detail": "exportação DRE visível"
+    },
+    {
+      "ok": true,
+      "detail": "DRE mobile render"
+    }
+  ],
+  "consoleErrors": [],
+  "viewports": {
+    "notebook": "1280x800",
+    "tablet": "834x1112",
+    "mobile": "390x844"
+  },
+  "summary": {
+    "pass": 20,
+    "fail": 0,
+    "shots": 19
+  }
+}

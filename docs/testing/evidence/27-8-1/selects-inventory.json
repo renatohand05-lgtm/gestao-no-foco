@@ -1,0 +1,1716 @@
+{
+  "at": "2026-08-02T00:00:29.559Z",
+  "totals": {
+    "GFSelect": 24,
+    "GFCombobox": 0,
+    "NativeSelect": 28,
+    "select_nativo": 161,
+    "total": 213
+  },
+  "rows": [
+    {
+      "arquivo": "components/audit/audit-filter.tsx",
+      "linha": 37,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/audit/audit-filter.tsx",
+      "linha": 55,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/catalog-import-panel.tsx",
+      "linha": 162,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/catalog-import-panel.tsx",
+      "linha": 324,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/catalog-import-panel.tsx",
+      "linha": 340,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/catalog-import-panel.tsx",
+      "linha": 356,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/catalog-import-panel.tsx",
+      "linha": 373,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/catalog-import-panel.tsx",
+      "linha": 450,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/stock-invoice-import-panel.tsx",
+      "linha": 101,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/catalog-import/stock-invoice-import-panel.tsx",
+      "linha": 136,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/clientes/cliente-form.tsx",
+      "linha": 185,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/clientes/cliente-form.tsx",
+      "linha": 203,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/clientes/cliente-form.tsx",
+      "linha": 336,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/clientes/cliente-form.tsx",
+      "linha": 361,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/clientes/cliente-form.tsx",
+      "linha": 375,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/clientes/cliente-form.tsx",
+      "linha": 563,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/clientes/cliente-workspace.tsx",
+      "linha": 443,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/crm/cliente-documentos-panel.tsx",
+      "linha": 64,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/crm/crm-tarefas-list.tsx",
+      "linha": 83,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/dashboard/dashboard-filters.tsx",
+      "linha": 115,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/dashboard/dashboard-filters.tsx",
+      "linha": 133,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/dashboard/dashboard-filters.tsx",
+      "linha": 151,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/dashboard/dashboard-filters.tsx",
+      "linha": 167,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/dashboard/executive-timeline/executive-timeline-filter.tsx",
+      "linha": 50,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/dashboard/resumo-dia-drawer.tsx",
+      "linha": 261,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/dashboard/resumo-vendas-mes-table.tsx",
+      "linha": 569,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/design-system/showcase/design-system-showcase.tsx",
+      "linha": 505,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/estoque-filters.tsx",
+      "linha": 58,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/estoque-filters.tsx",
+      "linha": 77,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/estoque-form.tsx",
+      "linha": 121,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/estoque-form.tsx",
+      "linha": 139,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/estoque-form.tsx",
+      "linha": 153,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/executive-stock-filters.tsx",
+      "linha": 47,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/executive-stock-filters.tsx",
+      "linha": 62,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/executive-stock-filters.tsx",
+      "linha": 77,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/executive-stock-filters.tsx",
+      "linha": 91,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/estoque/executive-stock-filters.tsx",
+      "linha": 104,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/cash-intelligence/reconciliation-client.tsx",
+      "linha": 174,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/category-manager.tsx",
+      "linha": 63,
+      "campo": "<select name=\"kind\" className=\"h-9 rounded-md border border-input px-2 text-sm\">",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/category-manager.tsx",
+      "linha": 70,
+      "campo": "<select name=\"parentId\" className=\"h-9 rounded-md border border-input px-2 text-sm\">",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/contas-client.tsx",
+      "linha": 46,
+      "campo": "<select name=\"type\" className=\"h-9 rounded-md border px-2 text-sm\" defaultValue=\"corrente\">",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/import/import-wizard-client.tsx",
+      "linha": 368,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/import/import-wizard-client.tsx",
+      "linha": 421,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movement-form.tsx",
+      "linha": 83,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movement-form.tsx",
+      "linha": 108,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movement-form.tsx",
+      "linha": 124,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movement-form.tsx",
+      "linha": 161,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movement-form.tsx",
+      "linha": 175,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movimentacoes-client.tsx",
+      "linha": 107,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movimentacoes-client.tsx",
+      "linha": 122,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movimentacoes-client.tsx",
+      "linha": 137,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movimentacoes-client.tsx",
+      "linha": 152,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movimentacoes-client.tsx",
+      "linha": 183,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/movimentacoes-client.tsx",
+      "linha": 195,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/transfer-form.tsx",
+      "linha": 113,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/finance/transfer-form.tsx",
+      "linha": 129,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/categoria-financeira-form.tsx",
+      "linha": 108,
+      "campo": "<select id=\"tipo\" {...form.register(\"tipo\")} className={gofControl}>",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/categoria-financeira-form.tsx",
+      "linha": 116,
+      "campo": "<select id=\"ativo\" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === \"true\")} class",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/centro-custo-form.tsx",
+      "linha": 104,
+      "campo": "<select id=\"ativo\" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === \"true\")} class",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-bancaria-form.tsx",
+      "linha": 101,
+      "campo": "<select id=\"tipo\" {...form.register(\"tipo\")} className={gofControl}>",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-bancaria-form.tsx",
+      "linha": 109,
+      "campo": "<select id=\"ativo\" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === \"true\")} class",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-lifecycle-dialogs.tsx",
+      "linha": 98,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-filters.tsx",
+      "linha": 61,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-filters.tsx",
+      "linha": 81,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-form.tsx",
+      "linha": 252,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-form.tsx",
+      "linha": 336,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-form.tsx",
+      "linha": 357,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-form.tsx",
+      "linha": 380,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-form.tsx",
+      "linha": 400,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-pagar-dialog.tsx",
+      "linha": 154,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-pagar-dialog.tsx",
+      "linha": 168,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-pagar-rateio-fields.tsx",
+      "linha": 107,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-filters.tsx",
+      "linha": 61,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-filters.tsx",
+      "linha": 81,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-form.tsx",
+      "linha": 218,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-form.tsx",
+      "linha": 240,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-form.tsx",
+      "linha": 259,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-form.tsx",
+      "linha": 280,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-form.tsx",
+      "linha": 300,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-form.tsx",
+      "linha": 320,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/conta-receber-receber-dialog.tsx",
+      "linha": 177,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/despesa-recorrente-form.tsx",
+      "linha": 180,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/despesa-recorrente-form.tsx",
+      "linha": 203,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/despesa-recorrente-form.tsx",
+      "linha": 218,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/despesa-recorrente-form.tsx",
+      "linha": 233,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/despesa-recorrente-form.tsx",
+      "linha": 248,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-classification-select.tsx",
+      "linha": 41,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-comparative-filters.tsx",
+      "linha": 52,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/financeiro/dre-comparative-filters.tsx",
+      "linha": 62,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/financeiro/dre-comparative-filters.tsx",
+      "linha": 72,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/financeiro/dre-drill-panel.tsx",
+      "linha": 91,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-drill-panel.tsx",
+      "linha": 103,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-drill-panel.tsx",
+      "linha": 115,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-drill-panel.tsx",
+      "linha": 127,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-drill-panel.tsx",
+      "linha": 139,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-drill-panel.tsx",
+      "linha": 151,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/dre-filters.tsx",
+      "linha": 92,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/financeiro/dre-filters.tsx",
+      "linha": 113,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/financeiro/dre-filters.tsx",
+      "linha": 131,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/financeiro/financeiro-filters.tsx",
+      "linha": 69,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/financeiro-filters.tsx",
+      "linha": 87,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/financeiro-filters.tsx",
+      "linha": 106,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fluxo-caixa-filters.tsx",
+      "linha": 72,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fluxo-caixa-filters.tsx",
+      "linha": 91,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fluxo-caixa-filters.tsx",
+      "linha": 113,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fluxo-caixa-filters.tsx",
+      "linha": 132,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/forma-pagamento-form.tsx",
+      "linha": 99,
+      "campo": "<select id=\"tipo\" {...form.register(\"tipo\")} className={gofControl}>",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/forma-pagamento-form.tsx",
+      "linha": 107,
+      "campo": "<select id=\"ativo\" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === \"true\")} class",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/forma-pagamento-form.tsx",
+      "linha": 116,
+      "campo": "<select id=\"gera_financeiro\" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === \"tru",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 165,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 263,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 280,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 295,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 310,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 325,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 354,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 367,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/fornecedor-form.tsx",
+      "linha": 388,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/plano-conta-form.tsx",
+      "linha": 115,
+      "campo": "<select id=\"tipo\" {...form.register(\"tipo\")} className={gofControl}>",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/plano-conta-form.tsx",
+      "linha": 122,
+      "campo": "<select id=\"natureza\" {...form.register(\"natureza\")} className={gofControl}>",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/plano-conta-form.tsx",
+      "linha": 140,
+      "campo": "<select id=\"ativo\" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === \"true\")} class",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/plano-conta-form.tsx",
+      "linha": 149,
+      "campo": "<select id=\"aceita_lancamento\" value={String(field.value)} onChange={(event) => field.onChange(event.target.value === \"t",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/financeiro/plano-conta-select.tsx",
+      "linha": 46,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/assisted-review-queue-client.tsx",
+      "linha": 296,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/import-row-review-client.tsx",
+      "linha": 60,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/intelligence-history-client.tsx",
+      "linha": 263,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/intelligence-history-client.tsx",
+      "linha": 277,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/intelligence-history-client.tsx",
+      "linha": 295,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/intelligence-history-client.tsx",
+      "linha": 313,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/mapping-studio-client.tsx",
+      "linha": 363,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/mapping-studio-client.tsx",
+      "linha": 409,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/mapping-studio-client.tsx",
+      "linha": 597,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/os-import-wizard-client.tsx",
+      "linha": 315,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/import-engine/sales-import-wizard-client.tsx",
+      "linha": 316,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanico-detail-panel.tsx",
+      "linha": 312,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanico-detail-panel.tsx",
+      "linha": 329,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanico-detail-panel.tsx",
+      "linha": 344,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanico-detail-panel.tsx",
+      "linha": 361,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanico-detail-panel.tsx",
+      "linha": 572,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanico-detail-panel.tsx",
+      "linha": 588,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanico-detail-panel.tsx",
+      "linha": 604,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanicos-manager.tsx",
+      "linha": 126,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/mecanicos/mecanicos-manager.tsx",
+      "linha": 142,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/metas/meta-vendas-form.tsx",
+      "linha": 85,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/nfe/nfe-conferencia-client.tsx",
+      "linha": 139,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/nfe/nfe-conferencia-client.tsx",
+      "linha": 243,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/nfe/nfe-conferencia-client.tsx",
+      "linha": 266,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/nfe/nfe-conferencia-client.tsx",
+      "linha": 341,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/nfe/nfe-conferencia-client.tsx",
+      "linha": 398,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/nfe/nfe-conferencia-client.tsx",
+      "linha": 419,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/nfe/nfe-conferencia-client.tsx",
+      "linha": 440,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/observability/observability-client.tsx",
+      "linha": 94,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/onboarding/onboarding-form.tsx",
+      "linha": 113,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/operacoes/dashboard-prefs-editor.tsx",
+      "linha": 134,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/operacoes/recursos-manager.tsx",
+      "linha": 166,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/operacoes/recursos-manager.tsx",
+      "linha": 196,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/ordens/inspecao/anexos-panel.tsx",
+      "linha": 97,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/inspecao/inspecao-envio-panel.tsx",
+      "linha": 252,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-desconto-panel.tsx",
+      "linha": 124,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-mecanico-binder.tsx",
+      "linha": 203,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-mecanico-binder.tsx",
+      "linha": 221,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-mecanico-binder.tsx",
+      "linha": 268,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-open-form.tsx",
+      "linha": 373,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-open-form.tsx",
+      "linha": 432,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-orcamento-itens-panel.tsx",
+      "linha": 394,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-orcamento-itens-panel.tsx",
+      "linha": 464,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-recurso-binder.tsx",
+      "linha": 71,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-veiculo-picker.tsx",
+      "linha": 77,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-workspace.tsx",
+      "linha": 689,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/ordens/os-workspace.tsx",
+      "linha": 934,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/ordens/os-workspace.tsx",
+      "linha": 388,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-workspace.tsx",
+      "linha": 587,
+      "campo": "<NativeSelect name=\"gravidade\" disabled={pending || !canDiagnostico} className=\"h-10\">",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-workspace.tsx",
+      "linha": 594,
+      "campo": "<NativeSelect name=\"urgencia\" disabled={pending || !canDiagnostico} className=\"h-10\">",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-workspace.tsx",
+      "linha": 1123,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/ordens/os-workspace.tsx",
+      "linha": 1134,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/produtos/produto-filters.tsx",
+      "linha": 60,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/produtos/produto-filters.tsx",
+      "linha": 78,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/produtos/produto-form.tsx",
+      "linha": 184,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/produtos/produto-form.tsx",
+      "linha": 202,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/produtos/produto-form.tsx",
+      "linha": 268,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/produtos/produto-form.tsx",
+      "linha": 553,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/produtos/produto-form.tsx",
+      "linha": 569,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/produtos/produto-form.tsx",
+      "linha": 585,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/produtos/produto-form.tsx",
+      "linha": 601,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/supply/inventory-cycles-client.tsx",
+      "linha": 129,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/supply/quotation-comparison-client.tsx",
+      "linha": 104,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/supply/supplier-finance-guided-client.tsx",
+      "linha": 84,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "components/vendas/commercial-intelligence-filters.tsx",
+      "linha": 66,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/vendas/commercial-intelligence-filters.tsx",
+      "linha": 81,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/vendas/commercial-intelligence-filters.tsx",
+      "linha": 96,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "components/vendas/venda-faturar-e-receber-button.tsx",
+      "linha": 138,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-filters.tsx",
+      "linha": 51,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-form.tsx",
+      "linha": 206,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-form.tsx",
+      "linha": 237,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-form.tsx",
+      "linha": 256,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-form.tsx",
+      "linha": 306,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-form.tsx",
+      "linha": 326,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-form.tsx",
+      "linha": 402,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-rapida-form.tsx",
+      "linha": 336,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-rapida-form.tsx",
+      "linha": 536,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-rapida-form.tsx",
+      "linha": 590,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-rapida-form.tsx",
+      "linha": 614,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-rapida-form.tsx",
+      "linha": 638,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-rapida-form.tsx",
+      "linha": 758,
+      "campo": "<GFSelect",
+      "tipo_atual": "GFSelect",
+      "risco_visual": "baixo",
+      "proxima_acao": "manter"
+    },
+    {
+      "arquivo": "components/vendas/venda-rapida-form.tsx",
+      "linha": 379,
+      "campo": "<NativeSelect",
+      "tipo_atual": "NativeSelect",
+      "risco_visual": "médio",
+      "proxima_acao": "migrar para GFSelect se crítico/UX"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/dashboard/page.tsx",
+      "linha": 184,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/dashboard/page.tsx",
+      "linha": 216,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/dashboard/page.tsx",
+      "linha": 231,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/dashboard/page.tsx",
+      "linha": 247,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/page.tsx",
+      "linha": 266,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/page.tsx",
+      "linha": 285,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/page.tsx",
+      "linha": 344,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    },
+    {
+      "arquivo": "app/(app)/[tenant]/ordens/page.tsx",
+      "linha": 360,
+      "campo": "<select",
+      "tipo_atual": "select nativo",
+      "risco_visual": "alto (painel SO)",
+      "proxima_acao": "envolver NativeSelect ou migrar GFSelect"
+    }
+  ]
+}

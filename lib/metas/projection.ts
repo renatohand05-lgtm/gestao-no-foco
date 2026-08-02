@@ -1,4 +1,8 @@
 import {
+  civilDateInTimezone,
+  DEFAULT_TENANT_TIMEZONE,
+} from "@/lib/dashboard/tenant-timezone";
+import {
   META_RITMO_ABAIXO_PP,
   META_RITMO_ACIMA_PP,
   META_RITMO_NO_RITMO_PP,
@@ -20,6 +24,15 @@ const OBSERVACAO_FERIADOS =
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
+}
+
+function civilPartsInSp(now: Date) {
+  const hoje = civilDateInTimezone(now, DEFAULT_TENANT_TIMEZONE);
+  return {
+    year: Number(hoje.slice(0, 4)),
+    monthIndex: Number(hoje.slice(5, 7)) - 1,
+    day: Number(hoje.slice(8, 10)),
+  };
 }
 
 /** Normaliza qualquer data YYYY-MM-DD para o 1º dia do mês. */
@@ -52,9 +65,10 @@ export function resolveCompetenciaFromPeriod(
   dataAte: string,
   now = new Date(),
 ): string {
-  const defaultsDe = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const defaultsAte = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(lastDay)}`;
+  const { year, monthIndex } = civilPartsInSp(now);
+  const defaultsDe = `${year}-${pad(monthIndex + 1)}-01`;
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+  const defaultsAte = `${year}-${pad(monthIndex + 1)}-${pad(lastDay)}`;
 
   if (dataDe === defaultsDe && dataAte === defaultsAte) {
     return defaultsDe;
@@ -167,8 +181,11 @@ export function buildMetaProjecao(input: {
   const valorMeta = input.meta ? Number(input.meta.valor_meta) : null;
   const realizado = Number(input.faturamentoRealizado) || 0;
 
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth();
+  const {
+    year: currentYear,
+    monthIndex: currentMonth,
+    day: currentDay,
+  } = civilPartsInSp(now);
   const mesAtual = year === currentYear && monthIndex === currentMonth;
   const mesFuturo =
     year > currentYear || (year === currentYear && monthIndex > currentMonth);
@@ -195,7 +212,7 @@ export function buildMetaProjecao(input: {
     diasUteisRestantes = 0;
     ultimoDiaDoMes = true;
   } else {
-    diasDecorridos = Math.min(Math.max(now.getDate(), 1), diasTotais);
+    diasDecorridos = Math.min(Math.max(currentDay, 1), diasTotais);
     diasRestantes = Math.max(diasTotais - diasDecorridos, 0);
     ultimoDiaDoMes = diasDecorridos >= diasTotais;
     diasUteisDecorridos = countWeekdaysInRange(

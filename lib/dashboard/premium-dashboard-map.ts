@@ -109,17 +109,19 @@ export function buildPremiumTopKpis(input: {
       value:
         hoje.mes.meta != null
           ? formatCurrencyCompact(hoje.mes.meta)
-          : "Indisponível",
+          : "Meta não cadastrada",
       supportingText:
         hoje.mes.percentual != null
           ? `${formatPercent(hoje.mes.percentual)} da meta`
-          : "Meta não cadastrada",
+          : "Cadastre em Configurações · Metas",
       tone:
-        hoje.mes.percentual != null && hoje.mes.percentual >= 100
-          ? "success"
-          : "warning",
+        hoje.mes.meta == null
+          ? "neutral"
+          : hoje.mes.percentual != null && hoje.mes.percentual >= 100
+            ? "success"
+            : "warning",
       unavailable: hoje.mes.meta == null,
-      href: `${base}/vendas`,
+      href: `${base}/configuracoes/metas`,
     },
   ];
 }
@@ -323,7 +325,13 @@ export function buildPremiumOpsCards(input: {
       hint:
         hoje.hoje.meta != null
           ? `Meta do dia ${formatCurrency(hoje.hoje.meta)}`
-          : "Sem meta diária",
+          : hoje.hoje.status === "fim_semana"
+            ? "Fim de semana · sem meta diária"
+            : hoje.hoje.status === "dia_fechado"
+              ? "Dia fechado · sem meta diária"
+              : hoje.mes.meta != null
+                ? "Sem meta diária · mensal vigente"
+                : "Meta não cadastrada",
       href: `/${tenantSlug}/vendas`,
     },
     {

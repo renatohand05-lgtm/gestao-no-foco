@@ -812,6 +812,11 @@ export type Database = {
           controla_lote: boolean;
           controla_serie: boolean;
           controla_validade: boolean;
+          tempo_estimado_minutos: number | null;
+          preco_sugerido: number | null;
+          especialidade: string | null;
+          equipe_ou_profissional: string | null;
+          unidade_cobranca: string | null;
         };
         Insert: {
           id?: string;
@@ -861,6 +866,11 @@ export type Database = {
           controla_lote?: boolean;
           controla_serie?: boolean;
           controla_validade?: boolean;
+          tempo_estimado_minutos?: number | null;
+          preco_sugerido?: number | null;
+          especialidade?: string | null;
+          equipe_ou_profissional?: string | null;
+          unidade_cobranca?: string | null;
         };
         Update: {
           id?: string;
@@ -910,6 +920,11 @@ export type Database = {
           controla_lote?: boolean;
           controla_serie?: boolean;
           controla_validade?: boolean;
+          tempo_estimado_minutos?: number | null;
+          preco_sugerido?: number | null;
+          especialidade?: string | null;
+          equipe_ou_profissional?: string | null;
+          unidade_cobranca?: string | null;
         };
         Relationships: [];
       };

@@ -1,3 +1,7 @@
+import {
+  civilDateInTimezone,
+  DEFAULT_TENANT_TIMEZONE,
+} from "@/lib/dashboard/tenant-timezone";
 import type { DashboardFilters } from "@/types/dashboard-executive";
 
 function pad(value: number) {
@@ -9,11 +13,12 @@ function defaultCalendarMonthPeriod(now = new Date()): {
   dataDe: string;
   dataAte: string;
 } {
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const dataDe = `${year}-${pad(month + 1)}-01`;
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const dataAte = `${year}-${pad(month + 1)}-${pad(lastDay)}`;
+  const hoje = civilDateInTimezone(now, DEFAULT_TENANT_TIMEZONE);
+  const year = Number(hoje.slice(0, 4));
+  const month = Number(hoje.slice(5, 7));
+  const dataDe = `${year}-${pad(month)}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const dataAte = `${year}-${pad(month)}-${pad(lastDay)}`;
   return { dataDe, dataAte };
 }
 

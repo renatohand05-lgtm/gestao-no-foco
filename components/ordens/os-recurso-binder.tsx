@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { buttonVariants } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 import { vincularOsRecursoAction } from "@/lib/operacoes/recursos-actions";
 import type { OficinaRecurso } from "@/lib/operacoes/recursos-service";
 import { cn } from "@/lib/utils";
@@ -67,10 +68,11 @@ export function OsRecursoBinder({
       {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
       {canEdit ? (
         <div className="flex flex-wrap items-end gap-2">
-          <select
-            className="h-9 min-w-40 rounded-md border border-input bg-transparent px-2 text-sm"
+          <NativeSelect
+            className="h-9 min-w-40"
             value={selected}
             onChange={(e) => setSelected(e.target.value)}
+            aria-label="Recurso / elevador"
           >
             <option value="">Selecionar…</option>
             {recursos.map((r) => (
@@ -78,7 +80,7 @@ export function OsRecursoBinder({
                 {r.nome} ({r.tipo}) — {r.status}
               </option>
             ))}
-          </select>
+          </NativeSelect>
           <button
             type="button"
             disabled={pending || !selected}

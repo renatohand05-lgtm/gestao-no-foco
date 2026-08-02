@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
+import { GFSelect } from "@/components/gf/gf-select";
+import { NativeSelect } from "@/components/ui/native-select";
+import { formatFormaPagamentoLabel } from "@/lib/financeiro/payment-method-label";
+import { buildCatalogItemSelectLabel } from "@/lib/produtos/service-commercial";
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
@@ -331,19 +335,15 @@ export function VendaRapidaForm({
       {modo === "existente" ? (
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Cliente</span>
-          <select
+          <GFSelect
             required
-            value={clienteId}
-            onChange={(e) => setClienteId(e.target.value)}
-            className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-          >
-            <option value="">Selecione…</option>
-            {clientes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nome}
-              </option>
-            ))}
-          </select>
+            value={clienteId || undefined}
+            onValueChange={setClienteId}
+            placeholder="Selecione…"
+            aria-label="Cliente"
+            triggerClassName="h-11"
+            options={clientes.map((c) => ({ value: c.id, label: c.nome }))}
+          />
         </label>
       ) : null}
 
@@ -378,9 +378,10 @@ export function VendaRapidaForm({
 
       <label className="block space-y-1 text-sm">
         <span className="text-muted-foreground">Ou escolha o produto</span>
-        <select
-          className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+        <NativeSelect
+          className="h-11"
           defaultValue=""
+          aria-label="Escolher produto"
           onChange={(e) => {
             const p = produtos.find((x) => x.id === e.target.value);
             if (p) addProduto(p);
@@ -390,11 +391,10 @@ export function VendaRapidaForm({
           <option value="">Adicionar produto…</option>
           {produtos.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.nome}
-              {p.sku ? ` (${p.sku})` : ""} — est. {p.estoque_atual}
+              {buildCatalogItemSelectLabel(p)}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </label>
 
       {lines.length > 0 ? (
@@ -534,19 +534,18 @@ export function VendaRapidaForm({
         </label>
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Tipo</span>
-          <select
+          <GFSelect
             value={descontoTipo}
-            onChange={(e) =>
-              setDescontoTipo(e.target.value as (typeof DESCONTO_TIPOS)[number])
+            onValueChange={(next) =>
+              setDescontoTipo(next as (typeof DESCONTO_TIPOS)[number])
             }
-            className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-          >
-            {DESCONTO_TIPOS.map((t) => (
-              <option key={t} value={t}>
-                {DESCONTO_TIPO_LABELS[t]}
-              </option>
-            ))}
-          </select>
+            aria-label="Tipo de desconto"
+            triggerClassName="h-11"
+            options={DESCONTO_TIPOS.map((t) => ({
+              value: t,
+              label: DESCONTO_TIPO_LABELS[t],
+            }))}
+          />
         </label>
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Motivo do desconto</span>
@@ -589,20 +588,18 @@ export function VendaRapidaForm({
           <div className="grid gap-3 md:grid-cols-3">
             <label className="block space-y-1 text-sm">
               <span className="text-muted-foreground">Forma de pagamento *</span>
-              <select
+              <GFSelect
                 required
-                value={formaId}
-                onChange={(e) => setFormaId(e.target.value)}
-                className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-              >
-                <option value="">Selecione…</option>
-                {formasPagamento.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.nome}
-                    {f.tipo ? ` (${f.tipo})` : ""}
-                  </option>
-                ))}
-              </select>
+                value={formaId || undefined}
+                onValueChange={setFormaId}
+                placeholder="Selecione…"
+                aria-label="Forma de pagamento"
+                triggerClassName="h-11"
+                options={formasPagamento.map((f) => ({
+                  value: f.id,
+                  label: formatFormaPagamentoLabel(f),
+                }))}
+              />
             </label>
             <label className="flex items-center gap-2 text-sm md:pt-6">
               <input
@@ -615,19 +612,18 @@ export function VendaRapidaForm({
             {receberAgora ? (
               <label className="block space-y-1 text-sm">
                 <span className="text-muted-foreground">Conta bancária *</span>
-                <select
+                <GFSelect
                   required
-                  value={contaId}
-                  onChange={(e) => setContaId(e.target.value)}
-                  className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                >
-                  <option value="">Selecione…</option>
-                  {contasBancarias.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome}
-                    </option>
-                  ))}
-                </select>
+                  value={contaId || undefined}
+                  onValueChange={setContaId}
+                  placeholder="Selecione…"
+                  aria-label="Conta bancária"
+                  triggerClassName="h-11"
+                  options={contasBancarias.map((c) => ({
+                    value: c.id,
+                    label: c.nome,
+                  }))}
+                />
               </label>
             ) : null}
           </div>
@@ -640,27 +636,25 @@ export function VendaRapidaForm({
               >
                 <label className="block space-y-1 text-sm">
                   <span className="text-muted-foreground">Forma {idx + 1}</span>
-                  <select
-                    value={p.forma_pagamento_id}
-                    onChange={(e) =>
+                  <GFSelect
+                    value={p.forma_pagamento_id || undefined}
+                    onValueChange={(next) =>
                       setPayLines((rows) =>
                         rows.map((r) =>
                           r.key === p.key
-                            ? { ...r, forma_pagamento_id: e.target.value }
+                            ? { ...r, forma_pagamento_id: next }
                             : r,
                         ),
                       )
                     }
-                    className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                  >
-                    <option value="">Selecione…</option>
-                    {formasPagamento.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.nome}
-                        {f.tipo ? ` (${f.tipo})` : ""}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Selecione…"
+                    aria-label={`Forma de pagamento ${idx + 1}`}
+                    triggerClassName="h-11"
+                    options={formasPagamento.map((f) => ({
+                      value: f.id,
+                      label: formatFormaPagamentoLabel(f),
+                    }))}
+                  />
                 </label>
                 <label className="block space-y-1 text-sm">
                   <span className="text-muted-foreground">Valor</span>
@@ -762,19 +756,18 @@ export function VendaRapidaForm({
             {receberAgora ? (
               <label className="block max-w-sm space-y-1 text-sm">
                 <span className="text-muted-foreground">Conta bancária *</span>
-                <select
+                <GFSelect
                   required
-                  value={contaId}
-                  onChange={(e) => setContaId(e.target.value)}
-                  className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                >
-                  <option value="">Selecione…</option>
-                  {contasBancarias.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome}
-                    </option>
-                  ))}
-                </select>
+                  value={contaId || undefined}
+                  onValueChange={setContaId}
+                  placeholder="Selecione…"
+                  aria-label="Conta bancária (múltiplas formas)"
+                  triggerClassName="h-11"
+                  options={contasBancarias.map((c) => ({
+                    value: c.id,
+                    label: c.nome,
+                  }))}
+                />
               </label>
             ) : null}
           </div>

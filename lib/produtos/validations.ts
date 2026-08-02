@@ -68,6 +68,11 @@ export const produtoFormSchema = z
     controla_validade: z.boolean().default(false),
     observacoes: optionalText,
     ativo: z.boolean(),
+    tempo_estimado_minutos: nullableNumber,
+    preco_sugerido: nullableNumber,
+    especialidade: optionalText,
+    equipe_ou_profissional: optionalText,
+    unidade_cobranca: optionalText,
   })
   .superRefine((data, ctx) => {
     if (data.tipo === "servico") {
@@ -98,7 +103,9 @@ export const produtoFormSchema = z
       ["custo", "Custo"],
       ["custo_reposicao", "Custo de reposição"],
       ["preco_venda", "Preço de venda"],
+      ["preco_sugerido", "Preço sugerido"],
       ["preco_minimo", "Preço mínimo"],
+      ["tempo_estimado_minutos", "Tempo estimado"],
       ["peso_kg", "Peso"],
       ["altura_cm", "Altura"],
       ["largura_cm", "Largura"],

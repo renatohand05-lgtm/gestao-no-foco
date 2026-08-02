@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { SaveButton } from "@/components/ui/save-button";
 import {
   DESCONTO_TIPO_LABELS,
@@ -120,10 +121,10 @@ export function OsDescontoPanel({
         </label>
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Tipo *</span>
-          <select
+          <NativeSelect
             name="desconto_tipo"
             required
-            className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+            className="h-10"
             defaultValue={
               recorrencia?.isRecorrente ? "cliente_recorrente" : "negociacao_comercial"
             }
@@ -133,7 +134,7 @@ export function OsDescontoPanel({
                 {DESCONTO_TIPO_LABELS[t]}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Motivo *</span>

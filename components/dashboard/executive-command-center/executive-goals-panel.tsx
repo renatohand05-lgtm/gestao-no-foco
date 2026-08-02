@@ -46,7 +46,8 @@ export function ExecutiveGoalsPanel({ goals }: Props) {
       </div>
       {!goals.available ? (
         <p className={cn(gofTypography.caption)}>
-          Meta indisponível no snapshot atual.
+          Meta não cadastrada para o período atual. Cadastre em Configurações →
+          Metas. Ausência de meta não é exibida como R$ 0,00.
         </p>
       ) : null}
     </ExecutiveSection>

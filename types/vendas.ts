@@ -65,11 +65,14 @@ export type VendaProdutoResumo = {
   id: string;
   nome: string;
   sku: string | null;
+  codigo_interno?: string | null;
   tipo: ProdutoTipo;
   unidade_medida: string;
   preco_venda: number | null;
   custo: number | null;
   estoque_atual: number;
+  preco_sugerido?: number | null;
+  tempo_estimado_minutos?: number | null;
 };
 
 export type VendaItemWithProduto = VendaItem & {

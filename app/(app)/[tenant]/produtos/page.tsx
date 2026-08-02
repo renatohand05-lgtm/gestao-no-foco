@@ -4,6 +4,7 @@ import { ModuleHeader } from "@/components/layout/module-header";
 import { ProdutoEmptyState } from "@/components/produtos/produto-empty-state";
 import { ProdutoFeedback } from "@/components/produtos/produto-feedback";
 import { ProdutoFilters } from "@/components/produtos/produto-filters";
+import { ProdutoHubTabs } from "@/components/produtos/produto-hub-tabs";
 import { ProdutoPagination } from "@/components/produtos/produto-pagination";
 import { ProdutoSearch } from "@/components/produtos/produto-search";
 import { ProdutoSort } from "@/components/produtos/produto-sort";
@@ -33,6 +34,8 @@ type ProdutosPageProps = {
     tipo?: string;
     ativo?: string;
     categoria?: string;
+    custoZerado?: string;
+    precoZerado?: string;
     success?: string;
     error?: string;
   }>;
@@ -47,8 +50,19 @@ export default async function ProdutosPage({
   searchParams,
 }: ProdutosPageProps) {
   const { tenant: tenantSlug } = await params;
-  const { q, page, sort, order, tipo, ativo, categoria, success, error } =
-    await searchParams;
+  const {
+    q,
+    page,
+    sort,
+    order,
+    tipo,
+    ativo,
+    categoria,
+    custoZerado,
+    precoZerado,
+    success,
+    error,
+  } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const service = await createProdutoService(tenant.id);
 
@@ -68,32 +82,53 @@ export default async function ProdutosPage({
     tipo: tipoFilter,
     ativo: ativoFilter,
     categoria,
+    custoZerado: custoZerado === "1",
+    precoZerado: precoZerado === "1",
   });
 
   const hasFilters =
     Boolean(q) ||
     tipoFilter !== "all" ||
     ativoFilter !== "all" ||
-    Boolean(categoria);
+    Boolean(categoria) ||
+    custoZerado === "1" ||
+    precoZerado === "1";
 
   return (
     <div className="space-y-6">
       <ModuleHeader
         title="Produtos & Serviços"
-        description={`Catálogo e estoque de ${tenant.name}`}
+        description={`Catálogo separado por tipo em ${tenant.name}`}
         breadcrumbs={[{ label: "Produtos & Serviços" }]}
       >
         <ActionButton
           action="create"
-          label="Importar / catálogo"
-          href={`/${tenantSlug}/produtos/importar`}
+          label="Importar produtos"
+          href={`/${tenantSlug}/produtos/importar?kind=produtos`}
         />
         <ActionButton
           action="create"
-          label="Novo item"
-          href={`/${tenantSlug}/produtos/novo`}
+          label="Importar serviços"
+          href={`/${tenantSlug}/produtos/importar?kind=servicos`}
+        />
+        <ActionButton
+          action="create"
+          label="Novo produto"
+          href={`/${tenantSlug}/produtos/novo?tipo=produto`}
+        />
+        <ActionButton
+          action="create"
+          label="Novo serviço"
+          href={`/${tenantSlug}/produtos/novo?tipo=servico`}
+        />
+        <ActionButton
+          action="view"
+          label="Gerenciar serviços"
+          href={`/${tenantSlug}/produtos/gerenciar-servicos`}
         />
       </ModuleHeader>
+
+      <ProdutoHubTabs tenantSlug={tenantSlug} currentTipo={tipoFilter} />
 
       <ProdutoFeedback
         success={success as ProdutoSuccessMessage | undefined}
@@ -110,6 +145,8 @@ export default async function ProdutosPage({
             currentTipo={tipoFilter}
             currentAtivo={ativo === "true" || ativo === "false" ? ativo : "all"}
             currentCategoria={categoria ?? ""}
+            currentCustoZerado={custoZerado === "1"}
+            currentPrecoZerado={precoZerado === "1"}
           />
           <ProdutoSort
             tenantSlug={tenantSlug}
@@ -131,7 +168,11 @@ export default async function ProdutosPage({
             {result.total} item{result.total === 1 ? "" : "s"} encontrado
             {result.total === 1 ? "" : "s"}
           </p>
-          <ProdutoTable tenantSlug={tenantSlug} produtos={result.data} />
+          <ProdutoTable
+            tenantSlug={tenantSlug}
+            produtos={result.data}
+            servicosMode={tipoFilter === "servico"}
+          />
           <ProdutoPagination
             tenantSlug={tenantSlug}
             page={result.page}

@@ -18,7 +18,10 @@ export type ProdutoSortField =
   | "preco_venda"
   | "estoque_atual"
   | "tipo"
-  | "ativo";
+  | "ativo"
+  | "custo"
+  | "preco_sugerido"
+  | "categoria";
 
 export type Produto = {
   id: string;
@@ -69,6 +72,12 @@ export type Produto = {
   controla_lote: boolean;
   controla_serie: boolean;
   controla_validade: boolean;
+  /** Sprint 27.8 — campos de serviço (migration 20260801) */
+  tempo_estimado_minutos: number | null;
+  preco_sugerido: number | null;
+  especialidade: string | null;
+  equipe_ou_profissional: string | null;
+  unidade_cobranca: string | null;
 };
 
 export type ProdutoListItem = Pick<
@@ -86,6 +95,10 @@ export type ProdutoListItem = Pick<
   | "ativo"
   | "created_at"
   | "updated_at"
+  | "custo"
+  | "preco_sugerido"
+  | "tempo_estimado_minutos"
+  | "unidade_cobranca"
 >;
 
 export type ProdutoInput = {
@@ -131,6 +144,12 @@ export type ProdutoInput = {
   controla_lote?: boolean;
   controla_serie?: boolean;
   controla_validade?: boolean;
+  /** Sprint 27.8 — campos de serviço */
+  tempo_estimado_minutos?: number | null;
+  preco_sugerido?: number | null;
+  especialidade?: string | null;
+  equipe_ou_profissional?: string | null;
+  unidade_cobranca?: string | null;
 };
 
 export type CreateProdutoInput = ProdutoInput;
@@ -145,6 +164,9 @@ export type ListProdutosParams = {
   tipo?: ProdutoTipo | "all";
   ativo?: boolean | "all";
   categoria?: string;
+  /** Sprint 27.8.2 — filtros comerciais de serviço */
+  custoZerado?: boolean;
+  precoZerado?: boolean;
 };
 
 export type ProdutoSuccessMessage = "created" | "updated" | "deleted";

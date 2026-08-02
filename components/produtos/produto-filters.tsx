@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import { GFSelect } from "@/components/gf/gf-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +16,8 @@ type ProdutoFiltersProps = {
   currentTipo?: string;
   currentAtivo?: string;
   currentCategoria?: string;
+  currentCustoZerado?: boolean;
+  currentPrecoZerado?: boolean;
 };
 
 export function ProdutoFilters({
@@ -22,6 +25,8 @@ export function ProdutoFilters({
   currentTipo = "all",
   currentAtivo = "all",
   currentCategoria = "",
+  currentCustoZerado = false,
+  currentPrecoZerado = false,
 }: ProdutoFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,38 +61,36 @@ export function ProdutoFilters({
         <label htmlFor="filter-tipo" className="text-xs font-medium text-muted-foreground">
           Tipo
         </label>
-        <select
+        <GFSelect
           id="filter-tipo"
           value={currentTipo}
           disabled={isPending}
-          onChange={(event) => updateParams({ tipo: event.target.value })}
-          className="flex h-9 w-full min-w-40 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-          {PRODUTO_TIPO_FILTER_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          onValueChange={(value) => updateParams({ tipo: value })}
+          aria-label="Tipo"
+          triggerClassName="min-w-40"
+          options={PRODUTO_TIPO_FILTER_OPTIONS.map((option) => ({
+            value: option.value,
+            label: option.label,
+          }))}
+        />
       </div>
 
       <div className="space-y-1.5">
         <label htmlFor="filter-ativo" className="text-xs font-medium text-muted-foreground">
           Status
         </label>
-        <select
+        <GFSelect
           id="filter-ativo"
           value={currentAtivo}
           disabled={isPending}
-          onChange={(event) => updateParams({ ativo: event.target.value })}
-          className="flex h-9 w-full min-w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-          {PRODUTO_STATUS_FILTER_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          onValueChange={(value) => updateParams({ ativo: value })}
+          aria-label="Status"
+          triggerClassName="min-w-36"
+          options={PRODUTO_STATUS_FILTER_OPTIONS.map((option) => ({
+            value: option.value,
+            label: option.label,
+          }))}
+        />
       </div>
 
       <div className="space-y-1.5">
@@ -124,6 +127,37 @@ export function ProdutoFilters({
           </Button>
         </div>
       </div>
+
+      {currentTipo === "servico" ? (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={currentCustoZerado ? "default" : "outline"}
+            disabled={isPending}
+            onClick={() =>
+              updateParams({
+                custoZerado: currentCustoZerado ? null : "1",
+              })
+            }
+          >
+            Custo zerado
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={currentPrecoZerado ? "default" : "outline"}
+            disabled={isPending}
+            onClick={() =>
+              updateParams({
+                precoZerado: currentPrecoZerado ? null : "1",
+              })
+            }
+          >
+            Preço zerado
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

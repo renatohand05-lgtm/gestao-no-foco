@@ -10,6 +10,7 @@ import {
   META_DIA_STATUS_LABEL,
   type MetaDiaStatus,
 } from "@/lib/dashboard/faturamento-agregacao";
+import { formatCurrencyCompact } from "@/lib/dashboard/format";
 import { gfType } from "@/lib/design-system/signature";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,8 @@ type Props = {
   dataHoje: string;
   updatedAtLabel: string;
   status: MetaDiaStatus;
+  /** Meta mensal vigente (R$) — ausente ≠ 0. */
+  metaMensal?: number | null;
   /** Saúde de caixa / empresa — label real do cockpit, nunca inventado. */
   companyStatusLabel?: string;
   companyStatusTone?: "success" | "warning" | "danger" | "neutral" | "info";
@@ -63,12 +66,15 @@ export function GFExecutiveHeader({
   dataHoje,
   updatedAtLabel,
   status,
+  metaMensal = null,
   companyStatusLabel,
   companyStatusTone = "neutral",
   tenantSlug,
 }: Props) {
   void _greeting;
   const dateLabel = formatLongDate(dataHoje);
+  const hasMetaMensal =
+    metaMensal != null && Number.isFinite(metaMensal) && metaMensal > 0;
 
   return (
     <header
@@ -95,9 +101,18 @@ export function GFExecutiveHeader({
                 Status · {companyStatusLabel}
               </GFStatusPill>
             ) : null}
-            <GFStatusPill tone={metaTone(status)}>
-              Meta do dia · {META_DIA_STATUS_LABEL[status]}
-            </GFStatusPill>
+            <span data-meta-mes-pill="">
+              <GFStatusPill tone={hasMetaMensal ? "info" : "neutral"}>
+                {hasMetaMensal
+                  ? `Meta do mês · ${formatCurrencyCompact(metaMensal)}`
+                  : "Meta do mês · Não cadastrada"}
+              </GFStatusPill>
+            </span>
+            <span data-meta-dia-pill="">
+              <GFStatusPill tone={metaTone(status)}>
+                Meta do dia · {META_DIA_STATUS_LABEL[status]}
+              </GFStatusPill>
+            </span>
             <span className={cn(gfType.caption, "px-1")}>
               Atualizado {updatedAtLabel}
             </span>

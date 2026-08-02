@@ -12,6 +12,7 @@ import {
   formatProdutoDate,
   formatQuantity,
 } from "@/lib/produtos/format";
+import { formatServiceMargin } from "@/lib/produtos/service-commercial";
 import type { Produto } from "@/types/produtos";
 
 type ProdutoDetailProps = {
@@ -88,14 +89,71 @@ export function ProdutoDetail({ tenantSlug, produto }: ProdutoDetailProps) {
 
         <SectionCard title="Precificação">
           <FormGrid>
-            <DetailItem label="Custo" value={formatCurrency(produto.custo)} />
-            <DetailItem label="Preço de venda" value={formatCurrency(produto.preco_venda)} />
             <DetailItem
-              label="Margem"
-              value={formatPercent(produto.margem_percent)}
+              label={
+                produto.tipo === "servico"
+                  ? "Custo da mão de obra"
+                  : "Custo"
+              }
+              value={formatCurrency(produto.custo)}
             />
+            <DetailItem
+              label={
+                produto.tipo === "servico" ? "Preço atual" : "Preço de venda"
+              }
+              value={formatCurrency(produto.preco_venda)}
+            />
+            {produto.tipo === "servico" ? (
+              <>
+                <DetailItem
+                  label="Preço sugerido"
+                  value={formatCurrency(produto.preco_sugerido)}
+                />
+                <DetailItem
+                  label="Margem"
+                  value={formatServiceMargin(
+                    produto.custo,
+                    produto.preco_venda,
+                  )}
+                />
+              </>
+            ) : (
+              <DetailItem
+                label="Margem"
+                value={formatPercent(produto.margem_percent)}
+              />
+            )}
           </FormGrid>
         </SectionCard>
+
+        {produto.tipo === "servico" ? (
+          <SectionCard title="Dados do serviço">
+            <FormGrid>
+              <DetailItem
+                label="Tempo estimado"
+                value={
+                  produto.tempo_estimado_minutos != null
+                    ? `${produto.tempo_estimado_minutos} min`
+                    : "—"
+                }
+              />
+              <DetailItem
+                label="Unidade de cobrança"
+                value={
+                  produto.unidade_cobranca || produto.unidade_medida || "—"
+                }
+              />
+              <DetailItem
+                label="Especialidade"
+                value={produto.especialidade || "—"}
+              />
+              <DetailItem
+                label="Equipe / profissional"
+                value={produto.equipe_ou_profissional || "—"}
+              />
+            </FormGrid>
+          </SectionCard>
+        ) : null}
 
         {showEstoque ? (
           <SectionCard title="Estoque">

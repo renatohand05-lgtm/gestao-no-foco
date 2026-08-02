@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { CommercialClienteTypeahead } from "@/components/vendas/commercial-cliente-typeahead";
 import { ExecutiveButton, ExecutiveFilterField } from "@/components/executive";
+import { NativeSelect } from "@/components/ui/native-select";
 import { gofControl } from "@/lib/design-system";
 import {
   ciClearHref,
@@ -62,11 +63,11 @@ export function CommercialIntelligenceFilters({
         />
       </ExecutiveFilterField>
       <ExecutiveFilterField label="Responsável comercial" htmlFor="ci-resp">
-        <select
+        <NativeSelect
           id="ci-resp"
           name="responsavel"
           defaultValue={responsavel ?? ""}
-          className={cn(gofControl, "min-w-[10rem]")}
+          className="min-w-[10rem]"
         >
           <option value="">Todos</option>
           {responsavelOptions.map((o) => (
@@ -74,14 +75,14 @@ export function CommercialIntelligenceFilters({
               {o.nome}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </ExecutiveFilterField>
       <ExecutiveFilterField label="Origem" htmlFor="ci-origem">
-        <select
+        <NativeSelect
           id="ci-origem"
           name="origem"
           defaultValue={origem ?? ""}
-          className={cn(gofControl, "min-w-[10rem]")}
+          className="min-w-[10rem]"
         >
           <option value="">Todas</option>
           {origemOptions.map((o) => (
@@ -89,14 +90,14 @@ export function CommercialIntelligenceFilters({
               {o.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </ExecutiveFilterField>
       <ExecutiveFilterField label="Status" htmlFor="ci-status">
-        <select
+        <NativeSelect
           id="ci-status"
           name="status"
           defaultValue={status ?? "all"}
-          className={cn(gofControl, "min-w-[10rem]")}
+          className="min-w-[10rem]"
         >
           <option value="all">Todos</option>
           {VENDA_STATUS_OPTIONS.map((o) => (
@@ -104,7 +105,7 @@ export function CommercialIntelligenceFilters({
               {o.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </ExecutiveFilterField>
       <CommercialClienteTypeahead
         tenantSlug={tenantSlug}

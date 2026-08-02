@@ -1,0 +1,18 @@
+{
+  "at": "2026-08-02T00:04:12.736Z",
+  "softDeleted": [
+    {
+      "id": "866428f1-9f41-4077-b227-200f7f74e2d7",
+      "nome": "[TESTE 27.8.1 UI] Homolog 1785629005818",
+      "codigo_interno": "UI2781-1785629005818",
+      "tipo": "servico"
+    },
+    {
+      "id": "4ca6f798-2f18-4f4b-aa95-d695a2d2e63b",
+      "nome": "[TESTE 27.8.1 UI] Homolog 1785628869705",
+      "codigo_interno": "UI2781-1785628869705",
+      "tipo": "servico"
+    }
+  ],
+  "count": 2
+}

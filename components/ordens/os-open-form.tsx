@@ -11,6 +11,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { SaveButton } from "@/components/ui/save-button";
 import {
   createOrdemServicoIntegradaAction,
@@ -18,7 +19,6 @@ import {
   type CreateOsIntegratedResult,
 } from "@/lib/ordens/actions";
 import type { OsAbrirDuplicate, OsSearchHit } from "@/lib/ordens/os-abrir-rpc";
-import { gofControl } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type Mode = "existente" | "novo_cliente";
@@ -370,15 +370,15 @@ export function OsOpenForm({
             </label>
             <label className="block space-y-1 text-sm">
               <span className="text-muted-foreground">Tipo</span>
-              <select
+              <NativeSelect
                 name="novo_tipo_pessoa"
                 disabled={pending}
-                className={cn(gofControl, "h-11")}
+                className="h-11"
                 defaultValue="pf"
               >
                 <option value="pf">Pessoa física</option>
                 <option value="pj">Pessoa jurídica</option>
-              </select>
+              </NativeSelect>
             </label>
             <label className="block space-y-1 text-sm">
               <span className="text-muted-foreground">Origem</span>
@@ -429,17 +429,17 @@ export function OsOpenForm({
         </label>
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Prioridade</span>
-          <select
+          <NativeSelect
             name="prioridade"
             defaultValue="normal"
             disabled={pending}
-            className={cn(gofControl, "h-11")}
+            className="h-11"
           >
             <option value="baixa">Baixa</option>
             <option value="normal">Normal</option>
             <option value="alta">Alta</option>
             <option value="urgente">Urgente</option>
-          </select>
+          </NativeSelect>
         </label>
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Previsão entrega</span>

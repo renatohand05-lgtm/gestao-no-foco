@@ -14,6 +14,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { SectionCard } from "@/components/ui/section-card";
 import { formatCurrency } from "@/lib/format";
 import type { ShareListItem } from "@/lib/ordens/compartilhamento-service";
@@ -248,11 +249,12 @@ export function InspecaoEnvioPanel({
         </label>
         <label className="space-y-1 text-xs">
           <span className="text-muted-foreground">Versão do orçamento</span>
-          <select
+          <NativeSelect
             value={versaoSelecionada || versaoPublicada?.id || ""}
             onChange={(e) => setVersaoSelecionada(e.target.value)}
             disabled={disabled || pending || versoes.length === 0}
-            className="h-9 w-full rounded-md border border-input bg-transparent px-2 text-sm"
+            className="h-9 w-full"
+            aria-label="Versão do orçamento"
           >
             {versoes.length === 0 ? (
               <option value="">Nenhuma versão</option>
@@ -263,7 +265,7 @@ export function InspecaoEnvioPanel({
                 </option>
               ))
             )}
-          </select>
+          </NativeSelect>
         </label>
       </div>
 

@@ -129,6 +129,7 @@ export function PremiumDashboardView({
             dataHoje={hoje.data_hoje}
             updatedAtLabel={hoje.atualizado_em_label}
             status={hoje.hoje.status}
+            metaMensal={hoje.mes.meta}
             companyStatusLabel={cockpit.saudeLabel}
             companyStatusTone={companyTone(cockpit.saude)}
             tenantSlug={tenantSlug}

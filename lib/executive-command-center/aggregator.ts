@@ -135,24 +135,20 @@ export function buildCommandGoals(params: {
       ? formatPredictiveMoney(params.hoje.projecaoFechamento)
       : "Indisponível";
 
-  const metaMes =
-    params.hoje?.metaMes != null
-      ? formatPredictiveMoney(params.hoje.metaMes)
-      : comercial?.metaDisponivel
-        ? formatPredictivePct(comercial.metaPercentual)
-        : "Indisponível";
-
-  const available =
-    pct != null ||
-    params.hoje?.metaMes != null ||
-    Boolean(comercial?.metaDisponivel);
+  // Nunca usar percentual como label da meta; ausência ≠ R$ 0,00
+  const hasMeta =
+    params.hoje?.metaMes != null &&
+    Number.isFinite(params.hoje.metaMes) &&
+    params.hoje.metaMes > 0;
 
   return {
-    metaMesLabel: metaMes,
-    percentualLabel: formatPredictivePct(pct),
+    metaMesLabel: hasMeta
+      ? formatPredictiveMoney(params.hoje!.metaMes!)
+      : "Meta não cadastrada",
+    percentualLabel: hasMeta ? formatPredictivePct(pct) : "Meta não cadastrada",
     projecaoLabel: proj,
-    abaixoRitmo: comercial?.metaAbaixoRitmo ?? null,
-    available,
+    abaixoRitmo: hasMeta ? (comercial?.metaAbaixoRitmo ?? null) : null,
+    available: hasMeta,
   };
 }
 

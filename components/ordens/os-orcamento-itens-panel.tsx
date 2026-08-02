@@ -9,6 +9,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import {
   addOsItemAction,
   converterOsItemPersonalizadoAction,
@@ -390,17 +391,18 @@ export function OsOrcamentoItensPanel({
                 disabled={pending}
                 placeholder="Desconto"
               />
-              <select
+              <NativeSelect
                 value={pecaOrigem}
                 onChange={(e) => setPecaOrigem(e.target.value)}
                 disabled={pending}
-                className="h-10 rounded-md border px-2 text-sm"
+                className="h-10"
+                aria-label="Origem da peça"
               >
                 <option value="estoque">Estoque</option>
                 <option value="cliente">Cliente</option>
                 <option value="compra">Compra</option>
                 <option value="outro">Outro</option>
-              </select>
+              </NativeSelect>
             </div>
           ) : null}
           <button
@@ -459,17 +461,18 @@ export function OsOrcamentoItensPanel({
                 </FeedbackMessage>
               ) : null}
               <div className="grid gap-2 md:grid-cols-2">
-                <select
+                <NativeSelect
                   value={pTipo}
                   onChange={(e) =>
                     setPTipo(e.target.value as "produto" | "servico")
                   }
-                  className="h-10 rounded-md border px-2 text-sm"
+                  className="h-10"
                   disabled={pending}
+                  aria-label="Tipo do item personalizado"
                 >
                   <option value="servico">Serviço personalizado</option>
                   <option value="produto">Produto personalizado</option>
-                </select>
+                </NativeSelect>
                 <Input
                   value={pDesc}
                   onChange={(e) => {

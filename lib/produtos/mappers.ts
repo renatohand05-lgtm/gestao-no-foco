@@ -49,6 +49,19 @@ export function normalizeProdutoFormValues(
     controla_validade: isServico ? false : Boolean(values.controla_validade),
     observacoes: values.observacoes?.trim() || null,
     ativo: values.ativo,
+    tempo_estimado_minutos: isServico
+      ? (values.tempo_estimado_minutos ?? null)
+      : null,
+    preco_sugerido: isServico ? (values.preco_sugerido ?? null) : null,
+    especialidade: isServico
+      ? values.especialidade?.trim() || null
+      : null,
+    equipe_ou_profissional: isServico
+      ? values.equipe_ou_profissional?.trim() || null
+      : null,
+    unidade_cobranca: isServico
+      ? values.unidade_cobranca?.trim() || values.unidade_medida.trim()
+      : null,
   };
 }
 
@@ -91,6 +104,11 @@ export function produtoToFormValues(produto: Produto): ProdutoFormValues {
     controla_validade: produto.controla_validade ?? false,
     observacoes: produto.observacoes ?? "",
     ativo: produto.ativo,
+    tempo_estimado_minutos: produto.tempo_estimado_minutos ?? null,
+    preco_sugerido: produto.preco_sugerido ?? null,
+    especialidade: produto.especialidade ?? "",
+    equipe_ou_profissional: produto.equipe_ou_profissional ?? "",
+    unidade_cobranca: produto.unidade_cobranca ?? "",
   };
 }
 
@@ -138,6 +156,11 @@ export function buildProdutoPayload(input: CreateProdutoInput) {
     controla_validade: input.controla_validade ?? false,
     observacoes: input.observacoes ?? null,
     ativo: input.ativo,
+    tempo_estimado_minutos: input.tempo_estimado_minutos ?? null,
+    preco_sugerido: input.preco_sugerido ?? null,
+    especialidade: input.especialidade ?? null,
+    equipe_ou_profissional: input.equipe_ou_profissional ?? null,
+    unidade_cobranca: input.unidade_cobranca ?? null,
   };
 }
 

@@ -227,6 +227,39 @@
   .font-mono {
     font-family: var(--font-mono), ui-monospace, monospace;
   }
+
+  /* Sprint 27.8 — fallback visual seguro para selects nativos restantes */
+  select {
+    color-scheme: light dark;
+  }
+
+  .dark select {
+    color-scheme: dark;
+  }
+
+  select.gof-native-select,
+  select[data-slot="native-select"] {
+    color-scheme: light dark;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  .dark select.gof-native-select,
+  .dark select[data-slot="native-select"] {
+    color-scheme: dark;
+    background-color: color-mix(in oklab, var(--input) 30%, var(--background));
+    color: var(--foreground);
+  }
+
+  select.gof-native-select option,
+  select[data-slot="native-select"] option,
+  select.gof-native-select optgroup,
+  select[data-slot="native-select"] optgroup,
+  .dark select option,
+  .dark select optgroup {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

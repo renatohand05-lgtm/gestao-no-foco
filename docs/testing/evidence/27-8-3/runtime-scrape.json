@@ -1,0 +1,63 @@
+{
+  "at": "2026-08-02T00:43:26.126Z",
+  "base": "http://localhost:3000",
+  "auth": true,
+  "pages": {
+    "dashboard": {
+      "url": "http://localhost:3000/teste-renato-01/dashboard",
+      "status": 200,
+      "metaMesPill": "Meta do mês · R$ 132.500",
+      "metaDiaPill": "Meta do dia · Fim de semana",
+      "kpiMeta": [
+        {
+          "title": "Faturamento do mês"
+        },
+        {
+          "title": "Lucro líquido"
+        },
+        {
+          "title": "Margem líquida"
+        },
+        {
+          "title": "EBITDA"
+        },
+        {
+          "title": "Caixa disponível"
+        },
+        {
+          "title": "Meta do mês"
+        }
+      ],
+      "has132500": true,
+      "hasSemMeta": true,
+      "hasNaoCadastrada": false,
+      "bodySnippet": "ENTERPRISE\n\nteste-renato-01\n\nPRINCIPAL\nCentro de Operações\nDashboard\nBusca\nOPERAÇÃO\nClientes\nProdutos & Serviços\nEstoque\nCompras\nVendas\nOrdens de Serviço\nMecânicos\nINTELIGÊNCIA\nInteligência\nTributário\nCRM\nFinanceiro\nIntegrações\nAnalytics\nRelatórios\nSISTEMA\nConfigurações\nteste-renato-01\nOwner\nToggle Sidebar\n\nGestão · teste-renato-01\n\nPlataforma de Gestão Inteligente\n\nBuscar…\n⌘K\nRA\n\nApresentação\n\nNormal\nExecutivo\nComercial\nTela Cheia\n\nteste-renato-01\n\nOnline\nNovo\nExportar\nBuscar\n⌘K\nFoco\n\nCOCKPIT EXECUTIVO\n\nteste-renato-01\n\nSábado, 1 De Agosto De 2026\n\nStatus · Atenção\nMeta do mês · R$ 132.500\nMeta do dia · Fim de semana\nAtualizado 01/08/2026, 21:43\nÚltima atualização: 01/08/2026, 21:43\nAtualizar dados\nFoco\nExportar\n\nEXECUTIVE BRIEF\n\n6 alertas\nBoa noite, Renato.\n\nteste-renato-01 · ciclo de 2026-08-01. Caixa atenção. Meta do mês R$ 132.500 · 4,9% atingido com R$ 6.532,50 realizados. Foco: Saúde de caixa.\n\nSaúde de caixa\nSAÚDE DE CAIXA\nAtenção\nFATURAMENTO\nR$ 6.532,50\nCAIXA\nR$ 123.032\nMETA MÊS\nR$ 132.500 · 4,9%\n\nFATURAMENTO DO MÊS\n\nR$ 6.532,50\n\nMês corrente · vendas\n\n-91,1% vs período anterior\n\nLUCRO LÍQUIDO\n\nIndisponível\n\nDRE completo não disponível neste ciclo\n\nMARGEM LÍQUIDA\n\n54,8%\n\nMargem de contribuição / receita líquida\n\n16,8% vs período anterior\n\nEBITDA\n\nR$ 3.686,50\n\nPeríodo filtrado do dashboard\n\n-83,1% vs período anterior\n\nCAIXA DISPONÍVEL\n\nR$ 123.032\n\nSaldo bancário consolidado\n\nMETA DO MÊS\n\nR$ 132.500\n\n4,9% da meta\n\nFaturamento\n\nSérie diária · 01 de ago. de 2026 — 31 de ago. de 2026\n\nDashboard · vendas · confiança Alta\n\nÚltimo ponto · 01 de ago. de 2026 — 31 de ago. de 2026\n\nR$ 189,00\n\nR$ 6,5 mil\nR$ 189\n01/08\n31/08\nCentral de Inteligência\n\nTop 3 · Análise baseada em regras, métricas e histórico do tenant.\n\nSaúde de caixa\n\nHá títulos vencidos a regularizar.\n\nALTA · COCKPIT FINANCEIRO · SALDO E PROJEÇÃO\n\nEstoque abaixo do mínimo\n\n3 SKU(s) abaixo do mínimo cadastrado.\n\nALTA · ESTOQUE · DASHBOARD\n\nClientes sem retorno / aguardando\n\n8 OS abertas · 1 atrasadas · 0 aguardando cliente\n\nALTA · CENTRO DE OPERAÇÕES\n\nVer todos (11)\nFluxo de caixa\n\nAtenção\n\nSALDO\nR$ 123.032\nPROJ. 7D\nR$ 123.221\nENTRADAS\nR$ 189,00\nSAÍDAS\nR$ 0,00\nEntradas\nSaídas\nAbrir fluxo completo\n\nVENDAS DE HOJE\n\nR$ 6.532,50\n\nSem meta diária\n\nPEDIDOS / OS EM ABERTO\n\n8\n\n1 atrasadas\n\nESTOQUE BAIXO\n\n3\n\nSKUs abaixo do mínimo\n\nCLIENTES ATIVOS\n\n9\n\nClientes com movimento no período\n\nAlertas e calendário fiscal\n6 alerta(s) de atenção neste ciclo\nCalendário fiscal\n\nIndisponível — nenhuma fonte confiável de"
+    },
+    "analytics": {
+      "url": "http://localhost:3000/teste-renato-01/analytics",
+      "status": 200,
+      "metaMesPill": null,
+      "metaDiaPill": null,
+      "kpiMeta": [],
+      "has132500": false,
+      "hasSemMeta": false,
+      "hasNaoCadastrada": false,
+      "bodySnippet": "ENTERPRISE\n\nteste-renato-01\n\nPRINCIPAL\nCentro de Operações\nDashboard\nBusca\nOPERAÇÃO\nClientes\nProdutos & Serviços\nEstoque\nCompras\nVendas\nOrdens de Serviço\nMecânicos\nINTELIGÊNCIA\nInteligência\nTributário\nCRM\nFinanceiro\nIntegrações\nAnalytics\nRelatórios\nSISTEMA\nConfigurações\nteste-renato-01\nOwner\nToggle Sidebar\n\nGestão · teste-renato-01\n\nPlataforma de Gestão Inteligente\n\nBuscar…\n⌘K\nRA\n\nApresentação\n\nNormal\nExecutivo\nComercial\nTela Cheia\nCarregando\nCarregando\nCarregando\nCarregando\nCarregando\n\nA plataforma que eleva sua gestão ao próximo nível."
+    },
+    "metas": {
+      "url": "http://localhost:3000/teste-renato-01/configuracoes/metas",
+      "status": 200,
+      "metaMesPill": null,
+      "metaDiaPill": null,
+      "kpiMeta": [],
+      "has132500": true,
+      "hasSemMeta": true,
+      "hasNaoCadastrada": false,
+      "bodySnippet": "ENTERPRISE\n\nteste-renato-01\n\nPRINCIPAL\nCentro de Operações\nDashboard\nBusca\nOPERAÇÃO\nClientes\nProdutos & Serviços\nEstoque\nCompras\nVendas\nOrdens de Serviço\nMecânicos\nINTELIGÊNCIA\nInteligência\nTributário\nCRM\nFinanceiro\nIntegrações\nAnalytics\nRelatórios\nSISTEMA\nConfigurações\nteste-renato-01\nOwner\nToggle Sidebar\n\nGestão · teste-renato-01\n\nPlataforma de Gestão Inteligente\n\nBuscar…\n⌘K\nRA\n\nApresentação\n\nNormal\nExecutivo\nComercial\nTela Cheia\nConfigurações\nMetas de Vendas\nMetas de Vendas\n\nMetas mensais e histórico de teste-renato-01\n\nNova meta\nMeta diária\nOverride manual por data. Sem override, o dashboard rateia a meta mensal pelos dias úteis (seg–sex). Histórico preservado via soft-delete.\nMeta diária — data\nValor (R$)\nSalvar meta do dia\n\nSem meta diária manual, o dashboard rateia a meta mensal pelos dias úteis. Edição por data não apaga o histórico (soft-delete).\n\nHistórico de metas\nRealizado = faturamento líquido (vendas faturadas + CR avulsas), mesma regra do dashboard.\nCompetência\tCentro\tMeta\tRealizado\tAtingimento\tProj. corridos\tProj. úteis\tGap\tNec. / dia útil\tRitmo esp.\tRitmo atual\tStatus\tAções\n2026-08\tGeral\tR$ 132.500,00\tR$ 6.721,50\t5,1%\tR$ 208.366,50\tR$ 0,00\tR$ 75.866,50\tR$ 5.989,45\t3,2%\t5,1%\tNo ritmo\t\nEditar\nExcluir meta\n\n2026-07\tGeral\tR$ 75.000,00\tR$ 75.682,00\t100,9%\tR$ 75.682,00\tR$ 75.682,00\tR$ 682,00\tR$ 0,00\t100,0%\t100,9%\tMeta atingida\t\nEditar\nExcluir meta\n\nA plataforma que eleva sua gestão ao próximo nível."
+    }
+  },
+  "verdict": {
+    "dashboardShowsMeta": true,
+    "dashboardFalseSemMeta": false
+  }
+}

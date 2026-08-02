@@ -1,0 +1,89 @@
+{
+  "at": "2026-08-02T00:36:13.606Z",
+  "tenant": {
+    "id": "30fd2055-b14e-4922-a239-94a291869f94",
+    "slug": "teste-renato-01"
+  },
+  "timezoneProbe": {
+    "serverUtc": "2026-08-02T00:36:13.203Z",
+    "americaSaoPaulo": {
+      "hoje": "2026-08-01",
+      "competencia": "2026-08-01"
+    }
+  },
+  "queryError": null,
+  "metasCount": 4,
+  "metas": [
+    {
+      "id": "1b881030-fdf7-4c38-80fe-f409ef766a42",
+      "tenant_id": "30fd2055-b14e-4922-a239-94a291869f94",
+      "competencia": "2027-07-01",
+      "valor_meta": 125650,
+      "centro_custo_id": "30695788-5fe7-4685-a2b2-8bb50076478a",
+      "observacao": null,
+      "deleted_at": "2026-07-13T12:44:36.467+00:00",
+      "created_at": "2026-07-13T12:33:25.495968+00:00",
+      "updated_at": "2026-07-13T12:44:35.927225+00:00",
+      "created_by": "b9f92604-243c-4b86-b497-4675c4df83ec"
+    },
+    {
+      "id": "8e6c8b0c-3ba5-4400-aca5-432dc94ac946",
+      "tenant_id": "30fd2055-b14e-4922-a239-94a291869f94",
+      "competencia": "2026-08-01",
+      "valor_meta": 132500,
+      "centro_custo_id": null,
+      "observacao": null,
+      "deleted_at": null,
+      "created_at": "2026-08-01T11:17:35.326243+00:00",
+      "updated_at": "2026-08-01T11:17:35.326243+00:00",
+      "created_by": "b9f92604-243c-4b86-b497-4675c4df83ec"
+    },
+    {
+      "id": "61503e26-f04a-44ae-aefb-efd33aab1c5d",
+      "tenant_id": "30fd2055-b14e-4922-a239-94a291869f94",
+      "competencia": "2026-07-01",
+      "valor_meta": 125650,
+      "centro_custo_id": "30695788-5fe7-4685-a2b2-8bb50076478a",
+      "observacao": null,
+      "deleted_at": "2026-07-13T12:32:47.436+00:00",
+      "created_at": "2026-07-13T04:15:29.486217+00:00",
+      "updated_at": "2026-07-13T12:32:46.914021+00:00",
+      "created_by": "b9f92604-243c-4b86-b497-4675c4df83ec"
+    },
+    {
+      "id": "16bf5a01-7f01-491f-becb-8fd3b1bfadc7",
+      "tenant_id": "30fd2055-b14e-4922-a239-94a291869f94",
+      "competencia": "2026-07-01",
+      "valor_meta": 75000,
+      "centro_custo_id": null,
+      "observacao": null,
+      "deleted_at": null,
+      "created_at": "2026-07-13T14:44:57.695363+00:00",
+      "updated_at": "2026-07-13T14:44:57.695363+00:00",
+      "created_by": "b9f92604-243c-4b86-b497-4675c4df83ec"
+    }
+  ],
+  "augustExact": [
+    {
+      "id": "8e6c8b0c-3ba5-4400-aca5-432dc94ac946",
+      "tenant_id": "30fd2055-b14e-4922-a239-94a291869f94",
+      "competencia": "2026-08-01",
+      "valor_meta": 132500,
+      "centro_custo_id": null,
+      "observacao": null,
+      "created_by": "b9f92604-243c-4b86-b497-4675c4df83ec",
+      "created_at": "2026-08-01T11:17:35.326243+00:00",
+      "updated_at": "2026-08-01T11:17:35.326243+00:00",
+      "deleted_at": null
+    }
+  ],
+  "augustLike": [],
+  "augustMonthOnlyString": [],
+  "diagnosis": {
+    "hasGeralAugust": true,
+    "hasCentroAugust": false,
+    "oldResolverValor": 132500,
+    "onlyCentroWouldMissDashboard": false,
+    "rootCauseHint": "Meta geral existe — investigar path UI/cache/KPI mapping"
+  }
+}

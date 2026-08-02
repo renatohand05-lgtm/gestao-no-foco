@@ -81,6 +81,9 @@ export async function upsertMetaDiariaAction(
     }
 
     revalidatePath(`/${tenantSlug}/dashboard`);
+    revalidatePath(`/${tenantSlug}/analytics`);
+    revalidatePath(`/${tenantSlug}/analytics/metas`);
+    revalidatePath(`/${tenantSlug}/inteligencia`);
     revalidatePath(`/${tenantSlug}/configuracoes/metas`);
     return { success: true, id: data.id as string };
   } catch (error) {

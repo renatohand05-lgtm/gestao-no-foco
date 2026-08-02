@@ -20,6 +20,7 @@ import {
 } from "@/lib/dashboard/tenant-timezone";
 import { resolveMetaDiaria } from "@/lib/metas/meta-diaria";
 import { toCompetenciaMonthStart } from "@/lib/metas/projection";
+import { resolveMetaMensalVigente } from "@/lib/metas/resolve-meta-mensal";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -424,30 +425,13 @@ export class ResumoVendasMesService {
     competencia: string,
     centroId?: string | null,
   ): Promise<number | null> {
-    let query = this.supabase
-      .from("metas_vendas_mensais")
-      .select("valor_meta")
-      .eq("tenant_id", this.tenantId)
-      .eq("competencia", competencia)
-      .is("deleted_at", null);
-
-    if (centroId) query = query.eq("centro_custo_id", centroId);
-    else query = query.is("centro_custo_id", null);
-
-    const { data, error } = await query.maybeSingle();
-    if (error && error.code !== "PGRST116") {
-      const list = await this.supabase
-        .from("metas_vendas_mensais")
-        .select("valor_meta")
-        .eq("tenant_id", this.tenantId)
-        .eq("competencia", competencia)
-        .is("deleted_at", null)
-        .is("centro_custo_id", null)
-        .limit(1);
-      if (list.error) return null;
-      return list.data?.[0] ? Number(list.data[0].valor_meta) : null;
-    }
-    return data ? Number(data.valor_meta) : null;
+    const resolved = await resolveMetaMensalVigente(
+      this.supabase,
+      this.tenantId,
+      competencia,
+      centroId,
+    );
+    return resolved.valor;
   }
 
   private async fetchMetaDiariaOverrides(

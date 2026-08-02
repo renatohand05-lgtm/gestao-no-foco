@@ -4,8 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 
+import { GFSelect } from "@/components/gf/gf-select";
+import { formatFormaPagamentoLabel } from "@/lib/financeiro/payment-method-label";
+import { buildCatalogItemSelectLabel } from "@/lib/produtos/service-commercial";
 import { CancelButton } from "@/components/ui/cancel-button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormField } from "@/components/ui/form-field";
@@ -54,9 +57,6 @@ type VendaFormProps = {
   categoriasFinanceiras: VendaCategoriaFinanceiraOption[];
   centrosCusto: VendaCentroCustoOption[];
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 const numberFieldOptions = {
   setValueAs: (value: string | number) => {
@@ -201,19 +201,25 @@ export function VendaForm({
               error={form.formState.errors.cliente_id?.message}
               className="md:col-span-2"
             >
-              <select
-                id="cliente_id"
-                {...form.register("cliente_id")}
-                className={selectClassName}
-              >
-                <option value="">Selecione um cliente</option>
-                {clientes.map((cliente) => (
-                  <option key={cliente.id} value={cliente.id}>
-                    {cliente.nome}
-                    {cliente.documento ? ` — ${cliente.documento}` : ""}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="cliente_id"
+                render={({ field }) => (
+                  <GFSelect
+                    id="cliente_id"
+                    value={field.value || undefined}
+                    onValueChange={field.onChange}
+                    placeholder="Selecione um cliente"
+                    aria-label="Cliente"
+                    options={clientes.map((cliente) => ({
+                      value: cliente.id,
+                      label: cliente.documento
+                        ? `${cliente.nome} — ${cliente.documento}`
+                        : cliente.nome,
+                    }))}
+                  />
+                )}
+              />
             </FormField>
 
             <FormField
@@ -226,32 +232,48 @@ export function VendaForm({
             </FormField>
 
             <FormField label="Status" htmlFor="status" required>
-              <select
-                id="status"
-                {...form.register("status")}
-                className={selectClassName}
-              >
-                {statusEditaveis.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <GFSelect
+                    id="status"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    aria-label="Status"
+                    options={statusEditaveis.map((option) => ({
+                      value: option.value,
+                      label: option.label,
+                    }))}
+                  />
+                )}
+              />
             </FormField>
 
             <FormField label="Forma de pagamento" htmlFor="forma_pagamento_id">
-              <select
-                id="forma_pagamento_id"
-                {...form.register("forma_pagamento_id")}
-                className={selectClassName}
-              >
-                <option value="">Opcional — obrigatória se gera financeiro</option>
-                {formasPagamento.map((forma) => (
-                  <option key={forma.id} value={forma.id}>
-                    {forma.nome}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="forma_pagamento_id"
+                render={({ field }) => (
+                  <GFSelect
+                    id="forma_pagamento_id"
+                    value={field.value || undefined}
+                    onValueChange={field.onChange}
+                    placeholder="Opcional — obrigatória se gera financeiro"
+                    aria-label="Forma de pagamento"
+                    options={formasPagamento.map((forma) => ({
+                      value: forma.id,
+                      label: formatFormaPagamentoLabel(forma),
+                      description:
+                        forma.nome &&
+                        forma.nome.trim().toUpperCase() !==
+                          formatFormaPagamentoLabel(forma).toUpperCase()
+                          ? forma.nome
+                          : undefined,
+                    }))}
+                  />
+                )}
+              />
               {formasPagamento.length === 0 ? (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Cadastre formas de pagamento em Financeiro para selecionar aqui.
@@ -285,33 +307,46 @@ export function VendaForm({
               label="Categoria financeira"
               htmlFor="categoria_financeira_id"
             >
-              <select
-                id="categoria_financeira_id"
-                {...form.register("categoria_financeira_id")}
-                className={selectClassName}
-              >
-                <option value="">Não informada</option>
-                {categoriasFinanceiras.map((categoria) => (
-                  <option key={categoria.id} value={categoria.id}>
-                    {categoria.nome}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="categoria_financeira_id"
+                render={({ field }) => (
+                  <GFSelect
+                    id="categoria_financeira_id"
+                    value={field.value || undefined}
+                    onValueChange={field.onChange}
+                    placeholder="Não informada"
+                    aria-label="Categoria financeira"
+                    options={categoriasFinanceiras.map((categoria) => ({
+                      value: categoria.id,
+                      label: categoria.nome,
+                    }))}
+                  />
+                )}
+              />
             </FormField>
 
             <FormField label="Centro de custo" htmlFor="centro_custo_id">
-              <select
-                id="centro_custo_id"
-                {...form.register("centro_custo_id")}
-                className={selectClassName}
-              >
-                <option value="">Não informado</option>
-                {centrosCusto.map((centro) => (
-                  <option key={centro.id} value={centro.id}>
-                    {centro.codigo} · {centro.nome}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="centro_custo_id"
+                render={({ field }) => (
+                  <GFSelect
+                    id="centro_custo_id"
+                    value={field.value || undefined}
+                    onValueChange={field.onChange}
+                    placeholder="Não informado"
+                    aria-label="Centro de custo"
+                    options={centrosCusto.map((centro) => ({
+                      value: centro.id,
+                      label: centro.nome,
+                      description: centro.codigo
+                        ? `Código: ${centro.codigo}`
+                        : undefined,
+                    }))}
+                  />
+                )}
+              />
             </FormField>
 
             <FormField
@@ -375,22 +410,29 @@ export function VendaForm({
                       error={form.formState.errors.itens?.[index]?.produto_id?.message}
                       className="md:col-span-2"
                     >
-                      <select
+                      <GFSelect
                         id={`itens.${index}.produto_id`}
-                        value={produtoId}
-                        onChange={(event) =>
-                          handleProdutoChange(index, event.target.value)
-                        }
-                        className={selectClassName}
-                      >
-                        <option value="">Selecione</option>
-                        {produtos.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.nome}
-                            {item.sku ? ` (${item.sku})` : ""}
-                          </option>
-                        ))}
-                      </select>
+                        value={produtoId || undefined}
+                        onValueChange={(next) => handleProdutoChange(index, next)}
+                        placeholder="Selecione produto ou serviço"
+                        aria-label="Produto ou serviço"
+                        options={[
+                          ...produtos
+                            .filter((item) => item.tipo === "servico")
+                            .map((item) => ({
+                              value: item.id,
+                              label: buildCatalogItemSelectLabel(item),
+                              type: "servico",
+                            })),
+                          ...produtos
+                            .filter((item) => item.tipo !== "servico")
+                            .map((item) => ({
+                              value: item.id,
+                              label: buildCatalogItemSelectLabel(item),
+                              type: item.tipo,
+                            })),
+                        ]}
+                      />
                     </FormField>
 
                     <FormField

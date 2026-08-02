@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import {
+  CatalogAddKindDialog,
+  type CatalogAddKind,
+} from "@/components/produtos/catalog-add-kind-dialog";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/format";
 import { searchCatalogoOsAction } from "@/lib/ordens/actions";
-import { cn } from "@/lib/utils";
 
 export type CatalogoItem = {
   id: string;
@@ -43,21 +46,55 @@ export function OsItemCatalogPicker({
   const [open, setOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState("");
   const [loading, setLoading] = useState(false);
+  const [kind, setKind] = useState<CatalogAddKind | null>(
+    tipo === "all" ? null : tipo === "servico" ? "servico" : "produto",
+  );
+
+  const effectiveTipo =
+    kind ?? (tipo === "all" ? "all" : tipo === "servico" ? "servico" : "produto");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !kind) return;
     const t = setTimeout(async () => {
       setLoading(true);
-      const res = await searchCatalogoOsAction(tenantSlug, q, tipo);
+      const res = await searchCatalogoOsAction(
+        tenantSlug,
+        q,
+        effectiveTipo === "all" ? "all" : effectiveTipo,
+      );
       setLoading(false);
       if (res.success) setResults(res.items);
     }, 250);
     return () => clearTimeout(t);
-  }, [q, open, tenantSlug, tipo]);
+  }, [q, open, tenantSlug, kind, effectiveTipo]);
+
+  const grouped = useMemo(() => {
+    const servicos = results.filter((r) => r.tipo === "servico");
+    const produtos = results.filter((r) => r.tipo !== "servico");
+    return { servicos, produtos };
+  }, [results]);
+
+  if (tipo === "all" && !kind) {
+    return (
+      <CatalogAddKindDialog
+        open
+        onChoose={(next) => {
+          setKind(next);
+          setOpen(true);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="relative space-y-1 text-sm">
-      <span className="text-muted-foreground">{label}</span>
+      <span className="text-muted-foreground">
+        {kind === "servico"
+          ? "Buscar serviço cadastrado"
+          : kind === "produto"
+            ? "Buscar produto cadastrado"
+            : label}
+      </span>
       {value && selectedLabel ? (
         <div className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 px-3 py-2">
           <span className="font-medium">{selectedLabel}</span>
@@ -101,7 +138,7 @@ export function OsItemCatalogPicker({
         />
       )}
       {open && !value ? (
-        <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-background shadow-md">
+        <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-border/60 bg-popover text-popover-foreground shadow-md dark:bg-[var(--popover)]">
           {loading ? (
             <li className="px-3 py-2 text-muted-foreground">Buscando…</li>
           ) : null}
@@ -110,46 +147,64 @@ export function OsItemCatalogPicker({
               Nenhum cadastro encontrado. Use item personalizado se necessário.
             </li>
           ) : null}
-          {results.map((item) => {
-            const isServico =
-              item.tipo === "servico" || item.tipo === "serviço";
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  className={cn(
-                    "w-full px-3 py-2 text-left hover:bg-muted/50",
-                  )}
-                  onClick={() => {
-                    setSelectedLabel(item.nome);
-                    setQ("");
-                    setOpen(false);
-                    onSelect(item);
-                  }}
-                >
-                  <p className="font-medium">{item.nome}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {isServico ? "Serviço" : "Produto"}
-                    {item.sku ? ` · SKU ${item.sku}` : ""}
-                    {item.codigo_interno ? ` · ${item.codigo_interno}` : ""}
-                    {item.codigo_barras ? ` · EAN ${item.codigo_barras}` : ""}
-                    {item.categoria ? ` · ${item.categoria}` : ""}
-                    {" · "}
-                    {formatCurrency(item.preco_venda)}
-                    {!isServico
-                      ? ` · est. ${item.estoque_atual}`
-                      : ""}
-                    {item.custo != null
-                      ? ` · custo ${formatCurrency(item.custo)}`
-                      : ""}
-                    {item.margem_percent != null
-                      ? ` · margem ${item.margem_percent}%`
-                      : ""}
-                  </p>
-                </button>
-              </li>
-            );
-          })}
+          {!loading && grouped.servicos.length > 0 ? (
+            <li className="px-3 py-1.5 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
+              Serviços
+            </li>
+          ) : null}
+          {grouped.servicos.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-left hover:bg-accent"
+                onClick={() => {
+                  setSelectedLabel(item.nome);
+                  setQ("");
+                  setOpen(false);
+                  onSelect(item);
+                }}
+              >
+                <p className="font-medium">{item.nome}</p>
+                <p className="text-xs text-muted-foreground">
+                  SERVIÇO
+                  {item.codigo_interno ? ` · ${item.codigo_interno}` : ""}
+                  {" · "}
+                  {formatCurrency(item.preco_venda)}
+                  {item.custo != null
+                    ? ` · custo MO ${formatCurrency(item.custo)}`
+                    : ""}
+                </p>
+              </button>
+            </li>
+          ))}
+          {!loading && grouped.produtos.length > 0 ? (
+            <li className="px-3 py-1.5 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
+              Produtos
+            </li>
+          ) : null}
+          {grouped.produtos.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-left hover:bg-accent"
+                onClick={() => {
+                  setSelectedLabel(item.nome);
+                  setQ("");
+                  setOpen(false);
+                  onSelect(item);
+                }}
+              >
+                <p className="font-medium">{item.nome}</p>
+                <p className="text-xs text-muted-foreground">
+                  PRODUTO
+                  {item.sku ? ` · SKU ${item.sku}` : ""}
+                  {" · "}
+                  {formatCurrency(item.preco_venda)}
+                  {` · est. ${item.estoque_atual}`}
+                </p>
+              </button>
+            </li>
+          ))}
         </ul>
       ) : null}
     </div>

@@ -546,7 +546,7 @@ export class VendaService {
     const { data, error } = await this.supabase
       .from("produtos")
       .select(
-        "id, nome, sku, tipo, unidade_medida, preco_venda, custo, estoque_atual",
+        "id, nome, sku, codigo_interno, tipo, unidade_medida, preco_venda, custo, estoque_atual, preco_sugerido, tempo_estimado_minutos",
       )
       .eq("tenant_id", this.tenantId)
       .is("deleted_at", null)

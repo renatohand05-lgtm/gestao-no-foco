@@ -21,6 +21,7 @@ import {
 } from "@/lib/dashboard/tenant-timezone";
 import { resolveMetaDiaria } from "@/lib/metas/meta-diaria";
 import { toCompetenciaMonthStart } from "@/lib/metas/projection";
+import { resolveMetaMensalVigente } from "@/lib/metas/resolve-meta-mensal";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -189,14 +190,22 @@ export class VendasDiaService {
       diaFechado: fechadoSet.has(hoje),
     });
 
+    // FDS / dia fechado: meta diária é 0 por rateio — não exibir R$ 0,00
+    // nem status "Sem meta" quando a meta mensal está cadastrada.
     const metaHoje =
-      metaMensal == null && metaHojeResolved.fonte === "sem_meta"
+      metaHojeResolved.fonte === "sem_meta" ||
+      metaHojeResolved.fonte === "zero_fds" ||
+      metaHojeResolved.fonte === "zero_fechado"
         ? null
         : metaHojeResolved.meta_diaria;
 
     const percentualHoje = calcPercentualAtingido(hojeAgg.liquido, metaHoje);
     const faltaHoje = calcFaltaParaMeta(hojeAgg.liquido, metaHoje);
-    const statusHoje = classifyMetaDiaStatus(percentualHoje, metaHoje);
+    const statusHoje = classifyMetaDiaStatus(
+      percentualHoje,
+      metaHoje,
+      metaHojeResolved.fonte,
+    );
 
     const serie = this.buildSerieDiaria({
       mesIni,
@@ -461,37 +470,13 @@ export class VendasDiaService {
     competencia: string,
     centroId?: string | null,
   ): Promise<number | null> {
-    let query = this.supabase
-      .from("metas_vendas_mensais")
-      .select("valor_meta, centro_custo_id")
-      .eq("tenant_id", this.tenantId)
-      .eq("competencia", competencia)
-      .is("deleted_at", null);
-
-    if (centroId) {
-      query = query.eq("centro_custo_id", centroId);
-    } else {
-      query = query.is("centro_custo_id", null);
-    }
-
-    const { data, error } = await query.maybeSingle();
-    if (error) {
-      // tabela ok; maybeSingle com 0 rows é null
-      if (error.code === "PGRST116") return null;
-      // Se múltiplas, pega a geral
-      const list = await this.supabase
-        .from("metas_vendas_mensais")
-        .select("valor_meta, centro_custo_id")
-        .eq("tenant_id", this.tenantId)
-        .eq("competencia", competencia)
-        .is("deleted_at", null)
-        .is("centro_custo_id", null)
-        .limit(1);
-      if (list.error) return null;
-      const row = list.data?.[0];
-      return row ? Number(row.valor_meta) : null;
-    }
-    return data ? Number(data.valor_meta) : null;
+    const resolved = await resolveMetaMensalVigente(
+      this.supabase,
+      this.tenantId,
+      competencia,
+      centroId,
+    );
+    return resolved.valor;
   }
 
   private async fetchMetaDiariaOverrides(

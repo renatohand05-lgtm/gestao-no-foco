@@ -120,7 +120,15 @@ export function footerStatusLabelFromHoje(
     return `Hoje · Meta ${label.toLowerCase()}`;
   }
   if (hoje.hoje.status === "sem_meta") {
-    return "Hoje · Sem meta diária";
+    return hoje.mes.meta != null && hoje.mes.meta > 0
+      ? "Hoje · Sem meta diária (mensal vigente)"
+      : "Hoje · Sem meta diária";
+  }
+  if (hoje.hoje.status === "fim_semana") {
+    return "Hoje · Fim de semana";
+  }
+  if (hoje.hoje.status === "dia_fechado") {
+    return "Hoje · Dia fechado";
   }
   return `Hoje · Meta ${label.toLowerCase()}`;
 }

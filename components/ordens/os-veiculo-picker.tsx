@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { OsVeiculoQuickDialog } from "@/components/ordens/os-veiculo-quick-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { NativeSelect } from "@/components/ui/native-select";
 import { listVeiculosByClienteAction } from "@/lib/ordens/actions";
 import {
   formatVeiculoLabel,
@@ -73,12 +74,13 @@ export function OsVeiculoPicker({
         <>
           <label className="block space-y-1 text-sm">
             <span className="text-muted-foreground">Veículo</span>
-            <select
+            <NativeSelect
               required
               disabled={disabled || loading}
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+              className="h-10"
+              aria-label="Veículo"
             >
               <option value="">Selecione…</option>
               {veiculos.map((v) => (
@@ -86,7 +88,7 @@ export function OsVeiculoPicker({
                   {formatVeiculoLabel(v)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <button
             type="button"

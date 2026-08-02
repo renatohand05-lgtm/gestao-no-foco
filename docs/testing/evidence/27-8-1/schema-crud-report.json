@@ -1,0 +1,234 @@
+{
+  "at": "2026-08-02T00:00:27.184Z",
+  "sprint": "27.8.1",
+  "columns": [
+    "tempo_estimado_minutos",
+    "preco_sugerido",
+    "especialidade",
+    "equipe_ou_profissional",
+    "unidade_cobranca"
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "msg": "migration defines tempo_estimado_minutos",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "migration defines preco_sugerido",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "migration defines especialidade",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "migration defines equipe_ou_profissional",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "migration defines unidade_cobranca",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "migration constraint tempo",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "migration constraint preco_sugerido",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "select novos campos",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "select retornou array",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tenant teste-renato-01 resolvido",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "criar serviço com novos campos",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tipo=servico",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tempo_estimado persistido",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "preco_sugerido persistido",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "especialidade persistida",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "equipe_ou_profissional persistida",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "unidade_cobranca persistida",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "editar serviço",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "reabrir serviço",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "edição preco_sugerido",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "edição tempo",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "edição unidade_cobranca",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "edição equipe",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "aceita nulos nos novos campos",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "constraint bloqueia tempo negativo",
+      "detail": "new row for relation \"produtos\" violates check constraint \"produtos_tempo_estimado_minutos_nonneg\""
+    },
+    {
+      "ok": true,
+      "msg": "constraint bloqueia preco_sugerido negativo",
+      "detail": "new row for relation \"produtos\" violates check constraint \"produtos_preco_sugerido_nonneg\""
+    },
+    {
+      "ok": true,
+      "msg": "filtro por código",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "busca por nome",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "serviço não aparece em outro tenant",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "soft-delete serviço de teste",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "serviço soft-deleted oculto",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "registro preservado (não hard-delete)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "RLS: anon sem membership não lista produtos",
+      "detail": "rows=0"
+    },
+    {
+      "ok": true,
+      "msg": "import: linha incompleta invalida",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "import: alerta custo zero",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "import: alerta preço zero",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "import: alerta preço < custo",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "import: alerta código existente",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "import: bloqueio duplicado na planilha",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "import: pelo menos 1 linha válida",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "nenhum produto afetado (contagem estável)",
+      "detail": "before=9 after=9"
+    }
+  ],
+  "serviceTestId": "f1704476-f66f-4c30-8b78-c736b5c56818",
+  "productCountBefore": 9,
+  "productCountAfter": 9,
+  "summary": {
+    "pass": 41,
+    "fail": 0,
+    "classificationHint": "APROVADO EM RUNTIME PÓS-MIGRATION (schema/crud)"
+  },
+  "importSummary": {
+    "total": 9,
+    "validas": 3,
+    "comAlerta": 4,
+    "invalidas": 2,
+    "custoZero": 2,
+    "precoZero": 2
+  }
+}

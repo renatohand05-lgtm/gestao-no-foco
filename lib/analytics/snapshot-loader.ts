@@ -219,36 +219,38 @@ export async function loadAnalyticsDomainSnapshot(args: {
   }
 
   try {
-    const mod = await import("@/lib/metas/commercial-panel-service");
-    const factory = (mod as Record<string, unknown>)
-      .createCommercialPanelService as
-      | ((tenantId: string) => {
-          getPanel: (p: Record<string, string>) => Promise<unknown>;
-        })
-      | undefined;
-    if (factory) {
-      const panel = asRecord(
-        await factory(args.tenantId).getPanel({
-          dataDe: args.period.from,
-          dataAte: args.period.to,
-        }),
+    const { createCommercialPanelService } = await import(
+      "@/lib/metas/commercial-panel-service"
+    );
+    const service = await createCommercialPanelService(args.tenantId);
+    const panel = await service.getPanel({
+      dataDe: args.period.from,
+      dataAte: args.period.to,
+    });
+    const proj = panel.projecao;
+    if (proj) {
+      const pct = proj.percentual_atingido;
+      snap.metas = {
+        // Campos canônicos de MetaProjecaoMensal (não aliases inventados)
+        metaFaturamento: proj.valor_meta,
+        realizadoFaturamento: proj.faturamento_realizado,
+        projecaoFaturamento:
+          proj.projecao_dias_uteis ?? proj.projecao_fechamento ?? null,
+        attainment: pct == null ? null : pct / 100,
+        probabilidadeLabel: null,
+      };
+      mark(
+        "metas",
+        proj.valor_meta != null ? "ok" : "empty",
+        "metas_vendas_mensais via commercial-panel",
       );
-      const proj = asRecord(panel.projecao);
-      if (Object.keys(proj).length) {
-        snap.metas = {
-          metaFaturamento: num(proj.meta),
-          realizadoFaturamento: num(proj.realizado),
-          projecaoFaturamento: num(proj.projetado),
-          attainment: num(proj.atingimento),
-          probabilidadeLabel:
-            typeof proj.probabilidadeLabel === "string"
-              ? proj.probabilidadeLabel
-              : null,
-        };
-      }
     }
-  } catch {
-    /* metas */
+  } catch (error) {
+    mark(
+      "metas",
+      "error",
+      error instanceof Error ? error.message : "Falha ao carregar metas",
+    );
   }
 
   try {

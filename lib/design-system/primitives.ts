@@ -34,9 +34,16 @@ export const gofControl = [
   "flex h-9 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-1.5 text-sm",
   "text-foreground shadow-xs transition-[border-color,box-shadow,background-color] duration-150 ease-out",
   "placeholder:text-muted-foreground",
+  "dark:bg-input/30",
   gofFocusRing,
   "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-muted/50 disabled:opacity-50",
   "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/25",
+].join(" ");
+
+/** Select nativo com fallback de tema (preferir GFSelect em áreas críticas) */
+export const gofNativeSelect = [
+  gofControl,
+  "gof-native-select appearance-auto",
 ].join(" ");
 
 export const gofControlTextarea = [

@@ -16,6 +16,12 @@ export type ServiceImportRowValues = {
   subcategoria?: string | null;
   descricao_curta?: string | null;
   preco_venda?: number | null;
+  /** Sprint 27.8 — custo de mão de obra */
+  custo?: number | null;
+  preco_sugerido?: number | null;
+  especialidade?: string | null;
+  unidade_cobranca?: string | null;
+  tempo_estimado_minutos?: number | null;
   garantia_dias?: number | null;
   status?: string | null;
   observacao_tecnica?: string | null;
@@ -48,9 +54,16 @@ export async function commitServiceImportRow(
     return { productId: input.existingId ?? "", action: "ignored" };
   }
 
+  const tempoMin =
+    input.values.tempo_estimado_minutos ??
+    (input.values.tempo_padrao_h != null
+      ? Math.round(input.values.tempo_padrao_h * 60)
+      : null);
+
   const observacoes = [
     input.values.observacao_tecnica,
-    input.values.tempo_padrao_h != null
+    input.values.tempo_padrao_h != null &&
+    input.values.tempo_estimado_minutos == null
       ? `Tempo padrão: ${input.values.tempo_padrao_h}h`
       : null,
     input.values.garantia_dias != null
@@ -60,6 +73,15 @@ export async function commitServiceImportRow(
   ]
     .filter(Boolean)
     .join(" | ");
+
+  const serviceFields = {
+    custo: input.values.custo ?? null,
+    preco_sugerido: input.values.preco_sugerido ?? null,
+    especialidade: input.values.especialidade ?? null,
+    unidade_cobranca:
+      input.values.unidade_cobranca ?? input.values.unidade ?? "UN",
+    tempo_estimado_minutos: tempoMin,
+  };
 
   if (input.decision === "update" && input.existingId) {
     await service.update(input.existingId, {
@@ -72,6 +94,7 @@ export async function commitServiceImportRow(
       ativo,
       observacoes: observacoes || null,
       controla_estoque: false,
+      ...serviceFields,
     });
     return { productId: input.existingId, action: "updated" };
   }
@@ -98,6 +121,7 @@ export async function commitServiceImportRow(
     controla_serie: false,
     controla_validade: false,
     estoque_atual: 0,
+    ...serviceFields,
   });
 
   return { productId: created.id, action: "created" };

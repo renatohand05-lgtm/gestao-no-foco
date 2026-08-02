@@ -15,10 +15,19 @@ export const FATURAMENTO_STATUS_VALIDO = "faturado" as const;
 
 export type MetaDiaStatus =
   | "sem_meta"
+  | "fim_semana"
+  | "dia_fechado"
   | "abaixo"
   | "atencao"
   | "atingida"
   | "superada";
+
+export type MetaDiariaFonte =
+  | "manual"
+  | "rateio"
+  | "zero_fds"
+  | "zero_fechado"
+  | "sem_meta";
 
 export type VendaFaturamentoInput = {
   status: string;
@@ -122,6 +131,7 @@ export function aggregateFaturamentoLiquido(input: {
 
 /**
  * Status visual meta do dia:
+ * - fim de semana / dia fechado: não confundir com “sem meta cadastrada”
  * - 0–79%: abaixo
  * - 80–99%: atenção
  * - 100%: atingida
@@ -130,7 +140,10 @@ export function aggregateFaturamentoLiquido(input: {
 export function classifyMetaDiaStatus(
   percentual: number | null,
   meta: number | null,
+  fonte?: MetaDiariaFonte | string | null,
 ): MetaDiaStatus {
+  if (fonte === "zero_fds") return "fim_semana";
+  if (fonte === "zero_fechado") return "dia_fechado";
   if (meta == null || meta <= 0) {
     if (percentual != null && percentual > 0) return "superada";
     return "sem_meta";
@@ -160,6 +173,8 @@ export function calcFaltaParaMeta(
 
 export const META_DIA_STATUS_LABEL: Record<MetaDiaStatus, string> = {
   sem_meta: "Sem meta",
+  fim_semana: "Fim de semana",
+  dia_fechado: "Dia fechado",
   abaixo: "Abaixo",
   atencao: "Atenção",
   atingida: "Atingida",

@@ -17,9 +17,11 @@ import { AnexosPanel } from "@/components/ordens/inspecao/anexos-panel";
 import { ChecklistVisual } from "@/components/ordens/inspecao/checklist-visual";
 import { InspecaoEnvioPanel } from "@/components/ordens/inspecao/inspecao-envio-panel";
 import { OsVeiculoEditDialog } from "@/components/ordens/os-veiculo-edit-dialog";
+import { GFSelect } from "@/components/gf/gf-select";
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { ExecutiveSection } from "@/components/executive";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -151,6 +153,9 @@ export function OsWorkspace({
   const [veiculoEditId, setVeiculoEditId] = useState(os.veiculo_id ?? "");
   const [execHoras, setExecHoras] = useState<Record<string, string>>({});
   const [veiculoMasterOpen, setVeiculoMasterOpen] = useState(false);
+  const [formaPagamentoFaturar, setFormaPagamentoFaturar] = useState(
+    formasPagamento[0]?.id ?? "",
+  );
   const {
     veiculos,
     error: veiculoError,
@@ -380,17 +385,17 @@ export function OsWorkspace({
                   placeholder="Nível combustível"
                   disabled={pending}
                 />
-                <select
+                <NativeSelect
                   name="prioridade"
                   defaultValue={os.prioridade}
                   disabled={pending}
-                  className="h-10 rounded-md border px-3 text-sm"
+                  className="h-10"
                 >
                   <option value="baixa">Baixa</option>
                   <option value="normal">Normal</option>
                   <option value="alta">Alta</option>
                   <option value="urgente">Urgente</option>
-                </select>
+                </NativeSelect>
                 <Input
                   name="objetos_deixados"
                   defaultValue={os.objetos_deixados ?? ""}
@@ -579,19 +584,19 @@ export function OsWorkspace({
               className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
             />
             <div className="grid gap-2 md:grid-cols-2">
-              <select name="gravidade" disabled={pending || !canDiagnostico} className="h-10 rounded-md border px-3 text-sm">
+              <NativeSelect name="gravidade" disabled={pending || !canDiagnostico} className="h-10">
                 <option value="">Gravidade</option>
                 <option value="baixa">Baixa</option>
                 <option value="media">Média</option>
                 <option value="alta">Alta</option>
                 <option value="critica">Crítica</option>
-              </select>
-              <select name="urgencia" disabled={pending || !canDiagnostico} className="h-10 rounded-md border px-3 text-sm">
+              </NativeSelect>
+              <NativeSelect name="urgencia" disabled={pending || !canDiagnostico} className="h-10">
                 <option value="">Urgência</option>
                 <option value="baixa">Baixa</option>
                 <option value="media">Média</option>
                 <option value="alta">Alta</option>
-              </select>
+              </NativeSelect>
             </div>
             <button
               type="submit"
@@ -681,18 +686,17 @@ export function OsWorkspace({
           ) : null}
           <label className="block space-y-1 text-sm">
             <span className="text-muted-foreground">Canal</span>
-            <select
+            <GFSelect
               value={aprovacaoCanal}
-              onChange={(e) => setAprovacaoCanal(e.target.value)}
+              onValueChange={setAprovacaoCanal}
               disabled={pending}
-              className="h-10 w-full rounded-md border px-3 text-sm"
-            >
-              {OS_APROVACAO_CANAL_OPTIONS.map((canal) => (
-                <option key={canal.value} value={canal.value}>
-                  {canal.label}
-                </option>
-              ))}
-            </select>
+              aria-label="Canal de aprovação"
+              triggerClassName="h-10"
+              options={OS_APROVACAO_CANAL_OPTIONS.map((canal) => ({
+                value: canal.value,
+                label: canal.label,
+              }))}
+            />
           </label>
 
           <div className="space-y-2 rounded-lg border p-3">
@@ -920,26 +924,27 @@ export function OsWorkspace({
                   run(
                     () =>
                       faturarOsAction(tenantSlug, os.id, {
-                        forma_pagamento_id: String(fd.get("forma_pagamento_id")),
+                        forma_pagamento_id: formaPagamentoFaturar,
                         data_venda: String(fd.get("data_venda")),
                       }),
                     "OS faturada. Venda e Contas a Receber geradas pelo motor atual.",
                   );
                 }}
               >
-                <select
+                <GFSelect
                   name="forma_pagamento_id"
                   required
                   disabled={pending || !canFaturar}
-                  className="h-10 w-full rounded-md border px-3 text-sm"
-                >
-                  <option value="">Forma de pagamento</option>
-                  {formasPagamento.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.nome}
-                    </option>
-                  ))}
-                </select>
+                  value={formaPagamentoFaturar || undefined}
+                  onValueChange={setFormaPagamentoFaturar}
+                  placeholder="Forma de pagamento"
+                  aria-label="Forma de pagamento"
+                  triggerClassName="h-10"
+                  options={formasPagamento.map((f) => ({
+                    value: f.id,
+                    label: f.nome,
+                  }))}
+                />
                 <Input
                   name="data_venda"
                   type="date"
@@ -1115,25 +1120,25 @@ export function OsWorkspace({
             }}
           >
             <Input name="motivo" required placeholder="Motivo" disabled={pending} />
-            <select
+            <NativeSelect
               name="tipo_retorno"
               disabled={pending}
-              className="h-10 w-full rounded-md border px-3 text-sm"
+              className="h-10"
             >
               <option value="garantia">Garantia</option>
               <option value="retrabalho">Retrabalho</option>
               <option value="novo_problema">Novo problema</option>
               <option value="cortesia">Cortesia</option>
               <option value="cobranca_adicional">Cobrança adicional</option>
-            </select>
-            <select
+            </NativeSelect>
+            <NativeSelect
               name="tipo_cobertura"
               disabled={pending}
-              className="h-10 w-full rounded-md border px-3 text-sm"
+              className="h-10"
             >
               <option value="garantia">Cobertura garantia</option>
               <option value="pago">Pago</option>
-            </select>
+            </NativeSelect>
             <Input
               name="diagnostico"
               placeholder="Diagnóstico do retorno"

@@ -17,24 +17,53 @@ import {
   formatProdutoDate,
   formatQuantity,
 } from "@/lib/produtos/format";
+import {
+  formatServiceMargin,
+  formatTempoEstimado,
+} from "@/lib/produtos/service-commercial";
 import type { ProdutoListItem } from "@/types/produtos";
 
 type ProdutoTableProps = {
   tenantSlug: string;
   produtos: ProdutoListItem[];
+  /** Quando true, colunas comerciais de serviço (sem estoque). */
+  servicosMode?: boolean;
 };
 
-export function ProdutoTable({ tenantSlug, produtos }: ProdutoTableProps) {
+export function ProdutoTable({
+  tenantSlug,
+  produtos,
+  servicosMode = false,
+}: ProdutoTableProps) {
+  const isServicos =
+    servicosMode ||
+    (produtos.length > 0 && produtos.every((p) => p.tipo === "servico"));
+
   return (
     <DataTable>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Item</TableHead>
+            <TableHead>{isServicos ? "Serviço" : "Item"}</TableHead>
             <TableHead className="hidden md:table-cell">Código</TableHead>
             <TableHead className="hidden lg:table-cell">Categoria</TableHead>
-            <TableHead className="hidden sm:table-cell">Preço</TableHead>
-            <TableHead className="hidden sm:table-cell">Estoque</TableHead>
+            {isServicos ? (
+              <>
+                <TableHead className="hidden sm:table-cell">Custo MO</TableHead>
+                <TableHead className="hidden sm:table-cell">Preço atual</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  Preço sugerido
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">Margem</TableHead>
+                <TableHead className="hidden xl:table-cell">Tempo</TableHead>
+                <TableHead className="hidden xl:table-cell">Unidade</TableHead>
+              </>
+            ) : (
+              <>
+                <TableHead className="hidden sm:table-cell">Preço</TableHead>
+                <TableHead className="hidden sm:table-cell">Estoque</TableHead>
+              </>
+            )}
             <TableHead className="hidden xl:table-cell">Status</TableHead>
             <TableHead className="hidden xl:table-cell">Cadastro</TableHead>
             <TableHead className="w-12" />
@@ -67,14 +96,44 @@ export function ProdutoTable({ tenantSlug, produtos }: ProdutoTableProps) {
               <TableCell className="hidden lg:table-cell">
                 {produto.categoria || "—"}
               </TableCell>
-              <TableCell className="hidden sm:table-cell">
-                {formatCurrency(produto.preco_venda)}
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">
-                {produto.tipo === "servico"
-                  ? "—"
-                  : formatQuantity(produto.estoque_atual, produto.unidade_medida)}
-              </TableCell>
+              {isServicos ? (
+                <>
+                  <TableCell className="hidden sm:table-cell tabular-nums">
+                    {formatCurrency(produto.custo)}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell tabular-nums">
+                    {formatCurrency(produto.preco_venda)}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell tabular-nums">
+                    {formatCurrency(produto.preco_sugerido)}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {formatServiceMargin(produto.custo, produto.preco_venda)}
+                  </TableCell>
+                  <TableCell className="hidden xl:table-cell">
+                    {formatTempoEstimado(produto.tempo_estimado_minutos)}
+                  </TableCell>
+                  <TableCell className="hidden xl:table-cell">
+                    {produto.unidade_cobranca ||
+                      produto.unidade_medida ||
+                      "—"}
+                  </TableCell>
+                </>
+              ) : (
+                <>
+                  <TableCell className="hidden sm:table-cell tabular-nums">
+                    {formatCurrency(produto.preco_venda)}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {produto.tipo === "servico"
+                      ? "—"
+                      : formatQuantity(
+                          produto.estoque_atual,
+                          produto.unidade_medida,
+                        )}
+                  </TableCell>
+                </>
+              )}
               <TableCell className="hidden xl:table-cell">
                 <ProdutoStatusBadge ativo={produto.ativo} />
               </TableCell>

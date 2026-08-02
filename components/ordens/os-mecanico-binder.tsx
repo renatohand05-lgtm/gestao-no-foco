@@ -20,6 +20,7 @@ import type {
 } from "@/lib/mecanicos/os-mecanico-service";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { buttonVariants } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -199,10 +200,11 @@ export function OsMecanicoBinder({
         <div className="flex flex-wrap items-end gap-2 border-t pt-3">
           <label className="space-y-1 text-xs">
             <span>Mecânico</span>
-            <select
-              className="h-9 min-w-44 rounded-md border px-2 text-sm"
+            <NativeSelect
+              className="h-9 min-w-44"
               value={mecanicoId}
               onChange={(e) => setMecanicoId(e.target.value)}
+              aria-label="Mecânico"
             >
               <option value="">Selecionar…</option>
               {mecanicos
@@ -212,19 +214,20 @@ export function OsMecanicoBinder({
                     {m.nome_completo} ({m.disponibilidade})
                   </option>
                 ))}
-            </select>
+            </NativeSelect>
           </label>
           <label className="space-y-1 text-xs">
             <span>Papel</span>
-            <select
-              className="h-9 rounded-md border px-2 text-sm"
+            <NativeSelect
+              className="h-9"
               value={papel}
               onChange={(e) => setPapel(e.target.value as OsMecanicoPapel)}
+              aria-label="Papel do mecânico"
             >
               <option value="principal">Principal</option>
               <option value="auxiliar">Auxiliar</option>
               <option value="responsavel_tecnico">Resp. técnico</option>
-            </select>
+            </NativeSelect>
           </label>
           <label className="space-y-1 text-xs">
             <span>%</span>
@@ -262,10 +265,11 @@ export function OsMecanicoBinder({
         <div className="flex flex-wrap items-end gap-2 border-t pt-3">
           <label className="space-y-1 text-xs">
             <span>Transferir responsabilidade para</span>
-            <select
-              className="h-9 min-w-44 rounded-md border px-2 text-sm"
+            <NativeSelect
+              className="h-9 min-w-44"
               value={transferPara}
               onChange={(e) => setTransferPara(e.target.value)}
+              aria-label="Transferir responsabilidade"
             >
               <option value="">Selecionar…</option>
               {mecanicos
@@ -277,7 +281,7 @@ export function OsMecanicoBinder({
                     {m.nome_completo}
                   </option>
                 ))}
-            </select>
+            </NativeSelect>
           </label>
           <button
             type="button"

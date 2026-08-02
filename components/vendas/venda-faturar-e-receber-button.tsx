@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
+import { GFSelect } from "@/components/gf/gf-select";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormField } from "@/components/ui/form-field";
@@ -28,9 +29,6 @@ type Props = {
   contasBancarias: { id: string; nome: string }[];
   redirectTo?: string;
 };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function VendaFaturarEReceberButton({
   tenantSlug,
@@ -137,18 +135,26 @@ export function VendaFaturarEReceberButton({
                   error={form.formState.errors.conta_bancaria_id?.message}
                   className="md:col-span-2"
                 >
-                  <select
+                  <GFSelect
                     id="conta_bancaria_id"
-                    {...form.register("conta_bancaria_id")}
-                    className={selectClassName}
-                  >
-                    <option value="">Selecione a conta</option>
-                    {contasBancarias.map((conta) => (
-                      <option key={conta.id} value={conta.id}>
-                        {conta.nome}
-                      </option>
-                    ))}
-                  </select>
+                    name="conta_bancaria_id"
+                    value={form.watch("conta_bancaria_id") || undefined}
+                    onValueChange={(next) =>
+                      form.setValue("conta_bancaria_id", next, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      })
+                    }
+                    placeholder="Selecione a conta"
+                    aria-label="Conta bancária / caixa"
+                    invalid={Boolean(
+                      form.formState.errors.conta_bancaria_id,
+                    )}
+                    options={contasBancarias.map((conta) => ({
+                      value: conta.id,
+                      label: conta.nome,
+                    }))}
+                  />
                 </FormField>
                 <FormField
                   label="Data de recebimento"

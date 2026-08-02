@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import { GFSelect } from "@/components/gf/gf-select";
 import { VENDA_STATUS_FILTER_OPTIONS } from "@/lib/vendas/constants";
 
 type VendaFiltersProps = {
@@ -47,19 +48,18 @@ export function VendaFilters({
         <label htmlFor="filter-status" className="text-xs font-medium text-muted-foreground">
           Status
         </label>
-        <select
+        <GFSelect
           id="filter-status"
           value={currentStatus}
           disabled={isPending}
-          onChange={(event) => updateParams({ status: event.target.value })}
-          className="flex h-9 w-full min-w-44 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-          {VENDA_STATUS_FILTER_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          onValueChange={(status) => updateParams({ status })}
+          aria-label="Filtrar por status"
+          triggerClassName="h-9 min-w-44"
+          options={VENDA_STATUS_FILTER_OPTIONS.map((option) => ({
+            value: option.value,
+            label: option.label,
+          }))}
+        />
       </div>
     </div>
   );

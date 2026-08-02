@@ -77,11 +77,16 @@ function DemoAwareChrome({
         )}
 
         <PageContainer>
-          <div className="mb-4 space-y-3">
+          {/* Sprint 30.1: chrome Apresentação colapsado por padrão (mobile-first). */}
+          <div className="mb-3 space-y-2 md:mb-4">
             {!hide.appSidebar ? (
-              <DemoModeControls compact={!active} />
+              <DemoModeControls
+                compact
+                defaultCollapsed
+                className="max-w-3xl"
+              />
             ) : null}
-            <DemoNavRail tenantSlug={tenant.slug} />
+            {active ? <DemoNavRail tenantSlug={tenant.slug} /> : null}
           </div>
           <PageSlot>{children}</PageSlot>
         </PageContainer>

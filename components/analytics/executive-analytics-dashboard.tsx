@@ -24,6 +24,12 @@ import {
 } from "@/lib/analytics/analytics-actions";
 import type { buildExecutiveAnalyticsBundle } from "@/lib/analytics/analytics-orchestrator";
 import type { AnalyticsPeriodPreset } from "@/lib/analytics";
+import {
+  friendlyAnalyticsConfidence,
+  friendlyAnalyticsMessage,
+  friendlyAnalyticsSource,
+  friendlyAnalyticsStatus,
+} from "@/lib/analytics/friendly-labels";
 import { gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
@@ -263,13 +269,21 @@ export function ExecutiveAnalyticsDashboard({
           </summary>
           <div className="border-t border-border px-4 py-3">
             <p className={cn(gofTypography.caption, "mb-2 text-muted-foreground")}>
-              Falha de uma fatia não derruba o dashboard. Persistência de período via
-              URL (?period=).
+              Uma fonte indisponível não derruba o painel. Período persistido na URL
+              (?period=). Detalhes técnicos no atributo title de cada chip.
             </p>
             <div className="flex flex-wrap gap-2">
               {sourceEntries.map(([key, h]) => (
-                <Badge key={key} variant="outline" title={h.message}>
-                  {key}: {h.status}
+                <Badge
+                  key={key}
+                  variant="outline"
+                  title={`${key}${h.message ? ` — ${h.message}` : ""}`}
+                >
+                  {friendlyAnalyticsSource(key)}:{" "}
+                  {friendlyAnalyticsStatus(h.status)}
+                  {h.message
+                    ? ` · ${friendlyAnalyticsMessage(h.message)}`
+                    : ""}
                 </Badge>
               ))}
             </div>
@@ -301,15 +315,7 @@ export function ExecutiveAnalyticsDashboard({
               <MetricCard
                 label={k.name}
                 value={k.formatted}
-                hint={
-                  k.confidence === "high"
-                    ? "Confiança alta"
-                    : k.confidence === "medium"
-                      ? "Confiança média"
-                      : k.confidence === "low"
-                        ? "Confiança baixa"
-                        : `Confiança ${k.confidence}`
-                }
+                hint={friendlyAnalyticsConfidence(k.confidence)}
                 tone={toneFromComparison(k.definitionId, bundle.comparisons)}
               />
             </button>
@@ -357,7 +363,10 @@ export function ExecutiveAnalyticsDashboard({
                 <p className="font-medium">{i.title}</p>
                 <p className="mt-1 text-[var(--text-secondary)]">{i.summary}</p>
                 <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                  Confiança {i.confidence} · {i.limitations[0]}
+                  {friendlyAnalyticsConfidence(i.confidence)}
+                  {i.limitations[0]
+                    ? ` · ${friendlyAnalyticsMessage(i.limitations[0])}`
+                    : ""}
                 </p>
               </div>
             ))}

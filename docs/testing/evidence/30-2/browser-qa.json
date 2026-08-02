@@ -1,0 +1,101 @@
+{
+  "at": "2026-08-02T22:44:05.199Z",
+  "sprint": "30.2",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3000",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "card Equipe com CTA Gerenciar equipe"
+    },
+    {
+      "ok": true,
+      "detail": "data-team-permissions-ready presente"
+    },
+    {
+      "ok": true,
+      "detail": "GET equipe status=200"
+    },
+    {
+      "ok": true,
+      "detail": "hub Equipe renderizado"
+    },
+    {
+      "ok": true,
+      "detail": "KPIs reais presentes"
+    },
+    {
+      "ok": true,
+      "detail": "sem UUID cru no face (primeiros 4k)"
+    },
+    {
+      "ok": true,
+      "detail": "aba Papéis navegável"
+    },
+    {
+      "ok": true,
+      "detail": "aba Auditoria navegável"
+    },
+    {
+      "ok": true,
+      "detail": "aba admin Convites navegável"
+    },
+    {
+      "ok": true,
+      "detail": "aba admin Equipes navegável"
+    },
+    {
+      "ok": true,
+      "detail": "aba admin Cargos navegável"
+    },
+    {
+      "ok": true,
+      "detail": "deep link ?tab=convites"
+    },
+    {
+      "ok": true,
+      "detail": "equipe tema dark"
+    },
+    {
+      "ok": true,
+      "detail": "equipe tema light"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1920 sem overflow global"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1366 sem overflow global"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 768 sem overflow global"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 390 sem overflow global"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 375 sem overflow global"
+    },
+    {
+      "ok": true,
+      "detail": "página responde sem crash"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 22,
+    "fail": 0
+  }
+}

@@ -19,6 +19,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { getSegmentNavLabels } from "./segment-labels";
+
 /**
  * Alinhado a lib/rbac/executive-access (EXECUTIVE_DASHBOARD_ANY_OF).
  * Strings literais — config não importa @/lib (testes Node / sidebar-core).
@@ -69,17 +71,21 @@ export const NAV_GROUP_ORDER: readonly NavGroupId[] = [
   "sistema",
 ] as const;
 
-export function getTenantNav(tenantSlug: string): NavItem[] {
+export function getTenantNav(
+  tenantSlug: string,
+  segment?: string | null,
+): NavItem[] {
   const base = `/${tenantSlug}`;
+  const labels = getSegmentNavLabels(segment);
 
-  return [
+  const items: NavItem[] = [
     {
       id: "ops-center",
-      title: "Centro de Operações",
+      title: labels.opsCenterTitle,
       href: `${base}/centro-operacoes`,
       icon: Activity,
       group: "principal",
-      description: "Quadro ao vivo da oficina",
+      description: labels.opsCenterDescription,
     },
     {
       id: "dashboard",
@@ -173,11 +179,11 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
     },
     {
       id: "work-orders",
-      title: "Ordens de Serviço",
+      title: labels.workOrders,
       href: `${base}/ordens`,
       icon: Wrench,
       group: "operacao",
-      description: "Ordem de Trabalho · oficinas e prestadores",
+      description: labels.workOrdersDescription,
     },
     {
       id: "agenda",
@@ -190,11 +196,11 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
     },
     {
       id: "mechanics",
-      title: "Mecânicos",
+      title: labels.team,
       href: `${base}/oficina/mecanicos`,
       icon: Users,
       group: "operacao",
-      description: "Equipe, custos e produtividade",
+      description: labels.teamDescription,
     },
     {
       id: "finance",
@@ -239,6 +245,12 @@ export function getTenantNav(tenantSlug: string): NavItem[] {
       description: "Empresa, equipe e preferências",
     },
   ];
+
+  return items.filter((item) => {
+    if (item.id === "mechanics" && !labels.showTeamNavItem) return false;
+    if (item.id === "work-orders" && !labels.showWorkOrders) return false;
+    return true;
+  });
 }
 
 export const marketingNav = [

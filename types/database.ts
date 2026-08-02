@@ -73,6 +73,13 @@ export type Database = {
           user_id: string;
           role: string;
           created_at: string;
+          /** Sprint 30.2 */
+          status: string;
+          updated_at: string;
+          deactivated_at: string | null;
+          team_id: string | null;
+          job_title_id: string | null;
+          notes: string | null;
         };
         Insert: {
           id?: string;
@@ -80,6 +87,12 @@ export type Database = {
           user_id: string;
           role?: string;
           created_at?: string;
+          status?: string;
+          updated_at?: string;
+          deactivated_at?: string | null;
+          team_id?: string | null;
+          job_title_id?: string | null;
+          notes?: string | null;
         };
         Update: {
           id?: string;
@@ -87,6 +100,180 @@ export type Database = {
           user_id?: string;
           role?: string;
           created_at?: string;
+          status?: string;
+          updated_at?: string;
+          deactivated_at?: string | null;
+          team_id?: string | null;
+          job_title_id?: string | null;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      tenant_teams: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          name: string;
+          description: string | null;
+          area: string | null;
+          status: string;
+          leader_user_id: string | null;
+          created_at: string;
+          updated_at: string;
+          archived_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          name: string;
+          description?: string | null;
+          area?: string | null;
+          status?: string;
+          leader_user_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          archived_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          name?: string;
+          description?: string | null;
+          area?: string | null;
+          status?: string;
+          leader_user_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          archived_at?: string | null;
+        };
+        Relationships: [];
+      };
+      tenant_team_members: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          team_id: string;
+          user_id: string;
+          joined_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          team_id: string;
+          user_id: string;
+          joined_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          team_id?: string;
+          user_id?: string;
+          joined_at?: string;
+        };
+        Relationships: [];
+      };
+      tenant_job_titles: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          name: string;
+          description: string | null;
+          level: number | null;
+          team_id: string | null;
+          default_membership_role: string | null;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          name: string;
+          description?: string | null;
+          level?: number | null;
+          team_id?: string | null;
+          default_membership_role?: string | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          name?: string;
+          description?: string | null;
+          level?: number | null;
+          team_id?: string | null;
+          default_membership_role?: string | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tenant_invitations: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          email: string;
+          full_name: string | null;
+          membership_role: string;
+          team_id: string | null;
+          job_title_id: string | null;
+          token_hash: string;
+          token_prefix: string;
+          status: string;
+          expires_at: string;
+          message: string | null;
+          invited_by: string | null;
+          accepted_at: string | null;
+          accepted_user_id: string | null;
+          cancelled_at: string | null;
+          created_at: string;
+          updated_at: string;
+          resent_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          email: string;
+          full_name?: string | null;
+          membership_role?: string;
+          team_id?: string | null;
+          job_title_id?: string | null;
+          token_hash: string;
+          token_prefix: string;
+          status?: string;
+          expires_at: string;
+          message?: string | null;
+          invited_by?: string | null;
+          accepted_at?: string | null;
+          accepted_user_id?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          resent_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          email?: string;
+          full_name?: string | null;
+          membership_role?: string;
+          team_id?: string | null;
+          job_title_id?: string | null;
+          token_hash?: string;
+          token_prefix?: string;
+          status?: string;
+          expires_at?: string;
+          message?: string | null;
+          invited_by?: string | null;
+          accepted_at?: string | null;
+          accepted_user_id?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          resent_at?: string | null;
         };
         Relationships: [];
       };

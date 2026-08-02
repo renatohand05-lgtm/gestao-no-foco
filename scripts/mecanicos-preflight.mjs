@@ -44,8 +44,15 @@ for (const f of required) {
 }
 
 const nav = readFileSync(resolve(root, "config/navigation.ts"), "utf8");
-if (nav.includes("oficina/mecanicos") && nav.includes("Mecânicos")) {
-  ok("nav Mecânicos");
+const segmentLabels = readFileSync(
+  resolve(root, "config/segment-labels.ts"),
+  "utf8",
+);
+if (
+  nav.includes("oficina/mecanicos") &&
+  (nav.includes("Mecânicos") || segmentLabels.includes('team: "Mecânicos"'))
+) {
+  ok("nav Mecânicos (segment-labels oficina)");
 } else bad("nav missing Mecânicos");
 
 const perm = readFileSync(resolve(root, "lib/permissoes/constants.ts"), "utf8");

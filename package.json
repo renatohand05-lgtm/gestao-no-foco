@@ -313,7 +313,22 @@
     "test:phase29-tenant-isolation": "node scripts/phase29-tenant-isolation-tests.mjs",
     "test:phase29-rbac": "node scripts/phase29-rbac-tests.mjs",
     "test:homolog-29-10-1": "node scripts/homolog-29-10-1-browser.mjs",
-    "test:homolog-29-11-release": "node scripts/homolog-29-11-release-browser.mjs"
+    "test:homolog-29-11-release": "node scripts/homolog-29-11-release-browser.mjs",
+    "test:homolog-30-0-audit": "node scripts/homolog-30-0-audit-browser.mjs",
+    "test:phase30-shell": "node scripts/phase30-shell-tests.mjs",
+    "test:phase30-operations-performance": "node scripts/phase30-operations-performance-tests.mjs",
+    "test:phase30-multisector-nav": "node --experimental-strip-types scripts/phase30-multisector-nav-tests.mjs",
+    "test:phase30-analytics-language": "node --experimental-strip-types scripts/phase30-analytics-language-tests.mjs",
+    "test:phase30-responsive": "node scripts/phase30-responsive-tests.mjs",
+    "test:homolog-30-1": "node scripts/homolog-30-1-browser.mjs",
+    "test:homolog-30-1-1": "node scripts/homolog-30-1-1-browser.mjs",
+    "test:homolog-30-2": "node scripts/homolog-30-2-browser.mjs",
+    "test:phase30-team": "node --experimental-strip-types scripts/phase30-team-tests.mjs",
+    "test:phase30-invitations": "node --experimental-strip-types scripts/phase30-invitations-tests.mjs",
+    "test:phase30-roles": "node --experimental-strip-types scripts/phase30-roles-tests.mjs",
+    "test:phase30-permissions-matrix": "node --experimental-strip-types scripts/phase30-permissions-matrix-tests.mjs",
+    "test:phase30-rbac-scope": "node --experimental-strip-types scripts/phase30-rbac-scope-tests.mjs",
+    "test:phase30-team-tenant-isolation": "node --experimental-strip-types scripts/phase30-team-tenant-isolation-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -14,6 +14,8 @@ type Props = {
   canAlterarStatus: boolean;
   syncedAt: string;
   pollSeconds?: number;
+  showVehicleFields?: boolean;
+  assigneeLabel?: string;
 };
 
 function formatSync(iso: string) {
@@ -29,6 +31,8 @@ export function CentroOpsLivePanel({
   canAlterarStatus,
   syncedAt,
   pollSeconds = 60,
+  showVehicleFields = true,
+  assigneeLabel = "Responsável",
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -78,6 +82,8 @@ export function CentroOpsLivePanel({
             tenantSlug={tenantSlug}
             board={board}
             canAlterarStatus={canAlterarStatus}
+            showVehicleFields={showVehicleFields}
+            assigneeLabel={assigneeLabel}
           />
         </div>
       </div>

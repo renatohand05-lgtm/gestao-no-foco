@@ -1,0 +1,168 @@
+{
+  "at": "2026-08-02T22:42:41.938Z",
+  "sprint": "30.2.2",
+  "baseUrl": "http://localhost:3000",
+  "mark": "QA3022-mscdynwy",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "shell Apresentação collapsed (got collapsed)"
+    },
+    {
+      "ok": true,
+      "detail": "sidebar comércio/restaurante sem Mecânicos"
+    },
+    {
+      "ok": true,
+      "detail": "centro-ops cold 1393ms"
+    },
+    {
+      "ok": true,
+      "detail": "centro-ops warm 1372ms"
+    },
+    {
+      "ok": true,
+      "detail": "cold ≤4000ms (got 1393)"
+    },
+    {
+      "ok": true,
+      "detail": "warm ≤2500ms aspiracional (got 1372)"
+    },
+    {
+      "ok": true,
+      "detail": "analytics sem path técnico na face"
+    },
+    {
+      "ok": true,
+      "detail": "config card Equipe ready"
+    },
+    {
+      "ok": true,
+      "detail": "GET /equipe 200"
+    },
+    {
+      "ok": true,
+      "detail": "schema Equipe pronto (sem banner pendente)"
+    },
+    {
+      "ok": true,
+      "detail": "sem UUID na face Equipe"
+    },
+    {
+      "ok": true,
+      "detail": "sem UI falsa de filial"
+    },
+    {
+      "ok": true,
+      "detail": "aba Membros com dados/labels"
+    },
+    {
+      "ok": true,
+      "detail": "busca membros interativa"
+    },
+    {
+      "ok": true,
+      "detail": "aba Equipes (admin)"
+    },
+    {
+      "ok": true,
+      "detail": "equipe criada: QA3022-mscdynwy-Equipe"
+    },
+    {
+      "ok": true,
+      "detail": "equipe arquivada/inativada"
+    },
+    {
+      "ok": true,
+      "detail": "persistência equipe após refresh"
+    },
+    {
+      "ok": true,
+      "detail": "cargo criado: QA3022-mscdynwy-Cargo"
+    },
+    {
+      "ok": true,
+      "detail": "form convite presente"
+    },
+    {
+      "ok": true,
+      "detail": "convite criado"
+    },
+    {
+      "ok": true,
+      "detail": "convite persistido após refresh"
+    },
+    {
+      "ok": true,
+      "detail": "convite cancelado"
+    },
+    {
+      "ok": true,
+      "detail": "deep-link ?tab=papeis"
+    },
+    {
+      "ok": true,
+      "detail": "matriz canônica (sem editor falso de papel customizado)"
+    },
+    {
+      "ok": true,
+      "detail": "aba Auditoria acessível"
+    },
+    {
+      "ok": true,
+      "detail": "Equipe dark"
+    },
+    {
+      "ok": true,
+      "detail": "Equipe light"
+    },
+    {
+      "ok": true,
+      "detail": "viewport tablet Equipe"
+    },
+    {
+      "ok": true,
+      "detail": "viewport mobile Equipe"
+    },
+    {
+      "ok": true,
+      "detail": "Owner/Admin vê abas administrativas"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    },
+    {
+      "ok": true,
+      "detail": "sem HTTP 500 nas navegações medidas"
+    }
+  ],
+  "perf": [
+    {
+      "label": "cold",
+      "navMs": 1393,
+      "status": 200,
+      "useful": true
+    },
+    {
+      "label": "warm",
+      "navMs": 1372,
+      "status": 200,
+      "useful": true
+    }
+  ],
+  "consoleErrors": [],
+  "notes": [
+    "Papel customizado / editar permissões: fora da UI 30.2 (matriz SYSTEM_ROLES read-only) — validado como ausência honesta",
+    "Filial: não suportada — validado ausência de UI",
+    "Perfis Financeiro/Operacional/Visualizador: sem contas dedicadas no storageState — cobertura via suites contract + page-auth"
+  ],
+  "summary": {
+    "pass": 34,
+    "fail": 0
+  }
+}

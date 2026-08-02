@@ -1,0 +1,1434 @@
+{
+  "at": "2026-08-02T17:54:09.448Z",
+  "sprint": "30.0",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "auth": true,
+  "sessionPersist": true,
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada (não é redirect-only)"
+    },
+    {
+      "ok": true,
+      "detail": "persistência de sessão após refresh"
+    },
+    {
+      "ok": true,
+      "detail": "deep link / nova aba DRE autenticado"
+    },
+    {
+      "ok": true,
+      "detail": "Dashboard /dashboard status=200 4266ms"
+    },
+    {
+      "ok": true,
+      "detail": "Clientes /clientes status=200 2755ms"
+    },
+    {
+      "ok": true,
+      "detail": "CRM Kanban /clientes/funil status=200 2724ms"
+    },
+    {
+      "ok": true,
+      "detail": "CRM /crm status=200 2476ms"
+    },
+    {
+      "ok": true,
+      "detail": "Pipeline /crm/pipeline status=200 2560ms"
+    },
+    {
+      "ok": true,
+      "detail": "Oportunidades /crm/oportunidades status=200 2550ms"
+    },
+    {
+      "ok": true,
+      "detail": "Vendas /vendas status=200 3448ms"
+    },
+    {
+      "ok": true,
+      "detail": "Ordens /ordens status=200 3792ms"
+    },
+    {
+      "ok": true,
+      "detail": "Produtos /produtos status=200 3425ms"
+    },
+    {
+      "ok": true,
+      "detail": "Estoque /estoque status=200 2925ms"
+    },
+    {
+      "ok": true,
+      "detail": "Compras /compras status=200 2477ms"
+    },
+    {
+      "ok": true,
+      "detail": "Pedidos /compras/pedidos status=200 2880ms"
+    },
+    {
+      "ok": true,
+      "detail": "Agenda /agenda status=200 2650ms"
+    },
+    {
+      "ok": true,
+      "detail": "Financeiro /financeiro status=200 3033ms"
+    },
+    {
+      "ok": true,
+      "detail": "Contas a pagar /financeiro/contas-pagar status=200 3103ms"
+    },
+    {
+      "ok": true,
+      "detail": "Contas a receber /financeiro/contas-receber status=200 3009ms"
+    },
+    {
+      "ok": true,
+      "detail": "Fluxo de Caixa /financeiro/fluxo-caixa status=200 3015ms"
+    },
+    {
+      "ok": true,
+      "detail": "DRE /financeiro/dre status=200 2758ms"
+    },
+    {
+      "ok": true,
+      "detail": "Analytics /analytics status=200 2512ms"
+    },
+    {
+      "ok": true,
+      "detail": "Inteligência /inteligencia status=200 3319ms"
+    },
+    {
+      "ok": true,
+      "detail": "Tributário /tributario status=200 3315ms"
+    },
+    {
+      "ok": true,
+      "detail": "Configurações /configuracoes status=200 2524ms"
+    },
+    {
+      "ok": true,
+      "detail": "Metas /configuracoes/metas status=200 2887ms"
+    },
+    {
+      "ok": true,
+      "detail": "Centro Operações /centro-operacoes status=200 12152ms"
+    },
+    {
+      "ok": true,
+      "detail": "Oficina/Mecânicos /oficina/mecanicos status=200 7803ms"
+    },
+    {
+      "ok": true,
+      "detail": "Relatórios /relatorios status=200 4630ms"
+    },
+    {
+      "ok": true,
+      "detail": "landing status=200"
+    },
+    {
+      "ok": true,
+      "detail": "login status=200"
+    },
+    {
+      "ok": true,
+      "detail": "dark mode data-gof-theme=dark"
+    },
+    {
+      "ok": true,
+      "detail": "light mode data-gof-theme=light"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1920 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1920 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1920 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1440 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1440 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1440 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1366 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1366 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1366 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1024 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1024 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1024 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 768 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 768 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 768 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 430 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 430 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 430 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 390 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 390 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 390 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 375 /dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 375 /financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 375 /clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "HTTP 500=0"
+    },
+    {
+      "ok": true,
+      "detail": "PageError=0"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    },
+    {
+      "ok": true,
+      "detail": "UUID hits=0"
+    }
+  ],
+  "routes": [
+    {
+      "path": "/dashboard",
+      "name": "dashboard",
+      "module": "Dashboard",
+      "status": 200,
+      "navMs": 4266,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/dashboard.png",
+      "webVitals": {
+        "ttfb": 372,
+        "domContentLoaded": 2856,
+        "load": 2856,
+        "fcp": 488,
+        "transferSize": 88555
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/clientes",
+      "name": "clientes",
+      "module": "Clientes",
+      "status": 200,
+      "navMs": 2755,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/clientes.png",
+      "webVitals": {
+        "ttfb": 848,
+        "domContentLoaded": 1352,
+        "load": 1352,
+        "fcp": 916,
+        "transferSize": 46561
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/clientes/funil",
+      "name": "kanban",
+      "module": "CRM Kanban",
+      "status": 200,
+      "navMs": 2724,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/kanban.png",
+      "webVitals": {
+        "ttfb": 837,
+        "domContentLoaded": 1306,
+        "load": 1307,
+        "fcp": 928,
+        "transferSize": 32877
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/crm",
+      "name": "crm",
+      "module": "CRM",
+      "status": 200,
+      "navMs": 2476,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/crm.png",
+      "webVitals": {
+        "ttfb": 352,
+        "domContentLoaded": 0,
+        "load": 0,
+        "fcp": 448,
+        "transferSize": 300
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/crm/pipeline",
+      "name": "crm-pipeline",
+      "module": "Pipeline",
+      "status": 200,
+      "navMs": 2560,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/crm-pipeline.png",
+      "webVitals": {
+        "ttfb": 835,
+        "domContentLoaded": 1149,
+        "load": 1156,
+        "fcp": 892,
+        "transferSize": 32253
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/crm/oportunidades",
+      "name": "crm-oportunidades",
+      "module": "Oportunidades",
+      "status": 200,
+      "navMs": 2550,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/crm-oportunidades.png",
+      "webVitals": {
+        "ttfb": 822,
+        "domContentLoaded": 1134,
+        "load": 1134,
+        "fcp": 912,
+        "transferSize": 32814
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/vendas",
+      "name": "vendas",
+      "module": "Vendas",
+      "status": 200,
+      "navMs": 3448,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/vendas.png",
+      "webVitals": {
+        "ttfb": 1404,
+        "domContentLoaded": 2037,
+        "load": 2037,
+        "fcp": 1484,
+        "transferSize": 46010
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/ordens",
+      "name": "ordens",
+      "module": "Ordens",
+      "status": 200,
+      "navMs": 3792,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/ordens.png",
+      "webVitals": {
+        "ttfb": 914,
+        "domContentLoaded": 2390,
+        "load": 2390,
+        "fcp": 1008,
+        "transferSize": 63779
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/produtos",
+      "name": "produtos",
+      "module": "Produtos",
+      "status": 200,
+      "navMs": 3425,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/produtos.png",
+      "webVitals": {
+        "ttfb": 1364,
+        "domContentLoaded": 2021,
+        "load": 2021,
+        "fcp": 1456,
+        "transferSize": 52873
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/estoque",
+      "name": "estoque",
+      "module": "Estoque",
+      "status": 200,
+      "navMs": 2925,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/estoque.png",
+      "webVitals": {
+        "ttfb": 873,
+        "domContentLoaded": 1510,
+        "load": 1510,
+        "fcp": 964,
+        "transferSize": 65455
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/compras",
+      "name": "compras",
+      "module": "Compras",
+      "status": 200,
+      "navMs": 2477,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/compras.png",
+      "webVitals": {
+        "ttfb": 393,
+        "domContentLoaded": 0,
+        "load": 0,
+        "fcp": 452,
+        "transferSize": 300
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/compras/pedidos",
+      "name": "compras-pedidos",
+      "module": "Pedidos",
+      "status": 200,
+      "navMs": 2880,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/compras-pedidos.png",
+      "webVitals": {
+        "ttfb": 983,
+        "domContentLoaded": 1465,
+        "load": 1465,
+        "fcp": 1068,
+        "transferSize": 32390
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/agenda",
+      "name": "agenda",
+      "module": "Agenda",
+      "status": 200,
+      "navMs": 2650,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/agenda.png",
+      "webVitals": {
+        "ttfb": 847,
+        "domContentLoaded": 1246,
+        "load": 1252,
+        "fcp": 924,
+        "transferSize": 32322
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/financeiro",
+      "name": "financeiro",
+      "module": "Financeiro",
+      "status": 200,
+      "navMs": 3033,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/financeiro.png",
+      "webVitals": {
+        "ttfb": 860,
+        "domContentLoaded": 1622,
+        "load": 1623,
+        "fcp": 920,
+        "transferSize": 41598
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/financeiro/contas-pagar",
+      "name": "contas-pagar",
+      "module": "Contas a pagar",
+      "status": 200,
+      "navMs": 3103,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/contas-pagar.png",
+      "webVitals": {
+        "ttfb": 882,
+        "domContentLoaded": 1702,
+        "load": 1702,
+        "fcp": 1004,
+        "transferSize": 45205
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/financeiro/contas-receber",
+      "name": "contas-receber",
+      "module": "Contas a receber",
+      "status": 200,
+      "navMs": 3009,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/contas-receber.png",
+      "webVitals": {
+        "ttfb": 746,
+        "domContentLoaded": 1604,
+        "load": 1604,
+        "fcp": 852,
+        "transferSize": 52318
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/financeiro/fluxo-caixa",
+      "name": "fluxo-caixa",
+      "module": "Fluxo de Caixa",
+      "status": 200,
+      "navMs": 3015,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/fluxo-caixa.png",
+      "webVitals": {
+        "ttfb": 861,
+        "domContentLoaded": 1604,
+        "load": 1605,
+        "fcp": 960,
+        "transferSize": 50300
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/financeiro/dre",
+      "name": "dre",
+      "module": "DRE",
+      "status": 200,
+      "navMs": 2758,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/dre.png",
+      "webVitals": {
+        "ttfb": 759,
+        "domContentLoaded": 1349,
+        "load": 1349,
+        "fcp": 860,
+        "transferSize": 46099
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/analytics",
+      "name": "analytics",
+      "module": "Analytics",
+      "status": 200,
+      "navMs": 2512,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/analytics.png",
+      "webVitals": {
+        "ttfb": 390,
+        "domContentLoaded": 0,
+        "load": 0,
+        "fcp": 456,
+        "transferSize": 300
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/inteligencia",
+      "name": "inteligencia",
+      "module": "Inteligência",
+      "status": 200,
+      "navMs": 3319,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/inteligencia.png",
+      "webVitals": {
+        "ttfb": 1254,
+        "domContentLoaded": 1911,
+        "load": 1911,
+        "fcp": 1340,
+        "transferSize": 29858
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/tributario",
+      "name": "tributario",
+      "module": "Tributário",
+      "status": 200,
+      "navMs": 3315,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/tributario.png",
+      "webVitals": {
+        "ttfb": 782,
+        "domContentLoaded": 1905,
+        "load": 1905,
+        "fcp": 880,
+        "transferSize": 29049
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/configuracoes",
+      "name": "configuracoes",
+      "module": "Configurações",
+      "status": 200,
+      "navMs": 2524,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/configuracoes.png",
+      "webVitals": {
+        "ttfb": 825,
+        "domContentLoaded": 1119,
+        "load": 1127,
+        "fcp": 888,
+        "transferSize": 30992
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/configuracoes/metas",
+      "name": "metas",
+      "module": "Metas",
+      "status": 200,
+      "navMs": 2887,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/metas.png",
+      "webVitals": {
+        "ttfb": 830,
+        "domContentLoaded": 1478,
+        "load": 1478,
+        "fcp": 904,
+        "transferSize": 34142
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/centro-operacoes",
+      "name": "centro-operacoes",
+      "module": "Centro Operações",
+      "status": 200,
+      "navMs": 12152,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/centro-operacoes.png",
+      "webVitals": {
+        "ttfb": 9867,
+        "domContentLoaded": 10736,
+        "load": 10736,
+        "fcp": 10008,
+        "transferSize": 41466
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/oficina/mecanicos",
+      "name": "oficina-mecanicos",
+      "module": "Oficina/Mecânicos",
+      "status": 200,
+      "navMs": 7803,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/oficina-mecanicos.png",
+      "webVitals": {
+        "ttfb": 5511,
+        "domContentLoaded": 6390,
+        "load": 6390,
+        "fcp": 5624,
+        "transferSize": 30489
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    },
+    {
+      "path": "/relatorios",
+      "name": "relatorios",
+      "module": "Relatórios",
+      "status": 200,
+      "navMs": 4630,
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "schemaErr": false,
+      "uuid": false,
+      "rawEnum": false,
+      "console": 0,
+      "pageErr": 0,
+      "shot": "screenshots/relatorios.png",
+      "webVitals": {
+        "ttfb": 2873,
+        "domContentLoaded": 3224,
+        "load": 3232,
+        "fcp": 2932,
+        "transferSize": 27512
+      },
+      "bodyPreview": "ENTERPRISE teste-renato-01 PRINCIPAL Centro de Operações Dashboard Busca OPERAÇÃO Clientes Produtos & Serviços Estoque Compras Vendas Ordens de Serviço Agenda Mecânicos INTELIGÊN"
+    }
+  ],
+  "perf": [
+    {
+      "path": "/dashboard",
+      "module": "Dashboard",
+      "navMs": 4266,
+      "ttfb": 372,
+      "domContentLoaded": 2856,
+      "load": 2856,
+      "fcp": 488,
+      "transferSize": 88555
+    },
+    {
+      "path": "/clientes",
+      "module": "Clientes",
+      "navMs": 2755,
+      "ttfb": 848,
+      "domContentLoaded": 1352,
+      "load": 1352,
+      "fcp": 916,
+      "transferSize": 46561
+    },
+    {
+      "path": "/clientes/funil",
+      "module": "CRM Kanban",
+      "navMs": 2724,
+      "ttfb": 837,
+      "domContentLoaded": 1306,
+      "load": 1307,
+      "fcp": 928,
+      "transferSize": 32877
+    },
+    {
+      "path": "/crm",
+      "module": "CRM",
+      "navMs": 2476,
+      "ttfb": 352,
+      "domContentLoaded": 0,
+      "load": 0,
+      "fcp": 448,
+      "transferSize": 300
+    },
+    {
+      "path": "/crm/pipeline",
+      "module": "Pipeline",
+      "navMs": 2560,
+      "ttfb": 835,
+      "domContentLoaded": 1149,
+      "load": 1156,
+      "fcp": 892,
+      "transferSize": 32253
+    },
+    {
+      "path": "/crm/oportunidades",
+      "module": "Oportunidades",
+      "navMs": 2550,
+      "ttfb": 822,
+      "domContentLoaded": 1134,
+      "load": 1134,
+      "fcp": 912,
+      "transferSize": 32814
+    },
+    {
+      "path": "/vendas",
+      "module": "Vendas",
+      "navMs": 3448,
+      "ttfb": 1404,
+      "domContentLoaded": 2037,
+      "load": 2037,
+      "fcp": 1484,
+      "transferSize": 46010
+    },
+    {
+      "path": "/ordens",
+      "module": "Ordens",
+      "navMs": 3792,
+      "ttfb": 914,
+      "domContentLoaded": 2390,
+      "load": 2390,
+      "fcp": 1008,
+      "transferSize": 63779
+    },
+    {
+      "path": "/produtos",
+      "module": "Produtos",
+      "navMs": 3425,
+      "ttfb": 1364,
+      "domContentLoaded": 2021,
+      "load": 2021,
+      "fcp": 1456,
+      "transferSize": 52873
+    },
+    {
+      "path": "/estoque",
+      "module": "Estoque",
+      "navMs": 2925,
+      "ttfb": 873,
+      "domContentLoaded": 1510,
+      "load": 1510,
+      "fcp": 964,
+      "transferSize": 65455
+    },
+    {
+      "path": "/compras",
+      "module": "Compras",
+      "navMs": 2477,
+      "ttfb": 393,
+      "domContentLoaded": 0,
+      "load": 0,
+      "fcp": 452,
+      "transferSize": 300
+    },
+    {
+      "path": "/compras/pedidos",
+      "module": "Pedidos",
+      "navMs": 2880,
+      "ttfb": 983,
+      "domContentLoaded": 1465,
+      "load": 1465,
+      "fcp": 1068,
+      "transferSize": 32390
+    },
+    {
+      "path": "/agenda",
+      "module": "Agenda",
+      "navMs": 2650,
+      "ttfb": 847,
+      "domContentLoaded": 1246,
+      "load": 1252,
+      "fcp": 924,
+      "transferSize": 32322
+    },
+    {
+      "path": "/financeiro",
+      "module": "Financeiro",
+      "navMs": 3033,
+      "ttfb": 860,
+      "domContentLoaded": 1622,
+      "load": 1623,
+      "fcp": 920,
+      "transferSize": 41598
+    },
+    {
+      "path": "/financeiro/contas-pagar",
+      "module": "Contas a pagar",
+      "navMs": 3103,
+      "ttfb": 882,
+      "domContentLoaded": 1702,
+      "load": 1702,
+      "fcp": 1004,
+      "transferSize": 45205
+    },
+    {
+      "path": "/financeiro/contas-receber",
+      "module": "Contas a receber",
+      "navMs": 3009,
+      "ttfb": 746,
+      "domContentLoaded": 1604,
+      "load": 1604,
+      "fcp": 852,
+      "transferSize": 52318
+    },
+    {
+      "path": "/financeiro/fluxo-caixa",
+      "module": "Fluxo de Caixa",
+      "navMs": 3015,
+      "ttfb": 861,
+      "domContentLoaded": 1604,
+      "load": 1605,
+      "fcp": 960,
+      "transferSize": 50300
+    },
+    {
+      "path": "/financeiro/dre",
+      "module": "DRE",
+      "navMs": 2758,
+      "ttfb": 759,
+      "domContentLoaded": 1349,
+      "load": 1349,
+      "fcp": 860,
+      "transferSize": 46099
+    },
+    {
+      "path": "/analytics",
+      "module": "Analytics",
+      "navMs": 2512,
+      "ttfb": 390,
+      "domContentLoaded": 0,
+      "load": 0,
+      "fcp": 456,
+      "transferSize": 300
+    },
+    {
+      "path": "/inteligencia",
+      "module": "Inteligência",
+      "navMs": 3319,
+      "ttfb": 1254,
+      "domContentLoaded": 1911,
+      "load": 1911,
+      "fcp": 1340,
+      "transferSize": 29858
+    },
+    {
+      "path": "/tributario",
+      "module": "Tributário",
+      "navMs": 3315,
+      "ttfb": 782,
+      "domContentLoaded": 1905,
+      "load": 1905,
+      "fcp": 880,
+      "transferSize": 29049
+    },
+    {
+      "path": "/configuracoes",
+      "module": "Configurações",
+      "navMs": 2524,
+      "ttfb": 825,
+      "domContentLoaded": 1119,
+      "load": 1127,
+      "fcp": 888,
+      "transferSize": 30992
+    },
+    {
+      "path": "/configuracoes/metas",
+      "module": "Metas",
+      "navMs": 2887,
+      "ttfb": 830,
+      "domContentLoaded": 1478,
+      "load": 1478,
+      "fcp": 904,
+      "transferSize": 34142
+    },
+    {
+      "path": "/centro-operacoes",
+      "module": "Centro Operações",
+      "navMs": 12152,
+      "ttfb": 9867,
+      "domContentLoaded": 10736,
+      "load": 10736,
+      "fcp": 10008,
+      "transferSize": 41466
+    },
+    {
+      "path": "/oficina/mecanicos",
+      "module": "Oficina/Mecânicos",
+      "navMs": 7803,
+      "ttfb": 5511,
+      "domContentLoaded": 6390,
+      "load": 6390,
+      "fcp": 5624,
+      "transferSize": 30489
+    },
+    {
+      "path": "/relatorios",
+      "module": "Relatórios",
+      "navMs": 4630,
+      "ttfb": 2873,
+      "domContentLoaded": 3224,
+      "load": 3232,
+      "fcp": 2932,
+      "transferSize": 27512
+    }
+  ],
+  "viewports": [
+    {
+      "viewport": "1920",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-1920.png"
+    },
+    {
+      "viewport": "1920",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-1920.png"
+    },
+    {
+      "viewport": "1920",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-1920.png"
+    },
+    {
+      "viewport": "1440",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-1440.png"
+    },
+    {
+      "viewport": "1440",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-1440.png"
+    },
+    {
+      "viewport": "1440",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-1440.png"
+    },
+    {
+      "viewport": "1366",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-1366.png"
+    },
+    {
+      "viewport": "1366",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-1366.png"
+    },
+    {
+      "viewport": "1366",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-1366.png"
+    },
+    {
+      "viewport": "1024",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-1024.png"
+    },
+    {
+      "viewport": "1024",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-1024.png"
+    },
+    {
+      "viewport": "1024",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-1024.png"
+    },
+    {
+      "viewport": "768",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-768.png"
+    },
+    {
+      "viewport": "768",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-768.png"
+    },
+    {
+      "viewport": "768",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-768.png"
+    },
+    {
+      "viewport": "430",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-430.png"
+    },
+    {
+      "viewport": "430",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-430.png"
+    },
+    {
+      "viewport": "430",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-430.png"
+    },
+    {
+      "viewport": "390",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-390.png"
+    },
+    {
+      "viewport": "390",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-390.png"
+    },
+    {
+      "viewport": "390",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-390.png"
+    },
+    {
+      "viewport": "375",
+      "path": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dash-375.png"
+    },
+    {
+      "viewport": "375",
+      "path": "/financeiro/dre",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-dre-375.png"
+    },
+    {
+      "viewport": "375",
+      "path": "/clientes/funil",
+      "status": 200,
+      "ok": true,
+      "shot": "screenshots/vp-kanban-375.png"
+    }
+  ],
+  "themes": [
+    {
+      "mode": "dark",
+      "attr": "dark"
+    },
+    {
+      "mode": "light",
+      "attr": "light"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "httpIssues": [],
+  "uuidHits": [],
+  "genericFlags": [],
+  "perfRanking": [
+    {
+      "path": "/centro-operacoes",
+      "module": "Centro Operações",
+      "navMs": 12152,
+      "ttfb": 9867,
+      "domContentLoaded": 10736,
+      "load": 10736,
+      "fcp": 10008,
+      "transferSize": 41466
+    },
+    {
+      "path": "/oficina/mecanicos",
+      "module": "Oficina/Mecânicos",
+      "navMs": 7803,
+      "ttfb": 5511,
+      "domContentLoaded": 6390,
+      "load": 6390,
+      "fcp": 5624,
+      "transferSize": 30489
+    },
+    {
+      "path": "/relatorios",
+      "module": "Relatórios",
+      "navMs": 4630,
+      "ttfb": 2873,
+      "domContentLoaded": 3224,
+      "load": 3232,
+      "fcp": 2932,
+      "transferSize": 27512
+    },
+    {
+      "path": "/dashboard",
+      "module": "Dashboard",
+      "navMs": 4266,
+      "ttfb": 372,
+      "domContentLoaded": 2856,
+      "load": 2856,
+      "fcp": 488,
+      "transferSize": 88555
+    },
+    {
+      "path": "/ordens",
+      "module": "Ordens",
+      "navMs": 3792,
+      "ttfb": 914,
+      "domContentLoaded": 2390,
+      "load": 2390,
+      "fcp": 1008,
+      "transferSize": 63779
+    },
+    {
+      "path": "/vendas",
+      "module": "Vendas",
+      "navMs": 3448,
+      "ttfb": 1404,
+      "domContentLoaded": 2037,
+      "load": 2037,
+      "fcp": 1484,
+      "transferSize": 46010
+    },
+    {
+      "path": "/produtos",
+      "module": "Produtos",
+      "navMs": 3425,
+      "ttfb": 1364,
+      "domContentLoaded": 2021,
+      "load": 2021,
+      "fcp": 1456,
+      "transferSize": 52873
+    },
+    {
+      "path": "/inteligencia",
+      "module": "Inteligência",
+      "navMs": 3319,
+      "ttfb": 1254,
+      "domContentLoaded": 1911,
+      "load": 1911,
+      "fcp": 1340,
+      "transferSize": 29858
+    },
+    {
+      "path": "/tributario",
+      "module": "Tributário",
+      "navMs": 3315,
+      "ttfb": 782,
+      "domContentLoaded": 1905,
+      "load": 1905,
+      "fcp": 880,
+      "transferSize": 29049
+    },
+    {
+      "path": "/financeiro/contas-pagar",
+      "module": "Contas a pagar",
+      "navMs": 3103,
+      "ttfb": 882,
+      "domContentLoaded": 1702,
+      "load": 1702,
+      "fcp": 1004,
+      "transferSize": 45205
+    }
+  ],
+  "summary": {
+    "pass": 61,
+    "fail": 0,
+    "routes": 26
+  }
+}

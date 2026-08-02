@@ -1,0 +1,107 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:rbac
+> node --experimental-strip-types scripts/rbac-tests.mjs
+
+(node:30060) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/renat/gestao-no-foco/lib/rbac/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\renat\gestao-no-foco\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Enterprise RBAC — Sprint 21.1
+
+  PASS  Catálogo: volume mínimo de permissões
+  PASS  Catálogo: padrão modulo.acao
+  PASS  Catálogo: sem chaves duplicadas
+  PASS  Catálogo: financeiro.editar conhecido
+  PASS  Catálogo: permissão desconhecida
+  PASS  Catálogo: metadados de risco
+  PASS  Catálogo: módulos dashboard/usuários/auditoria
+  PASS  Roles: 13 papéis padrão
+  PASS  Roles: metadados completos
+  PASS  Roles: ids válidos
+  PASS  Roles: personalizado ainda não é sistema
+  PASS  Roles: super_admin escopo platform
+  PASS  Roles: proprietario escopo tenant
+  PASS  Matrix: super_admin = catálogo completo
+  PASS  Matrix: proprietario sem permissões exclusivas de plataforma (ou subset)
+  PASS  Matrix: auditor sem exclusão financeira
+  PASS  Matrix: auditor com leitura financeira
+  PASS  Matrix: visualizacao sem exclusão
+  PASS  Matrix: visualizacao com dashboard
+  PASS  Matrix: financeiro herda aprovar
+  PASS  Matrix: role desconhecida = vazio
+  PASS  Deny-by-default: sem roles
+  PASS  Contexto inválido: null
+  PASS  Contexto inválido: undefined
+  PASS  Contexto incompleto: userId vazio
+  PASS  Permissão desconhecida negada
+  PASS  super_admin no tenant: acesso total
+  PASS  super_admin sem tenant e sem platformScope: negado
+  PASS  super_admin com platformScope: global permitido
+  PASS  super_admin platformScope: cross-tenant permitido
+  PASS  proprietario: acesso total no tenant
+  PASS  proprietario: negado em tenant diferente
+  PASS  proprietario: motivo TENANT_MISMATCH
+  PASS  auditor: leitura auditoria
+  PASS  auditor: sem criação
+  PASS  auditor: sem aprovação
+  PASS  visualizacao: leitura OS
+  PASS  visualizacao: sem exclusão
+  PASS  Precedência: deny explícito vence role
+  PASS  Precedência: reason EXPLICIT_DENY
+  PASS  Permissão adicional concede além da role
+  PASS  Precedência: deny explícito vence additional
+  PASS  tenantId ausente: MISSING_TENANT
+  PASS  hasAnyPermission: true
+  PASS  hasAllPermissions: false
+  PASS  hasAnyRole: true
+  PASS  hasAllRoles: false
+  PASS  hasRole: true
+  PASS  hasAnyPermission: array vazio = false
+  PASS  hasAllPermissions: array vazio = false
+  PASS  hasAnyRole: array vazio = false
+  PASS  Contexto: trim tenantId
+  PASS  Contexto: roles deduplicadas
+  PASS  Contexto: permissões adicionais deduplicadas
+  PASS  Ability: agrega roles
+  PASS  Ability: denied set
+  PASS  Determinístico: mesma decisão
+  PASS  explainAuthorization = authorize
+  PASS  AccessDeniedError: código estável
+  PASS  AccessDeniedError: mensagem segura
+  PASS  requirePermission: lança AccessDeniedError
+  PASS  requirePermission: permite
+  PASS  assertPermission: lança
+  PASS  requireAnyPermission: nega
+  PASS  requireAnyPermission: permite
+  PASS  requireAllPermissions: permite
+  PASS  requireRole: ROLE_REQUIRED
+  PASS  requireAnyPermission: array vazio → AuthorizationError
+  PASS  cannot: null context
+  PASS  cannot: null permission
+  PASS  cannot: undefined permission
+  PASS  PermissionGate: API completa
+  PASS  RoleGate: any/all + fallback
+  PASS  SecurityBoundary: decision + fallback
+  PASS  AccessDenied: a11y + mensagem segura
+  PASS  PermissionBadge presente
+  PASS  UserRoleBadge presente
+  PASS  security/index barrel removido (deep imports)
+  PASS  lib/rbac/index exporta API
+  PASS  package.json: script test:rbac
+  PASS  Arquivo presente: lib/rbac/types.ts
+  PASS  Arquivo presente: lib/rbac/permissions.ts
+  PASS  Arquivo presente: lib/rbac/roles.ts
+  PASS  Arquivo presente: lib/rbac/role-permissions.ts
+  PASS  Arquivo presente: lib/rbac/policies.ts
+  PASS  Arquivo presente: lib/rbac/abilities.ts
+  PASS  Arquivo presente: lib/rbac/authorization.ts
+  PASS  Arquivo presente: lib/rbac/guards.ts
+  PASS  Arquivo presente: lib/rbac/context.ts
+  PASS  Arquivo presente: lib/rbac/errors.ts
+  PASS  Arquivo presente: lib/rbac/index.ts
+  PASS  lib/rbac: sem dependência de React
+
+Resultado: 92 PASS · 0 FAIL
+

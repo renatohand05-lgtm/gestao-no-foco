@@ -1,0 +1,94 @@
+{
+  "at": "2026-08-02T22:41:32.834Z",
+  "sprint": "30.1.1",
+  "baseUrl": "http://localhost:3000",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "shell Apresentação collapsed (got collapsed)"
+    },
+    {
+      "ok": true,
+      "detail": "sidebar comércio sem Mecânicos"
+    },
+    {
+      "ok": true,
+      "detail": "sidebar tem Centro de Operações"
+    },
+    {
+      "ok": true,
+      "detail": "centro-ops cold 1949ms useful=true"
+    },
+    {
+      "ok": true,
+      "detail": "centro-ops warm 1415ms useful=true"
+    },
+    {
+      "ok": true,
+      "detail": "meta cold ≤4000ms (got 1949)"
+    },
+    {
+      "ok": true,
+      "detail": "meta warm ≤2500ms (got 1415)"
+    },
+    {
+      "ok": true,
+      "detail": "analytics sem path técnico face"
+    },
+    {
+      "ok": true,
+      "detail": "configurações aponta para módulo Equipe"
+    },
+    {
+      "ok": true,
+      "detail": "stub 30.1 removido"
+    },
+    {
+      "ok": true,
+      "detail": "tema dark"
+    },
+    {
+      "ok": true,
+      "detail": "tema light"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1920 chrome=collapsed"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 1024 chrome=collapsed"
+    },
+    {
+      "ok": true,
+      "detail": "viewport 390 chrome=collapsed"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "perf": [
+    {
+      "label": "cold",
+      "navMs": 1949,
+      "status": 200,
+      "useful": true
+    },
+    {
+      "label": "warm",
+      "navMs": 1415,
+      "status": 200,
+      "useful": true
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 17,
+    "fail": 0
+  }
+}

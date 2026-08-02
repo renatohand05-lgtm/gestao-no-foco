@@ -49,8 +49,8 @@ export function AppSidebar({ tenant, tenants }: AppSidebarProps) {
   const dark = resolved === "dark";
 
   const groups = useMemo(
-    () => buildSidebarNavGroups(getTenantNav(tenant.slug)),
-    [tenant.slug],
+    () => buildSidebarNavGroups(getTenantNav(tenant.slug, tenant.segment)),
+    [tenant.slug, tenant.segment],
   );
 
   return (

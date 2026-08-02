@@ -332,6 +332,7 @@ const allowedPostRc = new Set([
   "20260816_intelligence_persistence_phase27_6_1.sql", // Sprint 27.6.1 Intelligence persistence
   "20260817_tax_configuration_phase26_8.sql", // Sprint 26.8 Tax configuration
   "20260818_phase29_10_1_fix_cliente_contatos_ativo.sql", // Sprint 29.10.1 fix ativo index
+  "20260820_phase30_2_team_rbac.sql", // Sprint 30.2 Equipe / Team RBAC
 ]);
 const unexpected = migrations.filter((f) => {
   if (f.includes("22_10")) return true;

@@ -1,0 +1,244 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:phase29
+> node --experimental-strip-types scripts/phase29-tests.mjs
+
+=== Fase 29 — Full Gate (29.0–29.7 Homologação) ===
+
+[phase29-docs]
+  PASS  PHASE_29_ENTERPRISE.md
+  PASS  BARREL_POLICY.md
+  PASS  ARCHITECTURE aponta Fase 29
+  PASS  ARCHITECTURE aponta barrel policy
+  PASS  ARCHITECTURE sprint 29.0
+
+[phase29-canonical]
+  PASS  types/action-result.ts
+  PASS  ActionResult export
+  PASS  ActionResultWith extension
+  PASS  lib/format
+  PASS  toActionError source
+  PASS  lib/enterprise barrel (API pública)
+  PASS  MODULE_STANDARD
+  PASS  SERVICE_STANDARD
+  PASS  FORMATTERS
+
+[phase29-dead-code]
+  PASS  lib/phase28 removido
+  PASS  sem lib/phase28/index.ts
+  PASS  barrel removido: components/finance/index.ts
+  PASS  barrel removido: components/workflow/index.ts
+  PASS  barrel removido: components/demo/index.ts
+  PASS  barrel removido: components/observability/index.ts
+  PASS  barrel removido: components/security/index.ts
+  PASS  barrel removido: components/platform/index.ts
+  PASS  barrel removido: components/gf/index.ts
+  PASS  barrel removido: components/onboarding/index.ts
+  PASS  barrel removido: components/intelligence/index.ts
+  PASS  barrel removido: components/audit/index.ts
+  PASS  barrel removido: components/notifications/index.ts
+  PASS  barrel removido: components/timeline/index.ts
+  PASS  barrel removido: components/enterprise/index.ts
+  PASS  barrel removido: components/executive/copilot/index.ts
+  PASS  barrel removido: components/executive/timeline/index.ts
+  PASS  barrel removido: components/executive/insights/index.ts
+  PASS  barrel removido: components/executive/action-center/index.ts
+  PASS  barrel removido: components/executive/action-plan/index.ts
+  PASS  barrel removido: components/executive/predictions/index.ts
+  PASS  barrel removido: components/executive/intelligence/index.ts
+  PASS  barrel removido: components/dashboard/executive/index.ts
+  PASS  barrel removido: lib/tax/index.ts
+  PASS  barrel removido: lib/catalog-import/index.ts
+  PASS  mantém components/executive barrel
+  PASS  mantém lib/enterprise barrel
+  PASS  mantém lib/finance API pública
+
+[phase29-finance-cycle]
+  PASS  existe lib/finance/actions.ts
+  PASS  sem self-import @/lib/finance em lib/finance/actions.ts
+  PASS  existe lib/finance/cash-intelligence/cash-intelligence-actions.ts
+  PASS  sem self-import @/lib/finance em lib/finance/cash-intelligence/cash-intelligence-actions.ts
+  PASS  existe lib/finance/tax-intelligence/tax-intelligence-actions.ts
+  PASS  sem self-import @/lib/finance em lib/finance/tax-intelligence/tax-intelligence-actions.ts
+  PASS  existe lib/finance/import/import-actions.ts
+  PASS  sem self-import @/lib/finance em lib/finance/import/import-actions.ts
+  PASS  existe lib/import-engine/intelligence/intelligence-actions.ts
+  PASS  sem self-import @/lib/finance em lib/import-engine/intelligence/intelligence-actions.ts
+  PASS  actions usa deep paths finance
+  PASS  comentário do barrel finance sem mojibake
+
+[phase29-freeze-guards]
+  PASS  doc declara Freeze
+  PASS  doc menciona migrations no freeze
+  PASS  doc menciona RBAC freeze
+  PASS  migrations dir intacto
+  PASS  lib/rbac intacto
+  PASS  lib/financeiro intacto (dual stack)
+  PASS  código Phase 28 CRM permanece em lib/crm/phase28
+
+[phase29.1-performance]
+  PASS  PHASE_29_1_PERFORMANCE.md
+  PASS  PERFORMANCE.md referencia 29.1
+  PASS  filter-options usa React.cache
+  PASS  createDashboardService memoizado
+  PASS  layout tenant Promise.all
+  PASS  fluxo-caixa paralelo
+  PASS  cfo Promise.all
+  PASS  OS detalhe paralelo + lazy
+  PASS  lazy wrapper: components/ordens/os-workspace-lazy.tsx
+  PASS  components/ordens/os-workspace-lazy.tsx usa next/dynamic
+  PASS  lazy wrapper: components/finance/cash-intelligence/executive-cash-dashboard-lazy.tsx
+  PASS  components/finance/cash-intelligence/executive-cash-dashboard-lazy.tsx usa next/dynamic
+  PASS  lazy wrapper: components/finance/treasury-dashboard-client-lazy.tsx
+  PASS  components/finance/treasury-dashboard-client-lazy.tsx usa next/dynamic
+  PASS  lazy wrapper: components/crm/executive-crm-dashboard-lazy.tsx
+  PASS  components/crm/executive-crm-dashboard-lazy.tsx usa next/dynamic
+  PASS  lazy wrapper: components/analytics/executive-analytics-dashboard-lazy.tsx
+  PASS  components/analytics/executive-analytics-dashboard-lazy.tsx usa next/dynamic
+  PASS  AppShell PageSlot memo
+  PASS  fluxo sem unstable_cache
+  PASS  dre-service sem unstable_cache
+
+[phase29.2-permissions]
+  PASS  PHASE_29_2_PERMISSIONS.md
+  PASS  authorization layer
+  PASS  loadPermissionMap
+  PASS  tryResolvePermissions
+  PASS  React.cache
+  PASS  loadRolePermissions
+  PASS  hasMany
+  PASS  requireAll
+  PASS  fallback DEFAULT_ROLE_PERMISSIONS
+  PASS  OS detalhe usa tryResolvePermissions
+  PASS  OS detalhe sem createPermissionService direto
+  PASS  finance page-auth React.cache
+  PASS  tax page-auth React.cache
+  PASS  sidebar sem queries de permissão
+
+[phase29.3-ux]
+  PASS  PHASE_29_3_UX.md
+  PASS  BlockSuspenseFallback
+  PASS  feedback-tones
+  PASS  financeiro dashboard skeleton
+  PASS  movimentações skeleton
+  PASS  dialog Fechar PT
+  PASS  sheet Fechar PT
+  PASS  toast tones + focus
+  PASS  table mobile scroll
+  PASS  FormGrid sm breakpoint
+  PASS  approval empty → EmptyState
+  PASS  checklist usa toast
+
+[phase29.4-intelligence]
+  PASS  PHASE_29_4 doc
+  PASS  ARCHITECTURE aponta 29.4
+  PASS  lib/executive-intelligence/types.ts
+  PASS  lib/executive-intelligence/compose.ts
+  PASS  lib/executive-intelligence/scores.ts
+  PASS  lib/executive-intelligence/alerts.ts
+  PASS  lib/executive-intelligence/recommendations.ts
+  PASS  lib/executive-intelligence/ai-hook.ts
+  PASS  lib/executive-intelligence/present.ts
+  PASS  lib/executive-intelligence/index.ts
+  PASS  lib/executive-intelligence/signals/trend.ts
+  PASS  lib/executive-intelligence/signals/anomaly.ts
+  PASS  lib/executive-intelligence/signals/seasonality.ts
+  PASS  lib/executive-intelligence/adapters/from-charts.ts
+  PASS  lib/executive-intelligence/adapters/from-executive-ai.ts
+  PASS  components/dashboard/executive/executive-intelligence-signals-panel.tsx
+  PASS  LLM desligado no hook
+  PASS  modo deterministic
+  PASS  composer pack oficial
+  PASS  compose sem Supabase client
+  PASS  compose sem query from()
+  PASS  map AI scores
+  PASS  map BH scores
+  PASS  não recalcula faixas BH
+  PASS  sem buildExecutiveIntelligence na impl
+  PASS  impl exporta nome oficial
+  PASS  premium insights consome engine oficial
+  PASS  shell monta painel 29.4
+  PASS  migrations dir intacto
+  PASS  lib/ai/executive-ai-engine.ts intacto (não removido)
+  PASS  lib/dashboard/business-health-engine.ts intacto (não removido)
+
+[phase29.4-smoke]
+  PASS  detecta crescimento
+  PASS  detecta queda
+  PASS  detecta anomalia
+  PASS  seasonality hint válido
+  PASS  smoke llmEnabled false
+  PASS  smoke mode deterministic
+
+[phase29.5-unification]
+  PASS  PHASE_29_5 doc
+  PASS  ARCHITECTURE aponta 29.5
+  PASS  enterprise intelligence facade
+  PASS  enterprise intelligence contracts
+  PASS  composeEnterpriseInsights
+  PASS  runEnterpriseEngine
+  PASS  presentEnterpriseInsightCards
+  PASS  facade sem self-import barrel
+  PASS  barrel exporta engine
+  PASS  barrel exporta runEnterpriseEngine
+  PASS  ops compose puro sem I/O
+  PASS  commercial rename oficial
+  PASS  streaming usa nome oficial ops
+  PASS  premium via barrel enterprise
+  PASS  lib/executive-insights removido
+  PASS  mega-barrel intelligence/enterprise removido
+  PASS  UI insights dormante removida
+  PASS  UI predictions dormante removida
+  PASS  section ops órfã removida
+  PASS  stub audit-service removido
+  PASS  AI engine intacto
+  PASS  BH engine intacto
+  PASS  sinais 29.4 intactos
+
+[phase29.6-definitive]
+  PASS  PHASE_29_6 doc
+  PASS  ARCHITECTURE aponta 29.6
+  PASS  alias ops removido
+  PASS  alias comercial removido
+  PASS  streaming importa barrel enterprise
+  PASS  BH card via enterprise
+  PASS  signals panel via enterprise
+  PASS  premium-map via enterprise
+  PASS  components/dashboard/business-health/business-health-confidence.tsx sem deep BH
+  PASS  components/dashboard/business-health/business-health-score.tsx sem deep BH
+  PASS  components/dashboard/executive-command-center/executive-command-center.tsx sem deep BH
+  PASS  components/dashboard/executive-decision-center/decision-center-panel.tsx sem deep BH
+  PASS  components/dashboard/executive-timeline/executive-timeline-panel.tsx sem deep BH
+  PASS  components/ai/executive-copilot/executive-copilot-panel.tsx sem deep BH
+  PASS  sem dual-export present antigo
+  PASS  sem dual-export pack antigo
+  PASS  ops na fachada
+  PASS  comercial na fachada
+  PASS  barrel exporta factory BH
+  PASS  barrel exporta action EI
+  PASS  ECC via enterprise/intelligence
+
+[phase29.7-homologation]
+  PASS  PHASE_29_7 doc
+  PASS  ARCHITECTURE aponta 29.7
+  PASS  dashboard sem console.info
+  PASS  dashboard sem console.log
+  PASS  órfão source-info removido
+  PASS  órfão filters removido
+  PASS  órfão grid removido
+  PASS  órfão floating removido
+  PASS  órfão footer removido
+  PASS  workspace barrel limpo filters
+  PASS  workspace barrel limpo floating
+  PASS  predictions via intelligence (não barrel gordo)
+  PASS  BI via intelligence
+  PASS  AI engine intacto
+  PASS  BH engine intacto
+  PASS  migrations intactas
+  PASS  RBAC intacto
+
+=== Resultado: 206 PASS · 0 FAIL ===
+(node:31256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/renat/gestao-no-foco/lib/executive-intelligence/signals/trend.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\renat\gestao-no-foco\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

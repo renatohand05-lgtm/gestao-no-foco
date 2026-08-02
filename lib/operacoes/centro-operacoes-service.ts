@@ -5,8 +5,12 @@ import {
   OS_STATUS_TERMINAL,
   type OperacaoBoardColumnKey,
 } from "@/lib/operacoes/metricas";
+import { getOpsCenterCopy } from "@/config/segment-labels";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
+
+/** Limite do quadro vivo — 400 gerava payload/TTFB excessivo (Sprint 30.1). */
+const BOARD_ROW_LIMIT = 120;
 
 export type CentroOpsCard = {
   key: string;
@@ -87,32 +91,34 @@ export class CentroOperacoesService {
     private readonly tenantId: string,
   ) {}
 
-  async getData(tenantSlug: string): Promise<CentroOperacoesData> {
+  async getData(
+    tenantSlug: string,
+    options?: { segment?: string | null },
+  ): Promise<CentroOperacoesData> {
     const hoje = isoToday();
     const limiarSemUpdate = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    const copy = getOpsCenterCopy(options?.segment);
+    const selectCols =
+      "id, numero, status, data_abertura, previsao_entrega, valor_total, prioridade, mecanico_id, consultor_id, updated_at, ordem_retorno_id, garantia_dias, tipo_abertura, cliente:clientes(nome), veiculo:veiculos(placa, modelo)";
 
     const { data, error } = await this.supabase
       .from("ordens_servico")
-      .select(
-        "id, numero, status, data_abertura, previsao_entrega, valor_total, prioridade, mecanico_id, consultor_id, updated_at, ordem_retorno_id, garantia_dias, tipo_abertura, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
-      )
+      .select(selectCols)
       .eq("tenant_id", this.tenantId)
       .is("deleted_at", null)
       .is("arquivado_em", null)
-      .order("data_abertura", { ascending: false })
-      .limit(400);
+      .order("updated_at", { ascending: false })
+      .limit(BOARD_ROW_LIMIT);
 
     let rows = (data ?? []) as unknown as OsRow[];
     if (error && /arquivado_em/i.test(error.message)) {
       const retry = await this.supabase
         .from("ordens_servico")
-        .select(
-          "id, numero, status, data_abertura, previsao_entrega, valor_total, prioridade, mecanico_id, consultor_id, updated_at, ordem_retorno_id, garantia_dias, tipo_abertura, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
-        )
+        .select(selectCols)
         .eq("tenant_id", this.tenantId)
         .is("deleted_at", null)
-        .order("data_abertura", { ascending: false })
-        .limit(400);
+        .order("updated_at", { ascending: false })
+        .limit(BOARD_ROW_LIMIT);
       if (retry.error) throw new Error(retry.error.message);
       rows = (retry.data ?? []) as unknown as OsRow[];
     } else if (error) {
@@ -120,7 +126,9 @@ export class CentroOperacoesService {
     }
 
     const abertas = rows.filter((r) => !OS_STATUS_TERMINAL.has(r.status));
-    const naOficina = abertas.filter((r) => r.veiculo?.placa);
+    const naOficina = copy.showVehicleFields
+      ? abertas.filter((r) => r.veiculo?.placa)
+      : abertas;
     const atrasadas = abertas.filter(
       (r) => r.previsao_entrega && r.previsao_entrega.slice(0, 10) < hoje,
     );
@@ -139,14 +147,14 @@ export class CentroOperacoesService {
     const cards: CentroOpsCard[] = [
       {
         key: "carros",
-        label: "Carros na oficina",
+        label: copy.assetsInOpsLabel,
         count: naOficina.length,
         hrefFilter: listBase,
         tone: "default",
       },
       {
         key: "abertas",
-        label: "OS abertas",
+        label: copy.openOrdersLabel,
         count: abertas.length,
         hrefFilter: listBase,
       },

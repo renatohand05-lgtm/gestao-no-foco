@@ -20,12 +20,16 @@ type Props = {
   tenantSlug: string;
   board: Record<string, OperacaoBoardCard[]>;
   canAlterarStatus: boolean;
+  showVehicleFields?: boolean;
+  assigneeLabel?: string;
 };
 
 export function OperacaoBoard({
   tenantSlug,
   board: initialBoard,
   canAlterarStatus,
+  showVehicleFields = true,
+  assigneeLabel = "Responsável",
 }: Props) {
   const router = useRouter();
   const [board, setBoard] = useState(initialBoard);
@@ -114,7 +118,7 @@ export function OperacaoBoard({
               <div className="space-y-2">
                 {cards.length === 0 ? (
                   <p className="px-1 py-6 text-center text-[11px] text-muted-foreground">
-                    Nenhuma OS nesta etapa
+                    Nenhum item nesta etapa
                   </p>
                 ) : (
                   cards.map((card) => (
@@ -127,6 +131,8 @@ export function OperacaoBoard({
                       dragging={draggingId === card.id}
                       onDragStart={() => setDraggingId(card.id)}
                       onDragEnd={() => setDraggingId(null)}
+                      showVehicleFields={showVehicleFields}
+                      assigneeLabel={assigneeLabel}
                     />
                   ))
                 )}
@@ -147,6 +153,8 @@ function BoardCard({
   dragging,
   onDragStart,
   onDragEnd,
+  showVehicleFields,
+  assigneeLabel,
 }: {
   tenantSlug: string;
   card: OperacaoBoardCard;
@@ -155,6 +163,8 @@ function BoardCard({
   dragging: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
+  showVehicleFields: boolean;
+  assigneeLabel: string;
 }) {
   return (
     <div
@@ -178,17 +188,19 @@ function BoardCard({
           href={`/${tenantSlug}/ordens/${card.id}`}
           className="font-semibold underline-offset-2 hover:underline"
         >
-          OS #{card.numero}
+          #{card.numero}
         </Link>
         <span className="text-[10px] uppercase text-muted-foreground">
           {card.prioridade}
         </span>
       </div>
       <p className="mt-1 truncate font-medium">{card.clienteNome ?? "—"}</p>
-      <p className="truncate text-muted-foreground">
-        {card.placa ?? "sem placa"}
-        {card.modelo ? ` · ${card.modelo}` : ""}
-      </p>
+      {showVehicleFields ? (
+        <p className="truncate text-muted-foreground">
+          {card.placa ?? "sem placa"}
+          {card.modelo ? ` · ${card.modelo}` : ""}
+        </p>
+      ) : null}
       <div className="mt-2 flex flex-wrap gap-1">
         {card.atrasada ? (
           <span className="rounded bg-rose-600/15 px-1.5 py-0.5 text-[10px] text-rose-800 dark:text-rose-300">
@@ -219,8 +231,10 @@ function BoardCard({
             ? card.previsaoEntrega.slice(0, 10)
             : "sem prazo"}
         </p>
-        <p>Mecânico: {card.mecanicoNome ?? "—"}</p>
-        <p>Consultor: {card.consultorNome ?? "—"}</p>
+        <p>
+          {assigneeLabel}: {card.mecanicoNome ?? "—"}
+        </p>
+        {card.consultorNome ? <p>Consultor: {card.consultorNome}</p> : null}
         <p className="font-medium text-foreground">
           {formatCurrency(card.valorEstimado)}
         </p>

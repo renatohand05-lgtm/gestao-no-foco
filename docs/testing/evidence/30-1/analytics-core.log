@@ -1,0 +1,66 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:analytics-core
+> node --experimental-strip-types scripts/analytics-core-tests.mjs
+
+(node:16220) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/renat/gestao-no-foco/lib/analytics/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\renat\gestao-no-foco\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Analytics Core — Fase 23
+
+  PASS  Arquivo: lib/analytics/core/metric-types.ts
+  PASS  Arquivo: lib/analytics/core/metric-registry.ts
+  PASS  Arquivo: lib/analytics/core/analytics-engine.ts
+  PASS  Arquivo: lib/analytics/core/filter-engine.ts
+  PASS  Arquivo: lib/analytics/core/comparison-engine.ts
+  PASS  Arquivo: lib/analytics/core/trend-engine.ts
+  PASS  Arquivo: lib/analytics/core/drill-down-engine.ts
+  PASS  Arquivo: lib/analytics/insights/alert-engine.ts
+  PASS  Arquivo: lib/analytics/providers/executive-intelligence-provider.ts
+  PASS  Arquivo: lib/analytics/analytics-orchestrator.ts
+  PASS  Arquivo: lib/analytics/index.ts
+  PASS  Arquivo: scripts/analytics-core-tests.mjs
+  PASS  script test:analytics-core
+  PASS  Catálogo >= 40 (got 79)
+  PASS  Catálogo marca métricas unavailable
+  PASS  LTV unavailable
+  PASS  EBITDA available
+  PASS  Despesas lower_is_better
+  PASS  Período last_30 válido
+  PASS  Período anterior termina antes do atual
+  PASS  Aumento de custo = negativo
+  PASS  Aumento de receita = positivo
+  PASS  Resolve EBITDA da fonte
+  PASS  EBITDA available
+  PASS  LTV sem inventar valor
+  PASS  LTV unavailable
+  PASS  RBAC bloqueia financeiro
+  PASS  Compat dashboard.financeiro → analytics.financeiro
+  PASS  Catálogo resolve
+  PASS  Available sempre com valor
+  PASS  Comparativo despesas
+  PASS  Trend data points
+  PASS  Moving average
+  PASS  Projeção base
+  PASS  Projeção com limitações
+  PASS  Alertas gerados
+  PASS  Alertas nunca auto
+  PASS  Alertas revisão humana
+  PASS  Dedupe de alertas
+  PASS  Provider default determinístico
+  PASS  Label sem IA externa fingida
+  PASS  Insights determinísticos
+  PASS  Insights não executam
+  PASS  Sem dados ⇒ nenhuma métrica inventada
+  PASS  Bundle KPIs
+  PASS  Excel preparing
+  PASS  PDF preparing
+  PASS  Layout default
+  PASS  Fórmulas referenciam fontes
+  PASS  Sem random em engine
+  PASS  Available < total (há unavailable)
+
+Resultado: 51 PASS · 0 FAIL
+

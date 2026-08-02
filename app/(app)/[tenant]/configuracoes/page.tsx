@@ -68,16 +68,35 @@ export default async function ConfiguracoesPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-team-permissions-ready="">
           <CardHeader>
-            <CardTitle>Equipe</CardTitle>
-            <CardDescription>Membros e permissões</CardDescription>
+            <CardTitle>Equipe e permissões</CardTitle>
+            <CardDescription>Membros, convites, equipes e cargos</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Convide colaboradores e defina papéis de acesso.
+              Seu papel atual:{" "}
+              <span className="font-medium capitalize text-foreground">
+                {tenant.role}
+              </span>
+              . Gerencie membros, convites, equipes, cargos e a matriz de papéis
+              em um único lugar. Permissões de acesso são aplicadas no servidor
+              (RBAC).
             </p>
-            <Button variant="outline">Convidar membro</Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                render={<Link href={`/${tenantSlug}/configuracoes/equipe`} />}
+              >
+                Gerenciar equipe
+              </Button>
+              <Button
+                variant="outline"
+                render={<Link href={`/${tenantSlug}/configuracoes/equipe?tab=convites`} />}
+              >
+                Convidar membro
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

@@ -1,0 +1,34 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:phase29-migrations-contract
+> node scripts/phase29-migrations-contract-tests.mjs
+
+
+Phase 29.10 — Migrations contract
+
+  PASS  arquivo 20260726_crm_enterprise.sql no diretório migrations
+  PASS  arquivo 20260802_phase28_crm_rbac_fields.sql no diretório migrations
+  PASS  arquivo 20260812_crm_enterprise_fase24.sql no diretório migrations
+  PASS  arquivo 20260813_supply_chain_enterprise_fase25.sql no diretório migrations
+  PASS  arquivo 20260814_phase29_10_crm_compras_ensure.sql no diretório migrations
+  PASS  arquivo 20260818_phase29_10_1_fix_cliente_contatos_ativo.sql no diretório migrations
+  PASS  ordem: 20260726 primeiro entre o pacote
+  PASS  ordem: 20260802 antes de 20260812 (self-heal oportunidades cobre gap)
+  PASS  ordem: 20260813 antes do ensure 20260814
+  PASS  ensure IF NOT EXISTS
+  PASS  ensure to_regclass
+  PASS  ensure information_schema
+  PASS  ensure pg_constraint/policies
+  PASS  ensure sem DROP TABLE
+  PASS  ensure marcado manual
+  PASS  PHASE_29_10_MIGRATIONS.md presente
+  PASS  doc cita 60812
+  PASS  doc cita 60813
+  PASS  doc cita ensure
+  PASS  doc pede reload schema
+  PASS  RC lista 60812
+  PASS  RC lista 60813
+  PASS  RC lista 60814
+  PASS  RC lista 60818 fix 29.10.1
+
+Resultado: 24 PASS · 0 FAIL

@@ -1,0 +1,47 @@
+node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> gestao-no-foco@21.10.0-rc.1 test:homolog-29-11-release
+> node scripts/homolog-29-11-release-browser.mjs
+
+  PASS sess├úo autenticada
+  PASS viewport desktop 1440x900
+  PASS /dashboard status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /financeiro status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /financeiro/dre status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /financeiro/fluxo-caixa status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /financeiro/contas-pagar status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /financeiro/contas-receber status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /crm status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /clientes/funil status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /agenda status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /compras status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /compras/pedidos status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /estoque status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /financeiro/centros-custo status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /inteligencia status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /analytics status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /configuracoes status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS /configuracoes/metas status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS tema dark em /dashboard (data-gof-theme=dark html.dark=true)
+  PASS /dashboard status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS tema light em /dashboard (data-gof-theme=light html.dark=false)
+  PASS /dashboard status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS viewport tablet 768x1024
+  PASS /dashboard status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS viewport mobile 390x844
+  PASS /dashboard status=200 login=false schemaErr=false pageErr=0 console=0
+  PASS viewport desktop-restore 1440x900
+  PASS HTTP 500 count=0
+  PASS PageError count=0
+  PASS console.error bloqueantes=0
+  PASS UUID hits=0
+  PASS Hydration hits=0
+
+Browser 29.11 release: 33 PASS ┬À 0 FAIL

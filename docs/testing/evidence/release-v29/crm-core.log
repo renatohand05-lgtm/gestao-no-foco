@@ -1,0 +1,61 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:crm-core
+> node --experimental-strip-types scripts/crm-core-tests.mjs
+
+(node:17684) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/renat/gestao-no-foco/lib/crm/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\renat\gestao-no-foco\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+CRM Core — Fase 24
+
+  PASS  Barrel lib/crm
+  PASS  Orchestrator
+  PASS  KPI catalog
+  PASS  Feature flags
+  PASS  Script core
+  PASS  script test:crm-core
+  PASS  Label Qualificado
+  PASS  Label Lead
+  PASS  6 etapas padrão
+  PASS  Pipeline custom mescla label
+  PASS  Ignora estágio não canônico
+  PASS  Stage inválido → lead
+  PASS  Catálogo KPI >= 10
+  PASS  Retenção unavailable
+  PASS  Ativos available
+  PASS  Empty sem inventar
+  PASS  Dados indisponíveis
+  PASS  Retenção sem valor inventado
+  PASS  Tenant no snapshot
+  PASS  Ativos da fonte
+  PASS  Valor negociação = proposta+negociacao
+  PASS  Retenção null (sem inventar)
+  PASS  Resolve ativos
+  PASS  Resolve valor negociação
+  PASS  Drill fecha com agregado
+  PASS  Drill rastreável
+  PASS  Alertas sem auto
+  PASS  Alertas revisão humana
+  PASS  Dedupe
+  PASS  Provider determinístico
+  PASS  Texto obrigatório IA comercial
+  PASS  Insights não executam
+  PASS  Limitações explícitas
+  PASS  Base única clientes
+  PASS  Versão 24
+  PASS  5+ conectores arquitetura
+  PASS  Conectores não live
+  PASS  Timeline 360 unifica fontes
+  PASS  Timeline ordenada desc
+  PASS  Timeline com origem
+  PASS  Flag enterprise
+  PASS  Flag AI
+  PASS  IA sem random
+  PASS  KPI engine sem random
+  PASS  Migration Fase 24 presente (não executada)
+  PASS  Migration pipeline stages
+  PASS  Migration contatos (filho, não segunda base)
+
+Resultado: 47 PASS · 0 FAIL

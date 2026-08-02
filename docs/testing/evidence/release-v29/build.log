@@ -1,0 +1,218 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 build
+> next build
+
+▲ Next.js 16.2.10 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 12.2s
+  Running TypeScript ...
+  Finished TypeScript in 26.1s ...
+  Collecting page data using 19 workers ...
+  Generating static pages using 19 workers (0/10) ...
+  Generating static pages using 19 workers (2/10) 
+  Generating static pages using 19 workers (4/10) 
+  Generating static pages using 19 workers (7/10) 
+✓ Generating static pages using 19 workers (10/10) in 475ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /[tenant]
+├ ƒ /[tenant]/agenda
+├ ƒ /[tenant]/analytics
+├ ƒ /[tenant]/analytics/alertas
+├ ƒ /[tenant]/analytics/clientes
+├ ƒ /[tenant]/analytics/configuracoes
+├ ƒ /[tenant]/analytics/estoque
+├ ƒ /[tenant]/analytics/executivo
+├ ƒ /[tenant]/analytics/financeiro
+├ ƒ /[tenant]/analytics/metas
+├ ƒ /[tenant]/analytics/operacoes
+├ ƒ /[tenant]/analytics/relatorios
+├ ƒ /[tenant]/analytics/tributario
+├ ƒ /[tenant]/analytics/vendas
+├ ƒ /[tenant]/aprovacoes/runtime
+├ ƒ /[tenant]/atividade
+├ ƒ /[tenant]/busca
+├ ƒ /[tenant]/centro-operacoes
+├ ƒ /[tenant]/centro-operacoes/alertas
+├ ƒ /[tenant]/centro-operacoes/recursos
+├ ƒ /[tenant]/clientes
+├ ƒ /[tenant]/clientes/[id]
+├ ƒ /[tenant]/clientes/[id]/editar
+├ ƒ /[tenant]/clientes/agenda
+├ ƒ /[tenant]/clientes/central
+├ ƒ /[tenant]/clientes/dashboard
+├ ƒ /[tenant]/clientes/funil
+├ ƒ /[tenant]/clientes/novo
+├ ƒ /[tenant]/clientes/tarefas
+├ ƒ /[tenant]/compras
+├ ƒ /[tenant]/compras/almoxarifado
+├ ƒ /[tenant]/compras/cotacoes
+├ ƒ /[tenant]/compras/executivo
+├ ƒ /[tenant]/compras/indicadores
+├ ƒ /[tenant]/compras/inteligencia
+├ ƒ /[tenant]/compras/inventario
+├ ƒ /[tenant]/compras/pedidos
+├ ƒ /[tenant]/configuracoes
+├ ƒ /[tenant]/configuracoes/metas
+├ ƒ /[tenant]/configuracoes/metas/[id]/editar
+├ ƒ /[tenant]/configuracoes/metas/nova
+├ ƒ /[tenant]/crm
+├ ƒ /[tenant]/crm/agenda
+├ ƒ /[tenant]/crm/executivo
+├ ƒ /[tenant]/crm/follow-ups
+├ ƒ /[tenant]/crm/indicadores
+├ ƒ /[tenant]/crm/integracoes
+├ ƒ /[tenant]/crm/leads
+├ ƒ /[tenant]/crm/oportunidades
+├ ƒ /[tenant]/crm/pipeline
+├ ƒ /[tenant]/dashboard
+├ ƒ /[tenant]/descontos/aprovacoes
+├ ƒ /[tenant]/descontos/dashboard
+├ ƒ /[tenant]/design-system
+├ ƒ /[tenant]/estoque
+├ ƒ /[tenant]/estoque/[id]
+├ ƒ /[tenant]/estoque/abc
+├ ƒ /[tenant]/estoque/dashboard
+├ ƒ /[tenant]/estoque/importar
+├ ƒ /[tenant]/estoque/notas-fiscais
+├ ƒ /[tenant]/estoque/notas-fiscais/[id]
+├ ƒ /[tenant]/estoque/notas-fiscais/[id]/conferencia
+├ ƒ /[tenant]/estoque/notas-fiscais/nova
+├ ƒ /[tenant]/estoque/nova-movimentacao
+├ ƒ /[tenant]/estoque/reposicao
+├ ƒ /[tenant]/financeiro
+├ ƒ /[tenant]/financeiro/aging
+├ ƒ /[tenant]/financeiro/caixa
+├ ƒ /[tenant]/financeiro/categorias
+├ ƒ /[tenant]/financeiro/categorias/[id]
+├ ƒ /[tenant]/financeiro/categorias/[id]/editar
+├ ƒ /[tenant]/financeiro/categorias/novo
+├ ƒ /[tenant]/financeiro/centros-custo
+├ ƒ /[tenant]/financeiro/centros-custo/[id]
+├ ƒ /[tenant]/financeiro/centros-custo/[id]/editar
+├ ƒ /[tenant]/financeiro/centros-custo/novo
+├ ƒ /[tenant]/financeiro/cfo
+├ ƒ /[tenant]/financeiro/conciliacao
+├ ƒ /[tenant]/financeiro/contas
+├ ƒ /[tenant]/financeiro/contas-bancarias
+├ ƒ /[tenant]/financeiro/contas-bancarias/[id]
+├ ƒ /[tenant]/financeiro/contas-bancarias/[id]/editar
+├ ƒ /[tenant]/financeiro/contas-bancarias/novo
+├ ƒ /[tenant]/financeiro/contas-pagar
+├ ƒ /[tenant]/financeiro/contas-pagar/[id]
+├ ƒ /[tenant]/financeiro/contas-pagar/[id]/editar
+├ ƒ /[tenant]/financeiro/contas-pagar/nova
+├ ƒ /[tenant]/financeiro/contas-receber
+├ ƒ /[tenant]/financeiro/contas-receber/[id]
+├ ƒ /[tenant]/financeiro/contas-receber/[id]/editar
+├ ƒ /[tenant]/financeiro/contas-receber/nova
+├ ƒ /[tenant]/financeiro/dashboard
+├ ƒ /[tenant]/financeiro/despesas-recorrentes
+├ ƒ /[tenant]/financeiro/despesas-recorrentes/[id]
+├ ƒ /[tenant]/financeiro/despesas-recorrentes/[id]/editar
+├ ƒ /[tenant]/financeiro/despesas-recorrentes/novo
+├ ƒ /[tenant]/financeiro/dre
+├ ƒ /[tenant]/financeiro/fluxo-caixa
+├ ƒ /[tenant]/financeiro/formas-pagamento
+├ ƒ /[tenant]/financeiro/formas-pagamento/[id]
+├ ƒ /[tenant]/financeiro/formas-pagamento/[id]/editar
+├ ƒ /[tenant]/financeiro/formas-pagamento/novo
+├ ƒ /[tenant]/financeiro/fornecedores
+├ ƒ /[tenant]/financeiro/fornecedores/[id]
+├ ƒ /[tenant]/financeiro/fornecedores/[id]/editar
+├ ƒ /[tenant]/financeiro/fornecedores/novo
+├ ƒ /[tenant]/financeiro/importar
+├ ƒ /[tenant]/financeiro/inteligencia
+├ ƒ /[tenant]/financeiro/movimentacoes
+├ ƒ /[tenant]/financeiro/orcamento
+├ ƒ /[tenant]/financeiro/orcamento/[id]
+├ ƒ /[tenant]/financeiro/orcamento/novo
+├ ƒ /[tenant]/financeiro/plano-contas
+├ ƒ /[tenant]/financeiro/plano-contas/[id]
+├ ƒ /[tenant]/financeiro/plano-contas/[id]/editar
+├ ƒ /[tenant]/financeiro/plano-contas/novo
+├ ƒ /[tenant]/financeiro/transferencias
+├ ƒ /[tenant]/financeiro/tributos
+├ ƒ /[tenant]/integracoes
+├ ƒ /[tenant]/integracoes/auditoria
+├ ƒ /[tenant]/integracoes/conectores
+├ ƒ /[tenant]/integracoes/historico
+├ ƒ /[tenant]/integracoes/importar
+├ ƒ /[tenant]/integracoes/importar/financeiro
+├ ƒ /[tenant]/integracoes/importar/ordens
+├ ƒ /[tenant]/integracoes/importar/vendas
+├ ƒ /[tenant]/integracoes/mapeamentos
+├ ƒ /[tenant]/integracoes/perfis
+├ ƒ /[tenant]/integracoes/qualidade
+├ ƒ /[tenant]/integracoes/revisar
+├ ƒ /[tenant]/inteligencia
+├ ƒ /[tenant]/inteligencia/auditoria
+├ ƒ /[tenant]/inteligencia/configuracoes
+├ ƒ /[tenant]/inteligencia/copiloto
+├ ƒ /[tenant]/inteligencia/historico
+├ ƒ /[tenant]/observabilidade
+├ ƒ /[tenant]/oficina/mecanicos
+├ ƒ /[tenant]/oficina/mecanicos/[id]
+├ ƒ /[tenant]/ordens
+├ ƒ /[tenant]/ordens/[id]
+├ ƒ /[tenant]/ordens/dashboard
+├ ƒ /[tenant]/ordens/mecanicos
+├ ƒ /[tenant]/ordens/nova
+├ ƒ /[tenant]/ordens/qualidade-operacional
+├ ƒ /[tenant]/ordens/templates
+├ ƒ /[tenant]/primeiro-acesso
+├ ƒ /[tenant]/produtos
+├ ƒ /[tenant]/produtos/[id]
+├ ƒ /[tenant]/produtos/[id]/editar
+├ ƒ /[tenant]/produtos/gerenciar-servicos
+├ ƒ /[tenant]/produtos/importar
+├ ƒ /[tenant]/produtos/novo
+├ ƒ /[tenant]/produtos/qualidade-servicos
+├ ƒ /[tenant]/produtos/servicos
+├ ƒ /[tenant]/relatorios
+├ ƒ /[tenant]/tributario
+├ ƒ /[tenant]/tributario/auditoria
+├ ƒ /[tenant]/tributario/configuracoes
+├ ƒ /[tenant]/tributario/executivo
+├ ƒ /[tenant]/tributario/obrigacoes
+├ ƒ /[tenant]/tributario/regras
+├ ƒ /[tenant]/tributario/regras/[id]
+├ ƒ /[tenant]/tributario/regras/nova
+├ ƒ /[tenant]/tributario/simulador
+├ ƒ /[tenant]/tributario/simulador/[id]
+├ ƒ /[tenant]/tributario/simulador/comparar
+├ ƒ /[tenant]/tributario/simulador/novo
+├ ƒ /[tenant]/tributario/versoes
+├ ƒ /[tenant]/vendas
+├ ƒ /[tenant]/vendas/[id]
+├ ƒ /[tenant]/vendas/[id]/editar
+├ ƒ /[tenant]/vendas/abertas
+├ ƒ /[tenant]/vendas/dashboard
+├ ƒ /[tenant]/vendas/nova
+├ ƒ /[tenant]/vendas/rapida
+├ ƒ /api/auth/callback
+├ ƒ /api/health
+├ ƒ /api/inspecao/[token]
+├ ƒ /api/inspecao/[token]/midia/[anexoId]
+├ ƒ /api/status
+├ ƒ /api/v1/import
+├ ƒ /api/webhooks/import
+├ ○ /apple-icon
+├ ○ /icon
+├ ƒ /inspecao/[token]
+├ ○ /login
+├ ○ /manutencao
+├ ƒ /onboarding
+└ ○ /register
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

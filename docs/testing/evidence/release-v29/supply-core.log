@@ -1,0 +1,53 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:supply-core
+> node --experimental-strip-types scripts/supply-core-tests.mjs
+
+(node:13020) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/renat/gestao-no-foco/lib/supply/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\renat\gestao-no-foco\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Supply Core — Fase 25
+
+  PASS  Barrel lib/supply
+  PASS  Orchestrator
+  PASS  KPI catalog
+  PASS  Feature flags
+  PASS  script test:supply-core
+  PASS  Migration 20260813
+  PASS  Migration marca aplicação manual
+  PASS  Catálogo KPI >= 14
+  PASS  Giro available
+  PASS  Enterprise default on
+  PASS  External AI default off
+  PASS  Tipo peça
+  PASS  Tipo inválido → produto
+  PASS  Serviço não rastreia estoque
+  PASS  Peça rastreia estoque
+  PASS  Margem alvo 50%
+  PASS  Margem sem custo = null
+  PASS  Entrada +
+  PASS  Saída -
+  PASS  Reserva 0
+  PASS  Perda → saida legado
+  PASS  Devolução → entrada
+  PASS  assertMovementKind
+  PASS  Workflow rascunho→solicitacao
+  PASS  Integrado sem volta
+  PASS  Empty sem inventar
+  PASS  Dados indisponíveis
+  PASS  Rejeita tenantId do client
+  PASS  Rejeita UUID inválido
+  PASS  Ruptura detectada
+  PASS  Excesso detectado
+  PASS  Parado detectado
+  PASS  Valorização
+  PASS  Fornecedores KPI
+  PASS  Bundle version 25
+  PASS  Highlighted KPIs
+  PASS  Insights determinísticos
+  PASS  Provider determinístico
+  PASS  IA sem random
+
+Resultado: 39 PASS · 0 FAIL

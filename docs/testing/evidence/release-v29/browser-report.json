@@ -1,0 +1,174 @@
+{
+  "at": "2026-08-02T17:23:34.696Z",
+  "sprint": "29.11",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "auth": true,
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "viewport desktop 1440x900"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/dre status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/fluxo-caixa status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/contas-pagar status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/contas-receber status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/crm status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/clientes/funil status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/agenda status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/compras status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/compras/pedidos status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/estoque status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/centros-custo status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/inteligencia status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/analytics status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/configuracoes status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "/configuracoes/metas status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "tema dark em /dashboard (data-gof-theme=dark html.dark=true)"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "tema light em /dashboard (data-gof-theme=light html.dark=false)"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "viewport tablet 768x1024"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "viewport mobile 390x844"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false schemaErr=false pageErr=0 console=0"
+    },
+    {
+      "ok": true,
+      "detail": "viewport desktop-restore 1440x900"
+    },
+    {
+      "ok": true,
+      "detail": "HTTP 500 count=0"
+    },
+    {
+      "ok": true,
+      "detail": "PageError count=0"
+    },
+    {
+      "ok": true,
+      "detail": "console.error bloqueantes=0"
+    },
+    {
+      "ok": true,
+      "detail": "UUID hits=0"
+    },
+    {
+      "ok": true,
+      "detail": "Hydration hits=0"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "httpIssues": [],
+  "uuidHits": [],
+  "hydrationHits": [],
+  "shots": [
+    "screenshots/dashboard.png",
+    "screenshots/financeiro.png",
+    "screenshots/dre.png",
+    "screenshots/fluxo-caixa.png",
+    "screenshots/contas-pagar.png",
+    "screenshots/contas-receber.png",
+    "screenshots/crm.png",
+    "screenshots/kanban.png",
+    "screenshots/agenda.png",
+    "screenshots/compras.png",
+    "screenshots/pedidos.png",
+    "screenshots/estoque.png",
+    "screenshots/centros-custo.png",
+    "screenshots/inteligencia.png",
+    "screenshots/analytics.png",
+    "screenshots/configuracoes.png",
+    "screenshots/permissoes-metas.png",
+    "screenshots/dashboard-dark.png",
+    "screenshots/dashboard-light.png",
+    "screenshots/dashboard-tablet.png",
+    "screenshots/dashboard-mobile.png"
+  ],
+  "summary": {
+    "pass": 33,
+    "fail": 0,
+    "shots": 21
+  }
+}

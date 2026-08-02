@@ -1,0 +1,39 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:phase29-purchases-schema
+> node scripts/phase29-purchases-schema-tests.mjs
+
+
+Phase 29.10 — Purchases schema contract
+
+  PASS  20260813 existe
+  PASS  20260814 ensure existe
+  PASS  60813 define compras_pedidos
+  PASS  29.10 ensure menciona compras_pedidos
+  PASS  60813 define compras_pedido_itens
+  PASS  29.10 ensure menciona compras_pedido_itens
+  PASS  60813 define compras_cotacoes
+  PASS  29.10 ensure menciona compras_cotacoes
+  PASS  60813 define compras_eventos
+  PASS  29.10 ensure menciona compras_eventos
+  PASS  60813 define compras_cotacao_itens
+  PASS  29.10 ensure menciona compras_cotacao_itens
+  PASS  60813 define compras_recebimentos
+  PASS  29.10 ensure menciona compras_recebimentos
+  PASS  60813 define compras_recebimento_itens
+  PASS  29.10 ensure menciona compras_recebimento_itens
+  PASS  60813 define estoque_depositos
+  PASS  29.10 ensure menciona estoque_depositos
+  PASS  60813 RLS
+  PASS  29.10 policy pedidos
+  PASS  ensure pedidos
+  PASS  probe usa compras_pedidos
+  PASS  probePurchaseSchema exportado
+  PASS  detecta schema ausente
+  PASS  UI Schema pendente
+  PASS  UI aponta migration 60813
+  PASS  types compras_pedidos
+  PASS  types estoque_depositos
+  PASS  ensure sem DROP TABLE
+
+Resultado: 29 PASS · 0 FAIL

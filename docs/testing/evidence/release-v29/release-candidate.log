@@ -1,0 +1,79 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:release-candidate
+> node --experimental-strip-types scripts/release-candidate-tests.mjs
+
+(node:27376) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/renat/gestao-no-foco/lib/import-engine/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\renat\gestao-no-foco\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Sprint 22.10 — Release Candidate (Import Intelligence)
+
+  PASS  Arquivo: docs/architecture/IMPORT_INTELLIGENCE_RC_22_10.md
+  PASS  Arquivo: docs/architecture/IMPORT_INTELLIGENCE_OPERATIONS.md
+  PASS  Arquivo: docs/testing/HOMOLOGATION_CHECKLIST_22_10.md
+  PASS  Arquivo: lib/import-engine/errors/enterprise-import-errors.ts
+  PASS  Arquivo: lib/import-engine/observability/import-events.ts
+  PASS  Arquivo: scripts/release-candidate-tests.mjs
+  PASS  Arquivo: supabase/migrations/20260809_enterprise_import_intelligence.sql
+  PASS  Arquivo: supabase/migrations/20260810_enterprise_bank_reconciliation.sql
+  PASS  package.json script test:release-candidate
+  PASS  Feature flag externalAi default off
+  PASS  Feature flag ocr default off
+  PASS  Feature flag cnab default off
+  PASS  Feature flag connectors default off
+  PASS  Feature flag webhooks default off
+  PASS  Feature flag autoSync default off
+  PASS  Feature flag importApi default off
+  PASS  Provider externo sem credenciais não simula IA
+  PASS  Provider externo ausente detectado
+  PASS  Provider externo configurado mas stub não marca isExternalAi
+  PASS  create-reconciliation documenta sem fallback silencioso
+  PASS  create-reconciliation sem catch→memory
+  PASS  createProductionReconciliationService exportado
+  PASS  Reconciliation produção exige client Supabase
+  PASS  createProductionImportEngine definido
+  PASS  create-import-engine documenta sem fallback em produção
+  PASS  import-actions usa createProductionImportEngine
+  PASS  intelligence-actions usa createProductionImportEngine
+  PASS  createProductionImportEngine exige client
+  PASS  Tenant isolation: match ok
+  PASS  Tenant isolation: mismatch rejeitado
+  PASS  Duplicidade isolada por tenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/auditoria/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/conectores/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/historico/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/importar/ordens/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/importar/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/importar/vendas/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/mapeamentos/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/perfis/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/qualidade/page.tsx chama requireTenant
+  PASS  integracoes RBAC: app/(app)/[tenant]/integracoes/revisar/page.tsx chama requireTenant
+  PASS  File security: CSV válido
+  PASS  File security: executável bloqueado
+  PASS  Prompt injection: sinais detectados
+  PASS  Conteúdo sempre untrusted
+  PASS  Webhook: assinatura válida
+  PASS  Idempotency: primeira vez ok
+  PASS  Idempotency: replay detectado
+  PASS  Rollback module index
+  PASS  Rollback executeRollbackCore exportado
+  PASS  emitImportEvent registra evento
+  PASS  Observability: conteúdo sensível omitido
+  PASS  sanitize remove campos proibidos
+  PASS  Todos conectores em preparing
+  PASS  Registry: status preparing
+  PASS  Webhook connector não live
+  PASS  UI conciliação sem strings fictícias
+  PASS  toSafeClientMessage sem stack trace
+  PASS  toSafeClientMessage preserva mensagem EnterpriseImportError
+  PASS  Migration 20260809 listada
+  PASS  Migration 20260810 listada
+  PASS  Sem migration inesperada pós-RC (got nenhuma)
+  PASS  createProductionReconciliationService importável
+
+---
+PASS: 64  FAIL: 0

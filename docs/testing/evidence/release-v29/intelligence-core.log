@@ -1,0 +1,21 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:intelligence-core
+> node --experimental-strip-types scripts/intelligence-contracts-tests.mjs
+
+
+Intelligence Contracts — 27.0
+
+  PASS  IntelligenceRequest
+  PASS  IntelligenceResponse
+  PASS  EvidenceItem
+  PASS  ConfidenceResult
+  PASS  Recommendation
+  PASS  ActionPlan
+  PASS  SimulationScenario
+  PASS  IntelligenceMode
+  PASS  mode deterministic
+  PASS  mode provider
+  PASS  mode unavailable
+
+Resultado: 11 PASS · 0 FAIL

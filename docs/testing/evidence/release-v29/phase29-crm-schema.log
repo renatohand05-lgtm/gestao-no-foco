@@ -1,0 +1,42 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:phase29-crm-schema
+> node scripts/phase29-crm-schema-tests.mjs
+
+
+Phase 29.10 — CRM schema contract
+
+  PASS  m726 existe (supabase/migrations/20260726_crm_enterprise.sql)
+  PASS  m812 existe (supabase/migrations/20260812_crm_enterprise_fase24.sql)
+  PASS  m802 existe (supabase/migrations/20260802_phase28_crm_rbac_fields.sql)
+  PASS  m814 existe (supabase/migrations/20260814_phase29_10_crm_compras_ensure.sql)
+  PASS  coluna create valor_estimado coberta por migration
+  PASS  coluna create probabilidade coberta por migration
+  PASS  coluna create data_prevista_fechamento coberta por migration
+  PASS  coluna create motivo_perda coberta por migration
+  PASS  coluna create empresa_id coberta por migration
+  PASS  coluna create filial_id coberta por migration
+  PASS  coluna create estagio_funil coberta por migration
+  PASS  60812 valor_estimado IF NOT EXISTS
+  PASS  60812 índice principal contatos
+  PASS  60812 índice principal defensivo (ativo / information_schema)
+  PASS  60802 consentimento_contato
+  PASS  29.10 ensure cobre valor_estimado
+  PASS  29.10 ensure defensivo clientes
+  PASS  29.10 ensure idempotente ADD COLUMN
+  PASS  29.10.1 fix cliente_contatos.ativo existe
+  PASS  29.10.1 ADD COLUMN ativo
+  PASS  29.10.1 recria índice
+  PASS  29.10.1 defensivo information_schema
+  PASS  29.10.1 sem DROP TABLE
+  PASS  mapper envia valor_estimado
+  PASS  mapper envia estagio_funil
+  PASS  mapper não exige consentimento no create (ok)
+  PASS  types/database clientes.valor_estimado
+  PASS  types/database consentimento_contato
+  PASS  types/database crm_oportunidades
+  PASS  friendly-error mapeia coluna ausente
+  PASS  ensure crm_oportunidades
+  PASS  ensure sem DROP TABLE
+
+Resultado: 32 PASS · 0 FAIL

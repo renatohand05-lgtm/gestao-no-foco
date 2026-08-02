@@ -1,0 +1,29 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 test:inventory-core
+> node --experimental-strip-types scripts/inventory-core-tests.mjs
+
+(node:12700) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/renat/gestao-no-foco/lib/supply/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\renat\gestao-no-foco\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Inventory Core — Fase 25
+
+  PASS  inventory-model
+  PASS  warehouse-model
+  PASS  Kind inventário
+  PASS  Perda auditável
+  PASS  Uma divergência
+  PASS  Divergência -2
+  PASS  Needs adjustment
+  PASS  aberto→conferência
+  PASS  fechado sem reabrir
+  PASS  assertInventoryTransition lança
+  PASS  6 status inventário
+  PASS  Depósito sem nome
+  PASS  Depósito válido
+  PASS  Location code
+  PASS  Parse location
+
+Resultado: 15 PASS · 0 FAIL

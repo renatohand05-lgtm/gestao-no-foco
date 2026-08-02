@@ -1,0 +1,74 @@
+﻿{
+    "fail":  0,
+    "checks":  [
+                   {
+                       "detail":  "migration 60812",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "migration 60813",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "migration 60814",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "migration 60818",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "types cliente_contatos",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "types compras_pedidos",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "RLS enable count in 60813=13",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "index fix in 60818=2",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "AppProviders",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "supply rbac bridge",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "supply enterprise actions",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "auth storageState gitignored",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  ".env gitignored",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "next config present",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "sem marcadores de conflito (0)",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "doc PHASE_29_ENTERPRISE",
+                       "ok":  true
+                   },
+                   {
+                       "detail":  "alias intelligence-core",
+                       "ok":  true
+                   }
+               ],
+    "at":  "2026-08-02T14:25:18.0633601-03:00"
+}

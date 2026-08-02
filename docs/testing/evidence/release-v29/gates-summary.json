@@ -1,0 +1,67 @@
+[
+    {
+        "name":  "lint",
+        "exit":  0,
+        "seconds":  35.9
+    },
+    {
+        "name":  "build",
+        "exit":  0,
+        "seconds":  43.3
+    },
+    {
+        "name":  "phase29",
+        "exit":  0,
+        "seconds":  0.6
+    },
+    {
+        "name":  "release-candidate",
+        "exit":  0,
+        "seconds":  0.7
+    },
+    {
+        "name":  "crm-core",
+        "exit":  0,
+        "seconds":  0.5
+    },
+    {
+        "name":  "finance-core",
+        "exit":  0,
+        "seconds":  0.6
+    },
+    {
+        "name":  "supply-core",
+        "exit":  0,
+        "seconds":  0.5
+    },
+    {
+        "name":  "inventory-core",
+        "exit":  0,
+        "seconds":  0.5
+    },
+    {
+        "name":  "analytics-core",
+        "exit":  0,
+        "seconds":  0.5
+    },
+    {
+        "name":  "intelligence-core",
+        "exit":  0,
+        "seconds":  0.4
+    },
+    {
+        "name":  "phase29-migrations-contract",
+        "exit":  0,
+        "seconds":  0.4
+    },
+    {
+        "name":  "phase29-crm-schema",
+        "exit":  0,
+        "seconds":  0.4
+    },
+    {
+        "name":  "phase29-purchases-schema",
+        "exit":  0,
+        "seconds":  0.4
+    }
+]

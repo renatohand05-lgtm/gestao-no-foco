@@ -1,0 +1,84 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> gestao-no-foco@21.10.0-rc.1 lint
+> eslint
+
+
+C:\Users\renat\gestao-no-foco\app\(app)\[tenant]\estoque\abc\page.tsx
+  5:3  warning  'CardContent' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\components\tax\tax-rule-workflow-client.tsx
+  31:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\components\vendas\venda-faturar-e-receber-button.tsx
+  141:28  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+C:\Users\renat\gestao-no-foco\components\vendas\venda-faturar-e-receber-button.tsx:141:28
+  139 |                     id="conta_bancaria_id"
+  140 |                     name="conta_bancaria_id"
+> 141 |                     value={form.watch("conta_bancaria_id") || undefined}
+      |                            ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  142 |                     onValueChange={(next) =>
+  143 |                       form.setValue("conta_bancaria_id", next, {
+  144 |                         shouldValidate: true,  react-hooks/incompatible-library
+
+C:\Users\renat\gestao-no-foco\lib\intelligence\enterprise\recommendation\engine.ts
+  16:3  warning  '_createdBy' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\lib\metas\resolve-meta-mensal.ts
+  17:10  warning  'currentCompetenciaInTimezone' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\capture-27-6-2-intelligence.mjs
+    6:36  warning  'readFileSync' is defined but never used          @typescript-eslint/no-unused-vars
+    6:50  warning  'existsSync' is defined but never used            @typescript-eslint/no-unused-vars
+  144:11  warning  'hasEvidence' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\confidence-engine-tests.mjs
+   9:10  warning  'read' is defined but never used    @typescript-eslint/no-unused-vars
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\context-engine-tests.mjs
+   9:10  warning  'read' is defined but never used    @typescript-eslint/no-unused-vars
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\evidence-engine-tests.mjs
+   9:10  warning  'read' is defined but never used    @typescript-eslint/no-unused-vars
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\gen-phase27-tests.mjs
+  6:25  warning  'mkdirSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\homolog-27-8-3-runtime-scrape.mjs
+  6:33  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\homolog-29-9-browser.mjs
+  122:31  warning  'max' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\intelligence-audit-tests.mjs
+  10:10  warning  'read' is defined but never used    @typescript-eslint/no-unused-vars
+  11:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\intelligence-contracts-tests.mjs
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\intelligence-feature-flags-tests.mjs
+   9:10  warning  'read' is defined but never used    @typescript-eslint/no-unused-vars
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\intelligence-privacy-tests.mjs
+   9:10  warning  'read' is defined but never used    @typescript-eslint/no-unused-vars
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\intelligence-provider-gateway-tests.mjs
+   9:10  warning  'read' is defined but never used    @typescript-eslint/no-unused-vars
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\intelligence-rbac-tests.mjs
+  10:10  warning  'exists' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\renat\gestao-no-foco\scripts\merge-phase28-database-types.mjs
+  125:9  warning  'end' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 28 problems (0 errors, 28 warnings)

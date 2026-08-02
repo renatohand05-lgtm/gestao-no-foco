@@ -95,14 +95,14 @@ Validação (leitura via client service, **sem** apply pelo Agent):
 
 ## Commit / Push / Deploy
 
-Preenchido após publicação:
-
 | Item | Valor |
 |------|-------|
-| commit | _(hash)_ |
-| push | _(SIM/NÃO)_ |
-| deploy Vercel | _(Ready/…)_ |
-| URL produção | _(alias)_ |
+| commit | `17e60d7` — `feat(team): concluir Equipe, usuários e permissões da Fase 30` |
+| push | **SIM** — `main` = `origin/main` (`17e60d7`), ahead 0 / behind 0 |
+| deploy Vercel | **Ready** · Production · `dpl_2qH3MN4JiJUCaPPWj1Frwz6Jf5Bi` |
+| URL produção | https://gestao-no-foco.vercel.app |
+| Aliases | `gestao-no-foco.vercel.app`, `gestao-no-foco-renato16.vercel.app`, `gestao-no-foco-git-main-renato16.vercel.app` |
+| Smoke prod | **26 PASS / 0 FAIL** (auth via magiclink/ssr; Equipe/CRM/Financeiro/mobile/temas) |
 
 ## Bugs encontrados
 
@@ -128,11 +128,11 @@ Nenhuma para publicação do módulo Equipe.
 
 ## Classificação final
 
-**SPRINTS 30.1 E 30.2 PUBLICADAS** _(após push + deploy Ready + smoke prod)_
+**SPRINTS 30.1 E 30.2 PUBLICADAS**
 
 ### Checklist final
 
 1. Sprint 30.1 encerrada: **SIM**  
 2. Sprint 30.2 encerrada: **SIM**  
-3. Módulo Equipe em produção: **_(após deploy)_**  
+3. Módulo Equipe em produção: **SIM**  
 4. Pronto para Sprint 30.3: **SIM**

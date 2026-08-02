@@ -1,0 +1,115 @@
+{
+  "at": "2026-08-02T23:01:49.837Z",
+  "baseUrl": "https://gestao-no-foco.vercel.app",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "login público HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "verifyOtp+ssr cookies (renatohand05@gmail.com)"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard autenticado (https://gestao-no-foco.vercel.app/teste-renato-01/dashboard)"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "centro-operacoes HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "centro-operacoes sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "configuracoes HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "configuracoes sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "equipe HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "equipe sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "equipe schema ok"
+    },
+    {
+      "ok": true,
+      "detail": "equipe UI"
+    },
+    {
+      "ok": true,
+      "detail": "equipe sem UUID"
+    },
+    {
+      "ok": true,
+      "detail": "equipe-convites HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "equipe-convites sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "equipe-papeis HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "equipe-papeis sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "crm HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "crm sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "financeiro HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "financeiro sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "prod dark"
+    },
+    {
+      "ok": true,
+      "detail": "prod light"
+    },
+    {
+      "ok": true,
+      "detail": "prod mobile Equipe"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 26,
+    "fail": 0
+  }
+}

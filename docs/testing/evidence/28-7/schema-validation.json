@@ -1,0 +1,114 @@
+{
+  "at": "2026-08-02T01:58:51.459Z",
+  "sprint": "28.7",
+  "tenant": {
+    "id": "30fd2055-b14e-4922-a239-94a291869f94",
+    "slug": "teste-renato-01"
+  },
+  "pass": 18,
+  "fail": 0,
+  "checks": [
+    {
+      "ok": true,
+      "msg": "tenants legível",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tenant teste-renato-01",
+      "detail": "teste-renato-01"
+    },
+    {
+      "ok": true,
+      "msg": "tabela crm_oportunidades",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "colunas Phase28 crm_oportunidades",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "colunas Phase28 clientes (leads)",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tabela agenda_eventos",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tabela agenda_recursos",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "colunas agenda_eventos",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "colunas tipo_ordem/template_key",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tabela ordem_trabalho_templates",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tabela finance_budgets",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tabela finance_budget_lines",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "tabela centros_resultado",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "list oportunidades tenant A",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "filtro tenant_id inconsistente impossível",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "contagem oportunidades outro tenant (isolamento por filtro)",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "msg": "types: crm_oportunidades",
+      "detail": null
+    },
+    {
+      "ok": true,
+      "msg": "types/database.ts cobre Phase 28",
+      "detail": null
+    }
+  ],
+  "missingInTypes": [],
+  "runtime": {
+    "crm_oportunidades": true,
+    "agenda_eventos": true,
+    "agenda_recursos": true,
+    "ordem_trabalho_templates": true,
+    "finance_budgets": true,
+    "finance_budget_lines": true,
+    "centros_resultado": true,
+    "tipo_ordem": true,
+    "clientes_phase28": true
+  }
+}

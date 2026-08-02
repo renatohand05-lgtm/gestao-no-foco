@@ -36,6 +36,7 @@ export type PermissionModule =
   | "vendas"
   | "os"
   | "crm"
+  | "agenda"
   | "dashboard"
   | "analytics"
   | "inteligencia"

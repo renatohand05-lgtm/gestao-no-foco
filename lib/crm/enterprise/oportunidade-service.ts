@@ -42,7 +42,7 @@ export class CrmOportunidadeService {
   async listByCliente(clienteId: string): Promise<CrmOportunidadeRow[]> {
     await this.assertCliente(clienteId);
     const { data, error } = await this.supabase
-      .from("crm_oportunidades" as never)
+      .from("crm_oportunidades")
       .select("*")
       .eq("tenant_id", this.tenantId)
       .eq("cliente_id", clienteId)
@@ -51,6 +51,22 @@ export class CrmOportunidadeService {
 
     if (error) {
       throw new Error(`Falha ao ler crm_oportunidades: ${error.message}`);
+    }
+    return (data ?? []) as CrmOportunidadeRow[];
+  }
+
+  /** Fase 28.1 — listagem tenant-wide para UI de oportunidades. */
+  async listAll(limit = 200): Promise<CrmOportunidadeRow[]> {
+    const { data, error } = await this.supabase
+      .from("crm_oportunidades")
+      .select("*")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .order("updated_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      throw new Error(`Falha ao listar crm_oportunidades: ${error.message}`);
     }
     return (data ?? []) as CrmOportunidadeRow[];
   }
@@ -72,7 +88,7 @@ export class CrmOportunidadeService {
 
     const stage = input.stage_key?.trim() || "lead";
     const { data, error } = await this.supabase
-      .from("crm_oportunidades" as never)
+      .from("crm_oportunidades")
       .insert({
         tenant_id: this.tenantId,
         cliente_id: input.cliente_id,
@@ -139,7 +155,7 @@ export class CrmOportunidadeService {
     if (!check.ok) throw new Error(check.error);
 
     const { data, error } = await this.supabase
-      .from("crm_oportunidades" as never)
+      .from("crm_oportunidades")
       .update({
         stage_key: args.toStage,
         status,
@@ -190,7 +206,7 @@ export class CrmOportunidadeService {
 
   private async getById(id: string): Promise<CrmOportunidadeRow> {
     const { data, error } = await this.supabase
-      .from("crm_oportunidades" as never)
+      .from("crm_oportunidades")
       .select("*")
       .eq("id", id)
       .eq("tenant_id", this.tenantId)

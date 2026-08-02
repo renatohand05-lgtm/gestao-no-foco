@@ -42,6 +42,12 @@ export const PERMISSION_CATALOG = [
   def("financeiro.tributos.visualizar", "financeiro", "tributos.visualizar", "Visualizar Inteligência Tributária Enterprise", "financeiro_sensivel", "alto"),
   def("financeiro.tributos.simular", "financeiro", "tributos.simular", "Simular cenários tributários", "financeiro_sensivel", "alto"),
   def("financeiro.tributos.configurar", "financeiro", "tributos.configurar", "Configurar regras tributárias versionadas", "aprovacao", "critico"),
+  def("financeiro.orcamento.visualizar", "financeiro", "orcamento_visualizar", "Visualizar orçamento empresarial", "financeiro_sensivel", "alto"),
+  def("financeiro.orcamento.criar", "financeiro", "orcamento_criar", "Criar orçamento empresarial", "escrita", "alto"),
+  def("financeiro.orcamento.editar", "financeiro", "orcamento_editar", "Editar orçamento empresarial", "escrita", "alto"),
+  def("financeiro.orcamento.aprovar", "financeiro", "orcamento_aprovar", "Aprovar orçamento empresarial", "aprovacao", "critico"),
+  def("financeiro.aging.visualizar", "financeiro", "aging_visualizar", "Visualizar aging de inadimplência", "financeiro_sensivel", "alto"),
+  def("financeiro.cfo.visualizar", "financeiro", "cfo_visualizar", "Dashboard CFO", "financeiro_sensivel", "alto"),
 
   // Estoque
   def("estoque.visualizar", "estoque", "visualizar", "Visualizar estoque", "leitura", "baixo"),
@@ -108,6 +114,7 @@ export const PERMISSION_CATALOG = [
   def("os.reabrir", "os", "reabrir", "Reabrir ordens de serviço", "escrita", "alto"),
   def("os.ver_custo", "os", "ver_custo", "Visualizar custo de OS", "financeiro_sensivel", "alto"),
   def("os.ver_margem", "os", "ver_margem", "Visualizar margem de OS", "financeiro_sensivel", "alto"),
+  def("os.templates.configurar", "os", "templates_configurar", "Configurar templates de Ordem de Trabalho", "administracao", "alto"),
 
   // CRM
   def("crm.visualizar", "crm", "visualizar", "Visualizar CRM", "leitura", "baixo"),
@@ -123,11 +130,21 @@ export const PERMISSION_CATALOG = [
   def("crm.atividades.criar", "crm", "atividades_criar", "Criar atividades CRM", "escrita", "medio"),
   def("crm.atividades.editar", "crm", "atividades_editar", "Editar atividades CRM", "escrita", "medio"),
   def("crm.dashboard.visualizar", "crm", "dashboard_visualizar", "Dashboard executivo CRM", "leitura", "medio"),
+  def("crm.configurar", "crm", "configurar", "Configurar CRM (etapas e preferências)", "administracao", "alto"),
+  def("crm.converter", "crm", "converter", "Converter lead/oportunidade (cliente, orçamento, OS)", "escrita", "alto"),
+  def("crm.ver_todos_responsaveis", "crm", "ver_todos_responsaveis", "Ver pipeline de todos os responsáveis", "leitura", "alto"),
   // Alias clientes.* → mesmo módulo CRM (cadastro único)
   def("clientes.visualizar", "crm", "clientes_visualizar", "Visualizar cadastro de clientes", "leitura", "baixo"),
   def("clientes.criar", "crm", "clientes_criar", "Criar clientes", "escrita", "medio"),
   def("clientes.editar", "crm", "clientes_editar", "Editar clientes", "escrita", "medio"),
   def("clientes.excluir", "crm", "clientes_excluir", "Excluir clientes", "exclusao", "alto"),
+
+  // Agenda Enterprise (Fase 28.5)
+  def("agenda.visualizar", "agenda", "visualizar", "Visualizar agenda", "leitura", "baixo"),
+  def("agenda.criar", "agenda", "criar", "Criar eventos na agenda", "escrita", "medio"),
+  def("agenda.editar", "agenda", "editar", "Editar eventos na agenda", "escrita", "medio"),
+  def("agenda.excluir", "agenda", "excluir", "Excluir eventos na agenda", "exclusao", "alto"),
+  def("agenda.sobrescrever_conflito", "agenda", "sobrescrever_conflito", "Sobrescrever conflito de agenda com justificativa", "aprovacao", "alto"),
 
   // Dashboard
   def("dashboard.executivo", "dashboard", "executivo", "Acessar dashboard executivo", "leitura", "medio"),

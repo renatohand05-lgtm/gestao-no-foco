@@ -157,6 +157,21 @@ export async function createOrdemServicoIntegradaAction(
       };
     }
 
+    // Fase 28.4 — persiste tipo_ordem se a coluna existir (migration).
+    if (parsed.tipo_ordem && parsed.tipo_ordem !== "oficina") {
+      const patch = await supabase
+        .from("ordens_servico")
+        .update({ tipo_ordem: parsed.tipo_ordem })
+        .eq("id", result.os_id)
+        .eq("tenant_id", tenant.id);
+      if (patch.error) {
+        console.warn(
+          "[ordens] tipo_ordem não persistido (migration 28.4?):",
+          patch.error.message,
+        );
+      }
+    }
+
     revalidateOs(tenantSlug, result.os_id);
     revalidatePath(`/${tenantSlug}/clientes`);
     if (result.created_cliente) {

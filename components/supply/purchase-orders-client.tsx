@@ -23,10 +23,13 @@ type Row = {
   created_at: string;
 };
 
+/** Fase 28.2 — fluxo completo sem pular cotação/comparação. */
 const NEXT: Partial<Record<PurchaseWorkflowStatus, PurchaseWorkflowStatus>> = {
   rascunho: "solicitacao",
   solicitacao: "aprovacao",
-  aprovacao: "pedido",
+  aprovacao: "cotacao",
+  cotacao: "comparacao",
+  comparacao: "pedido",
   pedido: "recebimento",
   recebimento: "conferencia",
   conferencia: "integrado",

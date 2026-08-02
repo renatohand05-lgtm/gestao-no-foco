@@ -23,8 +23,8 @@ export default async function ClientesFunilPage({
     <div className="space-y-6">
       <CrmSubnav tenantSlug={tenantSlug} active="clientes/funil" />
       <ModuleHeader
-        title="Funil comercial"
-        description="Kanban de leads e oportunidades"
+        title="Funil de clientes"
+        description="Kanban do cadastro único (estágio do cliente). Oportunidades de negócio ficam em CRM → Oportunidades."
         breadcrumbs={[
           { label: "Clientes", href: `/${tenantSlug}/clientes` },
           { label: "Funil" },

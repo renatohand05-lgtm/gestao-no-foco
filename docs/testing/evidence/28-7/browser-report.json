@@ -1,0 +1,531 @@
+{
+  "at": "2026-08-02T02:00:07.477Z",
+  "sprint": "28.7",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "auth": true,
+  "shots": [
+    "crm/leads-desktop-dark",
+    "crm/oportunidades-desktop-dark",
+    "crm/follow-ups-desktop-dark",
+    "crm/indicadores-desktop-dark",
+    "crm/pipeline-desktop-dark",
+    "crm/kanban-desktop-dark",
+    "purchases/hub-desktop-dark",
+    "purchases/pedidos-desktop-dark",
+    "purchases/cotacoes-desktop-dark",
+    "purchases/indicadores-desktop-dark",
+    "inventory/hub-desktop-dark",
+    "inventory/abc-desktop-dark",
+    "inventory/reposicao-desktop-dark",
+    "inventory/inventario-desktop-dark",
+    "work-orders/lista-desktop-dark",
+    "work-orders/nova-desktop-dark",
+    "work-orders/templates-desktop-dark",
+    "schedule/semana-desktop-dark",
+    "schedule/crm-agenda-desktop-dark",
+    "finance/cfo-desktop-dark",
+    "finance/aging-desktop-dark",
+    "finance/orcamento-desktop-dark",
+    "finance/caixa-desktop-dark",
+    "finance/dre-desktop-dark",
+    "finance/fluxo-desktop-dark",
+    "regression/dashboard-desktop-dark",
+    "regression/vendas-desktop-dark",
+    "regression/vendas-nova-desktop-dark",
+    "regression/clientes-desktop-dark",
+    "regression/produtos-desktop-dark",
+    "regression/analytics-desktop-dark",
+    "regression/inteligencia-desktop-dark",
+    "regression/tributario-desktop-dark",
+    "crm/leads-desktop-light",
+    "finance/cfo-desktop-light",
+    "schedule/semana-desktop-light",
+    "crm/indicadores-notebook-light",
+    "inventory/abc-tablet-light",
+    "schedule/semana-mobile-light"
+  ],
+  "routes": [
+    {
+      "path": "crm/leads",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "CRM · Leads | Gestão",
+      "finalUrl": "/teste-renato-01/crm/leads"
+    },
+    {
+      "path": "crm/oportunidades",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "CRM · Oportunidades | Gestão",
+      "finalUrl": "/teste-renato-01/crm/oportunidades"
+    },
+    {
+      "path": "crm/follow-ups",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "CRM · Follow-ups | Gestão",
+      "finalUrl": "/teste-renato-01/crm/follow-ups"
+    },
+    {
+      "path": "crm/indicadores",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Indicadores CRM | Gestão",
+      "finalUrl": "/teste-renato-01/crm/indicadores"
+    },
+    {
+      "path": "crm/pipeline",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Pipeline CRM | Gestão",
+      "finalUrl": "/teste-renato-01/crm/pipeline"
+    },
+    {
+      "path": "clientes/funil",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Funil comercial | Gestão",
+      "finalUrl": "/teste-renato-01/clientes/funil"
+    },
+    {
+      "path": "compras",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "",
+      "finalUrl": "/teste-renato-01/compras"
+    },
+    {
+      "path": "compras/pedidos",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Pedidos de compra | Gestão",
+      "finalUrl": "/teste-renato-01/compras/pedidos"
+    },
+    {
+      "path": "compras/cotacoes",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Comparação de cotações | Gestão",
+      "finalUrl": "/teste-renato-01/compras/cotacoes"
+    },
+    {
+      "path": "compras/indicadores",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Indicadores Supply | Gestão",
+      "finalUrl": "/teste-renato-01/compras/indicadores"
+    },
+    {
+      "path": "estoque",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Estoque | Gestão",
+      "finalUrl": "/teste-renato-01/estoque"
+    },
+    {
+      "path": "estoque/abc",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Curva ABC · Estoque | Gestão",
+      "finalUrl": "/teste-renato-01/estoque/abc"
+    },
+    {
+      "path": "estoque/reposicao",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Reposição · Estoque | Gestão",
+      "finalUrl": "/teste-renato-01/estoque/reposicao"
+    },
+    {
+      "path": "estoque/inventario",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Detalhes da movimentação | Gestão",
+      "finalUrl": "/teste-renato-01/estoque/inventario"
+    },
+    {
+      "path": "ordens",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Central de Ordens de Serviço | Gestão",
+      "finalUrl": "/teste-renato-01/ordens"
+    },
+    {
+      "path": "ordens/nova",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Nova OS | Gestão",
+      "finalUrl": "/teste-renato-01/ordens/nova"
+    },
+    {
+      "path": "ordens/templates",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Templates · Ordem de Trabalho | Gestão",
+      "finalUrl": "/teste-renato-01/ordens/templates"
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Agenda Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/agenda"
+    },
+    {
+      "path": "crm/agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Agenda CRM | Gestão",
+      "finalUrl": "/teste-renato-01/crm/agenda"
+    },
+    {
+      "path": "financeiro/cfo",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Dashboard CFO | Gestão",
+      "finalUrl": "/teste-renato-01/financeiro/cfo"
+    },
+    {
+      "path": "financeiro/aging",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Aging / Inadimplência | Gestão",
+      "finalUrl": "/teste-renato-01/financeiro/aging"
+    },
+    {
+      "path": "financeiro/orcamento",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Orçamento empresarial | Gestão",
+      "finalUrl": "/teste-renato-01/financeiro/orcamento"
+    },
+    {
+      "path": "financeiro/caixa",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Caixa & Tesouraria Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/financeiro/caixa"
+    },
+    {
+      "path": "financeiro/dre",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "DRE Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/financeiro/dre"
+    },
+    {
+      "path": "financeiro/fluxo-caixa",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Fluxo de Caixa Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/financeiro/fluxo-caixa"
+    },
+    {
+      "path": "dashboard",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Dashboard | Gestão",
+      "finalUrl": "/teste-renato-01/dashboard"
+    },
+    {
+      "path": "vendas",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Vendas | Gestão",
+      "finalUrl": "/teste-renato-01/vendas"
+    },
+    {
+      "path": "vendas/nova",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Nova venda | Gestão",
+      "finalUrl": "/teste-renato-01/vendas/nova"
+    },
+    {
+      "path": "clientes",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Clientes | Gestão",
+      "finalUrl": "/teste-renato-01/clientes"
+    },
+    {
+      "path": "produtos",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Produtos & Serviços | Gestão",
+      "finalUrl": "/teste-renato-01/produtos"
+    },
+    {
+      "path": "analytics",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Analytics Executivo | Gestão",
+      "finalUrl": "/teste-renato-01/analytics/executivo"
+    },
+    {
+      "path": "inteligencia",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Inteligência Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/inteligencia"
+    },
+    {
+      "path": "tributario",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Tributário Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/tributario"
+    },
+    {
+      "path": "crm/leads",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "CRM · Leads | Gestão",
+      "finalUrl": "/teste-renato-01/crm/leads"
+    },
+    {
+      "path": "financeiro/cfo",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Dashboard CFO | Gestão",
+      "finalUrl": "/teste-renato-01/financeiro/cfo"
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Agenda Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/agenda"
+    },
+    {
+      "path": "crm/indicadores",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Indicadores CRM | Gestão",
+      "finalUrl": "/teste-renato-01/crm/indicadores"
+    },
+    {
+      "path": "estoque/abc",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Curva ABC · Estoque | Gestão",
+      "finalUrl": "/teste-renato-01/estoque/abc"
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false,
+      "title": "Agenda Enterprise | Gestão",
+      "finalUrl": "/teste-renato-01/agenda"
+    }
+  ],
+  "uuidHits": [],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/leads status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/oportunidades status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/follow-ups status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/indicadores status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/pipeline status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route clientes/funil status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route compras status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route compras/pedidos status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route compras/cotacoes status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route compras/indicadores status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route estoque status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route estoque/abc status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route estoque/reposicao status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route estoque/inventario status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route ordens status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route ordens/nova status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route ordens/templates status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/cfo status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/aging status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/orcamento status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/caixa status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/fluxo-caixa status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route vendas status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route vendas/nova status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route clientes status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route produtos status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route analytics status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route inteligencia status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route tributario status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/leads status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/cfo status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/indicadores status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route estoque/abc status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    }
+  ],
+  "summary": {
+    "pass": 40,
+    "fail": 0,
+    "shots": 39,
+    "uuidHits": 0
+  }
+}

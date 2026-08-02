@@ -19,7 +19,13 @@ export type FinancePermission =
   | "financeiro.alertas.visualizar"
   | "financeiro.tributos.visualizar"
   | "financeiro.tributos.simular"
-  | "financeiro.tributos.configurar";
+  | "financeiro.tributos.configurar"
+  | "financeiro.orcamento.visualizar"
+  | "financeiro.orcamento.criar"
+  | "financeiro.orcamento.editar"
+  | "financeiro.orcamento.aprovar"
+  | "financeiro.aging.visualizar"
+  | "financeiro.cfo.visualizar";
 
 export type BankAccountType =
   | "corrente"

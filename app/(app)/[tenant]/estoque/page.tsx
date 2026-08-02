@@ -98,6 +98,16 @@ export default async function EstoquePage({
           label="Nova movimentação"
           href={`/${tenantSlug}/estoque/nova-movimentacao`}
         />
+        <ActionButton
+          action="view"
+          label="Curva ABC"
+          href={`/${tenantSlug}/estoque/abc`}
+        />
+        <ActionButton
+          action="view"
+          label="Reposição"
+          href={`/${tenantSlug}/estoque/reposicao`}
+        />
       </ModuleHeader>
 
       <EstoqueFeedback

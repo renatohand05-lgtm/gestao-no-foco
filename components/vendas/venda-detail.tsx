@@ -6,6 +6,7 @@ import { VendaDeleteButton } from "@/components/vendas/venda-delete-button";
 import { VendaFaturarButton } from "@/components/vendas/venda-faturar-button";
 import { VendaFaturarEReceberButton } from "@/components/vendas/venda-faturar-e-receber-button";
 import { VendaStatusBadge } from "@/components/vendas/venda-status-badge";
+import { ConvertOrcamentoButtons } from "@/components/vendas/convert-orcamento-buttons";
 import { ActionButton } from "@/components/ui/action-button";
 import { FormGrid } from "@/components/ui/form-grid";
 import { SectionCard } from "@/components/ui/section-card";
@@ -78,6 +79,11 @@ export function VendaDetailView({
         ]}
       >
         <VendaStatusBadge status={venda.status} />
+        <ConvertOrcamentoButtons
+          tenantSlug={tenantSlug}
+          vendaId={venda.id}
+          status={venda.status}
+        />
         {canFaturar ? (
           <VendaFaturarButton
             tenantSlug={tenantSlug}

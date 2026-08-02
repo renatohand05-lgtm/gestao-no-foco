@@ -9,12 +9,17 @@ import { cn } from "@/lib/utils";
 const CRM_ENTERPRISE_LINKS = [
   { href: "crm", label: "Hub" },
   { href: "crm/executivo", label: "Executivo" },
+  { href: "crm/leads", label: "Leads" },
+  { href: "crm/oportunidades", label: "Oportunidades" },
+  { href: "crm/follow-ups", label: "Follow-ups" },
   { href: "crm/pipeline", label: "Pipeline" },
-  { href: "crm/agenda", label: "Agenda" },
+  { href: "clientes/funil", label: "Funil clientes" },
+  { href: "crm/agenda", label: "Agenda CRM" },
+  { href: "agenda", label: "Agenda" },
   { href: "crm/indicadores", label: "Indicadores" },
   { href: "crm/integracoes", label: "Integrações" },
   { href: "clientes", label: "Cadastro" },
-  { href: "clientes/central", label: "Central 14" },
+  { href: "clientes/central", label: "Central" },
 ] as const;
 
 type Props = {

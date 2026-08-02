@@ -1,0 +1,285 @@
+{
+  "at": "2026-08-02T11:32:56.025Z",
+  "sprint": "28.9",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "auth": true,
+  "shots": [
+    "dashboard/desktop-dark",
+    "budget/lista-desktop-dark",
+    "budget/criar-desktop-dark",
+    "schedule/semana-desktop-dark",
+    "schedule/dia-desktop-dark",
+    "schedule/mes-desktop-dark",
+    "schedule/lista-desktop-dark",
+    "schedule/create-form-dark",
+    "crm/opp-desktop-dark",
+    "crm/leads-desktop-dark",
+    "sales/orcamentos-dark",
+    "finance/dre-desktop-dark",
+    "finance/cfo-desktop-dark",
+    "regression/compras-dark",
+    "regression/estoque-dark",
+    "regression/analytics-dark",
+    "regression/metas-dark",
+    "budget/lista-desktop-light",
+    "schedule/semana-desktop-light",
+    "schedule/semana-notebook-light",
+    "budget/lista-tablet-light",
+    "schedule/semana-mobile-light",
+    "budget/criar-mobile-light"
+  ],
+  "routes": [
+    {
+      "path": "dashboard",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "financeiro/orcamento",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "financeiro/orcamento/novo",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda?view=dia",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda?view=mes",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda?view=lista",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "crm/oportunidades",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "crm/leads",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "vendas?status=orcamento",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "financeiro/dre",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "financeiro/cfo",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "compras",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "estoque",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "analytics",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "analytics/metas",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "financeiro/orcamento",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "financeiro/orcamento",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "agenda",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    },
+    {
+      "path": "financeiro/orcamento/novo",
+      "status": 200,
+      "onLogin": false,
+      "has404": false
+    }
+  ],
+  "uuidHits": [],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "route dashboard status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/orcamento status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/orcamento/novo status=200"
+    },
+    {
+      "ok": true,
+      "detail": "form criar orçamento"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda?view=dia status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda?view=mes status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda?view=lista status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "agenda CRUD form"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/oportunidades status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route crm/leads status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route vendas?status=orcamento status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/dre status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/cfo status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route compras status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route estoque status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route analytics status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route analytics/metas status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/orcamento status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/orcamento status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route agenda status=200"
+    },
+    {
+      "ok": true,
+      "detail": "route financeiro/orcamento/novo status=200"
+    }
+  ],
+  "summary": {
+    "pass": 26,
+    "fail": 0,
+    "shots": 23,
+    "uuidHits": 0
+  }
+}

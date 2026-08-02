@@ -5,7 +5,13 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   tenantSlug: string;
-  active: "lista" | "dashboard" | "nova" | "mecanicos" | "cadastro";
+  active:
+    | "lista"
+    | "dashboard"
+    | "nova"
+    | "mecanicos"
+    | "cadastro"
+    | "templates";
 };
 
 export function OsSubnav({ tenantSlug, active }: Props) {
@@ -25,6 +31,11 @@ export function OsSubnav({ tenantSlug, active }: Props) {
       key: "cadastro" as const,
       href: `/${tenantSlug}/oficina/mecanicos`,
       label: "Cadastro",
+    },
+    {
+      key: "templates" as const,
+      href: `/${tenantSlug}/ordens/templates`,
+      label: "Templates OT",
     },
     {
       key: "nova" as const,

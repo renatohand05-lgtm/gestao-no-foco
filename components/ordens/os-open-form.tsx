@@ -19,6 +19,10 @@ import {
   type CreateOsIntegratedResult,
 } from "@/lib/ordens/actions";
 import type { OsAbrirDuplicate, OsSearchHit } from "@/lib/ordens/os-abrir-rpc";
+import {
+  WORK_ORDER_TIPOS,
+  WORK_ORDER_TIPO_LABELS,
+} from "@/lib/ordens/work-order/templates";
 import { cn } from "@/lib/utils";
 
 type Mode = "existente" | "novo_cliente";
@@ -104,6 +108,7 @@ export function OsOpenForm({
       origem_atendimento: String(fd.get("origem_atendimento") ?? "") || "balcao",
       prioridade: String(fd.get("prioridade") ?? "normal"),
       previsao_entrega: String(fd.get("previsao_entrega") ?? "") || null,
+      tipo_ordem: String(fd.get("tipo_ordem") ?? "oficina") || "oficina",
     };
 
     const values =
@@ -418,6 +423,27 @@ export function OsOpenForm({
       )}
 
       <div className="grid gap-3 border-t pt-4 md:grid-cols-3">
+        <label className="block space-y-1 text-sm md:col-span-3">
+          <span className="text-muted-foreground">
+            Tipo de operação (Ordem de Trabalho)
+          </span>
+          <NativeSelect
+            name="tipo_ordem"
+            defaultValue="oficina"
+            disabled={pending}
+            className="h-11"
+            aria-label="Tipo de ordem de trabalho"
+          >
+            {WORK_ORDER_TIPOS.map((key) => (
+              <option key={key} value={key}>
+                {WORK_ORDER_TIPO_LABELS[key]}
+              </option>
+            ))}
+          </NativeSelect>
+          <span className="text-xs text-muted-foreground">
+            Persistência de tipos não-oficina depende da migration 28.4.
+          </span>
+        </label>
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Km entrada</span>
           <Input

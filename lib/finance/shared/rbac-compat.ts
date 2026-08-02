@@ -51,6 +51,29 @@ const IMPLIED_BY_LEGACY: Readonly<Record<string, readonly string[]>> = {
   "financeiro.tributos.configurar": [
     "financeiro.aprovar",
   ],
+  "financeiro.cfo.visualizar": [
+    "financeiro.visualizar",
+    "financeiro.ver_saldos",
+    "dashboard.financeiro",
+  ],
+  "financeiro.aging.visualizar": [
+    "financeiro.visualizar",
+  ],
+  "financeiro.orcamento.visualizar": [
+    "financeiro.visualizar",
+    "financeiro.ver_dre",
+  ],
+  "financeiro.orcamento.criar": [
+    "financeiro.criar",
+    "financeiro.orcamento.visualizar",
+  ],
+  "financeiro.orcamento.editar": [
+    "financeiro.editar",
+    "financeiro.orcamento.criar",
+  ],
+  "financeiro.orcamento.aprovar": [
+    "financeiro.aprovar",
+  ],
 };
 
 export function mapMembershipRoleToEnterpriseRoles(

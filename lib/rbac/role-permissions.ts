@@ -143,6 +143,7 @@ const FINANCEIRO_KEYS = unique([
 const COMERCIAL_KEYS = unique([
   ...byPrefix(["vendas"]),
   ...byPrefix(["crm"]),
+  ...byPrefix(["agenda"]),
   "inteligencia.visualizar",
   "inteligencia.perguntar",
   "inteligencia.recomendar",
@@ -159,6 +160,7 @@ const COMERCIAL_KEYS = unique([
 
 const OPERACOES_KEYS = unique([
   ...byPrefix(["os"]),
+  ...byPrefix(["agenda"]),
   "inteligencia.visualizar",
   "inteligencia.perguntar",
   "inteligencia.recomendar",

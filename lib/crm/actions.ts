@@ -41,7 +41,7 @@ export async function moveFunilStageAction(
     const user = await getCurrentUser();
     const stage = z.enum(CRM_FUNIL_STAGES).parse(estagio);
     const service = await createCrmFunilService(tenant.id);
-    await service.moveToStage(clienteId, stage);
+    await service.moveToStage(clienteId, stage, user?.id ?? null);
 
     try {
       const timeline = await createClienteTimelineService(tenant.id);
@@ -56,9 +56,70 @@ export async function moveFunilStageAction(
     }
 
     revalidateCrmPaths(tenantSlug, clienteId);
+    revalidatePath(`/${tenantSlug}/crm/leads`);
     return { success: true, id: clienteId };
   } catch (error) {
     return toActionError(error, "Erro ao mover no funil.", "crm.moveFunil");
+  }
+}
+
+/**
+ * Sprint 28.8 — Conversão lead → cliente comercial (mesma linha em `clientes`).
+ * Não cria cadastro duplicado. Usa plano canônico + moveToStage.
+ */
+export async function convertLeadToClienteAction(
+  tenantSlug: string,
+  clienteId: string,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const user = await getCurrentUser();
+    const { planLeadToCliente } = await import(
+      "@/lib/crm/phase28/conversion"
+    );
+    const service = await createCrmFunilService(tenant.id);
+
+    const supabase = await (await import("@/lib/supabase/server")).createClient();
+    const { data: row, error } = await supabase
+      .from("clientes")
+      .select("id, estagio_funil")
+      .eq("tenant_id", tenant.id)
+      .eq("id", clienteId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Lead/cliente não encontrado neste tenant.");
+
+    const plan = planLeadToCliente(row.estagio_funil ?? "lead");
+    if (!plan.ok || !plan.targetStage) {
+      throw new Error(plan.message);
+    }
+
+    const stage = z.enum(CRM_FUNIL_STAGES).parse(plan.targetStage);
+    await service.moveToStage(clienteId, stage, user?.id ?? null);
+
+    try {
+      const timeline = await createClienteTimelineService(tenant.id);
+      await timeline.record({
+        clienteId,
+        tipo: "funil",
+        titulo: `Lead convertido para ${stage}`,
+        userId: user?.id ?? null,
+      });
+    } catch {
+      /* timeline opcional */
+    }
+
+    revalidateCrmPaths(tenantSlug, clienteId);
+    revalidatePath(`/${tenantSlug}/crm/leads`);
+    revalidatePath(`/${tenantSlug}/crm/oportunidades`);
+    return { success: true, id: clienteId };
+  } catch (error) {
+    return toActionError(
+      error,
+      "Erro ao converter lead.",
+      "crm.convertLead",
+    );
   }
 }
 

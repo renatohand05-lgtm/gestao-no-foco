@@ -1,0 +1,97 @@
+﻿{
+    "summary":  {
+                    "fail500":  0,
+                    "fail404":  0
+                },
+    "at":  "2026-08-02T11:44:50.9166710Z",
+    "commit":  "921f2f8",
+    "deployment":  "dpl_2NFJuRd48ehD6L15iZRXXcvF9Faa",
+    "routes":  [
+                   {
+                       "path":  "/",
+                       "nofollow":  "200",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/login",
+                       "nofollow":  "200",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/dashboard",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/crm/leads",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/financeiro/orcamento",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/agenda",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/compras",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/estoque",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/vendas",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/vendas/nova",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/ordens",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/ordens/nova",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/financeiro",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/financeiro/dre",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/analytics",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/inteligencia",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   },
+                   {
+                       "path":  "/teste-renato-01/configuracoes/metas",
+                       "nofollow":  "307",
+                       "follow":  "200"
+                   }
+               ],
+    "base":  "https://gestao-no-foco.vercel.app"
+}

@@ -1,0 +1,40 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Vercel CLI 58.4.4 (Node.js 24.18.0)
+Fetching deployment "gestao-no-foco-95u7p47kv-renato16.vercel.app" in renato16
+> Fetched deployment "gestao-no-foco-95u7p47kv-renato16.vercel.app" in renato16 [434ms]
+
+  General
+
+    id		dpl_GXhLzDysLHbUwmg83whkq5JjpEmU
+    name	gestao-no-foco
+    target	production
+    status	ÔùÅ Ready
+    url		https://gestao-no-foco-95u7p47kv-renato16.vercel.app
+    created	Sun Aug 02 2026 14:28:28 GMT-0300 (Hor├írio Padr├úo de Bras├¡lia) [14m ago]
+
+
+  Aliases
+
+    ÔòÂ https://gestao-no-foco.vercel.app
+    ÔòÂ https://gestao-no-foco-renato16.vercel.app
+    ÔòÂ https://gestao-no-foco-git-main-renato16.vercel.app
+    
+
+  Builds
+
+    Ôöî .        [0ms]
+    Ôö£ÔöÇÔöÇ ╬╗ index (16.24MB) [iad1]
+    Ôö£ÔöÇÔöÇ ╬╗ _global-error (16.24MB) [iad1]
+    Ôö£ÔöÇÔöÇ ╬╗ _global-error.rsc (16.24MB) [iad1]
+    Ôö£ÔöÇÔöÇ ╬╗ _global-error.segments/__PAGE__.segment.rsc (16.24MB) [iad1]
+    Ôö£ÔöÇÔöÇ ╬╗ _global-error.segments/_full.segment.rsc (16.24MB) [iad1]
+    ÔööÔöÇÔöÇ 411 output items hidden
+    
+

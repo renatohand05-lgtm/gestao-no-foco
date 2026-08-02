@@ -1,0 +1,62 @@
+{
+  "at": "2026-08-02T17:43:49.562Z",
+  "base": "https://gestao-no-foco.vercel.app",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "/ noFollow=200 follow=200 loc="
+    },
+    {
+      "ok": true,
+      "detail": "/login noFollow=200 follow=200 loc="
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/dashboard noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Fdashboard"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/financeiro noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Ffinanceiro"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/financeiro/dre noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Ffinanceiro%2Fdre"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/crm noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Fcrm"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/compras noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Fcompras"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/estoque noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Festoque"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/agenda noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Fagenda"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/analytics noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Fanalytics"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/inteligencia noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Finteligencia"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/financeiro/fluxo-caixa noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Ffinanceiro%2Ffluxo-caixa"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/configuracoes noFollow=307 follow=200 loc=/login?redirectTo=%2Fteste-renato-01%2Fconfiguracoes"
+    }
+  ],
+  "summary": {
+    "pass": 13,
+    "fail": 0
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "at": "2026-08-02T17:43:54.882Z",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "/login status=200 url=https://gestao-no-foco.vercel.app/login"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/dashboard status=200 url=https://gestao-no-foco.vercel.app/login?redirectTo=%2Fteste-renato-01%2Fdashboar"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/crm status=200 url=https://gestao-no-foco.vercel.app/login?redirectTo=%2Fteste-renato-01%2Fcrm"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/compras status=200 url=https://gestao-no-foco.vercel.app/login?redirectTo=%2Fteste-renato-01%2Fcompras"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/financeiro/dre status=200 url=https://gestao-no-foco.vercel.app/login?redirectTo=%2Fteste-renato-01%2Ffinancei"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/estoque status=200 url=https://gestao-no-foco.vercel.app/login?redirectTo=%2Fteste-renato-01%2Festoque"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/analytics status=200 url=https://gestao-no-foco.vercel.app/login?redirectTo=%2Fteste-renato-01%2Fanalytic"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/inteligencia status=200 url=https://gestao-no-foco.vercel.app/login?redirectTo=%2Fteste-renato-01%2Fintelige"
+    },
+    {
+      "ok": true,
+      "detail": "auth_local_storage_on_prod=false (esperado false se cookie domínio localhost)"
+    }
+  ],
+  "summary": {
+    "pass": 9,
+    "fail": 0
+  }
+}

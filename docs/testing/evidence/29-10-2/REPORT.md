@@ -97,10 +97,19 @@ select
 
 ## 6–8. Commit corretivo
 
-Ver `git log` / `git show HEAD` após o commit desta sprint.
+| Campo | Valor |
+|-------|--------|
+| Hash | `c8d1327` |
+| Mensagem | `fix(release): homologar schema CRM e Compras da Fase 29` |
+| Base preservada | `92f1f13` |
+| Branch | `main` (ahead 2 de origin) |
+| Tag em HEAD | nenhuma |
+| Push/deploy | não |
 
-Incluído (esperado): migrations 60812/60814/60818, RBAC supply, UI compras, scripts/docs/evidências 29-9…29-10-2, package.json.  
+Incluído: migrations 60812/60814/60818, RBAC supply, UI compras, scripts/docs/evidências 29-9…29-10-2, package.json.  
 Excluído: `.env`, auth/storageState, `27-8-*`, `.next`.
+
+Working tree tracked: limpa (apenas untracked `27-8-*`).
 
 ---
 

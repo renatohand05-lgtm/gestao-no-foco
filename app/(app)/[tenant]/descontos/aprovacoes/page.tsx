@@ -5,7 +5,7 @@ import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { formatCurrency } from "@/lib/format";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -20,29 +20,28 @@ export default async function DescontosAprovacoesPage({
   const tenant = await requireTenant(tenantSlug);
 
   let canApprove = DEFAULT_ROLE_PERMISSIONS[tenant.role]["desconto.aprovar"];
-  try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    canApprove = await perms.has("desconto.aprovar");
-  } catch {
-    /* ok */
-  }
+  const descPerms = await tryResolvePermissions(tenant.id, tenant.role, [
+    "desconto.aprovar",
+  ]);
+  canApprove = descPerms["desconto.aprovar"];
 
   const supabase = await createClient();
-  const { data: pendentes } = await supabase
-    .from("desconto_eventos")
-    .select("*")
-    .eq("tenant_id", tenant.id)
-    .eq("status", "pendente")
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  const { data: historico } = await supabase
-    .from("desconto_eventos")
-    .select("*")
-    .eq("tenant_id", tenant.id)
-    .in("status", ["aprovado", "rejeitado"])
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [{ data: pendentes }, { data: historico }] = await Promise.all([
+    supabase
+      .from("desconto_eventos")
+      .select("*")
+      .eq("tenant_id", tenant.id)
+      .eq("status", "pendente")
+      .order("created_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("desconto_eventos")
+      .select("*")
+      .eq("tenant_id", tenant.id)
+      .in("status", ["aprovado", "rejeitado"])
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
 
   return (
     <div className="space-y-6">

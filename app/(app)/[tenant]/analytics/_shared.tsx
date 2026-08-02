@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { ExecutiveAnalyticsDashboard } from "@/components/analytics/executive-analytics-dashboard";
+import { ExecutiveAnalyticsDashboardLazy } from "@/components/analytics/executive-analytics-dashboard-lazy";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getExecutiveAnalyticsDashboard } from "@/lib/analytics/analytics-actions";
 import { isAnalyticsEnabled } from "@/lib/analytics";
@@ -44,7 +44,7 @@ export async function AnalyticsExecutivoPageInner({
   return (
     <div className="space-y-4 p-4 sm:p-6">
       <Suspense fallback={<Skeleton className="h-96 w-full" aria-busy="true" />}>
-        <ExecutiveAnalyticsDashboard
+        <ExecutiveAnalyticsDashboardLazy
           tenantSlug={tenantSlug}
           initialBundle={res.bundle}
           title={title}

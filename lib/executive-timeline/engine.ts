@@ -7,7 +7,7 @@ import type { ExecutiveAiResult } from "../ai/executive-ai-types.ts";
 import {
   runBusinessHealthEngine,
   type BusinessHealthResult,
-} from "../dashboard/business-health-engine.ts";
+} from "@/lib/enterprise/intelligence";
 import { composeExecutiveIntelligenceCenter } from "../dashboard/executive-intelligence-center-compose.ts";
 import type { ExecutiveDecisionResult } from "../dashboard/executive-decision-types.ts";
 import type { PredictiveIntelligenceResult } from "../predictive/types.ts";

@@ -1,8 +1,10 @@
 /**
  * Sprint 21.6 — Enterprise Persistence & Integration Layer · API pública.
+ * Sprint 29.6 — + Enterprise Intelligence Engine (única entrada oficial de inteligência).
  *
  * Domain engines (rbac/audit/workflow/approval/notifications) NÃO importam Supabase.
  * Persistência: Repository/Adapter → Supabase.
+ * Inteligência: preferir imports deste barrel (ou `./intelligence`) em app/components.
  */
 
 export type * from "./types.ts";
@@ -111,3 +113,49 @@ export {
   createAuthorizationService,
   type EnterpriseRepos,
 } from "./services/index.ts";
+
+/** Sprint 29.6 — Enterprise Intelligence Engine. */
+export {
+  composeEnterpriseInsights,
+  runEnterpriseEngine,
+  presentEnterpriseInsightCards,
+  resolveNamedScores,
+  buildCriticalIndicators,
+  runExecutiveAiEngine,
+  runBusinessHealthEngine,
+  BusinessHealthEngine,
+  classifyBusinessHealthStatus,
+  BUSINESS_HEALTH_STATUS_LABEL,
+  BUSINESS_HEALTH_CONFIDENCE_LABEL,
+  composeOpsExecutiveIntelligence,
+  composeCommercialExecutiveIntelligence,
+  toExecutiveIntelligenceInput,
+  buildExecutiveAction,
+  buildExecutiveScore,
+  buildExecutiveHealth,
+  buildExecutiveInsights,
+  buildExecutiveDiagnosis,
+  buildExecutiveTimeline,
+  ENTERPRISE_INTELLIGENCE_VERSION,
+} from "./intelligence.ts";
+
+export type {
+  EnterpriseInsightsPack,
+  EnterpriseNamedScores,
+  EnterpriseRecommendation,
+  EnterpriseInsightCard,
+  ExecutiveIntelligencePack,
+  ExecutiveNamedScores,
+  RecommendationBlueprint,
+  BusinessHealthResult,
+  BusinessHealthModuleResult,
+  BusinessHealthStatus,
+  BusinessHealthPriorityItem,
+  BusinessHealthEvidenceItem,
+  BusinessHealthConfidenceLevel,
+  ExecutiveAiResult,
+  ExecutiveAiInput,
+  ExecutiveIntelligenceData,
+  ExecutiveIntelligenceFeeds,
+  CriticalIndicator,
+} from "./intelligence-contracts.ts";

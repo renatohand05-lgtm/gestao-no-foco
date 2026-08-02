@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { OsWorkspace } from "@/components/ordens/os-workspace";
+import { OsWorkspaceLazy } from "@/components/ordens/os-workspace-lazy";
 import { createClienteRecorrenciaService } from "@/lib/crm/cliente-recorrencia-service";
 import { createCompartilhamentoService } from "@/lib/ordens/compartilhamento-service";
 import { createInspecaoStorageService } from "@/lib/ordens/inspecao-storage-service";
@@ -11,7 +11,7 @@ import { createRecursosOcupacaoService } from "@/lib/operacoes/recursos-service"
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createOsMecanicoService } from "@/lib/mecanicos/os-mecanico-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import {
@@ -87,38 +87,42 @@ export default async function OsDetailPage({
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.transferir_mecanico"] ?? false;
   let canApontarHoras =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["mecanicos.apontar_horas"] ?? false;
-  try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    canApplyDesconto = await perms.has("desconto.aplicar");
-    canAddPersonalizado = await perms.has("os.adicionar_item_personalizado");
-    canConvertPersonalizado = await perms.has(
-      "os.converter_item_personalizado",
-    );
-    canCancel = await perms.has("os.cancelar");
-    canArquivar = await perms.has("os.arquivar");
-    canExcluirRascunho = await perms.has("os.excluir_rascunho");
-    canRestaurar = await perms.has("os.restaurar");
-    canBindRecurso = await perms.has("centro_operacoes.alterar_status");
-    canAtribuirMecanico = await perms.has("os.atribuir_mecanico");
-    canTransferirMecanico = await perms.has("os.transferir_mecanico");
-    canApontarHoras = await perms.has("mecanicos.apontar_horas");
-  } catch {
-    /* ok */
-  }
+
+  const osPermKeys = [
+    "desconto.aplicar",
+    "os.adicionar_item_personalizado",
+    "os.converter_item_personalizado",
+    "os.cancelar",
+    "os.arquivar",
+    "os.excluir_rascunho",
+    "os.restaurar",
+    "centro_operacoes.alterar_status",
+    "os.atribuir_mecanico",
+    "os.transferir_mecanico",
+    "mecanicos.apontar_horas",
+  ] as const;
+  const osPerms = await tryResolvePermissions(
+    tenant.id,
+    tenant.role,
+    osPermKeys,
+  );
+  canApplyDesconto = osPerms["desconto.aplicar"];
+  canAddPersonalizado = osPerms["os.adicionar_item_personalizado"];
+  canConvertPersonalizado = osPerms["os.converter_item_personalizado"];
+  canCancel = osPerms["os.cancelar"];
+  canArquivar = osPerms["os.arquivar"];
+  canExcluirRascunho = osPerms["os.excluir_rascunho"];
+  canRestaurar = osPerms["os.restaurar"];
+  canBindRecurso = osPerms["centro_operacoes.alterar_status"];
+  canAtribuirMecanico = osPerms["os.atribuir_mecanico"];
+  canTransferirMecanico = osPerms["os.transferir_mecanico"];
+  canApontarHoras = osPerms["mecanicos.apontar_horas"];
 
   let recursos: Awaited<
     ReturnType<
       Awaited<ReturnType<typeof createRecursosOcupacaoService>>["getData"]
     >
   >["recursos"] = [];
-  try {
-    const recService = await createRecursosOcupacaoService(tenant.id);
-    const recData = await recService.getData();
-    recursos = recData.recursos;
-  } catch {
-    /* migration pendente */
-  }
-
   let mecanicosCadastro: Awaited<
     ReturnType<Awaited<ReturnType<typeof createMecanicoService>>["list"]>
   > = [];
@@ -130,24 +134,50 @@ export default async function OsDetailPage({
       Awaited<ReturnType<typeof createOsMecanicoService>>["calcularCustoReal"]
     >
   > | null = null;
-  try {
-    const mecSvc = await createMecanicoService(tenant.id);
-    const osMecSvc = await createOsMecanicoService(tenant.id);
-    mecanicosCadastro = await mecSvc.list({ status: "ativo" });
-    osMecanicos = await osMecSvc.listByOs(id);
-    osCustoReal = await osMecSvc.calcularCustoReal(id);
-  } catch {
-    /* migration pendente */
-  }
-
   let recorrencia = null;
-  try {
-    recorrencia = await createClienteRecorrenciaService(tenant.id).then((s) =>
-      s.get(os.cliente_id),
-    );
-  } catch {
-    /* ok */
+
+  const [recursosResult, mecanicosResult, recorrenciaResult] =
+    await Promise.all([
+      (async () => {
+        try {
+          const recService = await createRecursosOcupacaoService(tenant.id);
+          const recData = await recService.getData();
+          return recData.recursos;
+        } catch {
+          return null;
+        }
+      })(),
+      (async () => {
+        try {
+          const mecSvc = await createMecanicoService(tenant.id);
+          const osMecSvc = await createOsMecanicoService(tenant.id);
+          const [cadastro, porOs, custo] = await Promise.all([
+            mecSvc.list({ status: "ativo" }),
+            osMecSvc.listByOs(id),
+            osMecSvc.calcularCustoReal(id),
+          ]);
+          return { cadastro, porOs, custo };
+        } catch {
+          return null;
+        }
+      })(),
+      (async () => {
+        try {
+          const s = await createClienteRecorrenciaService(tenant.id);
+          return await s.get(os.cliente_id);
+        } catch {
+          return null;
+        }
+      })(),
+    ]);
+
+  if (recursosResult) recursos = recursosResult;
+  if (mecanicosResult) {
+    mecanicosCadastro = mecanicosResult.cadastro;
+    osMecanicos = mecanicosResult.porOs;
+    osCustoReal = mecanicosResult.custo;
   }
+  if (recorrenciaResult) recorrencia = recorrenciaResult;
 
   return (
     <ExecutivePage width="wide" spacing="loose">
@@ -156,7 +186,7 @@ export default async function OsDetailPage({
           { label: `#${os.numero}` },
         ]} />
       <ExecutiveHeader title={`OS #${os.numero}`} description={`${os.cliente_nome ?? "Cliente"} · ${os.placa ?? "sem placa"}`} />
-      <OsWorkspace
+      <OsWorkspaceLazy
         tenantSlug={tenantSlug}
         os={os}
         produtos={(produtos ?? []).map((p) => ({ id: p.id, nome: p.nome }))}

@@ -15,14 +15,16 @@ import {
   createMemoryIdempotencyRepository,
   MemoryEnterpriseStore,
 } from "@/lib/enterprise";
+import { createSupabaseFinanceCore } from "@/lib/finance/factory";
 import {
   FinanceError,
   FINANCE_ERROR_CODES,
-  createSupabaseFinanceCore,
-  resolveFinanceEffectivePermissions,
+} from "@/lib/finance/shared/errors";
+import { assertFinancePermission } from "@/lib/finance/shared/rbac";
+import {
   assertFinanceAccess,
-  assertFinancePermission,
-} from "@/lib/finance";
+  resolveFinanceEffectivePermissions,
+} from "@/lib/finance/shared/rbac-compat";
 import {
   createProductionImportEngine,
   type ImportColumnMapping,

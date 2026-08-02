@@ -6,6 +6,7 @@ import { ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui/section-card";
+import { useOptionalToast } from "@/components/platform/toast-provider";
 import {
   CHECKLIST_CLASSIFICACAO_CONFIG,
   mapStatusToClassificacao,
@@ -65,6 +66,7 @@ export function ChecklistVisual({
   onRefresh,
   disabled = false,
 }: Props) {
+  const toast = useOptionalToast();
   const [pending, startTransition] = useTransition();
   const [observacoes, setObservacoes] = useState<Record<string, string>>(() =>
     Object.fromEntries(items.map((item) => [item.id, item.observacao ?? ""])),
@@ -72,6 +74,11 @@ export function ChecklistVisual({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const notifyError = (message: string) => {
+    if (toast) toast.error(message);
+    else window.alert(message);
+  };
 
   const grouped = useMemo(() => {
     const map = new Map<string, ChecklistVisualItem[]>();
@@ -99,7 +106,7 @@ export function ChecklistVisual({
     startTransition(async () => {
       const result = await action();
       if (!result.success) {
-        window.alert(result.error ?? "Falha na operação.");
+        notifyError(result.error ?? "Falha na operação.");
         return;
       }
       onRefresh();
@@ -129,7 +136,7 @@ export function ChecklistVisual({
   async function openPreview(anexoId: string) {
     const result = await getOsAnexoSignedUrlAction(tenantSlug, anexoId);
     if (!result.success) {
-      window.alert(result.error ?? "Não foi possível abrir a imagem.");
+      notifyError(result.error ?? "Não foi possível abrir a imagem.");
       return;
     }
     setPreviewUrl(result.signedUrl);
@@ -147,7 +154,7 @@ export function ChecklistVisual({
       const result = await uploadOsAnexoAction(tenantSlug, fd);
       setUploadingItemId(null);
       if (!result.success) {
-        window.alert(result.error ?? "Erro no upload.");
+        notifyError(result.error ?? "Erro no upload.");
         return;
       }
       onRefresh();

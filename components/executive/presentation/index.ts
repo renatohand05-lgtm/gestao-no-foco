@@ -5,4 +5,3 @@ export { ExecutiveImpact } from "@/components/executive/presentation/executive-i
 export { ExecutiveConfidence } from "@/components/executive/presentation/executive-confidence";
 export { ExecutivePriorityBadge } from "@/components/executive/presentation/executive-priority-badge";
 export { ExecutiveDisclosure } from "@/components/executive/presentation/executive-disclosure";
-export { ExecutiveSourceInfo } from "@/components/executive/presentation/executive-source-info";

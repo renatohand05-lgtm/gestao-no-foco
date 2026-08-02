@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { SectionCard } from "@/components/ui/section-card";
+import { useOptionalToast } from "@/components/platform/toast-provider";
 import {
   deleteOsAnexoAction,
   getOsAnexoSignedUrlAction,
@@ -42,17 +43,23 @@ export function AnexosPanel({
   onRefresh,
   disabled = false,
 }: Props) {
+  const toast = useOptionalToast();
   const [pending, startTransition] = useTransition();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [etapa, setEtapa] = useState("entrada");
   const [legenda, setLegenda] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const notifyError = (message: string) => {
+    if (toast) toast.error(message);
+    else window.alert(message);
+  };
+
   function run(action: () => Promise<{ success: boolean; error?: string }>) {
     startTransition(async () => {
       const result = await action();
       if (!result.success) {
-        window.alert(result.error ?? "Falha na operação.");
+        notifyError(result.error ?? "Falha na operação.");
         return;
       }
       onRefresh();
@@ -62,7 +69,7 @@ export function AnexosPanel({
   async function openPreview(anexoId: string) {
     const result = await getOsAnexoSignedUrlAction(tenantSlug, anexoId);
     if (!result.success) {
-      window.alert(result.error ?? "Não foi possível abrir o arquivo.");
+      notifyError(result.error ?? "Não foi possível abrir o arquivo.");
       return;
     }
     setPreviewUrl(result.signedUrl);

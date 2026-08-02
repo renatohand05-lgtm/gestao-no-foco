@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { MovimentacoesClient } from "@/components/finance/movimentacoes-client";
+import { BlockSuspenseFallback } from "@/components/ui/block-suspense-fallback";
 import {
   listBankAccounts,
   listCategories,
@@ -106,7 +107,7 @@ export default async function MovimentacoesPage({
         description="Histórico com filtros, totais e paginação."
       />
       <Suspense
-        fallback={<p className="text-sm text-muted-foreground">A carregar…</p>}
+        fallback={<BlockSuspenseFallback lines={5} label="Carregando movimentações" />}
       >
         <MovimentacoesClient
           tenantSlug={tenantSlug}

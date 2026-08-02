@@ -1,13 +1,13 @@
 "use server";
 
-import {
-  runExecutiveCopilot,
-  submitIntelligenceFeedback,
-  getIntelligenceFeatureFlags,
-  providerGatewayHealth,
-  type IntelligenceFeedback,
-  type IntelligenceResponse,
-} from "./index.ts";
+import { runExecutiveCopilot } from "./copilot/core.ts";
+import { submitIntelligenceFeedback } from "./feedback/store.ts";
+import { getIntelligenceFeatureFlags } from "./feature-flags.ts";
+import { providerGatewayHealth } from "./provider/gateway.ts";
+import type {
+  IntelligenceFeedback,
+  IntelligenceResponse,
+} from "./types.ts";
 import { newCorrelationId } from "./provider/gateway.ts";
 import { loadLiveIntelligenceContext } from "./adapters/live-context.ts";
 import { probeIntelligenceSchema } from "./persistence/schema.ts";

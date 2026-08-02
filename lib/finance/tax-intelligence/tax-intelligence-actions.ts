@@ -11,12 +11,12 @@ import {
   createOutboxSupabaseAdapter,
   createRbacSupabaseAdapter,
 } from "@/lib/enterprise";
+import { assertFinancePermission } from "@/lib/finance/shared/rbac";
 import {
   assertFinanceAccess,
-  assertFinancePermission,
   resolveFinanceEffectivePermissions,
-  type FinancePermission,
-} from "@/lib/finance";
+} from "@/lib/finance/shared/rbac-compat";
+import type { FinancePermission } from "@/lib/finance/shared/types";
 import {
   buildTaxIntelligenceBundle,
   isTaxIntelligenceEnabled,

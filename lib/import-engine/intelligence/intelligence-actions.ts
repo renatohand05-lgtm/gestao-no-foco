@@ -14,11 +14,11 @@ import { revalidatePath } from "next/cache";
 
 import { getCurrentProfile } from "@/lib/auth/session";
 import { createRbacSupabaseAdapter } from "@/lib/enterprise";
+import { assertFinancePermission } from "@/lib/finance/shared/rbac";
 import {
   assertFinanceAccess,
-  assertFinancePermission,
   resolveFinanceEffectivePermissions,
-} from "@/lib/finance";
+} from "@/lib/finance/shared/rbac-compat";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import type { TenantWithRole } from "@/types";

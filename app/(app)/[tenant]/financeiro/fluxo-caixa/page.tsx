@@ -117,7 +117,7 @@ export default async function FluxoCaixaEnterprisePage({
     Boolean(dataDe) ||
     Boolean(dataAte);
 
-  const coreCashFlow = await listCashFlow(tenantSlug, {
+  const coreCashFlowPromise = listCashFlow(tenantSlug, {
     from: filters.dataDe,
     to: filters.dataAte,
     accountId: conta || undefined,
@@ -129,18 +129,32 @@ export default async function FluxoCaixaEnterprisePage({
   let filterOptions;
   let loadError: string | null = null;
 
-  try {
+  const legacyFluxoPromise = (async () => {
     const service = await createFluxoCaixaService(auth.tenant.id);
-    const result = await service.getFluxo(filters);
-    resumo = result.resumo;
-    daily = result.daily;
-    itens = result.itens;
-    filterOptions = result.filterOptions;
-  } catch (error) {
-    loadError =
-      error instanceof Error
-        ? error.message
-        : "Não foi possível carregar o Fluxo de Caixa.";
+    return service.getFluxo(filters);
+  })();
+
+  const [coreCashFlow, legacyResult] = await Promise.all([
+    coreCashFlowPromise,
+    legacyFluxoPromise.then(
+      (result) => ({ ok: true as const, result }),
+      (error: unknown) => ({
+        ok: false as const,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar o Fluxo de Caixa.",
+      }),
+    ),
+  ]);
+
+  if (legacyResult.ok) {
+    resumo = legacyResult.result.resumo;
+    daily = legacyResult.result.daily;
+    itens = legacyResult.result.itens;
+    filterOptions = legacyResult.result.filterOptions;
+  } else {
+    loadError = legacyResult.error;
   }
 
   if (loadError || !resumo || !daily || !itens || !filterOptions) {

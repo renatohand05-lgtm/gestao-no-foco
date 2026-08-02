@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cache } from "react";
 
 import { createContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { createContaReceberService } from "@/lib/financeiro/conta-receber-service";
@@ -651,13 +652,13 @@ export class DashboardService {
   }
 }
 
-export async function createDashboardService(
-  tenantId: string,
-  segment: TenantSegment | null,
-) {
-  const supabase = await createClient();
-  return new DashboardService(supabase, tenantId, segment);
-}
+/** Factory memoizada por request — evita recriar service nos loaders (Sprint 29.1). */
+export const createDashboardService = cache(
+  async (tenantId: string, segment: TenantSegment | null) => {
+    const supabase = await createClient();
+    return new DashboardService(supabase, tenantId, segment);
+  },
+);
 
 export function defaultDashboardPeriodo(now = new Date()): DashboardFilters {
   return defaultDrePeriodo(now);

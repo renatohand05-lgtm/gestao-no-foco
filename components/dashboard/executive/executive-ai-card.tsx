@@ -6,6 +6,7 @@ import type {
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import type { EccHojeKpis } from "@/lib/executive-command-center";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";
+import type { DashboardCharts } from "@/types/dashboard-executive";
 
 type Props = {
   data: ExecutiveAiResult;
@@ -19,6 +20,7 @@ type Props = {
   /** Feeds do mesmo ciclo (simulações Decision Center · sem fetch). */
   feeds?: ExecutiveAiInput | null;
   hoje?: EccHojeKpis | null;
+  charts?: DashboardCharts | null;
 };
 
 /**
@@ -35,6 +37,7 @@ export function ExecutiveAiCard({
   predictive,
   feeds = null,
   hoje = null,
+  charts = null,
 }: Props) {
   return (
     <div data-dashboard-block="ia-executiva">
@@ -49,6 +52,7 @@ export function ExecutiveAiCard({
         predictive={predictive}
         feeds={feeds}
         hoje={hoje}
+        charts={charts}
       />
     </div>
   );

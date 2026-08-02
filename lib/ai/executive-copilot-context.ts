@@ -9,7 +9,7 @@ import type { ExecutiveIntelligenceCenterData } from "../dashboard/executive-int
 import {
   runBusinessHealthEngine,
   type BusinessHealthResult,
-} from "../dashboard/business-health-engine.ts";
+} from "@/lib/enterprise/intelligence";
 import type { ExecutiveDecisionResult } from "../dashboard/executive-decision-types.ts";
 import type { ExecutiveCopilotAccess } from "./executive-copilot-types.ts";
 

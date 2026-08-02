@@ -1,5 +1,5 @@
 /**
- * Sprint 22.1 â€” Enterprise Financial Core Â· API pÃºblica.
+ * Sprint 22.1 — Enterprise Financial Core · API pública.
  */
 
 export type * from "./shared/types.ts";

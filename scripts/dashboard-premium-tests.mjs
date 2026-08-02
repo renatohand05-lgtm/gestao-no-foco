@@ -60,7 +60,7 @@ const stream = readFileSync(
 assert(stream.includes("PremiumDashboardView"), "usa PremiumDashboardView");
 assert(stream.includes("loadDashboardPrimary"), "loader primary real");
 assert(stream.includes("loadDashboardCharts"), "loader charts real");
-assert(stream.includes("buildExecutiveIntelligence"), "inteligência real");
+assert(stream.includes("composeOpsExecutiveIntelligence"), "inteligência real");
 assert(stream.includes("composeExecutiveFinancialCockpit"), "cockpit real");
 assert(!/Math\.random\(/.test(stream), "sem random no stream");
 assert(

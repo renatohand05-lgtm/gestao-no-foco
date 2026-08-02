@@ -1,7 +1,7 @@
 import {
   BUSINESS_HEALTH_CONFIDENCE_LABEL,
   type BusinessHealthConfidenceLevel,
-} from "@/lib/dashboard/business-health-engine";
+} from "@/lib/enterprise";
 import { gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import { ExecutiveBadge } from "@/components/executive";

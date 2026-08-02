@@ -10,7 +10,7 @@ import { QuickWins } from "@/components/dashboard/executive-decision-center/quic
 import { SimulationCard } from "@/components/dashboard/executive-decision-center/simulation-card";
 import { ExecutiveBadge, ExecutiveSection } from "@/components/executive";
 import type { ExecutiveAiInput, ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
-import type { BusinessHealthResult } from "@/lib/dashboard/business-health-engine";
+import type { BusinessHealthResult } from "@/lib/enterprise";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import {
   runExecutiveDecisionCenter,

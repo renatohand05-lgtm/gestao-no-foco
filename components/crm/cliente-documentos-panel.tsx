@@ -5,6 +5,7 @@ import { FileUp, Loader2, Trash2 } from "lucide-react";
 
 import { SectionCard } from "@/components/ui/section-card";
 import { Input } from "@/components/ui/input";
+import { useOptionalToast } from "@/components/platform/toast-provider";
 import {
   CRM_DOCUMENTO_CATEGORIA_LABELS,
   CRM_DOCUMENTO_CATEGORIAS,
@@ -30,16 +31,22 @@ export function ClienteDocumentosPanel({
   documentos,
   onRefresh,
 }: Props) {
+  const toast = useOptionalToast();
   const [pending, startTransition] = useTransition();
   const [categoria, setCategoria] = useState<string>("outro");
   const [legenda, setLegenda] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const notifyError = (message: string) => {
+    if (toast) toast.error(message);
+    else window.alert(message);
+  };
+
   function run(action: () => Promise<{ success: boolean; error?: string }>) {
     startTransition(async () => {
       const result = await action();
       if (!result.success) {
-        window.alert(result.error ?? "Falha na operação.");
+        notifyError(result.error ?? "Falha na operação.");
         return;
       }
       onRefresh();
@@ -49,7 +56,7 @@ export function ClienteDocumentosPanel({
   async function openDoc(id: string) {
     const result = await getClienteDocumentoSignedUrlAction(tenantSlug, id);
     if (!result.success || !result.signedUrl) {
-      window.alert(
+      notifyError(
         (!result.success && "error" in result ? result.error : undefined) ??
           "Não foi possível abrir.",
       );

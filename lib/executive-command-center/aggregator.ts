@@ -10,7 +10,7 @@ import type {
 import {
   runBusinessHealthEngine,
   type BusinessHealthResult,
-} from "../dashboard/business-health-engine.ts";
+} from "@/lib/enterprise/intelligence";
 import { composeExecutiveIntelligenceCenter } from "../dashboard/executive-intelligence-center-compose.ts";
 import type { ExecutiveDecisionResult } from "../dashboard/executive-decision-types.ts";
 import type { ExecutiveIntelligenceCenterData } from "../dashboard/executive-intelligence-center-types.ts";

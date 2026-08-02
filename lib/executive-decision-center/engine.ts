@@ -13,7 +13,7 @@ import type {
 import {
   runBusinessHealthEngine,
   type BusinessHealthResult,
-} from "../dashboard/business-health-engine.ts";
+} from "@/lib/enterprise/intelligence";
 import type { ExecutiveDecisionResult } from "../dashboard/executive-decision-types.ts";
 import {
   runExecutiveTimeline,

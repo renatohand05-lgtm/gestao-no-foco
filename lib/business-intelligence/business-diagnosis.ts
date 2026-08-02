@@ -9,7 +9,7 @@ import type { BusinessIntelligenceResult } from "@/lib/business-intelligence/typ
 import {
   buildExecutiveAction,
   toExecutiveIntelligenceInput,
-} from "@/lib/intelligence";
+} from "@/lib/enterprise/intelligence";
 import type { CommercialPanelData } from "@/types/commercial-panel";
 
 /**

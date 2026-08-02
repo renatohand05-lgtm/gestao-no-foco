@@ -13,7 +13,7 @@ import {
   type ExecutiveCopilotResponse,
 } from "@/lib/ai/executive-copilot-engine";
 import type { ExecutiveCopilotAccess } from "@/lib/ai/executive-copilot-types";
-import type { BusinessHealthResult } from "@/lib/dashboard/business-health-engine";
+import type { BusinessHealthResult } from "@/lib/enterprise";
 import type { ExecutiveIntelligenceCenterData } from "@/lib/dashboard/executive-intelligence-center-types";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";

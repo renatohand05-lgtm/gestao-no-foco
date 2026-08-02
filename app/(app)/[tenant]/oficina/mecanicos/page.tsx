@@ -4,7 +4,7 @@ import { MecanicosManager } from "@/components/mecanicos/mecanicos-manager";
 import { SectionCard } from "@/components/ui/section-card";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { requireTenant } from "@/lib/tenants";
 import {
   ExecutiveHeader,
@@ -28,14 +28,14 @@ export default async function OficinaMecanicosPage({
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["mecanicos.criar"] ?? false;
   let canEdit =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["mecanicos.editar"] ?? false;
-  try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    canView = await perms.has("mecanicos.visualizar");
-    canCreate = await perms.has("mecanicos.criar");
-    canEdit = await perms.has("mecanicos.editar");
-  } catch {
-    /* ok */
-  }
+  const mecListPerms = await tryResolvePermissions(tenant.id, tenant.role, [
+    "mecanicos.visualizar",
+    "mecanicos.criar",
+    "mecanicos.editar",
+  ]);
+  canView = mecListPerms["mecanicos.visualizar"];
+  canCreate = mecListPerms["mecanicos.criar"];
+  canEdit = mecListPerms["mecanicos.editar"];
 
   if (!canView) {
     return <p className="text-sm text-muted-foreground">Sem permissão.</p>;

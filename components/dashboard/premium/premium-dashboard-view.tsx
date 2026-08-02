@@ -77,6 +77,7 @@ export function PremiumDashboardView({
     decision,
     estoqueAbaixoMinimo,
     primary,
+    charts,
     tenantSlug,
   });
   const ops = buildPremiumOpsCards({

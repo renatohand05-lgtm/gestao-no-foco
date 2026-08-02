@@ -11,6 +11,8 @@ import {
 } from "react";
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
 
+import { FEEDBACK_SURFACE } from "@/components/ui/feedback-tones";
+import { gofFocusRing, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 export type ToastVariant = "success" | "error" | "info" | "warning";
@@ -40,13 +42,6 @@ const ICONS = {
   info: Info,
   warning: AlertCircle,
 } as const;
-
-const STYLES: Record<ToastVariant, string> = {
-  success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300",
-  error: "border-destructive/30 bg-destructive/10 text-destructive",
-  info: "border-blue-500/30 bg-blue-500/10 text-blue-800 dark:text-blue-300",
-  warning: "border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-300",
-};
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -120,22 +115,28 @@ function ToastCard({
     <div
       role="status"
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border px-3 py-2.5 text-sm shadow-lg backdrop-blur",
-        STYLES[variant],
+        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border px-3 py-2.5 shadow-lg backdrop-blur",
+        gofTypography.caption,
+        FEEDBACK_SURFACE[variant],
       )}
     >
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="min-w-0 flex-1">
-        {toast.title ? <p className="font-medium">{toast.title}</p> : null}
+        {toast.title ? (
+          <p className="font-medium text-foreground">{toast.title}</p>
+        ) : null}
         <p className={cn(toast.title && "mt-0.5 opacity-90")}>{toast.description}</p>
       </div>
       <button
         type="button"
-        className="rounded-md p-1 opacity-70 transition hover:opacity-100"
+        className={cn(
+          "rounded-md p-1 opacity-70 transition hover:opacity-100",
+          gofFocusRing,
+        )}
         aria-label="Fechar notificação"
         onClick={() => onDismiss(toast.id)}
       >
-        <X className="size-3.5" />
+        <X className="size-3.5" aria-hidden />
       </button>
     </div>
   );

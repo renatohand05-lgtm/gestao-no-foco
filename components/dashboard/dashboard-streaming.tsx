@@ -20,7 +20,9 @@ import {
   resolveTenantTimezone,
 } from "@/lib/dashboard/tenant-timezone";
 import { composeExecutiveDecision } from "@/lib/dashboard/executive-decision-service";
-import { buildExecutiveIntelligence } from "@/lib/dashboard/executive-intelligence-loader";
+import {
+  composeOpsExecutiveIntelligence,
+} from "@/lib/enterprise";
 import {
   loadExecutiveDashboardContext,
   toDecisionFeeds,
@@ -42,6 +44,7 @@ import { ExecutivePage, ExecutiveSkeleton } from "@/components/executive";
 import { gofMotion, gofRadius } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 import type {
+  DashboardCharts,
   DashboardFilterOptions,
   DashboardFilters,
 } from "@/types/dashboard-executive";
@@ -224,6 +227,7 @@ async function ExecutiveAiLazyBlock({
   tenantName,
   dateLabel,
   updatedAtLabel,
+  charts = null,
 }: {
   tenantId: string;
   tenantSlug: string;
@@ -240,6 +244,7 @@ async function ExecutiveAiLazyBlock({
   tenantName: string;
   dateLabel: string;
   updatedAtLabel: string;
+  charts?: DashboardCharts | null;
 }) {
   let result: ExecutiveAiResult | null = null;
   let predictive: PredictiveIntelligenceResult | null = null;
@@ -291,6 +296,7 @@ async function ExecutiveAiLazyBlock({
       updatedAtLabel={updatedAtLabel}
       predictive={predictive}
       feeds={feeds}
+      charts={charts}
       hoje={{
         faturamentoHoje: hoje.hoje.faturamento,
         metaHoje: hoje.hoje.meta,
@@ -347,7 +353,7 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
       resumo,
       feeds: toDecisionFeeds(execCtx),
     });
-    intelligence = buildExecutiveIntelligence({
+    intelligence = composeOpsExecutiveIntelligence({
       feeds: toIntelligenceFeeds(execCtx),
     });
     cockpit = composeExecutiveFinancialCockpit(execCtx);
@@ -408,6 +414,7 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
               tenantName={ctx.tenantName}
               dateLabel={dateLabel}
               updatedAtLabel={hojeData.atualizado_em_label}
+              charts={charts}
             />
           </Suspense>
         }

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useOptionalToast } from "@/components/platform/toast-provider";
 import {
   type ContaLifecycleSnapshot,
   type ParcelScope,
@@ -382,6 +383,7 @@ export function ContaLifecycleEstornoDialog({
 
 export function useDuplicarConta(kind: Kind, tenantSlug: string) {
   const router = useRouter();
+  const toast = useOptionalToast();
   const [isPending, startTransition] = useTransition();
 
   function duplicar(id: string) {
@@ -391,7 +393,10 @@ export function useDuplicarConta(kind: Kind, tenantSlug: string) {
           ? await duplicarContaPagarAction(tenantSlug, id)
           : await duplicarContaReceberAction(tenantSlug, id);
       if (!result.success || !result.id) {
-        window.alert(result.success === false ? result.error : "Falha ao duplicar.");
+        const message =
+          result.success === false ? result.error : "Falha ao duplicar.";
+        if (toast) toast.error(message ?? "Falha ao duplicar.");
+        else window.alert(message);
         return;
       }
       router.push(

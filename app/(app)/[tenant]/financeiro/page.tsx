@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
-import { TreasuryDashboardClient } from "@/components/finance/treasury-dashboard-client";
+import { TreasuryDashboardLazy } from "@/components/finance/treasury-dashboard-client-lazy";
+import { BlockSuspenseFallback } from "@/components/ui/block-suspense-fallback";
 import {
   getTreasuryAccounts,
   getTreasuryAlerts,
@@ -160,10 +161,8 @@ export default async function FinanceiroDashboardPage({
         ]}
       />
 
-      <Suspense
-        fallback={<p className="text-sm text-muted-foreground">A carregar…</p>}
-      >
-        <TreasuryDashboardClient
+      <Suspense fallback={<BlockSuspenseFallback lines={5} label="Carregando dashboard financeiro" />}>
+        <TreasuryDashboardLazy
           tenantSlug={tenantSlug}
           periodKey={periodKey}
           summary={summary}

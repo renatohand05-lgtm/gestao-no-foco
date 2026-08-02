@@ -14,24 +14,20 @@ import type { MecanicoInput } from "@/lib/mecanicos/mecanico-service";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import type { OsMecanicoPapel } from "@/lib/mecanicos/constants";
 import { createOsMecanicoService } from "@/lib/mecanicos/os-mecanico-service";
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { DEFAULT_ROLE_PERMISSIONS, type PermissionKey } from "@/lib/permissoes/constants";
+import { getPermission } from "@/lib/permissoes/authorization";
 import { requireTenant } from "@/lib/tenants";
 
 type ActionResult = { success: boolean; error?: string; id?: string };
 
 async function guard(
   tenantSlug: string,
-  key: keyof typeof DEFAULT_ROLE_PERMISSIONS.owner,
+  key: PermissionKey,
 ): Promise<{ tenantId: string; ok: boolean; error?: string }> {
   const tenant = await requireTenant(tenantSlug);
-  let ok =
-    DEFAULT_ROLE_PERMISSIONS[tenant.role][
-      key as keyof (typeof DEFAULT_ROLE_PERMISSIONS)["owner"]
-    ] ?? false;
+  let ok = DEFAULT_ROLE_PERMISSIONS[tenant.role][key] ?? false;
   try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    ok = await perms.has(key as never);
+    ok = await getPermission(tenant.id, tenant.role, key);
   } catch {
     /* fallback */
   }

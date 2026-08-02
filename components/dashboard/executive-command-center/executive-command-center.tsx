@@ -12,7 +12,7 @@ import { ExecutiveOpportunityPanel } from "@/components/dashboard/executive-comm
 import { ExecutivePriorityList } from "@/components/dashboard/executive-command-center/executive-priority-list";
 import { ExecutiveRiskPanel } from "@/components/dashboard/executive-command-center/executive-risk-panel";
 import { ExecutiveSection } from "@/components/executive";
-import type { BusinessHealthResult } from "@/lib/dashboard/business-health-engine";
+import type { BusinessHealthResult } from "@/lib/enterprise";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import {
   runExecutiveCommandCenter,

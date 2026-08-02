@@ -50,46 +50,50 @@ export default async function FinanceiroCfoPage({
   }
 
   const hoje = civilDateInTimezone(new Date(), DEFAULT_TENANT_TIMEZONE);
-  const cashRes = await getCashIntelligenceDashboard(tenantSlug, {
+
+  const cashPromise = getCashIntelligenceDashboard(tenantSlug, {
     horizonDays: 30,
   });
 
-  let agingTotalVencido = 0;
-  let agingTotalAVencer = 0;
-  try {
-    const cr = await createContaReceberService(auth.tenant.id);
-    const list = await cr.list({
-      page: 1,
-      perPage: 50,
-      status: "all",
-      sort: "data_vencimento",
-      order: "asc",
-    });
-    const titulos = list.data
-      .filter(
-        (i) =>
-          i.status_exibicao === "aberto" || i.status_exibicao === "vencido",
-      )
-      .map((i) => ({
-        id: i.id,
-        clienteNome: i.cliente?.nome ?? null,
-        valor: Math.max(
-          Number(i.valor_original ?? 0) +
-            Number(i.juros ?? 0) +
-            Number(i.multa ?? 0) -
-            Number(i.desconto ?? 0) -
-            Number(i.valor_recebido ?? 0),
-          0,
-        ),
-        dataVencimento: i.data_vencimento,
-        status: i.status_exibicao,
-      }));
-    const aging = buildAgingReport(titulos, hoje);
-    agingTotalVencido = aging.totalVencido;
-    agingTotalAVencer = aging.totalAVencer;
-  } catch {
-    /* aging parcial — não mascara com mock */
-  }
+  const agingPromise = (async () => {
+    try {
+      const cr = await createContaReceberService(auth.tenant.id);
+      const list = await cr.list({
+        page: 1,
+        perPage: 50,
+        status: "all",
+        sort: "data_vencimento",
+        order: "asc",
+      });
+      const titulos = list.data
+        .filter(
+          (i) =>
+            i.status_exibicao === "aberto" || i.status_exibicao === "vencido",
+        )
+        .map((i) => ({
+          id: i.id,
+          clienteNome: i.cliente?.nome ?? null,
+          valor: Math.max(
+            Number(i.valor_original ?? 0) +
+              Number(i.juros ?? 0) +
+              Number(i.multa ?? 0) -
+              Number(i.desconto ?? 0) -
+              Number(i.valor_recebido ?? 0),
+            0,
+          ),
+          dataVencimento: i.data_vencimento,
+          status: i.status_exibicao,
+        }));
+      return buildAgingReport(titulos, hoje);
+    } catch {
+      return null;
+    }
+  })();
+
+  const [cashRes, aging] = await Promise.all([cashPromise, agingPromise]);
+
+  const agingTotalVencido = aging?.totalVencido ?? 0;
+  const agingTotalAVencer = aging?.totalAVencer ?? 0;
 
   const saldo = cashRes.success
     ? cashRes.dashboard.balance.consolidated

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ExecutiveCrmDashboard } from "@/components/crm/executive-crm-dashboard";
+import { ExecutiveCrmDashboardLazy } from "@/components/crm/executive-crm-dashboard-lazy";
 import { getExecutiveCrmDashboard } from "@/lib/crm/crm-enterprise-actions";
 import { isCrmEnterpriseEnabled } from "@/lib/crm/crm-feature-flags";
 import { requireTenant } from "@/lib/tenants";
@@ -68,6 +68,6 @@ export default async function CrmExecutivoPage({
   }
 
   return (
-    <ExecutiveCrmDashboard tenantSlug={tenantSlug} initialBundle={bundle} />
+    <ExecutiveCrmDashboardLazy tenantSlug={tenantSlug} initialBundle={bundle} />
   );
 }

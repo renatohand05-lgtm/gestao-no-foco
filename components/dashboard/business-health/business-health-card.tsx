@@ -20,7 +20,7 @@ import {
   type BusinessHealthModuleResult,
   type BusinessHealthResult,
   type BusinessHealthStatus,
-} from "@/lib/dashboard/business-health-engine";
+} from "@/lib/enterprise";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
 import { gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";

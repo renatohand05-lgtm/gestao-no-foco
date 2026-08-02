@@ -110,15 +110,6 @@ async function DashboardStreamingRoot({
 
   const greeting = getGreeting(profile?.name);
 
-  // Diagnóstico de versão (somente servidor) — confirma código novo em produção.
-  console.info("[dashboard-v2]", {
-    tenant: tenantSlug,
-    sha:
-      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
-      process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
-      "local",
-  });
-
   const ctx: DashboardStreamCtx = {
     tenantId: tenant.id,
     tenantSlug,

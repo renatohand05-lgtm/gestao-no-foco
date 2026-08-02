@@ -1,4 +1,4 @@
-import { toExecutiveIntelligenceInput } from "@/lib/intelligence";
+import { toExecutiveIntelligenceInput } from "@/lib/enterprise/intelligence";
 import { resolvePredictionConfidence } from "@/lib/predictions/confidence";
 import { simulateDailyAverage } from "@/lib/predictions/daily-target-simulator";
 import {

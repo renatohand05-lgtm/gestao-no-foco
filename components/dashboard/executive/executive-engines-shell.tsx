@@ -6,6 +6,7 @@ import { ExecutiveCopilotPanel } from "@/components/ai/executive-copilot";
 import { BusinessHealthCard } from "@/components/dashboard/business-health";
 import { DecisionCenterPanel } from "@/components/dashboard/executive-decision-center";
 import { ExecutiveCommandCenter } from "@/components/dashboard/executive-command-center";
+import { ExecutiveIntelligenceSignalsPanel } from "@/components/dashboard/executive/executive-intelligence-signals-panel";
 import { ExecutiveTimelinePanel } from "@/components/dashboard/executive-timeline";
 import { PredictiveIntelligencePanel } from "@/components/dashboard/predictive";
 import type {
@@ -18,6 +19,7 @@ import {
   type EccHojeKpis,
 } from "@/lib/executive-command-center";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";
+import type { DashboardCharts } from "@/types/dashboard-executive";
 import { gofMotion } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +34,8 @@ type Props = {
   predictive: PredictiveIntelligenceResult;
   feeds?: ExecutiveAiInput | null;
   hoje?: EccHojeKpis | null;
+  /** Séries opcionais já carregadas no dashboard (sinais 29.4). */
+  charts?: DashboardCharts | null;
 };
 
 /**
@@ -49,6 +53,7 @@ export function ExecutiveEnginesShell({
   predictive,
   feeds = null,
   hoje = null,
+  charts = null,
 }: Props) {
   const shared = useMemo(
     () =>
@@ -81,6 +86,12 @@ export function ExecutiveEnginesShell({
       />
 
       <BusinessHealthCard ai={ai} data={shared.bh} />
+
+      <ExecutiveIntelligenceSignalsPanel
+        ai={ai}
+        businessHealth={shared.bh}
+        charts={charts}
+      />
 
       <ExecutiveCopilotPanel
         tenantSlug={tenantSlug}

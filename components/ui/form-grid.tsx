@@ -8,9 +8,9 @@ type FormGridProps = {
 
 const columnClassName: Record<NonNullable<FormGridProps["columns"]>, string> = {
   1: "grid-cols-1",
-  2: "md:grid-cols-2",
-  3: "md:grid-cols-2 lg:grid-cols-3",
-  4: "md:grid-cols-2 lg:grid-cols-4",
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-2 lg:grid-cols-3",
+  4: "sm:grid-cols-2 lg:grid-cols-4",
 };
 
 export function FormGrid({

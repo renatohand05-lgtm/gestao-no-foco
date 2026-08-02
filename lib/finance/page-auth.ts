@@ -1,6 +1,9 @@
 /**
  * Sprint 22.2 RC2 — Auth de páginas Enterprise Financeiro.
+ * Sprint 29.2 — React.cache por request (dedupe snapshot RBAC).
  */
+
+import { cache } from "react";
 
 import { getCurrentProfile } from "@/lib/auth/session";
 import {
@@ -17,7 +20,7 @@ import {
 } from "@/lib/finance/shared/rbac";
 import { FINANCE_ERROR_CODES, FinanceError } from "@/lib/finance/shared/errors";
 
-export async function resolveFinancePageAuth(tenantSlug: string) {
+export const resolveFinancePageAuth = cache(async (tenantSlug: string) => {
   const tenant = await requireTenant(tenantSlug);
   const profile = await getCurrentProfile();
   if (!profile?.id) {
@@ -50,7 +53,7 @@ export async function resolveFinancePageAuth(tenantSlug: string) {
   });
 
   return { tenant, context, profile };
-}
+});
 
 export async function requireFinancePagePermission(
   tenantSlug: string,

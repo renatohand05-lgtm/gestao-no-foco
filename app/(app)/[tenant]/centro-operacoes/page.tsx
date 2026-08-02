@@ -7,7 +7,7 @@ import { createCentroOperacoesService } from "@/lib/operacoes/centro-operacoes-s
 import { createDashboardPreferenciasService } from "@/lib/operacoes/dashboard-prefs-service";
 import type { DashboardPreferencia } from "@/lib/operacoes/dashboard-prefs-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { requireTenant } from "@/lib/tenants";
 import {
   ExecutiveHeader,
@@ -38,15 +38,16 @@ export default async function CentroOperacoesPage({
   let canPersonalizar =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["dashboard.personalizar"] ?? false;
 
-  try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    canView = await perms.has("centro_operacoes.visualizar");
-    canAlterar = await perms.has("centro_operacoes.alterar_status");
-    canAlertas = await perms.has("centro_operacoes.ver_alertas");
-    canPersonalizar = await perms.has("dashboard.personalizar");
-  } catch {
-    /* fallback */
-  }
+  const centroPerms = await tryResolvePermissions(tenant.id, tenant.role, [
+    "centro_operacoes.visualizar",
+    "centro_operacoes.alterar_status",
+    "centro_operacoes.ver_alertas",
+    "dashboard.personalizar",
+  ]);
+  canView = centroPerms["centro_operacoes.visualizar"];
+  canAlterar = centroPerms["centro_operacoes.alterar_status"];
+  canAlertas = centroPerms["centro_operacoes.ver_alertas"];
+  canPersonalizar = centroPerms["dashboard.personalizar"];
 
   if (!canView) {
     return (

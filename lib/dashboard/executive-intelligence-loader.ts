@@ -1,21 +1,19 @@
 /**
- * Loader da Inteligência Executiva (Gate 16.3 / 17.2).
- * Preferir loadExecutiveDashboardContext no dashboard (dedupe).
+ * Loader async da Inteligência Operativa (Gate 16.3 / 17.2).
+ * Somente Server Components / actions — importa contexto com Supabase.
+ * Composição pura: `ops-executive-intelligence.ts` / `@/lib/enterprise`.
  */
 
-import { composeExecutiveIntelligence } from "@/lib/dashboard/executive-intelligence-compose";
-import type { ExecutiveIntelligenceData } from "@/lib/dashboard/executive-intelligence-types";
-import type { CentroOperacoesData } from "@/lib/operacoes/centro-operacoes-service";
-import type { FluxoCaixaResumo } from "@/types/fluxo-caixa";
 import {
   loadExecutiveDashboardContext,
   toIntelligenceFeeds,
 } from "@/lib/dashboard/executive-dashboard-context-service";
+import type { ExecutiveIntelligenceFeeds } from "@/lib/dashboard/ops-executive-intelligence";
 
-export type ExecutiveIntelligenceFeeds = {
-  centro: CentroOperacoesData | null;
-  fluxoResumo: FluxoCaixaResumo | null;
-};
+export type { ExecutiveIntelligenceFeeds };
+export {
+  composeOpsExecutiveIntelligence,
+} from "@/lib/dashboard/ops-executive-intelligence";
 
 export async function loadExecutiveIntelligenceFeeds(
   tenantId: string,
@@ -23,14 +21,4 @@ export async function loadExecutiveIntelligenceFeeds(
 ): Promise<ExecutiveIntelligenceFeeds> {
   const ctx = await loadExecutiveDashboardContext(tenantId, tenantSlug);
   return toIntelligenceFeeds(ctx);
-}
-
-export function buildExecutiveIntelligence(input: {
-  priorities?: unknown;
-  feeds: ExecutiveIntelligenceFeeds;
-}): ExecutiveIntelligenceData {
-  return composeExecutiveIntelligence({
-    centro: input.feeds.centro,
-    fluxoResumo: input.feeds.fluxoResumo,
-  });
 }

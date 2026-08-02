@@ -1,8 +1,9 @@
 # Arquitetura Oficial — Gestão no Foco
 
-**Sprint de referência:** 21.10 — Enterprise Release Candidate (`21.10.0-rc.1`)  
-**Status do produto:** Fase 21 Enterprise em **RC** — ver [releases/ENTERPRISE_21_10_RC1.md](../releases/ENTERPRISE_21_10_RC1.md)  
-**Escopo deste doc:** princípios e mapa estáveis. Evoluções Enterprise 21.x não quebram os princípios multi-tenant / server-first.
+**Sprint de referência:** 29.0 — Arquitetura Enterprise e Padronização da Base  
+**Status do produto:** Fase 28 concluída; Fase 29 em padronização estrutural — ver [PHASE_29_ENTERPRISE.md](./PHASE_29_ENTERPRISE.md)  
+**Histórico RC:** Enterprise 21.10 permanece referência de release (`21.10.0-rc.1`) — ver [releases/ENTERPRISE_21_10_RC1.md](../releases/ENTERPRISE_21_10_RC1.md)  
+**Escopo deste doc:** princípios e mapa estáveis. Evoluções Enterprise não quebram os princípios multi-tenant / server-first.
 
 ---
 
@@ -100,6 +101,16 @@ Mutação:
 
 ## Documentos relacionados
 
+- [PHASE_29_ENTERPRISE.md](./PHASE_29_ENTERPRISE.md) — Fase 29 (padronização estrutural)
+- [PHASE_29_1_PERFORMANCE.md](./PHASE_29_1_PERFORMANCE.md) — Fase 29.1 (performance)
+- [PHASE_29_2_PERMISSIONS.md](./PHASE_29_2_PERMISSIONS.md) — Fase 29.2 (permissões / escala)
+- [PHASE_29_3_UX.md](./PHASE_29_3_UX.md) — Fase 29.3 (UX premium / responsividade)
+- [PHASE_29_4_EXECUTIVE_INTELLIGENCE.md](./PHASE_29_4_EXECUTIVE_INTELLIGENCE.md) — Fase 29.4 (inteligência executiva)
+- [PHASE_29_5_ENTERPRISE_ENGINE.md](./PHASE_29_5_ENTERPRISE_ENGINE.md) — Fase 29.5 (unificação engine enterprise)
+- [PHASE_29_6_ENTERPRISE_UNIFICATION.md](./PHASE_29_6_ENTERPRISE_UNIFICATION.md) — Fase 29.6 (unificação definitiva)
+- [PHASE_29_7_HOMOLOGATION.md](./PHASE_29_7_HOMOLOGATION.md) — Fase 29.7 (homologação / release)
+- [PHASE_29_8_RELEASE_AUDIT.md](./PHASE_29_8_RELEASE_AUDIT.md) — Fase 29.8 (release audit / browser QA)
+- [BARREL_POLICY.md](./BARREL_POLICY.md) — política de barrel exports
 - [MODULE_STANDARD.md](./MODULE_STANDARD.md)
 - [SERVICE_STANDARD.md](./SERVICE_STANDARD.md)
 - [UI_STANDARD.md](./UI_STANDARD.md)

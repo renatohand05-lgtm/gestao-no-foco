@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { memo, Suspense, type ReactNode } from "react";
 
 import { DemoModeProvider } from "@/components/demo/demo-mode-provider";
 import { DemoModeControls } from "@/components/demo/demo-mode-controls";
@@ -24,6 +24,14 @@ type AppShellProps = {
   };
   children: React.ReactNode;
 };
+
+/**
+ * Slot memoizado: quando o chrome reage ao DemoMode, a página não re-renderiza
+ * se a referência de children for estável (Sprint 29.1).
+ */
+const PageSlot = memo(function PageSlot({ children }: { children: ReactNode }) {
+  return <>{children}</>;
+});
 
 function DemoAwareChrome({
   tenant,
@@ -75,7 +83,7 @@ function DemoAwareChrome({
             ) : null}
             <DemoNavRail tenantSlug={tenant.slug} />
           </div>
-          {children}
+          <PageSlot>{children}</PageSlot>
         </PageContainer>
         {!hide.appSidebar ? (
           <BrandInstitutionalFooter compact className="mt-auto" />
@@ -103,7 +111,13 @@ export function AppShell(props: AppShellProps) {
       }
     >
       <DemoModeProvider tenantSlug={props.tenant.slug}>
-        <DemoAwareChrome {...props} />
+        <DemoAwareChrome
+          tenant={props.tenant}
+          tenants={props.tenants}
+          user={props.user}
+        >
+          {props.children}
+        </DemoAwareChrome>
       </DemoModeProvider>
     </Suspense>
   );

@@ -1,4 +1,4 @@
-import type { BusinessHealthEvidenceItem } from "@/lib/dashboard/business-health-engine";
+import type { BusinessHealthEvidenceItem } from "@/lib/enterprise";
 import { gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 

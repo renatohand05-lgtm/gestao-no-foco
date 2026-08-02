@@ -6,7 +6,7 @@ import { createMecanicoCompetenciaService } from "@/lib/mecanicos/competencia-se
 import { createMecanicoCustoService } from "@/lib/mecanicos/custo-service";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import {
@@ -37,16 +37,18 @@ export default async function MecanicoDetailPage({
     DEFAULT_ROLE_PERMISSIONS[tenant.role][
       "financeiro.gerar_obrigacao_mecanico"
     ] ?? false;
-  try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    canView = await perms.has("mecanicos.visualizar");
-    canEdit = await perms.has("mecanicos.editar");
-    canVerCusto = await perms.has("mecanicos.ver_custo");
-    canEditarCusto = await perms.has("mecanicos.editar_custo");
-    canGerarFolha = await perms.has("financeiro.gerar_obrigacao_mecanico");
-  } catch {
-    /* ok */
-  }
+  const mecPerms = await tryResolvePermissions(tenant.id, tenant.role, [
+    "mecanicos.visualizar",
+    "mecanicos.editar",
+    "mecanicos.ver_custo",
+    "mecanicos.editar_custo",
+    "financeiro.gerar_obrigacao_mecanico",
+  ]);
+  canView = mecPerms["mecanicos.visualizar"];
+  canEdit = mecPerms["mecanicos.editar"];
+  canVerCusto = mecPerms["mecanicos.ver_custo"];
+  canEditarCusto = mecPerms["mecanicos.editar_custo"];
+  canGerarFolha = mecPerms["financeiro.gerar_obrigacao_mecanico"];
 
   if (!canView) {
     return <p className="text-sm text-muted-foreground">Sem permissão.</p>;

@@ -105,6 +105,15 @@ Ver [STREAMING.md](./STREAMING.md): blocos Suspense independentes + loaders `Rea
 
 Ver [FLUXO_CAIXA_PAGINATION.md](./FLUXO_CAIXA_PAGINATION.md).
 
+## Performance Enterprise (Sprint 29.1)
+
+Ver [PHASE_29_1_PERFORMANCE.md](./PHASE_29_1_PERFORMANCE.md):
+
+- `React.cache` em filtros do dashboard e factory do `DashboardService`
+- `Promise.all` no layout tenant, Fluxo, CFO, OS detalhe, descontos
+- `next/dynamic` (lazy) para OS workspace, caixa, tesouraria, CRM e Analytics
+- `PageSlot` memoizado no AppShell (DemoMode)
+
 ## Oportunidades (documentadas — Sprint 10+)
 
 Auditoria 9.9.2 — **sem** mudança de arquitetura neste RC:
@@ -122,3 +131,6 @@ Auditoria 9.9.2 — **sem** mudança de arquitetura neste RC:
 
 1. Unificar `formatPercent` quando semantics forem alinhadas
 2. GROUP BY / RPC para rankings e resumos
+3. ~~`hasMany` em PermissionService (batch)~~ → ver [PHASE_29_2_PERMISSIONS.md](./PHASE_29_2_PERMISSIONS.md)
+4. Deep-imports executive em clients — Sprint 29.3+
+5. Cache compartilhado de `resolveAuthorizationSnapshot` — Sprint 29.3+

@@ -1,6 +1,9 @@
 /**
  * Sprint 26.8 — Auth de páginas Tributário.
+ * Sprint 29.2 — React.cache no resolve (dedupe snapshot por request).
  */
+
+import { cache } from "react";
 
 import { getCurrentProfile } from "@/lib/auth/session";
 import { createRbacSupabaseAdapter } from "@/lib/enterprise";
@@ -18,10 +21,7 @@ function isTaxPermission(p: string): boolean {
   return p.startsWith("tax.") || p.startsWith("financeiro.tributos.");
 }
 
-export async function requireTaxPagePermission(
-  tenantSlug: string,
-  permission: PermissionKey = "tax.visualizar",
-) {
+const resolveTaxPageAuth = cache(async (tenantSlug: string) => {
   const tenant = await requireTenant(tenantSlug);
   const profile = await getCurrentProfile();
   if (!profile?.id) throw new Error("PERMISSION_DENIED");
@@ -79,6 +79,22 @@ export async function requireTaxPagePermission(
     permissions.add("tax.publicar");
     permissions.add("tax.versionar");
   }
+
+  return {
+    tenant,
+    profile,
+    roles,
+    permissions,
+    elevated,
+  };
+});
+
+export async function requireTaxPagePermission(
+  tenantSlug: string,
+  permission: PermissionKey = "tax.visualizar",
+) {
+  const { tenant, profile, roles, permissions, elevated } =
+    await resolveTaxPageAuth(tenantSlug);
 
   const ctx = createAuthorizationContext({
     userId: profile.id,

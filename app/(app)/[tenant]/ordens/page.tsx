@@ -34,7 +34,7 @@ import {
   OS_STATUS_LABELS,
 } from "@/lib/ordens/os-status";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { cn } from "@/lib/utils";
 import { requireTenant } from "@/lib/tenants";
 import {
@@ -209,15 +209,16 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
   let canExcluirRascunho =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.excluir_rascunho"];
   let canRestaurar = DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.restaurar"];
-  try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    canCancel = await perms.has("os.cancelar");
-    canArquivar = await perms.has("os.arquivar");
-    canExcluirRascunho = await perms.has("os.excluir_rascunho");
-    canRestaurar = await perms.has("os.restaurar");
-  } catch {
-    /* ok */
-  }
+  const listPerms = await tryResolvePermissions(tenant.id, tenant.role, [
+    "os.cancelar",
+    "os.arquivar",
+    "os.excluir_rascunho",
+    "os.restaurar",
+  ]);
+  canCancel = listPerms["os.cancelar"];
+  canArquivar = listPerms["os.arquivar"];
+  canExcluirRascunho = listPerms["os.excluir_rascunho"];
+  canRestaurar = listPerms["os.restaurar"];
 
   const clearHref = osCentralClearHref(tenantSlug);
   const prevHref = pagination.hasPrev

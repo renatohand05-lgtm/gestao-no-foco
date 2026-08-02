@@ -11,7 +11,7 @@ import {
   type ExecutiveTimelineCategory,
   type ExecutiveTimelineSort,
 } from "@/lib/executive-timeline";
-import type { BusinessHealthResult } from "@/lib/dashboard/business-health-engine";
+import type { BusinessHealthResult } from "@/lib/enterprise";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";

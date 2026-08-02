@@ -302,7 +302,8 @@
     "test:phase28-conversion-idempotency": "node --experimental-strip-types scripts/phase28-tests.mjs conversion-idempotency",
     "test:phase28-conversion-rollback": "node --experimental-strip-types scripts/phase28-tests.mjs conversion-rollback",
     "test:phase28-types-contract": "node --experimental-strip-types scripts/phase28-tests.mjs types-contract",
-    "test:phase28-runtime-final": "node --experimental-strip-types scripts/phase28-tests.mjs runtime-final"
+    "test:phase28-runtime-final": "node --experimental-strip-types scripts/phase28-tests.mjs runtime-final",
+    "test:phase29": "node --experimental-strip-types scripts/phase29-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

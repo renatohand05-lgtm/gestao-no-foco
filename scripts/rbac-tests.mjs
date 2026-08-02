@@ -3,7 +3,7 @@
  * Sprint 21.1 — Enterprise Security & RBAC
  * Domínio + contratos de UI · sem I/O · sem auth provider.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -408,7 +408,6 @@ const boundary = read("components/security/security-boundary.tsx");
 const denied = read("components/security/access-denied.tsx");
 const badge = read("components/security/permission-badge.tsx");
 const roleBadge = read("components/security/user-role-badge.tsx");
-const secIndex = read("components/security/index.ts");
 const rbacIndex = read("lib/rbac/index.ts");
 const pkg = read("package.json");
 
@@ -439,9 +438,11 @@ assert(
 );
 assert(badge.includes("PermissionBadge"), "PermissionBadge presente");
 assert(roleBadge.includes("UserRoleBadge"), "UserRoleBadge presente");
+// Sprint 29.0 — barrel components/security/index.ts removido (BARREL_POLICY);
+// consumidores usam deep imports dos componentes abaixo.
 assert(
-  secIndex.includes("PermissionGate") && secIndex.includes("AccessDenied"),
-  "security/index exporta componentes",
+  !existsSync(join(root, "components/security/index.ts")),
+  "security/index barrel removido (deep imports)",
 );
 assert(
   rbacIndex.includes("authorize") &&

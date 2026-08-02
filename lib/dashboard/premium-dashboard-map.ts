@@ -2,12 +2,20 @@
  * Sprint 25.5.1 — Mapeamento visual premium → dados reais (sem inventar).
  */
 
-import type { DashboardKpiComparison, DashboardPrimaryData } from "@/types/dashboard-executive";
+import type {
+  DashboardCharts,
+  DashboardKpiComparison,
+  DashboardPrimaryData,
+} from "@/types/dashboard-executive";
 import type { DashboardHojeSnapshot } from "@/lib/dashboard/vendas-dia-service";
 import type { ExecutiveFinancialCockpitData } from "@/lib/dashboard/executive-financial-cockpit-types";
 import type { ExecutiveIntelligenceData } from "@/lib/dashboard/executive-intelligence-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import { formatCurrency, formatCurrencyCompact, formatPercent } from "@/lib/dashboard/format";
+import {
+  composeEnterpriseInsights,
+  presentEnterpriseInsightCards,
+} from "@/lib/enterprise";
 
 export type PremiumKpiItem = {
   id: string;
@@ -143,6 +151,8 @@ export function buildPremiumInsights(input: {
   decision: ExecutiveDecisionResult;
   estoqueAbaixoMinimo?: number | null;
   primary?: DashboardPrimaryData | null;
+  /** Séries já calculadas — sinais 29.4 (sem novo I/O). */
+  charts?: DashboardCharts | null;
   tenantSlug: string;
 }): PremiumInsightCard[] {
   const {
@@ -151,6 +161,7 @@ export function buildPremiumInsights(input: {
     decision,
     estoqueAbaixoMinimo = null,
     primary = null,
+    charts = null,
     tenantSlug,
   } = input;
   const cards: PremiumInsightCard[] = [];
@@ -293,6 +304,25 @@ export function buildPremiumInsights(input: {
               : "info",
       href: item.href,
     });
+  }
+
+  // Sprint 29.4/29.5 — sinais derivados de séries já carregadas (aditivo; sem novo I/O).
+  if (charts) {
+    const pack = composeEnterpriseInsights({ charts });
+    for (const card of presentEnterpriseInsightCards(pack)) {
+      cards.push({
+        id: card.id,
+        title: card.title,
+        body: card.body,
+        origem: card.origem,
+        periodo: card.periodo,
+        confianca: card.confianca,
+        severity: card.severity,
+        href: card.href?.startsWith("/")
+          ? `/${tenantSlug}${card.href}`
+          : card.href,
+      });
+    }
   }
 
   return cards;

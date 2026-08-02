@@ -10,9 +10,12 @@ export default async function TenantLayout({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  const tenant = await requireTenant(tenantSlug);
-  const tenants = await getUserTenants();
-  const profile = await getCurrentProfile();
+  // Cold path: paralelo (React.cache já deduplica se a page também chamar).
+  const [tenant, tenants, profile] = await Promise.all([
+    requireTenant(tenantSlug),
+    getUserTenants(),
+    getCurrentProfile(),
+  ]);
 
   return (
     <AppShell

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { ExecutiveCashDashboardClient } from "@/components/finance/cash-intelligence/executive-cash-dashboard";
+import { ExecutiveCashDashboardLazy } from "@/components/finance/cash-intelligence/executive-cash-dashboard-lazy";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCashIntelligenceDashboard } from "@/lib/finance/cash-intelligence/cash-intelligence-actions";
@@ -66,7 +66,7 @@ export default async function CaixaTesourariaPage({
         description="Saldo consolidado, realizado / previsto / projetado, alertas, capital de giro e simulações — sem misturar camadas."
       />
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-        <ExecutiveCashDashboardClient
+        <ExecutiveCashDashboardLazy
           tenantSlug={tenantSlug}
           initialDashboard={res.dashboard}
           initialHorizon={horizon}

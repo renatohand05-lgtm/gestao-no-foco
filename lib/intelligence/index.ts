@@ -1,14 +1,14 @@
-import type { CommercialPanelData } from "@/types/commercial-panel";
-import { buildExecutiveAction } from "@/lib/intelligence/executive-actions";
-import { buildExecutiveDiagnosis } from "@/lib/intelligence/executive-diagnosis";
-import { buildExecutiveHealth } from "@/lib/intelligence/executive-health";
-import { buildExecutiveInsights } from "@/lib/intelligence/executive-insights";
-import { buildExecutiveScore } from "@/lib/intelligence/executive-score";
-import { buildExecutiveTimeline } from "@/lib/intelligence/executive-timeline";
+import type { CommercialPanelData } from "../../types/commercial-panel.ts";
+import { buildExecutiveAction } from "./executive-actions.ts";
+import { buildExecutiveDiagnosis } from "./executive-diagnosis.ts";
+import { buildExecutiveHealth } from "./executive-health.ts";
+import { buildExecutiveInsights } from "./executive-insights.ts";
+import { buildExecutiveScore } from "./executive-score.ts";
+import { buildExecutiveTimeline } from "./executive-timeline.ts";
 import type {
   ExecutiveIntelligenceInput,
   ExecutiveIntelligenceResult,
-} from "@/lib/intelligence/types";
+} from "./types.ts";
 
 /**
  * Mapeia CommercialPanelData → entrada da inteligência (sem novos fetches).
@@ -59,9 +59,11 @@ export function toExecutiveIntelligenceInput(
 }
 
 /**
- * Orquestra score, saúde, insights, ação, diagnóstico e timeline.
+ * Orquestra score, saúde, insights, ação, diagnóstico e timeline (EI comercial).
+ * Sprint 29.5 — nomenclatura oficial: `composeCommercialExecutiveIntelligence`.
+ * Entrada pública: `@/lib/enterprise`.
  */
-export function buildExecutiveIntelligence(
+export function composeCommercialExecutiveIntelligence(
   panel: CommercialPanelData,
   tenantSlug: string,
 ): ExecutiveIntelligenceResult {
@@ -76,17 +78,17 @@ export function buildExecutiveIntelligence(
   };
 }
 
-export { buildExecutiveScore } from "@/lib/intelligence/executive-score";
-export { buildExecutiveHealth } from "@/lib/intelligence/executive-health";
-export { buildExecutiveInsights } from "@/lib/intelligence/executive-insights";
-export { buildExecutiveAction } from "@/lib/intelligence/executive-actions";
-export { buildExecutiveDiagnosis } from "@/lib/intelligence/executive-diagnosis";
-export { buildExecutiveTimeline } from "@/lib/intelligence/executive-timeline";
+export { buildExecutiveScore } from "./executive-score.ts";
+export { buildExecutiveHealth } from "./executive-health.ts";
+export { buildExecutiveInsights } from "./executive-insights.ts";
+export { buildExecutiveAction } from "./executive-actions.ts";
+export { buildExecutiveDiagnosis } from "./executive-diagnosis.ts";
+export { buildExecutiveTimeline } from "./executive-timeline.ts";
 export {
   EXECUTIVE_SCORE_WEIGHTS,
   EXECUTIVE_SCORE_BANDS,
   EXECUTIVE_INSIGHTS_MAX,
-} from "@/lib/intelligence/thresholds";
+} from "./thresholds.ts";
 export type {
   ExecutiveIntelligenceInput,
   ExecutiveIntelligenceResult,
@@ -96,4 +98,4 @@ export type {
   ExecutiveActionResult,
   ExecutiveDiagnosisResult,
   ExecutiveTimelineResult,
-} from "@/lib/intelligence/types";
+} from "./types.ts";

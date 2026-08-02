@@ -27,6 +27,7 @@ import type { EccHojeKpis } from "@/lib/executive-command-center";
 import type { PredictiveIntelligenceResult } from "@/lib/predictive";
 import { gofFocusRing, gofGrid, gofMotion, gofTypography } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
+import type { DashboardCharts } from "@/types/dashboard-executive";
 
 type Props = {
   ai: ExecutiveAiResult;
@@ -40,6 +41,7 @@ type Props = {
   /** Feeds do mesmo ciclo do snapshot (simulações · sem fetch). */
   feeds?: ExecutiveAiInput | null;
   hoje?: EccHojeKpis | null;
+  charts?: DashboardCharts | null;
 };
 
 function criticidadeTone(c: EicCriticidade): "danger" | "warning" | "info" {
@@ -73,6 +75,7 @@ export function ExecutiveIntelligenceCenter({
   predictive,
   feeds = null,
   hoje = null,
+  charts = null,
 }: Props) {
   const data = composeExecutiveIntelligenceCenter({ ai, decision });
   return (
@@ -88,6 +91,7 @@ export function ExecutiveIntelligenceCenter({
       predictive={predictive}
       feeds={feeds}
       hoje={hoje}
+      charts={charts}
     />
   );
 }
@@ -104,6 +108,7 @@ export function ExecutiveIntelligenceCenterView({
   predictive,
   feeds = null,
   hoje = null,
+  charts = null,
 }: {
   ai: ExecutiveAiResult;
   decision?: ExecutiveDecisionResult | null;
@@ -116,6 +121,7 @@ export function ExecutiveIntelligenceCenterView({
   predictive: PredictiveIntelligenceResult;
   feeds?: ExecutiveAiInput | null;
   hoje?: EccHojeKpis | null;
+  charts?: DashboardCharts | null;
 }) {
   return (
     <div
@@ -185,6 +191,7 @@ export function ExecutiveIntelligenceCenterView({
         predictive={predictive}
         feeds={feeds}
         hoje={hoje}
+        charts={charts}
       />
 
       <ExecutiveSection

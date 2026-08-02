@@ -6,10 +6,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  createEnterpriseContext,
-  createMemoryEnterpriseKit,
-} from "../lib/enterprise/index.ts";
+import { createEnterpriseContext } from "../lib/enterprise/context.ts";
+import { createMemoryEnterpriseKit } from "../lib/enterprise/repositories/memory.ts";
 import {
   FinanceError,
   assertFinancePermission,

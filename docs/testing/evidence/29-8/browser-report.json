@@ -1,0 +1,630 @@
+{
+  "at": "2026-08-02T15:51:03.079Z",
+  "sprint": "29.8",
+  "baseUrl": "http://localhost:3000",
+  "tenant": "teste-renato-01",
+  "auth": true,
+  "matrix": [
+    {
+      "route": "/",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "light",
+      "viewport": "desktop",
+      "shot": "screenshots/home-light-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/dashboard",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "light",
+      "viewport": "desktop",
+      "shot": "screenshots/login-light-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/dashboard",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/dashboard-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/clientes",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/clientes",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/clientes-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/produtos",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/produtos",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/produtos-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/produtos/servicos",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/produtos?tipo=servico",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/servicos-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/vendas",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/vendas",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/vendas-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/vendas/nova",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/vendas/nova",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/vendas-nova-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/ordens",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/ordens",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/ordens-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/ordens/nova",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/ordens/nova",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/ordens-nova-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/crm",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/crm/executivo",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/crm-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/crm/leads",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/crm/leads",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/crm-leads-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/crm/oportunidades",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/crm/oportunidades",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/crm-oportunidades-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/compras",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/compras/executivo",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/compras-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/estoque",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/estoque",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/estoque-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/agenda",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/agenda",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/agenda-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/financeiro-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro/orcamento",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/orcamento",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/orcamento-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro/dre",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/dre",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/dre-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro/cfo",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/cfo",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/cfo-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/analytics",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/analytics/executivo",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/analytics-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/inteligencia",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/inteligencia",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/inteligencia-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/configuracoes/metas",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/configuracoes/metas",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/metas-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/configuracoes",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/configuracoes",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "desktop",
+      "shot": "screenshots/configuracoes-dark-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/dashboard",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "light",
+      "viewport": "desktop",
+      "shot": "screenshots/dashboard-light-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro/dre",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/dre",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "light",
+      "viewport": "desktop",
+      "shot": "screenshots/dre-light-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/crm",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/crm/executivo",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "light",
+      "viewport": "desktop",
+      "shot": "screenshots/crm-light-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/inteligencia",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/inteligencia",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "light",
+      "viewport": "desktop",
+      "shot": "screenshots/inteligencia-light-desktop.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/dashboard",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "notebook",
+      "shot": "screenshots/dashboard-dark-notebook.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro/dre",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/dre",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "notebook",
+      "shot": "screenshots/dre-dark-notebook.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/dashboard",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "tablet",
+      "shot": "screenshots/dashboard-dark-tablet.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro/dre",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/dre",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "tablet",
+      "shot": "screenshots/dre-dark-tablet.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/dashboard",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "mobile",
+      "shot": "screenshots/dashboard-dark-mobile.png",
+      "consoleErrors": 0,
+      "ok": true
+    },
+    {
+      "route": "/financeiro/dre",
+      "status": 200,
+      "finalUrl": "http://localhost:3000/teste-renato-01/financeiro/dre",
+      "onLogin": false,
+      "has404": false,
+      "has500": false,
+      "theme": "dark",
+      "viewport": "mobile",
+      "shot": "screenshots/dre-dark-mobile.png",
+      "consoleErrors": 0,
+      "ok": true
+    }
+  ],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "url": "http://localhost:3000/_next/static/chunks/node_modules_14_65qq._.js",
+      "route": "/crm/leads"
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/_16cdejd._.js",
+      "route": "/crm/leads"
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/components_crm_executive-crm-dashboard_tsx_0fl9yof._.js",
+      "route": "/crm/leads"
+    },
+    {
+      "url": "http://localhost:3000/teste-renato-01/tributario",
+      "route": "/tributario"
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__0b0j49v._.css",
+      "route": "/tributario"
+    }
+  ],
+  "uuidHits": [],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "/ status=200 login=false 404=false theme=light vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/login status=200 login=false 404=false theme=light vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "sessão autenticada (storageState)"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/clientes status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/produtos status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/produtos/servicos status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/vendas status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/vendas/nova status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/ordens status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/ordens/nova status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/crm status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/crm/leads status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/crm/oportunidades status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/compras status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/estoque status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/agenda status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/orcamento status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/dre status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/cfo status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/analytics status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/inteligencia status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": false,
+      "detail": "/tributario: navigation error page.goto: Timeout 120000ms exceeded.\nCall log:\n  - navigating to \"http://localhost:3000/teste-renato-01/tributario\", waiting until \"domcontentloaded\"\n"
+    },
+    {
+      "ok": true,
+      "detail": "/configuracoes/metas status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/configuracoes status=200 login=false 404=false theme=dark vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false 404=false theme=light vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/dre status=200 login=false 404=false theme=light vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/crm status=200 login=false 404=false theme=light vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/inteligencia status=200 login=false 404=false theme=light vp=desktop"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false 404=false theme=dark vp=notebook"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/dre status=200 login=false 404=false theme=dark vp=notebook"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false 404=false theme=dark vp=tablet"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/dre status=200 login=false 404=false theme=dark vp=tablet"
+    },
+    {
+      "ok": true,
+      "detail": "/dashboard status=200 login=false 404=false theme=dark vp=mobile"
+    },
+    {
+      "ok": true,
+      "detail": "/financeiro/dre status=200 login=false 404=false theme=dark vp=mobile"
+    }
+  ],
+  "summary": {
+    "pass": 35,
+    "fail": 1,
+    "routes": 34,
+    "shots": 34,
+    "consoleErrors": 0,
+    "failedRequests": 5,
+    "uuidHits": 0
+  }
+}

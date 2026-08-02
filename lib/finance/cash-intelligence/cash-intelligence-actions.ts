@@ -7,13 +7,13 @@
 
 import { getCurrentProfile } from "@/lib/auth/session";
 import { createRbacSupabaseAdapter } from "@/lib/enterprise";
+import { createSupabaseFinanceCore } from "@/lib/finance/factory";
+import { assertFinancePermission } from "@/lib/finance/shared/rbac";
 import {
   assertFinanceAccess,
-  assertFinancePermission,
-  createSupabaseFinanceCore,
   resolveFinanceEffectivePermissions,
-  type FinancePermission,
-} from "@/lib/finance";
+} from "@/lib/finance/shared/rbac-compat";
+import type { FinancePermission } from "@/lib/finance/shared/types";
 import {
   buildExecutiveCashDashboard,
   cashIntelligenceDrillDown,

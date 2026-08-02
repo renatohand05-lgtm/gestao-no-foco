@@ -1,7 +1,7 @@
 import { OsOpenForm } from "@/components/ordens/os-open-form";
 import { OsSubnav } from "@/components/ordens/os-subnav";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
-import { createPermissionService } from "@/lib/permissoes/permission-service";
+import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { requireTenant } from "@/lib/tenants";
 import {
   ExecutiveHeader,
@@ -23,13 +23,12 @@ export default async function NovaOsPage({
   let canForceDuplicate =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.criar_cliente_forcado"];
   let canCreate = DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.criar"];
-  try {
-    const perms = await createPermissionService(tenant.id, tenant.role);
-    canForceDuplicate = await perms.has("os.criar_cliente_forcado");
-    canCreate = await perms.has("os.criar");
-  } catch {
-    /* tabela pode não existir ainda */
-  }
+  const novaPerms = await tryResolvePermissions(tenant.id, tenant.role, [
+    "os.criar_cliente_forcado",
+    "os.criar",
+  ]);
+  canForceDuplicate = novaPerms["os.criar_cliente_forcado"];
+  canCreate = novaPerms["os.criar"];
 
   return (
     <ExecutivePage width="wide" spacing="loose">

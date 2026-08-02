@@ -15,21 +15,27 @@ import {
   createMemoryIdempotencyRepository,
   MemoryEnterpriseStore,
 } from "@/lib/enterprise";
+import { createSupabaseFinanceCore } from "@/lib/finance/factory";
 import {
   FinanceError,
   FINANCE_ERROR_CODES,
-  createSupabaseFinanceCore,
-  resolveFinanceEffectivePermissions,
+} from "@/lib/finance/shared/errors";
+import {
   assertFinanceAccess,
-  type CreateBankAccountInput,
-  type CreateCategoryInput,
-  type CreateCostCenterInput,
-  type CreateMovementInput,
-  type TreasuryMovementFilters,
-  type TreasuryPeriodKey,
-  type UpdateBankAccountInput,
-  type UpdateMovementInput,
-} from "@/lib/finance";
+  resolveFinanceEffectivePermissions,
+} from "@/lib/finance/shared/rbac-compat";
+import type {
+  CreateBankAccountInput,
+  CreateCategoryInput,
+  CreateCostCenterInput,
+  CreateMovementInput,
+  UpdateBankAccountInput,
+  UpdateMovementInput,
+} from "@/lib/finance/shared/types";
+import type {
+  TreasuryMovementFilters,
+  TreasuryPeriodKey,
+} from "@/lib/finance/treasury/treasury-types";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 

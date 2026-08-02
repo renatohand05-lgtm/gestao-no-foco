@@ -9,6 +9,8 @@ import {
   ExecutiveFooterSkeleton,
 } from "@/components/dashboard/executive/executive-footer";
 import { PremiumDashboardView } from "@/components/dashboard/premium/premium-dashboard-view";
+import { PremiumMainRow } from "@/components/dashboard/premium/premium-main-row";
+import { buildPremiumInsights } from "@/lib/dashboard/premium-dashboard-map";
 import { buildExecutiveAiBundle } from "@/lib/ai/executive-ai-snapshot";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
 import {
@@ -221,7 +223,6 @@ async function ExecutiveAiLazyBlock({
   cockpit,
   execCtx,
   hoje,
-  commercial,
   decision,
   greeting,
   tenantName,
@@ -236,7 +237,6 @@ async function ExecutiveAiLazyBlock({
   >;
   execCtx: Awaited<ReturnType<typeof loadExecutiveDashboardContext>>;
   hoje: NonNullable<Awaited<ReturnType<typeof loadDashboardHojeSnapshot>>>;
-  commercial: CommercialIntelligenceData | null;
   decision: NonNullable<
     Awaited<ReturnType<typeof composeExecutiveDecision>>
   > | null;
@@ -246,6 +246,10 @@ async function ExecutiveAiLazyBlock({
   updatedAtLabel: string;
   charts?: DashboardCharts | null;
 }) {
+  // Sprint 30.4.1 — CI fora do first paint (só alimenta IA/Command Center)
+  const commercial: CommercialIntelligenceData | null =
+    await softLoadCommercial(tenantId);
+
   let result: ExecutiveAiResult | null = null;
   let predictive: PredictiveIntelligenceResult | null = null;
   let feeds: Awaited<ReturnType<typeof buildExecutiveAiBundle>>["input"] | null =
@@ -312,14 +316,83 @@ async function ExecutiveAiLazyBlock({
   );
 }
 
+function ChartsMainRowSkeleton() {
+  return (
+    <div
+      className={cn(
+        "h-56 animate-pulse rounded-2xl border border-[var(--brand-gold)]/15 bg-muted/30",
+        gofMotion.skeleton,
+      )}
+      aria-busy="true"
+      aria-label="Carregando gráficos do ciclo"
+      data-premium-block="charts-loading"
+      data-sprint="30.4.1"
+    />
+  );
+}
+
+/**
+ * Sprint 30.4.1 — gráficos/DRE series fora do first paint.
+ * Mesmos loaders/cache; só adia o await de charts pesados.
+ */
+async function ChartsMainRowBlock({
+  ctx,
+  cockpit,
+  intelligence,
+  decision,
+  estoqueAbaixoMinimo,
+  periodoLabel,
+  primary,
+}: {
+  ctx: DashboardStreamCtx;
+  cockpit: NonNullable<
+    Awaited<ReturnType<typeof composeExecutiveFinancialCockpit>>
+  >;
+  intelligence: NonNullable<
+    Awaited<ReturnType<typeof composeOpsExecutiveIntelligence>>
+  >;
+  decision: NonNullable<Awaited<ReturnType<typeof composeExecutiveDecision>>>;
+  estoqueAbaixoMinimo: number | null;
+  periodoLabel: string;
+  primary: Awaited<ReturnType<typeof softLoadPrimary>>;
+}) {
+  const charts = await softLoadCharts(
+    ctx.tenantId,
+    ctx.segment,
+    ctx.filters,
+  );
+  const insights = buildPremiumInsights({
+    cockpit,
+    intelligence,
+    decision,
+    estoqueAbaixoMinimo,
+    primary,
+    charts,
+    tenantSlug: ctx.tenantSlug,
+  });
+
+  return (
+    <PremiumMainRow
+      faturamentoDiario={charts?.faturamentoDiario ?? []}
+      receitasVsDespesas={
+        charts?.receitasVsDespesas ??
+        primary?.fluxoCharts.receitasVsDespesas ??
+        []
+      }
+      insights={insights}
+      cockpit={cockpit}
+      tenantSlug={ctx.tenantSlug}
+      periodoLabel={periodoLabel}
+    />
+  );
+}
+
 async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   let hojeData = null;
   let decision = null;
   let intelligence = null;
   let cockpit = null;
-  let commercial: CommercialIntelligenceData | null = null;
   let primary = null;
-  let charts = null;
   let execCtxLoaded: Awaited<
     ReturnType<typeof loadExecutiveDashboardContext>
   > | null = null;
@@ -327,25 +400,21 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   const centroCustoId =
     ctx.resumoFilters.centroCustoId ?? ctx.filters.centroCusto ?? null;
   try {
-    const [hoje, resumo, execCtx, ci, primaryData, chartsData] =
-      await Promise.all([
-        loadDashboardHojeSnapshot(ctx.tenantId, centroCustoId),
-        loadDashboardResumoMes(ctx.tenantId, {
-          year: ctx.resumoFilters.year,
-          month: ctx.resumoFilters.month,
-          centroCustoId,
-          vendedorId: ctx.resumoFilters.vendedorId ?? null,
-          origem: ctx.resumoFilters.origem ?? null,
-        }),
-        loadExecutiveDashboardContext(ctx.tenantId, ctx.tenantSlug),
-        softLoadCommercial(ctx.tenantId),
-        softLoadPrimary(ctx.tenantId, ctx.segment, ctx.filters),
-        softLoadCharts(ctx.tenantId, ctx.segment, ctx.filters),
-      ]);
+    // Sprint 30.4.1 — critical path sem CI e sem charts (8× DRE)
+    const [hoje, resumo, execCtx, primaryData] = await Promise.all([
+      loadDashboardHojeSnapshot(ctx.tenantId, centroCustoId),
+      loadDashboardResumoMes(ctx.tenantId, {
+        year: ctx.resumoFilters.year,
+        month: ctx.resumoFilters.month,
+        centroCustoId,
+        vendedorId: ctx.resumoFilters.vendedorId ?? null,
+        origem: ctx.resumoFilters.origem ?? null,
+      }),
+      loadExecutiveDashboardContext(ctx.tenantId, ctx.tenantSlug),
+      softLoadPrimary(ctx.tenantId, ctx.segment, ctx.filters),
+    ]);
     hojeData = hoje;
-    commercial = ci;
     primary = primaryData;
-    charts = chartsData;
     execCtxLoaded = execCtx;
     decision = composeExecutiveDecision({
       tenantSlug: ctx.tenantSlug,
@@ -392,14 +461,28 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
         tenantSlug={ctx.tenantSlug}
         tenantName={ctx.tenantName}
         greeting={ctx.greeting}
+        segment={ctx.segment}
         hoje={hojeData}
         primary={primary}
-        charts={charts}
+        charts={null}
         cockpit={cockpit}
         intelligence={intelligence}
         decision={decision}
         estoqueAbaixoMinimo={estoqueAbaixoMinimo}
         periodoLabel={periodoLabel}
+        mainRowSlot={
+          <Suspense fallback={<ChartsMainRowSkeleton />}>
+            <ChartsMainRowBlock
+              ctx={ctx}
+              cockpit={cockpit}
+              intelligence={intelligence}
+              decision={decision}
+              estoqueAbaixoMinimo={estoqueAbaixoMinimo}
+              periodoLabel={periodoLabel}
+              primary={primary}
+            />
+          </Suspense>
+        }
         aiSlot={
           <Suspense fallback={<ExecutiveAiSkeleton />}>
             <ExecutiveAiLazyBlock
@@ -408,13 +491,12 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
               cockpit={cockpit}
               execCtx={execCtxLoaded}
               hoje={hojeData}
-              commercial={commercial}
               decision={decision}
               greeting={ctx.greeting}
               tenantName={ctx.tenantName}
               dateLabel={dateLabel}
               updatedAtLabel={hojeData.atualizado_em_label}
-              charts={charts}
+              charts={null}
             />
           </Suspense>
         }
@@ -443,13 +525,32 @@ export function DashboardStreamingView({
           fallback={
             <div
               className={cn(
-                "h-72 border border-[var(--brand-gold)]/20 bg-card/60",
+                "space-y-3 border border-[var(--brand-gold)]/20 bg-card/60 p-4 sm:p-5",
                 gofRadius.lg,
-                gofMotion.skeleton,
               )}
-              aria-label="Carregando dashboard premium"
+              aria-label="Carregando cockpit executivo"
+              aria-busy="true"
               data-premium-block="loading"
-            />
+              data-sprint="30.4.1"
+            >
+              <div
+                className={cn("h-16 rounded-xl bg-muted/40", gofMotion.skeleton)}
+              />
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div
+                  className={cn("h-24 rounded-xl bg-muted/35", gofMotion.skeleton)}
+                />
+                <div
+                  className={cn("h-24 rounded-xl bg-muted/35", gofMotion.skeleton)}
+                />
+                <div
+                  className={cn("h-24 rounded-xl bg-muted/35", gofMotion.skeleton)}
+                />
+              </div>
+              <div
+                className={cn("h-40 rounded-xl bg-muted/30", gofMotion.skeleton)}
+              />
+            </div>
           }
         >
           <HojeExecutiveBlock ctx={ctx} />

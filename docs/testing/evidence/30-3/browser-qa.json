@@ -1,0 +1,86 @@
+{
+  "at": "2026-08-02T23:51:06.873Z",
+  "sprint": "30.3",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3001",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET primeiro-acesso 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop wizard enterprise visível"
+    },
+    {
+      "ok": true,
+      "detail": "desktop progressbar presente"
+    },
+    {
+      "ok": true,
+      "detail": "etapa segmento acessível"
+    },
+    {
+      "ok": true,
+      "detail": "segmento Oficina selecionável"
+    },
+    {
+      "ok": true,
+      "detail": "troca de segmento (restaurante)"
+    },
+    {
+      "ok": true,
+      "detail": "etapa dados da empresa"
+    },
+    {
+      "ok": true,
+      "detail": "checklist visível"
+    },
+    {
+      "ok": true,
+      "detail": "templates visíveis"
+    },
+    {
+      "ok": true,
+      "detail": "import prep visível"
+    },
+    {
+      "ok": true,
+      "detail": "conclusão / assistente executivo"
+    },
+    {
+      "ok": true,
+      "detail": "tablet GET primeiro-acesso 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet wizard enterprise visível"
+    },
+    {
+      "ok": true,
+      "detail": "tablet progressbar presente"
+    },
+    {
+      "ok": true,
+      "detail": "mobile GET primeiro-acesso 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile wizard enterprise visível"
+    },
+    {
+      "ok": true,
+      "detail": "mobile progressbar presente"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "passed": 18,
+    "failed": 0,
+    "consoleErrors": 0
+  }
+}

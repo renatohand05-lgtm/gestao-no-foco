@@ -1,0 +1,172 @@
+{
+  "at": "2026-08-02T23:51:29.707Z",
+  "sprint": "30.4.1",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3001",
+  "targets": {
+    "coldMs": 3000,
+    "warmMs": 1500
+  },
+  "baseline": {
+    "coldMs": 4802,
+    "warmMs": 3955
+  },
+  "timings": {
+    "desktop_cold_ms": 1712,
+    "desktop_warm_ms": 1388,
+    "notebook_cold_ms": 1606,
+    "tablet_cold_ms": 1388,
+    "mobile430_cold_ms": 1331,
+    "mobile390_cold_ms": 1406,
+    "mobile375_cold_ms": 1512
+  },
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "desktop cold 1712ms (alvo <=3000ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop warm 1388ms (alvo <=1500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "ganho cold ~64% · warm ~65% (informativo)"
+    },
+    {
+      "ok": true,
+      "detail": "notebook GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "notebook KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "notebook Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "notebook Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "notebook Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "tablet GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Quick Actions"
+    }
+  ],
+  "consoleErrors": [],
+  "gains": {
+    "coldPct": 64,
+    "warmPct": 65
+  },
+  "summary": {
+    "passed": 34,
+    "failed": 0,
+    "coldTargetMet": true,
+    "warmTargetMet": true
+  }
+}

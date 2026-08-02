@@ -1,0 +1,152 @@
+{
+  "at": "2026-08-02T23:36:15.752Z",
+  "sprint": "30.4",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3000",
+  "timings": {
+    "desktop_cold_ms": 4802,
+    "desktop_warm_ms": 3955,
+    "tablet_cold_ms": 6417,
+    "mobile_cold_ms": 4701
+  },
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop cold load 4802ms (soft <=8s QA local)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop cockpit v2 marker"
+    },
+    {
+      "ok": true,
+      "detail": "desktop KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Metas"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Fluxo Caixa"
+    },
+    {
+      "ok": true,
+      "detail": "desktop DRE"
+    },
+    {
+      "ok": true,
+      "detail": "desktop warm load 3955ms (soft <=6s QA local)"
+    },
+    {
+      "ok": true,
+      "detail": "drill-down dialog KPI"
+    },
+    {
+      "ok": true,
+      "detail": "tablet GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet cold load 6417ms (soft <=8s QA local)"
+    },
+    {
+      "ok": true,
+      "detail": "tablet cockpit v2 marker"
+    },
+    {
+      "ok": true,
+      "detail": "tablet KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Metas"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Fluxo Caixa"
+    },
+    {
+      "ok": true,
+      "detail": "tablet DRE"
+    },
+    {
+      "ok": true,
+      "detail": "mobile GET dashboard 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile cold load 4701ms (soft <=8s QA local)"
+    },
+    {
+      "ok": true,
+      "detail": "mobile cockpit v2 marker"
+    },
+    {
+      "ok": true,
+      "detail": "mobile KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "mobile Executive Brief"
+    },
+    {
+      "ok": true,
+      "detail": "mobile Alertas"
+    },
+    {
+      "ok": true,
+      "detail": "mobile Quick Actions"
+    },
+    {
+      "ok": true,
+      "detail": "mobile Metas"
+    },
+    {
+      "ok": true,
+      "detail": "mobile Fluxo Caixa"
+    },
+    {
+      "ok": true,
+      "detail": "mobile DRE"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "passed": 33,
+    "failed": 0,
+    "consoleErrors": 0
+  }
+}

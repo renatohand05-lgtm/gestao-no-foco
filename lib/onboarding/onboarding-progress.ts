@@ -14,6 +14,7 @@ type ProgressUpdate = {
   tourDismissedAt?: string | null;
   checklistDismissedAt?: string | null;
   completedAt?: string | null;
+  meta?: Record<string, unknown>;
 };
 
 /**
@@ -65,6 +66,7 @@ export async function upsertOnboardingProgress(params: {
           tour_dismissed_at: params.patch.tourDismissedAt ?? null,
           checklist_dismissed_at: params.patch.checklistDismissedAt ?? null,
           completed_at: params.patch.completedAt ?? null,
+          meta: params.patch.meta ?? {},
         } as never)
         .select("*")
         .single();
@@ -94,6 +96,8 @@ export async function upsertOnboardingProgress(params: {
           params.patch.completedAt === undefined
             ? existing.completedAt
             : params.patch.completedAt,
+        meta:
+          params.patch.meta === undefined ? existing.meta : params.patch.meta,
         version: existing.version + 1,
       } as never)
       .eq("id", existing.id)

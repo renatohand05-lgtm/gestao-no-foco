@@ -71,6 +71,8 @@ export type OnboardingProgressRecord = {
   checklistDismissedAt: string | null;
   completedAt: string | null;
   version: number;
+  /** jsonb — Sprint 30.3 enterprise meta vive aqui */
+  meta: Record<string, unknown>;
 };
 
 export type OnboardingSessionView = {

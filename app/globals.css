@@ -442,20 +442,29 @@
   animation: premium-enter var(--motion-normal) var(--ease-premium) both;
 }
 
+/* Sprint 30.4.1 — delays mais curtos = percepção de velocidade */
 .premium-enter-delay-1 {
-  animation-delay: 40ms;
+  animation-delay: 16ms;
 }
 .premium-enter-delay-2 {
-  animation-delay: 90ms;
+  animation-delay: 32ms;
 }
 .premium-enter-delay-3 {
-  animation-delay: 140ms;
+  animation-delay: 48ms;
 }
 .premium-enter-delay-4 {
-  animation-delay: 200ms;
+  animation-delay: 64ms;
 }
 .premium-enter-delay-5 {
-  animation-delay: 280ms;
+  animation-delay: 80ms;
+}
+
+/* Below-the-fold: pinta depois do first paint sem alterar layout */
+[data-cockpit-block="alerts"],
+[data-cockpit-block="quick-actions"],
+[data-cockpit-block="empty-states"] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
 }
 
 .premium-kpi-lift {

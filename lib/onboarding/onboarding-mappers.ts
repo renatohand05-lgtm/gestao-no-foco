@@ -14,6 +14,7 @@ type Row = {
   checklist_dismissed_at: string | null;
   completed_at: string | null;
   version: number;
+  meta?: Record<string, unknown> | null;
 };
 
 export function mapProgressRow(row: Row): OnboardingProgressRecord {
@@ -28,5 +29,9 @@ export function mapProgressRow(row: Row): OnboardingProgressRecord {
     checklistDismissedAt: row.checklist_dismissed_at,
     completedAt: row.completed_at,
     version: row.version,
+    meta:
+      row.meta && typeof row.meta === "object" && !Array.isArray(row.meta)
+        ? row.meta
+        : {},
   };
 }

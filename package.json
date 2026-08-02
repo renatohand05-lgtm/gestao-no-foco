@@ -328,8 +328,21 @@
     "test:phase30-roles": "node --experimental-strip-types scripts/phase30-roles-tests.mjs",
     "test:phase30-permissions-matrix": "node --experimental-strip-types scripts/phase30-permissions-matrix-tests.mjs",
     "test:phase30-rbac-scope": "node --experimental-strip-types scripts/phase30-rbac-scope-tests.mjs",
-    "test:phase30-team-tenant-isolation": "node --experimental-strip-types scripts/phase30-team-tenant-isolation-tests.mjs"
+    "test:phase30-team-tenant-isolation": "node --experimental-strip-types scripts/phase30-team-tenant-isolation-tests.mjs",
+    "test:phase30-onboarding": "node --experimental-strip-types scripts/phase30-onboarding-tests.mjs",
+    "test:phase30-templates": "node --experimental-strip-types scripts/phase30-templates-tests.mjs",
+    "test:phase30-checklist": "node --experimental-strip-types scripts/phase30-checklist-tests.mjs",
+    "test:phase30-segment-config": "node --experimental-strip-types scripts/phase30-segment-config-tests.mjs",
+    "test:homolog-30-3": "node scripts/homolog-30-3-browser.mjs",
+    "test:phase30-dashboard": "node --experimental-strip-types scripts/phase30-dashboard-tests.mjs",
+    "test:phase30-cockpit": "node scripts/phase30-cockpit-tests.mjs",
+    "test:phase30-kpis": "node scripts/phase30-kpis-tests.mjs",
+    "test:phase30-alerts": "node --experimental-strip-types scripts/phase30-alerts-tests.mjs",
+    "test:phase30-drilldown": "node scripts/phase30-drilldown-tests.mjs",
+    "test:homolog-30-4": "node scripts/homolog-30-4-browser.mjs",
+    "test:homolog-30-4-1": "node scripts/homolog-30-4-1-browser.mjs"
   },
+
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "@hookform/resolvers": "^5.4.0",

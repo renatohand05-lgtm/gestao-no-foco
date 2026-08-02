@@ -2,15 +2,21 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { BrandInstitutionalFooter } from "@/components/brand/brand-institutional-footer";
-import { DashboardQuickActions } from "@/components/dashboard/dashboard-quick-actions";
-import { ExecutiveBrief } from "@/components/dashboard/premium/executive-brief";
+import { AlertsCenter } from "@/components/dashboard/cockpit-v2/alerts-center";
+import { CockpitKpiGrid } from "@/components/dashboard/cockpit-v2/cockpit-kpi-grid";
+import { DreCashCards } from "@/components/dashboard/cockpit-v2/dre-cash-cards";
+import { EmptyStatesRail } from "@/components/dashboard/cockpit-v2/empty-states-rail";
+import { ExecutiveBriefV2 } from "@/components/dashboard/cockpit-v2/executive-brief-v2";
+import { MetaPanel } from "@/components/dashboard/cockpit-v2/meta-panel";
+import { QuickActionsPanel } from "@/components/dashboard/cockpit-v2/quick-actions-panel";
 import { PremiumDisclosure } from "@/components/dashboard/premium/premium-disclosure";
 import {
   PremiumAlertsRail,
   PremiumMainRow,
 } from "@/components/dashboard/premium/premium-main-row";
-import { PremiumOpsStrip, PremiumKpiStrip } from "@/components/dashboard/premium/premium-kpi-strip";
+import { PremiumOpsStrip } from "@/components/dashboard/premium/premium-kpi-strip";
 import { GFExecutiveHeader } from "@/components/gf/gf-executive-header";
+import { getSegmentQuickActions } from "@/config/dashboard/cockpit-v2";
 import type { DashboardHojeSnapshot } from "@/lib/dashboard/vendas-dia-service";
 import type {
   DashboardCharts,
@@ -19,11 +25,18 @@ import type {
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import type { ExecutiveFinancialCockpitData } from "@/lib/dashboard/executive-financial-cockpit-types";
 import type { ExecutiveIntelligenceData } from "@/lib/dashboard/executive-intelligence-types";
-import { buildExecutiveBrief } from "@/lib/dashboard/executive-brief";
+import { buildCockpitAlerts } from "@/lib/dashboard/cockpit-v2/alerts";
+import { getCockpitEmptyStates } from "@/lib/dashboard/cockpit-v2/empty-states";
+import { buildCockpitKpis } from "@/lib/dashboard/cockpit-v2/kpis";
+import {
+  buildCashExecutiveCard,
+  buildDreExecutiveCard,
+  buildExecutiveBriefV2,
+  buildMetaPanel,
+} from "@/lib/dashboard/cockpit-v2/panels";
 import {
   buildPremiumInsights,
   buildPremiumOpsCards,
-  buildPremiumTopKpis,
 } from "@/lib/dashboard/premium-dashboard-map";
 import { gfSpace } from "@/lib/design-system/signature";
 import { cn } from "@/lib/utils";
@@ -32,6 +45,7 @@ type Props = {
   tenantSlug: string;
   tenantName: string;
   greeting: string;
+  segment: string | null;
   hoje: DashboardHojeSnapshot;
   primary: DashboardPrimaryData | null;
   charts: DashboardCharts | null;
@@ -41,6 +55,8 @@ type Props = {
   estoqueAbaixoMinimo: number | null;
   periodoLabel: string;
   aiSlot: ReactNode;
+  /** Sprint 30.4.1 — gráficos em Suspense (fora do first paint) */
+  mainRowSlot?: ReactNode;
 };
 
 function companyTone(
@@ -53,13 +69,15 @@ function companyTone(
 }
 
 /**
- * Dashboard premium — Sprint 26.2 Signature Experience.
- * Header autoral → Brief → KPI cockpit unificado → gráfico → ops → disclosure.
+ * Executive Cockpit V2 — Sprint 30.4 (apresentação).
+ * Hierarquia: saudação → KPIs → Brief → Metas/DRE/Caixa → Alertas → Quick Actions.
+ * Sem alteração de cálculos financeiros.
  */
 export function PremiumDashboardView({
   tenantSlug,
   tenantName,
   greeting,
+  segment,
   hoje,
   primary,
   charts,
@@ -69,8 +87,8 @@ export function PremiumDashboardView({
   estoqueAbaixoMinimo,
   periodoLabel,
   aiSlot,
+  mainRowSlot,
 }: Props) {
-  const kpis = buildPremiumTopKpis({ primary, hoje, tenantSlug });
   const insights = buildPremiumInsights({
     cockpit,
     intelligence,
@@ -87,18 +105,37 @@ export function PremiumDashboardView({
     estoqueAbaixoMinimo,
     tenantSlug,
   });
-  const brief = buildExecutiveBrief({
-    greeting,
-    tenantName,
+  const kpis = buildCockpitKpis({
+    primary,
     hoje,
+    intelligence,
     cockpit,
-    kpis,
+    tenantSlug,
+    segment,
+  });
+  const alerts = buildCockpitAlerts({ insights, decision, tenantSlug });
+  const brief = buildExecutiveBriefV2({
+    hoje,
+    alerts,
     insights,
     tenantSlug,
   });
+  const meta = buildMetaPanel({ hoje, tenantSlug });
+  const dre = buildDreExecutiveCard({ primary, charts, tenantSlug });
+  const cash = buildCashExecutiveCard({ cockpit, tenantSlug });
+  const quickActions = getSegmentQuickActions(segment);
+  const emptyStates = getCockpitEmptyStates(segment);
 
-  const alertCount = insights.filter(
-    (i) => i.severity === "danger" || i.severity === "warning",
+  const activeEmpty: Array<(typeof emptyStates)[number]["domain"]> = [];
+  if (hoje.mes.quantidade_vendas === 0 && hoje.hoje.quantidade_vendas === 0) {
+    activeEmpty.push("vendas");
+  }
+  if (primary?.kpis.quantidade_clientes === 0) activeEmpty.push("clientes");
+  if (hoje.mes.meta == null) activeEmpty.push("metas");
+  if (!primary) activeEmpty.push("dre");
+
+  const alertCount = alerts.filter(
+    (a) => a.priority === "critica" || a.priority === "alta",
   ).length;
 
   return (
@@ -110,12 +147,16 @@ export function PremiumDashboardView({
       data-dashboard-premium-v257=""
       data-dashboard-premium-v261=""
       data-dashboard-premium-v262=""
-      data-dashboard-block="premium-v262"
-      data-dashboard-layout="cockpit-hierarchy"
-      data-cockpit-hierarchy="brief-kpi-chart-ops"
+      data-dashboard-premium-v304=""
+      data-dashboard-block="premium-v304"
+      data-dashboard-layout="cockpit-v2"
+      data-cockpit-hierarchy="header-kpi-brief-finance-alerts-actions"
       data-premium-motion="dashboard-entrance"
       data-brand-continuity="dashboard"
-      data-signature="26.2"
+      data-signature="30.4"
+      data-dashboard-premium-v3041=""
+      data-sprint-polish="30.4.1"
+      data-cockpit-segment={segment ?? "outro"}
     >
       <div
         className="pointer-events-none absolute -top-12 left-1/2 h-64 w-[min(100%,60rem)] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgb(201_168_76_/0.14),transparent_72%)]"
@@ -123,7 +164,17 @@ export function PremiumDashboardView({
       />
 
       <div className={cn("relative", gfSpace.stackSection)}>
-        <div className="premium-enter premium-enter-delay-1 space-y-[var(--gf-space-block)]">
+        {/* Bloco 1 — Saudação inteligente */}
+        <div
+          className="premium-enter premium-enter-delay-1 space-y-2"
+          data-cockpit-block="greeting"
+        >
+          <p
+            className="text-sm text-[var(--text-secondary)] text-pretty"
+            data-cockpit-greeting=""
+          >
+            {greeting.includes(".") ? greeting : `${greeting}.`}
+          </p>
           <GFExecutiveHeader
             greeting={greeting}
             tenantName={tenantName}
@@ -135,31 +186,70 @@ export function PremiumDashboardView({
             companyStatusTone={companyTone(cockpit.saude)}
             tenantSlug={tenantSlug}
           />
-          <ExecutiveBrief brief={brief} />
+          <p className="text-xs text-[var(--text-muted)]">
+            Período · {periodoLabel}
+          </p>
         </div>
 
+        {/* Bloco 2 — KPIs */}
         <div className="premium-enter premium-enter-delay-2">
-          <PremiumKpiStrip items={kpis} dominant />
+          <CockpitKpiGrid items={kpis} periodoLabel={periodoLabel} />
         </div>
 
+        {/* Bloco 3 — Executive Brief */}
         <div className="premium-enter premium-enter-delay-3">
-          <PremiumMainRow
-            faturamentoDiario={charts?.faturamentoDiario ?? []}
-            receitasVsDespesas={
-              charts?.receitasVsDespesas ??
-              primary?.fluxoCharts.receitasVsDespesas ??
-              []
-            }
-            insights={insights}
-            cockpit={cockpit}
-            tenantSlug={tenantSlug}
-            periodoLabel={periodoLabel}
-          />
+          <ExecutiveBriefV2 brief={brief} />
+        </div>
+
+        {/* Blocos 4–6 — Metas · DRE · Caixa */}
+        <div className="premium-enter premium-enter-delay-3 space-y-[var(--gf-space-block)]">
+          <MetaPanel meta={meta} />
+          <DreCashCards dre={dre} cash={cash} />
+        </div>
+
+        {/* Gráfico / inteligência — streamado (30.4.1) ou inline */}
+        <div
+          className="premium-enter premium-enter-delay-4"
+          data-cockpit-block="charts"
+        >
+          {mainRowSlot ?? (
+            <PremiumMainRow
+              faturamentoDiario={charts?.faturamentoDiario ?? []}
+              receitasVsDespesas={
+                charts?.receitasVsDespesas ??
+                primary?.fluxoCharts.receitasVsDespesas ??
+                []
+              }
+              insights={insights}
+              cockpit={cockpit}
+              tenantSlug={tenantSlug}
+              periodoLabel={periodoLabel}
+            />
+          )}
         </div>
 
         <div className="premium-enter premium-enter-delay-4">
           <PremiumOpsStrip items={ops} />
         </div>
+
+        {/* Bloco 7 — Alertas */}
+        <div className="premium-enter premium-enter-delay-5">
+          <AlertsCenter alerts={alerts} />
+        </div>
+
+        {/* Bloco 8 — Quick Actions */}
+        <div className="premium-enter premium-enter-delay-5">
+          <QuickActionsPanel
+            tenantSlug={tenantSlug}
+            actions={quickActions}
+          />
+        </div>
+
+        <EmptyStatesRail
+          tenantSlug={tenantSlug}
+          items={emptyStates}
+          activeDomains={activeEmpty}
+        />
 
         <div className="premium-enter premium-enter-delay-5">
           <PremiumDisclosure
@@ -171,7 +261,7 @@ export function PremiumDashboardView({
                   alertCount > 0
                     ? `${alertCount} alerta(s) de atenção neste ciclo`
                     : "Sem alertas críticos · calendário sob demanda",
-                defaultOpen: alertCount > 0,
+                defaultOpen: false,
                 children: (
                   <PremiumAlertsRail
                     insights={insights}
@@ -182,8 +272,7 @@ export function PremiumDashboardView({
               {
                 id: "ia",
                 title: "Command Center · Inteligência executiva",
-                summary:
-                  "Leitura de 5 segundos · evidências sob demanda.",
+                summary: "Leitura de 5 segundos · evidências sob demanda.",
                 defaultOpen: false,
                 children: (
                   <div
@@ -208,17 +297,6 @@ export function PremiumDashboardView({
                     </div>
                     {aiSlot}
                   </div>
-                ),
-              },
-              {
-                id: "atalhos",
-                title: "Launcher executivo",
-                summary: "Ações rápidas com contexto",
-                defaultOpen: false,
-                children: (
-                  <section data-premium-block="atalhos" data-gf-launcher="">
-                    <DashboardQuickActions tenantSlug={tenantSlug} />
-                  </section>
                 ),
               },
             ]}

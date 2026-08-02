@@ -1,6 +1,5 @@
-import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
-import { getOnboardingSession } from "@/lib/onboarding/actions";
-import { requireTenant } from "@/lib/tenants";
+import { EnterpriseOnboardingWizard } from "@/components/onboarding/enterprise/enterprise-onboarding-wizard";
+import { getEnterpriseOnboardingSession } from "@/lib/onboarding/enterprise/actions";
 
 export const metadata = {
   title: "Primeiro acesso",
@@ -12,8 +11,7 @@ type PageProps = {
 
 export default async function PrimeiroAcessoPage({ params }: PageProps) {
   const { tenant: tenantSlug } = await params;
-  const tenant = await requireTenant(tenantSlug);
-  const session = await getOnboardingSession(tenantSlug);
+  const session = await getEnterpriseOnboardingSession(tenantSlug);
 
   if (!session) {
     return (
@@ -34,11 +32,6 @@ export default async function PrimeiroAcessoPage({ params }: PageProps) {
   }
 
   return (
-    <OnboardingWizard
-      tenantSlug={tenantSlug}
-      tenantName={tenant.name}
-      segment={tenant.segment}
-      session={session}
-    />
+    <EnterpriseOnboardingWizard tenantSlug={tenantSlug} session={session} />
   );
 }

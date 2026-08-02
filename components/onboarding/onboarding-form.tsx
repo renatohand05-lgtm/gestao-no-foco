@@ -84,7 +84,7 @@ export function OnboardingForm() {
   return (
     <AuthFormShell
       title="Configure sua empresa"
-      description="Crie a empresa e avance para o checklist de primeiro valor."
+      description="Crie a empresa e avance ao onboarding enterprise multissetorial."
       className="max-w-lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">

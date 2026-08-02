@@ -1,7 +1,10 @@
 /**
  * Contexto compartilhado do Dashboard Executivo (Gate 17.2).
  * Um fetch por fonte — alimenta Decisão, Inteligência, Plano de Ação e Cockpit.
+ * Sprint 30.4.1 — React.cache por request (sem cache financeiro cross-tenant).
  */
+
+import { cache } from "react";
 
 import { createCentroOperacoesService } from "@/lib/operacoes/centro-operacoes-service";
 import type { CentroOperacoesData } from "@/lib/operacoes/centro-operacoes-service";
@@ -65,7 +68,7 @@ export type ExecutiveDashboardContext = {
 };
 
 /** Carrega todas as fontes executivas uma vez (soft-fail por fonte). */
-export async function loadExecutiveDashboardContext(
+async function loadExecutiveDashboardContextUncached(
   tenantId: string,
   tenantSlug: string,
 ): Promise<ExecutiveDashboardContext> {
@@ -182,6 +185,11 @@ export async function loadExecutiveDashboardContext(
     temContaBancaria,
   };
 }
+
+/** Memoizado por request RSC — dedupe entre cockpit / AI / export. */
+export const loadExecutiveDashboardContext = cache(
+  loadExecutiveDashboardContextUncached,
+);
 
 function mapOficina(
   centro: CentroOperacoesData | null,

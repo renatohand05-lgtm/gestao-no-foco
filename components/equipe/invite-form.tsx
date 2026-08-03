@@ -86,7 +86,7 @@ export function InviteForm({
 
   function handleCopy() {
     if (!lastResult) return;
-    const url = `${typeof window !== "undefined" ? window.location.origin : ""}${lastResult.inviteUrl}`;
+    const url = lastResult.inviteUrl;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(url);
       setCopied(true);

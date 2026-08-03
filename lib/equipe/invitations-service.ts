@@ -9,6 +9,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { absoluteAppUrl } from "@/lib/config/app-url";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -20,6 +21,10 @@ import {
   inviteTokenPrefix,
 } from "./token";
 import type { CreateInvitationInput, CreateInvitationResult, Invitation, MembershipRole } from "./types";
+
+function buildInviteAbsoluteUrl(tenantSlug: string, token: string): string {
+  return absoluteAppUrl(buildInviteUrlPath(tenantSlug, token));
+}
 
 const DEFAULT_VALIDADE_HORAS = 96;
 
@@ -168,7 +173,7 @@ export async function createInvitation(input: {
 
   return {
     invitation: mapInvitation(data as unknown as RawInvitationRow),
-    inviteUrl: buildInviteUrlPath(input.tenantSlug, token),
+    inviteUrl: buildInviteAbsoluteUrl(input.tenantSlug, token),
     token,
     emailSent: false,
   };
@@ -214,7 +219,7 @@ export async function resendInvitation(input: {
 
   return {
     invitation: mapInvitation(data as unknown as RawInvitationRow),
-    inviteUrl: buildInviteUrlPath(input.tenantSlug, token),
+    inviteUrl: buildInviteAbsoluteUrl(input.tenantSlug, token),
     token,
     emailSent: false,
   };

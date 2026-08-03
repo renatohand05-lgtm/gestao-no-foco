@@ -1,4 +1,5 @@
 import { brandConfig } from "@/config/brand";
+import { getAppBaseUrl } from "@/lib/config/app-url";
 
 /**
  * Site config — alinhado à identidade oficial (Gate 19.0.1).
@@ -11,7 +12,7 @@ export const siteConfig = {
   edition: brandConfig.edition,
   description:
     "Controle total da sua empresa em uma única plataforma. Financeiro, vendas, estoque, CRM, compras, BI e inteligência empresarial conectados.",
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  url: getAppBaseUrl(),
   links: {
     github: "https://github.com/gestao-no-foco",
     support: "mailto:suporte@gestaonoFoco.com.br",

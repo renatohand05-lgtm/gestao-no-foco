@@ -50,6 +50,42 @@ assert(url.startsWith("/convite/"), "URL de convite é global (/convite/…) —
 assert(!url.includes("minha-loja"), "URL não embute slug de tenant (middleware bloquearia não-membros)");
 assert(url.includes(tokenA), "URL de convite inclui o token (retorno único no momento da criação)");
 
+const { absoluteAppUrl, getAppBaseUrl, isLocalhostUrl, PRODUCTION_APP_URL } = await import(
+  "../lib/config/app-url.ts"
+);
+assert(isLocalhostUrl("http://localhost:3000"), "detecta localhost");
+assert(!isLocalhostUrl(PRODUCTION_APP_URL), "domínio oficial não é localhost");
+
+const prevNode = process.env.NODE_ENV;
+const prevVercel = process.env.VERCEL_ENV;
+const prevApp = process.env.APP_URL;
+const prevPublic = process.env.NEXT_PUBLIC_APP_URL;
+process.env.NODE_ENV = "production";
+process.env.VERCEL_ENV = "production";
+delete process.env.APP_URL;
+delete process.env.NEXT_PUBLIC_APP_URL;
+assert(
+  getAppBaseUrl() === PRODUCTION_APP_URL,
+  "produção sem APP_URL usa domínio oficial",
+);
+process.env.APP_URL = "http://localhost:3000";
+assert(
+  getAppBaseUrl() === PRODUCTION_APP_URL,
+  "produção rejeita APP_URL localhost",
+);
+process.env.APP_URL = PRODUCTION_APP_URL;
+assert(
+  absoluteAppUrl(`/convite/${tokenA}`) === `${PRODUCTION_APP_URL}/convite/${tokenA}`,
+  "absoluteAppUrl monta convite no domínio oficial",
+);
+process.env.NODE_ENV = prevNode;
+if (prevVercel === undefined) delete process.env.VERCEL_ENV;
+else process.env.VERCEL_ENV = prevVercel;
+if (prevApp === undefined) delete process.env.APP_URL;
+else process.env.APP_URL = prevApp;
+if (prevPublic === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
+else process.env.NEXT_PUBLIC_APP_URL = prevPublic;
+
 assert(INVITATION_STATUS_LABELS.pending === "Pendente", "status pending → Pendente");
 assert(INVITATION_STATUS_LABELS.accepted === "Aceito", "status accepted → Aceito");
 assert(INVITATION_STATUS_LABELS.expired === "Expirado", "status expired → Expirado");
@@ -59,6 +95,10 @@ assert(invitationStatusLabel(undefined) === "—", "invitationStatusLabel honest
 const invitationsService = readFileSync(
   join(root, "lib/equipe/invitations-service.ts"),
   "utf8",
+);
+assert(
+  invitationsService.includes("absoluteAppUrl") || invitationsService.includes("buildInviteAbsoluteUrl"),
+  "createInvitation/resend usam URL absoluta canônica",
 );
 assert(
   invitationsService.includes("Já existe um convite pendente"),

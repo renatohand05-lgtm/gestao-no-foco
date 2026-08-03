@@ -1,0 +1,80 @@
+{
+  "at": "2026-08-03T17:26:38.881Z",
+  "sprint": "30.8.1",
+  "base": "https://gestao-no-foco.vercel.app",
+  "commitHint": "2c107f5",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "alias / follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/ noFollow=200 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/login noFollow=200 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/dashboard noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=api noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=marketplace noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=connections noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=webhooks noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=scheduler noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=events noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=logs noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=monitor noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/integracoes?tab=config noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/automacoes noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/crm noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/analytics noFollow=307 follow=200"
+    }
+  ],
+  "summary": {
+    "pass": 17,
+    "fail": 0
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "at": "2026-08-03T16:24:22.947Z",
+  "sprint": "30.8",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3000",
+  "targets": {
+    "coldMs": 2500,
+    "warmMs": 1200
+  },
+  "timings": {
+    "coldMs": 802,
+    "warmMs": 1058
+  },
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop cold 802ms (alvo <=2500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Integration Hub marker"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Dashboard block"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Integration Hub title"
+    },
+    {
+      "ok": true,
+      "detail": "desktop API Center tab"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Marketplace tab"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Webhooks tab"
+    },
+    {
+      "ok": true,
+      "detail": "desktop warm 1058ms (alvo <=1200ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop dark"
+    },
+    {
+      "ok": true,
+      "detail": "desktop light"
+    },
+    {
+      "ok": true,
+      "detail": "tablet GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "tablet conteúdo"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 conteúdo"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 conteúdo"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 22,
+    "fail": 0
+  }
+}

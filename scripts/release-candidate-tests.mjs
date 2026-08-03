@@ -212,7 +212,9 @@ for (const page of integracoesPages) {
   if (redirectOnly.has(page)) continue;
   const src = read(page);
   assert(
-    src.includes("requireTenant"),
+    src.includes("requireTenant") ||
+      src.includes("requireIntegracoesAccess") ||
+      src.includes("getIntegrationHubAction"),
     `integracoes RBAC: ${page} chama requireTenant`,
   );
 }

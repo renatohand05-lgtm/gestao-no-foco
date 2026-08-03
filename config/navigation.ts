@@ -217,7 +217,12 @@ export function getTenantNav(
       href: `${base}/integracoes`,
       icon: Plug,
       group: "inteligencia",
-      description: "Importar arquivos, APIs e colar dados",
+      description: "Hub de integrações Enterprise",
+      requiredAnyPermissions: [
+        "integracoes.visualizar",
+        "integracoes.administrar",
+        "configuracoes.integracoes",
+      ],
     },
     {
       id: "automacoes",

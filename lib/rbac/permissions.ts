@@ -195,6 +195,26 @@ export const PERMISSION_CATALOG = [
   def("automacoes.ver_auditoria", "automacoes", "ver_auditoria", "Ver auditoria de automações", "leitura", "alto"),
   def("automacoes.administrar", "automacoes", "administrar", "Administrar Central de Automações", "administracao", "critico"),
 
+  // Integration Hub Enterprise (Fase 30.8) — novas permissões
+  def("integracoes.visualizar", "integracoes", "visualizar", "Visualizar Integration Hub", "leitura", "medio"),
+  def("integracoes.configurar", "integracoes", "configurar", "Configurar integrações (arquitetura)", "administracao", "alto"),
+  def("integracoes.administrar", "integracoes", "administrar", "Administrar Integration Hub", "administracao", "critico"),
+  def("api.visualizar", "api", "visualizar", "Visualizar API Center", "leitura", "medio"),
+  def("api.documentar", "api", "documentar", "Documentar APIs internas", "escrita", "medio"),
+  def("api.administrar", "api", "administrar", "Administrar API Center", "administracao", "critico"),
+  def("webhook.visualizar", "webhook", "visualizar", "Visualizar Webhook Center", "leitura", "medio"),
+  def("webhook.configurar", "webhook", "configurar", "Configurar webhooks (arquitetura)", "administracao", "alto"),
+  def("webhook.administrar", "webhook", "administrar", "Administrar Webhook Center", "administracao", "critico"),
+  def("scheduler.visualizar", "scheduler", "visualizar", "Visualizar Scheduler", "leitura", "medio"),
+  def("scheduler.configurar", "scheduler", "configurar", "Configurar jobs (arquitetura)", "administracao", "alto"),
+  def("scheduler.administrar", "scheduler", "administrar", "Administrar Scheduler", "administracao", "critico"),
+  def("eventbus.visualizar", "eventbus", "visualizar", "Visualizar Event Bus", "leitura", "medio"),
+  def("eventbus.configurar", "eventbus", "configurar", "Configurar Event Bus (arquitetura)", "administracao", "alto"),
+  def("eventbus.administrar", "eventbus", "administrar", "Administrar Event Bus", "administracao", "critico"),
+  def("logs.visualizar", "logs", "visualizar", "Visualizar logs de integração", "leitura", "medio"),
+  def("monitor.visualizar", "monitor", "visualizar", "Visualizar Monitor Enterprise", "leitura", "medio"),
+  def("monitor.administrar", "monitor", "administrar", "Administrar Monitor Enterprise", "administracao", "critico"),
+
   // Tributário Enterprise (Fase 26.8+)
   def("tax.visualizar", "tax", "visualizar", "Visualizar hub tributário", "leitura", "alto"),
   def("tax.executivo", "tax", "executivo", "Cockpit tributário executivo", "financeiro_sensivel", "alto"),

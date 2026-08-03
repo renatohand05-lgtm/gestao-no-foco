@@ -1,0 +1,221 @@
+{
+  "at": "2026-08-03T16:46:53.506Z",
+  "sprint": "30.8.1",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3000",
+  "targets": {
+    "coldMs": 2500,
+    "warmMs": 1200,
+    "tabSwitchMs": 500
+  },
+  "timings": {
+    "coldMs": 957,
+    "firstTabMs": 186,
+    "warmMs": 936
+  },
+  "tabSwitchMs": [
+    {
+      "label": "Dashboard",
+      "ms": 186
+    },
+    {
+      "label": "API Center",
+      "ms": 180
+    },
+    {
+      "label": "Marketplace",
+      "ms": 165
+    },
+    {
+      "label": "Connections",
+      "ms": 182
+    },
+    {
+      "label": "Webhooks",
+      "ms": 183
+    },
+    {
+      "label": "Scheduler",
+      "ms": 218
+    },
+    {
+      "label": "Event Bus",
+      "ms": 170
+    },
+    {
+      "label": "Logs",
+      "ms": 156
+    },
+    {
+      "label": "Monitor",
+      "ms": 196
+    },
+    {
+      "label": "Config",
+      "ms": 167
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "detail": "desktop1920 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop1920 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "cold 957ms (alvo <=2500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "Integration Hub marker"
+    },
+    {
+      "ok": true,
+      "detail": "GET ?tab=marketplace 200"
+    },
+    {
+      "ok": true,
+      "detail": "Marketplace tab via URL"
+    },
+    {
+      "ok": true,
+      "detail": "GET ?tab=api 200"
+    },
+    {
+      "ok": true,
+      "detail": "API Center tab via URL"
+    },
+    {
+      "ok": true,
+      "detail": "tab 1ª (Dashboard) 186ms (baseline)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch API Center 180ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Marketplace 165ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Connections 182ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Webhooks 183ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Scheduler 218ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Event Bus 170ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Logs 156ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Monitor 196ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "tab switch Config 167ms (alvo <500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "warm 936ms (alvo <=1200ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop dark screenshot"
+    },
+    {
+      "ok": true,
+      "detail": "desktop light screenshot"
+    },
+    {
+      "ok": true,
+      "detail": "desktop1366 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop1366 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "desktop1024 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop1024 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "tablet768 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet768 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "tablet-768 screenshot"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "mobile-390 screenshot"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 GET integracoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Integration Hub"
+    },
+    {
+      "ok": true,
+      "detail": "mobile-375 screenshot"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 39,
+    "fail": 0
+  }
+}

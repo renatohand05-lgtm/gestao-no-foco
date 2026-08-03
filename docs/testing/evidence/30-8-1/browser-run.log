@@ -1,0 +1,42 @@
+PASS desktop1920 GET integracoes 200
+PASS desktop1920 Integration Hub
+PASS sessão autenticada
+PASS GET integracoes 200
+PASS cold 957ms (alvo <=2500ms)
+PASS Integration Hub marker
+PASS GET ?tab=marketplace 200
+PASS Marketplace tab via URL
+PASS GET ?tab=api 200
+PASS API Center tab via URL
+PASS tab 1ª (Dashboard) 186ms (baseline)
+PASS tab switch API Center 180ms (alvo <500ms)
+PASS tab switch Marketplace 165ms (alvo <500ms)
+PASS tab switch Connections 182ms (alvo <500ms)
+PASS tab switch Webhooks 183ms (alvo <500ms)
+PASS tab switch Scheduler 218ms (alvo <500ms)
+PASS tab switch Event Bus 170ms (alvo <500ms)
+PASS tab switch Logs 156ms (alvo <500ms)
+PASS tab switch Monitor 196ms (alvo <500ms)
+PASS tab switch Config 167ms (alvo <500ms)
+PASS warm 936ms (alvo <=1200ms)
+PASS desktop dark screenshot
+PASS desktop light screenshot
+PASS desktop1366 GET integracoes 200
+PASS desktop1366 Integration Hub
+PASS desktop1024 GET integracoes 200
+PASS desktop1024 Integration Hub
+PASS tablet768 GET integracoes 200
+PASS tablet768 Integration Hub
+PASS tablet-768 screenshot
+PASS mobile430 GET integracoes 200
+PASS mobile430 Integration Hub
+PASS mobile390 GET integracoes 200
+PASS mobile390 Integration Hub
+PASS mobile-390 screenshot
+PASS mobile375 GET integracoes 200
+PASS mobile375 Integration Hub
+PASS mobile-375 screenshot
+PASS console bloqueante=0
+
+Cold 957ms · Warm 936ms
+Tab switches: Dashboard=186ms, API Center=180ms, Marketplace=165ms, Connections=182ms, Webhooks=183ms, Scheduler=218ms, Event Bus=170ms, Logs=156ms, Monitor=196ms, Config=167ms

@@ -1,0 +1,25 @@
+PASS sessão autenticada
+PASS desktop GET integracoes 200
+PASS desktop cold 802ms (alvo <=2500ms)
+PASS desktop Integration Hub marker
+PASS desktop Dashboard block
+PASS desktop Integration Hub title
+PASS desktop API Center tab
+PASS desktop Marketplace tab
+PASS desktop Webhooks tab
+PASS desktop warm 1058ms (alvo <=1200ms)
+PASS desktop dark
+PASS desktop light
+PASS tablet GET integracoes 200
+PASS tablet Integration Hub
+PASS tablet conteúdo
+PASS mobile390 GET integracoes 200
+PASS mobile390 Integration Hub
+PASS mobile390 conteúdo
+PASS mobile375 GET integracoes 200
+PASS mobile375 Integration Hub
+PASS mobile375 conteúdo
+PASS console bloqueante=0
+
+Cold 802ms · Warm 1058ms
+Browser QA 30.8: 22 PASS · 0 FAIL

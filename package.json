@@ -366,7 +366,19 @@
     "test:phase30-automation-dry-run": "node --experimental-strip-types scripts/phase30-automation-dry-run-tests.mjs",
     "test:phase30-automation-all": "npm run test:phase30-automations && npm run test:phase30-automation-builder && npm run test:phase30-automation-triggers && npm run test:phase30-automation-actions && npm run test:phase30-automation-approvals && npm run test:phase30-automation-idempotency && npm run test:phase30-automation-loop-prevention && npm run test:phase30-automation-tenant-isolation && npm run test:phase30-automation-rbac && npm run test:phase30-automation-dry-run",
     "test:homolog-30-7": "node scripts/homolog-30-7-browser.mjs",
-    "test:homolog-30-7-1": "node scripts/homolog-30-7-1-browser.mjs"
+    "test:homolog-30-7-1": "node scripts/homolog-30-7-1-browser.mjs",
+    "test:phase30-integrations": "node --experimental-strip-types scripts/phase30-integrations-tests.mjs",
+    "test:phase30-integrations-security": "node --experimental-strip-types scripts/phase30-integrations-security-tests.mjs",
+    "test:phase30-integrations-rbac": "node --experimental-strip-types scripts/phase30-integrations-rbac-tests.mjs",
+    "test:phase30-integrations-tenant-isolation": "node --experimental-strip-types scripts/phase30-integrations-tenant-isolation-tests.mjs",
+    "test:phase30-integrations-catalog": "node --experimental-strip-types scripts/phase30-integrations-catalog-tests.mjs",
+    "test:phase30-integrations-no-external-io": "node --experimental-strip-types scripts/phase30-integrations-no-external-io-tests.mjs",
+    "test:phase30-api-center": "node --experimental-strip-types scripts/phase30-api-center-tests.mjs",
+    "test:phase30-webhooks": "node --experimental-strip-types scripts/phase30-webhooks-tests.mjs",
+    "test:phase30-eventbus": "node --experimental-strip-types scripts/phase30-eventbus-tests.mjs",
+    "test:phase30-monitor": "node --experimental-strip-types scripts/phase30-monitor-tests.mjs",
+    "test:homolog-30-8": "node scripts/homolog-30-8-browser.mjs",
+    "test:homolog-30-8-1": "node scripts/homolog-30-8-1-browser.mjs"
   },
 
   "dependencies": {

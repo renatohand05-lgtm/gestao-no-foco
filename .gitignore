@@ -54,3 +54,8 @@ next-env.d.ts
 !.env.example
 
 .vercel
+
+
+# Turbo
+.turbo/
+**/.turbo/

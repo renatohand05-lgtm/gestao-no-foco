@@ -1,0 +1,11 @@
+# Prettier
+**/.next
+**/.expo
+**/dist
+**/dist-android
+**/node_modules
+**/coverage
+**/*.min.js
+package-lock.json
+docs/testing/evidence/**/*.png
+docs/testing/evidence/**/*.log

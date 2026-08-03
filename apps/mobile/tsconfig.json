@@ -1,0 +1,25 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@gof/design-tokens": ["../../packages/design-tokens/src/index.ts"],
+      "@gof/domain": ["../../packages/domain/src/index.ts"],
+      "@gof/schemas": ["../../packages/schemas/src/index.ts"],
+      "@gof/api-contracts": ["../../packages/api-contracts/src/index.ts"],
+      "@gof/rbac-contracts": ["../../packages/rbac-contracts/src/index.ts"],
+      "@gof/config": ["../../packages/config/src/index.ts"],
+      "@gof/utils": ["../../packages/utils/src/index.ts"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
+}

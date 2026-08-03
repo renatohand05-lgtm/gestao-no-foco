@@ -15,6 +15,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Mobile monorepo (Sprint 31.0) — lint via mobile:lint
+    "apps/**",
+    "packages/**",
   ]),
 ]);
 

@@ -1,0 +1,136 @@
+{
+  "at": "2026-08-02T23:58:50.530Z",
+  "baseUrl": "https://gestao-no-foco.vercel.app",
+  "commit": "9358ce4",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "login público HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "verifyOtp+ssr cookies (renatohand05@gmail.com)"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard autenticado (https://gestao-no-foco.vercel.app/teste-renato-01/dashboard)"
+    },
+    {
+      "ok": true,
+      "detail": "cockpit sinais (KPI/brief/alertas/ações)"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard sem erro de schema"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard sem UUID na face"
+    },
+    {
+      "ok": true,
+      "detail": "cold prod 4418ms (informativo ≤8s rede)"
+    },
+    {
+      "ok": true,
+      "detail": "warm prod 3949ms (informativo ≤6s rede)"
+    },
+    {
+      "ok": true,
+      "detail": "primeiro-acesso HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "primeiro-acesso sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "primeiro-acesso wizard/segmento/checklist"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard cockpit UI"
+    },
+    {
+      "ok": true,
+      "detail": "metas HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "metas sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "metas UI"
+    },
+    {
+      "ok": true,
+      "detail": "dre HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "dre sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "dre UI"
+    },
+    {
+      "ok": true,
+      "detail": "fluxo-caixa HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "fluxo-caixa sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "fluxo-caixa UI"
+    },
+    {
+      "ok": true,
+      "detail": "financeiro HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "financeiro sem 404/500"
+    },
+    {
+      "ok": true,
+      "detail": "prod dark"
+    },
+    {
+      "ok": true,
+      "detail": "prod light"
+    },
+    {
+      "ok": true,
+      "detail": "prod mobile cockpit"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    },
+    {
+      "ok": true,
+      "detail": "hidratação erros=0"
+    }
+  ],
+  "consoleErrors": [],
+  "timings": {
+    "coldMs": 4418,
+    "warmMs": 3949
+  },
+  "summary": {
+    "pass": 30,
+    "fail": 0
+  }
+}

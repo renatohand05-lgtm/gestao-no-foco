@@ -205,4 +205,18 @@ export type CrmFunilCard = {
   tags: string[];
   valor_pipeline: number;
   updated_at: string;
+  /** Sprint 30.5 — campos Premium (dados reais do cliente). */
+  valor_estimado: number | null;
+  probabilidade: number | null;
+  consultor_id: string | null;
+  consultor_nome: string | null;
+  prioridade_crm: string | null;
+  proxima_acao: string | null;
+  data_proxima_acao: string | null;
+  origem: string | null;
+  ultimo_contato_at: string | null;
+  idade_dias: number;
+  tempo_parado_dias: number;
+  commercial_score: number;
+  created_at: string;
 };

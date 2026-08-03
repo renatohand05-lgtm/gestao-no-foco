@@ -1,0 +1,103 @@
+{
+  "at": "2026-08-03T10:55:58.990Z",
+  "sprint": "30.7.1",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3000",
+  "targets": {
+    "coldMs": 2500,
+    "warmMs": 1200,
+    "historyMs": 1500
+  },
+  "timings": {
+    "coldMs": 1697,
+    "historyMs": 38,
+    "warmMs": 1046
+  },
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "GET automacoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "cold 1697ms (alvo <=2500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "Central renderizada"
+    },
+    {
+      "ok": true,
+      "detail": "status de schema visível"
+    },
+    {
+      "ok": false,
+      "detail": "schema ready (persistência)"
+    },
+    {
+      "ok": true,
+      "detail": "templates visíveis"
+    },
+    {
+      "ok": true,
+      "detail": "dry-run cenários executado"
+    },
+    {
+      "ok": false,
+      "detail": "dry-run com schema ok"
+    },
+    {
+      "ok": true,
+      "detail": "histórico 38ms (alvo <=1500ms)"
+    },
+    {
+      "ok": false,
+      "detail": "schema ready após refresh"
+    },
+    {
+      "ok": true,
+      "detail": "warm 1046ms (alvo <=1200ms)"
+    },
+    {
+      "ok": true,
+      "detail": "builder 8 etapas"
+    },
+    {
+      "ok": true,
+      "detail": "painel aprovações"
+    },
+    {
+      "ok": true,
+      "detail": "dark"
+    },
+    {
+      "ok": true,
+      "detail": "light"
+    },
+    {
+      "ok": true,
+      "detail": "mobile 390 Central"
+    },
+    {
+      "ok": true,
+      "detail": "sem UUID no topo da página"
+    },
+    {
+      "ok": true,
+      "detail": "sem enum cru no topo"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 17,
+    "fail": 3
+  }
+}

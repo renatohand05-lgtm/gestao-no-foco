@@ -1,11 +1,31 @@
 import Link from "next/link";
 
 import { ExecutiveCrmDashboardLazy } from "@/components/crm/executive-crm-dashboard-lazy";
+import { CrmPremiumDashboardView } from "@/components/crm/premium/crm-premium-dashboard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getExecutiveCrmDashboard } from "@/lib/crm/crm-enterprise-actions";
 import { isCrmEnterpriseEnabled } from "@/lib/crm/crm-feature-flags";
+import { getCachedCrmPremiumDashboard } from "@/lib/crm/premium";
+import {
+  civilDateInTimezone,
+  DEFAULT_TENANT_TIMEZONE,
+} from "@/lib/dashboard/tenant-timezone";
 import { requireTenant } from "@/lib/tenants";
+import { Suspense } from "react";
 
 export const metadata = { title: "CRM Executivo Enterprise" };
+
+async function PremiumBlock({
+  tenantId,
+  tenantSlug,
+}: {
+  tenantId: string;
+  tenantSlug: string;
+}) {
+  const hoje = civilDateInTimezone(new Date(), DEFAULT_TENANT_TIMEZONE);
+  const premium = await getCachedCrmPremiumDashboard(tenantId, hoje);
+  return <CrmPremiumDashboardView tenantSlug={tenantSlug} data={premium} />;
+}
 
 export default async function CrmExecutivoPage({
   params,
@@ -13,7 +33,7 @@ export default async function CrmExecutivoPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  await requireTenant(tenantSlug);
+  const tenant = await requireTenant(tenantSlug);
 
   if (!isCrmEnterpriseEnabled()) {
     return (
@@ -30,7 +50,6 @@ export default async function CrmExecutivoPage({
     bundle = await getExecutiveCrmDashboard(tenantSlug);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha no CRM.";
-    // Permissão conhecida → UI controlada (não mascara falhas de schema/query).
     if (/sem permissão|sessão ausente|desabilitado/i.test(message)) {
       if (process.env.NODE_ENV === "development") {
         console.error(
@@ -68,6 +87,28 @@ export default async function CrmExecutivoPage({
   }
 
   return (
-    <ExecutiveCrmDashboardLazy tenantSlug={tenantSlug} initialBundle={bundle} />
+    <div className="space-y-8 p-4 sm:p-6">
+      <Suspense
+        fallback={
+          <div className="space-y-3" aria-busy="true">
+            <Skeleton className="h-8 w-48" />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full" />
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <PremiumBlock tenantId={tenant.id} tenantSlug={tenantSlug} />
+      </Suspense>
+
+      <section aria-label="CRM Enterprise legado" className="border-t pt-6">
+        <ExecutiveCrmDashboardLazy
+          tenantSlug={tenantSlug}
+          initialBundle={bundle}
+        />
+      </section>
+    </div>
   );
 }

@@ -1,0 +1,22 @@
+PASS sessão autenticada
+PASS GET automacoes 200
+PASS cold 1697ms (alvo <=2500ms)
+PASS Central renderizada
+PASS status de schema visível
+FAIL schema ready (persistência)
+PASS templates visíveis
+PASS dry-run cenários executado
+FAIL dry-run com schema ok
+PASS histórico 38ms (alvo <=1500ms)
+FAIL schema ready após refresh
+PASS warm 1046ms (alvo <=1200ms)
+PASS builder 8 etapas
+PASS painel aprovações
+PASS dark
+PASS light
+PASS mobile 390 Central
+PASS sem UUID no topo da página
+PASS sem enum cru no topo
+PASS console bloqueante=0
+
+Cold 1697ms · Warm 1046ms · Hist 38ms

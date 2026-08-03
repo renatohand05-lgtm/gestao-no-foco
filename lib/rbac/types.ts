@@ -40,6 +40,7 @@ export type PermissionModule =
   | "dashboard"
   | "analytics"
   | "inteligencia"
+  | "automacoes"
   | "tax"
   | "usuarios"
   | "configuracoes"

@@ -1,0 +1,133 @@
+{
+  "at": "2026-08-03T00:15:40.147Z",
+  "sprint": "30.5",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3002",
+  "targets": {
+    "coldMs": 2500,
+    "warmMs": 1300
+  },
+  "timings": {
+    "coldMs": 1327,
+    "warmMs": 1029
+  },
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET crm/executivo 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop cold 1327ms (alvo <=2500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Dashboard Premium"
+    },
+    {
+      "ok": true,
+      "detail": "desktop CRM marker"
+    },
+    {
+      "ok": true,
+      "detail": "desktop warm 1029ms (alvo <=1300ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET funil 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Pipeline Premium"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET follow-ups 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Follow-up Premium"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Timeline presente"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Receita/Score painel"
+    },
+    {
+      "ok": true,
+      "detail": "desktop painéis analíticos"
+    },
+    {
+      "ok": true,
+      "detail": "desktop dark screenshot"
+    },
+    {
+      "ok": true,
+      "detail": "desktop light screenshot"
+    },
+    {
+      "ok": true,
+      "detail": "tablet GET crm/executivo 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Dashboard"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Pipeline"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 GET crm/executivo 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Dashboard"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Pipeline"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 GET crm/executivo 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Dashboard"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Pipeline"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 GET crm/executivo 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Dashboard"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Pipeline"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 28,
+    "fail": 0
+  }
+}

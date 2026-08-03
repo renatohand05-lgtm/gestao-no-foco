@@ -100,6 +100,40 @@ export class ClienteTarefaService {
 
     if (error) throw new Error(error.message);
   }
+
+  /** Sprint 30.5 — adiar / atribuir follow-up. */
+  async patch(
+    id: string,
+    input: {
+      data_vencimento?: string | null;
+      responsavel_id?: string | null;
+      status?: CrmTarefaStatus;
+    },
+  ): Promise<void> {
+    const patch: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (input.data_vencimento !== undefined) {
+      patch.data_vencimento = input.data_vencimento;
+    }
+    if (input.responsavel_id !== undefined) {
+      patch.responsavel_id = input.responsavel_id;
+    }
+    if (input.status !== undefined) {
+      patch.status = input.status;
+      if (input.status === "concluida") {
+        patch.concluida_em = new Date().toISOString();
+      }
+    }
+    const { error } = await this.supabase
+      .from("cliente_tarefas" as never)
+      .update(patch as never)
+      .eq("tenant_id", this.tenantId)
+      .eq("id", id)
+      .is("deleted_at", null);
+
+    if (error) throw new Error(error.message);
+  }
 }
 
 export async function createClienteTarefaService(tenantId: string) {

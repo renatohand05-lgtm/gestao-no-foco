@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { CRM_FUNIL_STAGES, type CrmFunilStage } from "@/lib/crm/constants";
+import { enrichPipelineCardMetrics } from "@/lib/crm/premium/pipeline-enrich";
 import { createClient } from "@/lib/supabase/server";
 import type { CrmFunilCard } from "@/types/crm";
 
@@ -18,7 +19,7 @@ export class CrmFunilService {
     const { data, error } = await this.supabase
       .from("clientes" as never)
       .select(
-        "id, nome, documento, email, telefone, estagio_funil, score, classificacao, updated_at",
+        "id, nome, documento, email, telefone, estagio_funil, score, classificacao, updated_at, created_at, valor_estimado, valor_potencial, probabilidade, consultor_id, prioridade_crm, proxima_acao, data_proxima_acao, origem",
       )
       .eq("tenant_id", this.tenantId)
       .is("deleted_at", null)
@@ -42,20 +43,61 @@ export class CrmFunilService {
       score: number;
       classificacao: string | null;
       updated_at: string;
+      created_at: string;
+      valor_estimado: number | null;
+      valor_potencial: number | null;
+      probabilidade: number | null;
+      consultor_id: string | null;
+      prioridade_crm: string | null;
+      proxima_acao: string | null;
+      data_proxima_acao: string | null;
+      origem: string | null;
     }>;
 
     if (!rows.length) return empty;
 
     const ids = rows.map((r) => r.id);
-    const [tagsByCliente, pipelineByCliente] = await Promise.all([
-      this.loadTagsBulk(ids),
-      this.loadPipelineBulk(ids),
-    ]);
+    const consultorIds = [
+      ...new Set(rows.map((r) => r.consultor_id).filter(Boolean)),
+    ] as string[];
+
+    const [tagsByCliente, pipelineByCliente, lastContactByCliente, names] =
+      await Promise.all([
+        this.loadTagsBulk(ids),
+        this.loadPipelineBulk(ids),
+        this.loadLastContactBulk(ids),
+        this.loadProfileNames(consultorIds),
+      ]);
+
+    const now = new Date();
 
     for (const row of rows) {
       const stage = CRM_FUNIL_STAGES.includes(row.estagio_funil)
         ? row.estagio_funil
         : "lead";
+      const valorPipeline = pipelineByCliente.get(row.id) ?? 0;
+      const valorEstimado =
+        row.valor_estimado != null
+          ? Number(row.valor_estimado)
+          : row.valor_potencial != null
+            ? Number(row.valor_potencial)
+            : null;
+      const ultimo =
+        lastContactByCliente.get(row.id) ?? row.updated_at ?? null;
+      const metrics = enrichPipelineCardMetrics({
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        ultimoContatoAt: ultimo,
+        valorEstimado,
+        valorPipeline,
+        stage,
+        origem: row.origem,
+        historicoCount: valorPipeline > 0 ? 1 : 0,
+        atividadeCount: lastContactByCliente.has(row.id) ? 1 : 0,
+        storedScore: Number(row.score ?? 0),
+        now,
+      });
+
       empty[stage].push({
         id: row.id,
         nome: row.nome,
@@ -66,8 +108,28 @@ export class CrmFunilService {
         score: Number(row.score ?? 0),
         classificacao: row.classificacao,
         tags: tagsByCliente.get(row.id) ?? [],
-        valor_pipeline: pipelineByCliente.get(row.id) ?? 0,
+        valor_pipeline: valorEstimado != null && valorEstimado > 0
+          ? valorEstimado
+          : valorPipeline,
         updated_at: row.updated_at,
+        valor_estimado: valorEstimado,
+        probabilidade:
+          row.probabilidade == null ? null : Number(row.probabilidade),
+        consultor_id: row.consultor_id,
+        consultor_nome: row.consultor_id
+          ? (names.get(row.consultor_id) ?? null)
+          : null,
+        prioridade_crm: row.prioridade_crm,
+        proxima_acao: row.proxima_acao,
+        data_proxima_acao: row.data_proxima_acao
+          ? String(row.data_proxima_acao).slice(0, 10)
+          : null,
+        origem: row.origem,
+        ultimo_contato_at: ultimo,
+        idade_dias: metrics.idadeDias,
+        tempo_parado_dias: metrics.tempoParadoDias,
+        commercial_score: metrics.commercialScore,
+        created_at: row.created_at,
       });
     }
 
@@ -86,6 +148,42 @@ export class CrmFunilService {
         valor_total: cards.reduce((a, c) => a + c.valor_pipeline, 0),
       };
     });
+  }
+
+  private async loadProfileNames(ids: string[]) {
+    const map = new Map<string, string>();
+    if (!ids.length) return map;
+    const { data } = await this.supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", ids.slice(0, 80));
+    for (const p of data ?? []) {
+      map.set(p.id, p.full_name?.trim() || p.email || p.id.slice(0, 8));
+    }
+    return map;
+  }
+
+  private async loadLastContactBulk(clienteIds: string[]) {
+    const map = new Map<string, string>();
+    if (!clienteIds.length) return map;
+    const { data, error } = await this.supabase
+      .from("cliente_eventos" as never)
+      .select("cliente_id, created_at")
+      .eq("tenant_id", this.tenantId)
+      .in("cliente_id", clienteIds.slice(0, 400))
+      .order("created_at", { ascending: false })
+      .limit(800);
+
+    if (error) return map;
+    for (const row of (data ?? []) as Array<{
+      cliente_id: string;
+      created_at: string;
+    }>) {
+      if (!map.has(row.cliente_id)) {
+        map.set(row.cliente_id, row.created_at);
+      }
+    }
+    return map;
   }
 
   private async loadTagsBulk(clienteIds: string[]) {

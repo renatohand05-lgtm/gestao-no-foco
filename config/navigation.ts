@@ -15,6 +15,7 @@ import {
   Users,
   Wallet,
   Warehouse,
+  Workflow,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
@@ -217,6 +218,18 @@ export function getTenantNav(
       icon: Plug,
       group: "inteligencia",
       description: "Importar arquivos, APIs e colar dados",
+    },
+    {
+      id: "automacoes",
+      title: "Automações",
+      href: `${base}/automacoes`,
+      icon: Workflow,
+      group: "inteligencia",
+      description: "Regras, aprovações e fluxos internos",
+      requiredAnyPermissions: [
+        "automacoes.visualizar",
+        "automacoes.administrar",
+      ],
     },
     {
       id: "analytics",

@@ -76,3 +76,18 @@ export {
   resolveCrmEffectivePermissions,
 } from "./rbac-compat.ts";
 export type { CrmEffectiveAuth } from "./rbac-compat.ts";
+
+export {
+  computeCommercialScore,
+  buildRevenueForecast,
+  buildLossReasonAnalysis,
+  categorizeLossReason,
+  groupPremiumFollowUps,
+  composeCrmPremiumDashboard,
+  getCachedCrmPremiumDashboard,
+} from "./premium/index.ts";
+export type {
+  CrmPremiumDashboard,
+  CrmPremiumKpis,
+  CommercialScoreResult,
+} from "./premium/types.ts";

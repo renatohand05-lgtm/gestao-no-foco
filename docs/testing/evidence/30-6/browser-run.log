@@ -1,0 +1,22 @@
+PASS sessão autenticada
+PASS desktop GET analytics 200
+PASS desktop cold 1873ms (alvo <=2000ms)
+PASS desktop Intelligence
+PASS desktop Insights
+PASS desktop Forecast
+PASS desktop Decision Center
+PASS desktop KPI Health
+PASS desktop warm 607ms (alvo <=1000ms)
+PASS desktop dark
+PASS desktop light
+PASS tablet GET analytics 200
+PASS tablet Analytics
+PASS mobile430 GET analytics 200
+PASS mobile430 Analytics
+PASS mobile390 GET analytics 200
+PASS mobile390 Analytics
+PASS mobile375 GET analytics 200
+PASS mobile375 Analytics
+PASS console bloqueante=0
+
+Cold 1873ms · Warm 607ms

@@ -1,0 +1,30 @@
+PASS sessão autenticada
+PASS desktop GET crm/executivo 200
+PASS desktop cold 1327ms (alvo <=2500ms)
+PASS desktop Dashboard Premium
+PASS desktop CRM marker
+PASS desktop warm 1029ms (alvo <=1300ms)
+PASS desktop GET funil 200
+PASS desktop Pipeline Premium
+PASS desktop GET follow-ups 200
+PASS desktop Follow-up Premium
+PASS desktop Timeline presente
+PASS desktop Receita/Score painel
+PASS desktop painéis analíticos
+PASS desktop dark screenshot
+PASS desktop light screenshot
+PASS tablet GET crm/executivo 200
+PASS tablet Dashboard
+PASS tablet Pipeline
+PASS mobile430 GET crm/executivo 200
+PASS mobile430 Dashboard
+PASS mobile430 Pipeline
+PASS mobile390 GET crm/executivo 200
+PASS mobile390 Dashboard
+PASS mobile390 Pipeline
+PASS mobile375 GET crm/executivo 200
+PASS mobile375 Dashboard
+PASS mobile375 Pipeline
+PASS console bloqueante=0
+
+Cold 1327ms · Warm 1029ms

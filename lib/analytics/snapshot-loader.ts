@@ -1,7 +1,9 @@
 /**
- * Fase 23 — Monta AnalyticsDomainSnapshot a partir dos módulos fonte.
- * Acessos defensivos — fatias ausentes ⇒ métricas "indisponível".
+ * Fase 23 / Sprint 30.6 — AnalyticsDomainSnapshot.
+ * Fontes independentes em Promise.all (perf) — sem alterar módulos financeiros.
  */
+
+import { cache } from "react";
 
 import type { AnalyticsDomainSnapshot } from "./core/analytics-context.ts";
 import type { AnalyticsDateRange } from "./core/metric-types.ts";
@@ -29,46 +31,33 @@ function rankList(raw: unknown): Array<{ id: string; label: string; value: numbe
   });
 }
 
-export async function loadAnalyticsDomainSnapshot(args: {
-  tenantId: string;
-  tenantSlug: string;
-  period: AnalyticsDateRange;
-}): Promise<AnalyticsDomainSnapshot> {
-  if (!args.tenantId?.trim()) {
-    throw new Error("tenantId obrigatório no snapshot Analytics.");
-  }
+type HealthMark = {
+  key: string;
+  status: "ok" | "empty" | "error";
+  message: string;
+};
 
-  const asOf = new Date().toISOString().slice(0, 10);
-  const health: NonNullable<AnalyticsDomainSnapshot["sourceHealth"]> = {};
-  const mark = (
-    key: string,
-    status: "ok" | "empty" | "error",
-    message: string,
-  ) => {
-    health[key] = { status, message, updatedAt: asOf };
-  };
+type SliceResult = {
+  patch: Partial<AnalyticsDomainSnapshot>;
+  marks: HealthMark[];
+};
 
-  const snap: AnalyticsDomainSnapshot = {
-    tenantId: args.tenantId,
-    tenantSlug: args.tenantSlug,
-    asOf,
-    sourceHealth: health,
-  };
-
+async function loadFinanceSlice(
+  tenantId: string,
+  tenantSlug: string,
+  period: AnalyticsDateRange,
+): Promise<SliceResult> {
   try {
     const { createFinancialIntelligenceService } = await import(
       "@/lib/financial-intelligence/service"
     );
     const { defaultDrePeriodo } = await import("@/lib/financeiro/dre-service");
-    const fi = await createFinancialIntelligenceService(
-      args.tenantId,
-      args.tenantSlug,
-    );
+    const fi = await createFinancialIntelligenceService(tenantId, tenantSlug);
     const fiSnap = asRecord(
       await fi.getSnapshot({
         ...defaultDrePeriodo(),
-        dataDe: args.period.from,
-        dataAte: args.period.to,
+        dataDe: period.from,
+        dataAte: period.to,
       }),
     );
     const cards = Array.isArray(fiSnap.metrics) ? fiSnap.metrics : [];
@@ -85,7 +74,7 @@ export async function loadAnalyticsDomainSnapshot(args: {
     const normPct = (v: number | null) =>
       v != null && v > 1 ? v / 100 : v;
 
-    snap.finance = {
+    const finance = {
       receitaBruta: pick("receita_bruta"),
       receitaLiquida: pick("receita_liquida"),
       ebitda: pick("ebitda"),
@@ -107,85 +96,121 @@ export async function loadAnalyticsDomainSnapshot(args: {
       topCentros: rankList(fiSnap.topCentros),
       topClientes: rankList(fiSnap.topClientes),
     };
-    mark(
-      "finance",
-      snap.finance.receitaLiquida != null ? "ok" : "empty",
-      snap.finance.receitaLiquida != null
-        ? "Financial Intelligence / DRE"
-        : "FI sem receita líquida no período",
-    );
+    return {
+      patch: { finance },
+      marks: [
+        {
+          key: "finance",
+          status: finance.receitaLiquida != null ? "ok" : "empty",
+          message:
+            finance.receitaLiquida != null
+              ? "Financial Intelligence / DRE"
+              : "FI sem receita líquida no período",
+        },
+      ],
+    };
   } catch (error) {
-    mark(
-      "finance",
-      "error",
-      error instanceof Error ? error.message : "Falha FI isolada",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "finance",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha FI isolada",
+        },
+      ],
+    };
   }
+}
 
+async function loadCashSlice(tenantSlug: string): Promise<SliceResult> {
   try {
     const { getCashIntelligenceDashboard } = await import(
       "@/lib/finance/cash-intelligence/cash-intelligence-actions"
     );
-    const res = await getCashIntelligenceDashboard(args.tenantSlug, {
+    const res = await getCashIntelligenceDashboard(tenantSlug, {
       horizonDays: 30,
     });
-    if (res.success) {
-      const d = asRecord(res.dashboard);
-      const balance = asRecord(d.balance);
-      const wc = asRecord(d.workingCapital);
-      const layers = asRecord(d.layers);
-      const totals = asRecord(layers.totals);
-      const projection = asRecord(d.projection);
-      snap.cash = {
-        entradas: num(d.periodInflows),
-        saidas: num(d.periodOutflows),
-        saldoConsolidado: num(balance.consolidated),
-        capitalGiro: num(wc.recommended) ?? num(wc.current),
-        necessidadeCaixa: num(wc.gap),
-        fluxoRealizadoNet:
-          (num(d.periodInflows) ?? 0) - (num(d.periodOutflows) ?? 0),
-        fluxoPrevistoNet:
-          (num(totals.forecastIn) ?? 0) - (num(totals.forecastOut) ?? 0),
-        fluxoProjetadoClosing: num(projection.closingBalance),
-        contasPagar: num(d.payablesOpen),
-        contasReceber: num(d.receivablesOpen),
-        // Inadimplência formal exige títulos overdue — não inventar a partir do consolidado
-        inadimplencia: null,
-        riskAlertCount: Array.isArray(d.alerts) ? d.alerts.length : 0,
+    if (!res.success) {
+      return {
+        patch: {},
+        marks: [
+          {
+            key: "cash",
+            status: "empty",
+            message: res.error ?? "Cash Intelligence sem dados",
+          },
+        ],
       };
-      mark("cash", "ok", "Cash Intelligence");
-      mark(
-        "fin.inadimplencia",
-        "empty",
-        "Inadimplência não exposta no dashboard de caixa — Dados indisponíveis",
-      );
-    } else {
-      mark("cash", "empty", res.error ?? "Cash Intelligence sem dados");
     }
+    const d = asRecord(res.dashboard);
+    const balance = asRecord(d.balance);
+    const wc = asRecord(d.workingCapital);
+    const layers = asRecord(d.layers);
+    const totals = asRecord(layers.totals);
+    const projection = asRecord(d.projection);
+    return {
+      patch: {
+        cash: {
+          entradas: num(d.periodInflows),
+          saidas: num(d.periodOutflows),
+          saldoConsolidado: num(balance.consolidated),
+          capitalGiro: num(wc.recommended) ?? num(wc.current),
+          necessidadeCaixa: num(wc.gap),
+          fluxoRealizadoNet:
+            (num(d.periodInflows) ?? 0) - (num(d.periodOutflows) ?? 0),
+          fluxoPrevistoNet:
+            (num(totals.forecastIn) ?? 0) - (num(totals.forecastOut) ?? 0),
+          fluxoProjetadoClosing: num(projection.closingBalance),
+          contasPagar: num(d.payablesOpen),
+          contasReceber: num(d.receivablesOpen),
+          inadimplencia: null,
+          riskAlertCount: Array.isArray(d.alerts) ? d.alerts.length : 0,
+        },
+      },
+      marks: [
+        { key: "cash", status: "ok", message: "Cash Intelligence" },
+        {
+          key: "fin.inadimplencia",
+          status: "empty",
+          message:
+            "Inadimplência não exposta no dashboard de caixa — Dados indisponíveis",
+        },
+      ],
+    };
   } catch (error) {
-    mark(
-      "cash",
-      "error",
-      error instanceof Error ? error.message : "Falha Cash isolada",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "cash",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha Cash isolada",
+        },
+      ],
+    };
   }
+}
 
+async function loadSalesSlice(
+  tenantId: string,
+  period: AnalyticsDateRange,
+): Promise<SliceResult> {
   try {
     const { createCommercialIntelligenceService } = await import(
       "@/lib/vendas/commercial-intelligence-service"
     );
-    const ci = await createCommercialIntelligenceService(args.tenantId);
+    const ci = await createCommercialIntelligenceService(tenantId);
     const data = asRecord(
       await ci.load({
-        de: args.period.from,
-        ate: args.period.to,
+        de: period.from,
+        ate: period.to,
       }),
     );
     const k = asRecord(data.kpis);
     const rankings = asRecord(data.rankings);
     const byClient = rankList(rankings.clientes);
-    const totalClient = byClient.reduce((s, i) => s + i.value, 0);
-    snap.sales = {
+    const sales = {
       faturamento: num(k.faturamento) ?? num(k.faturamentoLiquido),
       quantidade: num(k.quantidadeFaturadas) ?? num(k.qtdFaturadas),
       ticketMedio: num(k.ticketMedio),
@@ -199,216 +224,346 @@ export async function loadAnalyticsDomainSnapshot(args: {
       byChannel: rankList(data.porCanal ?? rankings.canais),
       byBranch: rankList(rankings.filiais ?? data.porFilial),
     };
-    mark(
-      "sales",
-      snap.sales.faturamento != null ? "ok" : "empty",
-      "Commercial Intelligence",
-    );
-    if (totalClient > 0 && byClient[0]) {
-      // concentração top1 — só com ranking real
-      if (!snap.customers) {
-        /* filled below */
-      }
-    }
+    return {
+      patch: { sales },
+      marks: [
+        {
+          key: "sales",
+          status: sales.faturamento != null ? "ok" : "empty",
+          message: "Commercial Intelligence",
+        },
+      ],
+    };
   } catch (error) {
-    mark(
-      "sales",
-      "error",
-      error instanceof Error ? error.message : "Falha Vendas isolada",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "sales",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha Vendas isolada",
+        },
+      ],
+    };
   }
+}
 
+async function loadMetasSlice(
+  tenantId: string,
+  period: AnalyticsDateRange,
+): Promise<SliceResult> {
   try {
     const { createCommercialPanelService } = await import(
       "@/lib/metas/commercial-panel-service"
     );
-    const service = await createCommercialPanelService(args.tenantId);
+    const service = await createCommercialPanelService(tenantId);
     const panel = await service.getPanel({
-      dataDe: args.period.from,
-      dataAte: args.period.to,
+      dataDe: period.from,
+      dataAte: period.to,
     });
     const proj = panel.projecao;
-    if (proj) {
-      const pct = proj.percentual_atingido;
-      snap.metas = {
-        // Campos canônicos de MetaProjecaoMensal (não aliases inventados)
-        metaFaturamento: proj.valor_meta,
-        realizadoFaturamento: proj.faturamento_realizado,
-        projecaoFaturamento:
-          proj.projecao_dias_uteis ?? proj.projecao_fechamento ?? null,
-        attainment: pct == null ? null : pct / 100,
-        probabilidadeLabel: null,
+    if (!proj) {
+      return {
+        patch: {},
+        marks: [{ key: "metas", status: "empty", message: "Sem projeção de meta" }],
       };
-      mark(
-        "metas",
-        proj.valor_meta != null ? "ok" : "empty",
-        "metas_vendas_mensais via commercial-panel",
-      );
     }
+    const pct = proj.percentual_atingido;
+    return {
+      patch: {
+        metas: {
+          metaFaturamento: proj.valor_meta,
+          realizadoFaturamento: proj.faturamento_realizado,
+          projecaoFaturamento:
+            proj.projecao_dias_uteis ?? proj.projecao_fechamento ?? null,
+          attainment: pct == null ? null : pct / 100,
+          probabilidadeLabel: null,
+        },
+      },
+      marks: [
+        {
+          key: "metas",
+          status: proj.valor_meta != null ? "ok" : "empty",
+          message: "metas_vendas_mensais via commercial-panel",
+        },
+      ],
+    };
   } catch (error) {
-    mark(
-      "metas",
-      "error",
-      error instanceof Error ? error.message : "Falha ao carregar metas",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "metas",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha ao carregar metas",
+        },
+      ],
+    };
   }
+}
 
+async function loadCustomersSlice(tenantId: string): Promise<SliceResult> {
   try {
     const { createCrmExecutivoService } = await import(
       "@/lib/crm/crm-executivo-service"
     );
-    const crm = await createCrmExecutivoService(args.tenantId);
+    const crm = await createCrmExecutivoService(tenantId);
     const portfolio = asRecord(await crm.loadPortfolio(new Date()));
     const k = asRecord(portfolio.kpis);
-    snap.customers = {
-      ativos: num(k.clientesAtivos),
-      novos: num(k.novosMes),
-      recorrentes: num(k.recorrentes),
-      inativos: num(k.inativos180),
-      frequencia: num(k.mediaVisitas),
-      ticketMedio: num(k.ticketMedioPorCliente),
-      receitaPorCliente: num(k.faturamentoPorCliente),
-      emRisco: Array.isArray(portfolio.riscos) ? portfolio.riscos.length : null,
-      concentracaoTop: (() => {
-        const clients = snap.sales?.byClient ?? [];
-        const total = clients.reduce((s, i) => s + i.value, 0);
-        if (!clients.length || total <= 0) return null;
-        return clients[0]!.value / total;
-      })(),
+    return {
+      patch: {
+        customers: {
+          ativos: num(k.clientesAtivos),
+          novos: num(k.novosMes),
+          recorrentes: num(k.recorrentes),
+          inativos: num(k.inativos180),
+          frequencia: num(k.mediaVisitas),
+          ticketMedio: num(k.ticketMedioPorCliente),
+          receitaPorCliente: num(k.faturamentoPorCliente),
+          emRisco: Array.isArray(portfolio.riscos) ? portfolio.riscos.length : null,
+          concentracaoTop: null,
+        },
+      },
+      marks: [{ key: "customers", status: "ok", message: "CRM Executivo" }],
     };
-    mark("customers", "ok", "CRM Executivo");
   } catch (error) {
-    mark(
-      "customers",
-      "error",
-      error instanceof Error ? error.message : "Falha CRM isolada",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "customers",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha CRM isolada",
+        },
+      ],
+    };
   }
+}
 
+async function loadOpsSlice(
+  tenantId: string,
+  period: AnalyticsDateRange,
+): Promise<SliceResult> {
   try {
     const { createOsDashboardService } = await import(
       "@/lib/ordens/os-dashboard-service"
     );
-    const os = await createOsDashboardService(args.tenantId);
+    const os = await createOsDashboardService(tenantId);
     const data = asRecord(
       await os.getData({
-        de: args.period.from,
-        ate: args.period.to,
+        de: period.from,
+        ate: period.to,
       }),
     );
     const k = asRecord(data.kpis);
     const series = asRecord(data.series);
-    snap.operations = {
-      quantidade:
-        (num(k.abertas) ?? 0) +
-        (num(k.finalizadas) ?? 0) +
-        (num(k.canceladas) ?? 0) +
-        (num(k.emExecucao) ?? 0),
-      abertas: num(k.abertas),
-      concluidas: num(k.finalizadas),
-      tempoMedio: num(k.tempoMedioConclusaoDias),
-      retrabalho: num(k.indiceRetrabalho),
-      conversao: num(k.taxaAprovacao),
-      faturamento: num(k.faturamento),
-      ticketMedio: num(k.ticketMedio),
-      servicos: rankList(series.porTipoServico),
+    return {
+      patch: {
+        operations: {
+          quantidade:
+            (num(k.abertas) ?? 0) +
+            (num(k.finalizadas) ?? 0) +
+            (num(k.canceladas) ?? 0) +
+            (num(k.emExecucao) ?? 0),
+          abertas: num(k.abertas),
+          concluidas: num(k.finalizadas),
+          tempoMedio: num(k.tempoMedioConclusaoDias),
+          retrabalho: num(k.indiceRetrabalho),
+          conversao: num(k.taxaAprovacao),
+          faturamento: num(k.faturamento),
+          ticketMedio: num(k.ticketMedio),
+          servicos: rankList(series.porTipoServico),
+        },
+      },
+      marks: [{ key: "operations", status: "ok", message: "OS Dashboard" }],
     };
-    mark("operations", "ok", "OS Dashboard");
   } catch (error) {
-    mark(
-      "operations",
-      "error",
-      error instanceof Error ? error.message : "Falha OS isolada",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "operations",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha OS isolada",
+        },
+      ],
+    };
   }
+}
 
+async function loadInventorySlice(
+  tenantId: string,
+  tenantSlug: string,
+): Promise<SliceResult> {
   try {
     const { createExecutiveStockService } = await import(
       "@/lib/estoque/executive-stock-service"
     );
-    const stock = await createExecutiveStockService(args.tenantId);
-    const data = asRecord(await stock.load(args.tenantSlug, {}));
+    const stock = await createExecutiveStockService(tenantId);
+    const data = asRecord(await stock.load(tenantSlug, {}));
     const k = asRecord(data.kpis ?? data);
     const zerados = num(k.produtosZerados) ?? 0;
     const abaixo = num(k.produtosAbaixoMinimo) ?? 0;
-    snap.inventory = {
-      valor: num(k.valorTotalEstoque),
-      giro: num(k.giroMedio),
-      cobertura: num(k.coberturaEstoque),
-      ruptura: zerados + abaixo > 0 ? zerados + abaixo : null,
-      excesso: num(k.valorFinanceiroParado),
-      itensParados: null,
+    return {
+      patch: {
+        inventory: {
+          valor: num(k.valorTotalEstoque),
+          giro: num(k.giroMedio),
+          cobertura: num(k.coberturaEstoque),
+          ruptura: zerados + abaixo > 0 ? zerados + abaixo : null,
+          excesso: num(k.valorFinanceiroParado),
+          itensParados: null,
+        },
+      },
+      marks: [
+        { key: "inventory", status: "ok", message: "Executive Stock" },
+        {
+          key: "estoque.curva_abc",
+          status: "empty",
+          message: "Curva ABC sem fonte canônica — Dados indisponíveis",
+        },
+      ],
     };
-    mark("inventory", "ok", "Executive Stock");
-    mark(
-      "estoque.curva_abc",
-      "empty",
-      "Curva ABC sem fonte canônica — Dados indisponíveis",
-    );
   } catch (error) {
-    mark(
-      "inventory",
-      "error",
-      error instanceof Error ? error.message : "Falha Estoque isolada",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "inventory",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha Estoque isolada",
+        },
+      ],
+    };
   }
+}
 
+async function loadTaxSlice(tenantSlug: string): Promise<SliceResult> {
   try {
     const { getTaxIntelligenceDashboard } = await import(
       "@/lib/finance/tax-intelligence/tax-intelligence-actions"
     );
-    const res = await getTaxIntelligenceDashboard(args.tenantSlug);
-    if (res.success) {
-      const d = asRecord(res.dashboard);
-      const efficiency = Array.isArray(d.efficiency) ? d.efficiency : [];
-      const eff = efficiency.find(
-        (e) => asRecord(e).key === "effective_load",
-      );
-      const ebitda = snap.finance?.ebitda;
-      const carga = num(d.consolidatedLoad);
-      snap.tax = {
-        carga,
-        previsto: num(d.projectedLoad),
-        impactoCaixa: num(asRecord(res.cashflow).totalTaxOutflow),
-        eficiencia: num(asRecord(eff).value),
-        oportunidades: Array.isArray(d.opportunities)
-          ? d.opportunities.reduce(
-              (s: number, o) => s + (num(asRecord(o).estimatedImpact) ?? 0),
-              0,
-            )
-          : null,
-        riscos: Array.isArray(res.alerts)
-          ? res.alerts.filter((a) => asRecord(a).severity !== "info").length
-          : null,
-        impactoEbitdaRatio:
-          carga != null && ebitda && ebitda !== 0 ? carga / ebitda : null,
-        byBranch: rankList(d.byBranch).map((b) => ({
-          ...b,
-          value: num(asRecord(b).value) ?? b.value,
-        })),
-        byRegime: [],
+    const res = await getTaxIntelligenceDashboard(tenantSlug);
+    if (!res.success) {
+      return {
+        patch: {},
+        marks: [
+          {
+            key: "tax",
+            status: "empty",
+            message: res.error ?? "Tax Intelligence sem dados",
+          },
+        ],
       };
-      // byBranch from tax uses `amount`
-      snap.tax.byBranch = Array.isArray(d.byBranch)
-        ? d.byBranch.map((b) => {
-            const r = asRecord(b);
-            return {
-              id: String(r.id),
-              label: String(r.label ?? r.id),
-              value: num(r.amount) ?? num(r.value) ?? 0,
-            };
-          })
-        : [];
-      mark("tax", "ok", "Tax Intelligence");
-    } else {
-      mark("tax", "empty", res.error ?? "Tax Intelligence sem dados");
     }
+    const d = asRecord(res.dashboard);
+    const efficiency = Array.isArray(d.efficiency) ? d.efficiency : [];
+    const eff = efficiency.find((e) => asRecord(e).key === "effective_load");
+    const carga = num(d.consolidatedLoad);
+    const byBranch = Array.isArray(d.byBranch)
+      ? d.byBranch.map((b) => {
+          const r = asRecord(b);
+          return {
+            id: String(r.id),
+            label: String(r.label ?? r.id),
+            value: num(r.amount) ?? num(r.value) ?? 0,
+          };
+        })
+      : [];
+    return {
+      patch: {
+        tax: {
+          carga,
+          previsto: num(d.projectedLoad),
+          impactoCaixa: num(asRecord(res.cashflow).totalTaxOutflow),
+          eficiencia: num(asRecord(eff).value),
+          oportunidades: Array.isArray(d.opportunities)
+            ? d.opportunities.reduce(
+                (s: number, o) => s + (num(asRecord(o).estimatedImpact) ?? 0),
+                0,
+              )
+            : null,
+          riscos: Array.isArray(res.alerts)
+            ? res.alerts.filter((a) => asRecord(a).severity !== "info").length
+            : null,
+          impactoEbitdaRatio: null,
+          byBranch,
+          byRegime: [],
+        },
+      },
+      marks: [{ key: "tax", status: "ok", message: "Tax Intelligence" }],
+    };
   } catch (error) {
-    mark(
-      "tax",
-      "error",
-      error instanceof Error ? error.message : "Falha Tax isolada",
-    );
+    return {
+      patch: {},
+      marks: [
+        {
+          key: "tax",
+          status: "error",
+          message: error instanceof Error ? error.message : "Falha Tax isolada",
+        },
+      ],
+    };
+  }
+}
+
+async function loadAnalyticsDomainSnapshotUncached(args: {
+  tenantId: string;
+  tenantSlug: string;
+  period: AnalyticsDateRange;
+}): Promise<AnalyticsDomainSnapshot> {
+  if (!args.tenantId?.trim()) {
+    throw new Error("tenantId obrigatório no snapshot Analytics.");
+  }
+
+  const asOf = new Date().toISOString().slice(0, 10);
+  const health: NonNullable<AnalyticsDomainSnapshot["sourceHealth"]> = {};
+
+  const slices = await Promise.all([
+    loadFinanceSlice(args.tenantId, args.tenantSlug, args.period),
+    loadCashSlice(args.tenantSlug),
+    loadSalesSlice(args.tenantId, args.period),
+    loadMetasSlice(args.tenantId, args.period),
+    loadCustomersSlice(args.tenantId),
+    loadOpsSlice(args.tenantId, args.period),
+    loadInventorySlice(args.tenantId, args.tenantSlug),
+    loadTaxSlice(args.tenantSlug),
+  ]);
+
+  const snap: AnalyticsDomainSnapshot = {
+    tenantId: args.tenantId,
+    tenantSlug: args.tenantSlug,
+    asOf,
+    sourceHealth: health,
+  };
+
+  for (const slice of slices) {
+    Object.assign(snap, slice.patch);
+    for (const m of slice.marks) {
+      health[m.key] = {
+        status: m.status,
+        message: m.message,
+        updatedAt: asOf,
+      };
+    }
+  }
+
+  // Pós-compose: concentração top1 e impacto EBITDA (dependem de sales/finance).
+  if (snap.customers && snap.sales?.byClient?.length) {
+    const clients = snap.sales.byClient;
+    const total = clients.reduce((s, i) => s + i.value, 0);
+    if (total > 0 && clients[0]) {
+      snap.customers = {
+        ...snap.customers,
+        concentracaoTop: clients[0].value / total,
+      };
+    }
+  }
+  if (snap.tax && snap.finance?.ebitda && snap.finance.ebitda !== 0 && snap.tax.carga != null) {
+    snap.tax = {
+      ...snap.tax,
+      impactoEbitdaRatio: snap.tax.carga / snap.finance.ebitda,
+    };
   }
 
   if (snap.tenantId !== args.tenantId) {
@@ -417,4 +572,82 @@ export async function loadAnalyticsDomainSnapshot(args: {
 
   snap.sourceHealth = health;
   return snap;
+}
+
+const loadAnalyticsDomainSnapshotCached = cache(
+  async (
+    tenantId: string,
+    tenantSlug: string,
+    from: string,
+    to: string,
+    preset: string,
+    label: string,
+  ) =>
+    loadAnalyticsDomainSnapshotUncached({
+      tenantId,
+      tenantSlug,
+      period: {
+        from,
+        to,
+        preset: preset as AnalyticsDateRange["preset"],
+        label,
+      },
+    }),
+);
+
+/** Cache curto entre requests (warm navigation) — dados reais, sem inventar. */
+const SNAPSHOT_TTL_MS = 45_000;
+const snapshotTtl = new Map<
+  string,
+  { expires: number; data: AnalyticsDomainSnapshot }
+>();
+
+function snapshotCacheKey(
+  tenantId: string,
+  from: string,
+  to: string,
+  preset: string,
+): string {
+  return `${tenantId}|${from}|${to}|${preset}`;
+}
+
+function pruneSnapshotTtl(now: number) {
+  if (snapshotTtl.size <= 48) return;
+  for (const [key, entry] of snapshotTtl) {
+    if (entry.expires <= now) snapshotTtl.delete(key);
+  }
+}
+
+/** Dedup por request (tenant + período) + TTL warm. */
+export async function loadAnalyticsDomainSnapshot(args: {
+  tenantId: string;
+  tenantSlug: string;
+  period: AnalyticsDateRange;
+}): Promise<AnalyticsDomainSnapshot> {
+  const now = Date.now();
+  const key = snapshotCacheKey(
+    args.tenantId,
+    args.period.from,
+    args.period.to,
+    args.period.preset,
+  );
+  const hit = snapshotTtl.get(key);
+  if (hit && hit.expires > now) {
+    return structuredClone(hit.data);
+  }
+
+  const data = await loadAnalyticsDomainSnapshotCached(
+    args.tenantId,
+    args.tenantSlug,
+    args.period.from,
+    args.period.to,
+    args.period.preset,
+    args.period.label,
+  );
+  snapshotTtl.set(key, {
+    expires: now + SNAPSHOT_TTL_MS,
+    data: structuredClone(data),
+  });
+  pruneSnapshotTtl(now);
+  return data;
 }

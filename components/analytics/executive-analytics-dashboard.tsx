@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, Download, Sparkles } from "lucide-react";
 
+import { DecisionCenterView } from "@/components/analytics/decision-center/decision-center-view";
 import { ExecutiveEmptyState, MetricCard } from "@/components/executive";
 import { AnalyticsNavigation } from "@/components/analytics/analytics-navigation";
 import { GFFilterBar } from "@/components/gf/gf-filter-bar";
@@ -71,8 +72,8 @@ type Props = {
 export function ExecutiveAnalyticsDashboard({
   tenantSlug,
   initialBundle,
-  title = "Analytics Enterprise",
-  description = "Indicadores executivos a partir das fontes canônicas — sem dados fictícios.",
+  title = "Centro de Inteligência Executiva",
+  description = "Indicadores, insights e decisões a partir de dados reais — sem IA generativa.",
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -116,6 +117,8 @@ export function ExecutiveAnalyticsDashboard({
       ),
     [bundle.kpis],
   );
+
+  const decisionPack = bundle.decisionCenter ?? null;
 
   const sourceEntries = useMemo(
     () => Object.entries(bundle.sourceHealth ?? {}),
@@ -291,13 +294,18 @@ export function ExecutiveAnalyticsDashboard({
         </details>
       ) : null}
 
+      {decisionPack ? <DecisionCenterView pack={decisionPack} /> : null}
+
       {bundle.empty ? (
         <ExecutiveEmptyState
           title="Dados indisponíveis"
           description="Nenhuma fonte canônica retornou métricas. Configure DRE, vendas, caixa ou tributos — nada é estimado."
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div
+          className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+          data-analytics-kpi-grid=""
+        >
           {availableKpis.slice(0, 12).map((k) => (
             <button
               key={k.definitionId}

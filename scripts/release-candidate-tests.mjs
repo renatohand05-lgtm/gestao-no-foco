@@ -333,6 +333,7 @@ const allowedPostRc = new Set([
   "20260817_tax_configuration_phase26_8.sql", // Sprint 26.8 Tax configuration
   "20260818_phase29_10_1_fix_cliente_contatos_ativo.sql", // Sprint 29.10.1 fix ativo index
   "20260820_phase30_2_team_rbac.sql", // Sprint 30.2 Equipe / Team RBAC
+  "20260821_phase30_7_automations.sql", // Sprint 30.7 Central de Automações
 ]);
 const unexpected = migrations.filter((f) => {
   if (f.includes("22_10")) return true;

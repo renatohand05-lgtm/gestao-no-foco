@@ -1,0 +1,234 @@
+ENTERPRISE
+
+teste-renato-01
+
+PRINCIPAL
+Centro de Operações
+Dashboard
+Busca
+OPERAÇÃO
+Clientes
+Produtos & Serviços
+Estoque
+Compras
+Vendas
+Ordens de Serviço
+Mecânicos
+INTELIGÊNCIA
+Inteligência
+Tributário
+CRM
+Financeiro
+Integrações
+Analytics
+Relatórios
+SISTEMA
+Configurações
+teste-renato-01
+Owner
+Toggle Sidebar
+
+Gestão · teste-renato-01
+
+Plataforma de Gestão Inteligente
+
+Buscar…
+⌘K
+RA
+
+Apresentação
+
+Normal
+Executivo
+Comercial
+Tela Cheia
+Analytics — Metas
+
+Atingimento via metas_vendas existentes.
+
+Executivo
+Financeiro
+Vendas
+Clientes
+Operações
+Estoque
+Tributário
+Metas
+Alertas
+Relatórios
+Configurações
+
+Período e exportação
+
+Hoje
+Ontem
+Semana
+7d
+30d
+90d
+365d
+Mês
+Trim.
+Sem.
+Ano
+CSV
+Excel (Em preparação)
+PDF (Em preparação)
+Análise baseada em regras, métricas e histórico do tenant.
+
+Atualizado: 2026-08-02
+
+Cobertura de dados
+
+6 de 10 fontes ativas
+
+Ver fontes
+
+Confiança consolidada no provider · detalhes técnicos sob demanda
+
+Saldo consolidado
+
+R$ 123.032,00
+
+Confiança alta
+
+Capital de giro
+
+R$ 0,00
+
+Confiança alta
+
+Clientes ativos
+
+9
+
+Confiança alta
+
+Quantidade de OS
+
+16
+
+Confiança alta
+
+OS abertas
+
+3
+
+Confiança alta
+
+Carga tributária consolidada
+
+R$ 0,00
+
+Confiança alta
+
+Alertas (3)
+Deduplicados por contexto e período.
+attention
+Clientes em risco
+
+2 cliente(s) sinalizados pelo CRM executivo.
+
+Revisar carteira em /clientes/central.
+
+attention
+Riscos tributários
+
+Tax Intelligence reportou alertas de risco.
+
+Abrir /financeiro/tributos.
+
+critical
+Concentração excessiva de receita
+
+Top cliente representa 67% do ranking comercial disponível.
+
+Revisar diversificação de carteira (sugestão).
+
+Insights
+Análise baseada em regras, métricas e histórico do tenant.
+
+Resumo executivo
+
+32 métricas disponíveis, 47 indisponíveis (sem estimativa). 3 alerta(s) abertos.
+
+Confiança medium · Análise baseada em regras, métricas e histórico do tenant.
+
+Clientes em risco
+
+2 cliente(s) sinalizados pelo CRM executivo. Recomendação: Revisar carteira em /clientes/central.
+
+Confiança medium · Alerta determinístico — revisão humana obrigatória.
+
+Riscos tributários
+
+Tax Intelligence reportou alertas de risco. Recomendação: Abrir /financeiro/tributos.
+
+Confiança medium · Alerta determinístico — revisão humana obrigatória.
+
+Concentração excessiva de receita
+
+Top cliente representa 67% do ranking comercial disponível. Recomendação: Revisar diversificação de carteira (sugestão).
+
+Confiança medium · Alerta determinístico — revisão humana obrigatória.
+
+Metas
+Integração com metas_vendas — sem alterar o módulo de metas.
+
+vendas.faturamento: meta 132500 · realizado 6721.5 · atingimento 0.050728301886792455 ·
+
+fin.receita_bruta: meta 132500 · realizado 6721.5 · atingimento 0.050728301886792455 ·
+
+Exportação
+csv: ready
+excel: Em preparação
+pdf: Em preparação
+print: ready
+Catálogo (amostra)
+Indisponíveis explícitos — sem estimativa silenciosa.
+Faturamento / Receita bruta
+Valor ausente na fonte — sem estimativa silenciosa.
+Receita líquida
+Valor ausente na fonte — sem estimativa silenciosa.
+EBITDA
+Valor ausente na fonte — sem estimativa silenciosa.
+Margem EBITDA
+Valor ausente na fonte — sem estimativa silenciosa.
+Lucro operacional (EBIT)
+Valor ausente na fonte — sem estimativa silenciosa.
+Lucro líquido
+Valor ausente na fonte — sem estimativa silenciosa.
+Despesas operacionais
+Valor ausente na fonte — sem estimativa silenciosa.
+CMV / Custos
+Valor ausente na fonte — sem estimativa silenciosa.
+Inadimplência (vencidos a receber)
+Valor ausente na fonte — sem estimativa silenciosa.
+Prazo médio de recebimento
+Não há serviço canônico de PMR no Finance Core nesta versão.
+Prazo médio de pagamento
+Não há serviço canônico de PMP no Finance Core nesta versão.
+Necessidade de caixa / risco
+Valor ausente na fonte — sem estimativa silenciosa.
+Faturamento comercial
+Valor ausente na fonte — sem estimativa silenciosa.
+Quantidade de vendas
+Valor ausente na fonte — sem estimativa silenciosa.
+Ticket médio
+Valor ausente na fonte — sem estimativa silenciosa.
+Taxa de conversão
+Valor ausente na fonte — sem estimativa silenciosa.
+Cancelamentos
+Valor ausente na fonte — sem estimativa silenciosa.
+Descontos
+Valor ausente na fonte — sem estimativa silenciosa.
+Vendas por vendedor
+Ranking/dimensional sem dados no snapshot (sem estimativa).
+Vendas por filial
+Ranking/dimensional sem dados no snapshot (sem estimativa).
+
+Layout widgets: 4 visíveis · flags analytics=true
+
+Navegação por teclado disponível nos filtros e cards de KPI.
+
+A plataforma que eleva sua gestão ao próximo nível.

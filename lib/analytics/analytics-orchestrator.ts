@@ -16,6 +16,7 @@ import type {
   AnalyticsExportStatus,
   AnalyticsPeriodPreset,
   MetricFilter,
+  MetricResult,
 } from "./core/metric-types.ts";
 import { buildAnalyticsAlerts } from "./insights/alert-engine.ts";
 import {
@@ -27,6 +28,7 @@ import {
   isAnalyticsExportPdfEnabled,
 } from "./analytics-feature-flags.ts";
 import { mergeAnalyticsLayout } from "./persistence/dashboard-layout-store.ts";
+import { composeDecisionCenterPack } from "./decision-center/compose.ts";
 
 export function buildAnalyticsExportStatuses(): AnalyticsExportStatus[] {
   return [
@@ -140,9 +142,12 @@ export function buildExecutiveAnalyticsBundle(args: {
     "fin.receita_liquida",
     "vendas.faturamento",
     "fin.ebitda",
+    "fin.lucro_liquido",
+    "fin.saldo_consolidado",
+    "vendas.quantidade",
   ].map((id) => buildTrendForMetric(args.snap, id));
 
-  return {
+  const base = {
     context,
     metrics,
     kpis,
@@ -167,6 +172,22 @@ export function buildExecutiveAnalyticsBundle(args: {
     sourceHealth: args.snap.sourceHealth ?? {},
     updatedAt: args.snap.asOf,
   };
+
+  /** Sprint 30.6 — Decision Center (puro, determinístico). */
+  const decisionCenter = composeDecisionCenterPack({
+    kpis: base.kpis as MetricResult[],
+    metrics: base.metrics,
+    comparisons: base.comparisons,
+    alerts: base.alerts,
+    insights: base.insights,
+    trends: base.trends,
+    targets: base.targets,
+    context: base.context,
+    updatedAt: base.updatedAt,
+    empty: base.empty,
+  });
+
+  return { ...base, decisionCenter };
 }
 
 export function analyticsDrillDown(

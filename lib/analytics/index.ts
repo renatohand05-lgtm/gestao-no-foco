@@ -68,3 +68,15 @@ export {
   analyticsDrillDown,
   buildAnalyticsExportStatuses,
 } from "./analytics-orchestrator.ts";
+export {
+  composeDecisionCenterPack,
+  buildExecutiveBrief,
+  buildKpiHealth,
+  buildForecastPanel,
+  buildDecisionItems,
+} from "./decision-center/index.ts";
+export type {
+  DecisionCenterPack,
+  KpiHealthLevel,
+  DecisionItem,
+} from "./decision-center/types.ts";

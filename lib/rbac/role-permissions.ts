@@ -75,6 +75,8 @@ const VISUALIZACAO_KEYS = unique([
   "analytics.visualizar",
   "analytics.executivo",
   "inteligencia.visualizar",
+  "automacoes.visualizar",
+  "automacoes.ver_historico",
   "tax.visualizar",
   "tax.executivo",
   "financeiro.visualizar",

@@ -207,9 +207,40 @@ export async function updateClienteTarefaStatusAction(
     }
 
     revalidateCrmPaths(tenantSlug, clienteId);
+    revalidatePath(`/${tenantSlug}/crm/follow-ups`);
     return { success: true, id: tarefaId };
   } catch (error) {
     return toActionError(error, "Erro ao atualizar tarefa.", "crm.updateTarefa");
+  }
+}
+
+/** Sprint 30.5 — concluir / adiar / atribuir follow-up. */
+export async function patchClienteTarefaAction(
+  tenantSlug: string,
+  tarefaId: string,
+  input: {
+    data_vencimento?: string | null;
+    responsavel_id?: string | null;
+    status?: string;
+    clienteId?: string;
+  },
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const parsedStatus = input.status
+      ? z.enum(CRM_TAREFA_STATUS).parse(input.status)
+      : undefined;
+    const service = await createClienteTarefaService(tenant.id);
+    await service.patch(tarefaId, {
+      data_vencimento: input.data_vencimento,
+      responsavel_id: input.responsavel_id,
+      status: parsedStatus,
+    });
+    revalidateCrmPaths(tenantSlug, input.clienteId);
+    revalidatePath(`/${tenantSlug}/crm/follow-ups`);
+    return { success: true, id: tarefaId };
+  } catch (error) {
+    return toActionError(error, "Erro ao atualizar follow-up.", "crm.patchTarefa");
   }
 }
 

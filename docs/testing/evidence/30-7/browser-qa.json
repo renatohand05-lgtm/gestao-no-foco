@@ -1,0 +1,121 @@
+{
+  "at": "2026-08-03T00:54:27.896Z",
+  "sprint": "30.7",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3007",
+  "targets": {
+    "coldMs": 2500,
+    "warmMs": 1200
+  },
+  "timings": {
+    "coldMs": 834,
+    "warmMs": 759
+  },
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET automacoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop cold 834ms (alvo <=2500ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Central marker"
+    },
+    {
+      "ok": true,
+      "detail": "desktop KPIs"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Builder tab"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Builder 8 steps"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Templates tab"
+    },
+    {
+      "ok": true,
+      "detail": "desktop dry-run button"
+    },
+    {
+      "ok": true,
+      "detail": "desktop warm 759ms (alvo <=1200ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop dark"
+    },
+    {
+      "ok": true,
+      "detail": "desktop light"
+    },
+    {
+      "ok": true,
+      "detail": "tablet GET automacoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Central"
+    },
+    {
+      "ok": true,
+      "detail": "tablet conteúdo"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 GET automacoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Central"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 conteúdo"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 GET automacoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Central"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 conteúdo"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 GET automacoes 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Central"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 conteúdo"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 25,
+    "fail": 0
+  }
+}

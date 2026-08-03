@@ -1,0 +1,27 @@
+PASS sessão autenticada
+PASS desktop GET automacoes 200
+PASS desktop cold 834ms (alvo <=2500ms)
+PASS desktop Central marker
+PASS desktop KPIs
+PASS desktop Builder tab
+PASS desktop Builder 8 steps
+PASS desktop Templates tab
+PASS desktop dry-run button
+PASS desktop warm 759ms (alvo <=1200ms)
+PASS desktop dark
+PASS desktop light
+PASS tablet GET automacoes 200
+PASS tablet Central
+PASS tablet conteúdo
+PASS mobile430 GET automacoes 200
+PASS mobile430 Central
+PASS mobile430 conteúdo
+PASS mobile390 GET automacoes 200
+PASS mobile390 Central
+PASS mobile390 conteúdo
+PASS mobile375 GET automacoes 200
+PASS mobile375 Central
+PASS mobile375 conteúdo
+PASS console bloqueante=0
+
+Cold 834ms · Warm 759ms

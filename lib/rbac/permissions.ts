@@ -181,6 +181,20 @@ export const PERMISSION_CATALOG = [
   def("inteligencia.ver_custos", "inteligencia", "ver_custos", "Ver custos/uso de inteligência", "financeiro_sensivel", "alto"),
   def("inteligencia.feedback", "inteligencia", "feedback", "Enviar feedback sobre respostas", "escrita", "baixo"),
 
+  // Automações Enterprise (Fase 30.7) — novas permissões; não altera as existentes
+  def("automacoes.visualizar", "automacoes", "visualizar", "Visualizar Central de Automações", "leitura", "medio"),
+  def("automacoes.criar", "automacoes", "criar", "Criar regras de automação", "escrita", "alto"),
+  def("automacoes.editar", "automacoes", "editar", "Editar regras de automação", "escrita", "alto"),
+  def("automacoes.ativar", "automacoes", "ativar", "Ativar regras de automação", "aprovacao", "critico"),
+  def("automacoes.pausar", "automacoes", "pausar", "Pausar regras de automação", "escrita", "alto"),
+  def("automacoes.arquivar", "automacoes", "arquivar", "Arquivar regras de automação", "exclusao", "alto"),
+  def("automacoes.simular", "automacoes", "simular", "Simular / dry-run de automações", "leitura", "alto"),
+  def("automacoes.executar", "automacoes", "executar", "Executar automações aprovadas", "aprovacao", "critico"),
+  def("automacoes.aprovar", "automacoes", "aprovar", "Aprovar execuções de automação", "aprovacao", "critico"),
+  def("automacoes.ver_historico", "automacoes", "ver_historico", "Ver histórico de execuções", "leitura", "medio"),
+  def("automacoes.ver_auditoria", "automacoes", "ver_auditoria", "Ver auditoria de automações", "leitura", "alto"),
+  def("automacoes.administrar", "automacoes", "administrar", "Administrar Central de Automações", "administracao", "critico"),
+
   // Tributário Enterprise (Fase 26.8+)
   def("tax.visualizar", "tax", "visualizar", "Visualizar hub tributário", "leitura", "alto"),
   def("tax.executivo", "tax", "executivo", "Cockpit tributário executivo", "financeiro_sensivel", "alto"),

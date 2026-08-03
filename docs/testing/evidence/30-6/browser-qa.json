@@ -1,0 +1,101 @@
+{
+  "at": "2026-08-03T00:34:00.155Z",
+  "sprint": "30.6",
+  "tenant": "teste-renato-01",
+  "baseUrl": "http://localhost:3005",
+  "targets": {
+    "coldMs": 2000,
+    "warmMs": 1000
+  },
+  "timings": {
+    "coldMs": 1873,
+    "warmMs": 607
+  },
+  "checks": [
+    {
+      "ok": true,
+      "detail": "sessão autenticada"
+    },
+    {
+      "ok": true,
+      "detail": "desktop GET analytics 200"
+    },
+    {
+      "ok": true,
+      "detail": "desktop cold 1873ms (alvo <=2000ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Intelligence"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Insights"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Forecast"
+    },
+    {
+      "ok": true,
+      "detail": "desktop Decision Center"
+    },
+    {
+      "ok": true,
+      "detail": "desktop KPI Health"
+    },
+    {
+      "ok": true,
+      "detail": "desktop warm 607ms (alvo <=1000ms)"
+    },
+    {
+      "ok": true,
+      "detail": "desktop dark"
+    },
+    {
+      "ok": true,
+      "detail": "desktop light"
+    },
+    {
+      "ok": true,
+      "detail": "tablet GET analytics 200"
+    },
+    {
+      "ok": true,
+      "detail": "tablet Analytics"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 GET analytics 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile430 Analytics"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 GET analytics 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile390 Analytics"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 GET analytics 200"
+    },
+    {
+      "ok": true,
+      "detail": "mobile375 Analytics"
+    },
+    {
+      "ok": true,
+      "detail": "console bloqueante=0"
+    }
+  ],
+  "consoleErrors": [],
+  "summary": {
+    "pass": 20,
+    "fail": 0
+  }
+}

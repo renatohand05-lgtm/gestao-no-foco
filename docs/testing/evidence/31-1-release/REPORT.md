@@ -49,14 +49,15 @@ Import boundaries: packages sem RN/Expo; mobile isolado em `apps/mobile`.
 
 ## Commit / push / Vercel
 
-Preenchido após publicação:
-
 | Item | Valor |
 |------|-------|
-| Commit | _(pendente)_ |
-| Push `origin/main` | _(pendente)_ |
-| Vercel Production | _(pendente)_ |
-| Smoke web | _(pendente)_ |
+| Commit | `b790029` — `feat(mobile): concluir fundacao e autenticacao Enterprise da Fase 31` |
+| Push `origin/main` | SIM (`e765e52..b790029`) |
+| Vercel Production | **success** — [deployment](https://vercel.com/renato16/gestao-no-foco/3cBJzUopnJXXCH4zCHkZv8PZM6Jg) |
+| Alias | https://gestao-no-foco.vercel.app |
+| Smoke web | `/` 200, `/login` 200, `/api/health` 200, `/demo` 307, `/onboarding` 307 — sem 404/500 nos checks |
+
+App mobile **não** publicado em stores; sem EAS Submit.
 
 ## Bugs
 
@@ -66,7 +67,7 @@ Preenchido após publicação:
 ## Pendências
 
 **Bloqueantes para “Android homologado”:** instalar SDK + device/AVD + rodar checklist.
-**Não bloqueantes para 31.2:** iOS device QA; filiais reais; screenshots device.
+**Não bloqueantes para 31.2:** iOS device QA; filiais reais; screenshots device; configurar Redirect URLs no Supabase.
 
 ## Checklist final
 
@@ -74,6 +75,6 @@ Preenchido após publicação:
 2. recovery homologado: **PARCIAL**
 3. biometria homologada: **PARCIAL**
 4. iOS preparado: **PARCIAL**
-5. fundação mobile versionada: _(atualizar pós-commit)_
-6. web preservada em produção: _(atualizar pós-deploy)_
+5. fundação mobile versionada: **SIM** (`b790029`)
+6. web preservada em produção: **SIM** (Vercel success + smoke 200)
 7. pronto para Sprint 31.2: **SIM**

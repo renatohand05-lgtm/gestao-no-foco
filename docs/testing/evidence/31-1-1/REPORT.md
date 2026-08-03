@@ -46,9 +46,16 @@ Guia: `docs/architecture/MOBILE_SUPABASE_REDIRECT_URLS.md`
 | 2 | recovery homologado | **PARCIAL** |
 | 3 | biometria homologada | **PARCIAL** |
 | 4 | iOS preparado | **PARCIAL** |
-| 5 | fundação mobile versionada | Ver release report pós-commit |
-| 6 | web preservada | Build/RC/RBAC PASS local |
+| 5 | fundação mobile versionada | **SIM** (`b790029`) |
+| 6 | web preservada | **SIM** (Vercel success + smoke) |
 | 7 | pronto para 31.2 | **SIM** (com ressalva Android) |
+
+## Publicação
+
+- Commit: `b790029`
+- Push: `origin/main`
+- Vercel: success — https://vercel.com/renato16/gestao-no-foco/3cBJzUopnJXXCH4zCHkZv8PZM6Jg
+- Relatório release: `docs/testing/evidence/31-1-release/REPORT.md`
 
 ## Não executado (conforme escopo)
 

@@ -21,8 +21,22 @@ function getSupabaseEnv() {
   return { url, key };
 }
 
+/** Assets estáticos que nunca devem passar por auth redirect. */
+function isStaticPublicAsset(pathname: string) {
+  return (
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/robots.txt" ||
+    pathname === "/favicon.ico" ||
+    /\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|txt|xml|woff2?)$/i.test(pathname)
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (isStaticPublicAsset(pathname)) {
+    return NextResponse.next({ request });
+  }
 
   if (isMaintenanceMode() && !isMaintenanceBypassPath(pathname)) {
     const url = request.nextUrl.clone();

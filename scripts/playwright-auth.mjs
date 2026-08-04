@@ -14,8 +14,9 @@ export const AUTH_FILE = resolve(AUTH_DIR, "user.json");
 export const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 const POLL_MS = 2000;
+/** Qualquer rota autenticada pós-login: /onboarding ou /[tenant]/… */
 const TENANT_ROUTE_RE =
-  /^\/[^/]+\/(dashboard|ordens|clientes|financeiro|vendas|configuracoes|relatorios|busca|primeiro-acesso)/;
+  /^\/(?:onboarding(?:\/.*)?|(?!login(?:\/|$)|register(?:\/|$)|inspecao(?:\/|$)|manutencao(?:\/|$)|convite(?:\/|$)|api(?:\/|$)|_next(?:\/|$))[^/]+\/[^/]+)/;
 
 mkdirSync(AUTH_DIR, { recursive: true });
 

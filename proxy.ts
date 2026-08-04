@@ -8,6 +8,10 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /*
+     * Exclui assets estáticos públicos (incl. PWA manifest).
+     * Sem isto, /manifest.webmanifest caía no middleware e redirecionava para /login.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|txt|xml|woff2?)$).*)",
   ],
 };

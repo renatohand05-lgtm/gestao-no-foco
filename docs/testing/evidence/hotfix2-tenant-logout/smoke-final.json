@@ -1,0 +1,45 @@
+{
+  "base": "http://localhost:3010",
+  "at": "2026-08-04T02:57:08.931Z",
+  "failed": 0,
+  "pageErrorCount": 0,
+  "pageErrors": [],
+  "steps": [
+    {
+      "name": "open-switcher",
+      "ok": true,
+      "url": "http://localhost:3010/[tenant]/dashboard",
+      "detail": null
+    },
+    {
+      "name": "open-avatar-menu",
+      "ok": true,
+      "url": "http://localhost:3010/[tenant]/dashboard",
+      "detail": null
+    },
+    {
+      "name": "logout-to-login",
+      "ok": true,
+      "url": "http://localhost:3010/login",
+      "detail": null
+    },
+    {
+      "name": "protected-blocked",
+      "ok": true,
+      "url": "http://localhost:3010/login?redirectTo=%2F%5Btenant%5D%2Fdashboard",
+      "detail": null
+    },
+    {
+      "name": "re-login",
+      "ok": true,
+      "url": "http://localhost:3010/[tenant]/dashboard",
+      "detail": null
+    },
+    {
+      "name": "manifest",
+      "ok": true,
+      "url": "http://localhost:3010/manifest.webmanifest",
+      "detail": null
+    }
+  ]
+}

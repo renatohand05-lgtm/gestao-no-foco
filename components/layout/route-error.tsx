@@ -15,6 +15,17 @@ type Props = {
   description?: string;
 };
 
+/** Remove padrões que possam vazar credenciais/PII de mensagens técnicas. */
+function sanitizeErrorText(value: unknown, max = 240): string {
+  return String(value ?? "")
+    .replace(/Bearer\s+[A-Za-z0-9\-._~+/]+=*/gi, "[redacted]")
+    .replace(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*/g, "[redacted-jwt]")
+    .replace(/(password|passwd|secret|token|cookie|authorization)\s*[:=]\s*\S+/gi, "$1=[redacted]")
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]")
+    .replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi, "[redacted-id]")
+    .slice(0, max);
+}
+
 export function RouteError({
   error,
   reset,
@@ -24,19 +35,37 @@ export function RouteError({
   const router = useRouter();
 
   useEffect(() => {
+    // Produção: só digest + nome sanitizado — sem stack, cookies ou PII na UI/storage.
     const payload = {
       level: "error",
       message: "route_error",
       at: new Date().toISOString(),
       context: {
-        digest: error.digest,
-        name: error.name,
-        message: error.message,
+        digest: error.digest ?? null,
+        name: sanitizeErrorText(error.name, 80),
       },
     };
     console.error(JSON.stringify(payload));
+
+    try {
+      sessionStorage.setItem(
+        "gof:last-route-error",
+        JSON.stringify({
+          at: payload.at,
+          digest: payload.context.digest,
+          name: payload.context.name,
+        }),
+      );
+    } catch {
+      // storage indisponível — ignore
+    }
+
     if (process.env.NODE_ENV === "development") {
-      console.error("[route_error:dev]", error.name, error.message, error.stack);
+      console.error(
+        "[route_error:dev]",
+        error.name,
+        sanitizeErrorText(error.message, 500),
+      );
     }
   }, [error]);
 

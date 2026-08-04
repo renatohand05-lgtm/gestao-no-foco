@@ -8,7 +8,7 @@
 | Item | Valor |
 |------|-------|
 | Feature commit | `2178bed` — `feat(mobile): concluir CRM, Estoque e Operação Mobile da Fase 31` |
-| Docs commit | *(este)* — `docs(testing): registrar checkpoint mobile até Sprint 31.6` |
+| Docs commit | `bac1e82` — `docs(testing): registrar checkpoint mobile até Sprint 31.6` |
 | Push | **SIM** — `main` = `origin/main` |
 | Ahead / behind | 0 / 0 |
 | Force push | Não |

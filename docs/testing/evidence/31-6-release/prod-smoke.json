@@ -1,0 +1,99 @@
+{
+  "at": "2026-08-04T12:31:45.381Z",
+  "baseUrl": "https://gestao-no-foco.vercel.app",
+  "tenant": "teste-renato-01",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "/ HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "/login HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "/api/health HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "/manifest.webmanifest HTTP 200"
+    },
+    {
+      "ok": true,
+      "detail": "/api/mobile/v1/tenants/00000000-0000-0000-0000-000000000001/crm/dashboard -> 401 (401 sem Bearer)"
+    },
+    {
+      "ok": true,
+      "detail": "/api/mobile/v1/tenants/00000000-0000-0000-0000-000000000001/estoque/dashboard -> 401 (401 sem Bearer)"
+    },
+    {
+      "ok": true,
+      "detail": "/api/mobile/v1/tenants/00000000-0000-0000-0000-000000000001/operacao/dashboard -> 401 (401 sem Bearer)"
+    },
+    {
+      "ok": true,
+      "detail": "/api/mobile/v1/tenants/00000000-0000-0000-0000-000000000001/financeiro/summary -> 401 (401 sem Bearer)"
+    },
+    {
+      "ok": true,
+      "detail": "/api/mobile/v1/tenants/00000000-0000-0000-0000-000000000001/dashboard -> 401 (401 sem Bearer)"
+    },
+    {
+      "ok": true,
+      "detail": "dashboard HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "financeiro HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "crm HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "estoque HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "operacao HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "equipe HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "analytics HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "automacoes HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "integracoes HTTP 200 (rota válida; auth=login-redirect)"
+    },
+    {
+      "ok": true,
+      "detail": "deep-auth produção: NÃO (storageState local) — ressalva não bloqueante"
+    },
+    {
+      "ok": true,
+      "detail": "console críticos: 0"
+    },
+    {
+      "ok": true,
+      "detail": "pageerrors: 0"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "deepAuth": false,
+  "summary": {
+    "passed": 21,
+    "failed": 0,
+    "total": 21
+  }
+}

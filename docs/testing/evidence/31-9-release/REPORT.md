@@ -4,6 +4,8 @@
 
 **Data:** 2026-08-04
 **Feature commit:** `a0e7c05`
+**Docs commit (este):** atualizado pós-smoke
+**HEAD sync:** `201c5e0` (+ commit de smoke se aplicável)
 **Escopo:** Sprints 31.7 + 31.8 + 31.9 (código, APIs, docs, testes, Web Vercel)
 **Fora de escopo:** EAS Build/Submit, APK/IPA, lojas, SQL remoto, migration
 
@@ -55,6 +57,26 @@ Ver `SECURITY.md` e `DEPENDENCIES.md`.
 - **31.8** Execução em campo (OS, checklist, fotos, galeria, assinatura, anexos)
 - **31.9** Produtividade (busca, commands, scanner preparado, favoritos, recentes, home adaptativa, deep links)
 
+## Deploy Web (Vercel)
+
+| Campo | Valor |
+|-------|-------|
+| Status | **Ready** |
+| Ambiente | Production |
+| Deployment | https://gestao-no-foco-ixlfv18nf-renato16.vercel.app |
+| Alias ativo | https://gestao-no-foco.vercel.app |
+| Feature commit | `a0e7c05` |
+| Docs commit | `201c5e0` |
+
+## Smoke produção
+
+Fonte: `prod-smoke.json` — **23 PASS / 0 FAIL**
+
+- Públicas `/`, `/login`, `/api/health`, `/api/status`, manifest: 200
+- APIs mobile sem Bearer (dashboard, finance, CRM, estoque, operação, inteligência, search, checklist): **401**
+- Módulos Web autenticados (redirect login): 200
+- Deep-auth com storageState: não executado (ressalva não bloqueante)
+
 ## Ressalvas
 
 - Android não homologado em device/emulador
@@ -62,7 +84,3 @@ Ver `SECURITY.md` e `DEPENDENCIES.md`.
 - iOS apenas readiness estática
 - Performance cold/warm não medida em device
 - Aplicativo **não** publicado em loja
-
-## Deploy / Smoke
-
-*(preenchido após push + Vercel Ready)*

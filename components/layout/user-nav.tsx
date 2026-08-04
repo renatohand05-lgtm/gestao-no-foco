@@ -1,7 +1,7 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { LogOut, Settings, User } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,14 @@ type UserNavProps = {
   avatarUrl?: string;
 };
 
+/**
+ * Logout idempotente — evita refresh RSC na rota protegida após signOut
+ * (re-render sem sessão derrubava o error boundary). Navegação hard para /login.
+ */
 export function UserNav({ email, name, avatarUrl }: UserNavProps) {
-  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+  const inFlight = useRef(false);
+
   const initials = name
     ? name
         .split(" ")
@@ -35,22 +41,37 @@ export function UserNav({ email, name, avatarUrl }: UserNavProps) {
     : "U";
 
   async function handleSignOut() {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
+    if (inFlight.current || signingOut) return;
+    inFlight.current = true;
+    setSigningOut(true);
 
-    if (error) {
-      console.error(getAuthErrorMessage(error));
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut({ scope: "global" });
+      if (error) {
+        console.error(getAuthErrorMessage(error));
+      }
+    } catch (err) {
+      console.error(
+        err instanceof Error ? err.message : "Falha ao encerrar sessão",
+      );
+    } finally {
+      // Hard navigation: limpa estado cliente e impede voltar a páginas autenticadas
+      // com dados em memória. Idempotente mesmo se signOut falhar parcialmente.
+      window.location.assign("/login");
     }
-
-    router.push("/login");
-    router.refresh();
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        disabled={signingOut}
         render={
-          <Button variant="ghost" className="relative size-8 rounded-full" />
+          <Button
+            variant="ghost"
+            className="relative size-8 rounded-full"
+            aria-label={signingOut ? "Saindo…" : "Abrir menu do usuário"}
+          />
         }
       >
         <Avatar className="size-8">
@@ -71,19 +92,26 @@ export function UserNav({ email, name, avatarUrl }: UserNavProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem disabled>
             <User className="mr-2 size-4" />
             Perfil
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem disabled>
             <Settings className="mr-2 size-4" />
             Preferências
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
+        <DropdownMenuItem
+          disabled={signingOut}
+          onClick={() => {
+            void handleSignOut();
+          }}
+          className="cursor-pointer"
+          variant="destructive"
+        >
           <LogOut className="mr-2 size-4" />
-          Sair
+          {signingOut ? "Saindo…" : "Sair"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

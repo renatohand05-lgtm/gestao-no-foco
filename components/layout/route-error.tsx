@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ export function RouteError({
   title = "Algo deu errado",
   description = "Não foi possível carregar esta página. Tente novamente.",
 }: Props) {
+  const router = useRouter();
+
   useEffect(() => {
     const payload = {
       level: "error",
@@ -63,8 +65,7 @@ export function RouteError({
         <Button
           type="button"
           variant="outline"
-          render={<Link href="/" />}
-          nativeButton={false}
+          onClick={() => router.push("/")}
         >
           Voltar ao início
         </Button>

@@ -44,10 +44,23 @@ export const getTenantBySlug = cache(
 );
 
 export const requireTenant = cache(async (slug: string): Promise<TenantWithRole> => {
-  const tenant = await getTenantBySlug(slug);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const tenants = await getUserTenants();
+  const tenant = tenants.find((item) => item.slug === slug) ?? null;
 
   if (!tenant) {
-    redirect("/onboarding");
+    // Sem membership neste slug: não abrir o tenant por URL.
+    // Se o usuário já tem empresas, vai para a primeira; senão onboarding.
+    const fallback = tenants[0]?.slug;
+    redirect(fallback ? `/${fallback}/dashboard` : "/onboarding");
   }
 
   return tenant;

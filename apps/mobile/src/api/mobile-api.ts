@@ -370,3 +370,838 @@ export function fetchFinanceDetail(input: {
     input.branchId,
   );
 }
+
+/* —— Sprint 31.4 CRM —— */
+
+export type MobileCrmDashboard = {
+  generatedAt: string;
+  updatedAtLabel: string;
+  kpis: {
+    receitaPrevista: string | null;
+    receitaFechada: string | null;
+    receitaProvavel: string | null;
+    conversao: string | null;
+    followUpsPendentes: number | null;
+    negociosEmRisco: number | null;
+    valorPipeline: string | null;
+    ticketMedio: string | null;
+  };
+  forecast: {
+    prevista: string | null;
+    provavel: string | null;
+    fechada: string | null;
+    conversao: string | null;
+  };
+  ranking: { nome: string; prevista: string; fechada: string }[];
+  alerts: {
+    id: string;
+    title: string;
+    description: string;
+    priority: string;
+    category: string;
+    href: string | null;
+  }[];
+  decisionBrief: string[];
+  quickActions: {
+    id: string;
+    label: string;
+    href: string;
+    permission: string | null;
+    enabled: boolean;
+    opensWeb: boolean;
+  }[];
+  unavailable: string[];
+};
+
+export type MobileCrmPipeline = {
+  columns: {
+    stage: string;
+    label: string;
+    count: number;
+    totalValor: string;
+    cards: {
+      id: string;
+      nome: string;
+      valor: string | null;
+      score: number | null;
+      origem: string | null;
+      diasParado: number | null;
+      responsavelId: string | null;
+    }[];
+  }[];
+  unavailable: boolean;
+};
+
+export type MobileCrmClientList = {
+  items: {
+    id: string;
+    nome: string;
+    telefone: string | null;
+    email: string | null;
+    cidade: string | null;
+    segmento: string | null;
+    status: string | null;
+    score: number | null;
+    responsavel: string | null;
+    ultimaInteracao: string | null;
+    valorGerado: string | null;
+  }[];
+  total: number;
+};
+
+export type MobileCrmClientDetail = {
+  id: string;
+  nome: string;
+  fields: { label: string; value: string }[];
+  score: number | null;
+  tags: string[];
+};
+
+export type MobileCrmTimeline = {
+  items: {
+    id: string;
+    tipo: string;
+    titulo: string;
+    descricao: string | null;
+    autor: string | null;
+    at: string;
+    clienteId: string | null;
+    clienteNome: string | null;
+  }[];
+};
+
+export type MobileCrmFollowups = {
+  buckets: {
+    id: string;
+    label: string;
+    items: {
+      id: string;
+      titulo: string;
+      clienteNome: string;
+      clienteId: string;
+      dataRef: string;
+      status: string;
+      responsavelId: string | null;
+    }[];
+  }[];
+};
+
+export type MobileCrmForecast = {
+  prevista: string | null;
+  provavel: string | null;
+  fechada: string | null;
+  conversao: string | null;
+  funil: { stage: string; count: number; valor: string; ponderado: string }[];
+  porResponsavel: {
+    nome: string;
+    prevista: string;
+    provavel: string;
+    fechada: string;
+  }[];
+};
+
+async function crmGet<T>(
+  tenantId: string,
+  path: string,
+  branchId?: string | null,
+) {
+  const accessToken = await getAccessToken();
+  return apiRequest<T>(`api/mobile/v1/tenants/${tenantId}/crm/${path}`, {
+    context: { accessToken, tenantId, branchId },
+    retry: true,
+  });
+}
+
+export function fetchCrmDashboard(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return crmGet<MobileCrmDashboard>(input.tenantId, "dashboard", input.branchId);
+}
+
+export function fetchCrmPipeline(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return crmGet<MobileCrmPipeline>(input.tenantId, "pipeline", input.branchId);
+}
+
+export function fetchCrmClients(input: {
+  tenantId: string;
+  branchId?: string | null;
+  q?: string;
+}) {
+  const q = input.q ? `?q=${encodeURIComponent(input.q)}` : "";
+  return crmGet<MobileCrmClientList>(
+    input.tenantId,
+    `clients${q}`,
+    input.branchId,
+  );
+}
+
+export function fetchCrmClientDetail(input: {
+  tenantId: string;
+  id: string;
+  branchId?: string | null;
+}) {
+  return crmGet<MobileCrmClientDetail>(
+    input.tenantId,
+    `clients/${input.id}`,
+    input.branchId,
+  );
+}
+
+export function fetchCrmTimeline(input: {
+  tenantId: string;
+  branchId?: string | null;
+  clienteId?: string;
+}) {
+  const q = input.clienteId
+    ? `?clienteId=${encodeURIComponent(input.clienteId)}`
+    : "";
+  return crmGet<MobileCrmTimeline>(
+    input.tenantId,
+    `timeline${q}`,
+    input.branchId,
+  );
+}
+
+export function fetchCrmFollowups(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return crmGet<MobileCrmFollowups>(input.tenantId, "followups", input.branchId);
+}
+
+export function fetchCrmForecast(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return crmGet<MobileCrmForecast>(input.tenantId, "forecast", input.branchId);
+}
+
+export function fetchCrmOpportunities(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return crmGet<{ items: Record<string, unknown>[] }>(
+    input.tenantId,
+    "opportunities",
+    input.branchId,
+  );
+}
+
+export function fetchCrmRanking(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return crmGet<{ items: Record<string, unknown>[] }>(
+    input.tenantId,
+    "ranking",
+    input.branchId,
+  );
+}
+
+export function fetchCrmAlerts(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return crmGet<{ alerts: MobileCrmDashboard["alerts"] }>(
+    input.tenantId,
+    "alerts",
+    input.branchId,
+  );
+}
+
+/* —— Sprint 31.5 Estoque / Compras —— */
+
+export type MobileStockDashboard = {
+  generatedAt: string;
+  updatedAtLabel: string;
+  kpis: {
+    produtosCadastrados: number | null;
+    valorEstoque: string | null;
+    produtosCriticos: number | null;
+    semEstoque: number | null;
+    reposicaoUrgente: number | null;
+    comprasAbertas: number | null;
+  };
+  recentMovements: {
+    id: string;
+    tipo: string;
+    produtoNome: string;
+    quantidade: string;
+    at: string;
+  }[];
+  alerts: {
+    id: string;
+    title: string;
+    description: string;
+    priority: string;
+    category: string;
+    href: string | null;
+  }[];
+  quickActions: {
+    id: string;
+    label: string;
+    href: string;
+    permission: string | null;
+    enabled: boolean;
+    opensWeb: boolean;
+  }[];
+  unavailable: string[];
+};
+
+export type MobileStockProductList = {
+  items: {
+    id: string;
+    nome: string;
+    sku: string | null;
+    categoria: string | null;
+    marca: string | null;
+    fornecedor: string | null;
+    status: string;
+    estoque: string;
+    preco: string | null;
+    critico: boolean;
+  }[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
+export type MobileStockProductDetail = {
+  id: string;
+  nome: string;
+  fields: { label: string; value: string }[];
+  tags: string[];
+};
+
+export type MobileStockMovements = {
+  items: {
+    id: string;
+    tipo: string;
+    produtoNome: string;
+    sku: string | null;
+    quantidade: string;
+    motivo: string | null;
+    origem: string;
+    at: string;
+  }[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
+export type MobileStockInventory = {
+  ready: boolean;
+  ciclosAbertos: number | null;
+  divergencias: number | null;
+  ultimaConferencia: string | null;
+  cycles: { id: string; kind: string; status: string; createdAt: string }[];
+  criticalHints: string[];
+  unavailable: boolean;
+};
+
+export type MobileStockPurchases = {
+  ready: boolean;
+  items: {
+    id: string;
+    numero: string;
+    status: string;
+    fornecedorId: string | null;
+    valor: string | null;
+    dataNecessidade: string | null;
+    createdAt: string;
+  }[];
+  unavailable: boolean;
+};
+
+export type MobileStockPurchaseDetail = {
+  id: string;
+  numero: string;
+  status: string;
+  valor: string | null;
+  dataNecessidade: string | null;
+  createdAt: string;
+  fornecedorId: string | null;
+  items: { label: string; qty: string; valor: string | null }[];
+  fields: { label: string; value: string }[];
+};
+
+export type MobileStockSuppliers = {
+  items: {
+    id: string;
+    nome: string;
+    contato: string | null;
+    cidade: string | null;
+    categoria: string | null;
+    ativo: boolean;
+    comprasRecentes?: number | null;
+    valorComprado?: string | null;
+  }[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
+async function stockGet<T>(
+  tenantId: string,
+  path: string,
+  branchId?: string | null,
+) {
+  const accessToken = await getAccessToken();
+  return apiRequest<T>(`api/mobile/v1/tenants/${tenantId}/estoque/${path}`, {
+    context: { accessToken, tenantId, branchId },
+    retry: true,
+  });
+}
+
+export function fetchStockDashboard(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return stockGet<MobileStockDashboard>(
+    input.tenantId,
+    "dashboard",
+    input.branchId,
+  );
+}
+
+export function fetchStockProducts(input: {
+  tenantId: string;
+  branchId?: string | null;
+  q?: string;
+  categoria?: string;
+  status?: string;
+  page?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (input.q) qs.set("q", input.q);
+  if (input.categoria) qs.set("categoria", input.categoria);
+  if (input.status) qs.set("status", input.status);
+  if (input.page) qs.set("page", String(input.page));
+  const suffix = qs.toString() ? `?${qs}` : "";
+  return stockGet<MobileStockProductList>(
+    input.tenantId,
+    `produtos${suffix}`,
+    input.branchId,
+  );
+}
+
+export function fetchStockProductDetail(input: {
+  tenantId: string;
+  id: string;
+  branchId?: string | null;
+}) {
+  return stockGet<MobileStockProductDetail>(
+    input.tenantId,
+    `produtos/${input.id}`,
+    input.branchId,
+  );
+}
+
+export function fetchStockCategories(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return stockGet<{ items: { label: string; valor: string | null }[] }>(
+    input.tenantId,
+    "categorias",
+    input.branchId,
+  );
+}
+
+export function fetchStockMovements(input: {
+  tenantId: string;
+  branchId?: string | null;
+  q?: string;
+  tipo?: string;
+  page?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (input.q) qs.set("q", input.q);
+  if (input.tipo) qs.set("tipo", input.tipo);
+  if (input.page) qs.set("page", String(input.page));
+  const suffix = qs.toString() ? `?${qs}` : "";
+  return stockGet<MobileStockMovements>(
+    input.tenantId,
+    `movimentacoes${suffix}`,
+    input.branchId,
+  );
+}
+
+export function fetchStockInventory(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return stockGet<MobileStockInventory>(
+    input.tenantId,
+    "inventario",
+    input.branchId,
+  );
+}
+
+export function fetchStockPurchases(input: {
+  tenantId: string;
+  branchId?: string | null;
+  status?: string;
+}) {
+  const qs = input.status
+    ? `?status=${encodeURIComponent(input.status)}`
+    : "";
+  return stockGet<MobileStockPurchases>(
+    input.tenantId,
+    `compras${qs}`,
+    input.branchId,
+  );
+}
+
+export function fetchStockPurchaseDetail(input: {
+  tenantId: string;
+  id: string;
+  branchId?: string | null;
+}) {
+  return stockGet<MobileStockPurchaseDetail>(
+    input.tenantId,
+    `compras/${input.id}`,
+    input.branchId,
+  );
+}
+
+export function fetchStockSuppliers(input: {
+  tenantId: string;
+  branchId?: string | null;
+  q?: string;
+  page?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (input.q) qs.set("q", input.q);
+  if (input.page) qs.set("page", String(input.page));
+  const suffix = qs.toString() ? `?${qs}` : "";
+  return stockGet<MobileStockSuppliers>(
+    input.tenantId,
+    `fornecedores${suffix}`,
+    input.branchId,
+  );
+}
+
+export function fetchStockAlerts(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return stockGet<{ alerts: MobileStockDashboard["alerts"] }>(
+    input.tenantId,
+    "alertas",
+    input.branchId,
+  );
+}
+
+export function fetchStockReposicao(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return stockGet<{
+    items: {
+      produtoId: string;
+      label: string;
+      estoqueAtual: string;
+      estoqueMinimo: string;
+      quantidadeSugerida: string;
+      pontoReposicao: string;
+    }[];
+  }>(input.tenantId, "reposicao", input.branchId);
+}
+
+/* —— Sprint 31.6 Operação —— */
+
+export type MobileOpsDashboard = {
+  generatedAt: string;
+  updatedAtLabel: string;
+  kpis: {
+    aguardando: number | null;
+    emExecucao: number | null;
+    prontos: number | null;
+    entreguesHoje: number | null;
+    faturamento: string | null;
+    ticketMedio: string | null;
+    ocupacaoRecursos: string | null;
+    produtividadeMecanicos: string | null;
+  };
+  recentOrders: {
+    id: string;
+    numero: string;
+    status: string;
+    cliente: string | null;
+    veiculo: string | null;
+  }[];
+  alerts: {
+    id: string;
+    title: string;
+    description: string;
+    priority: string;
+    category: string;
+    href: string | null;
+  }[];
+  quickActions: {
+    id: string;
+    label: string;
+    href: string;
+    permission: string | null;
+    enabled: boolean;
+    opensWeb: boolean;
+  }[];
+  unavailable: string[];
+};
+
+export type MobileOpsWorkOrderList = {
+  items: {
+    id: string;
+    numero: string;
+    status: string;
+    cliente: string | null;
+    veiculo: string | null;
+    valor: string | null;
+    abertura: string;
+    previsao: string | null;
+    prioridade: string;
+  }[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
+export type MobileOpsWorkOrderDetail = {
+  id: string;
+  numero: string;
+  status: string;
+  fields: { label: string; value: string }[];
+  services: { id: string; label: string; qty: string; valor: string | null }[];
+  parts: { id: string; label: string; qty: string; valor: string | null }[];
+  timeline: { id: string; at: string; titulo: string; detalhe: string | null }[];
+  photos: { id: string; label: string; createdAt: string }[];
+  observations: string | null;
+  webHref: string;
+};
+
+export type MobileOpsSchedule = {
+  items: {
+    id: string;
+    titulo: string;
+    status: string;
+    inicio: string;
+    fim: string;
+    clienteId: string | null;
+    osId: string | null;
+    responsavelId: string | null;
+  }[];
+  conflicts: { a: string; b: string; reason: string }[];
+  unavailable: boolean;
+};
+
+export type MobileOpsTeam = {
+  items: {
+    id: string;
+    nome: string;
+    status: string;
+    especialidade: string | null;
+    produtividade: string | null;
+    emExecucao: number | null;
+    ocupacao: string | null;
+  }[];
+};
+
+export type MobileOpsVehicleList = {
+  items: {
+    id: string;
+    placa: string | null;
+    modelo: string | null;
+    clienteId: string;
+    clienteNome: string | null;
+    km: number | null;
+  }[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
+export type MobileOpsVehicleDetail = {
+  id: string;
+  fields: { label: string; value: string }[];
+  recentOrders: {
+    id: string;
+    numero: string;
+    status: string;
+    abertura: string;
+  }[];
+};
+
+export type MobileOpsCustomerList = {
+  items: {
+    id: string;
+    nome: string;
+    telefone: string | null;
+    email: string | null;
+    cidade: string | null;
+  }[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
+export type MobileOpsCustomerDetail = {
+  id: string;
+  nome: string;
+  fields: { label: string; value: string }[];
+  vehicles: { id: string; label: string }[];
+  recentOrders: { id: string; numero: string; status: string }[];
+};
+
+async function opsGet<T>(
+  tenantId: string,
+  path: string,
+  branchId?: string | null,
+) {
+  const accessToken = await getAccessToken();
+  return apiRequest<T>(`api/mobile/v1/tenants/${tenantId}/operacao/${path}`, {
+    context: { accessToken, tenantId, branchId },
+    retry: true,
+  });
+}
+
+export function fetchOpsDashboard(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return opsGet<MobileOpsDashboard>(
+    input.tenantId,
+    "dashboard",
+    input.branchId,
+  );
+}
+
+export function fetchOpsWorkOrders(input: {
+  tenantId: string;
+  branchId?: string | null;
+  q?: string;
+  status?: string;
+  page?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (input.q) qs.set("q", input.q);
+  if (input.status) qs.set("status", input.status);
+  if (input.page) qs.set("page", String(input.page));
+  const suffix = qs.toString() ? `?${qs}` : "";
+  return opsGet<MobileOpsWorkOrderList>(
+    input.tenantId,
+    `work-orders${suffix}`,
+    input.branchId,
+  );
+}
+
+export function fetchOpsWorkOrderDetail(input: {
+  tenantId: string;
+  id: string;
+  branchId?: string | null;
+}) {
+  return opsGet<MobileOpsWorkOrderDetail>(
+    input.tenantId,
+    `work-orders/${input.id}`,
+    input.branchId,
+  );
+}
+
+export function fetchOpsSchedule(input: {
+  tenantId: string;
+  branchId?: string | null;
+  range?: "hoje" | "semana";
+}) {
+  const qs = input.range ? `?range=${encodeURIComponent(input.range)}` : "";
+  return opsGet<MobileOpsSchedule>(
+    input.tenantId,
+    `schedule${qs}`,
+    input.branchId,
+  );
+}
+
+export function fetchOpsTeam(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return opsGet<MobileOpsTeam>(input.tenantId, "team", input.branchId);
+}
+
+export function fetchOpsVehicles(input: {
+  tenantId: string;
+  branchId?: string | null;
+  q?: string;
+  page?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (input.q) qs.set("q", input.q);
+  if (input.page) qs.set("page", String(input.page));
+  const suffix = qs.toString() ? `?${qs}` : "";
+  return opsGet<MobileOpsVehicleList>(
+    input.tenantId,
+    `vehicles${suffix}`,
+    input.branchId,
+  );
+}
+
+export function fetchOpsVehicleDetail(input: {
+  tenantId: string;
+  id: string;
+  branchId?: string | null;
+}) {
+  return opsGet<MobileOpsVehicleDetail>(
+    input.tenantId,
+    `vehicles/${input.id}`,
+    input.branchId,
+  );
+}
+
+export function fetchOpsCustomers(input: {
+  tenantId: string;
+  branchId?: string | null;
+  q?: string;
+  page?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (input.q) qs.set("q", input.q);
+  if (input.page) qs.set("page", String(input.page));
+  const suffix = qs.toString() ? `?${qs}` : "";
+  return opsGet<MobileOpsCustomerList>(
+    input.tenantId,
+    `customers${suffix}`,
+    input.branchId,
+  );
+}
+
+export function fetchOpsCustomerDetail(input: {
+  tenantId: string;
+  id: string;
+  branchId?: string | null;
+}) {
+  return opsGet<MobileOpsCustomerDetail>(
+    input.tenantId,
+    `customers/${input.id}`,
+    input.branchId,
+  );
+}
+
+export function fetchOpsNotifications(input: {
+  tenantId: string;
+  branchId?: string | null;
+}) {
+  return opsGet<{ alerts: MobileOpsDashboard["alerts"] }>(
+    input.tenantId,
+    "notifications",
+    input.branchId,
+  );
+}

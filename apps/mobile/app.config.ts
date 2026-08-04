@@ -15,6 +15,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       NSFaceIDUsageDescription:
         "Use Face ID para desbloquear o app com segurança, sem armazenar sua senha.",
+      NSCameraUsageDescription:
+        "Use a câmera apenas para ler QR Code e código de barras no scanner contextual.",
     },
   },
   android: {
@@ -26,6 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: "com.gestaonofoco.app",
     predictiveBackGestureEnabled: false,
+    permissions: ["android.permission.CAMERA"],
   },
   web: {
     favicon: "./assets/favicon.png",
@@ -37,6 +40,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-splash-screen",
     "expo-image",
     "expo-local-authentication",
+    [
+      "expo-camera",
+      {
+        cameraPermission:
+          "Permitir câmera para ler QR Code e código de barras. Nenhuma imagem é gravada pelo scanner.",
+        recordAudioAndroid: false,
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

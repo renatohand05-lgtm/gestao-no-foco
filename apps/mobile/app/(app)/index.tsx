@@ -9,6 +9,8 @@ import {
   KpiGrid,
   MetasSection,
 } from "@/dashboard/sections";
+import { ProductivityStrip } from "@/productivity/productivity-strip";
+import { clearProductivityCaches } from "@/productivity/storage";
 import {
   clearDashboardSnapshot,
   loadDashboardSnapshot,
@@ -50,6 +52,7 @@ export default function HomeScreen() {
   const canView = useHasAnyPermission(EXEC_PERMS);
   const clearTenant = useTenantStore((s) => s.clearTenant);
   const logout = useSessionStore((s) => s.logout);
+  const userId = useSessionStore((s) => s.snapshot.userId);
 
   const [offlineSnap, setOfflineSnap] = useState<{
     savedAt: number;
@@ -99,6 +102,9 @@ export default function HomeScreen() {
             }} />
           }
         />
+        <View style={{ padding: 16 }}>
+          <ProductivityStrip />
+        </View>
       </SafeAreaScreen>
     );
   }
@@ -154,6 +160,8 @@ export default function HomeScreen() {
       >
         <DashboardHeader data={data} offlineMinutes={offlineMinutes} />
 
+        <ProductivityStrip />
+
         <Text variant="subtitle" style={styles.sectionTitle}>
           KPIs executivos
         </Text>
@@ -189,6 +197,9 @@ export default function HomeScreen() {
             variant="secondary"
             onPress={() => {
               void clearDashboardSnapshot(tenantId);
+              if (userId && tenantId) {
+                void clearProductivityCaches(userId, tenantId, branchId);
+              }
               clearTenant();
               router.replace("/(auth)/tenant");
             }}

@@ -13,7 +13,11 @@ export default function OperacaoLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Operação" }} />
       <Stack.Screen name="ordens" options={{ title: "Ordens" }} />
-      <Stack.Screen name="ordens/[id]" options={{ title: "Ordem" }} />
+      <Stack.Screen name="ordens/[id]/index" options={{ title: "Ordem" }} />
+      <Stack.Screen
+        name="ordens/[id]/assinatura"
+        options={{ title: "Assinatura" }}
+      />
       <Stack.Screen name="agenda" options={{ title: "Agenda" }} />
       <Stack.Screen name="equipe" options={{ title: "Equipe" }} />
       <Stack.Screen name="veiculos" options={{ title: "Veículos" }} />

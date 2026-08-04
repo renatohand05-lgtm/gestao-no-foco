@@ -19,9 +19,8 @@ import { AlertasOperacionaisService } from "@/lib/operacoes/alertas-service";
 import { CentroOperacoesService } from "@/lib/operacoes/centro-operacoes-service";
 import { MecanicosDashboardService } from "@/lib/operacoes/mecanicos-dashboard-service";
 import { RecursosOcupacaoService } from "@/lib/operacoes/recursos-service";
-import { InspecaoStorageService } from "@/lib/ordens/inspecao-storage-service";
-import { OrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import { OsDashboardService } from "@/lib/ordens/os-dashboard-service";
+import { OrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import { VeiculoService } from "@/lib/ordens/veiculo-service";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
@@ -41,7 +40,7 @@ async function soft<T>(fn: () => Promise<T>): Promise<T | null> {
   }
 }
 
-function hasPerm(permissions: readonly string[], key: string): boolean {
+export function hasPerm(permissions: readonly string[], key: string): boolean {
   return permissions.includes("*") || permissions.includes(key);
 }
 
@@ -138,12 +137,64 @@ export type MobileOpsWorkOrderDetail = {
   id: string;
   numero: string;
   status: string;
+  cliente: string | null;
+  veiculo: string | null;
+  placa: string | null;
+  mecanico: string | null;
+  previsao: string | null;
+  prioridade: string;
   fields: Array<{ label: string; value: string }>;
   services: Array<{ id: string; label: string; qty: string; valor: string | null }>;
   parts: Array<{ id: string; label: string; qty: string; valor: string | null }>;
-  timeline: Array<{ id: string; at: string; titulo: string; detalhe: string | null }>;
-  photos: Array<{ id: string; label: string; createdAt: string }>;
+  timeline: Array<{
+    id: string;
+    at: string;
+    titulo: string;
+    detalhe: string | null;
+    kind: string;
+  }>;
+  photos: Array<{
+    id: string;
+    label: string;
+    createdAt: string;
+    etapa: string;
+    tipo: string;
+    group: string;
+    mimeType: string | null;
+    thumbUrl: string | null;
+  }>;
+  attachments: Array<{
+    id: string;
+    label: string;
+    createdAt: string;
+    etapa: string;
+    tipo: string;
+    group: string;
+    mimeType: string | null;
+    isPdf: boolean;
+    isImage: boolean;
+  }>;
+  checklist: Array<{
+    id: string;
+    codigo: string;
+    label: string;
+    status: string;
+    classificacao: string;
+    observacao: string | null;
+    registradoEm: string | null;
+    responsavelId: string | null;
+    done: boolean;
+  }>;
+  checklistSummary: { done: number; pending: number; total: number };
+  signatures: Array<{
+    id: string;
+    label: string;
+    createdAt: string;
+    thumbUrl: string | null;
+  }>;
   observations: string | null;
+  canEdit: boolean;
+  aceiteEntregaEm: string | null;
   webHref: string;
 };
 
@@ -352,9 +403,55 @@ export async function composeOpsWorkOrderDetail(input: {
   const detail = await svc.getById(input.id);
   if (!detail) throw new Error("NOT_FOUND");
 
-  const photos = await soft(() =>
-    new InspecaoStorageService(client, input.tenantId).listAnexos(input.id),
+  const { listFieldAnexos, listFieldChecklist } = await import(
+    "@/lib/mobile/field-compose"
   );
+
+  const [anexos, checklist] = await Promise.all([
+    soft(() =>
+      listFieldAnexos({
+        client,
+        tenantId: input.tenantId,
+        permissions: input.permissions,
+        osId: input.id,
+        includeSignedUrls: true,
+        limit: 40,
+      }),
+    ),
+    soft(() =>
+      listFieldChecklist({
+        client,
+        tenantId: input.tenantId,
+        permissions: input.permissions,
+        osId: input.id,
+      }),
+    ),
+  ]);
+
+  let mecanicoNome: string | null = null;
+  if (detail.mecanico_id) {
+    const mec = await soft(async () => {
+      const { data } = await client
+        .from("profiles")
+        .select("full_name")
+        .eq("id", detail.mecanico_id as string)
+        .maybeSingle();
+      return data?.full_name ?? null;
+    });
+    mecanicoNome = mec;
+    if (!mecanicoNome) {
+      const mecRow = await soft(async () => {
+        const { data } = await client
+          .from("mecanicos" as never)
+          .select("nome_completo")
+          .eq("id", detail.mecanico_id as string)
+          .eq("tenant_id", input.tenantId)
+          .maybeSingle();
+        return (data as { nome_completo?: string } | null)?.nome_completo ?? null;
+      });
+      mecanicoNome = mecRow;
+    }
+  }
 
   const itens = detail.itens ?? [];
   const services = itens
@@ -374,35 +471,86 @@ export async function composeOpsWorkOrderDetail(input: {
       valor: money(Number(i.valor_total ?? i.valor_unitario)),
     }));
 
-  const timeline = (detail.eventos ?? []).slice(0, 40).map((e) => {
+  const timeline = (detail.eventos ?? []).slice(0, 60).map((e) => {
     const row = e as {
       id: string;
       created_at?: string;
       tipo?: string;
       descricao?: string | null;
-      de_status?: string | null;
-      para_status?: string | null;
+      estado_anterior?: string | null;
+      estado_posterior?: string | null;
+      motivo?: string | null;
     };
+    const statusLine = [row.estado_anterior, row.estado_posterior]
+      .filter(Boolean)
+      .join(" → ");
     return {
       id: row.id,
       at: row.created_at ?? "",
       titulo: row.tipo ?? "evento",
-      detalhe:
-        row.descricao ??
-        ([row.de_status, row.para_status].filter(Boolean).join(" → ") || null),
+      detalhe: row.descricao ?? (statusLine || row.motivo || null),
+      kind: String(row.tipo ?? "evento").toLowerCase(),
     };
   });
+
+  const allAnexos = anexos ?? [];
+  const photos = allAnexos
+    .filter((a) => a.isImage && a.group !== "assinatura")
+    .map((a) => ({
+      id: a.id,
+      label: a.label,
+      createdAt: a.createdAt,
+      etapa: a.etapa,
+      tipo: a.tipo,
+      group: a.group,
+      mimeType: a.mimeType,
+      thumbUrl: a.thumbUrl,
+    }));
+  const attachments = allAnexos.map((a) => ({
+    id: a.id,
+    label: a.label,
+    createdAt: a.createdAt,
+    etapa: a.etapa,
+    tipo: a.tipo,
+    group: a.group,
+    mimeType: a.mimeType,
+    isPdf: a.isPdf,
+    isImage: a.isImage,
+  }));
+  const signatures = allAnexos
+    .filter((a) => a.group === "assinatura")
+    .map((a) => ({
+      id: a.id,
+      label: a.label,
+      createdAt: a.createdAt,
+      thumbUrl: a.thumbUrl,
+    }));
+
+  const checklistItems = checklist ?? [];
+  const done = checklistItems.filter((c) => c.done).length;
+
+  const canEdit =
+    hasPerm(input.permissions, "os.editar") || hasPerm(input.permissions, "*");
 
   return {
     id: detail.id,
     numero: String(detail.numero),
     status: detail.status,
+    cliente: detail.cliente_nome,
+    veiculo: [detail.placa, detail.modelo].filter(Boolean).join(" ") || null,
+    placa: detail.placa,
+    mecanico: mecanicoNome,
+    previsao: detail.previsao_entrega,
+    prioridade: detail.prioridade || "normal",
     fields: [
       { label: "Cliente", value: detail.cliente_nome ?? "—" },
       {
         label: "Veículo",
         value: [detail.placa, detail.modelo].filter(Boolean).join(" ") || "—",
       },
+      { label: "Placa", value: detail.placa ?? "—" },
+      { label: "Status", value: detail.status || "—" },
+      { label: "Mecânico", value: mecanicoNome ?? "—" },
       { label: "Abertura", value: detail.data_abertura || "—" },
       { label: "Previsão", value: detail.previsao_entrega ?? "—" },
       { label: "Valor", value: money(detail.valor_total) ?? "—" },
@@ -411,12 +559,18 @@ export async function composeOpsWorkOrderDetail(input: {
     services,
     parts,
     timeline,
-    photos: (photos ?? []).slice(0, 30).map((p) => ({
-      id: p.id,
-      label: p.legenda || p.descricao || p.tipo || "anexo",
-      createdAt: p.created_at ?? "",
-    })),
+    photos,
+    attachments,
+    checklist: checklistItems,
+    checklistSummary: {
+      done,
+      pending: checklistItems.length - done,
+      total: checklistItems.length,
+    },
+    signatures,
     observations: detail.observacoes ?? null,
+    canEdit,
+    aceiteEntregaEm: detail.aceite_entrega_em ?? null,
     webHref: `/${input.tenantSlug}/ordens/${detail.id}`,
   };
 }

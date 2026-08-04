@@ -263,6 +263,8 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
   },
 
   logout: async () => {
+    const userId = get().snapshot.userId;
+    const tenant = useTenantStore.getState();
     try {
       if (isSupabaseConfigured()) {
         await getSupabaseClient().auth.signOut();
@@ -271,6 +273,16 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     } catch (err) {
       logger.warn("session.logout_remote_failed", err);
     } finally {
+      if (userId && tenant.tenantId) {
+        try {
+          const { clearProductivityCaches } = await import(
+            "@/productivity/storage"
+          );
+          await clearProductivityCaches(userId, tenant.tenantId, tenant.branchId);
+        } catch {
+          /* ignore */
+        }
+      }
       await clearSecureSession();
       resetSupabaseClient();
       useTenantStore.getState().clearTenant();

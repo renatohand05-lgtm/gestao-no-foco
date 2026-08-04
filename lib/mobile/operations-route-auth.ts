@@ -97,5 +97,8 @@ export function opsForbiddenOrError(err: unknown): NextResponse {
   if (err instanceof Error && err.message === "FORBIDDEN_OPS") {
     return mobileForbidden("Sem permissão operacional neste tenant");
   }
+  if (err instanceof Error && err.message === "FORBIDDEN_OPS_EDIT") {
+    return mobileForbidden("Sem permissão para editar ordens neste tenant");
+  }
   return mobileError(mapDatabaseErrorToUserMessage(err));
 }

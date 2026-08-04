@@ -979,12 +979,64 @@ export type MobileOpsWorkOrderDetail = {
   id: string;
   numero: string;
   status: string;
+  cliente: string | null;
+  veiculo: string | null;
+  placa: string | null;
+  mecanico: string | null;
+  previsao: string | null;
+  prioridade: string;
   fields: { label: string; value: string }[];
   services: { id: string; label: string; qty: string; valor: string | null }[];
   parts: { id: string; label: string; qty: string; valor: string | null }[];
-  timeline: { id: string; at: string; titulo: string; detalhe: string | null }[];
-  photos: { id: string; label: string; createdAt: string }[];
+  timeline: {
+    id: string;
+    at: string;
+    titulo: string;
+    detalhe: string | null;
+    kind: string;
+  }[];
+  photos: {
+    id: string;
+    label: string;
+    createdAt: string;
+    etapa: string;
+    tipo: string;
+    group: string;
+    mimeType: string | null;
+    thumbUrl: string | null;
+  }[];
+  attachments: {
+    id: string;
+    label: string;
+    createdAt: string;
+    etapa: string;
+    tipo: string;
+    group: string;
+    mimeType: string | null;
+    isPdf: boolean;
+    isImage: boolean;
+  }[];
+  checklist: {
+    id: string;
+    codigo: string;
+    label: string;
+    status: string;
+    classificacao: string;
+    observacao: string | null;
+    registradoEm: string | null;
+    responsavelId: string | null;
+    done: boolean;
+  }[];
+  checklistSummary: { done: number; pending: number; total: number };
+  signatures: {
+    id: string;
+    label: string;
+    createdAt: string;
+    thumbUrl: string | null;
+  }[];
   observations: string | null;
+  canEdit: boolean;
+  aceiteEntregaEm: string | null;
   webHref: string;
 };
 
@@ -1117,6 +1169,120 @@ export function fetchOpsWorkOrderDetail(input: {
   );
 }
 
+async function opsMutate<T>(
+  tenantId: string,
+  path: string,
+  method: "POST" | "PATCH" | "DELETE",
+  body?: unknown,
+  branchId?: string | null,
+) {
+  const accessToken = await getAccessToken();
+  return apiRequest<T>(`api/mobile/v1/tenants/${tenantId}/operacao/${path}`, {
+    method,
+    body,
+    context: { accessToken, tenantId, branchId },
+    retry: false,
+  });
+}
+
+export function patchOpsChecklistItem(input: {
+  tenantId: string;
+  osId: string;
+  checklistId: string;
+  classificacao: string;
+  observacao?: string | null;
+  branchId?: string | null;
+}) {
+  return opsMutate<{ id: string }>(
+    input.tenantId,
+    `work-orders/${input.osId}/checklist/${input.checklistId}`,
+    "PATCH",
+    {
+      classificacao: input.classificacao,
+      observacao: input.observacao ?? null,
+    },
+    input.branchId,
+  );
+}
+
+export function uploadOpsAnexo(input: {
+  tenantId: string;
+  osId: string;
+  base64: string;
+  mimeType: string;
+  fileName: string;
+  etapa: string;
+  tipo?: string;
+  legenda?: string | null;
+  checklistItemId?: string | null;
+  branchId?: string | null;
+}) {
+  return opsMutate<{ id: string }>(
+    input.tenantId,
+    `work-orders/${input.osId}/anexos`,
+    "POST",
+    {
+      base64: input.base64,
+      mimeType: input.mimeType,
+      fileName: input.fileName,
+      etapa: input.etapa,
+      tipo: input.tipo ?? "foto",
+      legenda: input.legenda ?? null,
+      checklistItemId: input.checklistItemId ?? null,
+    },
+    input.branchId,
+  );
+}
+
+export function deleteOpsAnexo(input: {
+  tenantId: string;
+  osId: string;
+  anexoId: string;
+  branchId?: string | null;
+}) {
+  return opsMutate<{ id: string }>(
+    input.tenantId,
+    `work-orders/${input.osId}/anexos/${input.anexoId}`,
+    "DELETE",
+    undefined,
+    input.branchId,
+  );
+}
+
+export function fetchOpsAnexoSignedUrl(input: {
+  tenantId: string;
+  osId: string;
+  anexoId: string;
+  branchId?: string | null;
+}) {
+  return opsGet<{ signedUrl: string; expiresIn: number }>(
+    input.tenantId,
+    `work-orders/${input.osId}/anexos/${input.anexoId}`,
+    input.branchId,
+  );
+}
+
+export function uploadOpsSignature(input: {
+  tenantId: string;
+  osId: string;
+  base64: string;
+  mimeType?: string;
+  fileName?: string;
+  branchId?: string | null;
+}) {
+  return opsMutate<{ id: string }>(
+    input.tenantId,
+    `work-orders/${input.osId}/assinatura`,
+    "POST",
+    {
+      base64: input.base64,
+      mimeType: input.mimeType ?? "image/png",
+      fileName: input.fileName ?? "assinatura-cliente.png",
+    },
+    input.branchId,
+  );
+}
+
 export function fetchOpsSchedule(input: {
   tenantId: string;
   branchId?: string | null;
@@ -1203,5 +1369,162 @@ export function fetchOpsNotifications(input: {
     input.tenantId,
     "notifications",
     input.branchId,
+  );
+}
+
+/* —— Sprint 31.7 Inteligência Operacional —— */
+
+export type MobileIntelligenceAlertItem = {
+  id: string;
+  title: string;
+  description: string;
+  priority: string;
+  category: string;
+  source: string;
+  href: string | null;
+  suggestedAction: string | null;
+};
+
+export type MobileIntelligencePack = {
+  generatedAt: string;
+  updatedAtLabel: string;
+  dashboard: MobileExecutiveDashboard;
+  operational: {
+    producaoDia: string | null;
+    ordensAbertas: string | null;
+    ordensAtrasadas: string | null;
+    agendaDia: string | null;
+    mecanicosAtivos: string | null;
+    tempoMedioOs: string | null;
+    ticketMedio: string | null;
+    carrosEntregues: string | null;
+    servicosPendentes: string | null;
+    eficienciaOperacional: string | null;
+    unavailable: string[];
+  };
+  executiveBrief: MobileExecutiveDashboard["brief"];
+  decision: MobileExecutiveDashboard["decision"];
+  analyticsDecision: {
+    available: boolean;
+    headline: string | null;
+    decisions: {
+      id: string;
+      title: string;
+      recommendation: string;
+      priority: string;
+      href: string | null;
+    }[];
+    risks: string[];
+    opportunities: string[];
+    bottlenecks: string[];
+  };
+  kpiHealth: {
+    metricId: string;
+    name: string;
+    level: "excelente" | "bom" | "atencao" | "critico";
+    levelLabel: string;
+    reason: string;
+    trend: string;
+    deltaPercent: number | null;
+    formatted: string;
+    historyHint: string;
+  }[];
+  alertCenter: {
+    operacional: MobileIntelligenceAlertItem[];
+    financeiro: MobileIntelligenceAlertItem[];
+    crm: MobileIntelligenceAlertItem[];
+    estoque: MobileIntelligenceAlertItem[];
+    agenda: MobileIntelligenceAlertItem[];
+    automacoes: MobileIntelligenceAlertItem[];
+    sistema: MobileIntelligenceAlertItem[];
+    total: number;
+  };
+  metas: MobileExecutiveDashboard["metas"] & {
+    dayTrend: string | null;
+    weekTrend: string | null;
+    monthTrend: string | null;
+  };
+  quickActions: MobileExecutiveDashboard["quickActions"];
+  moduleSync: {
+    dashboard: string;
+    operacao: string | null;
+    crm: string | null;
+    financeiro: string | null;
+    estoque: string | null;
+    lastSyncLabel: string;
+  };
+};
+
+export async function fetchIntelligencePack(input: {
+  tenantId: string;
+  branchId?: string | null;
+  branchName?: string | null;
+}) {
+  const accessToken = await getAccessToken();
+  const headers: Record<string, string> = {};
+  if (input.branchName) headers["x-gof-branch-name"] = input.branchName;
+  return apiRequest<MobileIntelligencePack>(
+    `api/mobile/v1/tenants/${input.tenantId}/inteligencia`,
+    {
+      context: {
+        accessToken,
+        tenantId: input.tenantId,
+        branchId: input.branchId,
+      },
+      headers,
+      retry: true,
+    },
+  );
+}
+
+/* —— Sprint 31.9 Produtividade — busca global —— */
+
+export type MobileSearchHit = {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string | null;
+  status: string | null;
+  route: string;
+  opensWeb: boolean;
+  permission: string | null;
+  updatedAt: string | null;
+};
+
+export type MobileSearchResult = {
+  q: string;
+  generatedAt: string;
+  items: MobileSearchHit[];
+  groups: Record<string, number>;
+  nextCursor?: string | null;
+};
+
+export async function fetchMobileSearch(input: {
+  tenantId: string;
+  q: string;
+  types?: string[] | null;
+  branchId?: string | null;
+  limit?: number;
+  cursor?: string | null;
+  signal?: AbortSignal;
+}) {
+  const accessToken = await getAccessToken();
+  const qs = new URLSearchParams();
+  qs.set("q", input.q);
+  if (input.types?.length) qs.set("types", input.types.join(","));
+  if (input.limit) qs.set("limit", String(input.limit));
+  if (input.cursor) qs.set("cursor", input.cursor);
+  if (input.branchId) qs.set("branchId", input.branchId);
+  return apiRequest<MobileSearchResult>(
+    `api/mobile/v1/tenants/${input.tenantId}/search?${qs}`,
+    {
+      context: {
+        accessToken,
+        tenantId: input.tenantId,
+        branchId: input.branchId,
+      },
+      retry: true,
+      signal: input.signal,
+    },
   );
 }

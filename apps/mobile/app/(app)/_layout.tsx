@@ -14,12 +14,28 @@ export default function AppLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Início", tabBarLabel: "Início" }} />
+      <Tabs.Screen
+        name="inteligencia"
+        options={{ title: "Inteligência", tabBarLabel: "Intel.", headerShown: false }}
+      />
       <Tabs.Screen name="crm" options={{ title: "CRM", tabBarLabel: "CRM", headerShown: false }} />
       <Tabs.Screen name="estoque" options={{ title: "Estoque", tabBarLabel: "Estoque", headerShown: false }} />
       <Tabs.Screen name="operacao" options={{ title: "Operação", tabBarLabel: "Operação", headerShown: false }} />
       <Tabs.Screen name="financeiro" options={{ title: "Financeiro", tabBarLabel: "Financeiro", headerShown: false }} />
       <Tabs.Screen name="profile" options={{ title: "Perfil", tabBarLabel: "Perfil" }} />
       <Tabs.Screen name="settings" options={{ title: "Ajustes", tabBarLabel: "Ajustes" }} />
+      <Tabs.Screen
+        name="busca"
+        options={{ title: "Busca", href: null, headerShown: true }}
+      />
+      <Tabs.Screen
+        name="comandos"
+        options={{ title: "Comandos", href: null, headerShown: true }}
+      />
+      <Tabs.Screen
+        name="scanner"
+        options={{ title: "Scanner", href: null, headerShown: true }}
+      />
     </Tabs>
   );
 }

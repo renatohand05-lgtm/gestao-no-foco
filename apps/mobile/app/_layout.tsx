@@ -3,6 +3,7 @@ import { resolveBootRoute } from "@/auth/guards";
 import { useSessionStore } from "@/auth/session-store";
 import { queryClient } from "@/query/client";
 import { ThemeProvider, useTheme } from "@/design/theme";
+import { resolveInternalDeepLink } from "@/productivity/deep-links";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, router } from "expo-router";
 import * as Linking from "expo-linking";
@@ -20,6 +21,15 @@ function handleAuthDeepLink(url: string) {
   }
   if (url.includes("auth/callback")) {
     router.push("/(auth)/reset");
+    return;
+  }
+  const state = useSessionStore.getState().state;
+  if (state !== "authenticated" && state !== "authenticated_without_branch" && state !== "offline_limited") {
+    return;
+  }
+  const resolved = resolveInternalDeepLink(url);
+  if (resolved.ok) {
+    router.push(resolved.route as never);
   }
 }
 

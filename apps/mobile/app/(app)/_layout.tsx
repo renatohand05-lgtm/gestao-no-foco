@@ -14,6 +14,7 @@ export default function AppLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Início", tabBarLabel: "Início" }} />
+      <Tabs.Screen name="financeiro" options={{ title: "Financeiro", tabBarLabel: "Financeiro", headerShown: false }} />
       <Tabs.Screen name="profile" options={{ title: "Perfil", tabBarLabel: "Perfil" }} />
       <Tabs.Screen name="settings" options={{ title: "Ajustes", tabBarLabel: "Ajustes" }} />
     </Tabs>

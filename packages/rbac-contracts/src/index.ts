@@ -5,14 +5,22 @@
 
 export type PermissionKey = string;
 
-/** Permissões relevantes ao shell mobile foundation. */
+/** Permissões relevantes ao shell mobile + dashboard executivo. */
 export const MOBILE_SHELL_PERMISSIONS = [
   "dashboard.visualizar",
+  "dashboard.executivo",
+  "analytics.executivo",
   "crm.visualizar",
   "ordens.visualizar",
   "estoque.visualizar",
   "financeiro.visualizar",
   "integracoes.visualizar",
+] as const;
+
+export const MOBILE_EXECUTIVE_DASHBOARD_ANY_OF = [
+  "dashboard.executivo",
+  "analytics.executivo",
+  "dashboard.visualizar",
 ] as const;
 
 export function hasPermission(

@@ -4,8 +4,8 @@
 
 **Data:** 2026-08-04
 **Feature commit:** `a0e7c05`
-**Docs commit (este):** atualizado pós-smoke
-**HEAD sync:** `201c5e0` (+ commit de smoke se aplicável)
+**Docs commit (este):** `0e1e624` (smoke)
+**HEAD sync:** `0e1e624` (= `origin/main`)
 **Escopo:** Sprints 31.7 + 31.8 + 31.9 (código, APIs, docs, testes, Web Vercel)
 **Fora de escopo:** EAS Build/Submit, APK/IPA, lojas, SQL remoto, migration
 
@@ -67,6 +67,7 @@ Ver `SECURITY.md` e `DEPENDENCIES.md`.
 | Alias ativo | https://gestao-no-foco.vercel.app |
 | Feature commit | `a0e7c05` |
 | Docs commit | `201c5e0` |
+| Smoke evidence commit | `0e1e624` |
 
 ## Smoke produção
 

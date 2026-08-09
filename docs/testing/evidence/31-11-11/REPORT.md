@@ -2,7 +2,7 @@
 
 ## Classificação
 
-**PUBLICAÇÃO EM CURSO → ver seção Deploy / Build ao final**
+**PUBLICAÇÃO CONCLUÍDA**
 
 Escopo: consolidar Sprints 31.11.7–31.11.10, gates, commit, push, deploy Vercel, smoke prod, build iOS preview.
 
@@ -63,26 +63,33 @@ Escopo: consolidar Sprints 31.11.7–31.11.10, gates, commit, push, deploy Verce
 
 ## Commit / Push / Deploy / Build
 
-Preenchidos após execução:
-
 | Item | Valor |
 |------|-------|
-| Commit SHA | _(pendente)_ |
+| Commit SHA | `530ac740b725c81e002de0df9420b7f715ad3e95` (`530ac74`) |
 | Branch | `main` |
-| Push sincronizado | _(pendente)_ |
-| Deploy Vercel | _(pendente)_ |
-| URL produção | `https://gestao-no-foco.vercel.app` |
-| Smoke prod | _(pendente)_ |
-| `/api/mobile/v1/memberships` sem token | _(pendente)_ |
-| EAS project | `@gesto-no-foco/gestao-no-foco` / `51b0c195-feec-4ac1-9fe6-a001d9571bb4` |
-| Build iOS ID | _(pendente)_ |
-| Build URL | _(pendente)_ |
+| Push sincronizado | **SIM** (`HEAD` = `origin/main`) |
+| Deploy Vercel | **Ready** — `dpl_Du8VrWk8qsChzU8aJfyvsjWpk48x` |
+| Deployment URL | https://gestao-no-foco-qafs4f11a-renato16.vercel.app |
+| Commit no deploy | `530ac74` (Branch: main) |
+| Alias produção | https://gestao-no-foco.vercel.app |
+| Smoke prod | **PASS** (`/` 200, `/login` 200, `/api/health` ok, `/api/status` ok) |
+| `/api/mobile/v1/memberships` sem token | **401** `UNAUTHORIZED` |
+| EAS whoami | contas `rfranco300` / `gesto-no-foco` |
+| EAS project | `@gesto-no-foco/gestao-no-foco` |
+| projectId | `51b0c195-feec-4ac1-9fe6-a001d9571bb4` |
+| bundleIdentifier | `com.gestaonofoco.app` |
+| Preview env | carregou `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`, anon key (valores não registrados) |
+| Credenciais iOS | reutilizadas (Distribution Certificate + Provisioning Profile existentes) |
+| Build iOS ID | `1d2f13fb-d4e4-4086-9a7f-97c45e18c94c` |
+| Build URL | https://expo.dev/accounts/gesto-no-foco/projects/gestao-no-foco/builds/1d2f13fb-d4e4-4086-9a7f-97c45e18c94c |
+| Build status | **finished** |
+| App Store / TestFlight | **NÃO** submetido |
 
 ---
 
 ## Ressalvas
 
-1. Deploy da API é obrigatório para o merge RBAC valer no iPhone (cliente + servidor).
-2. Variáveis EAS preview devem incluir `EXPO_PUBLIC_API_BASE_URL=https://gestao-no-foco.vercel.app` (não URL Supabase).
-3. App Store / TestFlight: **não** nesta sprint.
-4. Homologação final no dispositivo físico após instalar a build preview.
+1. Arquivo local não versionado: `app.json` vazio na raiz (não commitado).
+2. Archive EAS ~345 MB — considerar reforçar `.easignore` em sprint futura (não bloqueou).
+3. Homologação física no iPhone: instalar a build preview e validar RBAC em `teste-renato-01`.
+4. Confirmar no dispositivo que o perfil deixa de ser só MECANICO se membership for owner/admin.

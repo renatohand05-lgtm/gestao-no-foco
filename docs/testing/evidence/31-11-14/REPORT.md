@@ -30,15 +30,15 @@ Não declarar RESOLVIDO até a build corrigida abrir no mesmo iPhone.
 | 16 | parity Web/Mobile | **PASS** |
 | 17 | expo export iOS | **PASS** |
 | 18 | security | **PASS** |
-| 19 | commit SHA | `8ff0808` (+ follow-up easignore) |
-| 20 | HEAD == origin/main | **SIM** (após push do follow-up) |
-| 21 | Build homologação gerada | ver abaixo (112/113 tiveram bundle ainda idêntico; build pós-easignore é a válida) |
-| 22 | Build ID | _(preenchido após build com easignore corrigido)_ |
-| 23 | Build URL | _(preenchido)_ |
+| 19 | commit SHA | `b4e25b2` (easignore) / hotfix base `8ff0808` |
+| 20 | HEAD == origin/main | **SIM** |
+| 21 | Build homologação gerada | **SIM** — **Build 114** (112/113 inválidas: JS ainda = 110) |
+| 22 | Build ID | `7165e858-ae78-4030-8f30-3d0b2087c369` |
+| 23 | Build URL | https://expo.dev/accounts/gesto-no-foco/projects/gestao-no-foco/builds/7165e858-ae78-4030-8f30-3d0b2087c369 |
 | 24 | versão | `1.10.0` |
-| 25 | build number | _(autoIncrement remote)_ |
+| 25 | build number | **114** |
 | 26 | ambiente | `preview` |
-| 27 | pendências | Instalar build pós-fix no iPhone; confirmar abertura; opcional apagar app antes para limpar cache updates |
+| 27 | pendências | Instalar **Build 114** no iPhone (apagar app anterior recomendado) e confirmar abertura |
 
 ---
 
@@ -49,7 +49,7 @@ Não declarar RESOLVIDO até a build corrigida abrir no mesmo iPhone.
 | 110 | `1D2530372D9F9158A8E7E7C47DE32962F642E2A889F923754286D20BB1D9B745` | baseline funcional |
 | 111 | **idêntico** | só Info.plist 111 + signature + updates manifest |
 | 112 | **idêntico** | config nativa nova (`runtimeVersion`/`ON_ERROR_RECOVERY`), JS ainda cacheado |
-| 113 | **idêntico** | `--clear-cache` sem corrigir `.easignore` não bastou |
+| 114 | `B58EFD14FC788F0DC63B17CBD5CF7776F275C30D08F080FFC24B3567F4630C75` (~5.8 MB) | **JS novo** — easignore corrigido; homologar esta |
 
 Prova local do ignore (antes):
 
@@ -76,4 +76,14 @@ IGNORE app/layout.tsx
 | 112 | `fdae072f-0547-4310-90c9-854a8351664b` | config updates ok; **JS ainda = 110** |
 | 113 | `bfde3545-7ebb-4b7a-ab04-0cf1ad5860aa` | clear-cache; **JS ainda = 110** |
 
-Homologar apenas a build gerada **depois** do commit que corrige `.easignore`.
+## Build válida para homologação
+
+| Campo | Valor |
+|-------|--------|
+| Build | **114** |
+| ID | `7165e858-ae78-4030-8f30-3d0b2087c369` |
+| URL | https://expo.dev/accounts/gesto-no-foco/projects/gestao-no-foco/builds/7165e858-ae78-4030-8f30-3d0b2087c369 |
+| Versão | 1.10.0 |
+| runtimeVersion | `1.10.0-startup-31.11.14` |
+| Commit | `b4e25b2` |
+| `main.jsbundle` | SHA ≠ 110; tamanho ~5.8 MB (antes ~2.2 MB cacheado) |

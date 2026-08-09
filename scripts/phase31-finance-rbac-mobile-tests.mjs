@@ -21,14 +21,21 @@ const compose = readFileSync(join(root, "lib/mobile/finance-compose.ts"), "utf8"
 const auth = readFileSync(join(root, "lib/mobile/finance-route-auth.ts"), "utf8");
 const home = readFileSync(join(root, "apps/mobile/app/(app)/financeiro/index.tsx"), "utf8");
 const sections = readFileSync(join(root, "apps/mobile/src/finance/sections.tsx"), "utf8");
+const perms = readFileSync(join(root, "apps/mobile/src/finance/perms.ts"), "utf8");
 
 check("canViewFinance", /canViewFinance/.test(compose));
 check("FORBIDDEN_FINANCE", /FORBIDDEN_FINANCE/.test(compose));
 check("route membership", /getActiveMembership/.test(auth));
 check("route permissions", /resolveMobilePermissions/.test(auth));
 check("home FINANCE_VIEW_PERMS", /FINANCE_VIEW_PERMS/.test(home));
-check("perms canônicas", /financeiro\.visualizar/.test(sections));
-check("sem permissão paralela inventada", !/financeiro\.mobile\./.test(compose + sections));
+check(
+  "perms canônicas",
+  /financeiro\.visualizar/.test(perms) && /FINANCE_VIEW_PERMS/.test(perms),
+);
+check(
+  "sem permissão paralela inventada",
+  !/financeiro\.mobile\./.test(compose + sections + perms),
+);
 
 console.log(`\nResultado: ${pass} PASS · ${fail} FAIL\n`);
 process.exit(fail > 0 ? 1 : 0);

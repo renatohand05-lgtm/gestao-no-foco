@@ -24,7 +24,9 @@ const eas = JSON.parse(readFileSync(join(mobile, "eas.json"), "utf8"));
 const cfg = readFileSync(join(mobile, "app.config.ts"), "utf8");
 
 check("bundleIdentifier iOS", /bundleIdentifier:\s*"com\.gestaonofoco\.app"/.test(cfg));
-check("ios buildNumber 110", /IOS_BUILD_NUMBER = "110"/.test(cfg));
+check("EAS remote appVersionSource", eas.cli?.appVersionSource === "remote");
+check("sem ios.buildNumber local (remote)", !/buildNumber:\s*IOS_BUILD_NUMBER/.test(cfg) && !/IOS_BUILD_NUMBER\s*=/.test(cfg));
+check("iosBuildNumberSource eas-remote", /iosBuildNumberSource:\s*"eas-remote"/.test(cfg));
 check("Face ID usage", /NSFaceIDUsageDescription/.test(cfg));
 check("Camera usage", /NSCameraUsageDescription/.test(cfg));
 check("Photo library usage", /NSPhotoLibraryUsageDescription/.test(cfg));

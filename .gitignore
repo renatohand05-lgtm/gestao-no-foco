@@ -53,6 +53,9 @@ next-env.d.ts
 # keep example env tracked
 !.env.example
 
+# Expo root config is apps/mobile/app.config.ts — never commit accidental root app.json
+/app.json
+
 .vercel
 
 

@@ -4,9 +4,13 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  * Sprint 31.10+ — Mobile Release Candidate config.
  * Projeto EAS: @gesto-no-foco/gestao-no-foco
  * projectId não é segredo; EAS_PROJECT_ID no env pode sobrescrever temporariamente.
+ *
+ * Versionamento iOS:
+ * - Marketing version (`version` / `runtimeVersion.policy=appVersion`) → este arquivo
+ * - Build number iOS → EAS remote (`eas.json` → `cli.appVersionSource: "remote"`)
+ *   Não definir `ios.buildNumber` aqui (warning + ignorado pelo EAS).
  */
 const VERSION = "1.10.0";
-const IOS_BUILD_NUMBER = "110";
 const ANDROID_VERSION_CODE = 110;
 
 /** Projeto transferido para org gesto-no-foco — não criar outro; não alterar o ID. */
@@ -44,7 +48,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.gestaonofoco.app",
-    buildNumber: IOS_BUILD_NUMBER,
     infoPlist: {
       CFBundleDisplayName: "Gestão no Foco",
       NSFaceIDUsageDescription:
@@ -136,7 +139,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     version: {
       marketing: VERSION,
-      iosBuildNumber: IOS_BUILD_NUMBER,
+      /** iOS build number gerido remotamente pelo EAS (`appVersionSource: remote`). */
+      iosBuildNumberSource: "eas-remote",
       androidVersionCode: ANDROID_VERSION_CODE,
     },
     router: {},

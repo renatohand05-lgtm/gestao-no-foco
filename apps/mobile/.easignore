@@ -1,12 +1,13 @@
 # EAS usa .easignore no lugar do .gitignore quando este arquivo existe.
 # Caminhos relativos à raiz do monorepo (upload a partir do repo root).
 # Ref: https://docs.expo.dev/build-reference/easignore/
+# Sprint 31.11.12 — reduzir archive (~345 MB → excluir caches Next/build).
 
 # Dependências (instaladas no builder)
 node_modules/
 **/node_modules/
 
-# Next.js caches / deploys
+# Next.js caches / builds locais (centenas de MB — não entram no Metro mobile)
 .next/
 .next-build/
 .next-build-*/
@@ -16,19 +17,37 @@ out/
 # Docs e evidências (~207 MB) — não necessários ao bundle nativo
 docs/
 
+# App Web Next (API/runtime Web; bundle mobile usa apps/mobile + packages)
+app/
+components/
+# lib/ Web permanece incluída se packages reexportarem caminhos — NÃO excluir lib/
+# (mobile API types/contracts vivem em packages; lib só no server).
+# Excluir artefatos Web pesados fora do código-fonte:
+public/uploads/
+data/
+
+# Scripts de homologação / testes Node (não usados pelo Metro)
+scripts/
+coverage/
+playwright-report/
+test-results/
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
 # App mobile — artefatos locais
 apps/mobile/.expo/
 apps/mobile/dist/
 apps/mobile/dist-android/
+apps/mobile/dist-ios/
+apps/mobile/dist-ios-export-check/
 apps/mobile/web-build/
 apps/mobile/ios/
 apps/mobile/android/
+apps/mobile/test/
 **/.turbo/
-
-# Testes / coverage / reports
-coverage/
-playwright-report/
-test-results/
 
 # Logs e dumps
 **/*.log
@@ -41,6 +60,7 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 .pnpm-debug.log*
+*.tsbuildinfo
 
 # Env / secrets locais
 .env
@@ -66,8 +86,8 @@ yarn-error.*
 .git/
 .idea/
 .vscode/
+.cursor/
 .DS_Store
-*.tsbuildinfo
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -75,3 +95,7 @@ yarn-error.*
 !.yarn/versions
 .pnp
 .pnp.*
+
+# Supabase local / migrations não usadas no bundle JS (schema via packages)
+supabase/.branches/
+supabase/.temp/

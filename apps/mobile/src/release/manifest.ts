@@ -11,7 +11,8 @@ export const MOBILE_RC = {
   bundleIdentifier: "com.gestaonofoco.app",
   androidPackage: "com.gestaonofoco.app",
   version: "1.10.0",
-  iosBuildNumber: "110",
+  /** Build number iOS: fonte oficial = EAS remote (`eas.json` appVersionSource). */
+  iosBuildNumberSource: "eas-remote" as const,
   androidVersionCode: 110,
   brand: {
     gold: "#C9A84C",

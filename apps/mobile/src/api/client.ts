@@ -8,9 +8,9 @@ import {
   type ApiResult,
   type ApiSuccess,
 } from "@gof/api-contracts";
-import { createRequestId, sanitizeForLog, sleep } from "@gof/utils";
+import { createRequestId, sleep } from "@gof/utils";
 import Constants from "expo-constants";
-import { getApiBaseUrl } from "@/env/validate";
+import { getApiBaseResolution, getApiBaseUrl } from "@/env/validate";
 
 export type ClientContext = {
   tenantId?: string | null;
@@ -57,7 +57,6 @@ function normalizeError(
 
 function buildUrl(path: string): string {
   const base = getApiBaseUrl();
-  if (!base) return path;
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 }
 
@@ -75,6 +74,7 @@ export async function apiRequest<T>(
   const ctx = options.context ?? {};
   const maxAttempts =
     method === "GET" && options.retry !== false ? MAX_GET_RETRIES + 1 : 1;
+  const apiBase = getApiBaseResolution();
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const controller = new AbortController();
@@ -100,16 +100,24 @@ export async function apiRequest<T>(
       init.body = JSON.stringify(options.body);
     }
 
-    logger.debug("api.request", {
+    const url = buildUrl(path);
+    logger.info("api.request", {
       method,
       path,
       requestId,
       attempt,
-      headers: sanitizeForLog(headers),
+      apiBaseCode: apiBase.code,
+      apiHost: (() => {
+        try {
+          return new URL(apiBase.url).host;
+        } catch {
+          return "invalid";
+        }
+      })(),
     });
 
     try {
-      const response = await fetch(buildUrl(path), init);
+      const response = await fetch(url, init);
       clearTimeout(timeout);
       const text = await response.text();
       let parsed: unknown = null;
@@ -131,7 +139,13 @@ export async function apiRequest<T>(
           await sleep(300 * attempt);
           continue;
         }
-        logger.warn("api.error", sanitizeForLog(failure));
+        logger.warn("api.error", {
+          path,
+          status: failure.status,
+          code: failure.error.code,
+          requestId,
+          apiBaseCode: apiBase.code,
+        });
         return failure;
       }
 
@@ -159,7 +173,12 @@ export async function apiRequest<T>(
         await sleep(300 * attempt);
         continue;
       }
-      logger.warn("api.network", sanitizeForLog(failure));
+      logger.warn("api.network", {
+        path,
+        code: failure.error.code,
+        requestId,
+        apiBaseCode: apiBase.code,
+      });
       return failure;
     }
   }

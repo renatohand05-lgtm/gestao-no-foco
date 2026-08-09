@@ -420,6 +420,9 @@
     "test:phase31-mobile-password-recovery": "node scripts/phase31-mobile-password-recovery-tests.mjs",
     "test:phase31-mobile-deep-links": "node scripts/phase31-mobile-deep-links-tests.mjs",
     "test:phase31-mobile-biometrics": "node scripts/phase31-mobile-biometrics-tests.mjs",
+    "test:phase31-mobile-auth-recovery": "node scripts/phase31-mobile-auth-recovery-tests.mjs",
+    "test:phase31-mobile-boot-safety": "node scripts/phase31-mobile-boot-safety-tests.mjs",
+    "test:phase31-mobile-post-login": "node scripts/phase31-mobile-post-login-tests.mjs",
     "test:phase31-mobile-offline-limited": "node scripts/phase31-mobile-offline-limited-tests.mjs",
     "test:phase31-mobile-logout": "node scripts/phase31-mobile-logout-tests.mjs",
     "test:phase31-mobile-navigation": "node scripts/phase31-mobile-navigation-tests.mjs",
@@ -515,7 +518,16 @@
     "test:phase31-productivity-tenant-isolation": "node scripts/phase31-productivity-tenant-isolation-tests.mjs",
     "test:phase31-productivity-offline": "node scripts/phase31-productivity-offline-tests.mjs",
     "test:phase31-productivity-api": "node scripts/phase31-productivity-api-tests.mjs",
-    "test:homolog-31-9": "node scripts/homolog-31-9-tests.mjs"
+    "test:homolog-31-9": "node scripts/homolog-31-9-tests.mjs",
+    "test:phase31-release-candidate-mobile": "node scripts/phase31-release-candidate-mobile-tests.mjs",
+    "test:phase31-rc-security": "node scripts/phase31-rc-security-tests.mjs",
+    "test:phase31-rc-permissions": "node scripts/phase31-rc-permissions-tests.mjs",
+    "test:homolog-31-10": "node scripts/homolog-31-10-tests.mjs",
+    "test:phase31-android-build": "node scripts/phase31-android-build-tests.mjs",
+    "test:homolog-31-11": "node scripts/homolog-31-11-tests.mjs",
+    "test:phase31-ios-build": "node scripts/phase31-ios-build-tests.mjs",
+    "test:homolog-31-11-1": "node scripts/homolog-31-11-1-tests.mjs",
+    "test:phase31-11-10-rbac-parity": "node --experimental-strip-types scripts/phase31-11-10-rbac-parity-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

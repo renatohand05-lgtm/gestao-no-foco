@@ -8,25 +8,45 @@ import { authErrorFromCode } from "@/auth/errors";
 import { logger } from "@/observability/logger";
 
 export async function isBiometricAvailable(): Promise<boolean> {
-  const compatible = await LocalAuthentication.hasHardwareAsync();
-  if (!compatible) return false;
-  return LocalAuthentication.isEnrolledAsync();
+  try {
+    const compatible = await LocalAuthentication.hasHardwareAsync();
+    if (!compatible) return false;
+    return LocalAuthentication.isEnrolledAsync();
+  } catch (err) {
+    logger.warn("biometric.available_failed", {
+      name: err instanceof Error ? err.name : "Error",
+    });
+    return false;
+  }
 }
 
 export async function getBiometricLabel(): Promise<string> {
-  const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-  if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-    return "Face ID";
-  }
-  if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-    return "Biometria";
+  try {
+    const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+    if (
+      types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)
+    ) {
+      return "Face ID";
+    }
+    if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+      return "Biometria";
+    }
+  } catch {
+    /* ignore */
   }
   return "Desbloqueio do dispositivo";
 }
 
 export async function loadBiometricPref(): Promise<boolean> {
-  const meta = await loadSessionMetadata();
-  return meta.biometricEnabled;
+  try {
+    const meta = await loadSessionMetadata();
+    return meta.biometricEnabled;
+  } catch (err) {
+    logger.warn("biometric.pref_load_failed", {
+      name: err instanceof Error ? err.name : "Error",
+    });
+    return false;
+  }
 }
 
 export async function setBiometricPref(enabled: boolean): Promise<void> {
@@ -37,40 +57,51 @@ export async function setBiometricPref(enabled: boolean): Promise<void> {
 /**
  * Desbloqueio local — nunca armazena senha.
  * Requer sessão já válida em SecureStore.
+ * Nunca propaga exceção nativa para o caller.
  */
-export async function unlockApp(): Promise<{ ok: true } | { ok: false; message: string }> {
-  const enabled = await loadBiometricPref();
-  if (!enabled) {
-    return { ok: true };
-  }
+export async function unlockApp(): Promise<
+  { ok: true } | { ok: false; message: string }
+> {
+  try {
+    const enabled = await loadBiometricPref();
+    if (!enabled) {
+      return { ok: true };
+    }
 
-  const available = await isBiometricAvailable();
-  if (!available) {
+    const available = await isBiometricAvailable();
+    if (!available) {
+      return {
+        ok: false,
+        message: authErrorFromCode("biometric_not_enrolled").message,
+      };
+    }
+
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: "Desbloquear Gestão no Foco",
+      cancelLabel: "Cancelar",
+      disableDeviceFallback: false,
+    });
+
+    if (result.success) {
+      return { ok: true };
+    }
+
+    if (result.error === "user_cancel" || result.error === "system_cancel") {
+      return {
+        ok: false,
+        message: authErrorFromCode("biometric_cancelled").message,
+      };
+    }
+
     return {
       ok: false,
-      message: authErrorFromCode("biometric_not_enrolled").message,
+      message: authErrorFromCode("biometric_failed").message,
     };
-  }
-
-  const result = await LocalAuthentication.authenticateAsync({
-    promptMessage: "Desbloquear Gestão no Foco",
-    cancelLabel: "Cancelar",
-    disableDeviceFallback: false,
-  });
-
-  if (result.success) {
-    return { ok: true };
-  }
-
-  if (result.error === "user_cancel" || result.error === "system_cancel") {
+  } catch (err) {
+    logger.error("biometric.unlock_threw", err);
     return {
       ok: false,
-      message: authErrorFromCode("biometric_cancelled").message,
+      message: authErrorFromCode("biometric_failed").message,
     };
   }
-
-  return {
-    ok: false,
-    message: authErrorFromCode("biometric_failed").message,
-  };
 }

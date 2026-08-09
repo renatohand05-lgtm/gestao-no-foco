@@ -43,7 +43,7 @@ for (const state of REQUIRED_STATES) {
 }
 
 const secureSrc = readFileSync(join(mobileRoot, "src/auth/secure-session.ts"), "utf8");
-check("secure-session uses SecureStore", /SecureStore/.test(secureSrc));
+check("secure-session uses SecureStore", /SecureStore|safeSecure/.test(secureSrc));
 check("secure-session exports saveSession", /export async function saveSession/.test(secureSrc));
 check(
   "isProductionMode rejects mock tokens",

@@ -1,14 +1,15 @@
 import { fetchBranches } from "@/api/mobile-api";
+import { AuthenticatedDataError } from "@/auth/AuthenticatedDataError";
 import { useSessionStore } from "@/auth/session-store";
 import {
   Button,
   EmptyState,
-  ErrorState,
   ListItem,
   LoadingState,
   SafeAreaScreen,
   Text,
 } from "@/design/components";
+import { logger } from "@/observability/logger";
 import { useTenantStore } from "@/tenant/context-store";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -26,8 +27,16 @@ export default function BranchScreen() {
     queryKey: ["mobile", "branches", tenantId],
     enabled: Boolean(tenantId),
     queryFn: async () => {
+      logger.info("postlogin.branches_start", { hasTenant: Boolean(tenantId) });
       const result = await fetchBranches(tenantId);
-      if (!result.ok) throw new Error(result.error.message);
+      if (!result.ok) {
+        logger.warn("postlogin.branches_failed", { status: result.status });
+        throw new Error(result.error.message);
+      }
+      logger.info("postlogin.branches_ok", {
+        count: result.data.items.length,
+        allowContinue: result.data.allowContinueWithoutBranch,
+      });
       return result.data;
     },
   });
@@ -42,19 +51,20 @@ export default function BranchScreen() {
 
   if (isError || !data) {
     return (
-      <SafeAreaScreen>
-        <ErrorState
-          title="Falha ao carregar"
-          message="Não foi possível carregar as filiais."
-          action={<ListItem title="Tentar novamente" onPress={() => refetch()} />}
-        />
-      </SafeAreaScreen>
+      <AuthenticatedDataError
+        code="BRANCH_LOAD_FAILED"
+        title="Não foi possível carregar seus dados."
+        onRetry={() => {
+          void refetch();
+        }}
+      />
     );
   }
 
   const handleContinueWithoutBranch = () => {
     continueWithoutBranch();
     markContinueWithoutBranch();
+    logger.info("postlogin.continue_without_branch", {});
     router.replace("/(app)");
   };
 
@@ -84,6 +94,7 @@ export default function BranchScreen() {
               onPress={() => {
                 setBranch(branch.id, branch.name);
                 markBranchSelected();
+                logger.info("postlogin.branch_selected", {});
                 router.replace("/(app)");
               }}
             />

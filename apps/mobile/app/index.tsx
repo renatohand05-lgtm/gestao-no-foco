@@ -1,4 +1,5 @@
 import { resolveBootRoute } from "@/auth/guards";
+import BootstrapErrorActions from "@/auth/BootstrapErrorActions";
 import { useSessionStore } from "@/auth/session-store";
 import { LoadingState, SafeAreaScreen } from "@/design/components";
 import { Redirect } from "expo-router";
@@ -12,6 +13,11 @@ export default function BootScreen() {
         <LoadingState title="Iniciando Gestão…" />
       </SafeAreaScreen>
     );
+  }
+
+  // Erro de bootstrap (ex.: rede) — retry + voltar ao login, sem loop.
+  if (state === "error") {
+    return <BootstrapErrorActions kind="network" />;
   }
 
   return <Redirect href={resolveBootRoute(state)} />;

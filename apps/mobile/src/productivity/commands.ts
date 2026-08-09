@@ -1,8 +1,9 @@
 import type { AdaptiveProfile, CommandItem } from "@/productivity/types";
 
+import { hasAnyPermission } from "@gof/rbac-contracts";
+
 function hasAny(permissions: readonly string[], keys: string[]): boolean {
-  if (permissions.includes("*")) return true;
-  return keys.some((k) => permissions.includes(k));
+  return hasAnyPermission(permissions, keys);
 }
 
 export function resolveAdaptiveProfile(

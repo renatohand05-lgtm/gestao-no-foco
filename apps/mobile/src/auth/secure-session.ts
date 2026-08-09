@@ -1,10 +1,14 @@
-import * as SecureStore from "expo-secure-store";
-
 import { logger } from "@/observability/logger";
+import {
+  safeSecureDelete,
+  safeSecureGet,
+  safeSecureSet,
+} from "@/storage/secure";
 
 export const STORAGE_VERSION = 2;
 
-const KEYS = {
+/** Chaves reais do SecureStore para sessão mobile (não inventar nomes). */
+export const SECURE_SESSION_KEYS = {
   storageVersion: "gof.storage_version",
   accessToken: "gof.access_token",
   refreshToken: "gof.refresh_token",
@@ -17,6 +21,8 @@ const KEYS = {
   lastBranchId: "gof.last_branch_id",
   lastValidatedAt: "gof.last_validated_at",
 } as const;
+
+const KEYS = SECURE_SESSION_KEYS;
 
 export type StoredSession = {
   accessToken: string;
@@ -62,36 +68,43 @@ export async function saveMockSession(input: {
     expiresAt: null,
   });
 
-  logger.info("session.mock_saved", { userId, email: input.email });
-  return { accessToken, refreshToken, userId, email: input.email, displayName, expiresAt: null };
+  logger.info("session.mock_saved", { userId });
+  return {
+    accessToken,
+    refreshToken,
+    userId,
+    email: input.email,
+    displayName,
+    expiresAt: null,
+  };
 }
 
 export async function saveSession(input: StoredSession): Promise<void> {
-  await SecureStore.setItemAsync(KEYS.storageVersion, String(STORAGE_VERSION));
-  await SecureStore.setItemAsync(KEYS.accessToken, input.accessToken);
+  await safeSecureSet(KEYS.storageVersion, String(STORAGE_VERSION));
+  await safeSecureSet(KEYS.accessToken, input.accessToken);
   if (input.refreshToken) {
-    await SecureStore.setItemAsync(KEYS.refreshToken, input.refreshToken);
+    await safeSecureSet(KEYS.refreshToken, input.refreshToken);
   } else {
-    await SecureStore.deleteItemAsync(KEYS.refreshToken).catch(() => undefined);
+    await safeSecureDelete(KEYS.refreshToken);
   }
-  await SecureStore.setItemAsync(KEYS.userId, input.userId);
-  await SecureStore.setItemAsync(KEYS.email, input.email);
-  await SecureStore.setItemAsync(KEYS.displayName, input.displayName);
+  await safeSecureSet(KEYS.userId, input.userId);
+  await safeSecureSet(KEYS.email, input.email);
+  await safeSecureSet(KEYS.displayName, input.displayName);
   if (input.expiresAt) {
-    await SecureStore.setItemAsync(KEYS.expiresAt, input.expiresAt);
+    await safeSecureSet(KEYS.expiresAt, input.expiresAt);
   } else {
-    await SecureStore.deleteItemAsync(KEYS.expiresAt).catch(() => undefined);
+    await safeSecureDelete(KEYS.expiresAt);
   }
   await touchLastValidatedAt();
   logger.info("session.saved", { userId: input.userId });
 }
 
 export async function touchLastValidatedAt(): Promise<void> {
-  await SecureStore.setItemAsync(KEYS.lastValidatedAt, new Date().toISOString());
+  await safeSecureSet(KEYS.lastValidatedAt, new Date().toISOString());
 }
 
 export async function loadStoredSession(): Promise<StoredSession | null> {
-  const accessToken = await SecureStore.getItemAsync(KEYS.accessToken);
+  const accessToken = await safeSecureGet(KEYS.accessToken);
   if (!accessToken) return null;
 
   if (isProductionMode() && isMockToken(accessToken)) {
@@ -99,13 +112,14 @@ export async function loadStoredSession(): Promise<StoredSession | null> {
     return null;
   }
 
-  const [refreshToken, userId, email, displayName, expiresAt] = await Promise.all([
-    SecureStore.getItemAsync(KEYS.refreshToken),
-    SecureStore.getItemAsync(KEYS.userId),
-    SecureStore.getItemAsync(KEYS.email),
-    SecureStore.getItemAsync(KEYS.displayName),
-    SecureStore.getItemAsync(KEYS.expiresAt),
-  ]);
+  const [refreshToken, userId, email, displayName, expiresAt] =
+    await Promise.all([
+      safeSecureGet(KEYS.refreshToken),
+      safeSecureGet(KEYS.userId),
+      safeSecureGet(KEYS.email),
+      safeSecureGet(KEYS.displayName),
+      safeSecureGet(KEYS.expiresAt),
+    ]);
 
   if (!userId || !email) return null;
 
@@ -120,7 +134,7 @@ export async function loadStoredSession(): Promise<StoredSession | null> {
 }
 
 export async function getAccessToken(): Promise<string | null> {
-  const token = await SecureStore.getItemAsync(KEYS.accessToken);
+  const token = await safeSecureGet(KEYS.accessToken);
   if (token && isProductionMode() && isMockToken(token)) {
     return null;
   }
@@ -130,10 +144,10 @@ export async function getAccessToken(): Promise<string | null> {
 export async function loadSessionMetadata(): Promise<SessionMetadata> {
   const [biometricRaw, lastTenantId, lastBranchId, lastValidatedAt] =
     await Promise.all([
-      SecureStore.getItemAsync(KEYS.biometricEnabled),
-      SecureStore.getItemAsync(KEYS.lastTenantId),
-      SecureStore.getItemAsync(KEYS.lastBranchId),
-      SecureStore.getItemAsync(KEYS.lastValidatedAt),
+      safeSecureGet(KEYS.biometricEnabled),
+      safeSecureGet(KEYS.lastTenantId),
+      safeSecureGet(KEYS.lastBranchId),
+      safeSecureGet(KEYS.lastValidatedAt),
     ]);
 
   return {
@@ -145,30 +159,28 @@ export async function loadSessionMetadata(): Promise<SessionMetadata> {
 }
 
 export async function setBiometricEnabled(enabled: boolean): Promise<void> {
-  await SecureStore.setItemAsync(KEYS.biometricEnabled, enabled ? "true" : "false");
+  await safeSecureSet(KEYS.biometricEnabled, enabled ? "true" : "false");
 }
 
 export async function setLastTenantId(tenantId: string | null): Promise<void> {
   if (tenantId) {
-    await SecureStore.setItemAsync(KEYS.lastTenantId, tenantId);
+    await safeSecureSet(KEYS.lastTenantId, tenantId);
   } else {
-    await SecureStore.deleteItemAsync(KEYS.lastTenantId).catch(() => undefined);
+    await safeSecureDelete(KEYS.lastTenantId);
   }
 }
 
 export async function setLastBranchId(branchId: string | null): Promise<void> {
   if (branchId) {
-    await SecureStore.setItemAsync(KEYS.lastBranchId, branchId);
+    await safeSecureSet(KEYS.lastBranchId, branchId);
   } else {
-    await SecureStore.deleteItemAsync(KEYS.lastBranchId).catch(() => undefined);
+    await safeSecureDelete(KEYS.lastBranchId);
   }
 }
 
 export async function clearSecureSession(): Promise<void> {
   await Promise.all(
-    Object.values(KEYS).map((key) =>
-      SecureStore.deleteItemAsync(key).catch(() => undefined),
-    ),
+    Object.values(KEYS).map((key) => safeSecureDelete(key)),
   );
   logger.info("session.cleared");
 }

@@ -1,0 +1,77 @@
+# EAS usa .easignore no lugar do .gitignore quando este arquivo existe.
+# Caminhos relativos à raiz do monorepo (upload a partir do repo root).
+# Ref: https://docs.expo.dev/build-reference/easignore/
+
+# Dependências (instaladas no builder)
+node_modules/
+**/node_modules/
+
+# Next.js caches / deploys
+.next/
+.next-build/
+.next-build-*/
+.vercel/
+out/
+
+# Docs e evidências (~207 MB) — não necessários ao bundle nativo
+docs/
+
+# App mobile — artefatos locais
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/dist-android/
+apps/mobile/web-build/
+apps/mobile/ios/
+apps/mobile/android/
+**/.turbo/
+
+# Testes / coverage / reports
+coverage/
+playwright-report/
+test-results/
+
+# Logs e dumps
+**/*.log
+*-release-*.log
+build-release-*.log
+lint-release-*.log
+vercel-deploy-*.json
+vercel-inspect-*.json
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.pnpm-debug.log*
+
+# Env / secrets locais
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Store artifacts
+*.apk
+*.aab
+*.ipa
+*.app.dSYM.zip
+
+# IDE / OS / VCS
+.git/
+.idea/
+.vscode/
+.DS_Store
+*.tsbuildinfo
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnp
+.pnp.*

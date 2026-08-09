@@ -39,10 +39,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getPref(PREF_KEYS.theme, "system" as ThemePreference).then((pref) => {
-      setPreferenceState(pref);
-      setLoaded(true);
-    });
+    getPref(PREF_KEYS.theme, "system" as ThemePreference)
+      .then((pref) => {
+        setPreferenceState(pref);
+        setLoaded(true);
+      })
+      .catch(() => {
+        setLoaded(true);
+      });
   }, []);
 
   const resolved: "light" | "dark" =

@@ -50,6 +50,14 @@ check(
   "_layout unlock only when biometric pref enabled",
   /loadBiometricPref[\s\S]*enabled/.test(layoutSrc),
 );
+check(
+  "_layout biometric fail resets local auth (returnToLogin)",
+  /returnToLogin/.test(layoutSrc),
+);
+check(
+  "_layout single biometric attempt per boot",
+  /consumeBiometricUnlockAttempt/.test(layoutSrc),
+);
 
 const appConfigSrc = readFileSync(join(mobileRoot, "app.config.ts"), "utf8");
 check(

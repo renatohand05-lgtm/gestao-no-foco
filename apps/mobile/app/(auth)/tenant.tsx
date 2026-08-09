@@ -1,15 +1,20 @@
 import { fetchMemberships, fetchPermissions } from "@/api/mobile-api";
+import { AuthenticatedDataError } from "@/auth/AuthenticatedDataError";
 import { authErrorFromCode } from "@/auth/errors";
+import {
+  classifyMembershipError,
+} from "@/auth/post-login-errors";
 import { useSessionStore } from "@/auth/session-store";
 import {
   EmptyState,
-  ErrorState,
   Input,
   ListItem,
   LoadingState,
   SafeAreaScreen,
   Text,
 } from "@/design/components";
+import { getApiBaseResolution } from "@/env/validate";
+import { logger } from "@/observability/logger";
 import { useTenantStore } from "@/tenant/context-store";
 import type { SegmentId } from "@gof/config";
 import { useQuery } from "@tanstack/react-query";
@@ -22,12 +27,37 @@ export default function TenantScreen() {
   const markTenantSelected = useSessionStore((s) => s.markTenantSelected);
   const setTenant = useTenantStore((s) => s.setTenant);
   const [query, setQuery] = useState("");
+  const apiBase = getApiBaseResolution();
 
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["mobile", "memberships"],
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["mobile", "memberships", apiBase.code],
     queryFn: async () => {
+      logger.info("postlogin.memberships_start", {
+        apiBaseCode: apiBase.code,
+        apiHost: (() => {
+          try {
+            return new URL(apiBase.url).host;
+          } catch {
+            return "invalid";
+          }
+        })(),
+      });
       const result = await fetchMemberships();
-      if (!result.ok) throw new Error(result.error.message);
+      if (!result.ok) {
+        logger.warn("postlogin.memberships_failed", {
+          status: result.status,
+          code: result.error.code,
+          apiBaseCode: apiBase.code,
+        });
+        const err = new Error(result.error.message) as Error & {
+          status?: number;
+        };
+        err.status = result.status;
+        throw err;
+      }
+      logger.info("postlogin.memberships_ok", {
+        count: result.data.items.length,
+      });
       return result.data.items;
     },
   });
@@ -44,6 +74,9 @@ export default function TenantScreen() {
   }, [data, query]);
 
   const handleSelect = async (tenant: (typeof filtered)[number]) => {
+    logger.info("postlogin.tenant_selected", {
+      hasSlug: Boolean(tenant.slug),
+    });
     const perms = await fetchPermissions(tenant.tenantId);
     setTenant({
       tenantId: tenant.tenantId,
@@ -65,14 +98,16 @@ export default function TenantScreen() {
   }
 
   if (isError) {
+    const code = classifyMembershipError(error, apiBase.code);
     return (
-      <SafeAreaScreen>
-        <ErrorState
-          title="Falha ao carregar"
-          message={authErrorFromCode("network_unavailable").message}
-          action={<ListItem title="Tentar novamente" onPress={() => refetch()} />}
-        />
-      </SafeAreaScreen>
+      <AuthenticatedDataError
+        code={code}
+        title="Não foi possível carregar seus dados."
+        onRetry={() => {
+          void refetch();
+        }}
+        showGoHome={false}
+      />
     );
   }
 
@@ -83,6 +118,12 @@ export default function TenantScreen() {
         <Text variant="body" muted style={styles.subtitle}>
           {email}
         </Text>
+
+        {apiBase.corrected ? (
+          <Text variant="caption" muted>
+            API do app ajustada automaticamente ({apiBase.code}).
+          </Text>
+        ) : null}
 
         <Input
           placeholder="Buscar empresa…"

@@ -26,16 +26,16 @@ console.log("\nPhase 31.1 — mobile logout\n");
 const sessionSrc = readFileSync(join(mobileRoot, "src/auth/session-store.ts"), "utf8");
 check("session-store exports logout", /\blogout\s*:/.test(sessionSrc));
 check(
-  "logout clears secure session",
-  /logout[\s\S]*clearSecureSession/.test(sessionSrc),
+  "logout clears secure session (via resetLocalMobileAuth ou clearSecureSession)",
+  /logout[\s\S]*(resetLocalMobileAuth|clearSecureSession)/.test(sessionSrc),
 );
 check(
   "logout clears tenant store",
-  /logout[\s\S]*clearTenant/.test(sessionSrc),
+  /logout[\s\S]*(clearTenant|resetLocalMobileAuth)/.test(sessionSrc),
 );
 check(
-  "logout clears queryClient",
-  /logout[\s\S]*queryClient\.clear/.test(sessionSrc),
+  "logout clears queryClient (direto ou via reset)",
+  /logout[\s\S]*(queryClient\.clear|resetLocalMobileAuth)/.test(sessionSrc),
 );
 
 const apiSrc = readFileSync(join(mobileRoot, "src/api/mobile-api.ts"), "utf8");

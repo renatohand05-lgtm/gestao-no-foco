@@ -6,8 +6,18 @@ node_modules/
 # Expo
 .expo/
 dist/
+dist-android/
+dist-ios/
+dist-ios-export-check/
 web-build/
 expo-env.d.ts
+
+# Store artifacts (nunca versionar)
+*.apk
+*.aab
+*.ipa
+*.app.dSYM.zip
+
 
 # Native
 .kotlin/

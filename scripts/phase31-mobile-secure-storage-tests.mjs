@@ -29,10 +29,10 @@ const secureSessionSrc = readFileSync(
   join(mobileRoot, "src/auth/secure-session.ts"),
   "utf8",
 );
-check("secure-session uses SecureStore for tokens", /SecureStore/.test(secureSessionSrc));
+check("secure-session uses SecureStore for tokens", /SecureStore|safeSecure/.test(secureSessionSrc));
 check(
   "secure-session stores accessToken in SecureStore",
-  /KEYS\.accessToken|accessToken.*SecureStore/.test(secureSessionSrc),
+  /KEYS\.accessToken|accessToken.*SecureStore|safeSecureSet\(KEYS\.accessToken/.test(secureSessionSrc),
 );
 check(
   "secure-session does not use AsyncStorage",

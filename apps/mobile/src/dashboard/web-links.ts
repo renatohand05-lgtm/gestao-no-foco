@@ -4,7 +4,7 @@ const OFFICIAL_WEB = "https://gestao-no-foco.vercel.app";
 
 /**
  * Abre módulos web ainda não nativos (quick actions).
- * Preferência: EXPO_PUBLIC_API_BASE_URL; fallback domínio oficial.
+ * Preferência: API base mobile resolvida (nunca Supabase).
  */
 export function resolveWebOrigin(): string {
   const base = getApiBaseUrl()?.replace(/\/$/, "");

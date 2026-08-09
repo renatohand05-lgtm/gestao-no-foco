@@ -1,9 +1,19 @@
 import type { AuthSessionState, SessionSnapshot } from "@gof/domain";
 import { create } from "zustand";
 
+import { resetBootAttemptCounters } from "@/auth/boot-attempts";
 import { authErrorFromCode, normalizeAuthError } from "@/auth/errors";
 import { evaluateOfflineGate } from "@/auth/offline-gate";
+import {
+  classifyRestoreFailure,
+  messageForAuthFailure,
+} from "@/auth/recovery-policy";
 import { refreshSessionOnce } from "@/auth/refresh";
+import {
+  bindSessionResetTarget,
+  resetLocalMobileAuth,
+  wipeLocalAuthArtifacts,
+} from "@/auth/reset-local-auth";
 import {
   clearSecureSession,
   getAccessToken,
@@ -20,17 +30,23 @@ import { postLogout } from "@/api/mobile-api";
 import { isSupabaseConfigured } from "@/env/validate";
 import { logger } from "@/observability/logger";
 import { fetchNetworkStatus } from "@/offline/network";
-import { getSupabaseClient, resetSupabaseClient, sessionToStored } from "@/supabase/client";
+import { getSupabaseClient, sessionToStored } from "@/supabase/client";
 import { useTenantStore } from "@/tenant/context-store";
-import { queryClient } from "@/query/client";
+
+type BootOptions = {
+  /** manual = reconectar explícito; auto = cold start (default). */
+  mode?: "auto" | "manual";
+};
 
 type SessionStore = {
   state: AuthSessionState;
   snapshot: SessionSnapshot;
   errorMessage: string | null;
-  boot: () => Promise<void>;
+  boot: (options?: BootOptions) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  /** Recuperação segura → login (idempotente). */
+  returnToLogin: (reason?: string, errorMessage?: string | null) => Promise<void>;
   markTenantSelected: () => void;
   markBranchSelected: () => void;
   markContinueWithoutBranch: () => void;
@@ -87,6 +103,10 @@ async function persistSupabaseSession(): Promise<SessionSnapshot | null> {
   });
 }
 
+let bootInFlight: Promise<void> | null = null;
+/** Uma restauração automática (refresh) por cold start; manual sempre permitido. */
+let autoRestoreCompleted = false;
+
 export const useSessionStore = create<SessionStore>((set, get) => ({
   state: "booting",
   snapshot: initialSnapshot,
@@ -103,101 +123,146 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     });
   },
 
-  boot: async () => {
-    set({ state: "booting", snapshot: snapshotFrom("booting"), errorMessage: null });
+  boot: async (options = {}) => {
+    const mode = options.mode ?? "auto";
+    if (bootInFlight) return bootInFlight;
 
-    try {
-      const network = await fetchNetworkStatus();
-      const stored = await loadStoredSession();
+    if (mode === "auto" && autoRestoreCompleted) {
+      // Evita segundo refresh automático (ex.: remount) sem impedir reconectar manual.
+      return;
+    }
 
-      if (!stored) {
-        set({ state: "unauthenticated", snapshot: snapshotFrom("unauthenticated") });
-        return;
-      }
+    bootInFlight = (async () => {
+      set({ state: "booting", snapshot: snapshotFrom("booting"), errorMessage: null });
 
-      if (isProductionMode() && isMockToken(stored.accessToken)) {
-        await clearSecureSession();
-        set({ state: "unauthenticated", snapshot: snapshotFrom("unauthenticated") });
-        return;
-      }
+      try {
+        logger.info("session.boot_begin", {
+          mode,
+          networkKnown: true,
+        });
+        const network = await fetchNetworkStatus();
+        logger.info("session.boot_network", { network });
+        const stored = await loadStoredSession();
+        logger.info("session.boot_stored", {
+          hasSession: Boolean(stored),
+          hasRefresh: Boolean(stored?.refreshToken),
+        });
 
-      if (network === "offline") {
-        const gate = await evaluateOfflineGate();
-        if (gate.allowed) {
-          const meta = await loadSessionMetadata();
-          if (meta.lastTenantId) {
-            useTenantStore.getState().restoreFromMetadata({
-              tenantId: meta.lastTenantId,
-              branchId: meta.lastBranchId,
+        if (!stored) {
+          set({ state: "unauthenticated", snapshot: snapshotFrom("unauthenticated") });
+          return;
+        }
+
+        if (isProductionMode() && isMockToken(stored.accessToken)) {
+          await wipeLocalAuthArtifacts();
+          set({ state: "unauthenticated", snapshot: snapshotFrom("unauthenticated") });
+          return;
+        }
+
+        if (network === "offline") {
+          const gate = await evaluateOfflineGate();
+          if (gate.allowed) {
+            const meta = await loadSessionMetadata();
+            if (meta.lastTenantId) {
+              useTenantStore.getState().restoreFromMetadata({
+                tenantId: meta.lastTenantId,
+                branchId: meta.lastBranchId,
+              });
+            }
+            set({
+              state: "offline_limited",
+              snapshot: snapshotFrom("offline_limited", {
+                userId: gate.session.userId,
+                email: gate.session.email,
+                displayName: gate.session.displayName,
+                hasSecureToken: true,
+                expiresAt: gate.session.expiresAt,
+              }),
             });
+            return;
           }
+          await wipeLocalAuthArtifacts();
           set({
-            state: "offline_limited",
-            snapshot: snapshotFrom("offline_limited", {
-              userId: gate.session.userId,
-              email: gate.session.email,
-              displayName: gate.session.displayName,
-              hasSecureToken: true,
-              expiresAt: gate.session.expiresAt,
-            }),
+            state: "expired",
+            errorMessage: authErrorFromCode("session_expired").message,
+            snapshot: snapshotFrom("expired"),
           });
           return;
         }
+
+        if (!isSupabaseConfigured()) {
+          set({
+            state: "error",
+            errorMessage: "Supabase não configurado",
+            snapshot: snapshotFrom("error"),
+          });
+          return;
+        }
+
+        set({ state: "refreshing", snapshot: snapshotFrom("refreshing", get().snapshot) });
+
+        const refreshed = await refreshSessionOnce();
+        const snapshot = await persistSupabaseSession();
+
+        if (!snapshot) {
+          const kind = classifyRestoreFailure({
+            network: network === "online" ? "online" : "unknown",
+            refreshOk: refreshed,
+            hasSessionAfterRefresh: false,
+          });
+          await wipeLocalAuthArtifacts();
+          set({
+            state: "revoked",
+            errorMessage: messageForAuthFailure(kind),
+            snapshot: snapshotFrom("revoked"),
+          });
+          return;
+        }
+
+        const meta = await loadSessionMetadata();
+        if (meta.lastTenantId) {
+          useTenantStore.getState().restoreFromMetadata({
+            tenantId: meta.lastTenantId,
+            branchId: meta.lastBranchId,
+          });
+        }
+
+        await touchLastValidatedAt();
+        const nextState = resolveContextState();
         set({
-          state: "expired",
-          errorMessage: authErrorFromCode("session_expired").message,
-          snapshot: snapshotFrom("expired"),
+          state: nextState,
+          snapshot: snapshotFrom(nextState, snapshot),
+          errorMessage: null,
         });
-        return;
-      }
-
-      if (!isSupabaseConfigured()) {
+      } catch (err) {
+        logger.error("session.boot_failed", err);
+        const normalized = normalizeAuthError(err);
+        // Rede: mantém artifacts para retry / "Voltar ao login".
+        // Demais: limpa e signed-out (não classificar token como rede).
+        if (normalized.code === "network_unavailable") {
+          set({
+            state: "error",
+            errorMessage: normalized.message,
+            snapshot: snapshotFrom("error"),
+          });
+          return;
+        }
+        await wipeLocalAuthArtifacts();
         set({
-          state: "error",
-          errorMessage: "Supabase não configurado",
-          snapshot: snapshotFrom("error"),
+          state: "unauthenticated",
+          errorMessage: normalized.message,
+          snapshot: snapshotFrom("unauthenticated"),
         });
-        return;
+      } finally {
+        if (mode === "auto") {
+          autoRestoreCompleted = true;
+        }
       }
+    })().finally(() => {
+      bootInFlight = null;
+    });
 
-      set({ state: "refreshing", snapshot: snapshotFrom("refreshing", get().snapshot) });
-
-      const refreshed = await refreshSessionOnce();
-      const snapshot = refreshed ? await persistSupabaseSession() : await persistSupabaseSession();
-
-      if (!snapshot) {
-        await clearSecureSession();
-        useTenantStore.getState().clearTenant();
-        set({
-          state: "revoked",
-          errorMessage: authErrorFromCode("session_revoked").message,
-          snapshot: snapshotFrom("revoked"),
-        });
-        return;
-      }
-
-      const meta = await loadSessionMetadata();
-      if (meta.lastTenantId) {
-        useTenantStore.getState().restoreFromMetadata({
-          tenantId: meta.lastTenantId,
-          branchId: meta.lastBranchId,
-        });
-      }
-
-      await touchLastValidatedAt();
-      const nextState = resolveContextState();
-      set({
-        state: nextState,
-        snapshot: snapshotFrom(nextState, snapshot),
-      });
-    } catch (err) {
-      logger.error("session.boot_failed", err);
-      set({
-        state: "error",
-        errorMessage: normalizeAuthError(err).message,
-        snapshot: snapshotFrom("error"),
-      });
-    }
+    return bootInFlight;
   },
 
   login: async (email, password) => {
@@ -238,6 +303,13 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       const stored = sessionToStored(data.session, email.trim());
       await saveSession(stored);
       useTenantStore.getState().clearTenant();
+      resetBootAttemptCounters();
+      autoRestoreCompleted = false;
+
+      logger.info("postlogin.login_ok", {
+        hasUser: Boolean(stored.userId),
+        hasRefresh: Boolean(stored.refreshToken),
+      });
 
       set({
         state: "authenticated_without_tenant",
@@ -248,18 +320,25 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
           hasSecureToken: true,
           expiresAt: stored.expiresAt,
         }),
+        errorMessage: null,
       });
       return true;
     } catch (err) {
       logger.error("session.login_failed", err);
       const normalized = normalizeAuthError(err);
       set({
-        state: "error",
+        state: "unauthenticated",
         errorMessage: normalized.message,
-        snapshot: snapshotFrom("error"),
+        snapshot: snapshotFrom("unauthenticated"),
       });
       return false;
     }
+  },
+
+  returnToLogin: async (reason = "return_to_login", errorMessage = null) => {
+    resetBootAttemptCounters();
+    autoRestoreCompleted = false;
+    await resetLocalMobileAuth({ reason, errorMessage });
   },
 
   logout: async () => {
@@ -283,15 +362,9 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
           /* ignore */
         }
       }
-      await clearSecureSession();
-      resetSupabaseClient();
-      useTenantStore.getState().clearTenant();
-      queryClient.clear();
-      set({
-        state: "unauthenticated",
-        snapshot: snapshotFrom("unauthenticated"),
-        errorMessage: null,
-      });
+      resetBootAttemptCounters();
+      autoRestoreCompleted = false;
+      await resetLocalMobileAuth({ reason: "logout" });
     }
   },
 
@@ -372,6 +445,12 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     });
   },
 }));
+
+bindSessionResetTarget({
+  setState: (partial) => {
+    useSessionStore.setState(partial);
+  },
+});
 
 export async function getSessionTokenForApi(): Promise<string | null> {
   return getAccessToken();

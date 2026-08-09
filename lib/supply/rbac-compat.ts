@@ -9,9 +9,9 @@
  * quando o snapshot DB não traz as keys de compras/estoque.
  */
 
-import type { TenantRole } from "@/lib/constants";
-import { ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES } from "@/lib/rbac/membership";
-import { getPermissionsForRoles } from "@/lib/rbac/role-permissions";
+import type { TenantRole } from "../constants.ts";
+import { ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES } from "../rbac/membership.ts";
+import { getPermissionsForRoles } from "../rbac/role-permissions.ts";
 
 export const MEMBERSHIP_TO_ENTERPRISE_ROLES: Readonly<
   Record<TenantRole, readonly string[]>

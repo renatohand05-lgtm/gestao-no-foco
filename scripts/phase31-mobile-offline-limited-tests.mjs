@@ -55,7 +55,11 @@ check(
 );
 check(
   "offline.tsx offers reconnect action",
-  /Tentar reconectar|boot/.test(offlineSrc),
+  /Tentar novamente|Tentar reconectar|boot/.test(offlineSrc),
+);
+check(
+  "offline.tsx offers Voltar para o login",
+  /Voltar para o login/.test(offlineSrc),
 );
 
 console.log(`\nResultado: ${pass} PASS · ${fail} FAIL\n`);

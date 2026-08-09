@@ -1,4 +1,5 @@
 import { fetchExecutiveDashboard, type MobileExecutiveDashboard } from "@/api/mobile-api";
+import { AuthenticatedDataError } from "@/auth/AuthenticatedDataError";
 import { useSessionStore } from "@/auth/session-store";
 import {
   AlertsSection,
@@ -25,6 +26,7 @@ import {
   Text,
 } from "@/design/components";
 import { useNetworkStatus, isOnline } from "@/offline/network";
+import { OPS_VIEW_PERMS } from "@/operacao/sections";
 import { useHasAnyPermission } from "@/permissions/gate";
 import { qk } from "@/query/keys";
 import { useTenantStore } from "@/tenant/context-store";
@@ -50,6 +52,7 @@ export default function HomeScreen() {
   const network = useNetworkStatus();
   const online = isOnline(network);
   const canView = useHasAnyPermission(EXEC_PERMS);
+  const canOps = useHasAnyPermission(OPS_VIEW_PERMS);
   const clearTenant = useTenantStore((s) => s.clearTenant);
   const logout = useSessionStore((s) => s.logout);
   const userId = useSessionStore((s) => s.snapshot.userId);
@@ -63,6 +66,13 @@ export default function HomeScreen() {
     if (!tenantId) return;
     void loadDashboardSnapshot(tenantId).then(setOfflineSnap);
   }, [tenantId]);
+
+  /** Sem permissão executiva: aterrissa em Operação (não mascara RBAC). */
+  useEffect(() => {
+    if (!canView && canOps) {
+      router.replace("/operacao");
+    }
+  }, [canView, canOps]);
 
   const query = useQuery({
     queryKey: qk.module(tenantId || null, branchId, "dashboard-executive"),
@@ -119,18 +129,31 @@ export default function HomeScreen() {
 
   if (online && query.isError && !data) {
     const status = (query.error as { status?: number })?.status;
+    if (status === 403) {
+      return (
+        <SafeAreaScreen edges={["left", "right"]}>
+          <ErrorState
+            title="Acesso negado"
+            message="Sem permissão para o Dashboard Executivo neste tenant."
+            action={
+              <Button
+                title="Trocar empresa"
+                onPress={() => {
+                  clearTenant();
+                  router.replace("/(auth)/tenant");
+                }}
+              />
+            }
+          />
+        </SafeAreaScreen>
+      );
+    }
     return (
-      <SafeAreaScreen edges={["left", "right"]}>
-        <ErrorState
-          title={status === 403 ? "Acesso negado" : "Falha ao carregar"}
-          message={
-            query.error instanceof Error
-              ? query.error.message
-              : "Não foi possível carregar o dashboard."
-          }
-          action={<Button title="Tentar novamente" onPress={() => void query.refetch()} />}
-        />
-      </SafeAreaScreen>
+      <AuthenticatedDataError
+        code="DASHBOARD_LOAD_FAILED"
+        title="Não foi possível carregar seus dados."
+        onRetry={() => void query.refetch()}
+      />
     );
   }
 

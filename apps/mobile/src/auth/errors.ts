@@ -42,8 +42,29 @@ export function normalizeAuthError(error: unknown): NormalizedAuthError {
     }
   }
 
-  if (error instanceof TypeError || (error instanceof Error && error.message.includes("Network"))) {
-    return { code: "network_unavailable", message: friendlyAuthMessage("network_unavailable") };
+  if (error instanceof Error) {
+    const lower = error.message.toLowerCase();
+    // Não classificar falha de token/sessão como rede.
+    if (
+      lower.includes("jwt") ||
+      lower.includes("refresh") ||
+      lower.includes("session") ||
+      lower.includes("sessão") ||
+      lower.includes("sessao")
+    ) {
+      return { code: "session_expired", message: friendlyAuthMessage("session_expired") };
+    }
+    if (
+      error instanceof TypeError ||
+      lower.includes("network") ||
+      lower.includes("falha de rede") ||
+      lower.includes("failed to fetch")
+    ) {
+      return {
+        code: "network_unavailable",
+        message: friendlyAuthMessage("network_unavailable"),
+      };
+    }
   }
 
   return { code: "unknown", message: friendlyAuthMessage("unknown") };

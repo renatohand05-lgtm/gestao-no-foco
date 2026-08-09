@@ -23,12 +23,55 @@ export const MOBILE_EXECUTIVE_DASHBOARD_ANY_OF = [
   "dashboard.visualizar",
 ] as const;
 
+/**
+ * Aliases legados (oficina / seed) → chaves canónicas do Dashboard Executivo.
+ * Espelha `lib/rbac/executive-access` sem depender do app Web.
+ */
+export const MOBILE_EXECUTIVE_PERMISSION_ALIASES: Readonly<
+  Record<string, readonly string[]>
+> = {
+  "dashboard.executivo": [
+    "dashboard.visualizar_executivo",
+    "analytics.executivo",
+  ],
+  "analytics.executivo": [
+    "dashboard.executivo",
+    "dashboard.visualizar_executivo",
+  ],
+  "dashboard.visualizar": [
+    "dashboard.executivo",
+    "analytics.executivo",
+    "dashboard.visualizar_executivo",
+  ],
+};
+
+export function expandMobileExecutiveAliases(
+  permissions: readonly string[],
+): string[] {
+  const set = new Set(permissions);
+  for (const [canonical, aliases] of Object.entries(
+    MOBILE_EXECUTIVE_PERMISSION_ALIASES,
+  )) {
+    if (set.has(canonical)) continue;
+    if (aliases.some((a) => set.has(a))) set.add(canonical);
+  }
+  if (set.has("dashboard.executivo")) set.add("analytics.executivo");
+  if (set.has("analytics.executivo")) set.add("dashboard.executivo");
+  if (set.has("dashboard.visualizar_executivo")) {
+    set.add("dashboard.executivo");
+    set.add("analytics.executivo");
+  }
+  return [...set];
+}
+
 export function hasPermission(
   permissions: readonly string[],
   required: string,
 ): boolean {
   if (permissions.includes("*")) return true;
-  return permissions.includes(required);
+  if (permissions.includes(required)) return true;
+  const aliases = MOBILE_EXECUTIVE_PERMISSION_ALIASES[required];
+  return aliases?.some((a) => permissions.includes(a)) ?? false;
 }
 
 export function hasAnyPermission(

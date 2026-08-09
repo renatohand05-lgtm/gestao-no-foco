@@ -34,8 +34,8 @@ Ressalva: contraste/tab bar validados por tokens + gates; **teste físico da Bui
 | 21 | nova build necessária | **SIM** (runtime visual) |
 | 22 | build gerada | **119** FINISHED |
 | 23 | Build ID | `8c5c68d1-9325-4a68-833d-c8d794cd7390` |
-| 24 | commit SHA (runtime) | `bea9d98` |
-| 25 | HEAD == origin/main | após push deste REPORT |
+| 24 | commit SHA | runtime `bea9d98` · evidence `56d7980` |
+| 25 | HEAD == origin/main | **SIM** |
 | 26 | blockers | Homologação visual iPhone da 119 |
 | 27 | próxima ação | 🟡 TESTAR NO IPHONE PRIMEIRO |
 

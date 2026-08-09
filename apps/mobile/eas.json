@@ -47,6 +47,7 @@
       }
     },
     "production": {
+      "distribution": "store",
       "channel": "production",
       "autoIncrement": true,
       "android": {

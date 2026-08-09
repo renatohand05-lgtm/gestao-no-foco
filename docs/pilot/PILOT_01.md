@@ -2,7 +2,8 @@
 
 **Baseline estável:** 1.10.0 · **Build 118** (homologada — `docs/testing/evidence/32-3/REPORT.md`)  
 **EAS Build 118:** `3c3dae74-dfcd-48bc-950e-e8edde70d438`  
-**Candidata visual (32.4):** Build **119** (se gerada) — polimento tab bar / contraste; homologar no iPhone antes do TestFlight  
+**Candidata visual (32.4):** Build **119** (`8c5c68d1-9325-4a68-833d-c8d794cd7390`) — polimento tab bar / contraste; **homologar no iPhone antes do TestFlight**  
+
 **Canal:** TestFlight interno / production (STORE)  
 **Status:** piloto controlado — **não** App Review pública; convites manuais
 

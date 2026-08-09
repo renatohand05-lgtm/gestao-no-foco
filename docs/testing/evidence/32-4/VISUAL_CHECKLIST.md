@@ -1,6 +1,6 @@
 # Checklist visual — tab bar & contraste (32.4)
 
-Build: ________  Data: ________  Testador: ________
+Build: **119** (`8c5c68d1-9325-4a68-833d-c8d794cd7390`)  Data: ________  Testador: ________
 
 | Item | PASS | FAIL | N/A | Obs. |
 |------|------|------|-----|------|

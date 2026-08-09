@@ -34,8 +34,8 @@ Ressalvas: performance device ainda TBD (coleta no piloto); sink de telemetria �
 | 20 | produção | **OK** — `/api/health` 200; memberships sem token **401** |
 | 21 | piloto preparado | **SIM** — `docs/pilot/PILOT_01.md` + checklist + release process |
 | 22 | nova build necessária | **SIM** (runtime: telemetry, taxonomy, CRM compose, integrity 32.2) |
-| 23 | build final | **118** (preencher após EAS) |
-| 24 | pendências | Homologar 118 no iPhone; coletar p50/p95; convites TestFlight manuais |
+| 23 | build final | **118** — ID `3c3dae74-dfcd-48bc-950e-e8edde70d438` |
+| 24 | pendências | Homologar 118 no iPhone; submit TestFlight manual; coletar p50/p95; convites manuais |
 | 25 | blockers | Nenhum gate crítico |
 | 26 | pronto para piloto controlado | **SIM COM RESSALVAS** (após homologação física da 118) |
 
@@ -62,12 +62,16 @@ Sanitização: sem senha/token/anon/PII; `sanitizeForLog` ampliado.
 
 ## Build 118
 
-Preenchido após `eas build --profile production`:
-
 | Campo | Valor |
 |-------|-------|
-| Build number | _(após EAS)_ |
-| Build ID | _(após EAS)_ |
-| Commit | _(SHA do commit 32.2)_ |
+| version / build | `1.10.0` / **118** |
+| Build ID | `3c3dae74-dfcd-48bc-950e-e8edde70d438` |
+| Build URL | https://expo.dev/accounts/gesto-no-foco/projects/gestao-no-foco/builds/3c3dae74-dfcd-48bc-950e-e8edde70d438 |
+| IPA | https://expo.dev/artifacts/eas/jrWYXZ5L4uAdMUmcvS5o3t0ppcss1nqWQ4J8sFEjDCo.ipa |
+| Commit | `4cd175d` |
 | runtimeVersion | `1.10.0-pilot-32.2` |
+| profile / channel / dist | production / production / STORE |
 | TestFlight submit automático | **NÃO** |
+| HEAD == origin/main | **SIM** |
+
+Baseline estável histórica: **117**. Candidata ao piloto: **118** (após homologação no iPhone).

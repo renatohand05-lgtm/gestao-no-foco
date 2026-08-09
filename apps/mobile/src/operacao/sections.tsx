@@ -3,14 +3,8 @@ import { Card, Text } from "@/design/components";
 import { useTheme } from "@/design/theme";
 import { Pressable, StyleSheet, View } from "react-native";
 
-export const OPS_VIEW_PERMS = [
-  "os.visualizar",
-  "centro_operacoes.visualizar",
-  "dashboard.operacional",
-  "agenda.visualizar",
-  "mecanicos.visualizar",
-  "clientes.visualizar",
-] as const;
+/** @deprecated Importar de `@/operacao/perms` no bootstrap (tab layout). */
+export { OPS_VIEW_PERMS } from "@/operacao/perms";
 
 function KpiTile({ title, value }: { title: string; value: string }) {
   const { colors } = useTheme();

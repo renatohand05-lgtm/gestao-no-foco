@@ -3,14 +3,8 @@ import { Card, Text } from "@/design/components";
 import { useTheme } from "@/design/theme";
 import { Pressable, StyleSheet, View } from "react-native";
 
-export const STOCK_VIEW_PERMS = [
-  "estoque.visualizar",
-  "produtos.visualizar",
-  "compras.visualizar",
-  "fornecedores.visualizar",
-  "supply.dashboard.visualizar",
-  "dashboard.estoque",
-] as const;
+/** @deprecated Importar de `@/stock/perms` no bootstrap (tab layout). */
+export { STOCK_VIEW_PERMS } from "@/stock/perms";
 
 function KpiTile({ title, value }: { title: string; value: string }) {
   const { colors } = useTheme();

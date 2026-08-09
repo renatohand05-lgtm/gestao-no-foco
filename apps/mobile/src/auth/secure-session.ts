@@ -133,12 +133,39 @@ export async function loadStoredSession(): Promise<StoredSession | null> {
   };
 }
 
+/**
+ * Bearer para `/api/mobile/v1/*`.
+ * Prefer SecureStore; se vazio (Keychain após upgrade Ad Hoc→App Store,
+ * ou token > limite ~2048), usa a sessão Auth canônica no AsyncStorage.
+ */
 export async function getAccessToken(): Promise<string | null> {
   const token = await safeSecureGet(KEYS.accessToken);
-  if (token && isProductionMode() && isMockToken(token)) {
+  if (token) {
+    if (isProductionMode() && isMockToken(token)) {
+      return null;
+    }
+    return token;
+  }
+
+  try {
+    const { isSupabaseConfigured } = await import("@/env/validate");
+    if (!isSupabaseConfigured()) return null;
+    const { getSupabaseClient } = await import("@/supabase/client");
+    const supabase = getSupabaseClient();
+    const { data } = await supabase.auth.getSession();
+    const access = data.session?.access_token ?? null;
+    if (!access) return null;
+    if (isProductionMode() && isMockToken(access)) return null;
+    // Best-effort: reidratar SecureStore para próximas leituras / offline gate
+    void safeSecureSet(KEYS.accessToken, access);
+    logger.info("session.token_fallback_supabase");
+    return access;
+  } catch (err) {
+    logger.warn("session.token_fallback_failed", {
+      name: err instanceof Error ? err.name : "Error",
+    });
     return null;
   }
-  return token;
 }
 
 export async function loadSessionMetadata(): Promise<SessionMetadata> {

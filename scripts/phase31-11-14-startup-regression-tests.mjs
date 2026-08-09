@@ -62,16 +62,17 @@ check(
 
 const configSrc = readFileSync(configPath, "utf8");
 check(
-  "runtimeVersion isolado do cache 1.10.0 da Build 110/111",
-  configSrc.includes("1.10.0-startup-31.11.14"),
+  "runtimeVersion isolado do cache bare 1.10.0 (Build 110/111)",
+  /RUNTIME_VERSION\s*=\s*"1\.10\.0-/.test(configSrc) &&
+    !/RUNTIME_VERSION\s*=\s*"1\.10\.0"\s*;/.test(configSrc),
 );
 check(
   "updates.checkAutomatically = ON_ERROR_RECOVERY",
   configSrc.includes('checkAutomatically: "ON_ERROR_RECOVERY"'),
 );
 check(
-  "startupIntegrity 31.11.14 embutido no extra",
-  configSrc.includes('STARTUP_INTEGRITY = "31.11.14"') &&
+  "startupIntegrity embutido no extra",
+  /STARTUP_INTEGRITY\s*=\s*"[^"]+"/.test(configSrc) &&
     configSrc.includes("startupIntegrity: STARTUP_INTEGRITY"),
 );
 check(

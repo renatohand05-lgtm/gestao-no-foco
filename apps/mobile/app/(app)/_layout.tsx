@@ -2,9 +2,9 @@ import { Tabs } from "expo-router";
 import { useTheme } from "@/design/theme";
 import { useHasAnyPermission } from "@/permissions/gate";
 import { FINANCE_VIEW_PERMS } from "@/finance/perms";
-import { CRM_VIEW_PERMS } from "@/crm/sections";
-import { STOCK_VIEW_PERMS } from "@/stock/sections";
-import { OPS_VIEW_PERMS } from "@/operacao/sections";
+import { CRM_VIEW_PERMS } from "@/crm/perms";
+import { STOCK_VIEW_PERMS } from "@/stock/perms";
+import { OPS_VIEW_PERMS } from "@/operacao/perms";
 
 const EXEC_PERMS = [
   "dashboard.executivo",

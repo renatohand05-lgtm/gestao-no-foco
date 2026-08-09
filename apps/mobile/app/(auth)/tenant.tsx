@@ -27,6 +27,7 @@ export default function TenantScreen() {
   const markTenantSelected = useSessionStore((s) => s.markTenantSelected);
   const setTenant = useTenantStore((s) => s.setTenant);
   const [query, setQuery] = useState("");
+  const [permError, setPermError] = useState<Error | null>(null);
   const apiBase = getApiBaseResolution();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -77,13 +78,25 @@ export default function TenantScreen() {
     logger.info("postlogin.tenant_selected", {
       hasSlug: Boolean(tenant.slug),
     });
+    setPermError(null);
     const perms = await fetchPermissions(tenant.tenantId);
+    if (!perms.ok) {
+      logger.warn("postlogin.permissions_failed", {
+        status: perms.status,
+        code: perms.error.code,
+      });
+      // Nunca gravar [] silenciosamente — esconde abas / Access Denied em massa.
+      const err = new Error(perms.error.message) as Error & { status?: number };
+      err.status = perms.status;
+      setPermError(err);
+      return;
+    }
     setTenant({
       tenantId: tenant.tenantId,
       tenantSlug: tenant.slug,
       tenantName: tenant.name,
       segmentId: tenant.segmentId as SegmentId | null,
-      permissions: perms.ok ? perms.data.permissions : [],
+      permissions: perms.data.permissions,
     });
     markTenantSelected();
     router.push("/(auth)/branch");
@@ -105,6 +118,20 @@ export default function TenantScreen() {
         title="Não foi possível carregar seus dados."
         onRetry={() => {
           void refetch();
+        }}
+        showGoHome={false}
+      />
+    );
+  }
+
+  if (permError) {
+    const code = classifyMembershipError(permError, apiBase.code);
+    return (
+      <AuthenticatedDataError
+        code={code}
+        title="Não foi possível carregar suas permissões."
+        onRetry={() => {
+          setPermError(null);
         }}
         showGoHome={false}
       />
@@ -143,7 +170,9 @@ export default function TenantScreen() {
               key={tenant.tenantId}
               title={tenant.name}
               subtitle={`${tenant.slug} · ${tenant.role}`}
-              onPress={() => handleSelect(tenant)}
+              onPress={() => {
+                void handleSelect(tenant);
+              }}
             />
           ))
         )}

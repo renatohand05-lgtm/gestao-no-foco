@@ -3,12 +3,8 @@ import { Card, Text } from "@/design/components";
 import { useTheme } from "@/design/theme";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
-export const CRM_VIEW_PERMS = [
-  "crm.visualizar",
-  "crm.dashboard.visualizar",
-  "crm.pipeline.visualizar",
-  "clientes.visualizar",
-] as const;
+/** @deprecated Importar de `@/crm/perms` no bootstrap (tab layout). */
+export { CRM_VIEW_PERMS } from "@/crm/perms";
 
 function moneyOrDash(v: string | null | undefined) {
   return v && v.trim().length > 0 ? v : "—";

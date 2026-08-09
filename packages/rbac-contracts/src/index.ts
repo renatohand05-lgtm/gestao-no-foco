@@ -45,6 +45,28 @@ export const MOBILE_EXECUTIVE_PERMISSION_ALIASES: Readonly<
   ],
 };
 
+/** Aliases analytics/dashboard → módulo financeiro (paridade Web). */
+export const MOBILE_FINANCE_PERMISSION_ALIASES: Readonly<
+  Record<string, readonly string[]>
+> = {
+  "financeiro.visualizar": ["analytics.financeiro", "dashboard.financeiro"],
+  "financeiro.ver_saldos": [
+    "analytics.financeiro",
+    "dashboard.financeiro",
+    "financeiro.visualizar",
+  ],
+  "financeiro.ver_fluxo_caixa": [
+    "analytics.financeiro",
+    "dashboard.financeiro",
+    "financeiro.visualizar",
+  ],
+  "financeiro.ver_dre": [
+    "analytics.financeiro",
+    "dashboard.financeiro",
+    "financeiro.visualizar",
+  ],
+};
+
 export function expandMobileExecutiveAliases(
   permissions: readonly string[],
 ): string[] {
@@ -61,6 +83,12 @@ export function expandMobileExecutiveAliases(
     set.add("dashboard.executivo");
     set.add("analytics.executivo");
   }
+  for (const [canonical, aliases] of Object.entries(
+    MOBILE_FINANCE_PERMISSION_ALIASES,
+  )) {
+    if (set.has(canonical)) continue;
+    if (aliases.some((a) => set.has(a))) set.add(canonical);
+  }
   return [...set];
 }
 
@@ -70,8 +98,10 @@ export function hasPermission(
 ): boolean {
   if (permissions.includes("*")) return true;
   if (permissions.includes(required)) return true;
-  const aliases = MOBILE_EXECUTIVE_PERMISSION_ALIASES[required];
-  return aliases?.some((a) => permissions.includes(a)) ?? false;
+  const execAliases = MOBILE_EXECUTIVE_PERMISSION_ALIASES[required];
+  if (execAliases?.some((a) => permissions.includes(a))) return true;
+  const financeAliases = MOBILE_FINANCE_PERMISSION_ALIASES[required];
+  return financeAliases?.some((a) => permissions.includes(a)) ?? false;
 }
 
 export function hasAnyPermission(

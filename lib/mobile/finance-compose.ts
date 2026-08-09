@@ -43,16 +43,20 @@ async function soft<T>(fn: () => Promise<T>): Promise<T | null> {
   }
 }
 
+import { financePermissionSatisfied } from "@/lib/finance/shared/rbac-compat";
+
 function hasPerm(permissions: readonly string[], key: string): boolean {
-  return permissions.includes("*") || permissions.includes(key);
+  if (permissions.includes("*")) return true;
+  return financePermissionSatisfied(permissions, key);
 }
 
 export function canViewFinance(permissions: readonly string[]): boolean {
+  if (permissions.includes("*")) return true;
   return (
-    hasPerm(permissions, "financeiro.visualizar") ||
-    hasPerm(permissions, "financeiro.ver_saldos") ||
-    hasPerm(permissions, "financeiro.ver_fluxo_caixa") ||
-    hasPerm(permissions, "financeiro.ver_dre")
+    financePermissionSatisfied(permissions, "financeiro.visualizar") ||
+    financePermissionSatisfied(permissions, "financeiro.ver_saldos") ||
+    financePermissionSatisfied(permissions, "financeiro.ver_fluxo_caixa") ||
+    financePermissionSatisfied(permissions, "financeiro.ver_dre")
   );
 }
 

@@ -87,7 +87,13 @@ export default function SettingsScreen() {
         <Card style={styles.card}>
           <Text variant="subtitle">Sobre</Text>
           <ListItem title="Versão" trailing={<Text variant="body">{version}</Text>} />
-          <ListItem title="Build" trailing={<Text variant="body">{build}</Text>} />
+          <ListItem
+            title="Build"
+            trailing={<Text variant="body">{build}</Text>}
+          />
+          <Text variant="caption" muted>
+            Build number do binário (EAS remote). Ambiente da build: {appEnv}.
+          </Text>
           <ListItem title="Ambiente" trailing={<Text variant="body">{appEnv}</Text>} />
         </Card>
 

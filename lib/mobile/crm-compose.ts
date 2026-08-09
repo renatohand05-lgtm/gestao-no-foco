@@ -345,9 +345,16 @@ export async function composeCrmDashboard(input: {
   const hoje = hojeIso();
 
   const oppService = new CrmOportunidadeService(client, input.tenantId);
-  const opps =
-    (await soft(() => oppService.listAll(500))) ?? ([] as CrmOportunidadeRow[]);
-  if (!opps.length) unavailable.push("oportunidades");
+  let opps: CrmOportunidadeRow[] = [];
+  let oportunidadesLoadFailed = false;
+  try {
+    opps = await oppService.listAll(500);
+  } catch {
+    // Erro técnico (RLS/rede/schema) — não mascarar como lista vazia.
+    oportunidadesLoadFailed = true;
+    opps = [];
+  }
+  if (oportunidadesLoadFailed) unavailable.push("oportunidades");
 
   const followUps =
     (await soft(() => loadFollowUpItems(client, input.tenantId))) ?? [];

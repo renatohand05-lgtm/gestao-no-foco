@@ -26,10 +26,31 @@ export const MEMBERSHIP_TO_ENTERPRISE_ROLES: Readonly<
 
 /** Permissões granulares 22.2 implicadas por equivalentes anteriores. */
 const IMPLIED_BY_LEGACY: Readonly<Record<string, readonly string[]>> = {
+  /** Analytics/Dashboard financeiro (Enterprise) → módulo financeiro canónico. */
+  "financeiro.visualizar": [
+    "dashboard.financeiro",
+    "analytics.financeiro",
+  ],
+  "financeiro.ver_saldos": [
+    "dashboard.financeiro",
+    "analytics.financeiro",
+    "financeiro.visualizar",
+  ],
+  "financeiro.ver_fluxo_caixa": [
+    "dashboard.financeiro",
+    "analytics.financeiro",
+    "financeiro.visualizar",
+  ],
+  "financeiro.ver_dre": [
+    "dashboard.financeiro",
+    "analytics.financeiro",
+    "financeiro.visualizar",
+  ],
   "financeiro.contas.visualizar": [
     "financeiro.visualizar",
     "financeiro.ver_saldos",
     "dashboard.financeiro",
+    "analytics.financeiro",
   ],
   "financeiro.movimentacoes.visualizar": [
     "financeiro.visualizar",
@@ -43,6 +64,7 @@ const IMPLIED_BY_LEGACY: Readonly<Record<string, readonly string[]>> = {
     "financeiro.visualizar",
     "financeiro.ver_dre",
     "dashboard.financeiro",
+    "analytics.financeiro",
   ],
   "financeiro.tributos.simular": [
     "financeiro.criar",
@@ -55,6 +77,7 @@ const IMPLIED_BY_LEGACY: Readonly<Record<string, readonly string[]>> = {
     "financeiro.visualizar",
     "financeiro.ver_saldos",
     "dashboard.financeiro",
+    "analytics.financeiro",
   ],
   "financeiro.aging.visualizar": [
     "financeiro.visualizar",
@@ -86,7 +109,9 @@ export function mapMembershipRoleToEnterpriseRoles(
 
 export function hasFinancePermissionKey(permission: string): boolean {
   return (
-    permission.startsWith("financeiro.") || permission === "dashboard.financeiro"
+    permission.startsWith("financeiro.") ||
+    permission === "dashboard.financeiro" ||
+    permission === "analytics.financeiro"
   );
 }
 

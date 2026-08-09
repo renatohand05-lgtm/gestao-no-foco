@@ -527,7 +527,8 @@
     "test:homolog-31-11": "node scripts/homolog-31-11-tests.mjs",
     "test:phase31-ios-build": "node scripts/phase31-ios-build-tests.mjs",
     "test:homolog-31-11-1": "node scripts/homolog-31-11-1-tests.mjs",
-    "test:phase31-11-10-rbac-parity": "node --experimental-strip-types scripts/phase31-11-10-rbac-parity-tests.mjs"
+    "test:phase31-11-10-rbac-parity": "node --experimental-strip-types scripts/phase31-11-10-rbac-parity-tests.mjs",
+    "test:phase31-11-13-finance-alias": "node --experimental-strip-types scripts/phase31-11-13-finance-alias-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

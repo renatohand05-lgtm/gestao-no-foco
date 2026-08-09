@@ -8,6 +8,8 @@ export const FINANCE_VIEW_PERMS = [
   "financeiro.ver_saldos",
   "financeiro.ver_fluxo_caixa",
   "financeiro.ver_dre",
+  "dashboard.financeiro",
+  "analytics.financeiro",
 ] as const;
 
 function moneyOrDash(v: string | null | undefined) {

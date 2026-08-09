@@ -1,8 +1,9 @@
 # Piloto controlado 01 — Gestão no Foco Mobile
 
-**Versão alvo:** 1.10.0 (Build piloto — ver `docs/testing/evidence/32-2/REPORT.md`)  
-**Canal:** TestFlight interno / production  
-**Status:** preparado — **não** adicionar usuários reais automaticamente
+**Versão alvo:** 1.10.0 · **Build 118** (homologada no iPhone — `docs/testing/evidence/32-3/REPORT.md`)  
+**EAS Build ID:** `3c3dae74-dfcd-48bc-950e-e8edde70d438`  
+**Canal:** TestFlight interno / production (STORE)  
+**Status:** candidata pronta para submit TestFlight — **não** adicionar usuários reais automaticamente; submit sob autorização humana
 
 ## Objetivo
 

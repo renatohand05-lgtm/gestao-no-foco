@@ -32,5 +32,5 @@
 
 ## Nota de evolução
 
-A Sprint 32.2 introduz telemetria sanitizada, taxonomia de erros e correção CRM empty≠error.  
-Se houver alteração runtime, a **Build 118** substitui 117 como candidata ao piloto; caso contrário 117 permanece baseline operacional.
+A Sprint 32.2 introduziu telemetria sanitizada, taxonomia de erros e correção CRM empty≠error → **Build 118**.  
+Sprint **32.3:** Build **118** homologada no iPhone físico e confirmada como candidata principal ao TestFlight / piloto (`docs/testing/evidence/32-3/REPORT.md`).

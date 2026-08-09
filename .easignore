@@ -1,0 +1,88 @@
+# EAS archive ignore — monorepo ROOT (upload is the git repo).
+# Sprint 31.11.12: apps/mobile/.easignore cannot exclude parent dirs (gitignore rules).
+# Keep apps/mobile/.easignore only for package-local paths; this file shrinks the archive.
+
+# Dependencies (reinstalled on builder)
+node_modules/
+**/node_modules/
+
+# Next.js caches / local builds (~300MB+)
+.next/
+.next-build/
+.next-build-*/
+.vercel/
+out/
+
+# Docs / evidence (~207MB)
+docs/
+
+# Web-only surfaces not needed for Metro mobile bundle
+app/
+components/
+public/uploads/
+data/
+
+# Homologation / Node test scripts
+scripts/
+coverage/
+playwright-report/
+test-results/
+
+# Mobile local artifacts
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/dist-android/
+apps/mobile/dist-ios/
+apps/mobile/dist-ios-export-check/
+apps/mobile/web-build/
+apps/mobile/ios/
+apps/mobile/android/
+apps/mobile/test/
+**/.turbo/
+
+# Logs / dumps
+**/*.log
+*-release-*.log
+build-release-*.log
+lint-release-*.log
+vercel-deploy-*.json
+vercel-inspect-*.json
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Store artifacts
+*.apk
+*.aab
+*.ipa
+*.app.dSYM.zip
+
+# IDE / VCS
+.git/
+.idea/
+.vscode/
+.cursor/
+.DS_Store
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnp
+.pnp.*
+
+# Supabase temp
+supabase/.branches/
+supabase/.temp/

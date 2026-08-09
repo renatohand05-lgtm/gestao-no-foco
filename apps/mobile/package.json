@@ -16,6 +16,7 @@
     "build": "npx expo export --platform android --output-dir dist-android --dump-sourcemap false"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "@gof/api-contracts": "*",
     "@gof/config": "*",
     "@gof/design-tokens": "*",

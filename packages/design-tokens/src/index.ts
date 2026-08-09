@@ -78,4 +78,29 @@ export const darkTheme = {
   success: gofPalette.success,
 } as const;
 
+/**
+ * Tab bar — contraste enterprise (Sprint 32.4).
+ * Inactive ≠ disabled: inativo permanece legível; disabled é mais apagado.
+ */
+export const gofTabBar = {
+  light: {
+    bg: gofPalette.white,
+    border: gofPalette.border,
+    active: gofPalette.goldDeep,
+    inactive: "#4A5563",
+    disabled: "#A1A1AA",
+    labelActive: gofPalette.goldDeep,
+    labelInactive: "#4A5563",
+  },
+  dark: {
+    bg: gofPalette.graphite,
+    border: gofPalette.graphiteElevated,
+    active: gofPalette.goldSoft,
+    inactive: gofPalette.silver,
+    disabled: "#5C6370",
+    labelActive: gofPalette.goldSoft,
+    labelInactive: gofPalette.silver,
+  },
+} as const;
+
 export type GofTheme = typeof lightTheme | typeof darkTheme;

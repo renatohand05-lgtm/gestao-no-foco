@@ -1,19 +1,20 @@
 # Piloto controlado 01 — Gestão no Foco Mobile
 
-**Versão alvo:** 1.10.0 · **Build 118** (homologada no iPhone — `docs/testing/evidence/32-3/REPORT.md`)  
-**EAS Build ID:** `3c3dae74-dfcd-48bc-950e-e8edde70d438`  
+**Baseline estável:** 1.10.0 · **Build 118** (homologada — `docs/testing/evidence/32-3/REPORT.md`)  
+**EAS Build 118:** `3c3dae74-dfcd-48bc-950e-e8edde70d438`  
+**Candidata visual (32.4):** Build **119** (se gerada) — polimento tab bar / contraste; homologar no iPhone antes do TestFlight  
 **Canal:** TestFlight interno / production (STORE)  
-**Status:** candidata pronta para submit TestFlight — **não** adicionar usuários reais automaticamente; submit sob autorização humana
+**Status:** piloto controlado — **não** App Review pública; convites manuais
 
 ## Objetivo
 
-Validar estabilidade, RBAC, qualidade de dados e UX em uso real limitado, sem App Review pública.
+Validar estabilidade, RBAC, qualidade de dados, UX e **legibilidade visual** (tab bar) em uso real limitado.
 
 ## Duração
 
 7–14 dias corridos (ajustável).
 
-## Usuários / empresas
+## Usuários internos
 
 | Papel | Qtd sugerida | Critério |
 |-------|--------------|----------|
@@ -22,7 +23,7 @@ Validar estabilidade, RBAC, qualidade de dados e UX em uso real limitado, sem Ap
 | Financeiro/CRM (opcional) | 0–2 | se módulo liberado |
 
 Empresas: **somente tenants já existentes** autorizados pelo responsável.  
-Convites manuais via App Store Connect / TestFlight — sem automação neste doc.
+Convites manuais via App Store Connect / TestFlight — sem automação.
 
 ## Módulos liberados
 
@@ -34,8 +35,6 @@ Convites manuais via App Store Connect / TestFlight — sem automação neste do
 - Operação (leitura + fluxos já nativos)  
 - Perfil / Ajustes / Face ID / troca empresa-filial  
 
-Fora: mutações pesadas só via Web quando o app abrir portal.
-
 ## Critérios de sucesso
 
 - Login + Face ID sem loop  
@@ -44,30 +43,33 @@ Fora: mutações pesadas só via Web quando o app abrir portal.
 - Zero crash recorrente no cold start  
 - Offline: sem perda de sessão por rede  
 - Feedback de erros compreensível  
+- **Tab bar:** ativo óbvio; inativo legível; safe area OK  
 
-## Critérios de interrupção
+## Feedback a coletar
+
+| Área | Perguntas |
+|------|-----------|
+| Visual | Tab bar legível? Ativo claro? Inativo não parece desabilitado? |
+| Performance | Cold start / navegação aceitável? |
+| Funcional | Módulos abrem? Sessão estável? Offline ok? |
+
+Usar também `docs/testing/evidence/32-4/VISUAL_CHECKLIST.md`.
+
+## Bugs bloqueantes (interrupção)
 
 - Vazamento de secret / token em log  
 - Cross-tenant comprovado  
-- Regressão de sessão/permissões (sintoma Build 116)  
+- Regressão de sessão/permissões  
 - Crash rate impedindo uso diário  
 - Inconsistência financeira grave Web×Mobile  
+- Tab bar ilegível após “polimento”  
 
 ## Canal de suporte
 
-Responsável interno (definir nome/contato no kickoff).  
-Canal: WhatsApp/e-mail interno + evidências anexas.
+Responsável interno (definir no kickoff). WhatsApp/e-mail + screenshots.
 
-## Como reportar erro
+## Evidências
 
-1. Screenshot + horário  
-2. Build number (Ajustes)  
-3. Empresa / filial (nome, sem IDs sensíveis em canal aberto)  
-4. Passos para reproduzir  
-5. Se possível: `requestId` se aparecer em tela de erro futura  
-
-## Evidências necessárias
-
-- Checklist `docs/pilot/PILOT_01_CHECKLIST.md` preenchido  
-- Logs sanitizados (sem token)  
-- Comparativo Web×Mobile financeiro se divergência  
+- `docs/pilot/PILOT_01_CHECKLIST.md`  
+- Checklist visual 32.4  
+- Logs sanitizados  

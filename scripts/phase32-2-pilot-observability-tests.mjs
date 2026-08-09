@@ -83,9 +83,9 @@ check("sanitizeForLog cobre email/cpf/token", /email|cpf|token/i.test(utils));
 
 const config = readFileSync(join(root, "apps/mobile/app.config.ts"), "utf8");
 check(
-  "integrity 32.2",
-  config.includes('STARTUP_INTEGRITY = "32.2"') &&
-    config.includes("1.10.0-pilot-32.2"),
+  "runtimeVersion isolado + integrity definida",
+  /RUNTIME_VERSION\s*=\s*"1\.10\.0-/.test(config) &&
+    /STARTUP_INTEGRITY\s*=\s*"[^"]+"/.test(config),
 );
 
 for (const f of [

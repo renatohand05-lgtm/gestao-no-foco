@@ -1,71 +1,63 @@
-# EAS usa .easignore no lugar do .gitignore quando este arquivo existe.
-# Caminhos relativos à raiz do monorepo (upload a partir do repo root).
+# Paths relative to apps/mobile/ (directory of this file + eas.json).
 # Ref: https://docs.expo.dev/build-reference/easignore/
-# Sprint 31.11.12 — reduzir archive (~345 MB → excluir caches Next/build).
+# Sprint 31.11.12 — fix: previous paths assumed monorepo root and were ignored.
 
-# Dependências (instaladas no builder)
-node_modules/
-**/node_modules/
+# Monorepo root dependencies / caches (EAS reinstalls)
+../../node_modules/
+../../**/node_modules/
 
-# Next.js caches / builds locais (centenas de MB — não entram no Metro mobile)
-.next/
-.next-build/
-.next-build-*/
-.vercel/
-out/
+# Next.js local builds (~300MB+)
+../../.next/
+../../.next-build/
+../../.next-build-*/
+../../.vercel/
+../../out/
 
-# Docs e evidências (~207 MB) — não necessários ao bundle nativo
-docs/
+# Docs / evidence (~207MB)
+../../docs/
 
-# App Web Next (API/runtime Web; bundle mobile usa apps/mobile + packages)
-app/
-components/
-# lib/ Web permanece incluída se packages reexportarem caminhos — NÃO excluir lib/
-# (mobile API types/contracts vivem em packages; lib só no server).
-# Excluir artefatos Web pesados fora do código-fonte:
-public/uploads/
-data/
+# Web-only Next app surface (not Metro mobile)
+../../app/
+../../components/
+../../public/uploads/
+../../data/
 
-# Scripts de homologação / testes Node (não usados pelo Metro)
-scripts/
-coverage/
-playwright-report/
-test-results/
-**/__tests__/
-**/*.test.ts
-**/*.test.tsx
-**/*.spec.ts
-**/*.spec.tsx
+# Homologation scripts (not Metro)
+../../scripts/
+../../coverage/
+../../playwright-report/
+../../test-results/
 
-# App mobile — artefatos locais
-apps/mobile/.expo/
-apps/mobile/dist/
-apps/mobile/dist-android/
-apps/mobile/dist-ios/
-apps/mobile/dist-ios-export-check/
-apps/mobile/web-build/
-apps/mobile/ios/
-apps/mobile/android/
-apps/mobile/test/
+# Local mobile artifacts
+.expo/
+dist/
+dist-android/
+dist-ios/
+dist-ios-export-check/
+web-build/
+ios/
+android/
+test/
 **/.turbo/
 
-# Logs e dumps
+# Logs / dumps (repo root + local)
+../../**/*.log
+../../*-release-*.log
+../../build-release-*.log
+../../lint-release-*.log
+../../vercel-deploy-*.json
+../../vercel-inspect-*.json
 **/*.log
-*-release-*.log
-build-release-*.log
-lint-release-*.log
-vercel-deploy-*.json
-vercel-inspect-*.json
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-.pnpm-debug.log*
 *.tsbuildinfo
+../../*.tsbuildinfo
 
-# Env / secrets locais
+# Env / secrets
 .env
 .env.*
 !.env.example
+../../.env
+../../.env.*
+!../../.env.example
 **/.env
 **/.env.*
 !**/.env.example
@@ -82,20 +74,20 @@ yarn-error.*
 *.ipa
 *.app.dSYM.zip
 
-# IDE / OS / VCS
-.git/
-.idea/
-.vscode/
-.cursor/
+# IDE / VCS
+../../.git/
+../../.idea/
+../../.vscode/
+../../.cursor/
 .DS_Store
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-.pnp
-.pnp.*
+../../.yarn/
+!../../.yarn/patches
+!../../.yarn/plugins
+!../../.yarn/releases
+!../../.yarn/versions
+../../.pnp
+../../.pnp.*
 
-# Supabase local / migrations não usadas no bundle JS (schema via packages)
-supabase/.branches/
-supabase/.temp/
+# Supabase temp
+../../supabase/.branches/
+../../supabase/.temp/

@@ -136,12 +136,12 @@ const FINANCE_VIEW = [
 }
 
 {
-  const sections = readFileSync(
-    join(root, "apps/mobile/src/finance/sections.tsx"),
+  const perms = readFileSync(
+    join(root, "apps/mobile/src/finance/perms.ts"),
     "utf8",
   );
   assert(
-    /analytics\.financeiro/.test(sections),
+    /analytics\.financeiro/.test(perms) && /FINANCE_VIEW_PERMS/.test(perms),
     "FINANCE_VIEW_PERMS inclui analytics.financeiro",
   );
 }

@@ -27,6 +27,7 @@ import type {
 } from "@/types/contas-receber";
 import type { DreResumo } from "@/types/dre";
 import type { FluxoCaixaResumo, FluxoCaixaDailyPoint } from "@/types/fluxo-caixa";
+import { financePermissionSatisfied } from "@/lib/finance/shared/rbac-compat";
 
 export function resolveFinanceDataClient(
   userClient: SupabaseClient<Database>,
@@ -42,8 +43,6 @@ async function soft<T>(fn: () => Promise<T>): Promise<T | null> {
     return null;
   }
 }
-
-import { financePermissionSatisfied } from "@/lib/finance/shared/rbac-compat";
 
 function hasPerm(permissions: readonly string[], key: string): boolean {
   if (permissions.includes("*")) return true;

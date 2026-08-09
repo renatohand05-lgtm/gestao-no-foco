@@ -12,6 +12,18 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  */
 const VERSION = "1.10.0";
 const ANDROID_VERSION_CODE = 110;
+/**
+ * Runtime do expo-updates (independente da marketing version).
+ * Sprint 31.11.14: Build 111 reutilizou o JS da 110 e manteve runtime 1.10.0
+ * com novo embedded update id — risco de conflito de cache no upgrade iOS.
+ * Namespace novo isola a Build 112+ sem alterar CFBundleShortVersionString.
+ */
+const RUNTIME_VERSION = "1.10.0-startup-31.11.14";
+const STARTUP_INTEGRITY = "31.11.14";
+const EAS_GIT_COMMIT =
+  process.env.EAS_BUILD_GIT_COMMIT_HASH?.trim() ||
+  process.env.EAS_COMMIT_HASH?.trim() ||
+  "local";
 
 /** Projeto transferido para org gesto-no-foco — não criar outro; não alterar o ID. */
 const DEFAULT_EAS_PROJECT_ID = "51b0c195-feec-4ac1-9fe6-a001d9571bb4";
@@ -38,12 +50,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "gof",
   userInterfaceStyle: "automatic",
   primaryColor: BRAND.gold,
-  runtimeVersion: {
-    policy: "appVersion",
-  },
+  runtimeVersion: RUNTIME_VERSION,
   updates: {
     url: UPDATES_URL,
     fallbackToCacheTimeout: 0,
+    /** Não bloquear/reventar cold start com fetch de update (hotfix 31.11.14). */
+    checkAutomatically: "ON_ERROR_RECOVERY",
   },
   ios: {
     supportsTablet: true,
@@ -132,6 +144,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       process.env.EAS_BUILD_PROFILE ??
       process.env.EXPO_PUBLIC_APP_ENV ??
       "development",
+    startupIntegrity: STARTUP_INTEGRITY,
+    easGitCommit: EAS_GIT_COMMIT,
     brand: {
       name: "Gestão no Foco",
       primary: BRAND.gold,
@@ -139,6 +153,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     version: {
       marketing: VERSION,
+      runtime: RUNTIME_VERSION,
       /** iOS build number gerido remotamente pelo EAS (`appVersionSource: remote`). */
       iosBuildNumberSource: "eas-remote",
       androidVersionCode: ANDROID_VERSION_CODE,

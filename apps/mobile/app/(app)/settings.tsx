@@ -92,7 +92,12 @@ export default function SettingsScreen() {
             trailing={<Text variant="body">{build}</Text>}
           />
           <Text variant="caption" muted>
-            Build number do binário (EAS remote). Ambiente da build: {appEnv}.
+            Build number do binário (EAS remote). Ambiente: {appEnv}. Integrity:{" "}
+            {String(
+              (Constants.expoConfig?.extra as { startupIntegrity?: string } | undefined)
+                ?.startupIntegrity ?? "—",
+            )}
+            .
           </Text>
           <ListItem title="Ambiente" trailing={<Text variant="body">{appEnv}</Text>} />
         </Card>

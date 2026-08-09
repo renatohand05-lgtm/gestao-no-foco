@@ -3,14 +3,8 @@ import { Card, Text } from "@/design/components";
 import { useTheme } from "@/design/theme";
 import { Pressable, StyleSheet, View } from "react-native";
 
-export const FINANCE_VIEW_PERMS = [
-  "financeiro.visualizar",
-  "financeiro.ver_saldos",
-  "financeiro.ver_fluxo_caixa",
-  "financeiro.ver_dre",
-  "dashboard.financeiro",
-  "analytics.financeiro",
-] as const;
+/** @deprecated Importar de `@/finance/perms` no bootstrap (tab layout). */
+export { FINANCE_VIEW_PERMS } from "@/finance/perms";
 
 function moneyOrDash(v: string | null | undefined) {
   return v && v.trim().length > 0 ? v : "—";

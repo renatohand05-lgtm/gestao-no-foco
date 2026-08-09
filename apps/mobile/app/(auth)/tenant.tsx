@@ -15,6 +15,7 @@ import {
 } from "@/design/components";
 import { getApiBaseResolution } from "@/env/validate";
 import { logger } from "@/observability/logger";
+import { mobileTelemetry } from "@/observability/telemetry";
 import { useTenantStore } from "@/tenant/context-store";
 import type { SegmentId } from "@gof/config";
 import { useQuery } from "@tanstack/react-query";
@@ -97,6 +98,10 @@ export default function TenantScreen() {
       tenantName: tenant.name,
       segmentId: tenant.segmentId as SegmentId | null,
       permissions: perms.data.permissions,
+    });
+    mobileTelemetry.track("TENANT_SELECTED");
+    mobileTelemetry.track("RBAC_LOADED", {
+      reason: `perms:${perms.data.permissions.length}`,
     });
     markTenantSelected();
     router.push("/(auth)/branch");

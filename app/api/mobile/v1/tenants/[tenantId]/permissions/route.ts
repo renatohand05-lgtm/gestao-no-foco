@@ -9,6 +9,7 @@ import {
   mobileForbidden,
   mobileJson,
   mobileUnauthorized,
+  readMobileRequestId,
 } from "@/lib/mobile/response";
 import { mapDatabaseErrorToUserMessage } from "@/lib/supabase/friendly-error";
 
@@ -19,9 +20,10 @@ type RouteContext = { params: Promise<{ tenantId: string }> };
 
 /** GET /api/mobile/v1/tenants/:tenantId/permissions */
 export async function GET(request: Request, context: RouteContext) {
+  const requestId = readMobileRequestId(request);
   const auth = await authenticateMobileRequest(request);
   if (isMobileAuthFailure(auth)) {
-    return mobileUnauthorized(auth.message);
+    return mobileUnauthorized(auth.message, requestId);
   }
 
   const { tenantId } = await context.params;
@@ -33,7 +35,7 @@ export async function GET(request: Request, context: RouteContext) {
       auth.user.id,
     );
     if (!membership) {
-      return mobileForbidden("Você não pertence a esta empresa");
+      return mobileForbidden("Você não pertence a esta empresa", requestId);
     }
 
     const resolved = await resolveMobilePermissions(
@@ -43,8 +45,8 @@ export async function GET(request: Request, context: RouteContext) {
       membership.role,
     );
 
-    return mobileJson(resolved);
+    return mobileJson(resolved, 200, requestId);
   } catch (err) {
-    return mobileError(mapDatabaseErrorToUserMessage(err));
+    return mobileError(mapDatabaseErrorToUserMessage(err), 500, requestId);
   }
 }

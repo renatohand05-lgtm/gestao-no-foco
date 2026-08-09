@@ -2,7 +2,8 @@
  * @gof/utils — helpers multiplataforma (stub 31.0).
  */
 
-const SENSITIVE_KEYS = /token|password|secret|authorization|api[_-]?key/i;
+const SENSITIVE_KEYS =
+  /token|password|passwd|secret|authorization|api[_-]?key|refresh|anon|bearer|cpf|cnpj|documento|document|email|phone|telefone|senha/i;
 
 export function sanitizeForLog(value: unknown): unknown {
   if (value == null || typeof value !== "object") return value;

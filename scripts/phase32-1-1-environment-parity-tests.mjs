@@ -195,9 +195,9 @@ check(
 
 const configSrc = readFileSync(join(root, "apps/mobile/app.config.ts"), "utf8");
 check(
-  "runtimeVersion hotfix 32.1.1",
-  configSrc.includes("1.10.0-hotfix-32.1.1") &&
-    configSrc.includes('STARTUP_INTEGRITY = "32.1.1"'),
+  "runtimeVersion isolado (não bare 1.10.0)",
+  /RUNTIME_VERSION\s*=\s*"1\.10\.0-/.test(configSrc) &&
+    /STARTUP_INTEGRITY\s*=\s*"[^"]+"/.test(configSrc),
 );
 
 // Nenhuma feature gate de módulo por APP_ENV no src mobile

@@ -8,6 +8,7 @@ import {
   mobileError,
   mobileJson,
   mobileUnauthorized,
+  readMobileRequestId,
 } from "@/lib/mobile/response";
 import { mapDatabaseErrorToUserMessage } from "@/lib/supabase/friendly-error";
 
@@ -16,9 +17,10 @@ export const runtime = "nodejs";
 
 /** GET /api/mobile/v1/memberships */
 export async function GET(request: Request) {
+  const requestId = readMobileRequestId(request);
   const auth = await authenticateMobileRequest(request);
   if (isMobileAuthFailure(auth)) {
-    return mobileUnauthorized(auth.message);
+    return mobileUnauthorized(auth.message, requestId);
   }
 
   const { user, supabase } = auth;
@@ -30,12 +32,16 @@ export async function GET(request: Request) {
       .eq("user_id", user.id);
 
     if (membershipsError) {
-      return mobileError(mapDatabaseErrorToUserMessage(membershipsError));
+      return mobileError(
+        mapDatabaseErrorToUserMessage(membershipsError),
+        500,
+        requestId,
+      );
     }
 
     const active = (memberships ?? []).filter((m) => !isInactiveMembership(m));
     if (active.length === 0) {
-      return mobileJson({ items: [] });
+      return mobileJson({ items: [] }, 200, requestId);
     }
 
     const tenantIds = active.map((m) => m.tenant_id);
@@ -45,7 +51,11 @@ export async function GET(request: Request) {
       .in("id", tenantIds);
 
     if (tenantsError) {
-      return mobileError(mapDatabaseErrorToUserMessage(tenantsError));
+      return mobileError(
+        mapDatabaseErrorToUserMessage(tenantsError),
+        500,
+        requestId,
+      );
     }
 
     const items = (tenants ?? []).map((tenant) => {
@@ -59,8 +69,8 @@ export async function GET(request: Request) {
       };
     });
 
-    return mobileJson({ items });
+    return mobileJson({ items }, 200, requestId);
   } catch (err) {
-    return mobileError(mapDatabaseErrorToUserMessage(err));
+    return mobileError(mapDatabaseErrorToUserMessage(err), 500, requestId);
   }
 }

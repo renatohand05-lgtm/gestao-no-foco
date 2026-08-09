@@ -11,6 +11,7 @@ import { resolveBootRoute } from "@/auth/guards";
 import { messageForAuthFailure } from "@/auth/recovery-policy";
 import { useSessionStore } from "@/auth/session-store";
 import { logger } from "@/observability/logger";
+import { mobileTelemetry } from "@/observability/telemetry";
 import { router } from "expo-router";
 
 type Props = {
@@ -101,6 +102,9 @@ export class RootErrorBoundary extends Component<Props, State> {
       name: error?.name,
       message: error?.message?.slice(0, 120),
       componentStack: info.componentStack?.slice(0, 200),
+    });
+    mobileTelemetry.track("UNHANDLED_ERROR", {
+      reason: error?.name?.slice(0, 40) ?? "Error",
     });
   }
 

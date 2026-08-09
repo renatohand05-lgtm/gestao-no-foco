@@ -11,6 +11,7 @@ import { queryClient } from "@/query/client";
 import { ThemeProvider, useTheme } from "@/design/theme";
 import { resolveInternalDeepLink } from "@/productivity/deep-links";
 import { logger } from "@/observability/logger";
+import { mobileTelemetry } from "@/observability/telemetry";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, router, useRootNavigationState } from "expo-router";
 import * as Linking from "expo-linking";
@@ -87,9 +88,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     logger.info("app.boot_start", {});
+    mobileTelemetry.track("APP_STARTED");
     void boot({ mode: "auto" })
       .catch((err) => {
         logger.error("app.boot_unhandled", err);
+        mobileTelemetry.track("UNHANDLED_ERROR", {
+          reason: err instanceof Error ? err.name : "boot",
+        });
         useSessionStore.getState().setError(
           messageForAuthFailure("unexpected"),
         );
@@ -103,6 +108,7 @@ export default function RootLayout() {
     if (state !== "booting") {
       SplashScreen.hideAsync().catch(() => undefined);
       logger.info("app.boot_state", { state });
+      mobileTelemetry.track("APP_READY", { reason: state });
     }
   }, [state]);
 
@@ -131,11 +137,13 @@ export default function RootLayout() {
         const result = await unlockApp();
         if (result.ok) {
           logger.info("biometric.unlock_ok");
+          mobileTelemetry.track("BIOMETRIC_SUCCESS");
           return;
         }
 
         const kind = classifyBiometricUnlockFailure(result.message);
         logger.info("biometric.unlock_fail", { kind });
+        mobileTelemetry.track("BIOMETRIC_FAILED", { reason: kind });
         await returnToLogin(
           `biometric_${kind}`,
           messageForAuthFailure(kind),

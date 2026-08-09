@@ -10,6 +10,7 @@ import {
   Text,
 } from "@/design/components";
 import { logger } from "@/observability/logger";
+import { mobileTelemetry } from "@/observability/telemetry";
 import { useTenantStore } from "@/tenant/context-store";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -65,6 +66,7 @@ export default function BranchScreen() {
     continueWithoutBranch();
     markContinueWithoutBranch();
     logger.info("postlogin.continue_without_branch", {});
+    mobileTelemetry.track("BRANCH_SELECTED", { reason: "continue_without" });
     router.replace("/(app)");
   };
 
@@ -95,6 +97,7 @@ export default function BranchScreen() {
                 setBranch(branch.id, branch.name);
                 markBranchSelected();
                 logger.info("postlogin.branch_selected", {});
+                mobileTelemetry.track("BRANCH_SELECTED");
                 router.replace("/(app)");
               }}
             />

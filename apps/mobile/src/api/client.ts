@@ -1,4 +1,6 @@
 import { logger } from "@/observability/logger";
+import { mobileTelemetry } from "@/observability/telemetry";
+import { categoryFromApiError } from "@/errors/taxonomy";
 import {
   API_HEADERS,
   DEFAULT_REQUEST_TIMEOUT_MS,
@@ -145,6 +147,15 @@ export async function apiRequest<T>(
           code: failure.error.code,
           requestId,
           apiBaseCode: apiBase.code,
+          category: categoryFromApiError(failure.error.code, failure.status),
+        });
+        mobileTelemetry.track("API_FAILED", {
+          requestId,
+          endpoint: path,
+          status: failure.status,
+          code: failure.error.code,
+          hasTenant: Boolean(ctx.tenantId),
+          hasBranch: Boolean(ctx.branchId),
         });
         return failure;
       }
@@ -178,6 +189,15 @@ export async function apiRequest<T>(
         code: failure.error.code,
         requestId,
         apiBaseCode: apiBase.code,
+        category: categoryFromApiError(failure.error.code, failure.status),
+      });
+      mobileTelemetry.track("API_FAILED", {
+        requestId,
+        endpoint: path,
+        status: 0,
+        code: failure.error.code,
+        hasTenant: Boolean(ctx.tenantId),
+        hasBranch: Boolean(ctx.branchId),
       });
       return failure;
     }

@@ -29,6 +29,7 @@ import {
 import { postLogout } from "@/api/mobile-api";
 import { isSupabaseConfigured } from "@/env/validate";
 import { logger } from "@/observability/logger";
+import { mobileTelemetry } from "@/observability/telemetry";
 import { fetchNetworkStatus } from "@/offline/network";
 import { getSupabaseClient, sessionToStored } from "@/supabase/client";
 import { useTenantStore } from "@/tenant/context-store";
@@ -210,6 +211,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
             refreshOk: refreshed,
             hasSessionAfterRefresh: false,
           });
+          mobileTelemetry.track("SESSION_REFRESH_FAILED", { reason: kind });
           await wipeLocalAuthArtifacts();
           set({
             state: "revoked",
@@ -218,6 +220,10 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
           });
           return;
         }
+
+        mobileTelemetry.track("SESSION_RESTORED", {
+          hasTenant: Boolean(useTenantStore.getState().tenantId),
+        });
 
         const meta = await loadSessionMetadata();
         if (meta.lastTenantId) {
@@ -292,6 +298,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
 
       if (error || !data.session) {
         const normalized = normalizeAuthError(error);
+        mobileTelemetry.track("LOGIN_FAILED", { code: normalized.code });
         set({
           state: "unauthenticated",
           errorMessage: normalized.message,
@@ -310,6 +317,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
         hasUser: Boolean(stored.userId),
         hasRefresh: Boolean(stored.refreshToken),
       });
+      mobileTelemetry.track("LOGIN_SUCCESS");
 
       set({
         state: "authenticated_without_tenant",
@@ -326,6 +334,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     } catch (err) {
       logger.error("session.login_failed", err);
       const normalized = normalizeAuthError(err);
+      mobileTelemetry.track("LOGIN_FAILED", { code: normalized.code });
       set({
         state: "unauthenticated",
         errorMessage: normalized.message,

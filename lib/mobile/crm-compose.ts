@@ -356,8 +356,12 @@ export async function composeCrmDashboard(input: {
   }
   if (oportunidadesLoadFailed) unavailable.push("oportunidades");
 
-  const followUps =
-    (await soft(() => loadFollowUpItems(client, input.tenantId))) ?? [];
+  const followUpsLoaded = await soft(() =>
+    loadFollowUpItems(client, input.tenantId),
+  );
+  const followUpsFailed = followUpsLoaded == null;
+  if (followUpsFailed) unavailable.push("follow_ups");
+  const followUps = followUpsLoaded ?? [];
   const clienteRows = await loadClienteRows(client, input.tenantId);
 
   const ownerIds = [
@@ -453,7 +457,8 @@ export async function composeCrmDashboard(input: {
       href: "/crm/clients",
     });
   }
-  if (abertas.length === 0) {
+  // Pipeline vazio só é válido quando a carga de oportunidades OK.
+  if (!oportunidadesLoadFailed && abertas.length === 0) {
     alerts.push({
       id: "pipeline-vazio",
       title: "Pipeline vazio",
@@ -486,24 +491,34 @@ export async function composeCrmDashboard(input: {
     decisionBrief.push(`${atRisk.length} cliente(s) em risco comercial`);
   }
 
+  // Erro de carga ≠ zero: KPIs monetários/derivados ficam null quando oportunidades falharam.
+  const moneyOrUnavailable = (value: number | null | undefined) =>
+    oportunidadesLoadFailed ? null : money(value);
+
   return {
     generatedAt: new Date().toISOString(),
     updatedAtLabel: new Date().toLocaleString("pt-BR"),
     kpis: {
-      receitaPrevista: money(forecast.receitaPrevista),
-      receitaFechada: money(forecast.receitaFechada),
-      receitaProvavel: money(forecast.receitaProvavel),
-      conversao: conversao != null ? formatPercent(conversao) : null,
-      followUpsPendentes: followUps.length,
-      negociosEmRisco: atRisk.length,
-      valorPipeline: money(valorPipeline),
-      ticketMedio: money(ticketMedio),
+      receitaPrevista: moneyOrUnavailable(forecast.receitaPrevista),
+      receitaFechada: moneyOrUnavailable(forecast.receitaFechada),
+      receitaProvavel: moneyOrUnavailable(forecast.receitaProvavel),
+      conversao:
+        oportunidadesLoadFailed || conversao == null
+          ? null
+          : formatPercent(conversao),
+      followUpsPendentes: followUpsFailed ? null : followUps.length,
+      negociosEmRisco: oportunidadesLoadFailed ? null : atRisk.length,
+      valorPipeline: moneyOrUnavailable(valorPipeline),
+      ticketMedio: moneyOrUnavailable(ticketMedio),
     },
     forecast: {
-      prevista: money(forecast.receitaPrevista),
-      provavel: money(forecast.receitaProvavel),
-      fechada: money(forecast.receitaFechada),
-      conversao: conversao != null ? formatPercent(conversao) : null,
+      prevista: moneyOrUnavailable(forecast.receitaPrevista),
+      provavel: moneyOrUnavailable(forecast.receitaProvavel),
+      fechada: moneyOrUnavailable(forecast.receitaFechada),
+      conversao:
+        oportunidadesLoadFailed || conversao == null
+          ? null
+          : formatPercent(conversao),
     },
     ranking: ranking.slice(0, 8).map((r) => ({
       nome: r.nome,

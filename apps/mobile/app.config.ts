@@ -18,8 +18,8 @@ const ANDROID_VERSION_CODE = 110;
  * com novo embedded update id — risco de conflito de cache no upgrade iOS.
  * Namespace novo isola a Build 112+ sem alterar CFBundleShortVersionString.
  */
-const RUNTIME_VERSION = "1.10.0-visual-32.4";
-const STARTUP_INTEGRITY = "32.4";
+const RUNTIME_VERSION = "1.10.0-fix-32.5";
+const STARTUP_INTEGRITY = "32.5";
 const EAS_GIT_COMMIT =
   process.env.EAS_BUILD_GIT_COMMIT_HASH?.trim() ||
   process.env.EAS_COMMIT_HASH?.trim() ||

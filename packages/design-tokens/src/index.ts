@@ -87,19 +87,21 @@ export const gofTabBar = {
     bg: gofPalette.white,
     border: gofPalette.border,
     active: gofPalette.goldDeep,
-    inactive: "#4A5563",
+    /** Cinza médio — legível; ≠ disabled. */
+    inactive: "#3D4654",
     disabled: "#A1A1AA",
     labelActive: gofPalette.goldDeep,
-    labelInactive: "#4A5563",
+    labelInactive: "#3D4654",
   },
   dark: {
     bg: gofPalette.graphite,
     border: gofPalette.graphiteElevated,
     active: gofPalette.goldSoft,
-    inactive: gofPalette.silver,
+    /** Prata clara — não usar silverMuted (parece disabled). */
+    inactive: "#D8DDE6",
     disabled: "#5C6370",
     labelActive: gofPalette.goldSoft,
-    labelInactive: gofPalette.silver,
+    labelInactive: "#D8DDE6",
   },
 } as const;
 

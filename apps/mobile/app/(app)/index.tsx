@@ -26,10 +26,13 @@ import {
   Text,
 } from "@/design/components";
 import { useNetworkStatus, isOnline } from "@/offline/network";
-import { OPS_VIEW_PERMS } from "@/operacao/sections";
+import { OPS_VIEW_PERMS } from "@/operacao/perms";
 import { useHasAnyPermission } from "@/permissions/gate";
 import { qk } from "@/query/keys";
-import { useTenantStore } from "@/tenant/context-store";
+import {
+  arePermissionsAuthoritative,
+  useTenantStore,
+} from "@/tenant/context-store";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -49,6 +52,8 @@ export default function HomeScreen() {
   const tenantSlug = useTenantStore((s) => s.tenantSlug);
   const branchId = useTenantStore((s) => s.branchId);
   const branchName = useTenantStore((s) => s.branchName);
+  const permissionsStatus = useTenantStore((s) => s.permissionsStatus);
+  const rbacReady = arePermissionsAuthoritative(permissionsStatus);
   const network = useNetworkStatus();
   const online = isOnline(network);
   const canView = useHasAnyPermission(EXEC_PERMS);
@@ -67,16 +72,17 @@ export default function HomeScreen() {
     void loadDashboardSnapshot(tenantId).then(setOfflineSnap);
   }, [tenantId]);
 
-  /** Sem permissão executiva: aterrissa em Operação (não mascara RBAC). */
+  /** Sem permissão executiva: aterrissa em Operação (só após RBAC autoritativo). */
   useEffect(() => {
+    if (!rbacReady) return;
     if (!canView && canOps) {
       router.replace("/operacao");
     }
-  }, [canView, canOps]);
+  }, [rbacReady, canView, canOps]);
 
   const query = useQuery({
     queryKey: qk.module(tenantId || null, branchId, "dashboard-executive"),
-    enabled: Boolean(tenantId) && online && canView,
+    enabled: Boolean(tenantId) && online && rbacReady && canView,
     staleTime: 60_000,
     queryFn: async () => {
       const result = await fetchExecutiveDashboard({
@@ -98,6 +104,35 @@ export default function HomeScreen() {
   const snapshotAt = query.dataUpdatedAt || offlineSnap?.savedAt || 0;
   const offlineMinutes =
     !online && data && snapshotAt > 0 ? minutesSince(snapshotAt) : null;
+
+  /** Cold start: não confundir permissões ainda não hidratadas com deny. */
+  if (!rbacReady) {
+    return (
+      <SafeAreaScreen edges={["left", "right"]}>
+        <DashboardSkeleton />
+      </SafeAreaScreen>
+    );
+  }
+
+  if (permissionsStatus === "error" && !canView) {
+    return (
+      <SafeAreaScreen edges={["left", "right"]}>
+        <ErrorState
+          title="Não foi possível carregar permissões"
+          message="Tente novamente ou troque de empresa. O Dashboard não foi bloqueado por lista vazia."
+          action={
+            <Button
+              title="Trocar empresa"
+              onPress={() => {
+                clearTenant();
+                router.replace("/(auth)/tenant");
+              }}
+            />
+          }
+        />
+      </SafeAreaScreen>
+    );
+  }
 
   if (!canView) {
     return (

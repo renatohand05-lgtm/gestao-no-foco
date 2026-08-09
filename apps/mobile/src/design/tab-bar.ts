@@ -1,6 +1,6 @@
 /**
- * Sprint 32.4 — tokens e opções da tab bar mobile.
- * Inactive ≠ disabled; contraste legível em dark/light.
+ * Sprint 32.4/32.5 — tokens e opções da tab bar mobile.
+ * Inactive ≠ disabled; contraste legível; labels curtas anti-truncamento.
  */
 import { gofTabBar, gofTypography } from "@gof/design-tokens";
 import { Platform, type TextStyle, type ViewStyle } from "react-native";
@@ -50,17 +50,20 @@ export function buildTabScreenOptions(
     tabBarInactiveBackgroundColor: "transparent",
     tabBarHideOnKeyboard: true,
     tabBarLabelStyle: {
-      fontSize: 11,
-      lineHeight: 14,
+      fontSize: 10,
+      lineHeight: 12,
       fontWeight: "600",
-      marginBottom: Platform.OS === "ios" ? 2 : 4,
+      marginBottom: Platform.OS === "ios" ? 1 : 3,
+      // Evita Dynamic Type explodir e cortar "Financ." / "Estoq."
+      // (React Navigation aplica via Text; max via allowFontScaling + style).
     },
     tabBarIconStyle: {
       marginTop: 2,
     },
     tabBarItemStyle: {
       minHeight: 44,
-      paddingVertical: 2,
+      paddingVertical: 1,
+      paddingHorizontal: 0,
     },
     tabBarStyle: {
       backgroundColor: tokens.TAB_BAR_BG,
@@ -68,11 +71,12 @@ export function buildTabScreenOptions(
       borderTopWidth: 1,
       // Safe area inferior é aplicada pelo React Navigation.
       paddingTop: 4,
-      height: Platform.OS === "ios" ? 88 : 64,
+      height: Platform.OS === "ios" ? 84 : 62,
       elevation: 0,
       shadowOpacity: 0,
     },
-    tabBarAllowFontScaling: true,
+    // Font scaling limitado no layout via accessibility; default true com labels curtas.
+    tabBarAllowFontScaling: false,
   };
 }
 

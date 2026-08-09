@@ -7,6 +7,10 @@ import { FINANCE_VIEW_PERMS } from "@/finance/perms";
 import { CRM_VIEW_PERMS } from "@/crm/perms";
 import { STOCK_VIEW_PERMS } from "@/stock/perms";
 import { OPS_VIEW_PERMS } from "@/operacao/perms";
+import {
+  arePermissionsAuthoritative,
+  useTenantStore,
+} from "@/tenant/context-store";
 
 const EXEC_PERMS = [
   "dashboard.executivo",
@@ -17,10 +21,12 @@ const EXEC_PERMS = [
 /**
  * Esconde abas de módulos sem permissão (paridade com nav Web filtrada).
  * Guards de tela + API continuam como autoridade — href:null só remove do tab bar.
- * Sprint 32.4: contraste ativo/inativo + ícones + safe area.
+ * Sprint 32.5: não esconder Início/Dashboard enquanto RBAC ainda hidrata.
  */
 export default function AppLayout() {
   const { colors, resolved } = useTheme();
+  const permissionsStatus = useTenantStore((s) => s.permissionsStatus);
+  const rbacReady = arePermissionsAuthoritative(permissionsStatus);
   const canExec = useHasAnyPermission(EXEC_PERMS);
   const canCrm = useHasAnyPermission(CRM_VIEW_PERMS);
   const canStock = useHasAnyPermission(STOCK_VIEW_PERMS);
@@ -28,6 +34,10 @@ export default function AppLayout() {
   const canFinance = useHasAnyPermission(FINANCE_VIEW_PERMS);
 
   const tabOptions = buildTabScreenOptions(resolved);
+
+  /** Durante hydrate: mantém abas visíveis (evita Dashboard sumir no cold start). */
+  const hrefIf = (allowed: boolean) =>
+    !rbacReady || allowed ? undefined : null;
 
   return (
     <Tabs
@@ -45,8 +55,8 @@ export default function AppLayout() {
         options={{
           title: "Início",
           tabBarLabel: "Início",
-          tabBarAccessibilityLabel: "Início",
-          href: canExec ? undefined : null,
+          tabBarAccessibilityLabel: "Início, Dashboard",
+          href: hrefIf(canExec),
         }}
       />
       <Tabs.Screen
@@ -56,7 +66,7 @@ export default function AppLayout() {
           tabBarLabel: "Intel.",
           tabBarAccessibilityLabel: "Inteligência",
           headerShown: false,
-          href: canExec ? undefined : null,
+          href: hrefIf(canExec),
         }}
       />
       <Tabs.Screen
@@ -66,37 +76,37 @@ export default function AppLayout() {
           tabBarLabel: "CRM",
           tabBarAccessibilityLabel: "CRM",
           headerShown: false,
-          href: canCrm ? undefined : null,
+          href: hrefIf(canCrm),
         }}
       />
       <Tabs.Screen
         name="estoque"
         options={{
           title: "Estoque",
-          tabBarLabel: "Estoque",
+          tabBarLabel: "Estoq.",
           tabBarAccessibilityLabel: "Estoque",
           headerShown: false,
-          href: canStock ? undefined : null,
+          href: hrefIf(canStock),
         }}
       />
       <Tabs.Screen
         name="operacao"
         options={{
           title: "Operação",
-          tabBarLabel: "Operação",
+          tabBarLabel: "Ops",
           tabBarAccessibilityLabel: "Operação",
           headerShown: false,
-          href: canOps ? undefined : null,
+          href: hrefIf(canOps),
         }}
       />
       <Tabs.Screen
         name="financeiro"
         options={{
           title: "Financeiro",
-          tabBarLabel: "Financeiro",
+          tabBarLabel: "Financ.",
           tabBarAccessibilityLabel: "Financeiro",
           headerShown: false,
-          href: canFinance ? undefined : null,
+          href: hrefIf(canFinance),
         }}
       />
       <Tabs.Screen
@@ -111,7 +121,7 @@ export default function AppLayout() {
         name="settings"
         options={{
           title: "Ajustes",
-          tabBarLabel: "Ajustes",
+          tabBarLabel: "Mais",
           tabBarAccessibilityLabel: "Ajustes",
         }}
       />

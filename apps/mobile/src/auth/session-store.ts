@@ -32,6 +32,7 @@ import { logger } from "@/observability/logger";
 import { mobileTelemetry } from "@/observability/telemetry";
 import { fetchNetworkStatus } from "@/offline/network";
 import { getSupabaseClient, sessionToStored } from "@/supabase/client";
+import { hydrateTenantPermissions } from "@/tenant/hydrate-permissions";
 import { useTenantStore } from "@/tenant/context-store";
 
 type BootOptions = {
@@ -169,6 +170,10 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
                 tenantId: meta.lastTenantId,
                 branchId: meta.lastBranchId,
               });
+              await hydrateTenantPermissions({
+                tenantId: meta.lastTenantId,
+                online: false,
+              });
             }
             set({
               state: "offline_limited",
@@ -230,6 +235,11 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
           useTenantStore.getState().restoreFromMetadata({
             tenantId: meta.lastTenantId,
             branchId: meta.lastBranchId,
+          });
+          // Cold start / upgrade: reidrata RBAC — sem isso Início/Dashboard some do tab bar.
+          await hydrateTenantPermissions({
+            tenantId: meta.lastTenantId,
+            online: true,
           });
         }
 

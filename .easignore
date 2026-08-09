@@ -16,11 +16,13 @@ out/
 # Docs / evidence (~207MB)
 docs/
 
-# Web-only surfaces not needed for Metro mobile bundle
-app/
-components/
-public/uploads/
-data/
+# Web-only surfaces (ROOT ONLY — leading `/`).
+# Sprint 31.11.14: bare `app/` also matched `apps/mobile/app/` (Expo Router),
+# so EAS uploads omitted all mobile routes and Hermes kept reusing the Build 110 bundle.
+/app/
+/components/
+/public/uploads/
+/data/
 
 # Homologation / Node test scripts
 scripts/

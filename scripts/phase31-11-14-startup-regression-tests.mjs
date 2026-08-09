@@ -123,5 +123,24 @@ check(
   rbacMod.hasPermission([], "financeiro.visualizar") === false,
 );
 
+{
+  const ignoreMod = await import("ignore");
+  const ignore = ignoreMod.default ?? ignoreMod;
+  const eas = readFileSync(join(root, ".easignore"), "utf8");
+  check(
+    ".easignore usa /app/ (root-only), não app/ solto",
+    /^\/app\//m.test(eas) && !/^app\//m.test(eas),
+  );
+  const ig = ignore().add(eas);
+  check(
+    "easignore NÃO exclui apps/mobile/app (Expo Router)",
+    ig.ignores("apps/mobile/app/_layout.tsx") === false,
+  );
+  check(
+    "easignore ainda exclui app/ web (Next root)",
+    ig.ignores("app/layout.tsx") === true,
+  );
+}
+
 console.log(`\nResultado: ${pass} PASS · ${fail} FAIL\n`);
 process.exit(fail > 0 ? 1 : 0);

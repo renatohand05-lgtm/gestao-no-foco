@@ -531,7 +531,8 @@
     "test:phase31-11-13-finance-alias": "node --experimental-strip-types scripts/phase31-11-13-finance-alias-tests.mjs",
     "test:phase31-11-14-startup": "node --experimental-strip-types scripts/phase31-11-14-startup-regression-tests.mjs",
     "test:phase32-1-1-env-parity": "node --experimental-strip-types scripts/phase32-1-1-environment-parity-tests.mjs",
-    "test:phase32-2-pilot": "node scripts/phase32-2-pilot-observability-tests.mjs"
+    "test:phase32-2-pilot": "node scripts/phase32-2-pilot-observability-tests.mjs",
+    "test:phase33-0-finance-action-rbac": "node --experimental-strip-types --test scripts/phase33-0-financeiro-action-rbac-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

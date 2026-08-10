@@ -44,7 +44,7 @@ import {
   receberContaFormSchema,
   transferenciaBancariaFormSchema,
 } from "@/lib/financeiro/validations";
-import { requireTenant } from "@/lib/tenants";
+import { requireFinanceiroAction } from "@/lib/financeiro/action-auth";
 import type { ActionResult } from "@/types/action-result";
 import { toActionError } from "@/lib/supabase/friendly-error";
 
@@ -73,7 +73,7 @@ export async function createPlanoContaAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = planoContaFormSchema.parse(values);
     const service = await createPlanoContaService(tenant.id);
     const item = await service.create(normalizePlanoContaFormValues(parsed));
@@ -91,7 +91,7 @@ export async function updatePlanoContaAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = planoContaFormSchema.parse(values);
     const service = await createPlanoContaService(tenant.id);
     await service.update(id, normalizePlanoContaFormValues(parsed));
@@ -108,7 +108,7 @@ export async function deletePlanoContaAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const service = await createPlanoContaService(tenant.id);
     await service.softDelete(id);
 
@@ -126,7 +126,7 @@ export async function createCentroCustoAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = centroCustoFormSchema.parse(values);
     const service = await createCentroCustoService(tenant.id);
     const item = await service.create(normalizeCentroCustoFormValues(parsed));
@@ -144,7 +144,7 @@ export async function updateCentroCustoAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = centroCustoFormSchema.parse(values);
     const service = await createCentroCustoService(tenant.id);
     await service.update(id, normalizeCentroCustoFormValues(parsed));
@@ -161,7 +161,7 @@ export async function deleteCentroCustoAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const service = await createCentroCustoService(tenant.id);
     await service.softDelete(id);
 
@@ -179,7 +179,7 @@ export async function createContaBancariaAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = contaBancariaFormSchema.parse(values);
     const service = await createContaBancariaService(tenant.id);
     const item = await service.create(
@@ -199,7 +199,7 @@ export async function updateContaBancariaAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = contaBancariaFormSchema.parse(values);
     const service = await createContaBancariaService(tenant.id);
     await service.update(id, normalizeContaBancariaFormValues(parsed));
@@ -216,7 +216,7 @@ export async function deleteContaBancariaAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const service = await createContaBancariaService(tenant.id);
     await service.softDelete(id);
 
@@ -234,7 +234,7 @@ export async function createFormaPagamentoAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = formaPagamentoFormSchema.parse(values);
     const service = await createFormaPagamentoService(tenant.id);
     const item = await service.create(
@@ -254,7 +254,7 @@ export async function updateFormaPagamentoAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = formaPagamentoFormSchema.parse(values);
     const service = await createFormaPagamentoService(tenant.id);
     await service.update(id, normalizeFormaPagamentoFormValues(parsed));
@@ -271,7 +271,7 @@ export async function deleteFormaPagamentoAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const service = await createFormaPagamentoService(tenant.id);
     await service.softDelete(id);
 
@@ -289,7 +289,7 @@ export async function createCategoriaFinanceiraAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = categoriaFinanceiraFormSchema.parse(values);
     const service = await createCategoriaFinanceiraService(tenant.id);
     const item = await service.create(
@@ -309,7 +309,7 @@ export async function updateCategoriaFinanceiraAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = categoriaFinanceiraFormSchema.parse(values);
     const service = await createCategoriaFinanceiraService(tenant.id);
     await service.update(id, normalizeCategoriaFinanceiraFormValues(parsed));
@@ -326,7 +326,7 @@ export async function deleteCategoriaFinanceiraAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const service = await createCategoriaFinanceiraService(tenant.id);
     await service.softDelete(id);
 
@@ -344,7 +344,7 @@ export async function createContaReceberAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = contaReceberFormSchema.parse(values);
     const service = await createContaReceberService(tenant.id);
     const item = await service.create(normalizeContaReceberFormValues(parsed));
@@ -363,7 +363,7 @@ export async function updateContaReceberAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = contaReceberFormSchema.parse(values);
     const service = await createContaReceberService(tenant.id);
     await service.update(id, normalizeContaReceberFormValues(parsed));
@@ -382,7 +382,7 @@ export async function updateClassificacaoContaReceberAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = classificacaoContaReceberFormSchema.parse(values);
     const service = await createContaReceberService(tenant.id);
     await service.updateClassificacao(id, parsed);
@@ -401,7 +401,7 @@ export async function receberContaReceberAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = receberContaFormSchema.parse(values);
     const service = await createContaReceberService(tenant.id);
     await service.receber(id, normalizeReceberContaFormValues(parsed));
@@ -425,7 +425,7 @@ export async function cancelarContaReceberAction(
   options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const user = await getCurrentUser();
     const service = await createContaReceberService(tenant.id);
     await service.cancelar(id, {
@@ -448,7 +448,7 @@ export async function deleteContaReceberAction(
   options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const user = await getCurrentUser();
     const service = await createContaReceberService(tenant.id);
     await service.softDelete(id, {
@@ -471,7 +471,7 @@ export async function estornarContaReceberAction(
   values: { motivo: string; data_estorno?: string },
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const user = await getCurrentUser();
     const service = await createContaReceberService(tenant.id);
     await service.estornarBaixas(id, {
@@ -494,7 +494,7 @@ export async function duplicarContaReceberAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const user = await getCurrentUser();
     const service = await createContaReceberService(tenant.id);
     const item = await service.duplicar(id, user?.id ?? null);
@@ -514,7 +514,7 @@ export async function createContaPagarAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = contaPagarFormSchema.parse(values);
     const service = await createContaPagarService(tenant.id);
     const item = await service.create(normalizeContaPagarFormValues(parsed));
@@ -533,7 +533,7 @@ export async function updateContaPagarAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = contaPagarFormSchema.parse(values);
     const service = await createContaPagarService(tenant.id);
     await service.update(id, normalizeContaPagarFormValues(parsed));
@@ -552,7 +552,7 @@ export async function updateClassificacaoContaPagarAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = classificacaoContaPagarFormSchema.parse(values);
     const service = await createContaPagarService(tenant.id);
     await service.updateClassificacao(id, parsed);
@@ -571,7 +571,7 @@ export async function pagarContaPagarAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = pagarContaFormSchema.parse(values);
     const service = await createContaPagarService(tenant.id);
     await service.pagar(id, normalizePagarContaFormValues(parsed));
@@ -590,7 +590,7 @@ export async function cancelarContaPagarAction(
   options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const user = await getCurrentUser();
     const service = await createContaPagarService(tenant.id);
     await service.cancelar(id, {
@@ -613,7 +613,7 @@ export async function deleteContaPagarAction(
   options: { motivo?: string; scope?: ParcelScope } = {},
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const user = await getCurrentUser();
     const service = await createContaPagarService(tenant.id);
     await service.softDelete(id, {
@@ -636,7 +636,7 @@ export async function estornarContaPagarAction(
   values: { motivo: string; data_estorno?: string },
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const user = await getCurrentUser();
     const service = await createContaPagarService(tenant.id);
     await service.estornarBaixas(id, {
@@ -659,7 +659,7 @@ export async function duplicarContaPagarAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const user = await getCurrentUser();
     const service = await createContaPagarService(tenant.id);
     const item = await service.duplicar(id, user?.id ?? null);
@@ -691,7 +691,7 @@ export async function createMovimentacaoBancariaAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const profile = await getCurrentProfile();
     const parsed = movimentacaoBancariaFormSchema.parse(values);
     const service = await createMovimentacaoBancariaService(tenant.id);
@@ -712,7 +712,7 @@ export async function createTransferenciaBancariaAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.transferir");
     const profile = await getCurrentProfile();
     const parsed = transferenciaBancariaFormSchema.parse(values);
     const service = await createMovimentacaoBancariaService(tenant.id);
@@ -734,7 +734,7 @@ export async function estornarMovimentacaoBancariaAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const profile = await getCurrentProfile();
     const parsed = estornarMovimentacaoBancariaFormSchema.parse(values);
     const service = await createMovimentacaoBancariaService(tenant.id);
@@ -756,7 +756,7 @@ export async function deleteMovimentacaoBancariaAction(
   movimentacaoId: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const service = await createMovimentacaoBancariaService(tenant.id);
     await service.softDelete(movimentacaoId);
 
@@ -773,7 +773,7 @@ export async function applySuggestedDreLinhasAction(
   tenantSlug: string,
 ): Promise<ActionResult & { updated?: number; pendingCount?: number }> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const categorias = await createCategoriaFinanceiraService(tenant.id);
     const planos = await createPlanoContaService(tenant.id);
     const [catResult, planoResult] = await Promise.all([
@@ -802,7 +802,7 @@ export async function createDespesaRecorrenteAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const parsed = despesaRecorrenteFormSchema.parse(values);
     const service = await createDespesaRecorrenteService(tenant.id);
     const item = await service.create({
@@ -834,7 +834,7 @@ export async function updateDespesaRecorrenteAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const parsed = despesaRecorrenteFormSchema.parse(values);
     const service = await createDespesaRecorrenteService(tenant.id);
     await service.update(id, {
@@ -865,7 +865,7 @@ export async function pauseDespesaRecorrenteAction(
   pausada: boolean,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const service = await createDespesaRecorrenteService(tenant.id);
     await service.pause(id, pausada);
     revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes", id);
@@ -880,7 +880,7 @@ export async function encerrarDespesaRecorrenteAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const service = await createDespesaRecorrenteService(tenant.id);
     await service.update(id, {
       ativo: false,
@@ -899,7 +899,7 @@ export async function deleteDespesaRecorrenteAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.excluir");
     const service = await createDespesaRecorrenteService(tenant.id);
     await service.softDelete(id);
     revalidateFinanceiroPaths(tenantSlug, "despesas-recorrentes");
@@ -914,7 +914,7 @@ export async function generateDespesaRecorrenteAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const service = await createDespesaRecorrenteService(tenant.id);
     const result = await service.generateNextOccurrence(id);
     if (!result) {
@@ -934,7 +934,7 @@ export async function duplicateDespesaRecorrenteAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.criar");
     const service = await createDespesaRecorrenteService(tenant.id);
     const current = await service.getById(id);
     if (!current) throw new Error("Recorrência não encontrada.");
@@ -973,7 +973,7 @@ export async function applyDreGapSuggestionAction(
   },
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     if (input.categoriaId) {
       const categorias = await createCategoriaFinanceiraService(tenant.id);
       await categorias.applyClassification({
@@ -1015,7 +1015,7 @@ export async function applyDreGapSuggestionsBatchAction(
   }>,
 ): Promise<ActionResult & { updated?: number }> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const tenant = await requireFinanceiroAction(tenantSlug, "financeiro.editar");
     const categorias = await createCategoriaFinanceiraService(tenant.id);
     const planos = await createPlanoContaService(tenant.id);
     let updated = 0;

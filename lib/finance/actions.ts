@@ -6,14 +6,11 @@ import { getCurrentProfile } from "@/lib/auth/session";
 import {
   createAuditSupabaseAdapter,
   createApprovalSupabaseAdapter,
-  createIdempotencySupabaseAdapter,
   createNotificationSupabaseAdapter,
   createOutboxSupabaseAdapter,
   createRbacSupabaseAdapter,
   createWorkflowSupabaseAdapter,
   createEnterpriseContext,
-  createMemoryIdempotencyRepository,
-  MemoryEnterpriseStore,
 } from "@/lib/enterprise";
 import { createSupabaseFinanceCore } from "@/lib/finance/factory";
 import {
@@ -37,20 +34,11 @@ import type {
   TreasuryPeriodKey,
 } from "@/lib/finance/treasury/treasury-types";
 import { createClient } from "@/lib/supabase/server";
+import { resolvePersistentIdempotency } from "@/lib/finance/persistent-idempotency";
 import { requireTenant } from "@/lib/tenants";
 
 async function resolveIdempotency() {
-  try {
-    const { isAdminClientAvailable, createAdminClient } = await import(
-      "@/lib/supabase/admin"
-    );
-    if (isAdminClientAvailable()) {
-      return createIdempotencySupabaseAdapter(createAdminClient());
-    }
-  } catch {
-    /* fall through */
-  }
-  return createMemoryIdempotencyRepository(new MemoryEnterpriseStore());
+  return resolvePersistentIdempotency();
 }
 
 async function resolveFinance(tenantSlug: string) {

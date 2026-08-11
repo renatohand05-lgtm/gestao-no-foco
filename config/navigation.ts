@@ -87,6 +87,11 @@ export function getTenantNav(
       icon: Activity,
       group: "principal",
       description: labels.opsCenterDescription,
+      requiredAnyPermissions: [
+        "centro_operacoes.visualizar",
+        "dashboard.operacional",
+        "os.visualizar",
+      ],
     },
     {
       id: "dashboard",
@@ -95,6 +100,11 @@ export function getTenantNav(
       icon: LayoutDashboard,
       group: "principal",
       description: "Visão geral do negócio",
+      requiredAnyPermissions: [
+        "dashboard.executivo",
+        "dashboard.visualizar",
+        "analytics.executivo",
+      ],
     },
     {
       id: "search",
@@ -137,6 +147,7 @@ export function getTenantNav(
       icon: Users,
       group: "inteligencia",
       description: "Relacionamento Enterprise e pipeline",
+      requiredAnyPermissions: ["crm.visualizar", "clientes.visualizar"],
     },
     {
       id: "clients",
@@ -145,6 +156,7 @@ export function getTenantNav(
       icon: Users,
       group: "operacao",
       description: "Cadastro único de clientes",
+      requiredAnyPermissions: ["clientes.visualizar", "crm.visualizar"],
     },
     {
       id: "products",
@@ -153,6 +165,7 @@ export function getTenantNav(
       icon: Package,
       group: "operacao",
       description: "Catálogo e estoque",
+      requiredAnyPermissions: ["produtos.visualizar"],
     },
     {
       id: "inventory",
@@ -161,6 +174,7 @@ export function getTenantNav(
       icon: Warehouse,
       group: "operacao",
       description: "Movimentações e saldos",
+      requiredAnyPermissions: ["estoque.visualizar", "produtos.visualizar"],
     },
     {
       id: "purchases",
@@ -169,6 +183,7 @@ export function getTenantNav(
       icon: Truck,
       group: "operacao",
       description: "Supply Chain Enterprise",
+      requiredAnyPermissions: ["compras.visualizar", "fornecedores.visualizar"],
     },
     {
       id: "sales",
@@ -177,6 +192,7 @@ export function getTenantNav(
       icon: ShoppingCart,
       group: "operacao",
       description: "Pedidos e orçamentos",
+      requiredAnyPermissions: ["vendas.visualizar"],
     },
     {
       id: "work-orders",
@@ -185,6 +201,7 @@ export function getTenantNav(
       icon: Wrench,
       group: "operacao",
       description: labels.workOrdersDescription,
+      requiredAnyPermissions: ["os.visualizar"],
     },
     {
       id: "agenda",
@@ -202,6 +219,7 @@ export function getTenantNav(
       icon: Users,
       group: "operacao",
       description: labels.teamDescription,
+      requiredAnyPermissions: ["mecanicos.visualizar", "os.visualizar"],
     },
     {
       id: "finance",
@@ -210,6 +228,11 @@ export function getTenantNav(
       icon: Wallet,
       group: "inteligencia",
       description: "Fluxo de caixa, CFO e orçamento",
+      requiredAnyPermissions: [
+        "financeiro.visualizar",
+        "dashboard.financeiro",
+        "analytics.financeiro",
+      ],
     },
     {
       id: "integrations",

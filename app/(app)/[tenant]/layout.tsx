@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { getCurrentProfile } from "@/lib/auth/session";
+import { resolveTenantNavPermissions } from "@/lib/navigation/resolve-nav-auth";
 import { getUserTenants, requireTenant } from "@/lib/tenants";
 
 export default async function TenantLayout({
@@ -16,11 +17,13 @@ export default async function TenantLayout({
     getUserTenants(),
     getCurrentProfile(),
   ]);
+  const permissions = await resolveTenantNavPermissions(tenant);
 
   return (
     <AppShell
       tenant={tenant}
       tenants={tenants}
+      permissions={permissions}
       user={{
         email: profile?.email,
         name: profile?.name ?? undefined,

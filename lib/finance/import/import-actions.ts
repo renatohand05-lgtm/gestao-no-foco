@@ -6,14 +6,11 @@ import { getCurrentProfile } from "@/lib/auth/session";
 import {
   createAuditSupabaseAdapter,
   createApprovalSupabaseAdapter,
-  createIdempotencySupabaseAdapter,
   createNotificationSupabaseAdapter,
   createOutboxSupabaseAdapter,
   createRbacSupabaseAdapter,
   createWorkflowSupabaseAdapter,
   createEnterpriseContext,
-  createMemoryIdempotencyRepository,
-  MemoryEnterpriseStore,
 } from "@/lib/enterprise";
 import { createSupabaseFinanceCore } from "@/lib/finance/factory";
 import {
@@ -30,6 +27,7 @@ import {
   type ImportColumnMapping,
   type ImportReviewRow,
 } from "@/lib/import-engine";
+import { resolvePersistentIdempotency } from "@/lib/finance/persistent-idempotency";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -46,28 +44,7 @@ import {
 } from "./finance-import-session";
 
 async function resolveIdempotency() {
-  try {
-    const { isAdminClientAvailable, createAdminClient } = await import(
-      "@/lib/supabase/admin"
-    );
-    if (isAdminClientAvailable()) {
-      return createIdempotencySupabaseAdapter(createAdminClient());
-    }
-  } catch {
-    /* fall through */
-  }
-  // Sprint 22.10.1 — sem fallback silencioso em produção.
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.ALLOW_IMPORT_MEMORY !== "1" &&
-    process.env.ALLOW_IMPORT_MEMORY?.toLowerCase() !== "true"
-  ) {
-    throw new Error(
-      "Idempotência: SUPABASE_SERVICE_ROLE_KEY / admin client obrigatório em produção. " +
-        "Não há fallback silencioso para memória.",
-    );
-  }
-  return createMemoryIdempotencyRepository(new MemoryEnterpriseStore());
+  return resolvePersistentIdempotency();
 }
 
 async function resolveFinanceImport(tenantSlug: string) {

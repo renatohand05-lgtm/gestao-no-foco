@@ -17,6 +17,7 @@ import type { TenantWithRole } from "@/types";
 type AppShellProps = {
   tenant: TenantWithRole;
   tenants: TenantWithRole[];
+  permissions?: readonly string[];
   user?: {
     email?: string;
     name?: string;
@@ -36,6 +37,7 @@ const PageSlot = memo(function PageSlot({ children }: { children: ReactNode }) {
 function DemoAwareChrome({
   tenant,
   tenants,
+  permissions,
   user,
   children,
 }: AppShellProps) {
@@ -50,7 +52,11 @@ function DemoAwareChrome({
       )}
     >
       {!hide.appSidebar ? (
-        <AppSidebar tenant={tenant} tenants={tenants} />
+        <AppSidebar
+          tenant={tenant}
+          tenants={tenants}
+          permissions={permissions}
+        />
       ) : null}
       <SidebarInset
         className={cn(
@@ -103,7 +109,11 @@ export function AppShell(props: AppShellProps) {
     <Suspense
       fallback={
         <SidebarProvider>
-          <AppSidebar tenant={props.tenant} tenants={props.tenants} />
+          <AppSidebar
+            tenant={props.tenant}
+            tenants={props.tenants}
+            permissions={props.permissions}
+          />
           <SidebarInset className="min-h-svh bg-background">
             <AppHeader
               tenantName={props.tenant.name}
@@ -119,6 +129,7 @@ export function AppShell(props: AppShellProps) {
         <DemoAwareChrome
           tenant={props.tenant}
           tenants={props.tenants}
+          permissions={props.permissions}
           user={props.user}
         >
           {props.children}

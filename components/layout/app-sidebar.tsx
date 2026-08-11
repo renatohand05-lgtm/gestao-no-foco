@@ -8,6 +8,7 @@ import type { LucideIcon } from "lucide-react";
 import { BrandLogo, BrandMark } from "@/components/brand";
 import { useTheme } from "@/components/brand/theme-provider";
 import { getTenantNav } from "@/config/navigation";
+import { filterNavByPermissions } from "@/lib/navigation/filter-nav-by-permissions";
 import {
   buildSidebarNavGroups,
   isNavItemActive,
@@ -35,23 +36,33 @@ import type { TenantWithRole } from "@/types";
 type AppSidebarProps = {
   tenant: TenantWithRole;
   tenants: TenantWithRole[];
+  /** Permissões efetivas (UX). Backend/RLS continuam autoridade. */
+  permissions?: readonly string[];
 };
 
 /**
  * Sidebar — identidade oficial Gestão (Gate 19.0.1 + Sprint 25.7.2 keys).
  * Só apresentação / branding — agrupamento via id/group estáveis.
  */
-export function AppSidebar({ tenant, tenants }: AppSidebarProps) {
+export function AppSidebar({
+  tenant,
+  tenants,
+  permissions,
+}: AppSidebarProps) {
   const pathname = usePathname();
   const { state } = useSidebar();
   const { resolved } = useTheme();
   const collapsed = state === "collapsed";
   const dark = resolved === "dark";
 
-  const groups = useMemo(
-    () => buildSidebarNavGroups(getTenantNav(tenant.slug, tenant.segment)),
-    [tenant.slug, tenant.segment],
-  );
+  const groups = useMemo(() => {
+    const raw = getTenantNav(tenant.slug, tenant.segment);
+    const items =
+      permissions === undefined
+        ? raw
+        : filterNavByPermissions(raw, permissions);
+    return buildSidebarNavGroups(items);
+  }, [tenant.slug, tenant.segment, permissions]);
 
   return (
     <Sidebar

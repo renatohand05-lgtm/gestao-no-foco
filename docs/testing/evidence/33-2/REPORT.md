@@ -44,8 +44,10 @@ Detalhe: `docs/architecture/PHASE_33_2_MULTI_TENANT.md`
 
 ## Produção
 
-Deploy via push `main` → Vercel.  
-Smoke HTTP: `npm run test:phase33-2-prod-smoke` (só tenants de teste / auth gates).  
+Deploy: push `main` `4bbe4d5` → Vercel (`https://gestao-no-foco.vercel.app`).  
+Smoke HTTP: `npm run test:phase33-2-prod-smoke` → **20 PASS · 0 FAIL**  
+Evidence: `docs/testing/evidence/33-2/prod-smoke.json`  
+Tenants: `teste-renato-01`, `gestaonofoco2` (somente auth gates; sem dados de cliente).  
 RLS financeiro: regressão coberta pelos contratos 33.1; smoke pós-migration 33.1 permanece a evidência de write deny (20/20).
 
 ## Plano 5 dias (avaliação real)

@@ -1,0 +1,91 @@
+{
+  "at": "2026-08-12T14:40:50.874Z",
+  "sprint": "33.2",
+  "base": "https://gestao-no-foco.vercel.app",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "/api/health status=200"
+    },
+    {
+      "ok": true,
+      "detail": "/login noFollow=200 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/register noFollow=200 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/onboarding noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/empresas/nova noFollow=307 follow=200"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/dashboard noFollow=307 loc=/login?redirectTo=%2Fteste-renato-01%2Fdashboard"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/crm noFollow=307 loc=/login?redirectTo=%2Fteste-renato-01%2Fcrm"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/ordens noFollow=307 loc=/login?redirectTo=%2Fteste-renato-01%2Fordens"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/estoque noFollow=307 loc=/login?redirectTo=%2Fteste-renato-01%2Festoque"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/financeiro noFollow=307 loc=/login?redirectTo=%2Fteste-renato-01%2Ffinanceiro"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/configuracoes/equipe noFollow=307 loc=/login?redirectTo=%2Fteste-renato-01%2Fconfiguracoes%2Fequipe"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/perfil noFollow=307 loc=/login?redirectTo=%2Fteste-renato-01%2Fperfil"
+    },
+    {
+      "ok": true,
+      "detail": "/gestaonofoco2/dashboard noFollow=307 loc=/login?redirectTo=%2Fgestaonofoco2%2Fdashboard"
+    },
+    {
+      "ok": true,
+      "detail": "/gestaonofoco2/crm noFollow=307 loc=/login?redirectTo=%2Fgestaonofoco2%2Fcrm"
+    },
+    {
+      "ok": true,
+      "detail": "/gestaonofoco2/ordens noFollow=307 loc=/login?redirectTo=%2Fgestaonofoco2%2Fordens"
+    },
+    {
+      "ok": true,
+      "detail": "/gestaonofoco2/estoque noFollow=307 loc=/login?redirectTo=%2Fgestaonofoco2%2Festoque"
+    },
+    {
+      "ok": true,
+      "detail": "/gestaonofoco2/financeiro noFollow=307 loc=/login?redirectTo=%2Fgestaonofoco2%2Ffinanceiro"
+    },
+    {
+      "ok": true,
+      "detail": "/gestaonofoco2/configuracoes/equipe noFollow=307 loc=/login?redirectTo=%2Fgestaonofoco2%2Fconfiguracoes%2Fequipe"
+    },
+    {
+      "ok": true,
+      "detail": "/gestaonofoco2/perfil noFollow=307 loc=/login?redirectTo=%2Fgestaonofoco2%2Fperfil"
+    },
+    {
+      "ok": true,
+      "detail": "evil-slug noFollow=307"
+    }
+  ],
+  "summary": {
+    "pass": 20,
+    "fail": 0
+  }
+}

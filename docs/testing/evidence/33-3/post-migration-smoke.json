@@ -1,0 +1,156 @@
+{
+  "at": "2026-08-12T15:49:11.141Z",
+  "sprint": "33.3-post-migration",
+  "marker": "smoke-33-3-1786549743253",
+  "base": "https://gestao-no-foco.vercel.app",
+  "results": {
+    "table_billing_plans": {
+      "ok": true,
+      "detail": "pilot=pilot amount=null"
+    },
+    "table_billing_subscriptions": {
+      "ok": true,
+      "detail": "ok"
+    },
+    "table_billing_checkout_attempts": {
+      "ok": true,
+      "detail": "ok"
+    },
+    "table_billing_provider_events": {
+      "ok": true,
+      "detail": "ok"
+    },
+    "pilot_plan_seed": {
+      "ok": true,
+      "detail": "is_pilot=true amount_cents=null"
+    },
+    "pilot_entitlements": {
+      "ok": true,
+      "detail": "dashboard,crm,operacao,estoque,financeiro,equipe,configuracoes"
+    },
+    "tenant_test_a": {
+      "ok": true,
+      "detail": "teste-renato-01"
+    },
+    "tenant_test_b": {
+      "ok": true,
+      "detail": "gestaonofoco2"
+    },
+    "rpc_owner_billing": {
+      "ok": true,
+      "detail": "read=true manage=true"
+    },
+    "rpc_member_billing": {
+      "ok": true,
+      "detail": "read=true manage=false"
+    },
+    "rpc_cross_tenant_manage_false": {
+      "ok": true,
+      "detail": "manage_b=false"
+    },
+    "owner_trial_create": {
+      "ok": true,
+      "detail": "status=trial plan=true"
+    },
+    "owner_read_own": {
+      "ok": true,
+      "detail": "trial"
+    },
+    "owner_cross_tenant_blocked": {
+      "ok": true,
+      "detail": "empty"
+    },
+    "owner_cross_tenant_update_blocked": {
+      "ok": true,
+      "detail": "rows=0"
+    },
+    "member_read_own": {
+      "ok": true,
+      "detail": "trial"
+    },
+    "member_insert_blocked": {
+      "ok": true,
+      "detail": "new row violates row-level security policy for table \"billing_subscriptions\""
+    },
+    "member_update_blocked": {
+      "ok": true,
+      "detail": "rows=0"
+    },
+    "no_real_charge_status": {
+      "ok": true,
+      "detail": "status=trial provider=none"
+    },
+    "unauthenticated_blocked": {
+      "ok": true,
+      "detail": "rows=0"
+    },
+    "unauthenticated_write_blocked": {
+      "ok": true,
+      "detail": "new row violates row-level security policy for table \"billing_subscriptions\""
+    },
+    "provider_events_owner_denied": {
+      "ok": true,
+      "detail": "permission denied for table billing_provider_events"
+    },
+    "provider_events_owner_insert_denied": {
+      "ok": true,
+      "detail": "permission denied for table billing_provider_events"
+    },
+    "provider_events_service_role_ok": {
+      "ok": true,
+      "detail": "8537ee3a-addb-4e7a-acc5-46762c922910"
+    },
+    "checkout_owner_create": {
+      "ok": true,
+      "detail": "provider_missing"
+    },
+    "checkout_idempotent_duplicate": {
+      "ok": true,
+      "detail": "23505"
+    },
+    "checkout_member_blocked": {
+      "ok": true,
+      "detail": "new row violates row-level security policy for table \"billing_checkout_attempts\""
+    },
+    "http_assinatura_auth_gate": {
+      "ok": true,
+      "detail": "307"
+    },
+    "http_webhook_get": {
+      "ok": true,
+      "detail": "200"
+    },
+    "http_webhook_no_fake_paid": {
+      "ok": true,
+      "detail": "503"
+    },
+    "http_regress_dashboard": {
+      "ok": true,
+      "detail": "307"
+    },
+    "http_regress_crm": {
+      "ok": true,
+      "detail": "307"
+    },
+    "http_regress_ordens": {
+      "ok": true,
+      "detail": "307"
+    },
+    "http_regress_estoque": {
+      "ok": true,
+      "detail": "307"
+    },
+    "http_regress_financeiro": {
+      "ok": true,
+      "detail": "307"
+    },
+    "service_role_not_public_env": {
+      "ok": true,
+      "detail": "ok"
+    }
+  },
+  "summary": {
+    "pass": 36,
+    "fail": 0
+  }
+}

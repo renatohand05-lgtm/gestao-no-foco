@@ -537,7 +537,8 @@
     "test:phase33-2-multiempresa": "node --experimental-strip-types --test scripts/phase33-2-multiempresa-tests.mjs",
     "test:phase33-2-prod-smoke": "node scripts/phase33-2-prod-smoke.mjs",
     "test:phase33-3-billing": "node --experimental-strip-types --test scripts/phase33-3-billing-tests.mjs",
-    "test:phase33-3-prod-smoke": "node scripts/phase33-3-prod-smoke.mjs"
+    "test:phase33-3-prod-smoke": "node scripts/phase33-3-prod-smoke.mjs",
+    "test:phase33-3-post-migration-smoke": "node scripts/phase33-3-post-migration-smoke.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -1,16 +1,20 @@
 # Billing / monetização — arquitetura (Sprint 33.3)
 
-**Status:** schema + gates + UI + webhook stub. **Pagamento real NÃO implementado.**
+**Status:** schema aplicado em production + gates + UI + webhook stub. **Pagamento real NÃO implementado.**
 
-## Auditoria (código real)
+## Homologação pós-migration (2026-08-12)
 
-| Item | Situação |
-|------|----------|
-| Provedor Stripe/Asaas/MP no produto | Apenas stub de catálogo de integrações |
-| Env de cobrança SaaS | Documentado em `.env.example` — **não configurado** por padrão |
-| `billing_*` tables | Migration `supabase/migrations/20260823_phase33_3_billing.sql` |
-| RBAC `configuracoes.faturamento` | Continua **platform-only** (super_admin) — não misturar com assinatura do tenant |
-| Gestão tenant billing | Membership **OWNER** (`can_manage_billing`) / view OWNER+ADMIN |
+Migration `20260823_phase33_3_billing.sql` aplicada manualmente por Renato (SQL Editor: Success).  
+Smoke: `scripts/phase33-3-post-migration-smoke.mjs` → **36 PASS · 0 FAIL**  
+Evidence: `docs/testing/evidence/33-3/post-migration-smoke.json`
+
+Confirmado em production:
+
+- Tabelas `billing_plans`, `billing_subscriptions`, `billing_checkout_attempts`, `billing_provider_events`
+- Funções `can_read_billing` / `can_manage_billing`
+- RLS: OWNER gerencia; member lê; cross-tenant bloqueado; unauth bloqueado
+- `billing_provider_events` inacessível a authenticated; service role OK
+- Trial `provider=none` sem cobrança
 
 ## Modelo
 
@@ -26,7 +30,7 @@ billing_checkout_attempts  (idempotência checkout)
 billing_provider_events    (idempotência webhook)
 ```
 
-**Assinatura = TENANT.** Empresa A e Empresa B nunca compartilham a mesma row.
+**Assinatura = TENANT.** Empresa A e B nunca compartilham a mesma row.
 
 ## RBAC ≠ Entitlement
 
@@ -34,68 +38,38 @@ billing_provider_events    (idempotência webhook)
 |--------|--------|
 | Entitlement (plano) | Módulos liberados para a **empresa** |
 | RBAC (membership) | O que o **usuário** pode fazer |
-| Final | `entitlement ∧ rbac` (`lib/billing/entitlements.ts` → `finalAccessAllowed`) |
-
-Pagamento **nunca** concede role admin.
+| Final | `entitlement ∧ rbac` |
 
 ## Enforcement
 
-- `BILLING_ENFORCEMENT=0` (default): acesso `open` — **não bloqueia** tenants de teste/piloto.
-- `BILLING_ENFORCEMENT=1`: aplica restrição controlada (não apaga tenant/dados).
-
-### past_due / canceled / trial expirado
-
-| Status | Comportamento (enforcement on) |
-|--------|--------------------------------|
-| `past_due` | Restrição controlada; dados preservados |
-| `canceled` | Restrito; dados preservados |
-| trial sem `trial_end` ou expirado | Restrito (não há trial infinito) |
-| missing subscription | Restrito |
+- `BILLING_ENFORCEMENT=0` (default): não bloqueia piloto/teste
+- `=1`: restrição controlada (não apaga tenant/dados)
 
 ## Provedor
 
-**NÃO CONFIGURADO** por padrão (`BILLING_PROVIDER=none`).
+**NÃO CONFIGURADO** (`BILLING_PROVIDER=none`).
 
-Decisão necessária do Renato (escolher **um**):
+### Comparativo (recomendação técnica)
 
-1. Stripe — `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (servidor)
-2. Asaas — `ASAAS_API_KEY` + `ASAAS_WEBHOOK_TOKEN`
-3. Mercado Pago — `MERCADOPAGO_ACCESS_TOKEN` + `MERCADOPAGO_WEBHOOK_SECRET`
+| | Stripe | **Asaas (recomendado)** | Mercado Pago |
+|--|--------|-------------------------|--------------|
+| PIX / boleto BR | Fraco / médio | **Forte** | Forte |
+| Assinatura recorrente | Forte | **Forte p/ PME BR** | Médio-forte |
+| Cartão | Forte | Bom | Bom |
+| Webhook | Forte | Bom | Bom |
+| Operação Brasil | Mais fricção | **Nativa** | Nativa |
 
-Nenhuma secret com `NEXT_PUBLIC_`.
+**Recomendação:** Asaas para o SaaS brasileiro multiempresa. Stripe se expansão internacional for prioridade imediata. Mercado Pago se já houver ecossistema MP.
 
-## Checkout
+Nenhuma conta criada nesta sprint. Secrets ainda **não** solicitados para produção de cobrança.
 
-- Server action `requestCheckoutAction`
-- Persiste `billing_checkout_attempts` com idempotency key
-- Sem provedor → `provider_missing` — **não** marca `active`/`paid`
-- Com provedor detectado → ainda **não cobra** até autorização explícita (`BILLING_CHECKOUT_NOT_ENABLED`)
+## Checkout / Webhook
 
-## Webhook
-
-- `POST /api/billing/webhook`
-- Sem provedor → 503
-- Secret inválido → 401
-- `event_id` obrigatório; unique `(provider, event_id)` = idempotência / replay
-- Sync de status para `active`/`past_due` aguarda integração do provedor escolhido
+- Checkout: server action; sem provedor → `provider_missing` (nunca `paid` no frontend)
+- Webhook: `POST /api/billing/webhook` — 503 sem provedor; idempotente por `(provider, event_id)`
 
 ## UI
 
-- `/{tenant}/configuracoes/assinatura` — OWNER/ADMIN veem; OWNER gerencia
-- Link em Configurações
-
-## Plano seed
-
-- slug `pilot` — **temporário**, `amount_cents = null`, `is_pilot = true`
-- Sem preço comercial hardcoded
-
-## Arquivos
-
-| Path | Papel |
-|------|-------|
-| `lib/billing/*` | Domínio |
-| `app/api/billing/webhook/route.ts` | Webhook |
-| `app/(app)/[tenant]/configuracoes/assinatura/page.tsx` | UI |
-| `docs/billing/PILOT_BILLING_RUNBOOK.md` | Operação piloto |
+`/{tenant}/configuracoes/assinatura` — OWNER/ADMIN veem; OWNER gerencia trial
 
 **PAYMENT IMPLEMENTADO: NÃO**

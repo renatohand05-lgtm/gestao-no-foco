@@ -1,0 +1,92 @@
+{
+  "at": "2026-08-12T14:16:17.235Z",
+  "sprint": "33.1-post-migration",
+  "marker": "smoke-33-1-1786544177170",
+  "base": "https://gestao-no-foco.vercel.app",
+  "results": {
+    "tenant_test_a": {
+      "ok": true,
+      "detail": "teste-renato-01"
+    },
+    "tenant_test_b": {
+      "ok": true,
+      "detail": "gestaonofoco2"
+    },
+    "policies_functions_active": {
+      "ok": true,
+      "detail": "write=true read=true err="
+    },
+    "owner_insert": {
+      "ok": true,
+      "detail": ""
+    },
+    "owner_update": {
+      "ok": true,
+      "detail": ""
+    },
+    "member_write_fn_false": {
+      "ok": true,
+      "detail": "write=false read=true"
+    },
+    "member_insert_blocked": {
+      "ok": true,
+      "detail": "new row violates row-level security policy for table \"contas_pagar\""
+    },
+    "member_update_blocked": {
+      "ok": true,
+      "detail": "rows=0"
+    },
+    "member_delete_blocked": {
+      "ok": true,
+      "detail": "rows=0"
+    },
+    "owner_row_survived_member_delete": {
+      "ok": true,
+      "detail": ""
+    },
+    "cross_tenant_read_blocked": {
+      "ok": true,
+      "detail": "none"
+    },
+    "cross_tenant_write_blocked": {
+      "ok": true,
+      "detail": "new row violates row-level security policy for table \"contas_pagar\""
+    },
+    "unauth_write_blocked": {
+      "ok": true,
+      "detail": "permission denied for function can_write_finance"
+    },
+    "owner_delete": {
+      "ok": true,
+      "detail": ""
+    },
+    "prod_health": {
+      "ok": true,
+      "detail": "status=200"
+    },
+    "http_dashboard": {
+      "ok": true,
+      "detail": "status=307"
+    },
+    "http_financeiro": {
+      "ok": true,
+      "detail": "status=307"
+    },
+    "http_crm": {
+      "ok": true,
+      "detail": "status=307"
+    },
+    "http_ordens": {
+      "ok": true,
+      "detail": "status=307"
+    },
+    "http_estoque": {
+      "ok": true,
+      "detail": "status=307"
+    }
+  },
+  "summary": {
+    "pass": 20,
+    "fail": 0
+  }
+}

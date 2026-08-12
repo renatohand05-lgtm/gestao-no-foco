@@ -2,6 +2,7 @@ const RESERVED_SEGMENTS = new Set([
   "login",
   "register",
   "onboarding",
+  "empresas",
   "inspecao",
   "manutencao",
   "convite",
@@ -26,6 +27,8 @@ export function getTenantSlugFromPath(pathname: string) {
 export function isProtectedRoute(pathname: string) {
   return (
     pathname === "/onboarding" ||
+    pathname === "/empresas/nova" ||
+    pathname.startsWith("/empresas/") ||
     pathname === "/convite" ||
     pathname.startsWith("/convite/") ||
     isTenantRoute(pathname)

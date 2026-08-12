@@ -49,7 +49,7 @@ function DashboardPeriodFilter({
       dataDe: filters.dataDe,
       dataAte: filters.dataAte,
     });
-    writeStoredDashboardFilters(nextFilters);
+    writeStoredDashboardFilters(tenantSlug, nextFilters);
 
     startTransition(() => {
       const queryString = params.toString();

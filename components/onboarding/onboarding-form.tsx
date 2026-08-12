@@ -14,6 +14,7 @@ import {
   slugifyTenantName,
 } from "@/lib/onboarding/create-tenant";
 import { createClient } from "@/lib/supabase/client";
+import { buildLastTenantCookie } from "@/lib/tenant/active-tenant";
 import type { TenantSegment } from "@/types";
 
 const segments: { value: TenantSegment; label: string }[] = [
@@ -25,17 +26,24 @@ const segments: { value: TenantSegment; label: string }[] = [
   { value: "outro", label: "Outro" },
 ];
 
-export function OnboardingForm() {
+type OnboardingFormProps = {
+  mode?: "first" | "additional";
+};
+
+export function OnboardingForm({ mode = "first" }: OnboardingFormProps) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [segment, setSegment] = useState<TenantSegment>("comercio");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const slug = slugifyTenantName(name);
+  const isAdditional = mode === "additional";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading || submitted) return;
     setLoading(true);
     setError(null);
 
@@ -72,7 +80,10 @@ export function OnboardingForm() {
         return;
       }
 
+      setSubmitted(true);
+      document.cookie = buildLastTenantCookie(result.slug);
       router.push(`/${result.slug}/primeiro-acesso`);
+      router.refresh();
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -83,8 +94,12 @@ export function OnboardingForm() {
 
   return (
     <AuthFormShell
-      title="Configure sua empresa"
-      description="Crie a empresa e avance ao onboarding enterprise multissetorial."
+      title={isAdditional ? "Nova empresa" : "Configure sua empresa"}
+      description={
+        isAdditional
+          ? "Crie outra empresa na mesma conta. Você será OWNER desta empresa."
+          : "Crie a empresa e avance ao onboarding enterprise multissetorial."
+      }
       className="max-w-lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -97,6 +112,7 @@ export function OnboardingForm() {
             value={name}
             onChange={(event) => setName(event.target.value)}
             required
+            disabled={loading || submitted}
           />
         </AuthField>
 
@@ -116,6 +132,7 @@ export function OnboardingForm() {
             onChange={(event) =>
               setSegment(event.target.value as TenantSegment)
             }
+            disabled={loading || submitted}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             {segments.map((item) => (
@@ -126,8 +143,13 @@ export function OnboardingForm() {
           </select>
         </AuthField>
 
-        <AuthSubmitButton loading={loading} loadingText="Criando empresa...">
-          Continuar para o primeiro acesso
+        <AuthSubmitButton
+          loading={loading || submitted}
+          loadingText="Criando empresa..."
+        >
+          {isAdditional
+            ? "Criar empresa"
+            : "Continuar para o primeiro acesso"}
         </AuthSubmitButton>
       </form>
     </AuthFormShell>

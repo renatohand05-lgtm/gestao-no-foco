@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getTenantSlugFromPath } from "@/lib/auth/routes";
+import { pickPreferredTenantSlug } from "@/lib/tenant/active-tenant";
 import type { Database } from "@/types/database";
 
 export async function getUserTenantSlugs(
@@ -27,6 +28,7 @@ export async function getUserTenantSlugs(
 export function resolvePostLoginPath(
   tenantSlugs: string[],
   redirectTo?: string | null,
+  preferredSlug?: string | null,
 ) {
   if (tenantSlugs.length > 0) {
     if (redirectTo) {
@@ -36,7 +38,8 @@ export function resolvePostLoginPath(
       }
     }
 
-    return `/${tenantSlugs[0]}/dashboard`;
+    const chosen = pickPreferredTenantSlug(tenantSlugs, preferredSlug);
+    return `/${chosen}/dashboard`;
   }
 
   return "/onboarding";
@@ -46,7 +49,8 @@ export async function getPostLoginPath(
   supabase: SupabaseClient<Database>,
   userId: string,
   redirectTo?: string | null,
+  preferredSlug?: string | null,
 ) {
   const tenantSlugs = await getUserTenantSlugs(supabase, userId);
-  return resolvePostLoginPath(tenantSlugs, redirectTo);
+  return resolvePostLoginPath(tenantSlugs, redirectTo, preferredSlug);
 }

@@ -60,7 +60,7 @@ export function DashboardFiltersBar({
       dataDe: filters.dataDe,
       dataAte: filters.dataAte,
     });
-    writeStoredDashboardFilters(nextFilters);
+    writeStoredDashboardFilters(tenantSlug, nextFilters);
     startTransition(() => {
       const queryString = params.toString();
       router.push(
@@ -238,7 +238,7 @@ export function DashboardFilterPersistence({
 
     import("@/lib/dashboard/filter-storage").then(
       ({ readStoredDashboardFilters }) => {
-        const stored = readStoredDashboardFilters();
+        const stored = readStoredDashboardFilters(tenantSlug);
         if (!stored) return;
         const params = new URLSearchParams();
         params.set("dataDe", stored.dataDe ?? defaults.dataDe);

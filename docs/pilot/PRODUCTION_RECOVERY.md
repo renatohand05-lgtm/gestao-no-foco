@@ -1,5 +1,8 @@
 # Recuperação / snapshot — produção (Portal Web)
 
+**Sprint check 33.2:** procedimento abaixo **permanece válido** antes do 1º cliente.
+**Restore testado de ponta a ponta nesta sprint:** **NÃO** (não declarar testado sem evidência).
+
 **Evidência:** não há job de backup automatizado no repositório.  
 A proteção de dados depende do **plano Supabase** (PITR / daily backups) + **snapshot manual** antes de migrations.
 

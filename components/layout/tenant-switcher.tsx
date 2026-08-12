@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Building2, Check, ChevronsUpDown, Loader2, Plus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -19,6 +19,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { TenantRole } from "@/lib/constants";
+import { buildLastTenantCookie } from "@/lib/tenant/active-tenant";
+import { clearTenantScopedClientCaches } from "@/lib/tenant/clear-tenant-client-cache";
 import type { TenantWithRole } from "@/types";
 
 type TenantSwitcherProps = {
@@ -39,12 +41,8 @@ function roleLabel(role: string | null | undefined) {
 }
 
 /**
- * Seletor de empresas — troca via router.push (não clona Next Link no Menu.Item).
- * Base UI + Next 16 em produção pode derrubar o error boundary ao clonar Link lazy.
- *
- * Criação de empresa adicional (multi-tenant): fluxo completo ainda não
- * existe para quem já tem membership — onboarding só atende 1ª empresa.
- * Ver desenho em docs/testing/evidence/hotfix-tenant-logout/.
+ * Seletor de empresas — lista só memberships; troca atualiza cookie + limpa cache.
+ * Empresa adicional: /empresas/nova (OWNER da nova empresa).
  */
 export function TenantSwitcher({
   currentTenant,
@@ -65,6 +63,7 @@ export function TenantSwitcher({
   }, [tenants]);
 
   const switching = isPending || pendingSlug != null;
+  const showSwitcherChrome = safeTenants.length > 1;
 
   function switchTenant(slug: string) {
     if (!slug || switching) return;
@@ -74,7 +73,10 @@ export function TenantSwitcher({
     setPendingSlug(slug);
     startTransition(() => {
       try {
+        clearTenantScopedClientCaches(currentTenant.slug);
+        document.cookie = buildLastTenantCookie(slug);
         router.push(`/${slug}/dashboard`);
+        router.refresh();
       } catch {
         setPendingSlug(null);
         setError("Não foi possível trocar de empresa. Tente novamente.");
@@ -107,6 +109,7 @@ export function TenantSwitcher({
               <span className="truncate font-semibold">{currentTenant.name}</span>
               <span className="truncate text-xs text-muted-foreground">
                 {roleLabel(currentTenant.role)}
+                {showSwitcherChrome ? " · trocar" : ""}
               </span>
             </div>
             <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-70" aria-hidden />
@@ -141,6 +144,7 @@ export function TenantSwitcher({
                       <span className="truncate font-medium">{tenant.name}</span>
                       <span className="truncate text-xs text-muted-foreground">
                         {roleLabel(tenant.role)}
+                        {active ? " · ativa" : ""}
                       </span>
                     </span>
                     {busy ? (
@@ -152,6 +156,17 @@ export function TenantSwitcher({
                 );
               })
             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              disabled={switching}
+              className="cursor-pointer gap-2"
+              onClick={() => {
+                router.push("/empresas/nova");
+              }}
+            >
+              <Plus className="size-4 shrink-0" aria-hidden />
+              <span>Nova empresa</span>
+            </DropdownMenuItem>
             {error ? (
               <>
                 <DropdownMenuSeparator />

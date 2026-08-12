@@ -1,27 +1,46 @@
 import type { DashboardFilters } from "@/types/dashboard-executive";
 
-export const DASHBOARD_FILTERS_STORAGE_KEY = "gnf:dashboard-filters";
+const LEGACY_KEY = "gnf:dashboard-filters";
+
+export function dashboardFiltersStorageKey(tenantSlug: string): string {
+  const slug = tenantSlug.trim().toLowerCase() || "unknown";
+  return `gnf:dashboard-filters:${slug}`;
+}
+
+/** @deprecated use dashboardFiltersStorageKey(tenantSlug) */
+export const DASHBOARD_FILTERS_STORAGE_KEY = LEGACY_KEY;
 
 export type StoredDashboardFilters = Partial<DashboardFilters>;
 
-export function readStoredDashboardFilters(): StoredDashboardFilters | null {
+export function readStoredDashboardFilters(
+  tenantSlug: string,
+): StoredDashboardFilters | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.localStorage.getItem(DASHBOARD_FILTERS_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as StoredDashboardFilters;
+    const raw = window.localStorage.getItem(
+      dashboardFiltersStorageKey(tenantSlug),
+    );
+    if (raw) return JSON.parse(raw) as StoredDashboardFilters;
+    // Migração one-shot do legado sem slug (não reutilizar em outro tenant).
+    const legacy = window.localStorage.getItem(LEGACY_KEY);
+    if (!legacy) return null;
+    window.localStorage.removeItem(LEGACY_KEY);
+    return null;
   } catch {
     return null;
   }
 }
 
-export function writeStoredDashboardFilters(filters: DashboardFilters) {
+export function writeStoredDashboardFilters(
+  tenantSlug: string,
+  filters: DashboardFilters,
+) {
   if (typeof window === "undefined") return;
 
   try {
     window.localStorage.setItem(
-      DASHBOARD_FILTERS_STORAGE_KEY,
+      dashboardFiltersStorageKey(tenantSlug),
       JSON.stringify(filters),
     );
   } catch {

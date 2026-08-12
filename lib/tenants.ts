@@ -2,6 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 
 import type { TenantRole } from "@/lib/constants";
+import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
 import type { Tenant, TenantWithRole } from "@/types";
 
@@ -58,7 +59,12 @@ export const requireTenant = cache(async (slug: string): Promise<TenantWithRole>
 
   if (!tenant) {
     // Sem membership neste slug: não abrir o tenant por URL.
-    // Se o usuário já tem empresas, vai para a primeira; senão onboarding.
+    // Se o usuário já tem empresas, vai para a autorizada; senão onboarding.
+    logger.warn("tenant_context_denied", {
+      attemptedSlug: slug,
+      userId: user.id,
+      authorizedCount: tenants.length,
+    });
     const fallback = tenants[0]?.slug;
     redirect(fallback ? `/${fallback}/dashboard` : "/onboarding");
   }

@@ -8,8 +8,11 @@ import {
   requestCheckoutAction,
   startPilotTrialAction,
 } from "@/lib/billing/actions";
+import type { PaymentHint } from "@/lib/billing/payment-hint";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+type BillingMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
 
 type Props = {
   tenantSlug: string;
@@ -18,6 +21,7 @@ type Props = {
   providerConfigured: boolean;
   subscriptionStatus: string | null;
   isSandbox: boolean;
+  initialPaymentHint?: PaymentHint | null;
 };
 
 export function BillingActionsPanel({
@@ -27,21 +31,29 @@ export function BillingActionsPanel({
   providerConfigured,
   subscriptionStatus,
   isSandbox,
+  initialPaymentHint = null,
 }: Props) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [billingType, setBillingType] = useState<"PIX" | "BOLETO">("PIX");
+  const [billingType, setBillingType] = useState<BillingMethod>("PIX");
   const [email, setEmail] = useState("");
   const [document, setDocument] = useState("");
-  const [paymentHint, setPaymentHint] = useState<{
-    invoiceUrl?: string | null;
-    bankSlipUrl?: string | null;
-    dueDate?: string | null;
-    value?: number | null;
-    billingType?: string;
-  } | null>(null);
+  const [paymentHint, setPaymentHint] = useState<PaymentHint | null>(
+    initialPaymentHint,
+  );
+
+  // Cartão: somente em memória React — sem persistência no browser.
+  const [cardHolderName, setCardHolderName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardMonth, setCardMonth] = useState("");
+  const [cardYear, setCardYear] = useState("");
+  const [cardCcv, setCardCcv] = useState("");
+  const [cardPostal, setCardPostal] = useState("");
+  const [cardAddressNumber, setCardAddressNumber] = useState("");
+  const [cardPhone, setCardPhone] = useState("");
+  const [cardHolderDoc, setCardHolderDoc] = useState("");
 
   if (!canManage) {
     return (
@@ -50,6 +62,18 @@ export function BillingActionsPanel({
         empresa.
       </p>
     );
+  }
+
+  function clearCardFields() {
+    setCardHolderName("");
+    setCardNumber("");
+    setCardMonth("");
+    setCardYear("");
+    setCardCcv("");
+    setCardPostal("");
+    setCardAddressNumber("");
+    setCardPhone("");
+    setCardHolderDoc("");
   }
 
   function onStartTrial() {
@@ -81,12 +105,30 @@ export function BillingActionsPanel({
         billingType,
         customerEmail: email || undefined,
         customerDocument: document || undefined,
+        card:
+          billingType === "CREDIT_CARD"
+            ? {
+                holderName: cardHolderName,
+                number: cardNumber,
+                expiryMonth: cardMonth,
+                expiryYear: cardYear,
+                ccv: cardCcv,
+                holderInfoName: cardHolderName,
+                holderEmail: email,
+                holderCpfCnpj: cardHolderDoc || document,
+                postalCode: cardPostal,
+                addressNumber: cardAddressNumber,
+                phone: cardPhone,
+              }
+            : undefined,
       });
       if (res.ok) {
         setMessage(res.message);
         if (res.paymentHint) setPaymentHint(res.paymentHint);
+        if (billingType === "CREDIT_CARD") clearCardFields();
       } else {
         setError(res.message);
+        if (billingType === "CREDIT_CARD") clearCardFields();
       }
       router.refresh();
     });
@@ -113,6 +155,11 @@ export function BillingActionsPanel({
     });
   }
 
+  const methodLabel =
+    paymentHint?.billingType === "CREDIT_CARD"
+      ? "CARTÃO"
+      : paymentHint?.billingType ?? "—";
+
   return (
     <div className="space-y-3">
       {isSandbox ? (
@@ -132,7 +179,7 @@ export function BillingActionsPanel({
 
       <div className="space-y-2 rounded-md border border-border/70 p-3">
         <p className="text-xs font-medium text-muted-foreground">
-          Checkout Asaas (PIX / Boleto)
+          Checkout Asaas (PIX / Boleto / Cartão)
         </p>
         <label className="block text-xs text-muted-foreground">
           E-mail de cobrança
@@ -143,6 +190,7 @@ export function BillingActionsPanel({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="financeiro@empresa.com"
             disabled={pending}
+            autoComplete="email"
           />
         </label>
         <label className="block text-xs text-muted-foreground">
@@ -153,6 +201,7 @@ export function BillingActionsPanel({
             onChange={(e) => setDocument(e.target.value)}
             placeholder="Somente números"
             disabled={pending}
+            autoComplete="off"
           />
         </label>
         <div className="flex flex-wrap gap-2">
@@ -174,19 +223,126 @@ export function BillingActionsPanel({
           >
             Boleto
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={billingType === "CREDIT_CARD" ? "default" : "outline"}
+            disabled={pending}
+            onClick={() => setBillingType("CREDIT_CARD")}
+          >
+            Cartão
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          disabled={pending}
-          onClick={onCheckout}
-        >
+
+        {billingType === "CREDIT_CARD" ? (
+          <div className="space-y-2 rounded-md border border-dashed border-border/80 p-2">
+            <p className="text-[11px] text-muted-foreground">
+              Cartão enviado só via HTTPS para tokenização Asaas. PAN/CVV não
+              são gravados.
+            </p>
+            <label className="block text-xs text-muted-foreground">
+              Nome no cartão
+              <Input
+                className="mt-1"
+                value={cardHolderName}
+                onChange={(e) => setCardHolderName(e.target.value)}
+                disabled={pending}
+                autoComplete="cc-name"
+              />
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              Número
+              <Input
+                className="mt-1"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                disabled={pending}
+                inputMode="numeric"
+                autoComplete="cc-number"
+              />
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <label className="block text-xs text-muted-foreground">
+                Mês
+                <Input
+                  className="mt-1"
+                  value={cardMonth}
+                  onChange={(e) => setCardMonth(e.target.value)}
+                  placeholder="MM"
+                  disabled={pending}
+                  autoComplete="cc-exp-month"
+                />
+              </label>
+              <label className="block text-xs text-muted-foreground">
+                Ano
+                <Input
+                  className="mt-1"
+                  value={cardYear}
+                  onChange={(e) => setCardYear(e.target.value)}
+                  placeholder="AAAA"
+                  disabled={pending}
+                  autoComplete="cc-exp-year"
+                />
+              </label>
+              <label className="block text-xs text-muted-foreground">
+                CVV
+                <Input
+                  className="mt-1"
+                  value={cardCcv}
+                  onChange={(e) => setCardCcv(e.target.value)}
+                  disabled={pending}
+                  autoComplete="cc-csc"
+                />
+              </label>
+            </div>
+            <label className="block text-xs text-muted-foreground">
+              CPF/CNPJ do titular
+              <Input
+                className="mt-1"
+                value={cardHolderDoc}
+                onChange={(e) => setCardHolderDoc(e.target.value)}
+                disabled={pending}
+                autoComplete="off"
+              />
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              CEP
+              <Input
+                className="mt-1"
+                value={cardPostal}
+                onChange={(e) => setCardPostal(e.target.value)}
+                disabled={pending}
+                autoComplete="postal-code"
+              />
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              Nº endereço
+              <Input
+                className="mt-1"
+                value={cardAddressNumber}
+                onChange={(e) => setCardAddressNumber(e.target.value)}
+                disabled={pending}
+                autoComplete="off"
+              />
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              Telefone
+              <Input
+                className="mt-1"
+                value={cardPhone}
+                onChange={(e) => setCardPhone(e.target.value)}
+                disabled={pending}
+                autoComplete="tel"
+              />
+            </label>
+          </div>
+        ) : null}
+
+        <Button variant="outline" disabled={pending} onClick={onCheckout}>
           {providerConfigured
-            ? `Iniciar checkout ${billingType}`
+            ? `Iniciar checkout ${billingType === "CREDIT_CARD" ? "CARTÃO" : billingType}`
             : "Checkout (Asaas não configurado)"}
         </Button>
-        <p className="text-[11px] text-muted-foreground">
-          Cartão: não disponível sem tokenização Asaas (sem formulário inseguro).
-        </p>
       </div>
 
       {hasSubscription && subscriptionStatus !== "canceled" ? (
@@ -200,11 +356,34 @@ export function BillingActionsPanel({
       ) : null}
 
       {paymentHint ? (
-        <div className="rounded-md bg-muted px-3 py-2 text-xs space-y-1">
+        <div
+          className="rounded-md bg-muted px-3 py-2 text-xs space-y-1"
+          data-billing-method={paymentHint.billingType}
+        >
           <p>
-            Método: {paymentHint.billingType ?? "—"} · Valor:{" "}
-            {paymentHint.value ?? "—"} · Venc.: {paymentHint.dueDate ?? "—"}
+            Método: {methodLabel} · Valor: {paymentHint.value ?? "—"} · Venc.:{" "}
+            {paymentHint.dueDate ?? "—"}
           </p>
+          {paymentHint.divergence ? (
+            <p className="text-destructive" role="alert">
+              Divergência com o provedor (
+              {paymentHint.providerBillingType ?? "—"}). Método exibido é o
+              solicitado.
+            </p>
+          ) : null}
+          {paymentHint.billingType === "PIX" && paymentHint.pixQrCodeImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              alt="QR Code PIX"
+              className="mt-1 h-40 w-40 rounded border border-border bg-white"
+              src={`data:image/png;base64,${paymentHint.pixQrCodeImage}`}
+            />
+          ) : null}
+          {paymentHint.billingType === "PIX" && paymentHint.pixCopiaECola ? (
+            <p className="break-all font-mono text-[10px]">
+              PIX copia e cola: {paymentHint.pixCopiaECola}
+            </p>
+          ) : null}
           {paymentHint.invoiceUrl ? (
             <a
               className="text-primary underline"
@@ -212,10 +391,14 @@ export function BillingActionsPanel({
               target="_blank"
               rel="noreferrer"
             >
-              Abrir fatura / pagamento
+              {paymentHint.billingType === "PIX"
+                ? "Abrir fatura / pagamento PIX"
+                : paymentHint.billingType === "BOLETO"
+                  ? "Abrir fatura"
+                  : "Abrir fatura / pagamento"}
             </a>
           ) : null}
-          {paymentHint.bankSlipUrl ? (
+          {paymentHint.billingType === "BOLETO" && paymentHint.bankSlipUrl ? (
             <a
               className="block text-primary underline"
               href={paymentHint.bankSlipUrl}

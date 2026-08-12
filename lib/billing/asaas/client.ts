@@ -43,6 +43,7 @@ export async function asaasRequest<T>(opts: AsaasRequestOptions): Promise<T> {
   const url = `${base}${opts.path.startsWith("/") ? opts.path : `/${opts.path}`}`;
   const method = opts.method ?? "GET";
 
+  // Nunca logar body bruto (pode conter PAN/CVV em tokenize/creditCard).
   const res = await fetch(url, {
     method,
     headers: {
@@ -67,13 +68,21 @@ export async function asaasRequest<T>(opts: AsaasRequestOptions): Promise<T> {
     const desc =
       errObj?.errors?.[0]?.description ||
       `Asaas HTTP ${res.status}`;
+    // Sanitiza: sem eco de payload de cartão
+    const safeDesc = /cart[aã]o|credit.?card|cvv|ccv|pan/i.test(desc)
+      ? "Falha no processamento do cartão pelo provedor."
+      : desc;
     logger.warn("billing.asaas.api_error", {
       requestId: opts.requestId,
-      path: opts.path,
+      path: opts.path.replace(/cus_[A-Za-z0-9]+/g, "cus_***"),
       status: res.status,
       code: errObj?.errors?.[0]?.code ?? null,
     });
-    throw new AsaasApiError(desc, res.status, errObj?.errors?.[0]?.code || "ASAAS_HTTP");
+    throw new AsaasApiError(
+      safeDesc,
+      res.status,
+      errObj?.errors?.[0]?.code || "ASAAS_HTTP",
+    );
   }
 
   return json as T;

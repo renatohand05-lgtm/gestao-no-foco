@@ -17,8 +17,19 @@ import {
   requireBillingPageAuth,
 } from "@/lib/billing/auth";
 import { isBillingEnforcementEnabled } from "@/lib/billing/config";
+import type { PaymentHint } from "@/lib/billing/payment-hint";
+import { getLatestCheckoutForTenant } from "@/lib/billing/repository";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Assinatura" };
+
+function parsePaymentHint(summary: unknown): PaymentHint | null {
+  if (!summary || typeof summary !== "object") return null;
+  const hint = (summary as { paymentHint?: PaymentHint }).paymentHint;
+  if (!hint || typeof hint !== "object") return null;
+  if (!hint.billingType) return null;
+  return hint;
+}
 
 export default async function AssinaturaPage({
   params,
@@ -54,8 +65,18 @@ export default async function AssinaturaPage({
 
   let view;
   let schemaMissing = false;
+  let initialPaymentHint: PaymentHint | null = null;
   try {
     view = await loadBillingView(auth.tenant.id);
+    try {
+      const supabase = await createClient();
+      const latest = await getLatestCheckoutForTenant(supabase, auth.tenant.id);
+      if (latest?.status === "completed") {
+        initialPaymentHint = parsePaymentHint(latest.result_summary);
+      }
+    } catch {
+      /* checkout history opcional */
+    }
   } catch (err) {
     if (
       err instanceof BillingError &&
@@ -105,8 +126,8 @@ export default async function AssinaturaPage({
         <FeedbackMessage variant="info">
           Asaas ainda não configurado no servidor. Configure:{" "}
           {auth.missingCredentials.join(", ") ||
-            "BILLING_PROVIDER, ASAAS_API_KEY, ASAAS_WEBHOOK_TOKEN"}. Trial sem
-          cartão permanece disponível.
+            "BILLING_PROVIDER, ASAAS_API_KEY, ASAAS_WEBHOOK_TOKEN"}
+          . Trial sem cartão permanece disponível.
         </FeedbackMessage>
       ) : null}
 
@@ -182,12 +203,24 @@ export default async function AssinaturaPage({
           </CardHeader>
           <CardContent>
             <BillingActionsPanel
+              key={
+                initialPaymentHint
+                  ? [
+                      initialPaymentHint.billingType,
+                      initialPaymentHint.dueDate ?? "",
+                      initialPaymentHint.invoiceUrl ?? "",
+                      initialPaymentHint.bankSlipUrl ?? "",
+                      initialPaymentHint.pixCopiaECola ?? "",
+                    ].join("|")
+                  : "no-hint"
+              }
               tenantSlug={tenantSlug}
               canManage={auth.canManage}
               hasSubscription={Boolean(sub)}
               providerConfigured={auth.providerConfigured}
               subscriptionStatus={sub?.status ?? null}
               isSandbox={auth.isSandbox}
+              initialPaymentHint={initialPaymentHint}
             />
           </CardContent>
         </Card>

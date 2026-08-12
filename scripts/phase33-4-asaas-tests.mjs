@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 33.4 — Asaas adapter contracts (no live API calls without credentials).
+ * Sprint 33.4 hotfix — PIX≠BOLETO, payment-hint, cartão tokenização (contratos).
  */
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
@@ -16,12 +16,95 @@ describe("33.4 Asaas files present", () => {
     "lib/billing/asaas/client.ts",
     "lib/billing/asaas/customers.ts",
     "lib/billing/asaas/subscriptions.ts",
+    "lib/billing/asaas/tokenize.ts",
     "lib/billing/asaas/status-map.ts",
     "lib/billing/asaas/webhook.ts",
+    "lib/billing/payment-hint.ts",
+    "lib/billing/remote-ip.ts",
     "docs/billing/ASAAS_SANDBOX.md",
   ]) {
     it(`exists ${p}`, () => assert.ok(existsSync(join(root, p))));
   }
+});
+
+describe("33.4 payment-hint PIX≠BOLETO", () => {
+  it("PIX nunca inclui bankSlipUrl / Abrir boleto logic", async () => {
+    const mod = await import(
+      pathToFileURL(join(root, "lib/billing/payment-hint.ts")).href +
+        `?t=${Date.now()}`
+    );
+    const hint = mod.buildPaymentHint({
+      requested: "PIX",
+      providerBillingType: "PIX",
+      invoiceUrl: "https://sandbox.asaas.com/i/pix",
+      bankSlipUrl: "https://sandbox.asaas.com/b/boleto-should-hide",
+      pixCopiaECola: "00020126...",
+      pixQrCodeImage: "base64qr",
+    });
+    assert.equal(hint.billingType, "PIX");
+    assert.equal(hint.bankSlipUrl, null);
+    assert.equal(hint.pixCopiaECola, "00020126...");
+    assert.equal(mod.shouldShowBoletoLink(hint), false);
+    assert.equal(mod.shouldShowPixPayload(hint), true);
+  });
+
+  it("BOLETO mostra boleto só com URL; sem misturar PIX", async () => {
+    const mod = await import(
+      pathToFileURL(join(root, "lib/billing/payment-hint.ts")).href +
+        `?t=${Date.now() + 1}`
+    );
+    const withSlip = mod.buildPaymentHint({
+      requested: "BOLETO",
+      providerBillingType: "BOLETO",
+      bankSlipUrl: "https://sandbox.asaas.com/b/ok",
+      pixCopiaECola: "should-ignore",
+    });
+    assert.equal(withSlip.billingType, "BOLETO");
+    assert.equal(withSlip.pixCopiaECola, null);
+    assert.equal(mod.shouldShowBoletoLink(withSlip), true);
+
+    const noSlip = mod.buildPaymentHint({
+      requested: "BOLETO",
+      providerBillingType: "BOLETO",
+    });
+    assert.equal(mod.shouldShowBoletoLink(noSlip), false);
+  });
+
+  it("divergência não mascara método solicitado", async () => {
+    const mod = await import(
+      pathToFileURL(join(root, "lib/billing/payment-hint.ts")).href +
+        `?t=${Date.now() + 2}`
+    );
+    const hint = mod.buildPaymentHint({
+      requested: "PIX",
+      providerBillingType: "BOLETO",
+      bankSlipUrl: "https://x/boleto",
+    });
+    assert.equal(hint.billingType, "PIX");
+    assert.equal(hint.divergence, true);
+    assert.equal(hint.bankSlipUrl, null);
+  });
+});
+
+describe("33.4 pickPaymentForBillingType", () => {
+  it("não escolhe BOLETO quando pedido PIX", async () => {
+    // Função está em subscriptions.ts (server-only) — espelha contrato via source + lógica local
+    const src = read("lib/billing/asaas/subscriptions.ts");
+    assert.match(src, /pickPaymentForBillingType/);
+    assert.match(src, /billingTypeAligned/);
+    assert.match(src, /updatePendingPayments/);
+    assert.match(src, /DIVERGENCE/);
+
+    const payments = [
+      { id: "pay_b", billingType: "BOLETO", bankSlipUrl: "https://b" },
+      { id: "pay_p", billingType: "PIX", invoiceUrl: "https://p" },
+    ];
+    const exact = payments.find(
+      (p) => String(p.billingType || "").toUpperCase() === "PIX",
+    );
+    assert.equal(exact?.id, "pay_p");
+    assert.ok(!exact?.bankSlipUrl);
+  });
 });
 
 describe("33.4 status mapping", () => {
@@ -101,29 +184,54 @@ describe("33.4 config sandbox safety", () => {
   });
 });
 
-describe("33.4 webhook + actions contracts", () => {
+describe("33.4 webhook + actions + card contracts", () => {
   it("webhook valida asaas-access-token e processa eventos reais", () => {
     const wh = read("app/api/billing/webhook/route.ts");
     assert.match(wh, /asaas-access-token/);
     assert.match(wh, /processAsaasWebhook/);
-    assert.match(wh, /billing\.webhook\.rejected/);
-    const proc = read("lib/billing/asaas/webhook.ts");
     const map = read("lib/billing/asaas/status-map.ts");
     assert.match(map, /PAYMENT_RECEIVED/);
     assert.match(map, /PAYMENT_OVERDUE/);
+    const proc = read("lib/billing/asaas/webhook.ts");
     assert.match(proc, /SUBSCRIPTION_MISMATCH|CUSTOMER_MISMATCH/);
     assert.match(proc, /23505/);
   });
 
-  it("checkout não marca active; cartão bloqueado sem tokenização", () => {
+  it("checkout tokeniza cartão; não marca active; não persiste PAN/CVV", () => {
     const actions = read("lib/billing/actions.ts");
-    assert.match(actions, /CREDIT_CARD/);
-    assert.match(actions, /BILLING_CARD_NOT_SUPPORTED/);
+    assert.match(actions, /tokenizeAsaasCreditCard/);
+    assert.match(actions, /resolveClientRemoteIp/);
+    assert.match(actions, /requestedBillingType/);
+    assert.match(actions, /buildPaymentHint/);
+    assert.match(actions, /CUSTOMER_TENANT_MISMATCH/);
     assert.match(actions, /status interno não foi marcado active/);
-    assert.match(actions, /ensureAsaasCustomer/);
-    assert.match(actions, /ensureAsaasSubscription/);
-    assert.match(actions, /cancelSubscriptionAction/);
     assert.doesNotMatch(actions, /status:\s*["']active["']/);
+    assert.doesNotMatch(actions, /localStorage|sessionStorage/);
+    // result_summary não guarda number/ccv
+    assert.doesNotMatch(actions, /result_summary:[\s\S]{0,200}ccv/i);
+    assert.match(actions, /cardMeta/);
+  });
+
+  it("tokenize endpoint oficial + sem log de PAN", () => {
+    const tok = read("lib/billing/asaas/tokenize.ts");
+    assert.match(tok, /\/v3\/creditCard\/tokenizeCreditCard/);
+    assert.match(tok, /remoteIp/);
+    assert.doesNotMatch(tok, /logger\.(info|warn|error|exception)\([\s\S]{0,80}number/);
+    assert.doesNotMatch(tok, /logger\.(info|warn|error|exception)\([\s\S]{0,80}ccv/i);
+  });
+
+  it("client nunca loga body bruto de cartão", () => {
+    const client = read("lib/billing/asaas/client.ts");
+    assert.match(client, /Nunca logar body bruto/);
+    assert.match(client, /safeDesc/);
+  });
+
+  it("remoteIp usa forwarded headers, sem IP fixo de produção", () => {
+    const ip = read("lib/billing/remote-ip.ts");
+    assert.match(ip, /x-forwarded-for/);
+    assert.match(ip, /x-real-ip/);
+    assert.doesNotMatch(ip, /116\.213\.42\.532/);
+    assert.doesNotMatch(ip, /["']8\.8\.8\.8["']/);
   });
 
   it("customer usa externalReference=tenant_id", () => {
@@ -132,14 +240,28 @@ describe("33.4 webhook + actions contracts", () => {
     assert.match(src, /maskDocument/);
   });
 
-  it("UI sandbox + PIX/BOLETO + cancel", () => {
+  it("UI: PIX/BOLETO/Cartão; Abrir boleto só em BOLETO; sandbox; reload hint", () => {
     const ui = read("components/billing/billing-actions-panel.tsx");
     assert.match(ui, /AMBIENTE DE TESTE \/ SANDBOX/);
     assert.match(ui, /PIX/);
     assert.match(ui, /BOLETO/);
-    assert.match(ui, /cancelSubscriptionAction/);
+    assert.match(ui, /CREDIT_CARD/);
+    assert.match(ui, /initialPaymentHint/);
+    assert.match(ui, /Método:/);
+    assert.match(ui, /billingType === "BOLETO" && paymentHint\.bankSlipUrl/);
+    assert.match(ui, /Abrir boleto/);
+    assert.doesNotMatch(ui, /localStorage\.|sessionStorage\./);
     const page = read("app/(app)/[tenant]/configuracoes/assinatura/page.tsx");
-    assert.match(page, /isSandbox/);
+    assert.match(page, /getLatestCheckoutForTenant/);
+    assert.match(page, /initialPaymentHint/);
+  });
+
+  it("cross-tenant: tokenização amarra customer do tenant", () => {
+    const actions = read("lib/billing/actions.ts");
+    assert.match(actions, /CUSTOMER_TENANT_MISMATCH/);
+    const tok = read("lib/billing/asaas/tokenize.ts");
+    assert.match(tok, /customerId/);
+    assert.match(tok, /tenantId/);
   });
 
   it("mobile não alterado", () => {

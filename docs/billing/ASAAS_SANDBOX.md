@@ -1,18 +1,20 @@
-# Asaas SANDBOX — Gestão no Foco (Sprint 33.4)
+# Asaas SANDBOX — Gestão no Foco (Sprint 33.4 + hotfix PIX/Cartão)
 
 ## Escopo
 
-Integração **sandbox** do Asaas para cobrança SaaS por **tenant**.  
+Integração **sandbox** do Asaas para cobrança SaaS por **tenant**.
 **Não** usa credencial production. **Não** cobra cliente real.
 
 ## Arquivos
 
 | Path | Papel |
 |------|-------|
-| `lib/billing/asaas/*` | Adapter (client, customers, subscriptions, status-map, webhook) |
+| `lib/billing/asaas/*` | Adapter (client, customers, subscriptions, tokenize, status-map, webhook) |
+| `lib/billing/payment-hint.ts` | Fonte da verdade do método na UI (PIX ≠ BOLETO) |
+| `lib/billing/remote-ip.ts` | IP do cliente via forwarded headers |
 | `lib/billing/actions.ts` | Checkout / cancel / trial |
 | `app/api/billing/webhook/route.ts` | Webhook (`asaas-access-token`) |
-| `app/(app)/[tenant]/configuracoes/assinatura/page.tsx` | UI |
+| `app/(app)/[tenant]/configuracoes/assinatura/page.tsx` | UI + reload do hint |
 
 ## Variáveis (somente servidor)
 
@@ -27,56 +29,59 @@ Integração **sandbox** do Asaas para cobrança SaaS por **tenant**.
 | `ASAAS_API_BASE_URL` | opcional | default `https://api-sandbox.asaas.com` |
 | `ASAAS_ALLOW_PRODUCTION` | **não** setar | bloqueia API production |
 
-Nunca `NEXT_PUBLIC_*` para secrets.
+Nunca `NEXT_PUBLIC_*` para secrets. Nunca imprimir `ASAAS_API_KEY` / `ASAAS_WEBHOOK_TOKEN`.
 
-## Setup sandbox (Renato)
+## Bug corrigido (33.4 hotfix)
 
-1. Criar conta Asaas Sandbox (manual — fora do repo)
-2. Gerar API Key sandbox
-3. Criar Webhook apontando para  
-   `https://gestao-no-foco.vercel.app/api/billing/webhook`  
-   Auth token = valor de `ASAAS_WEBHOOK_TOKEN`  
-   Eventos mínimos:  
-   `PAYMENT_CREATED`, `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`,  
-   `SUBSCRIPTION_CREATED`, `SUBSCRIPTION_UPDATED`, `SUBSCRIPTION_INACTIVATED`, `SUBSCRIPTION_DELETED`
-4. No Vercel (Production env): setar variáveis acima com `BILLING_ASAAS_CHECKOUT_ENABLED=1` só após smoke local/sandbox
-5. Redeploy
+**Sintoma:** usuário escolhia PIX, mensagem citava PIX, mas o card mostrava `Método: BOLETO` + `Abrir boleto`.
 
-## Fluxo
+**Causa:** reuse de subscription ACTIVE ignorava `billingType`; o hint usava o primeiro payment (boleto antigo).
 
-```
-OWNER → Assinatura → Checkout PIX/BOLETO
-  → ensure customer (externalReference=tenant_id)
-  → ensure subscription Asaas
-  → grava provider_*_id (status interno NÃO vira active)
-  → webhook PAYMENT_RECEIVED/CONFIRMED → active
-  → PAYMENT_OVERDUE → past_due
-  → SUBSCRIPTION_DELETED/INACTIVATED → canceled
-```
+**Correção:**
+1. `ensureAsaasSubscription` alinha/atualiza `billingType` no provider (ou falha com DIVERGENCE).
+2. `buildPaymentHint` usa método **solicitado** como rótulo; **nunca** anexa `bankSlipUrl` em PIX.
+3. `pickPaymentForBillingType` só usa cobrança do método pedido.
+4. UI renderiza `Abrir boleto` **somente** se `billingType === BOLETO` e houver `bankSlipUrl`.
+5. Reload hidrata hint do último `billing_checkout_attempts` completed.
+
+## Decisão cartão (tokenização)
+
+**Fluxo A (preferido):** tokenizar primeiro
+`POST /v3/creditCard/tokenizeCreditCard` → `creditCardToken` → criar/atualizar subscription com `billingType=CREDIT_CARD` + `creditCardToken` + `remoteIp`.
+
+Motivo: dados sensíveis atravessam o servidor uma vez; depois só token; alinhado ao sandbox Asaas; evita formulário inseguro persistente.
+
+Não persistir PAN/CVV. Persistência local: no máximo `cardMeta` (brand/last4) no `result_summary`.
 
 ## Métodos
 
-| Método | Status integração |
-|--------|-------------------|
-| PIX | Implementado (API subscription `billingType=PIX`) |
-| Boleto | Implementado (`BOLETO`) |
-| Cartão | **Não** — exige tokenização Asaas; formulário PAN/CVV proibido |
+| Método | Status |
+|--------|--------|
+| PIX | `billingType=PIX` + QR/copia-e-cola quando Asaas retorna |
+| Boleto | `billingType=BOLETO` + `bankSlipUrl` só se retornado |
+| Cartão | Tokenização + subscription CREDIT_CARD (sandbox) |
 
 ## Idempotência
 
-- Customer: lookup por `externalReference=tenant_id`
-- Subscription: reuse ACTIVE com mesmo externalReference
+- Customer: `externalReference=tenant_id`
+- Subscription: reuse ACTIVE **com mesmo billingType**; senão PUT alinhando método
 - Checkout: `billing_checkout_attempts (tenant_id, idempotency_key)`
 - Webhook: `billing_provider_events (provider, event_id)` unique
 
-## Segurança
+## Multiempresa
 
-- 1 tenant = 1 customer principal
-- Webhook rejeita token inválido
-- Mismatch customer/subscription → 409, sem update
-- Evento desconhecido → não concede `active`
-- Production API bloqueada sem `ASAAS_ALLOW_PRODUCTION=1`
+- Tenant A → customer A → token A
+- Tenant B → customer B → token B
+- Mismatch `externalReference` → erro; token de A não é enviado para customer B.
 
-## Go-live checklist (NÃO executar agora)
+## Setup sandbox (Renato)
 
-Ver `docs/billing/PILOT_BILLING_RUNBOOK.md`.
+1. Conta Asaas Sandbox
+2. API Key sandbox + Webhook → `https://gestao-no-foco.vercel.app/api/billing/webhook`
+3. Eventos: `PAYMENT_*` + `SUBSCRIPTION_*` já listados no runbook
+4. Vercel Production: envs sandbox + `BILLING_ASAAS_CHECKOUT_ENABLED=1`
+5. Redeploy
+
+## Go-live real
+
+**Não** nesta sprint. Ver `docs/billing/PILOT_BILLING_RUNBOOK.md`.

@@ -1,4 +1,4 @@
-# Runbook — Billing piloto (Sprint 33.4)
+# Runbook — Billing piloto (Sprint 33.4 hotfix)
 
 ## Status
 
@@ -6,42 +6,47 @@
 |------|--------|
 | Schema billing (33.3) | Aplicado em production |
 | Trial sem cartão | GO |
-| Adapter Asaas sandbox (código) | Pronto |
-| Secrets Asaas no Vercel | **Pendente Renato** |
+| Adapter Asaas sandbox | Pronto (PIX / BOLETO / CREDIT_CARD tokenizado) |
+| Secrets Asaas no Vercel | Configurados (sandbox) — confirmar pós-deploy |
+| Bug PIX→UI BOLETO | **Corrigido no código** — revalidar smoke |
 | Cobrança real | **OFF** |
 
-## Credenciais necessárias (sandbox)
+## Credenciais (sandbox only)
 
 1. `BILLING_PROVIDER=asaas`
 2. `ASAAS_ENV=sandbox`
 3. `ASAAS_API_KEY` (sandbox)
 4. `ASAAS_WEBHOOK_TOKEN`
-5. `BILLING_ASAAS_CHECKOUT_ENABLED=1` (só após webhook configurado)
+5. `BILLING_ASAAS_CHECKOUT_ENABLED=1`
 
-Webhook URL: `https://gestao-no-foco.vercel.app/api/billing/webhook`  
-Header validado: `asaas-access-token`
+Webhook: `https://gestao-no-foco.vercel.app/api/billing/webhook`
+Header: `asaas-access-token`
 
-Detalhes: `docs/billing/ASAAS_SANDBOX.md`
+## Smoke sandbox (tenant de teste apenas)
 
-## Trial (já validado)
+1. OWNER na empresa de teste → Assinatura
+2. **PIX:** método na UI = PIX; sem “Abrir boleto”; reload mantém PIX
+3. **BOLETO:** método = BOLETO; “Abrir boleto” só se Asaas devolver URL
+4. **Cartão (opcional):** usar cartão de teste Asaas; recusa não marca `active`
+5. Double-submit com mesma idempotency key → sem cobrança duplicada
+6. Trocar de empresa no switcher → customer/token isolados
 
-OWNER → Configurações → Assinatura → Ativar trial piloto.
+## Cartão — decisão
 
-## Go-live checklist (futuro — NÃO executar)
-
-- [ ] Conta Asaas production aprovada + KYC
-- [ ] API key production (nunca misturar com sandbox)
-- [ ] Webhook production HTTPS + token novo
-- [ ] `ASAAS_ENV=production` + `ASAAS_ALLOW_PRODUCTION=1` só com autorização
-- [ ] Plano comercial com `amount_cents` definido
-- [ ] Teste cobrança mínima controlada
-- [ ] Cancelamento + past_due homologados
-- [ ] Monitoramento logs `billing.webhook.*`
-- [ ] Rollback: `BILLING_ASAAS_CHECKOUT_ENABLED=0` + `BILLING_PROVIDER=none`
+Tokenizar primeiro (`/v3/creditCard/tokenizeCreditCard`), depois subscription com `creditCardToken` + `remoteIp` do cliente.
 
 ## O que NÃO fazer
 
-- Não usar key production agora
-- Não cobrar cliente real
-- Não reaplicar migration 33.3 sem necessidade
-- Não colocar secrets no frontend
+- Key / endpoint production
+- Cobrar cliente real
+- Alterar `apps/mobile`
+- Guardar PAN/CVV
+- Mascarar PIX como BOLETO
+
+## Rollback
+
+`BILLING_ASAAS_CHECKOUT_ENABLED=0` (mantém trial).
+
+## Go-live real (futuro)
+
+Ver checklist em `docs/billing/ASAAS_SANDBOX.md` — **não** executar nesta sprint.

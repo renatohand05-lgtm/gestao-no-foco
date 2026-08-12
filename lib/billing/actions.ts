@@ -13,6 +13,9 @@ import {
   ensureAsaasSubscription,
   cancelAsaasSubscription,
   listSubscriptionPayments,
+  pickPaymentForBillingType,
+  fetchPaymentPixQrCode,
+  tokenizeAsaasCreditCard,
   AsaasApiError,
 } from "@/lib/billing/asaas";
 import type { AsaasBillingType } from "@/lib/billing/asaas/types";
@@ -24,6 +27,11 @@ import {
   isBillingProviderConfigured,
   listMissingAsaasCredentials,
 } from "@/lib/billing/config";
+import {
+  buildPaymentHint,
+  type PaymentHint,
+} from "@/lib/billing/payment-hint";
+import { resolveClientRemoteIp } from "@/lib/billing/remote-ip";
 import {
   getPlanBySlug,
   getSubscriptionForTenant,
@@ -42,15 +50,25 @@ export type BillingActionResult =
   | {
       ok: true;
       message: string;
-      paymentHint?: {
-        billingType?: string;
-        invoiceUrl?: string | null;
-        bankSlipUrl?: string | null;
-        dueDate?: string | null;
-        value?: number | null;
-      };
+      paymentHint?: PaymentHint;
     }
   | { ok: false; code: string; message: string };
+
+export type CardCheckoutFields = {
+  holderName: string;
+  number: string;
+  expiryMonth: string;
+  expiryYear: string;
+  ccv: string;
+  holderInfoName: string;
+  holderEmail: string;
+  holderCpfCnpj: string;
+  postalCode: string;
+  addressNumber: string;
+  addressComplement?: string;
+  phone: string;
+  mobilePhone?: string;
+};
 
 export async function startPilotTrialAction(
   tenantSlug: string,
@@ -105,9 +123,19 @@ function normalizeBillingType(raw: string | undefined): AsaasBillingType | null 
   return null;
 }
 
+function parseStoredHint(summary: unknown): PaymentHint | undefined {
+  if (!summary || typeof summary !== "object") return undefined;
+  const s = summary as { paymentHint?: PaymentHint };
+  return s.paymentHint ?? undefined;
+}
+
 /**
  * Checkout Asaas sandbox (opt-in). Frontend NUNCA marca paid/active.
  * Idempotente por (tenant, idempotencyKey).
+ *
+ * Cartão: tokeniza primeiro (POST /v3/creditCard/tokenizeCreditCard),
+ * depois cria/atualiza assinatura com creditCardToken + remoteIp.
+ * Nunca persiste PAN/CVV.
  */
 export async function requestCheckoutAction(input: {
   tenantSlug: string;
@@ -117,6 +145,7 @@ export async function requestCheckoutAction(input: {
   customerEmail?: string;
   customerDocument?: string;
   customerPhone?: string;
+  card?: CardCheckoutFields;
 }): Promise<BillingActionResult> {
   const requestId = crypto.randomUUID();
   try {
@@ -143,16 +172,15 @@ export async function requestCheckoutAction(input: {
       return {
         ok: false,
         code: "BILLING_TYPE_INVALID",
-        message: "Método inválido. Use PIX ou BOLETO.",
+        message: "Método inválido. Use PIX, BOLETO ou CREDIT_CARD.",
       };
     }
+
     if (billingType === "CREDIT_CARD") {
-      return {
-        ok: false,
-        code: "BILLING_CARD_NOT_SUPPORTED",
-        message:
-          "Cartão exige tokenização Asaas. Formulário inseguro não é suportado nesta sprint.",
-      };
+      const cardErr = validateCardFields(input.card);
+      if (cardErr) {
+        return { ok: false, code: "CARD_FIELDS_INVALID", message: cardErr };
+      }
     }
 
     const planSlug = (input.planSlug || PILOT_PLAN_SLUG).trim();
@@ -180,6 +208,7 @@ export async function requestCheckoutAction(input: {
       return {
         ok: true,
         message: `Checkout já registrado (${attempt.status}). Sem nova cobrança.`,
+        paymentHint: parseStoredHint(attempt.result_summary),
       };
     }
 
@@ -191,6 +220,7 @@ export async function requestCheckoutAction(input: {
           reason: "PROVIDER_NOT_CONFIGURED",
           provider,
           missing,
+          requestedBillingType: billingType,
         },
       });
       logger.info("billing.checkout.failed", {
@@ -211,6 +241,7 @@ export async function requestCheckoutAction(input: {
           reason: "CHECKOUT_OPT_IN_REQUIRED",
           note: "Defina BILLING_ASAAS_CHECKOUT_ENABLED=1 no servidor (sandbox).",
           missing: listMissingAsaasCredentials(),
+          requestedBillingType: billingType,
         },
       });
       return {
@@ -225,24 +256,36 @@ export async function requestCheckoutAction(input: {
     if (!plan) {
       await updateCheckoutAttempt(supabase, attempt.id, {
         status: "failed",
-        result_summary: { reason: "PLAN_MISSING" },
+        result_summary: {
+          reason: "PLAN_MISSING",
+          requestedBillingType: billingType,
+        },
       });
       return { ok: false, code: "PLAN_MISSING", message: "Plano não encontrado." };
     }
 
-    // Pilot plan may have null price — sandbox requires value > 0
     const valueReais =
       plan.amountCents != null && plan.amountCents > 0
         ? plan.amountCents / 100
         : Number(process.env.BILLING_SANDBOX_AMOUNT || "19.9");
 
     const email =
-      input.customerEmail?.trim() || auth.profile.email?.trim() || "";
-    const document = (input.customerDocument || "").replace(/\D/g, "");
+      input.customerEmail?.trim() ||
+      input.card?.holderEmail?.trim() ||
+      auth.profile.email?.trim() ||
+      "";
+    const document = (
+      input.customerDocument ||
+      input.card?.holderCpfCnpj ||
+      ""
+    ).replace(/\D/g, "");
     if (!email || !document || document.length < 11) {
       await updateCheckoutAttempt(supabase, attempt.id, {
         status: "failed",
-        result_summary: { reason: "CUSTOMER_DATA_REQUIRED" },
+        result_summary: {
+          reason: "CUSTOMER_DATA_REQUIRED",
+          requestedBillingType: billingType,
+        },
       });
       return {
         ok: false,
@@ -261,7 +304,10 @@ export async function requestCheckoutAction(input: {
       if (!trial.ok) {
         await updateCheckoutAttempt(supabase, attempt.id, {
           status: "failed",
-          result_summary: { reason: trial.code },
+          result_summary: {
+            reason: trial.code,
+            requestedBillingType: billingType,
+          },
         });
         return { ok: false, code: trial.code, message: trial.message };
       }
@@ -275,10 +321,60 @@ export async function requestCheckoutAction(input: {
           name: auth.tenant.name,
           email,
           cpfCnpj: document,
-          phone: input.customerPhone,
+          phone: input.customerPhone || input.card?.phone,
           externalReference: auth.tenant.id,
         },
       });
+
+      // Isolamento: se o provider devolver externalReference, deve bater com o tenant.
+      if (
+        customer.externalReference &&
+        customer.externalReference !== auth.tenant.id
+      ) {
+        throw new Error(
+          "CUSTOMER_TENANT_MISMATCH: customer Asaas não pertence a este tenant.",
+        );
+      }
+
+      let creditCardToken: string | undefined;
+      let remoteIp: string | undefined;
+      let cardMeta: {
+        brand: string | null;
+        last4: string | null;
+      } | null = null;
+
+      if (billingType === "CREDIT_CARD" && input.card) {
+        remoteIp = await resolveClientRemoteIp();
+        const tokenized = await tokenizeAsaasCreditCard({
+          requestId,
+          tenantId: auth.tenant.id,
+          customerId: customer.id,
+          remoteIp,
+          creditCard: {
+            holderName: input.card.holderName,
+            number: input.card.number,
+            expiryMonth: input.card.expiryMonth,
+            expiryYear: input.card.expiryYear,
+            ccv: input.card.ccv,
+          },
+          creditCardHolderInfo: {
+            name: input.card.holderInfoName || input.card.holderName,
+            email: input.card.holderEmail || email,
+            cpfCnpj: input.card.holderCpfCnpj || document,
+            postalCode: input.card.postalCode,
+            addressNumber: input.card.addressNumber,
+            addressComplement: input.card.addressComplement,
+            phone: input.card.phone,
+            mobilePhone: input.card.mobilePhone,
+          },
+        });
+        creditCardToken = tokenized.creditCardToken;
+        cardMeta = {
+          brand: tokenized.creditCardBrand,
+          last4: tokenized.creditCardNumberLast4,
+        };
+        // Nunca gravar PAN/CVV — apenas token em memória até criar a assinatura.
+      }
 
       const { subscription: asaasSub, created: subCreated } =
         await ensureAsaasSubscription({
@@ -288,6 +384,8 @@ export async function requestCheckoutAction(input: {
           value: valueReais,
           billingType,
           description: `${plan.name} — ${auth.tenant.name}`,
+          creditCardToken,
+          remoteIp,
         });
 
       await linkProviderSubscription({
@@ -300,37 +398,64 @@ export async function requestCheckoutAction(input: {
           : null,
       });
 
-      let paymentHint: {
-        billingType?: string;
-        invoiceUrl?: string | null;
-        bankSlipUrl?: string | null;
-        dueDate?: string | null;
-        value?: number | null;
-      } = {
-        billingType,
+      let paymentHint = buildPaymentHint({
+        requested: billingType,
+        providerBillingType: asaasSub.billingType,
         dueDate: asaasSub.nextDueDate ?? null,
         value: valueReais,
-        invoiceUrl: null,
-        bankSlipUrl: null,
-      };
+      });
 
       try {
         const pays = await listSubscriptionPayments({
           subscriptionId: asaasSub.id,
           requestId,
         });
-        const first = pays.data?.[0];
-        if (first) {
-          paymentHint = {
-            billingType: first.billingType || billingType,
-            dueDate: first.dueDate ?? asaasSub.nextDueDate ?? null,
-            value: first.value ?? valueReais,
-            invoiceUrl: first.invoiceUrl ?? null,
-            bankSlipUrl: first.bankSlipUrl ?? null,
-          };
+        const matched = pickPaymentForBillingType(pays.data, billingType);
+        if (matched) {
+          let pixQr: string | null = null;
+          let pixPayload: string | null = null;
+          if (billingType === "PIX" && matched.id) {
+            try {
+              const qr = await fetchPaymentPixQrCode({
+                paymentId: matched.id,
+                requestId,
+              });
+              pixQr = qr.encodedImage;
+              pixPayload = qr.payload;
+            } catch {
+              /* QR opcional */
+            }
+          }
+          paymentHint = buildPaymentHint({
+            requested: billingType,
+            providerBillingType: matched.billingType || asaasSub.billingType,
+            invoiceUrl: matched.invoiceUrl,
+            bankSlipUrl: matched.bankSlipUrl,
+            pixQrCodeImage: pixQr,
+            pixCopiaECola: pixPayload,
+            dueDate: matched.dueDate ?? asaasSub.nextDueDate ?? null,
+            value: matched.value ?? valueReais,
+          });
         }
       } catch {
         /* payment list opcional */
+      }
+
+      if (paymentHint.divergence) {
+        await updateCheckoutAttempt(supabase, attempt.id, {
+          status: "failed",
+          result_summary: {
+            reason: "BILLING_TYPE_DIVERGENCE",
+            requestedBillingType: billingType,
+            providerBillingType: paymentHint.providerBillingType,
+            paymentHint,
+          },
+        });
+        return {
+          ok: false,
+          code: "BILLING_TYPE_DIVERGENCE",
+          message: `Método solicitado (${billingType}) diverge do provedor (${paymentHint.providerBillingType}). Não mascaramos o método.`,
+        };
       }
 
       await updateCheckoutAttempt(supabase, attempt.id, {
@@ -338,11 +463,17 @@ export async function requestCheckoutAction(input: {
         result_summary: {
           asaasCustomerId: customer.id,
           asaasSubscriptionId: asaasSub.id,
+          requestedBillingType: billingType,
+          providerBillingType: asaasSub.billingType,
           billingType,
           subCreated,
           sandbox: isAsaasSandbox(),
           note: "Assinatura criada no Asaas; status active só via webhook de pagamento.",
           paymentHint,
+          // Somente metadados seguros do cartão (sem token longo se não necessário reuso imediato)
+          cardMeta: cardMeta
+            ? { brand: cardMeta.brand, last4: cardMeta.last4 }
+            : undefined,
         },
       });
 
@@ -351,21 +482,35 @@ export async function requestCheckoutAction(input: {
         ok: true,
         message: subCreated
           ? `Assinatura Asaas (${billingType}) criada no sandbox. Aguardando pagamento/webhook — status interno não foi marcado active pelo frontend.`
-          : `Assinatura Asaas já existia para este tenant (idempotente).`,
+          : `Assinatura Asaas alinhada a ${billingType} (idempotente / atualizada).`,
         paymentHint,
       };
     } catch (err) {
-      const msg =
+      const raw =
         err instanceof AsaasApiError
           ? err.message
           : err instanceof Error
             ? err.message
             : "Falha Asaas";
+      const isCard =
+        billingType === "CREDIT_CARD" ||
+        /cart[aã]o|credit.?card|recus|negad|token/i.test(raw);
+      const msg = isCard
+        ? "Não foi possível processar o cartão. Verifique os dados ou use outro método. Nenhum status active foi alterado."
+        : raw.slice(0, 200);
       await updateCheckoutAttempt(supabase, attempt.id, {
         status: "failed",
-        result_summary: { reason: "ASAAS_ERROR", message: msg.slice(0, 200) },
+        result_summary: {
+          reason: "ASAAS_ERROR",
+          message: msg.slice(0, 200),
+          requestedBillingType: billingType,
+        },
       });
-      logger.info("billing.checkout.failed", { requestId, message: msg.slice(0, 120) });
+      logger.info("billing.checkout.failed", {
+        requestId,
+        billingType,
+        message: msg.slice(0, 120),
+      });
       return { ok: false, code: "ASAAS_CHECKOUT_FAILED", message: msg };
     }
   } catch (err) {
@@ -381,6 +526,36 @@ export async function requestCheckoutAction(input: {
       message: "Falha ao registrar checkout.",
     };
   }
+}
+
+function validateCardFields(card: CardCheckoutFields | undefined): string | null {
+  if (!card) return "Preencha os dados do cartão.";
+  const number = card.number.replace(/\s/g, "");
+  if (!card.holderName.trim()) return "Informe o nome impresso no cartão.";
+  if (!/^\d{13,19}$/.test(number)) return "Número do cartão inválido.";
+  if (!/^\d{1,2}$/.test(card.expiryMonth.trim())) return "Mês de validade inválido.";
+  if (!/^\d{4}$/.test(card.expiryYear.trim())) return "Ano de validade inválido (AAAA).";
+  if (!/^\d{3,4}$/.test(card.ccv.trim())) return "CVV inválido.";
+  if (!card.holderInfoName.trim() && !card.holderName.trim()) {
+    return "Informe o nome do titular.";
+  }
+  if (!card.holderEmail.trim() && !card.phone.trim()) {
+    /* email pode vir do campo cobrança */
+  }
+  if (!card.postalCode.replace(/\D/g, "") || card.postalCode.replace(/\D/g, "").length < 8) {
+    return "CEP do titular inválido.";
+  }
+  if (!card.addressNumber.trim()) return "Número do endereço do titular obrigatório.";
+  if (!card.phone.replace(/\D/g, "") || card.phone.replace(/\D/g, "").length < 10) {
+    return "Telefone do titular inválido.";
+  }
+  if (
+    !card.holderCpfCnpj.replace(/\D/g, "") ||
+    card.holderCpfCnpj.replace(/\D/g, "").length < 11
+  ) {
+    return "CPF/CNPJ do titular inválido.";
+  }
+  return null;
 }
 
 export async function cancelSubscriptionAction(
@@ -425,7 +600,6 @@ export async function cancelSubscriptionAction(
         });
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Falha ao cancelar no Asaas";
-        // Se já deletada, segue para marcar local
         if (!/not found|não encontrad|404/i.test(msg)) {
           return { ok: false, code: "ASAAS_CANCEL_FAILED", message: msg };
         }

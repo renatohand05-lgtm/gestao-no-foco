@@ -39,7 +39,9 @@
 
 ## Produção
 
-Deploy via push `main`. Smoke: `npm run test:phase33-3-prod-smoke` (tenants de teste).  
+Deploy: push `main` `2b0a6da` → Vercel.  
+Smoke: `npm run test:phase33-3-prod-smoke` → **11 PASS · 0 FAIL**  
+Evidence: `docs/testing/evidence/33-3/prod-smoke.json`  
 **Migration SQL ainda NÃO aplicada automaticamente** — Renato deve aplicar no SQL Editor.
 
 ## Decisão

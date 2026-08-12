@@ -1,0 +1,55 @@
+{
+  "at": "2026-08-12T15:03:47.071Z",
+  "sprint": "33.3",
+  "base": "https://gestao-no-foco.vercel.app",
+  "checks": [
+    {
+      "ok": true,
+      "detail": "/api/health 200"
+    },
+    {
+      "ok": true,
+      "detail": "GET /api/billing/webhook 200"
+    },
+    {
+      "ok": true,
+      "detail": "POST webhook sem secret 503 (não 200 paid)"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/dashboard 307"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/crm 307"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/ordens 307"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/estoque 307"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/financeiro 307"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/configuracoes 307"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/configuracoes/assinatura 307"
+    },
+    {
+      "ok": true,
+      "detail": "/teste-renato-01/configuracoes/equipe 307"
+    }
+  ],
+  "summary": {
+    "pass": 11,
+    "fail": 0
+  }
+}

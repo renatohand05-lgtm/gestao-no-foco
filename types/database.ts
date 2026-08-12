@@ -66,6 +66,171 @@ export type Database = {
         };
         Relationships: [];
       };
+      billing_plans: {
+        Row: {
+          id: string;
+          slug: string;
+          name: string;
+          status: string;
+          amount_cents: number | null;
+          currency: string | null;
+          billing_interval: string | null;
+          entitlements: Json;
+          is_pilot: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          name: string;
+          status?: string;
+          amount_cents?: number | null;
+          currency?: string | null;
+          billing_interval?: string | null;
+          entitlements?: Json;
+          is_pilot?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          name?: string;
+          status?: string;
+          amount_cents?: number | null;
+          currency?: string | null;
+          billing_interval?: string | null;
+          entitlements?: Json;
+          is_pilot?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      billing_subscriptions: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          plan_id: string;
+          status: string;
+          provider: string;
+          provider_customer_id: string | null;
+          provider_subscription_id: string | null;
+          trial_start: string | null;
+          trial_end: string | null;
+          current_period_start: string | null;
+          current_period_end: string | null;
+          cancel_at_period_end: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          plan_id: string;
+          status: string;
+          provider?: string;
+          provider_customer_id?: string | null;
+          provider_subscription_id?: string | null;
+          trial_start?: string | null;
+          trial_end?: string | null;
+          current_period_start?: string | null;
+          current_period_end?: string | null;
+          cancel_at_period_end?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          plan_id?: string;
+          status?: string;
+          provider?: string;
+          provider_customer_id?: string | null;
+          provider_subscription_id?: string | null;
+          trial_start?: string | null;
+          trial_end?: string | null;
+          current_period_start?: string | null;
+          current_period_end?: string | null;
+          cancel_at_period_end?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      billing_provider_events: {
+        Row: {
+          id: string;
+          provider: string;
+          event_id: string;
+          tenant_id: string | null;
+          event_type: string | null;
+          payload_summary: Json;
+          processed_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider: string;
+          event_id: string;
+          tenant_id?: string | null;
+          event_type?: string | null;
+          payload_summary?: Json;
+          processed_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          provider?: string;
+          event_id?: string;
+          tenant_id?: string | null;
+          event_type?: string | null;
+          payload_summary?: Json;
+          processed_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      billing_checkout_attempts: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          idempotency_key: string;
+          plan_slug: string;
+          status: string;
+          provider: string;
+          result_summary: Json;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          idempotency_key: string;
+          plan_slug: string;
+          status: string;
+          provider?: string;
+          result_summary?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          idempotency_key?: string;
+          plan_slug?: string;
+          status?: string;
+          provider?: string;
+          result_summary?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       tenant_members: {
         Row: {
           id: string;

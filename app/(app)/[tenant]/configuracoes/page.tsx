@@ -100,6 +100,35 @@ export default async function ConfiguracoesPage({
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>Assinatura</CardTitle>
+            <CardDescription>
+              Plano, trial e status comercial desta empresa
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              A assinatura pertence à empresa (tenant), não ao usuário. OWNER
+              gerencia; membros comuns não alteram cobrança.
+            </p>
+            {tenant.role === "owner" || tenant.role === "admin" ? (
+              <Button
+                variant="outline"
+                render={
+                  <Link href={`/${tenantSlug}/configuracoes/assinatura`} />
+                }
+              >
+                Ver assinatura
+              </Button>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Sem acesso à gestão de assinatura neste papel.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         {tenant.role === "owner" || tenant.role === "admin" ? (
           <Card>
             <CardHeader>

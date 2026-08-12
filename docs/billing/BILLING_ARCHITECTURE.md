@@ -1,71 +1,101 @@
-# Billing / monetização — arquitetura (Sprint 33.2)
+# Billing / monetização — arquitetura (Sprint 33.3)
 
-**Status:** preparação documental. **Pagamento real NÃO implementado nesta sprint.**
+**Status:** schema + gates + UI + webhook stub. **Pagamento real NÃO implementado.**
 
-## O que já existe no código
+## Auditoria (código real)
 
 | Item | Situação |
 |------|----------|
-| `plans` / `subscriptions` / checkout / webhooks de cobrança | **Não existem** como domínio SaaS |
-| Stripe / gateway no produto | Apenas stub de catálogo de integrações (não cobrança do SaaS) |
-| RBAC (`owner`/`admin`/`manager`/`member` + permissions) | **Existe** e é a fonte de verdade de *o que o usuário pode fazer* |
-| Tenant + `tenant_members` | **Existe** — unidade de cobrança futura = **tenant (empresa)** |
-| Feature flags / intelligence entitlements ad-hoc | Existem em módulos específicos; **não** substituem plano comercial |
+| Provedor Stripe/Asaas/MP no produto | Apenas stub de catálogo de integrações |
+| Env de cobrança SaaS | Documentado em `.env.example` — **não configurado** por padrão |
+| `billing_*` tables | Migration `supabase/migrations/20260823_phase33_3_billing.sql` |
+| RBAC `configuracoes.faturamento` | Continua **platform-only** (super_admin) — não misturar com assinatura do tenant |
+| Gestão tenant billing | Membership **OWNER** (`can_manage_billing`) / view OWNER+ADMIN |
 
-## Modelo mínimo alvo (sem provedor fixo)
+## Modelo
 
 ```
-tenant
-  └── subscription
-        ├── plan_id
+tenant (empresa)
+  └── billing_subscriptions (1:1)
+        ├── plan_id → billing_plans
         ├── status: trial | active | past_due | canceled
-        ├── current_period_end
-        └── entitlements[]  (ex.: module.finance, seats.max)
+        ├── provider / provider_*_id
+        └── trial_* / current_period_*
+
+billing_checkout_attempts  (idempotência checkout)
+billing_provider_events    (idempotência webhook)
 ```
 
-### Separação obrigatória
+**Assinatura = TENANT.** Empresa A e Empresa B nunca compartilham a mesma row.
 
-| Conceito | Decide | Exemplo |
-|----------|--------|---------|
-| **Entitlement (plano)** | O que a **empresa** contratou | Plano habilita módulo Financeiro |
-| **RBAC (membership)** | O que **este usuário** pode fazer na empresa | Só OWNER/ADMIN escreve financeiro |
+## RBAC ≠ Entitlement
 
-Nunca misturar: um plano sem Financeiro não libera o módulo; com Financeiro, RBAC ainda bloqueia `member` na escrita (RLS 33.1).
+| Camada | Decide |
+|--------|--------|
+| Entitlement (plano) | Módulos liberados para a **empresa** |
+| RBAC (membership) | O que o **usuário** pode fazer |
+| Final | `entitlement ∧ rbac` (`lib/billing/entitlements.ts` → `finalAccessAllowed`) |
 
-## O que falta (Sprint 33.3+)
+Pagamento **nunca** concede role admin.
 
-1. Tabelas `billing_plans`, `billing_subscriptions` (ou nomes equivalentes) com RLS por `tenant_id`
-2. Server-only sync de status (webhook do provedor → DB)
-3. Gate de entitlement no servidor (não só no frontend)
-4. Trial controlado para piloto (status `trial` sem cartão, se desejado)
-5. UI de plano/fatura (após segurança estável)
+## Enforcement
 
-## Onde integrar pagamento
+- `BILLING_ENFORCEMENT=0` (default): acesso `open` — **não bloqueia** tenants de teste/piloto.
+- `BILLING_ENFORCEMENT=1`: aplica restrição controlada (não apaga tenant/dados).
 
-- **Webhook HTTP** em rota server-only (`/api/billing/webhook` — a criar)
-- Atualiza `subscription.status` com **idempotência** (`event_id` único do provedor)
-- Frontend **nunca** decide sozinho se a assinatura está ativa
-- Service role / secret do webhook **somente** no servidor (Vercel env)
+### past_due / canceled / trial expirado
 
-## Segurança
+| Status | Comportamento (enforcement on) |
+|--------|--------------------------------|
+| `past_due` | Restrição controlada; dados preservados |
+| `canceled` | Restrito; dados preservados |
+| trial sem `trial_end` ou expirado | Restrito (não há trial infinito) |
+| missing subscription | Restrito |
 
-- Não confiar em query string / localStorage para “paid”
-- Webhook: verificar assinatura do provedor; rejeitar replay
-- Idempotência: processar o mesmo `event_id` no máximo uma vez
-- Logs: sem PAN/CVV/token completo; correlation/request id ok
-- Piloto: pode operar em `trial`/`active` manual sem gateway — **sem bypass de RLS/RBAC**
+## Provedor
 
-## Piloto e monetização
+**NÃO CONFIGURADO** por padrão (`BILLING_PROVIDER=none`).
 
-- Liberar cliente piloto **não** exige cobrança nesta sprint
-- Flag de piloto (`PILOT_TENANT_SLUGS` / settings) é **observabilidade/ops**, não entitlement premium escondido
+Decisão necessária do Renato (escolher **um**):
 
-## Relação com os próximos dias
+1. Stripe — `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (servidor)
+2. Asaas — `ASAAS_API_KEY` + `ASAAS_WEBHOOK_TOKEN`
+3. Mercado Pago — `MERCADOPAGO_ACCESS_TOKEN` + `MERCADOPAGO_WEBHOOK_SECRET`
 
-| Dia | Foco |
-|-----|------|
-| 33.2 (hoje) | Multiempresa + docs billing |
-| 33.3 | Schema mínimo + webhook stub + gate entitlement sem provedor obrigatório |
-| 33.4 | Observabilidade + recovery + production gates |
+Nenhuma secret com `NEXT_PUBLIC_`.
+
+## Checkout
+
+- Server action `requestCheckoutAction`
+- Persiste `billing_checkout_attempts` com idempotency key
+- Sem provedor → `provider_missing` — **não** marca `active`/`paid`
+- Com provedor detectado → ainda **não cobra** até autorização explícita (`BILLING_CHECKOUT_NOT_ENABLED`)
+
+## Webhook
+
+- `POST /api/billing/webhook`
+- Sem provedor → 503
+- Secret inválido → 401
+- `event_id` obrigatório; unique `(provider, event_id)` = idempotência / replay
+- Sync de status para `active`/`past_due` aguarda integração do provedor escolhido
+
+## UI
+
+- `/{tenant}/configuracoes/assinatura` — OWNER/ADMIN veem; OWNER gerencia
+- Link em Configurações
+
+## Plano seed
+
+- slug `pilot` — **temporário**, `amount_cents = null`, `is_pilot = true`
+- Sem preço comercial hardcoded
+
+## Arquivos
+
+| Path | Papel |
+|------|-------|
+| `lib/billing/*` | Domínio |
+| `app/api/billing/webhook/route.ts` | Webhook |
+| `app/(app)/[tenant]/configuracoes/assinatura/page.tsx` | UI |
+| `docs/billing/PILOT_BILLING_RUNBOOK.md` | Operação piloto |
 
 **PAYMENT IMPLEMENTADO: NÃO**

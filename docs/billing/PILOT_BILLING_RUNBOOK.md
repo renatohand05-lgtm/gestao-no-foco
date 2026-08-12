@@ -1,46 +1,47 @@
-# Runbook — Billing do piloto (Sprint 33.3)
+# Runbook — Billing piloto (Sprint 33.4)
 
-## Status (pós-migration)
+## Status
 
 | Item | Estado |
 |------|--------|
-| Migration `20260823_phase33_3_billing.sql` | **Aplicada** em production (Renato · SQL Editor Success) |
-| Smoke pós-migration | **36 PASS** (`npm run test:phase33-3-post-migration-smoke`) |
-| Provedor de pagamento | **Não configurado** |
-| Cobrança real | **Desligada** |
+| Schema billing (33.3) | Aplicado em production |
+| Trial sem cartão | GO |
+| Adapter Asaas sandbox (código) | Pronto |
+| Secrets Asaas no Vercel | **Pendente Renato** |
+| Cobrança real | **OFF** |
 
-**Não reaplicar** a migration salvo instrução explícita de correção.
+## Credenciais necessárias (sandbox)
 
-## Objetivo
+1. `BILLING_PROVIDER=asaas`
+2. `ASAAS_ENV=sandbox`
+3. `ASAAS_API_KEY` (sandbox)
+4. `ASAAS_WEBHOOK_TOKEN`
+5. `BILLING_ASAAS_CHECKOUT_ENABLED=1` (só após webhook configurado)
 
-Operar o primeiro cliente em **trial sem cartão**, com assinatura por tenant.
+Webhook URL: `https://gestao-no-foco.vercel.app/api/billing/webhook`  
+Header validado: `asaas-access-token`
 
-## Ativar trial no tenant piloto (OWNER)
+Detalhes: `docs/billing/ASAAS_SANDBOX.md`
 
-1. Login como **OWNER** em tenant de teste ou piloto
-2. **Configurações → Assinatura**
-3. **Ativar trial piloto (sem cartão)**
-4. Conferir `trial_end` (padrão 30 dias · `BILLING_PILOT_TRIAL_DAYS`)
-5. Manter `BILLING_ENFORCEMENT=0` no Vercel
+## Trial (já validado)
+
+OWNER → Configurações → Assinatura → Ativar trial piloto.
+
+## Go-live checklist (futuro — NÃO executar)
+
+- [ ] Conta Asaas production aprovada + KYC
+- [ ] API key production (nunca misturar com sandbox)
+- [ ] Webhook production HTTPS + token novo
+- [ ] `ASAAS_ENV=production` + `ASAAS_ALLOW_PRODUCTION=1` só com autorização
+- [ ] Plano comercial com `amount_cents` definido
+- [ ] Teste cobrança mínima controlada
+- [ ] Cancelamento + past_due homologados
+- [ ] Monitoramento logs `billing.webhook.*`
+- [ ] Rollback: `BILLING_ASAAS_CHECKOUT_ENABLED=0` + `BILLING_PROVIDER=none`
 
 ## O que NÃO fazer
 
-- Não reexecutar a migration sem necessidade
-- Não cobrar cliente real sem autorização explícita
-- Não configurar Stripe/Asaas/MP nesta etapa de homologação
+- Não usar key production agora
+- Não cobrar cliente real
+- Não reaplicar migration 33.3 sem necessidade
 - Não colocar secrets no frontend
-- Não compartilhar assinatura entre tenants
-- Não apagar tenant/dados em `past_due`/`canceled`
-
-## Próximo passo comercial (depois da 33.4 / autorização)
-
-1. Escolher provedor (**recomendação técnica: Asaas**)
-2. Criar conta **sandbox**
-3. Configurar secrets só no Vercel
-4. Webhook → `https://gestao-no-foco.vercel.app/api/billing/webhook`
-5. Homologar sandbox → só então cobrança real
-
-## Recovery
-
-Falha de billing **não** exige restore de dados de negócio.  
-Snapshot geral: `docs/pilot/PRODUCTION_RECOVERY.md`.

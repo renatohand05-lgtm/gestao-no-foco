@@ -88,14 +88,25 @@ export default async function AssinaturaPage({
         ]}
       />
 
+      {auth.isSandbox ? (
+        <FeedbackMessage variant="warning">
+          AMBIENTE DE TESTE / SANDBOX — cobranças Asaas, se ativadas, não são
+          production.
+        </FeedbackMessage>
+      ) : null}
+
       {schemaMissing ? (
         <FeedbackMessage variant="warning">
-          Schema de billing ainda não aplicado neste ambiente. Peça ao operador
-          para aplicar{" "}
-          <code className="text-xs">
-            supabase/migrations/20260823_phase33_3_billing.sql
-          </code>{" "}
-          (manual). Enquanto isso, o piloto opera sem cobrança.
+          Schema de billing ainda não aplicado neste ambiente.
+        </FeedbackMessage>
+      ) : null}
+
+      {!auth.providerConfigured ? (
+        <FeedbackMessage variant="info">
+          Asaas ainda não configurado no servidor. Configure:{" "}
+          {auth.missingCredentials.join(", ") ||
+            "BILLING_PROVIDER, ASAAS_API_KEY, ASAAS_WEBHOOK_TOKEN"}. Trial sem
+          cartão permanece disponível.
         </FeedbackMessage>
       ) : null}
 
@@ -130,7 +141,7 @@ export default async function AssinaturaPage({
             ) : null}
             {sub?.currentPeriodEnd ? (
               <p>
-                <span className="text-muted-foreground">Próxima renovação:</span>{" "}
+                <span className="text-muted-foreground">Próxima cobrança:</span>{" "}
                 {sub.currentPeriodEnd.slice(0, 10)}
               </p>
             ) : null}
@@ -139,9 +150,25 @@ export default async function AssinaturaPage({
               {sub?.provider ?? auth.provider}
               {auth.providerConfigured ? "" : " (não configurado)"}
             </p>
+            {sub?.providerCustomerId ? (
+              <p>
+                <span className="text-muted-foreground">Customer:</span>{" "}
+                <code className="text-xs">{sub.providerCustomerId}</code>
+              </p>
+            ) : null}
+            {sub?.providerSubscriptionId ? (
+              <p>
+                <span className="text-muted-foreground">Subscription:</span>{" "}
+                <code className="text-xs">{sub.providerSubscriptionId}</code>
+              </p>
+            ) : null}
             <p>
               <span className="text-muted-foreground">Enforcement:</span>{" "}
               {isBillingEnforcementEnabled() ? "ligado" : "desligado (piloto)"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              past_due / canceled: não apagam tenant nem histórico. Grace period
+              comercial ainda não definido — suporte técnico preparado.
             </p>
           </CardContent>
         </Card>
@@ -150,8 +177,7 @@ export default async function AssinaturaPage({
           <CardHeader>
             <CardTitle>Gerenciar</CardTitle>
             <CardDescription>
-              Checkout real exige provedor + autorização. Frontend nunca marca
-              pagamento como aprovado.
+              Checkout server-side. Status active só via webhook confiável.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -160,6 +186,8 @@ export default async function AssinaturaPage({
               canManage={auth.canManage}
               hasSubscription={Boolean(sub)}
               providerConfigured={auth.providerConfigured}
+              subscriptionStatus={sub?.status ?? null}
+              isSandbox={auth.isSandbox}
             />
           </CardContent>
         </Card>

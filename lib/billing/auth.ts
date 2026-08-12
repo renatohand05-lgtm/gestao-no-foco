@@ -4,7 +4,10 @@ import { cache } from "react";
 
 import {
   getConfiguredBillingProvider,
+  isAsaasConfigured,
+  isAsaasSandbox,
   isBillingProviderConfigured,
+  listMissingAsaasCredentials,
 } from "@/lib/billing/config";
 import {
   isTrialExpired,
@@ -65,6 +68,10 @@ export const requireBillingPageAuth = cache(async (tenantSlug: string) => {
     canManage: canManageBilling(tenant.role),
     provider: getConfiguredBillingProvider(),
     providerConfigured: isBillingProviderConfigured(),
+    asaasConfigured: isAsaasConfigured(),
+    isSandbox:
+      getConfiguredBillingProvider() === "asaas" ? isAsaasSandbox() : true,
+    missingCredentials: listMissingAsaasCredentials(),
   };
 });
 

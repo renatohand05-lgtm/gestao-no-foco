@@ -239,3 +239,71 @@ export async function updateCheckoutAttempt(
     .eq("id", id);
   if (error) throw error;
 }
+
+export async function linkProviderSubscription(input: {
+  client: Client;
+  tenantId: string;
+  providerCustomerId: string;
+  providerSubscriptionId: string;
+  /** Não promove para active — pagamento confirma via webhook. */
+  keepStatus?: boolean;
+  currentPeriodEnd?: string | null;
+}) {
+  const patch: {
+    provider: string;
+    provider_customer_id: string;
+    provider_subscription_id: string;
+    updated_at: string;
+    current_period_end?: string;
+  } = {
+    provider: "asaas",
+    provider_customer_id: input.providerCustomerId,
+    provider_subscription_id: input.providerSubscriptionId,
+    updated_at: new Date().toISOString(),
+  };
+  if (input.currentPeriodEnd) {
+    patch.current_period_end = input.currentPeriodEnd;
+  }
+  const { data, error } = await input.client
+    .from("billing_subscriptions")
+    .update(patch)
+    .eq("tenant_id", input.tenantId)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapSub(data) : null;
+}
+
+export async function markSubscriptionCanceled(input: {
+  client: Client;
+  tenantId: string;
+  cancelAtPeriodEnd?: boolean;
+}) {
+  const { data, error } = await input.client
+    .from("billing_subscriptions")
+    .update({
+      status: "canceled",
+      cancel_at_period_end: input.cancelAtPeriodEnd ?? false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("tenant_id", input.tenantId)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapSub(data) : null;
+}
+
+export async function getLatestCheckoutForTenant(
+  client: Client,
+  tenantId: string,
+) {
+  const { data, error } = await client
+    .from("billing_checkout_attempts")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}

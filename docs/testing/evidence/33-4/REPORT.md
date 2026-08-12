@@ -37,7 +37,8 @@ PAN/CVV não persistem (nem logs, nem Supabase, nem storage browser).
 | lint (arquivos da sprint) | PASS |
 | build web | PASS |
 | `git diff --check` (paths sprint) | PASS |
-| Smoke PIX/BOLETO/Cartão live | **PENDENTE** (pós-deploy, tenant teste) |
+| Smoke PIX/BOLETO/Cartão live | **PENDENTE** (pós-deploy Ready `902c60c` → Renato no tenant teste) |
+| Production deploy (git → Vercel) | **PASS** (`https://gestao-no-foco.vercel.app`, dpl Ready) |
 
 ## Docs
 

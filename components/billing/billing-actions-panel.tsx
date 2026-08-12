@@ -8,7 +8,11 @@ import {
   requestCheckoutAction,
   startPilotTrialAction,
 } from "@/lib/billing/actions";
-import type { PaymentHint } from "@/lib/billing/payment-hint";
+import {
+  formatProviderPaymentStatus,
+  methodDisplayLabel,
+  type PaymentHint,
+} from "@/lib/billing/payment-hint";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -154,11 +158,6 @@ export function BillingActionsPanel({
       }
     });
   }
-
-  const methodLabel =
-    paymentHint?.billingType === "CREDIT_CARD"
-      ? "CARTÃO"
-      : paymentHint?.billingType ?? "—";
 
   return (
     <div className="space-y-3">
@@ -359,10 +358,30 @@ export function BillingActionsPanel({
         <div
           className="rounded-md bg-muted px-3 py-2 text-xs space-y-1"
           data-billing-method={paymentHint.billingType}
+          data-testid="last-charge-card"
         >
+          <p className="font-medium text-foreground">Última cobrança criada</p>
+          <p className="text-[11px] text-muted-foreground">
+            Resultado do último checkout — não é o método selecionado no
+            formulário acima.
+          </p>
           <p>
-            Método: {methodLabel} · Valor: {paymentHint.value ?? "—"} · Venc.:{" "}
+            <span className="text-muted-foreground">Método:</span>{" "}
+            {methodDisplayLabel(paymentHint.billingType)}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Valor:</span>{" "}
+            {paymentHint.value ?? "—"}
+          </p>
+          <p>
+            <span className="text-muted-foreground">
+              Vencimento atual:
+            </span>{" "}
             {paymentHint.dueDate ?? "—"}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Status:</span>{" "}
+            {formatProviderPaymentStatus(paymentHint.providerStatus)}
           </p>
           {paymentHint.divergence ? (
             <p className="text-destructive" role="alert">

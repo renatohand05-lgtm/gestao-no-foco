@@ -10,13 +10,16 @@ export type PaymentHint = {
   bankSlipUrl: string | null;
   pixQrCodeImage: string | null;
   pixCopiaECola: string | null;
+  /** Vencimento da cobrança atual (payment.dueDate). */
   dueDate: string | null;
   value: number | null;
+  /** Status técnico Asaas da cobrança (PENDING, CONFIRMED, …). */
+  providerStatus: string | null;
   divergence: boolean;
 };
 
 /**
- * Monta hint de UI sem misturar PIX e BOLETO.
+ * Monta hint de UI sem misturar PIX / BOLETO / CARTÃO.
  * Fonte da verdade do rótulo: requestedBillingType.
  */
 export function buildPaymentHint(input: {
@@ -28,6 +31,7 @@ export function buildPaymentHint(input: {
   pixCopiaECola?: string | null;
   dueDate?: string | null;
   value?: number | null;
+  providerStatus?: string | null;
 }): PaymentHint {
   const provider = (input.providerBillingType || "").toUpperCase() || null;
   const divergence = Boolean(
@@ -44,6 +48,7 @@ export function buildPaymentHint(input: {
     pixCopiaECola: null,
     dueDate: input.dueDate ?? null,
     value: input.value ?? null,
+    providerStatus: (input.providerStatus || "").toUpperCase() || null,
     divergence,
   };
 
@@ -54,7 +59,6 @@ export function buildPaymentHint(input: {
     hint.pixQrCodeImage = input.pixQrCodeImage ?? null;
     hint.pixCopiaECola = input.pixCopiaECola ?? null;
     hint.invoiceUrl = input.invoiceUrl ?? null;
-    // Nunca anexar bankSlipUrl em PIX
     hint.bankSlipUrl = null;
   } else if (input.requested === "CREDIT_CARD") {
     hint.invoiceUrl = input.invoiceUrl ?? null;
@@ -73,4 +77,57 @@ export function shouldShowPixPayload(hint: PaymentHint): boolean {
     hint.billingType === "PIX" &&
     Boolean(hint.pixCopiaECola || hint.pixQrCodeImage)
   );
+}
+
+export function methodDisplayLabel(type: AsaasBillingType | string | null): string {
+  const t = (type || "").toUpperCase();
+  if (t === "CREDIT_CARD") return "CARTÃO";
+  if (t === "PIX") return "PIX";
+  if (t === "BOLETO") return "BOLETO";
+  return t || "—";
+}
+
+/** Texto amigável + código técnico (não perde o status Asaas). */
+export function formatProviderPaymentStatus(
+  status: string | null | undefined,
+): string {
+  const s = (status || "").toUpperCase();
+  if (!s) return "—";
+  const map: Record<string, string> = {
+    PENDING: "Pendente",
+    AWAITING_PAYMENT: "Aguardando pagamento",
+    AWAITING_RISK_ANALYSIS: "Em análise",
+    CONFIRMED: "Confirmado",
+    RECEIVED: "Recebido",
+    RECEIVED_IN_CASH: "Recebido em dinheiro",
+    OVERDUE: "Vencido",
+    REFUNDED: "Estornado",
+    REFUND_REQUESTED: "Estorno solicitado",
+    CHARGEBACK_REQUESTED: "Chargeback solicitado",
+    CHARGEBACK_DISPUTE: "Chargeback em disputa",
+    DELETED: "Excluído",
+    RESTORED: "Restaurado",
+  };
+  const friendly = map[s] ?? "Status do provedor";
+  return `${friendly} (${s})`;
+}
+
+/**
+ * Evita contradizer "próxima renovação" com o vencimento da cobrança atual
+ * quando as datas forem iguais (mostra só uma semântica).
+ */
+export function resolveBillingDateLabels(input: {
+  currentChargeDue: string | null | undefined;
+  nextRenewal: string | null | undefined;
+}): {
+  currentChargeDue: string | null;
+  nextRenewal: string | null;
+  sameDate: boolean;
+} {
+  const current = input.currentChargeDue?.slice(0, 10) || null;
+  const next = input.nextRenewal?.slice(0, 10) || null;
+  if (current && next && current === next) {
+    return { currentChargeDue: current, nextRenewal: null, sameDate: true };
+  }
+  return { currentChargeDue: current, nextRenewal: next, sameDate: false };
 }

@@ -1,60 +1,73 @@
-# Sprint 33.4 hotfix — PIX≠BOLETO + cartão tokenizado (Asaas sandbox)
+# Sprint 33.4 — Fechamento Asaas sandbox (PIX + BOLETO + CARTÃO + datas + webhook)
 
 **Data:** 2026-08-12  
 **Mobile:** **NÃO alterado**  
-**Bug:** PIX criava cobrança correta no Asaas mas a UI mostrava `Método: BOLETO` + `Abrir boleto`.
+**ASAAS_ENV:** sandbox (production API bloqueada sem allow)
 
-## Causa raiz
+## Homologação manual (Renato) — pré-fechamento
 
-1. `ensureAsaasSubscription` reusava ACTIVE sem checar `billingType`.
-2. Hint usava o primeiro payment da lista (boleto antigo).
-3. UI exibia `Abrir boleto` sempre que havia `bankSlipUrl`.
+| Método | Resultado |
+|--------|-----------|
+| PIX | Funcional (sandbox) |
+| BOLETO | Funcional (sandbox) |
+| CARTÃO | Funcional (sandbox) |
+| Bug PIX→UI BOLETO | Corrigido |
 
-## Correção
+## Correção de datas (UI)
 
-| Item | Detalhe |
-|------|---------|
-| Alinhamento provider | Update/PUT quando billingType diverge; DIVERGENCE sem mascarar |
-| `buildPaymentHint` | Rótulo = método solicitado; PIX nunca leva `bankSlipUrl` |
-| `pickPaymentForBillingType` | Só payment do método pedido |
-| UI | `Abrir boleto` só se `billingType === BOLETO` && URL |
-| Reload | Hint do último checkout `completed` |
+| Campo | Semântica |
+|-------|-----------|
+| Cobrança atual / vencimento | `payment.dueDate` da última cobrança criada |
+| Próxima renovação | `billing_subscriptions.current_period_end` ← `subscription.nextDueDate` Asaas |
+| Última cobrança criada | Card separado do formulário (método + valor + vencimento + status provider) |
 
-## Cartão (decisão A)
+Não altera datas do provider — só interpretação/rótulos.
 
-Tokenizar primeiro (`POST /v3/creditCard/tokenizeCreditCard`) → subscription com `creditCardToken` + `remoteIp` do cliente (forwarded headers).  
-PAN/CVV não persistem (nem logs, nem Supabase, nem storage browser).
+## Status da cobrança
+
+Persiste `providerStatus` no payment hint (PENDING, CONFIRMED, RECEIVED, …) com label amigável + código técnico.  
+Assinatura `active` **só** via webhook/backend.
+
+## Webhook
+
+| Check | Resultado |
+|-------|-----------|
+| GET `/api/billing/webhook` | PASS (`asaas`, sandbox=true) |
+| POST sem token | PASS → 401 INVALID_SIGNATURE |
+| POST token inválido | PASS → 401 |
+| Evento autenticado real (PAYMENT_*) | **NÃO EXECUTADO** neste agente (sem replay com secret) |
+| Idempotência (código `23505`) | PASS (contrato) |
+
+Script: `npm run test:phase33-4-webhook-smoke`
 
 ## Gates
 
 | Gate | Resultado |
 |------|-----------|
-| `test:phase33-4-asaas` | 26 PASS |
-| `test:phase33-3-billing` | 15 PASS |
-| `test:phase33-2-multiempresa` | 16 PASS |
-| `test:phase33-1-hardening` | 13 PASS |
+| `test:phase33-4-asaas` | 27 PASS |
+| `test:phase33-4-webhook-smoke` | PASS (auth gate) |
 | `test:rbac` | 92 PASS |
-| lint (arquivos da sprint) | PASS |
+| lint (arquivos sprint) | PASS |
 | build web | PASS |
 | `git diff --check` (paths sprint) | PASS |
-| Smoke PIX/BOLETO/Cartão live | **PENDENTE** (pós-deploy Ready `902c60c` → Renato no tenant teste) |
-| Production deploy (git → Vercel) | **PASS** (`https://gestao-no-foco.vercel.app`, dpl Ready) |
 
-## Docs
+## Segurança cartão
 
-- `docs/billing/ASAAS_SANDBOX.md`
-- `docs/billing/PILOT_BILLING_RUNBOOK.md`
-
-## Migration / ENVs
-
-- Nova migration: **NÃO**
-- Novas ENVs: **NENHUMA** (reusa sandbox já configurada)
+- PAN/CVV: não persistidos
+- Tokenização: `/v3/creditCard/tokenizeCreditCard` + `remoteIp` cliente
+- Cross-tenant: customer `externalReference=tenant_id`
 
 ## Go / No-Go
 
 | Critério | Veredito |
 |----------|----------|
-| Piloto sem cobrança | GO |
-| PIX/BOLETO sandbox | GO após smoke manual no tenant teste |
-| Cartão sandbox | GO código; smoke cartão pendente |
+| Piloto sem cobrança | **GO** |
+| PIX / BOLETO / CARTÃO sandbox | **GO** (manual + código; smoke UI datas após deploy) |
+| Cobrança sandbox (conjunto) | **GO** após confirmar labels no tenant teste |
 | Cobrança real | **NO-GO** |
+| Prazo 5 dias | **VERDE** |
+
+## Migration / ENVs
+
+- Nova migration: **NÃO**
+- Novas ENVs: **NENHUMA**

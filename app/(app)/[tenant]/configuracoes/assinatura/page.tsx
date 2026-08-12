@@ -18,6 +18,7 @@ import {
 } from "@/lib/billing/auth";
 import { isBillingEnforcementEnabled } from "@/lib/billing/config";
 import type { PaymentHint } from "@/lib/billing/payment-hint";
+import { resolveBillingDateLabels } from "@/lib/billing/payment-hint";
 import { getLatestCheckoutForTenant } from "@/lib/billing/repository";
 import { createClient } from "@/lib/supabase/server";
 
@@ -97,6 +98,10 @@ export default async function AssinaturaPage({
 
   const sub = view.subscription;
   const plan = view.plan;
+  const dateLabels = resolveBillingDateLabels({
+    currentChargeDue: initialPaymentHint?.dueDate,
+    nextRenewal: sub?.currentPeriodEnd,
+  });
 
   return (
     <div className="space-y-6">
@@ -160,10 +165,26 @@ export default async function AssinaturaPage({
                 {view.trialExpired ? " (expirado)" : ""}
               </p>
             ) : null}
-            {sub?.currentPeriodEnd ? (
+            {dateLabels.currentChargeDue ? (
               <p>
-                <span className="text-muted-foreground">Próxima cobrança:</span>{" "}
-                {sub.currentPeriodEnd.slice(0, 10)}
+                <span className="text-muted-foreground">
+                  Cobrança atual / vencimento:
+                </span>{" "}
+                {dateLabels.currentChargeDue}
+              </p>
+            ) : null}
+            {dateLabels.nextRenewal ? (
+              <p>
+                <span className="text-muted-foreground">
+                  Próxima renovação:
+                </span>{" "}
+                {dateLabels.nextRenewal}
+              </p>
+            ) : null}
+            {dateLabels.sameDate ? (
+              <p className="text-[11px] text-muted-foreground">
+                A data acima é o vencimento da cobrança atual; a próxima
+                renovação do ciclo ainda não diverge no provedor.
               </p>
             ) : null}
             <p>
@@ -208,6 +229,7 @@ export default async function AssinaturaPage({
                   ? [
                       initialPaymentHint.billingType,
                       initialPaymentHint.dueDate ?? "",
+                      initialPaymentHint.providerStatus ?? "",
                       initialPaymentHint.invoiceUrl ?? "",
                       initialPaymentHint.bankSlipUrl ?? "",
                       initialPaymentHint.pixCopiaECola ?? "",

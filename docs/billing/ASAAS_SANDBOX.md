@@ -82,6 +82,25 @@ Não persistir PAN/CVV. Persistência local: no máximo `cardMeta` (brand/last4)
 4. Vercel Production: envs sandbox + `BILLING_ASAAS_CHECKOUT_ENABLED=1`
 5. Redeploy
 
+## Datas na UI (semântica)
+
+| Rótulo | Fonte |
+|--------|-------|
+| Cobrança atual / vencimento | `payment.dueDate` da última cobrança criada |
+| Próxima renovação | `subscription.nextDueDate` → `current_period_end` |
+| Última cobrança criada | Card de resultado do checkout (não confundir com o seletor do formulário) |
+| Status | Status Asaas da cobrança (`PENDING`, `CONFIRMED`, …) amigável + técnico |
+
+Se as duas datas coincidem, a UI mostra só a cobrança atual e explica que a renovação ainda não diverge.
+
+## Webhook smoke
+
+```bash
+npm run test:phase33-4-webhook-smoke
+```
+
+Valida GET + rejeição 401 sem token / token inválido. Evento autenticado real continua via Asaas Sandbox → URL production.
+
 ## Go-live real
 
 **Não** nesta sprint. Ver `docs/billing/PILOT_BILLING_RUNBOOK.md`.

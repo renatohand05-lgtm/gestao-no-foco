@@ -398,11 +398,13 @@ export async function requestCheckoutAction(input: {
           : null,
       });
 
+      // dueDate da cobrança atual ≠ nextDueDate da assinatura (próxima renovação).
       let paymentHint = buildPaymentHint({
         requested: billingType,
         providerBillingType: asaasSub.billingType,
-        dueDate: asaasSub.nextDueDate ?? null,
+        dueDate: null,
         value: valueReais,
+        providerStatus: null,
       });
 
       try {
@@ -433,8 +435,9 @@ export async function requestCheckoutAction(input: {
             bankSlipUrl: matched.bankSlipUrl,
             pixQrCodeImage: pixQr,
             pixCopiaECola: pixPayload,
-            dueDate: matched.dueDate ?? asaasSub.nextDueDate ?? null,
+            dueDate: matched.dueDate ?? null,
             value: matched.value ?? valueReais,
+            providerStatus: matched.status ?? null,
           });
         }
       } catch {

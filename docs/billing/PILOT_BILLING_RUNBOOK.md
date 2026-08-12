@@ -1,14 +1,15 @@
-# Runbook — Billing piloto (Sprint 33.4 hotfix)
+# Runbook — Billing piloto (Sprint 33.4 fechamento)
 
 ## Status
 
 | Item | Estado |
 |------|--------|
-| Schema billing (33.3) | Aplicado em production |
+| Schema billing (33.3) | Aplicado |
 | Trial sem cartão | GO |
-| Adapter Asaas sandbox | Pronto (PIX / BOLETO / CREDIT_CARD tokenizado) |
-| Secrets Asaas no Vercel | Configurados (sandbox) — confirmar pós-deploy |
-| Bug PIX→UI BOLETO | **Corrigido no código** — revalidar smoke |
+| PIX / BOLETO / CARTÃO sandbox | Homologados manualmente |
+| Bug PIX→UI BOLETO | Corrigido |
+| Datas UI | Cobrança atual ≠ Próxima renovação (rótulos distintos) |
+| Webhook auth gate | Smoke PASS (`test:phase33-4-webhook-smoke`) |
 | Cobrança real | **OFF** |
 
 ## Credenciais (sandbox only)
@@ -22,31 +23,17 @@
 Webhook: `https://gestao-no-foco.vercel.app/api/billing/webhook`
 Header: `asaas-access-token`
 
-## Smoke sandbox (tenant de teste apenas)
+## Smoke pós-deploy (tenant teste)
 
-1. OWNER na empresa de teste → Assinatura
-2. **PIX:** método na UI = PIX; sem “Abrir boleto”; reload mantém PIX
-3. **BOLETO:** método = BOLETO; “Abrir boleto” só se Asaas devolver URL
-4. **Cartão (opcional):** usar cartão de teste Asaas; recusa não marca `active`
-5. Double-submit com mesma idempotency key → sem cobrança duplicada
-6. Trocar de empresa no switcher → customer/token isolados
+1. Confirmar card **Última cobrança criada** (método/valor/vencimento/status)
+2. Plano: **Cobrança atual / vencimento** e **Próxima renovação** sem ambiguidade
+3. PIX sem “Abrir boleto”; BOLETO/CARTÃO isolados
+4. Opcional: no painel Asaas Sandbox, reenviar `PAYMENT_RECEIVED` e conferir status da assinatura só via webhook
 
-## Cartão — decisão
+## Próxima sprint
 
-Tokenizar primeiro (`/v3/creditCard/tokenizeCreditCard`), depois subscription com `creditCardToken` + `remoteIp` do cliente.
-
-## O que NÃO fazer
-
-- Key / endpoint production
-- Cobrar cliente real
-- Alterar `apps/mobile`
-- Guardar PAN/CVV
-- Mascarar PIX como BOLETO
+33.5
 
 ## Rollback
 
-`BILLING_ASAAS_CHECKOUT_ENABLED=0` (mantém trial).
-
-## Go-live real (futuro)
-
-Ver checklist em `docs/billing/ASAAS_SANDBOX.md` — **não** executar nesta sprint.
+`BILLING_ASAAS_CHECKOUT_ENABLED=0`

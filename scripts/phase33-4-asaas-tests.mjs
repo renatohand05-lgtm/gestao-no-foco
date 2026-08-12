@@ -84,6 +84,42 @@ describe("33.4 payment-hint PIX≠BOLETO", () => {
     assert.equal(hint.divergence, true);
     assert.equal(hint.bankSlipUrl, null);
   });
+
+  it("PIX ≠ BOLETO ≠ CARTÃO e datas não ambíguas", async () => {
+    const mod = await import(
+      pathToFileURL(join(root, "lib/billing/payment-hint.ts")).href +
+        `?t=${Date.now() + 3}`
+    );
+    const pix = mod.buildPaymentHint({ requested: "PIX", providerBillingType: "PIX" });
+    const boleto = mod.buildPaymentHint({
+      requested: "BOLETO",
+      providerBillingType: "BOLETO",
+      bankSlipUrl: "https://b",
+    });
+    const card = mod.buildPaymentHint({
+      requested: "CREDIT_CARD",
+      providerBillingType: "CREDIT_CARD",
+      providerStatus: "PENDING",
+    });
+    assert.notEqual(pix.billingType, boleto.billingType);
+    assert.notEqual(pix.billingType, card.billingType);
+    assert.notEqual(boleto.billingType, card.billingType);
+    assert.equal(mod.methodDisplayLabel("CREDIT_CARD"), "CARTÃO");
+    assert.match(mod.formatProviderPaymentStatus("CONFIRMED"), /Confirmado \(CONFIRMED\)/);
+    const dates = mod.resolveBillingDateLabels({
+      currentChargeDue: "2026-08-13",
+      nextRenewal: "2026-09-13",
+    });
+    assert.equal(dates.currentChargeDue, "2026-08-13");
+    assert.equal(dates.nextRenewal, "2026-09-13");
+    assert.equal(dates.sameDate, false);
+    const same = mod.resolveBillingDateLabels({
+      currentChargeDue: "2026-08-13",
+      nextRenewal: "2026-08-13T23:59:59.000Z",
+    });
+    assert.equal(same.sameDate, true);
+    assert.equal(same.nextRenewal, null);
+  });
 });
 
 describe("33.4 pickPaymentForBillingType", () => {
@@ -240,20 +276,21 @@ describe("33.4 webhook + actions + card contracts", () => {
     assert.match(src, /maskDocument/);
   });
 
-  it("UI: PIX/BOLETO/Cartão; Abrir boleto só em BOLETO; sandbox; reload hint", () => {
+  it("UI: última cobrança + datas + status; Abrir boleto só em BOLETO", () => {
     const ui = read("components/billing/billing-actions-panel.tsx");
     assert.match(ui, /AMBIENTE DE TESTE \/ SANDBOX/);
-    assert.match(ui, /PIX/);
-    assert.match(ui, /BOLETO/);
+    assert.match(ui, /Última cobrança criada/);
+    assert.match(ui, /Vencimento atual/);
+    assert.match(ui, /formatProviderPaymentStatus/);
     assert.match(ui, /CREDIT_CARD/);
-    assert.match(ui, /initialPaymentHint/);
-    assert.match(ui, /Método:/);
     assert.match(ui, /billingType === "BOLETO" && paymentHint\.bankSlipUrl/);
     assert.match(ui, /Abrir boleto/);
     assert.doesNotMatch(ui, /localStorage\.|sessionStorage\./);
     const page = read("app/(app)/[tenant]/configuracoes/assinatura/page.tsx");
+    assert.match(page, /Próxima renovação/);
+    assert.match(page, /Cobrança atual \/ vencimento/);
+    assert.match(page, /resolveBillingDateLabels/);
     assert.match(page, /getLatestCheckoutForTenant/);
-    assert.match(page, /initialPaymentHint/);
   });
 
   it("cross-tenant: tokenização amarra customer do tenant", () => {

@@ -1,5 +1,6 @@
 # Sprint 33.8 — Asaas Production Readiness
 
+**Status 33.8:** READINESS. Provisionamento controlado: `docs/billing/ASAAS_PRODUCTION_PROVISIONING.md` (Sprint 33.9).  
 **Status desta sprint:** READINESS ONLY.  
 **ASAAS_ENV atual:** sandbox.  
 **BILLING_REAL_CHARGES_ENABLED:** OFF (fail-closed).  

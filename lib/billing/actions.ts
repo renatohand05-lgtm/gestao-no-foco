@@ -26,6 +26,7 @@ import {
   isAsaasSandbox,
   isBillingProviderConfigured,
   isRealChargesAuthorized,
+  isRealProductionChargeAllowed,
   listMissingAsaasCredentials,
 } from "@/lib/billing/config";
 import {
@@ -332,7 +333,7 @@ export async function requestCheckoutAction(input: {
       return { ok: false, code: priced.code, message: priced.message };
     }
     const valueReais = priced.valueReais;
-    if (!isAsaasSandbox() && !isRealChargesAuthorized()) {
+    if (!isAsaasSandbox() && !isRealProductionChargeAllowed()) {
       await updateCheckoutAttempt(supabase, attempt.id, {
         status: "failed",
         result_summary: {

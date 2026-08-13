@@ -15,6 +15,7 @@ export {
   isBillingEnforcementEnabled,
   isBillingProviderConfigured,
   isRealChargesAuthorized,
+  isRealProductionChargeAllowed,
   listMissingAsaasCredentials,
 } from "@/lib/billing/config";
 export {

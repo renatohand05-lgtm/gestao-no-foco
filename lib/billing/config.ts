@@ -5,8 +5,9 @@
  * Gates (fail-closed):
  * A) técnico: BILLING_PROVIDER=asaas + ASAAS_API_KEY + ASAAS_WEBHOOK_TOKEN
  * B) checkout sandbox: A + ASAAS_ENV=sandbox + BILLING_ASAAS_CHECKOUT_ENABLED=1
- * C) cobrança real: B-equivalente production + ASAAS_ALLOW_PRODUCTION=1
- *    + BILLING_REAL_CHARGES_ENABLED=1
+ * C) cobrança real: ASAAS_ENV=production + ASAAS_ALLOW_PRODUCTION=1
+ *    + BILLING_REAL_CHARGES_ENABLED=1 + checkout=1 + keys production distintas
+ * Nenhum gate isolado autoriza cobrança real.
  */
 
 export function isBillingEnforcementEnabled(): boolean {
@@ -146,7 +147,7 @@ export function isAsaasConfigured(): boolean {
 
 /**
  * Checkout Asaas só com provider asaas + secrets + opt-in.
- * Production exige ALLOW + REAL_CHARGES (fail-closed).
+ * Production exige a combinação completa (fail-closed).
  */
 export function isAsaasCheckoutEnabled(): boolean {
   if (!isAsaasConfigured()) return false;
@@ -157,9 +158,39 @@ export function isAsaasCheckoutEnabled(): boolean {
     return false;
   }
   if (getAsaasEnvMode() === "production") {
-    return isAsaasProductionAllowed() && isRealChargesAuthorized();
+    return isRealProductionChargeAllowed();
   }
   return true;
+}
+
+/**
+ * Cobrança real só com TODOS os gates. Qualquer um ausente = false.
+ * ASAAS_ENV=production sozinho: NÃO.
+ * BILLING_REAL_CHARGES_ENABLED sozinho: NÃO.
+ */
+export function isRealProductionChargeAllowed(): boolean {
+  if (getAsaasEnvMode() !== "production") return false;
+  if (!isAsaasProductionAllowed()) return false;
+  if (!isRealChargesAuthorized()) return false;
+  if (process.env.BILLING_ASAAS_CHECKOUT_ENABLED !== "1") return false;
+  if (!isAsaasConfigured()) return false;
+  try {
+    assertAsaasConfigConsistent();
+  } catch {
+    return false;
+  }
+  return Boolean(getAsaasApiKey() && getAsaasWebhookToken());
+}
+
+/** Presença de slots production (boolean). Nunca devolve o valor. */
+export function hasProductionCredentialSlots(): {
+  apiKey: boolean;
+  webhookToken: boolean;
+} {
+  return {
+    apiKey: Boolean(envTrim("ASAAS_API_KEY_PRODUCTION")),
+    webhookToken: Boolean(envTrim("ASAAS_WEBHOOK_TOKEN_PRODUCTION")),
+  };
 }
 
 export function isBillingProviderConfigured(): boolean {

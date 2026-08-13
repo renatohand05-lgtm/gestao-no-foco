@@ -4,11 +4,13 @@ import {
   getAsaasApiKey,
   getAsaasEnvMode,
   getAsaasWebhookToken,
+  hasProductionCredentialSlots,
   isAsaasCheckoutEnabled,
   isAsaasProductionAllowed,
   isAsaasSandbox,
   isBillingEnforcementEnabled,
   isRealChargesAuthorized,
+  isRealProductionChargeAllowed,
 } from "./config.ts";
 import { COMMERCIAL_CATALOG, SANDBOX_HOMOLOGATION_AMOUNT_CENTS } from "./catalog.ts";
 
@@ -27,6 +29,7 @@ export function auditProductionReadiness(): {
   asaasEnv: "sandbox" | "production";
   sandboxMode: boolean;
   realChargesAuthorized: boolean;
+  productionChargeAllowed: boolean;
   checkoutEnabled: boolean;
   enforcementEnabled: boolean;
   readyForRealMicrotransaction: boolean;
@@ -35,8 +38,10 @@ export function auditProductionReadiness(): {
   const asaasEnv = getAsaasEnvMode();
   const sandboxMode = isAsaasSandbox();
   const realChargesAuthorized = isRealChargesAuthorized();
+  const productionChargeAllowed = isRealProductionChargeAllowed();
   const checkoutEnabled = isAsaasCheckoutEnabled();
   const enforcementEnabled = isBillingEnforcementEnabled();
+  const slots = hasProductionCredentialSlots();
 
   let keyIsolationOk = true;
   let keyIsolationDetail = "Chaves sandbox e production não coincidem (ou production ausente).";
@@ -155,20 +160,31 @@ export function auditProductionReadiness(): {
     },
     {
       id: "checkout-sandbox-only",
-      ok: sandboxMode ? true : !checkoutEnabled || realChargesAuthorized,
+      ok: sandboxMode ? true : !checkoutEnabled || productionChargeAllowed,
       detail: sandboxMode
         ? checkoutEnabled
           ? "Checkout sandbox opt-in ativo (regressão técnica)."
           : "Checkout sandbox opt-in desligado."
-        : "Checkout production só com allow + real charges.",
+        : "Checkout production só com combinação completa de gates.",
+    },
+    {
+      id: "production-charge-combination",
+      ok: !productionChargeAllowed,
+      detail: productionChargeAllowed
+        ? "Cobrança real permitida pela combinação de gates."
+        : "Cobrança real bloqueada — combinação de gates incompleta (esperado).",
+    },
+    {
+      id: "production-slots-unused-in-sandbox",
+      ok: sandboxMode,
+      detail: sandboxMode
+        ? `Slots production no processo: apiKey=${slots.apiKey ? "presente" : "ausente"}, webhook=${slots.webhookToken ? "presente" : "ausente"} (sandbox não os usa).`
+        : "Modo production ativo.",
     },
   ];
 
   const readyForRealMicrotransaction = Boolean(
-    asaasEnv === "production" &&
-      isAsaasProductionAllowed() &&
-      realChargesAuthorized &&
-      checkoutEnabled &&
+    productionChargeAllowed &&
       productionKeyPresent &&
       productionTokenPresent &&
       keyIsolationOk &&
@@ -179,6 +195,7 @@ export function auditProductionReadiness(): {
     asaasEnv,
     sandboxMode,
     realChargesAuthorized,
+    productionChargeAllowed,
     checkoutEnabled,
     enforcementEnabled,
     readyForRealMicrotransaction,

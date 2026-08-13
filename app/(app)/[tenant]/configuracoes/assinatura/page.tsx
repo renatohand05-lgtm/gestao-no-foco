@@ -19,6 +19,7 @@ import {
 import { isBillingEnforcementEnabled } from "@/lib/billing/config";
 import type { PaymentHint } from "@/lib/billing/payment-hint";
 import { resolveBillingDateLabels } from "@/lib/billing/payment-hint";
+import { resolveCommercialLifecycle } from "@/lib/billing/status-guard";
 import { enrichPaymentHintFromProvider } from "@/lib/billing/enrich-payment-hint";
 import { getLatestCheckoutForTenant } from "@/lib/billing/repository";
 import { createClient } from "@/lib/supabase/server";
@@ -110,6 +111,10 @@ export default async function AssinaturaPage({
     currentChargeDue: initialPaymentHint?.dueDate,
     nextRenewal: sub?.currentPeriodEnd,
   });
+  const commercialLifecycle = resolveCommercialLifecycle({
+    subscriptionStatus: sub?.status ?? null,
+    checkoutCompleted: Boolean(initialPaymentHint),
+  });
 
   return (
     <div className="space-y-6">
@@ -165,6 +170,12 @@ export default async function AssinaturaPage({
             <p>
               <span className="text-muted-foreground">Status:</span>{" "}
               <span className="capitalize">{sub?.status ?? "—"}</span>
+              {commercialLifecycle === "pending" ? (
+                <span className="text-muted-foreground">
+                  {" "}
+                  · Aguardando confirmação do pagamento
+                </span>
+              ) : null}
             </p>
             {sub?.status === "trial" ? (
               <p>

@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  assertAsaasConfigConsistent,
   getAsaasApiBaseUrl,
   getAsaasApiKey,
   isAsaasConfigured,
@@ -37,6 +38,16 @@ export async function asaasRequest<T>(opts: AsaasRequestOptions): Promise<T> {
   const apiKey = getAsaasApiKey();
   if (!apiKey) {
     throw new AsaasApiError("ASAAS_API_KEY ausente", 503, "ASAAS_KEY_MISSING");
+  }
+
+  try {
+    assertAsaasConfigConsistent();
+  } catch (err) {
+    throw new AsaasApiError(
+      err instanceof Error ? err.message : "Configuração Asaas inconsistente.",
+      503,
+      "ASAAS_CONFIG_INCONSISTENT",
+    );
   }
 
   const base = getAsaasApiBaseUrl();

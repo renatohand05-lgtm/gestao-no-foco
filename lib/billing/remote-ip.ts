@@ -38,6 +38,22 @@ export async function resolveClientRemoteIp(): Promise<string> {
   );
 }
 
+/** Cartão em production exige HTTPS (Vercel/proxy). */
+export async function assertClientHttps(): Promise<void> {
+  const h = await headers();
+  const proto = (
+    h.get("x-forwarded-proto") ||
+    h.get("x-forwarded-protocol") ||
+    ""
+  )
+    .split(",")[0]
+    ?.trim()
+    .toLowerCase();
+  if (proto && proto !== "https") {
+    throw new Error("HTTPS_REQUIRED: checkout com cartão exige HTTPS.");
+  }
+}
+
 function firstForwarded(value: string | null): string | null {
   if (!value) return null;
   const first = value.split(",")[0]?.trim();

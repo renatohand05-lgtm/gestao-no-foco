@@ -22,6 +22,7 @@
 | `ASAAS_ALLOW_PRODUCTION` | ausente | `1` (só com autorização) |
 | `ASAAS_API_BASE_URL` | omitir / sandbox | omitir (default `https://api.asaas.com`) |
 | `BILLING_ASAAS_CHECKOUT_ENABLED` | `1` | `0` no primeiro deploy; `1` só após smoke |
+| `BILLING_REAL_CHARGES_ENABLED` | ausente | `1` só após confirmação humana |
 | `BILLING_PROVIDER` | `asaas` | `asaas` |
 | `BILLING_ENFORCEMENT` | off | off até decisão separada |
 

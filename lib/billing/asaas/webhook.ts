@@ -4,6 +4,10 @@ import { createHash } from "node:crypto";
 
 import { mapAsaasEventToInternalStatus } from "@/lib/billing/asaas/status-map";
 import type { AsaasWebhookPayload } from "@/lib/billing/asaas/types";
+import {
+  canApplyPaymentStatus,
+  canApplySubscriptionStatus,
+} from "@/lib/billing/status-guard";
 import type { BillingSubscriptionStatus } from "@/lib/billing/types";
 import { logger } from "@/lib/observability/logger";
 import type { createAdminClient } from "@/lib/supabase/admin";
@@ -185,6 +189,18 @@ export async function processAsaasWebhook(input: {
     return { ok: true, ignored: true, statusApplied: null };
   }
 
+  const currentStatus = current.status as BillingSubscriptionStatus;
+  if (!canApplySubscriptionStatus(currentStatus, mapped)) {
+    logger.info("billing.webhook.status_regression_blocked", {
+      requestId: input.requestId,
+      tenantId,
+      current: currentStatus,
+      ignored: mapped,
+      event,
+    });
+    return { ok: true, ignored: true, statusApplied: null };
+  }
+
   if (
     subId &&
     current.provider_subscription_id &&
@@ -273,6 +289,17 @@ async function syncLatestCheckoutPaymentStatus(input: {
       ? (summary.paymentHint as Record<string, unknown>)
       : null;
   if (!prevHint) return;
+
+  const currentPay = typeof prevHint.providerStatus === "string"
+    ? prevHint.providerStatus
+    : null;
+  if (!canApplyPaymentStatus(currentPay, input.paymentStatus)) {
+    logger.info("billing.webhook.payment_status_regression_blocked", {
+      requestId: input.requestId,
+      tenantId: input.tenantId,
+    });
+    return;
+  }
 
   const { error } = await input.admin
     .from("billing_checkout_attempts")

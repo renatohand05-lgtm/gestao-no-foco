@@ -1,6 +1,12 @@
 /**
- * Sprint 33.4 — config Asaas + billing (server-only).
+ * Config Asaas + billing (server-only).
  * Nenhuma secret com NEXT_PUBLIC_.
+ *
+ * Gates (fail-closed):
+ * A) técnico: BILLING_PROVIDER=asaas + ASAAS_API_KEY + ASAAS_WEBHOOK_TOKEN
+ * B) checkout sandbox: A + ASAAS_ENV=sandbox + BILLING_ASAAS_CHECKOUT_ENABLED=1
+ * C) cobrança real: B-equivalente production + ASAAS_ALLOW_PRODUCTION=1
+ *    + BILLING_REAL_CHARGES_ENABLED=1
  */
 
 export function isBillingEnforcementEnabled(): boolean {
@@ -28,17 +34,38 @@ export function isAsaasProductionAllowed(): boolean {
   return process.env.ASAAS_ALLOW_PRODUCTION === "1";
 }
 
+/**
+ * Gate C — cobrança real. Default OFF.
+ * Não confundir com checkout sandbox.
+ */
+export function isRealChargesAuthorized(): boolean {
+  return process.env.BILLING_REAL_CHARGES_ENABLED === "1";
+}
+
+function isProductionAsaasHost(url: string): boolean {
+  return /api\.asaas\.com/i.test(url) && !/sandbox/i.test(url);
+}
+
 export function getAsaasApiBaseUrl(): string {
   const override = process.env.ASAAS_API_BASE_URL?.trim();
   if (override) {
-    // Override só em sandbox path a menos que production liberada
-    if (
-      /api\.asaas\.com/i.test(override) &&
-      !/sandbox/i.test(override) &&
-      !isAsaasProductionAllowed()
-    ) {
+    if (isProductionAsaasHost(override) && !isAsaasProductionAllowed()) {
       throw new Error(
         "ASAAS_API_BASE_URL aponta para production sem ASAAS_ALLOW_PRODUCTION=1",
+      );
+    }
+    if (getAsaasEnvMode() === "sandbox" && isProductionAsaasHost(override)) {
+      throw new Error(
+        "ASAAS_ENV=sandbox não pode usar endpoint production. Sem fallback.",
+      );
+    }
+    if (
+      getAsaasEnvMode() === "production" &&
+      /sandbox/i.test(override) &&
+      isRealChargesAuthorized()
+    ) {
+      throw new Error(
+        "Cobrança real não pode usar endpoint sandbox. Configuração inconsistente.",
       );
     }
     return override.replace(/\/$/, "");
@@ -52,6 +79,21 @@ export function getAsaasApiBaseUrl(): string {
     return "https://api.asaas.com";
   }
   return "https://api-sandbox.asaas.com";
+}
+
+/**
+ * Falha fechada se sandbox/production misturados.
+ * Não faz fallback automático para produção.
+ */
+export function assertAsaasConfigConsistent(): void {
+  const mode = getAsaasEnvMode();
+  const base = getAsaasApiBaseUrl();
+  if (mode === "sandbox" && isProductionAsaasHost(base)) {
+    throw new Error("ASAAS_ENV=sandbox com host production — checkout bloqueado.");
+  }
+  if (mode === "production" && /sandbox/i.test(base)) {
+    throw new Error("ASAAS_ENV=production com host sandbox — configuração inválida.");
+  }
 }
 
 export function getAsaasApiKey(): string | null {
@@ -72,16 +114,16 @@ export function isAsaasConfigured(): boolean {
 }
 
 /**
- * Checkout Asaas só com provider asaas + secrets + sandbox (ou production liberada).
- * Default: não chama API se secrets ausentes.
+ * Checkout Asaas só com provider asaas + secrets + opt-in.
+ * Production exige ALLOW + REAL_CHARGES (fail-closed).
  */
 export function isAsaasCheckoutEnabled(): boolean {
   if (!isAsaasConfigured()) return false;
-  if (getAsaasEnvMode() === "production" && !isAsaasProductionAllowed()) {
-    return false;
+  if (process.env.BILLING_ASAAS_CHECKOUT_ENABLED !== "1") return false;
+  if (getAsaasEnvMode() === "production") {
+    return isAsaasProductionAllowed() && isRealChargesAuthorized();
   }
-  // Opt-in explícito para chamadas de criação (evita cobrança acidental)
-  return process.env.BILLING_ASAAS_CHECKOUT_ENABLED === "1";
+  return true;
 }
 
 export function isBillingProviderConfigured(): boolean {
@@ -120,7 +162,7 @@ export function getBillingWebhookSecret(): string | null {
   );
 }
 
-/** Lista exata do que Renato precisa configurar (sem inventar valores). */
+/** Lista exata do que falta (sem inventar valores). */
 export function listMissingAsaasCredentials(): string[] {
   const missing: string[] = [];
   if (getConfiguredBillingProvider() !== "asaas") {
@@ -128,9 +170,6 @@ export function listMissingAsaasCredentials(): string[] {
   }
   if (!getAsaasApiKey()) missing.push("ASAAS_API_KEY (sandbox)");
   if (!getAsaasWebhookToken()) missing.push("ASAAS_WEBHOOK_TOKEN");
-  if (!process.env.ASAAS_ENV) {
-    // não obrigatório (default sandbox), mas documentado
-  }
   if (process.env.BILLING_ASAAS_CHECKOUT_ENABLED !== "1") {
     missing.push("BILLING_ASAAS_CHECKOUT_ENABLED=1 (opt-in checkout sandbox)");
   }

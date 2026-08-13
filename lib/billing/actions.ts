@@ -25,16 +25,26 @@ import {
   isAsaasConfigured,
   isAsaasSandbox,
   isBillingProviderConfigured,
+  isRealChargesAuthorized,
   listMissingAsaasCredentials,
 } from "@/lib/billing/config";
+import {
+  isPlanSlugAuthorized,
+  rejectClientPriceFields,
+  resolveCheckoutAmount,
+} from "@/lib/billing/checkout-amount";
 import {
   buildPaymentHint,
   type PaymentHint,
 } from "@/lib/billing/payment-hint";
-import { resolveClientRemoteIp } from "@/lib/billing/remote-ip";
+import {
+  assertClientHttps,
+  resolveClientRemoteIp,
+} from "@/lib/billing/remote-ip";
 import {
   getPlanBySlug,
   getSubscriptionForTenant,
+  getSubscriptionWithPlan,
   linkProviderSubscription,
   markSubscriptionCanceled,
   recordCheckoutAttempt,
@@ -167,6 +177,17 @@ export async function requestCheckoutAction(input: {
       };
     }
 
+    const priceReject = rejectClientPriceFields(
+      input as unknown as Record<string, unknown>,
+    );
+    if (priceReject) {
+      return {
+        ok: false,
+        code: "PRICE_NOT_CLIENT_SETTABLE",
+        message: priceReject,
+      };
+    }
+
     const billingType = normalizeBillingType(input.billingType);
     if (!billingType) {
       return {
@@ -183,9 +204,26 @@ export async function requestCheckoutAction(input: {
       }
     }
 
-    const planSlug = (input.planSlug || PILOT_PLAN_SLUG).trim();
+    const requestedPlanSlug = (input.planSlug || PILOT_PLAN_SLUG).trim();
     const provider = getConfiguredBillingProvider();
     const supabase = await createClient();
+    const existingSub = await getSubscriptionForTenant(supabase, auth.tenant.id);
+    const tenantPlan = existingSub
+      ? (await getSubscriptionWithPlan(supabase, auth.tenant.id)).plan
+      : null;
+    if (
+      !isPlanSlugAuthorized({
+        requestedSlug: requestedPlanSlug,
+        tenantPlanSlug: tenantPlan?.slug ?? null,
+      })
+    ) {
+      return {
+        ok: false,
+        code: "PLAN_NOT_AUTHORIZED",
+        message: "Plano não autorizado para este tenant.",
+      };
+    }
+    const planSlug = requestedPlanSlug;
 
     logger.info("billing.checkout.started", {
       requestId,
@@ -193,6 +231,8 @@ export async function requestCheckoutAction(input: {
       provider,
       billingType,
       sandbox: isAsaasSandbox(),
+      realCharges: isRealChargesAuthorized(),
+      planSlug,
     });
 
     const { attempt, created } = await recordCheckoutAttempt({
@@ -264,10 +304,32 @@ export async function requestCheckoutAction(input: {
       return { ok: false, code: "PLAN_MISSING", message: "Plano não encontrado." };
     }
 
-    const valueReais =
-      plan.amountCents != null && plan.amountCents > 0
-        ? plan.amountCents / 100
-        : Number(process.env.BILLING_SANDBOX_AMOUNT || "19.9");
+    const priced = resolveCheckoutAmount(plan);
+    if (!priced.ok) {
+      await updateCheckoutAttempt(supabase, attempt.id, {
+        status: "failed",
+        result_summary: {
+          reason: priced.code,
+          requestedBillingType: billingType,
+        },
+      });
+      return { ok: false, code: priced.code, message: priced.message };
+    }
+    const valueReais = priced.valueReais;
+    if (!isAsaasSandbox() && !isRealChargesAuthorized()) {
+      await updateCheckoutAttempt(supabase, attempt.id, {
+        status: "failed",
+        result_summary: {
+          reason: "REAL_CHARGES_BLOCKED",
+          requestedBillingType: billingType,
+        },
+      });
+      return {
+        ok: false,
+        code: "REAL_CHARGES_BLOCKED",
+        message: "Cobrança real não autorizada (BILLING_REAL_CHARGES_ENABLED).",
+      };
+    }
 
     const email =
       input.customerEmail?.trim() ||
@@ -344,6 +406,9 @@ export async function requestCheckoutAction(input: {
       } | null = null;
 
       if (billingType === "CREDIT_CARD" && input.card) {
+        if (!isAsaasSandbox()) {
+          await assertClientHttps();
+        }
         remoteIp = await resolveClientRemoteIp();
         const tokenized = await tokenizeAsaasCreditCard({
           requestId,
@@ -471,6 +536,8 @@ export async function requestCheckoutAction(input: {
           billingType,
           subCreated,
           sandbox: isAsaasSandbox(),
+          amountSource: priced.source,
+          amountCents: priced.amountCents,
           note: "Assinatura criada no Asaas; status active só via webhook de pagamento.",
           paymentHint,
           // Somente metadados seguros do cartão (sem token longo se não necessário reuso imediato)

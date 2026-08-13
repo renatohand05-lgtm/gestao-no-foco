@@ -72,6 +72,10 @@
 | build | PASS |
 | `git diff --check` | PASS (warnings CRLF) |
 
+**Commit:** `ccef7b7ad480ef80ba8d238655d12e7930d2319b`  
+**HEAD == origin/main:** SIM  
+**Migration production:** NÃO EXECUTADA
+
 ## Backup / PITR
 
 **VERIFICAÇÃO MANUAL NECESSÁRIA** no painel Supabase (fora do repo).

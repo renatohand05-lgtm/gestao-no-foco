@@ -99,10 +99,6 @@ create policy "Owners e admins atualizam empresas"
   );
 
 -- Tenant members (sem policies recursivas)
-create policy "Usuários veem seus vínculos"
-  on public.tenant_members for select
-  using (auth.uid() = user_id);
-
-create policy "Usuário pode se vincular como owner ao criar empresa"
-  on public.tenant_members for insert
-  with check (auth.uid() = user_id);
+-- Sprint 34.2: self-join arbitrário removido.
+-- Criação de owner: RPC public.create_tenant_with_owner (ver migration 20260825).
+-- Policies finais de tenant_members estão em 20260825_phase34_2_p0_tenant_rls_hardening.sql.

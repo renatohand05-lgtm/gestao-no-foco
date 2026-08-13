@@ -4,7 +4,15 @@ import { redirect } from "next/navigation";
 import type { TenantRole } from "@/lib/constants";
 import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
+import { isActiveMembershipRow } from "@/lib/tenants/membership-status";
 import type { Tenant, TenantWithRole } from "@/types";
+
+type MembershipQueryRow = {
+  role: string;
+  tenant_id: string;
+  status?: string | null;
+  deactivated_at?: string | null;
+};
 
 export const getUserTenants = cache(async (): Promise<TenantWithRole[]> => {
   const supabase = await createClient();
@@ -16,12 +24,16 @@ export const getUserTenants = cache(async (): Promise<TenantWithRole[]> => {
 
   const { data: memberships } = await supabase
     .from("tenant_members")
-    .select("role, tenant_id")
+    .select("role, tenant_id, status, deactivated_at")
     .eq("user_id", user.id);
 
-  if (!memberships?.length) return [];
+  const active = ((memberships ?? []) as MembershipQueryRow[]).filter(
+    isActiveMembershipRow,
+  );
 
-  const tenantIds = memberships.map((membership) => membership.tenant_id);
+  if (!active.length) return [];
+
+  const tenantIds = active.map((membership) => membership.tenant_id);
 
   const { data: tenants } = await supabase
     .from("tenants")
@@ -32,7 +44,7 @@ export const getUserTenants = cache(async (): Promise<TenantWithRole[]> => {
 
   return tenants.map((tenant) => ({
     ...(tenant as Tenant),
-    role: memberships.find((membership) => membership.tenant_id === tenant.id)!
+    role: active.find((membership) => membership.tenant_id === tenant.id)!
       .role as TenantRole,
   }));
 });
@@ -58,8 +70,6 @@ export const requireTenant = cache(async (slug: string): Promise<TenantWithRole>
   const tenant = tenants.find((item) => item.slug === slug) ?? null;
 
   if (!tenant) {
-    // Sem membership neste slug: não abrir o tenant por URL.
-    // Se o usuário já tem empresas, vai para a autorizada; senão onboarding.
     logger.warn("tenant_context_denied", {
       attemptedSlug: slug,
       userId: user.id,

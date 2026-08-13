@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { TenantRole } from "@/lib/constants";
+import { isActiveMembershipRow } from "@/lib/tenants/membership-status";
 import type { Database } from "@/types/database";
 
 type MembershipRow = {
@@ -10,9 +11,7 @@ type MembershipRow = {
 };
 
 export function isInactiveMembership(membership: MembershipRow): boolean {
-  if (membership.deactivated_at) return true;
-  if (membership.status && membership.status !== "active") return true;
-  return false;
+  return !isActiveMembershipRow(membership);
 }
 
 export async function getActiveMembership(

@@ -2,7 +2,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getTenantSlugFromPath } from "@/lib/auth/routes";
 import { pickPreferredTenantSlug } from "@/lib/tenant/active-tenant";
+import { isActiveMembershipRow } from "@/lib/tenants/membership-status";
 import type { Database } from "@/types/database";
+
+type MembershipSlugRow = {
+  tenant_id: string;
+  status?: string | null;
+  deactivated_at?: string | null;
+};
 
 export async function getUserTenantSlugs(
   supabase: SupabaseClient<Database>,
@@ -10,12 +17,16 @@ export async function getUserTenantSlugs(
 ) {
   const { data: memberships } = await supabase
     .from("tenant_members")
-    .select("tenant_id")
+    .select("tenant_id, status, deactivated_at")
     .eq("user_id", userId);
 
-  if (!memberships?.length) return [];
+  const active = ((memberships ?? []) as MembershipSlugRow[]).filter(
+    isActiveMembershipRow,
+  );
 
-  const tenantIds = memberships.map((membership) => membership.tenant_id);
+  if (!active.length) return [];
+
+  const tenantIds = active.map((membership) => membership.tenant_id);
 
   const { data: tenants } = await supabase
     .from("tenants")

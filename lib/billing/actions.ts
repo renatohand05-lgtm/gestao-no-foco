@@ -33,6 +33,7 @@ import {
   rejectClientPriceFields,
   resolveCheckoutAmount,
 } from "@/lib/billing/checkout-amount";
+import { classifyPlanChange } from "@/lib/billing/plan-change";
 import {
   buildPaymentHint,
   type PaymentHint,
@@ -302,6 +303,21 @@ export async function requestCheckoutAction(input: {
         },
       });
       return { ok: false, code: "PLAN_MISSING", message: "Plano não encontrado." };
+    }
+    if (plan.status !== "active") {
+      await updateCheckoutAttempt(supabase, attempt.id, {
+        status: "failed",
+        result_summary: {
+          reason: "PLAN_INACTIVE",
+          requestedBillingType: billingType,
+          planSlug,
+        },
+      });
+      return {
+        ok: false,
+        code: "PLAN_INACTIVE",
+        message: "Plano inativo não pode ser usado no checkout.",
+      };
     }
 
     const priced = resolveCheckoutAmount(plan);
@@ -701,6 +717,54 @@ export async function cancelSubscriptionAction(
       ok: false,
       code: "BILLING_CANCEL_FAILED",
       message: "Falha ao cancelar assinatura.",
+    };
+  }
+}
+
+/**
+ * Upgrade/downgrade: registra intenção sem cobrar e sem apagar dados.
+ */
+export async function requestPlanChangeAction(input: {
+  tenantSlug: string;
+  targetPlanSlug: string;
+}): Promise<BillingActionResult> {
+  try {
+    const auth = await requireBillingPageAuth(input.tenantSlug);
+    if (!auth.canManage) {
+      return {
+        ok: false,
+        code: BILLING_ERROR_CODES.PERMISSION_DENIED,
+        message: "Apenas o OWNER pode solicitar troca de plano.",
+      };
+    }
+    const supabase = await createClient();
+    const { plan } = await getSubscriptionWithPlan(supabase, auth.tenant.id);
+    const decision = classifyPlanChange(
+      plan?.slug || "pilot",
+      input.targetPlanSlug,
+    );
+    logger.info("billing.plan_change.requested", {
+      tenantId: auth.tenant.id,
+      kind: decision.kind,
+      from: decision.from,
+      to: decision.to,
+      charges: false,
+    });
+    if (!decision.allowed) {
+      return { ok: false, code: "PLAN_CHANGE_NOT_ALLOWED", message: decision.message };
+    }
+    return {
+      ok: true,
+      message: decision.message,
+    };
+  } catch (err) {
+    if (err instanceof BillingError) {
+      return { ok: false, code: err.code, message: err.message };
+    }
+    return {
+      ok: false,
+      code: "PLAN_CHANGE_FAILED",
+      message: "Não foi possível registrar a troca de plano.",
     };
   }
 }

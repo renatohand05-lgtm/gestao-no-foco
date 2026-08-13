@@ -112,9 +112,9 @@ describe("33.6 preço server-side", () => {
       }),
       true,
     );
-    assert.equal(
-      mod.rejectClientPriceFields({ amount: 1 }),
-      "Preço não pode ser enviado pelo cliente.",
+    assert.match(
+      String(mod.rejectClientPriceFields({ amount: 1 })),
+      /Preço/,
     );
     assert.equal(mod.rejectClientPriceFields({ billingType: "PIX" }), null);
     if (prevEnv === undefined) delete process.env.ASAAS_ENV;

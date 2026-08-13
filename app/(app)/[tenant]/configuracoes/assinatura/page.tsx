@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { BillingActionsPanel } from "@/components/billing/billing-actions-panel";
+import { BillingCatalogPanel } from "@/components/billing/billing-catalog-panel";
 import { ModuleHeader } from "@/components/layout/module-header";
 import {
   Card,
@@ -162,6 +163,9 @@ export default async function AssinaturaPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
+            <p className="text-xs font-medium text-muted-foreground">
+              Seu plano atual
+            </p>
             <p>
               <span className="text-muted-foreground">Plano:</span>{" "}
               {plan?.name ?? "Nenhum"}
@@ -266,6 +270,23 @@ export default async function AssinaturaPage({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Planos disponíveis</CardTitle>
+          <CardDescription>
+            Catálogo comercial mensal (BRL). Checkout production e cobrança real
+            permanecem desligados.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <BillingCatalogPanel
+            tenantSlug={tenantSlug}
+            canManage={auth.canManage}
+            currentPlanSlug={plan?.slug ?? null}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

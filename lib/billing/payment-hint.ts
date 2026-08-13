@@ -92,7 +92,10 @@ export function formatProviderPaymentStatus(
   status: string | null | undefined,
 ): string {
   const s = (status || "").toUpperCase();
-  if (!s) return "—";
+  if (!s) {
+    // Sem fabricar CONFIRMED — só comunica ausência de confirmação do provider.
+    return "Aguardando confirmação do provedor";
+  }
   const map: Record<string, string> = {
     PENDING: "Pendente",
     AWAITING_PAYMENT: "Aguardando pagamento",

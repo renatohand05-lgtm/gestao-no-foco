@@ -123,6 +123,17 @@ export async function processAsaasWebhook(input: {
     hasTenant: Boolean(tenantId),
   });
 
+  // Atualiza status da última cobrança no checkout (não promove active sozinho).
+  if (tenantId && input.payload.payment?.status) {
+    await syncLatestCheckoutPaymentStatus({
+      admin: input.admin,
+      tenantId,
+      paymentStatus: String(input.payload.payment.status),
+      event,
+      requestId: input.requestId,
+    });
+  }
+
   const mapped = mapAsaasEventToInternalStatus({
     event,
     subscriptionStatus: input.payload.subscription?.status,
@@ -234,4 +245,62 @@ export async function processAsaasWebhook(input: {
   });
 
   return { ok: true, statusApplied: mapped };
+}
+
+async function syncLatestCheckoutPaymentStatus(input: {
+  admin: Admin;
+  tenantId: string;
+  paymentStatus: string;
+  event: string;
+  requestId: string;
+}) {
+  const { data: latest } = await input.admin
+    .from("billing_checkout_attempts")
+    .select("id, status, result_summary")
+    .eq("tenant_id", input.tenantId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!latest || latest.status !== "completed") return;
+
+  const summary =
+    latest.result_summary && typeof latest.result_summary === "object"
+      ? (latest.result_summary as Record<string, unknown>)
+      : {};
+  const prevHint =
+    summary.paymentHint && typeof summary.paymentHint === "object"
+      ? (summary.paymentHint as Record<string, unknown>)
+      : null;
+  if (!prevHint) return;
+
+  const { error } = await input.admin
+    .from("billing_checkout_attempts")
+    .update({
+      result_summary: {
+        ...summary,
+        paymentHint: {
+          ...prevHint,
+          providerStatus: input.paymentStatus.toUpperCase(),
+        },
+        lastWebhookEvent: input.event,
+        lastWebhookPaymentStatus: input.paymentStatus.toUpperCase(),
+      },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", latest.id)
+    .eq("tenant_id", input.tenantId);
+
+  if (error) {
+    logger.warn("billing.webhook.checkout_status_sync_failed", {
+      requestId: input.requestId,
+      tenantId: input.tenantId,
+    });
+    return;
+  }
+  logger.info("billing.webhook.checkout_status_synced", {
+    requestId: input.requestId,
+    tenantId: input.tenantId,
+    paymentStatus: input.paymentStatus.toUpperCase(),
+  });
 }

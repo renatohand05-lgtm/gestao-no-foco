@@ -19,6 +19,7 @@ import {
 import { isBillingEnforcementEnabled } from "@/lib/billing/config";
 import type { PaymentHint } from "@/lib/billing/payment-hint";
 import { resolveBillingDateLabels } from "@/lib/billing/payment-hint";
+import { enrichPaymentHintFromProvider } from "@/lib/billing/enrich-payment-hint";
 import { getLatestCheckoutForTenant } from "@/lib/billing/repository";
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,6 +75,13 @@ export default async function AssinaturaPage({
       const latest = await getLatestCheckoutForTenant(supabase, auth.tenant.id);
       if (latest?.status === "completed") {
         initialPaymentHint = parsePaymentHint(latest.result_summary);
+      }
+      if (view.subscription?.providerSubscriptionId && initialPaymentHint) {
+        initialPaymentHint = await enrichPaymentHintFromProvider({
+          providerSubscriptionId: view.subscription.providerSubscriptionId,
+          hint: initialPaymentHint,
+          tenantId: auth.tenant.id,
+        });
       }
     } catch {
       /* checkout history opcional */

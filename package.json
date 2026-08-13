@@ -545,7 +545,8 @@
     "test:phase33-6-pre-golive": "node --experimental-strip-types --test scripts/phase33-6-pre-golive-tests.mjs",
     "test:phase33-7-catalog": "node --experimental-strip-types --test scripts/phase33-7-catalog-tests.mjs",
     "test:phase33-8-readiness": "node --experimental-strip-types --test scripts/phase33-8-production-readiness-tests.mjs",
-    "test:phase33-9-provisioning": "node --experimental-strip-types --test scripts/phase33-9-provisioning-tests.mjs"
+    "test:phase33-9-provisioning": "node --experimental-strip-types --test scripts/phase33-9-provisioning-tests.mjs",
+    "test:phase33-10-cutover-prep": "node --experimental-strip-types --test scripts/phase33-10-cutover-prep-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

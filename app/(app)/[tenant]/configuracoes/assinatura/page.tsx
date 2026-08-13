@@ -18,6 +18,7 @@ import {
   requireBillingPageAuth,
 } from "@/lib/billing/auth";
 import { isBillingEnforcementEnabled } from "@/lib/billing/config";
+import { getBillingOperationalStatus } from "@/lib/billing/operational-status";
 import type { PaymentHint } from "@/lib/billing/payment-hint";
 import { resolveBillingDateLabels } from "@/lib/billing/payment-hint";
 import { resolveCommercialLifecycle } from "@/lib/billing/status-guard";
@@ -116,6 +117,7 @@ export default async function AssinaturaPage({
     subscriptionStatus: sub?.status ?? null,
     checkoutCompleted: Boolean(initialPaymentHint),
   });
+  const ops = getBillingOperationalStatus();
 
   return (
     <div className="space-y-6">
@@ -231,6 +233,18 @@ export default async function AssinaturaPage({
               <span className="text-muted-foreground">Enforcement:</span>{" "}
               {isBillingEnforcementEnabled() ? "ligado" : "desligado (piloto)"}
             </p>
+            {auth.canManage ? (
+              <p className="text-[11px] text-muted-foreground">
+                Operacional: env={ops.environment}
+                {" · "}checkout={ops.checkoutEnabled ? "on" : "off"}
+                {" · "}cobrança real={ops.realChargesEnabled ? "on" : "off"}
+                {" · "}key production=
+                {ops.productionApiKeyPresent ? "presente" : "ausente"}
+                {ops.productionApiKeyBlockedExternally
+                  ? " (bloqueio externo Asaas)"
+                  : ""}
+              </p>
+            ) : null}
             <p className="text-xs text-muted-foreground">
               past_due / canceled: não apagam tenant nem histórico. Grace period
               comercial ainda não definido — suporte técnico preparado.

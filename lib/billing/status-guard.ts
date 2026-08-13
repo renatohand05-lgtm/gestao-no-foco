@@ -60,3 +60,29 @@ export function resolveCommercialLifecycle(input: {
   }
   return input.subscriptionStatus;
 }
+
+export type WebhookApplyDecision =
+  | "duplicate"
+  | "ignore"
+  | "unknown"
+  | "apply"
+  | "regression_blocked";
+
+/**
+ * Replay/idempotência: evento duplicado não reaplica.
+ * Evento fora de ordem não rebaixa CONFIRMED/RECEIVED/active.
+ */
+export function decideWebhookApply(input: {
+  alreadyPersisted: boolean;
+  mapped: BillingSubscriptionStatus | "ignore" | "unknown";
+  current: BillingSubscriptionStatus | null;
+}): WebhookApplyDecision {
+  if (input.alreadyPersisted) return "duplicate";
+  if (input.mapped === "ignore") return "ignore";
+  if (input.mapped === "unknown") return "unknown";
+  if (!input.current) return "ignore";
+  if (!canApplySubscriptionStatus(input.current, input.mapped)) {
+    return "regression_blocked";
+  }
+  return "apply";
+}

@@ -5,6 +5,7 @@ import type {
   AsaasBillingType,
   AsaasSubscription,
 } from "@/lib/billing/asaas/types";
+import { BILLING_EVENTS, logBilling } from "@/lib/billing/observability";
 import { logger } from "@/lib/observability/logger";
 
 type ListResponse = {
@@ -163,6 +164,12 @@ export async function ensureAsaasSubscription(
     subscriptionId: created.id,
     tenantId: input.tenantId,
     billingType: input.billingType,
+  });
+  logBilling(BILLING_EVENTS.providerSubscriptionCreated, {
+    requestId: input.requestId,
+    tenantId: input.tenantId,
+    subscriptionId: created.id,
+    operation: "ensure_subscription",
   });
 
   return {

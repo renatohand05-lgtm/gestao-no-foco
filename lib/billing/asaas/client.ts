@@ -6,6 +6,7 @@ import {
   getAsaasApiKey,
   isAsaasConfigured,
 } from "@/lib/billing/config";
+import { BILLING_EVENTS, logBilling } from "@/lib/billing/observability";
 import { logger } from "@/lib/observability/logger";
 
 export class AsaasApiError extends Error {
@@ -61,7 +62,8 @@ export async function asaasRequest<T>(opts: AsaasRequestOptions): Promise<T> {
       "Content-Type": "application/json",
       Accept: "application/json",
       access_token: apiKey,
-      "User-Agent": "GestaoNoFoco/33.4",
+      "User-Agent": "GestaoNoFoco/33.10",
+      ...(opts.requestId ? { "x-request-id": opts.requestId } : {}),
     },
     body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
   });
@@ -89,6 +91,16 @@ export async function asaasRequest<T>(opts: AsaasRequestOptions): Promise<T> {
       status: res.status,
       code: errObj?.errors?.[0]?.code ?? null,
     });
+    logBilling(
+      BILLING_EVENTS.providerError,
+      {
+        requestId: opts.requestId,
+        operation: "asaas_request",
+        providerStatus: String(res.status),
+        reason: errObj?.errors?.[0]?.code || "ASAAS_HTTP",
+      },
+      "warn",
+    );
     throw new AsaasApiError(
       safeDesc,
       res.status,

@@ -167,7 +167,7 @@ describe("33.6 contracts", () => {
 
   it("webhook usa status-guard", () => {
     const wh = read("lib/billing/asaas/webhook.ts");
-    assert.match(wh, /canApplySubscriptionStatus/);
+    assert.match(wh, /canApplySubscriptionStatus|decideWebhookApply/);
     assert.match(wh, /canApplyPaymentStatus/);
     assert.match(wh, /status_regression_blocked/);
   });

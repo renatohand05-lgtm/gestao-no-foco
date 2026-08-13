@@ -29,6 +29,7 @@ import {
   isRealProductionChargeAllowed,
   listMissingAsaasCredentials,
 } from "@/lib/billing/config";
+import { BILLING_EVENTS, logBilling } from "@/lib/billing/observability";
 import {
   isPlanSlugAuthorized,
   rejectClientPriceFields,
@@ -236,6 +237,13 @@ export async function requestCheckoutAction(input: {
       realCharges: isRealChargesAuthorized(),
       planSlug,
     });
+    logBilling(BILLING_EVENTS.checkoutRequested, {
+      requestId,
+      tenantId: auth.tenant.id,
+      operation: "checkout",
+      sandbox: isAsaasSandbox(),
+      providerStatus: billingType,
+    });
 
     const { attempt, created } = await recordCheckoutAttempt({
       client: supabase,
@@ -277,6 +285,16 @@ export async function requestCheckoutAction(input: {
     }
 
     if (!isAsaasCheckoutEnabled()) {
+      logBilling(
+        BILLING_EVENTS.killSwitchTriggered,
+        {
+          requestId,
+          tenantId: auth.tenant.id,
+          operation: "checkout",
+          reason: "BILLING_ASAAS_CHECKOUT_ENABLED",
+        },
+        "warn",
+      );
       await updateCheckoutAttempt(supabase, attempt.id, {
         status: "ready",
         result_summary: {
@@ -334,6 +352,16 @@ export async function requestCheckoutAction(input: {
     }
     const valueReais = priced.valueReais;
     if (!isAsaasSandbox() && !isRealProductionChargeAllowed()) {
+      logBilling(
+        BILLING_EVENTS.billingGuardBlocked,
+        {
+          requestId,
+          tenantId: auth.tenant.id,
+          operation: "checkout",
+          reason: "REAL_CHARGES_BLOCKED",
+        },
+        "warn",
+      );
       await updateCheckoutAttempt(supabase, attempt.id, {
         status: "failed",
         result_summary: {
@@ -562,6 +590,23 @@ export async function requestCheckoutAction(input: {
             ? { brand: cardMeta.brand, last4: cardMeta.last4 }
             : undefined,
         },
+      });
+
+      logBilling(BILLING_EVENTS.checkoutCreated, {
+        requestId,
+        tenantId: auth.tenant.id,
+        operation: "checkout",
+        sandbox: isAsaasSandbox(),
+        customerId: customer.id,
+        subscriptionId: asaasSub.id,
+        providerStatus: paymentHint.providerStatus ?? null,
+      });
+      logBilling(BILLING_EVENTS.providerPaymentCreated, {
+        requestId,
+        tenantId: auth.tenant.id,
+        operation: "checkout",
+        subscriptionId: asaasSub.id,
+        providerStatus: paymentHint.providerStatus ?? null,
       });
 
       revalidatePath(`/${input.tenantSlug}/configuracoes/assinatura`);

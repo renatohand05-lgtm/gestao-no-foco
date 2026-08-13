@@ -121,3 +121,15 @@ Correlacionar: `requestId`, `tenantId`, `asaasSubscriptionId` / `asaasCustomerId
 | Não fazer | Apagar tenant/histórico/events |
 | Ação | Retry; se 404, confirmar `canceled` local |
 | Escalar | Provider inconsistente após retries |
+
+## L. API Key Production Asaas indisponível no painel
+
+**Código:** `ASAAS_PRODUCTION_API_KEY_BLOCKER`
+
+| | |
+|--|--|
+| Detectar | Integrações → Chaves de API → botão "Gerar chave de API" cinza/desabilitado |
+| Estado | Conta production aprovada; KYC GO; painel operacional; suporte Asaas acionado |
+| Não fazer | Workaround; reutilizar `ASAAS_API_KEY` sandbox; alterar Vercel; ligar `BILLING_REAL_CHARGES_ENABLED`; cutover |
+| Ação | Continuar sandbox. Aguardar desbloqueio oficial da geração de chave. Não colar keys no chat |
+| Escalar | Somente após o Asaas habilitar o botão | |

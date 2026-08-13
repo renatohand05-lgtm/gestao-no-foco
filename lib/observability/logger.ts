@@ -36,7 +36,8 @@ function shouldLog(level: LogLevel) {
 /** Remove chaves sensíveis de contextos de log. */
 export function sanitizeContext(context?: LogContext): LogContext | undefined {
   if (!context) return undefined;
-  const blocked = /password|secret|token|authorization|service_role|cookie|apikey/i;
+  const blocked =
+    /password|secret|token|authorization|service_role|cookie|apikey|api_key|access_token|pan|cvv|ccv|creditcard|credit_card|asaas_api/i;
   const out: LogContext = {};
   for (const [key, value] of Object.entries(context)) {
     if (blocked.test(key)) {

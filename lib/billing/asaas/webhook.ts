@@ -4,9 +4,10 @@ import { createHash } from "node:crypto";
 
 import { mapAsaasEventToInternalStatus } from "@/lib/billing/asaas/status-map";
 import type { AsaasWebhookPayload } from "@/lib/billing/asaas/types";
+import { BILLING_EVENTS, logBilling } from "@/lib/billing/observability";
 import {
   canApplyPaymentStatus,
-  canApplySubscriptionStatus,
+  decideWebhookApply,
 } from "@/lib/billing/status-guard";
 import type { BillingSubscriptionStatus } from "@/lib/billing/types";
 import { logger } from "@/lib/observability/logger";
@@ -109,12 +110,18 @@ export async function processAsaasWebhook(input: {
 
   if (insertErr) {
     if (insertErr.code === "23505") {
+      const eventIdHash = createHash("sha256")
+        .update(eventId)
+        .digest("hex")
+        .slice(0, 12);
       logger.info("billing.webhook.duplicate", {
         requestId: input.requestId,
-        eventIdHash: createHash("sha256")
-          .update(eventId)
-          .digest("hex")
-          .slice(0, 12),
+        eventIdHash,
+      });
+      logBilling(BILLING_EVENTS.webhookDuplicate, {
+        requestId: input.requestId,
+        eventIdHash,
+        operation: "webhook",
       });
       return { ok: true, duplicate: true };
     }
@@ -125,6 +132,12 @@ export async function processAsaasWebhook(input: {
     requestId: input.requestId,
     event,
     hasTenant: Boolean(tenantId),
+  });
+  logBilling(BILLING_EVENTS.webhookReceived, {
+    requestId: input.requestId,
+    tenantId: tenantId ?? undefined,
+    operation: "webhook",
+    providerStatus: input.payload.payment?.status ?? null,
   });
 
   // Atualiza status da última cobrança no checkout (não promove active sozinho).
@@ -190,7 +203,12 @@ export async function processAsaasWebhook(input: {
   }
 
   const currentStatus = current.status as BillingSubscriptionStatus;
-  if (!canApplySubscriptionStatus(currentStatus, mapped)) {
+  const decision = decideWebhookApply({
+    alreadyPersisted: false,
+    mapped,
+    current: currentStatus,
+  });
+  if (decision === "regression_blocked" || decision === "ignore") {
     logger.info("billing.webhook.status_regression_blocked", {
       requestId: input.requestId,
       tenantId,
@@ -258,6 +276,14 @@ export async function processAsaasWebhook(input: {
     tenantId,
     status: mapped,
     event,
+  });
+  logBilling(BILLING_EVENTS.billingStateChanged, {
+    requestId: input.requestId,
+    tenantId,
+    operation: "subscription_status",
+    providerStatus: mapped,
+    subscriptionId: current.id,
+    customerId: current.provider_customer_id,
   });
 
   return { ok: true, statusApplied: mapped };

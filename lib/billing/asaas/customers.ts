@@ -5,6 +5,7 @@ import type {
   AsaasCustomer,
   AsaasCustomerInput,
 } from "@/lib/billing/asaas/types";
+import { BILLING_EVENTS, logBilling } from "@/lib/billing/observability";
 import { logger } from "@/lib/observability/logger";
 
 type ListResponse = {
@@ -60,6 +61,12 @@ export async function ensureAsaasCustomer(input: {
     customerId: created.id,
     tenantId: ref,
     doc: maskDocument(input.customer.cpfCnpj),
+  });
+  logBilling(BILLING_EVENTS.providerCustomerCreated, {
+    requestId: input.requestId,
+    tenantId: ref,
+    customerId: created.id,
+    operation: "ensure_customer",
   });
 
   return { customer: created, created: true };

@@ -5,13 +5,17 @@ import { NextResponse, type NextRequest } from "next/server";
 import { processAsaasWebhook } from "@/lib/billing/asaas/webhook";
 import type { AsaasWebhookPayload } from "@/lib/billing/asaas/types";
 import {
-  getAsaasWebhookToken,
   getBillingWebhookSecret,
   getConfiguredBillingProvider,
   isAsaasConfigured,
   isAsaasSandbox,
   isBillingProviderConfigured,
 } from "@/lib/billing/config";
+import {
+  authenticateAsaasWebhookHeader,
+  readAsaasWebhookHeader,
+} from "@/lib/billing/webhook-auth";
+import { BILLING_EVENTS, logBilling } from "@/lib/billing/observability";
 import { logger } from "@/lib/observability/logger";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import type { Json } from "@/types/database";
@@ -24,16 +28,6 @@ function safeEqual(a: string, b: string) {
   const bb = Buffer.from(b);
   if (ba.length !== bb.length) return false;
   return timingSafeEqual(ba, bb);
-}
-
-function verifyAsaasToken(request: NextRequest, token: string): boolean {
-  const header =
-    request.headers.get("asaas-access-token") ||
-    request.headers.get("x-billing-webhook-secret") ||
-    request.headers.get("x-webhook-secret") ||
-    "";
-  if (!header) return false;
-  return safeEqual(header, token);
 }
 
 function sanitizeGeneric(body: unknown): Json {
@@ -60,7 +54,22 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-request-id") || crypto.randomUUID();
   const provider = getConfiguredBillingProvider();
 
-  if (!isBillingProviderConfigured()) {
+  if (provider === "none") {
+    logger.warn("billing.webhook.rejected", {
+      requestId,
+      reason: "PROVIDER_NOT_CONFIGURED",
+    });
+    return NextResponse.json(
+      {
+        ok: false,
+        code: "PROVIDER_NOT_CONFIGURED",
+        message: "Provedor de billing não configurado. Webhook inativo.",
+      },
+      { status: 503, headers: { "x-request-id": requestId } },
+    );
+  }
+
+  if (provider !== "asaas" && !isBillingProviderConfigured()) {
     logger.warn("billing.webhook.rejected", {
       requestId,
       reason: "PROVIDER_NOT_CONFIGURED",
@@ -96,10 +105,35 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // —— Asaas path ——
-  if (provider === "asaas" && isAsaasConfigured()) {
-    const token = getAsaasWebhookToken();
-    if (!token || !verifyAsaasToken(request, token)) {
+  // —— Asaas path (token do ambiente atual; sem fallback sandbox↔production) ——
+  if (provider === "asaas") {
+    const header = readAsaasWebhookHeader(request.headers);
+    const auth = authenticateAsaasWebhookHeader(header);
+    if (auth.reason === "missing_expected_token") {
+      logBilling(
+        BILLING_EVENTS.webhookRejected,
+        {
+          requestId,
+          reason: auth.reason,
+          operation: "webhook",
+        },
+        "warn",
+      );
+      return NextResponse.json(
+        { ok: false, code: "WEBHOOK_TOKEN_MISSING" },
+        { status: 503, headers: { "x-request-id": requestId } },
+      );
+    }
+    if (!auth.ok) {
+      logBilling(
+        BILLING_EVENTS.webhookRejected,
+        {
+          requestId,
+          reason: auth.reason,
+          operation: "webhook",
+        },
+        "warn",
+      );
       logger.warn("billing.webhook.rejected", {
         requestId,
         reason: "INVALID_SIGNATURE",
@@ -109,6 +143,11 @@ export async function POST(request: NextRequest) {
         { status: 401, headers: { "x-request-id": requestId } },
       );
     }
+    logBilling(BILLING_EVENTS.webhookAuthenticated, {
+      requestId,
+      operation: "webhook",
+      sandbox: isAsaasSandbox(),
+    });
 
     const admin = createAdminClient();
     try {

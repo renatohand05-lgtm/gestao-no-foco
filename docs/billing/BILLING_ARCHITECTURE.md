@@ -65,5 +65,6 @@ OWNER gerencia billing; member não inicia checkout.
 ## Docs
 
 - Suporte: `docs/billing/SUPPORT_RUNBOOK.md`
+- Readiness production 33.8 (não executar cobrança): `docs/billing/ASAAS_PRODUCTION_READINESS.md`
 - Ativação real (não executar): `docs/billing/PRODUCTION_ACTIVATION_RUNBOOK.md`
 - Piloto: `docs/billing/PILOT_BILLING_RUNBOOK.md`

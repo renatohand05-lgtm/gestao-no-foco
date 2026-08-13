@@ -543,7 +543,8 @@
     "test:phase33-4-webhook-smoke": "node scripts/phase33-4-webhook-smoke.mjs",
     "test:phase33-5-pilot": "node --experimental-strip-types --test scripts/phase33-5-pilot-readiness-tests.mjs",
     "test:phase33-6-pre-golive": "node --experimental-strip-types --test scripts/phase33-6-pre-golive-tests.mjs",
-    "test:phase33-7-catalog": "node --experimental-strip-types --test scripts/phase33-7-catalog-tests.mjs"
+    "test:phase33-7-catalog": "node --experimental-strip-types --test scripts/phase33-7-catalog-tests.mjs",
+    "test:phase33-8-readiness": "node --experimental-strip-types --test scripts/phase33-8-production-readiness-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

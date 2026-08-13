@@ -20,8 +20,10 @@ export function mapAsaasEventToInternalStatus(input: {
     case "PAYMENT_REFUNDED":
       return "canceled";
     case "PAYMENT_CREATED":
+    case "PAYMENT_UPDATED":
     case "PAYMENT_DELETED":
     case "PAYMENT_RESTORED":
+    case "PAYMENT_AWAITING_RISK_ANALYSIS":
       return "ignore";
     case "SUBSCRIPTION_CREATED":
       // Criação ≠ pagamento. Mantém trial/estado atual via ignore.

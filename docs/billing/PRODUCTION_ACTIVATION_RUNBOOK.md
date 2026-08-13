@@ -1,6 +1,6 @@
 # Runbook — Ativação Asaas PRODUCTION (NÃO EXECUTAR AGORA)
 
-**Status:** documentação apenas (Sprint 33.5).  
+**Status:** documentação apenas (Sprint 33.5). Readiness atual: `docs/billing/ASAAS_PRODUCTION_READINESS.md`.  
 **Estado atual obrigatório:** `ASAAS_ENV=sandbox`.  
 **Cobrança real:** NO-GO até autorização explícita.
 

@@ -1,5 +1,7 @@
 # Pré-produção comercial Asaas — Sprint 33.6
 
+Readiness 33.8: `docs/billing/ASAAS_PRODUCTION_READINESS.md`.
+
 **NÃO EXECUTAR ativação real nesta sprint.**  
 **ASAAS_ENV atual:** sandbox. **Cobrança real:** NO-GO.
 

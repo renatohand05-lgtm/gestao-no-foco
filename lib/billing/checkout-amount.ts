@@ -29,6 +29,18 @@ export function resolveCheckoutAmount(plan: BillingPlan): CheckoutAmountResult {
     };
   }
 
+  if (
+    (plan.isPilot || plan.slug === PILOT_PLAN_SLUG) &&
+    !isAsaasSandbox()
+  ) {
+    return {
+      ok: false,
+      code: "PILOT_NOT_IN_PRODUCTION",
+      message:
+        "Plano piloto/homologação não pode ser cobrado em production. R$ 19,90 não é preço comercial.",
+    };
+  }
+
   const commercial = getCommercialPlan(plan.slug);
   if (commercial) {
     return {

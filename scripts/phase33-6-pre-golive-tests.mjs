@@ -51,6 +51,13 @@ describe("33.6 production fail-closed", () => {
     assert.equal(mod.isAsaasCheckoutEnabled(), false, "sem REAL_CHARGES");
 
     process.env.BILLING_REAL_CHARGES_ENABLED = "1";
+    assert.equal(
+      mod.isAsaasCheckoutEnabled(),
+      false,
+      "production não reutiliza chave sandbox",
+    );
+    process.env.ASAAS_API_KEY_PRODUCTION = "prod-key-distinct";
+    process.env.ASAAS_WEBHOOK_TOKEN_PRODUCTION = "prod-wh-distinct";
     assert.equal(mod.isAsaasCheckoutEnabled(), true);
 
     process.env.ASAAS_ENV = "sandbox";
@@ -91,9 +98,14 @@ describe("33.6 preço server-side", () => {
     process.env.ASAAS_ENV = "production";
     const prod = mod.resolveCheckoutAmount(pilot);
     assert.equal(prod.ok, false);
-    assert.equal(prod.code, "COMMERCIAL_PRICE_UNDEFINED");
+    assert.equal(prod.code, "PILOT_NOT_IN_PRODUCTION");
 
-    const priced = mod.resolveCheckoutAmount({ ...pilot, amountCents: 4990 });
+    const priced = mod.resolveCheckoutAmount({
+      ...pilot,
+      slug: "custom",
+      isPilot: false,
+      amountCents: 4990,
+    });
     assert.equal(priced.ok, true);
     assert.equal(priced.valueReais, 49.9);
     assert.equal(priced.source, "plan");

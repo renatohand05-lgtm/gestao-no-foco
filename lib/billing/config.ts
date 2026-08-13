@@ -36,10 +36,36 @@ export function isAsaasProductionAllowed(): boolean {
 
 /**
  * Gate C — cobrança real. Default OFF.
- * Não confundir com checkout sandbox.
+ * Ausente, false, 0, true, yes ou qualquer valor ≠ "1" = OFF.
  */
 export function isRealChargesAuthorized(): boolean {
   return process.env.BILLING_REAL_CHARGES_ENABLED === "1";
+}
+
+function envTrim(name: string): string | null {
+  const v = process.env[name]?.trim();
+  return v || null;
+}
+
+/**
+ * Isolamento sandbox ≠ production.
+ * Production NUNCA reutiliza ASAAS_API_KEY / ASAAS_WEBHOOK_TOKEN sandbox.
+ */
+export function assertAsaasKeyIsolation(): void {
+  const sandboxKey = envTrim("ASAAS_API_KEY") || "";
+  const productionKey = envTrim("ASAAS_API_KEY_PRODUCTION") || "";
+  if (sandboxKey && productionKey && sandboxKey === productionKey) {
+    throw new Error(
+      "ASAAS_API_KEY_PRODUCTION não pode ser igual à chave sandbox.",
+    );
+  }
+  const sandboxToken = envTrim("ASAAS_WEBHOOK_TOKEN") || "";
+  const productionToken = envTrim("ASAAS_WEBHOOK_TOKEN_PRODUCTION") || "";
+  if (sandboxToken && productionToken && sandboxToken === productionToken) {
+    throw new Error(
+      "ASAAS_WEBHOOK_TOKEN_PRODUCTION não pode ser igual ao token sandbox.",
+    );
+  }
 }
 
 function isProductionAsaasHost(url: string): boolean {
@@ -86,6 +112,7 @@ export function getAsaasApiBaseUrl(): string {
  * Não faz fallback automático para produção.
  */
 export function assertAsaasConfigConsistent(): void {
+  assertAsaasKeyIsolation();
   const mode = getAsaasEnvMode();
   const base = getAsaasApiBaseUrl();
   if (mode === "sandbox" && isProductionAsaasHost(base)) {
@@ -97,13 +124,17 @@ export function assertAsaasConfigConsistent(): void {
 }
 
 export function getAsaasApiKey(): string | null {
-  const key = process.env.ASAAS_API_KEY?.trim();
-  return key || null;
+  if (getAsaasEnvMode() === "production") {
+    return envTrim("ASAAS_API_KEY_PRODUCTION");
+  }
+  return envTrim("ASAAS_API_KEY");
 }
 
 export function getAsaasWebhookToken(): string | null {
-  const t = process.env.ASAAS_WEBHOOK_TOKEN?.trim();
-  return t || null;
+  if (getAsaasEnvMode() === "production") {
+    return envTrim("ASAAS_WEBHOOK_TOKEN_PRODUCTION");
+  }
+  return envTrim("ASAAS_WEBHOOK_TOKEN");
 }
 
 export function isAsaasConfigured(): boolean {
@@ -120,6 +151,11 @@ export function isAsaasConfigured(): boolean {
 export function isAsaasCheckoutEnabled(): boolean {
   if (!isAsaasConfigured()) return false;
   if (process.env.BILLING_ASAAS_CHECKOUT_ENABLED !== "1") return false;
+  try {
+    assertAsaasConfigConsistent();
+  } catch {
+    return false;
+  }
   if (getAsaasEnvMode() === "production") {
     return isAsaasProductionAllowed() && isRealChargesAuthorized();
   }
@@ -168,8 +204,13 @@ export function listMissingAsaasCredentials(): string[] {
   if (getConfiguredBillingProvider() !== "asaas") {
     missing.push("BILLING_PROVIDER=asaas");
   }
-  if (!getAsaasApiKey()) missing.push("ASAAS_API_KEY (sandbox)");
-  if (!getAsaasWebhookToken()) missing.push("ASAAS_WEBHOOK_TOKEN");
+  if (getAsaasEnvMode() === "production") {
+    if (!getAsaasApiKey()) missing.push("ASAAS_API_KEY_PRODUCTION");
+    if (!getAsaasWebhookToken()) missing.push("ASAAS_WEBHOOK_TOKEN_PRODUCTION");
+  } else {
+    if (!getAsaasApiKey()) missing.push("ASAAS_API_KEY (sandbox)");
+    if (!getAsaasWebhookToken()) missing.push("ASAAS_WEBHOOK_TOKEN");
+  }
   if (process.env.BILLING_ASAAS_CHECKOUT_ENABLED !== "1") {
     missing.push("BILLING_ASAAS_CHECKOUT_ENABLED=1 (opt-in checkout sandbox)");
   }

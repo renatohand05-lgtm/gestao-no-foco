@@ -2,6 +2,7 @@
 
 **Data:** 2026-08-14  
 **Branch:** `main`  
+**Commit revisão (forma contextual):** `59b6363d31c3fd5b9ff94978655984b4d9be5945`  
 **Tipo:** UX/modelo Contas a Pagar — sem billing / Asaas / 33.11 / auto-migration prod  
 **34.8:** GO (beta controlado aguarda homologação desta melhoria)
 

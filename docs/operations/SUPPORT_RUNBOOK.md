@@ -75,8 +75,10 @@
 
 ### Billing sandbox visível
 
-- Esperado enquanto frozen.
+- No piloto (enforcement OFF + cobrança real OFF): UI de Assinatura **não** deve oferecer checkout sandbox como pagamento.
+- Esperado: mensagem de piloto sem cobrança real.
 - Não ativar Asaas production nem `BILLING_REAL_CHARGES_ENABLED`.
+- Ver [BETA_SCOPE.md](./BETA_SCOPE.md) e [FIRST_CLIENT_CHECKLIST.md](./FIRST_CLIENT_CHECKLIST.md).
 
 ## Quando escalar
 

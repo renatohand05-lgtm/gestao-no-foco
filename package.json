@@ -552,7 +552,8 @@
     "test:phase34-4-access-journey": "node --experimental-strip-types --test scripts/phase34-4-access-journey-tests.mjs",
     "test:phase34-5-pilot-ux": "node --experimental-strip-types --test scripts/phase34-5-pilot-ux-tests.mjs",
     "test:phase34-6-ops-readiness": "node --experimental-strip-types --test scripts/phase34-6-ops-readiness-tests.mjs",
-    "test:phase34-7-reports-integrity": "node --experimental-strip-types --test scripts/phase34-7-reports-integrity-tests.mjs"
+    "test:phase34-7-reports-integrity": "node --experimental-strip-types --test scripts/phase34-7-reports-integrity-tests.mjs",
+    "test:phase34-8-release-candidate": "node --experimental-strip-types --test scripts/phase34-8-release-candidate-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

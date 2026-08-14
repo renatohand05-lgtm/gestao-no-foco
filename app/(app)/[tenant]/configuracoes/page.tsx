@@ -104,7 +104,8 @@ export default async function ConfiguracoesPage({
           <CardHeader>
             <CardTitle>Assinatura</CardTitle>
             <CardDescription>
-              Plano, trial e status comercial desta empresa
+              Plano comercial desta empresa. No piloto, cobrança online não
+              está ativa.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

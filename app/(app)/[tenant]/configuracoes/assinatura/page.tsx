@@ -17,7 +17,7 @@ import {
   loadBillingView,
   requireBillingPageAuth,
 } from "@/lib/billing/auth";
-import { isBillingEnforcementEnabled } from "@/lib/billing/config";
+import { isBillingEnforcementEnabled, isRealChargesAuthorized } from "@/lib/billing/config";
 import { getBillingOperationalStatus } from "@/lib/billing/operational-status";
 import type { PaymentHint } from "@/lib/billing/payment-hint";
 import { resolveBillingDateLabels } from "@/lib/billing/payment-hint";
@@ -118,6 +118,9 @@ export default async function AssinaturaPage({
     checkoutCompleted: Boolean(initialPaymentHint),
   });
   const ops = getBillingOperationalStatus();
+  /** Piloto/beta: cobrança real OFF e enforcement OFF — não expor checkout sandbox ao cliente. */
+  const pilotBillingFrozen =
+    !isBillingEnforcementEnabled() && !isRealChargesAuthorized();
 
   return (
     <div className="space-y-6">
@@ -130,7 +133,13 @@ export default async function AssinaturaPage({
         ]}
       />
 
-      {auth.isSandbox ? (
+      {pilotBillingFrozen ? (
+        <FeedbackMessage variant="info">
+          Piloto sem cobrança real. Pagamentos online não estão ativos. O uso do
+          produto não depende de checkout neste momento — suporte define o plano
+          comercial manualmente.
+        </FeedbackMessage>
+      ) : auth.isSandbox ? (
         <FeedbackMessage variant="warning">
           AMBIENTE DE TESTE / SANDBOX — cobranças Asaas, se ativadas, não são
           production.
@@ -143,12 +152,10 @@ export default async function AssinaturaPage({
         </FeedbackMessage>
       ) : null}
 
-      {!auth.providerConfigured ? (
+      {!pilotBillingFrozen && !auth.providerConfigured ? (
         <FeedbackMessage variant="info">
-          Asaas ainda não configurado no servidor. Configure:{" "}
-          {auth.missingCredentials.join(", ") ||
-            "BILLING_PROVIDER, ASAAS_API_KEY, ASAAS_WEBHOOK_TOKEN"}
-          . Trial sem cartão permanece disponível.
+          Cobrança online ainda não configurada no servidor. Trial sem cartão
+          permanece disponível quando habilitado.
         </FeedbackMessage>
       ) : null}
 
@@ -170,12 +177,14 @@ export default async function AssinaturaPage({
             </p>
             <p>
               <span className="text-muted-foreground">Plano:</span>{" "}
-              {plan?.name ?? "Nenhum"}
+              {plan?.name ?? (pilotBillingFrozen ? "Piloto (manual)" : "Nenhum")}
               {plan?.isPilot ? " (piloto interno)" : ""}
             </p>
             <p>
               <span className="text-muted-foreground">Status:</span>{" "}
-              <span className="capitalize">{sub?.status ?? "—"}</span>
+              <span className="capitalize">
+                {sub?.status ?? (pilotBillingFrozen ? "piloto" : "—")}
+              </span>
               {commercialLifecycle === "pending" ? (
                 <span className="text-muted-foreground">
                   {" "}
@@ -212,28 +221,30 @@ export default async function AssinaturaPage({
                 renovação do ciclo ainda não diverge no provedor.
               </p>
             ) : null}
-            <p>
-              <span className="text-muted-foreground">Provedor:</span>{" "}
-              {sub?.provider ?? auth.provider}
-              {auth.providerConfigured ? "" : " (não configurado)"}
-            </p>
-            {sub?.providerCustomerId ? (
+            {!pilotBillingFrozen ? (
+              <p>
+                <span className="text-muted-foreground">Provedor:</span>{" "}
+                {sub?.provider ?? auth.provider}
+                {auth.providerConfigured ? "" : " (não configurado)"}
+              </p>
+            ) : null}
+            {!pilotBillingFrozen && sub?.providerCustomerId ? (
               <p>
                 <span className="text-muted-foreground">Customer:</span>{" "}
                 <code className="text-xs">{sub.providerCustomerId}</code>
               </p>
             ) : null}
-            {sub?.providerSubscriptionId ? (
+            {!pilotBillingFrozen && sub?.providerSubscriptionId ? (
               <p>
                 <span className="text-muted-foreground">Subscription:</span>{" "}
                 <code className="text-xs">{sub.providerSubscriptionId}</code>
               </p>
             ) : null}
             <p>
-              <span className="text-muted-foreground">Enforcement:</span>{" "}
-              {isBillingEnforcementEnabled() ? "ligado" : "desligado (piloto)"}
+              <span className="text-muted-foreground">Cobrança real:</span>{" "}
+              {isRealChargesAuthorized() ? "autorizada" : "desligada (piloto)"}
             </p>
-            {auth.canManage ? (
+            {!pilotBillingFrozen && auth.canManage ? (
               <p className="text-[11px] text-muted-foreground">
                 Operacional: env={ops.environment}
                 {" · "}checkout={ops.checkoutEnabled ? "on" : "off"}
@@ -256,31 +267,41 @@ export default async function AssinaturaPage({
           <CardHeader>
             <CardTitle>Gerenciar</CardTitle>
             <CardDescription>
-              Checkout server-side. Status active só via webhook confiável.
+              {pilotBillingFrozen
+                ? "Checkout online não faz parte do piloto atual."
+                : "Checkout server-side. Status active só via webhook confiável."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <BillingActionsPanel
-              key={
-                initialPaymentHint
-                  ? [
-                      initialPaymentHint.billingType,
-                      initialPaymentHint.dueDate ?? "",
-                      initialPaymentHint.providerStatus ?? "",
-                      initialPaymentHint.invoiceUrl ?? "",
-                      initialPaymentHint.bankSlipUrl ?? "",
-                      initialPaymentHint.pixCopiaECola ?? "",
-                    ].join("|")
-                  : "no-hint"
-              }
-              tenantSlug={tenantSlug}
-              canManage={auth.canManage}
-              hasSubscription={Boolean(sub)}
-              providerConfigured={auth.providerConfigured}
-              subscriptionStatus={sub?.status ?? null}
-              isSandbox={auth.isSandbox}
-              initialPaymentHint={initialPaymentHint}
-            />
+            {pilotBillingFrozen ? (
+              <p className="text-sm text-muted-foreground">
+                Não há pagamento PIX, boleto ou cartão neste piloto. Dúvidas de
+                plano: fale com o suporte responsável — não use telas de
+                sandbox como cobrança real.
+              </p>
+            ) : (
+              <BillingActionsPanel
+                key={
+                  initialPaymentHint
+                    ? [
+                        initialPaymentHint.billingType,
+                        initialPaymentHint.dueDate ?? "",
+                        initialPaymentHint.providerStatus ?? "",
+                        initialPaymentHint.invoiceUrl ?? "",
+                        initialPaymentHint.bankSlipUrl ?? "",
+                        initialPaymentHint.pixCopiaECola ?? "",
+                      ].join("|")
+                    : "no-hint"
+                }
+                tenantSlug={tenantSlug}
+                canManage={auth.canManage}
+                hasSubscription={Boolean(sub)}
+                providerConfigured={auth.providerConfigured}
+                subscriptionStatus={sub?.status ?? null}
+                isSandbox={auth.isSandbox}
+                initialPaymentHint={initialPaymentHint}
+              />
+            )}
           </CardContent>
         </Card>
       </div>
@@ -289,16 +310,25 @@ export default async function AssinaturaPage({
         <CardHeader>
           <CardTitle>Planos disponíveis</CardTitle>
           <CardDescription>
-            Catálogo comercial mensal (BRL). Checkout production e cobrança real
-            permanecem desligados.
+            {pilotBillingFrozen
+              ? "Referência comercial. Nenhuma cobrança é iniciada nesta tela no piloto."
+              : "Catálogo comercial mensal (BRL). Checkout production e cobrança real permanecem desligados."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <BillingCatalogPanel
-            tenantSlug={tenantSlug}
-            canManage={auth.canManage}
-            currentPlanSlug={plan?.slug ?? null}
-          />
+          {pilotBillingFrozen ? (
+            <BillingCatalogPanel
+              tenantSlug={tenantSlug}
+              canManage={false}
+              currentPlanSlug={plan?.slug ?? null}
+            />
+          ) : (
+            <BillingCatalogPanel
+              tenantSlug={tenantSlug}
+              canManage={auth.canManage}
+              currentPlanSlug={plan?.slug ?? null}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

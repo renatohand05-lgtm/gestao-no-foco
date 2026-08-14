@@ -550,7 +550,8 @@
     "test:phase34-2-p0-tenant-rls": "node --experimental-strip-types --test scripts/phase34-2-p0-tenant-rls-tests.mjs",
     "test:phase34-3-p1-mutation-auth": "node --experimental-strip-types --test scripts/phase34-3-p1-mutation-auth-tests.mjs",
     "test:phase34-4-access-journey": "node --experimental-strip-types --test scripts/phase34-4-access-journey-tests.mjs",
-    "test:phase34-5-pilot-ux": "node --experimental-strip-types --test scripts/phase34-5-pilot-ux-tests.mjs"
+    "test:phase34-5-pilot-ux": "node --experimental-strip-types --test scripts/phase34-5-pilot-ux-tests.mjs",
+    "test:phase34-6-ops-readiness": "node --experimental-strip-types --test scripts/phase34-6-ops-readiness-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

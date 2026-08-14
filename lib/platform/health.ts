@@ -1,5 +1,5 @@
 /**
- * Health / status do sistema — Sprint 13.21.
+ * Health / status do sistema — Sprint 13.21 / reforço 34.6.
  * Somente leitura; sem expor secrets.
  */
 
@@ -26,8 +26,13 @@ export type SystemStatus = {
   version: string;
   env: string;
   maintenance: boolean;
+  /** Billing permanece frozen — apenas estado seguro (sem secrets). */
+  billing: {
+    frozen: true;
+    realChargesAuthorized: false;
+    asaasEnv: "sandbox" | "unknown";
+  };
   uptimeSeconds: number;
-  node: string;
   at: string;
   checks: HealthCheckResult["checks"];
 };
@@ -40,6 +45,15 @@ export function getAppVersion(): string {
 
 export function getRuntimeEnv(): string {
   return process.env.VERCEL_ENV || process.env.NODE_ENV || "development";
+}
+
+function billingPublicState(): SystemStatus["billing"] {
+  const asaas = (process.env.ASAAS_ENV || "sandbox").toLowerCase();
+  return {
+    frozen: true,
+    realChargesAuthorized: false,
+    asaasEnv: asaas === "production" ? "unknown" : "sandbox",
+  };
 }
 
 export async function probeSupabase(): Promise<{
@@ -64,7 +78,6 @@ export async function probeSupabase(): Promise<{
     });
     clearTimeout(timeout);
     const ms = Date.now() - started;
-    // Alguns projetos não expõem /auth/v1/health — 404 ainda prova conectividade DNS/TLS
     if (res.ok || res.status === 404) {
       return { ok: true, ms };
     }
@@ -84,6 +97,9 @@ export async function buildHealthCheck(): Promise<HealthCheckResult> {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
+  const serviceRoleConfigured = Boolean(
+    (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim(),
+  );
 
   const checks: HealthCheckResult["checks"] = {
     env: { ok: envOk, detail: envOk ? "configured" : "missing_supabase_env" },
@@ -92,13 +108,23 @@ export async function buildHealthCheck(): Promise<HealthCheckResult> {
       ms: supabase.ms,
       detail: supabase.detail,
     },
+    serviceRole: {
+      ok: serviceRoleConfigured,
+      detail: serviceRoleConfigured ? "configured" : "missing",
+    },
   };
 
-  const allOk = Object.values(checks).every((c) => c.ok);
+  const criticalOk = checks.env.ok && checks.supabase.ok;
   const anyOk = Object.values(checks).some((c) => c.ok);
 
   return {
-    status: allOk ? "ok" : anyOk ? "degraded" : "down",
+    status: criticalOk
+      ? checks.serviceRole.ok
+        ? "ok"
+        : "degraded"
+      : anyOk
+        ? "degraded"
+        : "down",
     checks,
     at: new Date().toISOString(),
     version: getAppVersion(),
@@ -116,8 +142,8 @@ export async function buildSystemStatus(
     version: health.version,
     env: health.env,
     maintenance,
+    billing: billingPublicState(),
     uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
-    node: process.version,
     at: health.at,
     checks: health.checks,
   };

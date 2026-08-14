@@ -1,9 +1,9 @@
 /**
- * Mapeia erros técnicos (PostgREST / Postgres) para mensagens úteis ao usuário.
+ * Mapeia erros técnicos (PostgREST / Postgres / rede) para mensagens úteis ao usuário.
  * Mantém log técnico no servidor — nunca transforma falha estrutural em sucesso.
  */
 
-import { logger } from "@/lib/observability/logger";
+import { logger } from "../observability/logger.ts";
 
 export function mapDatabaseErrorToUserMessage(
   error: unknown,
@@ -19,33 +19,56 @@ export function mapDatabaseErrorToUserMessage(
   const message = raw.toLowerCase();
 
   if (
+    message.includes("failed to fetch") ||
+    message.includes("networkerror") ||
+    message.includes("fetch failed")
+  ) {
+    return "Falha de comunicação com o servidor. Verifique a conexão e tente novamente.";
+  }
+
+  if (message.includes("pgrst116") || message.includes("results contain 0 rows")) {
+    return "Registro não encontrado ou sem permissão para visualizar.";
+  }
+
+  if (message.includes("timeout") || message.includes("aborted")) {
+    return "A operação demorou demais. Tente novamente em instantes.";
+  }
+
+  if (
     (message.includes("could not find") && message.includes("column")) ||
     (message.includes("column") && message.includes("schema cache"))
   ) {
-    return "O cadastro está temporariamente desatualizado no servidor (coluna ausente). Peça ao administrador para aplicar as migrations pendentes e recarregar o schema.";
+    return "O cadastro está temporariamente desatualizado no servidor. Peça ao administrador para aplicar as atualizações pendentes.";
   }
 
   if (message.includes("column") && message.includes("does not exist")) {
-    return "Estrutura do banco incompleta para esta operação. Verifique se as migrations recentes foram aplicadas no Supabase.";
+    return "Estrutura do banco incompleta para esta operação. Verifique se as atualizações recentes foram aplicadas.";
   }
 
   if (message.includes("relation") && message.includes("does not exist")) {
-    return "Tabela necessária não encontrada no banco. Verifique as migrations pendentes.";
+    return "Recurso necessário não encontrado no banco. Verifique atualizações pendentes.";
   }
 
   if (message.includes("duplicate key") || message.includes("23505")) {
-    return "Já existe um registro com os mesmos dados únicos neste tenant.";
+    return "Já existe um registro com os mesmos dados nesta empresa.";
   }
 
-  if (message.includes("row-level security") || message.includes("42501")) {
-    return "Você não tem permissão para esta operação neste tenant.";
+  if (
+    message.includes("row-level security") ||
+    message.includes("42501") ||
+    message.includes("permission denied")
+  ) {
+    return "Você não tem permissão para esta operação nesta empresa.";
   }
 
   if (message.includes("jwt") || message.includes("not authenticated")) {
     return "Sessão expirada. Faça login novamente.";
   }
 
-  // Mantém mensagem de negócio já amigável (duplicidade, validação etc.)
+  if (message.includes("500") && message.includes("internal")) {
+    return fallback;
+  }
+
   if (
     raw.includes("Possível duplicidade") ||
     raw.includes("não pode") ||
@@ -55,8 +78,11 @@ export function mapDatabaseErrorToUserMessage(
     return raw;
   }
 
-  // Evita vazar JSON bruto / stacks
-  if (raw.trim().startsWith("{") || raw.includes("\n    at ")) {
+  if (
+    raw.trim().startsWith("{") ||
+    raw.includes("\n    at ") ||
+    /^PGRST\d+/i.test(raw.trim())
+  ) {
     return fallback;
   }
 

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getPostLoginPath } from "@/lib/auth/redirect";
+import { logger } from "@/lib/observability/logger";
 
 /**
  * Usar apenas em contextos server-side onde a sessão já está nos cookies
@@ -16,8 +17,8 @@ export async function getAuthRedirectPath(redirectTo?: string | null) {
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.error(error);
-    throw new Error(error.message);
+    logger.exception("auth.getAuthRedirectPath", error, { domain: "auth" });
+    throw new Error("Não foi possível validar a sessão. Faça login novamente.");
   }
 
   if (!user) {

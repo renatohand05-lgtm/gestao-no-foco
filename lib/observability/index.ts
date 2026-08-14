@@ -97,4 +97,10 @@ export {
 
 /** Legado Sprint 13.21 — mantido. */
 export { logger, sanitizeContext, type LogLevel, type LogContext } from "./logger.ts";
+export {
+  CORRELATION_ID_HEADER,
+  REQUEST_ID_HEADER,
+  requestIdHeaders,
+  resolveRequestId,
+} from "./request-id.ts";
 export { withTiming, createRequestTimer } from "./perf.ts";

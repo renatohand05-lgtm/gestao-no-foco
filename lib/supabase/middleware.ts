@@ -64,7 +64,9 @@ export async function updateSession(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
   if (isOperationalApi) {
-    return NextResponse.next({ request });
+    const response = NextResponse.next({ request });
+    response.headers.set("x-request-id", requestId);
+    return response;
   }
 
   const env = getSupabaseEnv();

@@ -1,6 +1,7 @@
 /**
- * Logger centralizado — Sprint 13.21.
+ * Logger centralizado — Sprint 13.21 / reforço 34.6.
  * Estruturado, sem PII/secrets. Pronto para hook futuro (Sentry etc.).
+ * Não criar conta Sentry automaticamente nesta sprint.
  */
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -11,6 +12,7 @@ type LogEntry = {
   level: LogLevel;
   message: string;
   at: string;
+  env?: string;
   context?: LogContext;
 };
 
@@ -20,6 +22,9 @@ const LEVEL_ORDER: Record<LogLevel, number> = {
   warn: 30,
   error: 40,
 };
+
+const SENSITIVE_KEY =
+  /password|passwd|secret|token|authorization|service_role|cookie|apikey|api[_-]?key|access[_-]?token|refresh[_-]?token|bearer|pan|cvv|ccv|credit[_-]?card|card[_-]?number|asaas[_-]?api|webhook[_-]?secret|private[_-]?key|session/i;
 
 function minLevel(): LogLevel {
   const raw = (process.env.LOG_LEVEL || "").toLowerCase();
@@ -33,24 +38,45 @@ function shouldLog(level: LogLevel) {
   return LEVEL_ORDER[level] >= LEVEL_ORDER[minLevel()];
 }
 
-/** Remove chaves sensíveis de contextos de log. */
-export function sanitizeContext(context?: LogContext): LogContext | undefined {
-  if (!context) return undefined;
-  const blocked =
-    /password|secret|token|authorization|service_role|cookie|apikey|api_key|access_token|pan|cvv|ccv|creditcard|credit_card|asaas_api/i;
+function runtimeEnvLabel(): string {
+  return process.env.VERCEL_ENV || process.env.NODE_ENV || "development";
+}
+
+function looksLikeSecretValue(value: string): boolean {
+  if (/^Bearer\s+/i.test(value)) return true;
+  if (/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/.test(value)) return true; // JWT-ish
+  if (/sk_(live|test)_/i.test(value)) return true;
+  if (/service_role/i.test(value) && value.length > 40) return true;
+  return false;
+}
+
+function sanitizeValue(value: unknown, depth = 0): unknown {
+  if (depth > 4) return "[truncated]";
+  if (value == null) return value;
+  if (typeof value === "string") {
+    if (looksLikeSecretValue(value)) return "[redacted]";
+    if (value.length > 500) return `${value.slice(0, 500)}…`;
+    return value;
+  }
+  if (typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    return value.slice(0, 20).map((item) => sanitizeValue(item, depth + 1));
+  }
   const out: LogContext = {};
-  for (const [key, value] of Object.entries(context)) {
-    if (blocked.test(key)) {
+  for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+    if (SENSITIVE_KEY.test(key)) {
       out[key] = "[redacted]";
       continue;
     }
-    if (typeof value === "string" && value.length > 500) {
-      out[key] = `${value.slice(0, 500)}…`;
-      continue;
-    }
-    out[key] = value;
+    out[key] = sanitizeValue(nested, depth + 1);
   }
   return out;
+}
+
+/** Remove chaves/valores sensíveis de contextos de log (recursivo). */
+export function sanitizeContext(context?: LogContext): LogContext | undefined {
+  if (!context) return undefined;
+  return sanitizeValue(context) as LogContext;
 }
 
 function emit(level: LogLevel, message: string, context?: LogContext) {
@@ -59,6 +85,7 @@ function emit(level: LogLevel, message: string, context?: LogContext) {
     level,
     message,
     at: new Date().toISOString(),
+    env: runtimeEnvLabel(),
     context: sanitizeContext(context),
   };
   const line = JSON.stringify(entry);

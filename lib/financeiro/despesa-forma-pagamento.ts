@@ -27,7 +27,6 @@ export type FormaPagamentoMatchable = {
 const PESSOAL: FormaPagamentoPreferenciaKey[] = [
   "pix",
   "transferencia",
-  "ted",
   "deposito",
   "dinheiro",
   "debito_conta",
@@ -37,8 +36,7 @@ const PRESTADOR_ALUGUEL: FormaPagamentoPreferenciaKey[] = [
   "pix",
   "transferencia",
   "boleto",
-  "debito_conta",
-  "dinheiro",
+  "debito_automatico",
 ];
 
 const UTILIDADES: FormaPagamentoPreferenciaKey[] = [
@@ -154,7 +152,9 @@ export function formaMatchesPreferencia(
       return (
         tipo === "cartao_credito" ||
         tipo === "cartao_debito" ||
-        /cartao/.test(nome)
+        /cartao/.test(nome) ||
+        nome === "credito" ||
+        nome === "debito"
       );
     case "guia":
       return (
@@ -164,11 +164,13 @@ export function formaMatchesPreferencia(
         /\bgps\b/.test(nome)
       );
     case "transferencia":
-      if (/\bted\b/.test(nome) || /deposito/.test(nome)) return false;
+      // TED é tratado como transferência (sem opção DOC).
+      if (/deposito/.test(nome)) return false;
       return (
         tipo === "transferencia" ||
         /transferencia/.test(nome) ||
-        /\btransf\b/.test(nome)
+        /\btransf\b/.test(nome) ||
+        /\bted\b/.test(nome)
       );
     default:
       return false;

@@ -25,6 +25,11 @@ import {
 import { buildContaPagarPayload } from "@/lib/financeiro/mappers";
 import { normalizeRateioLines } from "@/lib/financeiro/conta-pagar-rateio";
 import {
+  missingContasPagarFormas,
+  type FormaPagamentoExisting,
+} from "@/lib/financeiro/formas-pagamento-catalog";
+import { formatFormaPagamentoLabel } from "@/lib/financeiro/payment-method-label";
+import {
   baixarContaPagarAtomico,
   estornarMovimentacaoBancariaAtomico,
 } from "@/lib/financeiro/movimentacao-bancaria-rpc";
@@ -975,6 +980,12 @@ export class ContaPagarService {
   }
 
   async listFormasPagamento(): Promise<FormaPagamentoOption[]> {
+    try {
+      await this.ensureContasPagarFormasCatalog();
+    } catch {
+      // Sem permissão de escrita ou corrida: segue com o que já existe no tenant.
+    }
+
     const { data, error } = await this.supabase
       .from("formas_pagamento")
       .select("id, nome, tipo")
@@ -985,7 +996,51 @@ export class ContaPagarService {
 
     if (error) throw new Error(error.message);
 
-    return (data ?? []) as FormaPagamentoOption[];
+    const rows = (data ?? []) as FormaPagamentoExisting[];
+    return rows.map((row) => ({
+      id: row.id,
+      nome: formatFormaPagamentoLabel({
+        nome: row.nome,
+        tipo: row.tipo,
+      }),
+      tipo: row.tipo ?? null,
+    }));
+  }
+
+  /**
+   * Garante catálogo mínimo CAP no tenant (idempotente).
+   * Não apaga/renomeia CREDITO/DEBITO/DINHEIRO/PIX legados — só completa faltantes.
+   */
+  async ensureContasPagarFormasCatalog(): Promise<void> {
+    const { data, error } = await this.supabase
+      .from("formas_pagamento")
+      .select("id, nome, tipo")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null);
+
+    if (error) throw new Error(error.message);
+
+    const existing = (data ?? []) as FormaPagamentoExisting[];
+    const missing = missingContasPagarFormas(existing);
+    if (missing.length === 0) return;
+
+    const payload = missing.map((item) => ({
+      tenant_id: this.tenantId,
+      nome: item.nome,
+      tipo: item.tipo,
+      ativo: true,
+      gera_financeiro: true,
+      dias_compensacao: 0,
+    }));
+
+    const { error: insertError } = await this.supabase
+      .from("formas_pagamento")
+      .insert(payload);
+
+    // Corrida / unique: outro request pode ter inserido — listagem seguinte cobre.
+    if (insertError && insertError.code !== "23505") {
+      throw new Error(insertError.message);
+    }
   }
 
   async listCategorias(): Promise<CategoriaFinanceiraOption[]> {

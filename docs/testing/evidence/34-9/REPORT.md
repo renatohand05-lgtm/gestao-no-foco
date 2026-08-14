@@ -2,119 +2,65 @@
 
 **Data:** 2026-08-14  
 **Branch:** `main`  
-**Commit revisão (forma contextual):** `59b6363d31c3fd5b9ff94978655984b4d9be5945`  
 **Tipo:** UX/modelo Contas a Pagar — sem billing / Asaas / 33.11 / auto-migration prod  
 **34.8:** GO (beta controlado aguarda homologação desta melhoria)
 
 ## Status
 
-**SPRINT 34.9: GO (código)** — migration production **PENDING** · homologação manual **PENDING**
+**SPRINT 34.9: GO (código)** — migrations production **PENDING** · homologação manual **PENDING**
 
-### Revisão pós-homologação (forma contextual)
+### Correção de homologação — forma de pagamento
 
-Lançamento rápido agora **sugere/prioriza** formas de pagamento do tenant conforme o tipo de despesa.
-Sem migration nova. Reutiliza `formas_pagamento.tipo` + match de nome. DOC não é incentivado.
+**NO-GO manual** identificado: select mostrava só `CREDITO` / `DEBITO` / `DINHEIRO` / `PIX`.
+
+#### CAUSA RAIZ
+
+O select de Nova conta **não** usa enum hardcoded. A fonte real é:
+
+`nova/page.tsx` → `ContaPagarService.listFormasPagamento()` → tabela `formas_pagamento` (tenant).
+
+A sugestão contextual só **reordena** linhas existentes. Em production o tenant só tinha 4 formas legadas em caixa alta — por isso Boleto / Transferência / Débito automático / Depósito **não apareciam**. Testes anteriores validavam ranking puro, não a fonte real do catálogo.
+
+#### Correção
+
+1. Catálogo mínimo CAP (`lib/financeiro/formas-pagamento-catalog.ts`)
+2. `ensureContasPagarFormasCatalog()` no `listFormasPagamento` (idempotente; não apaga legado)
+3. Labels amigáveis via `formatFormaPagamentoLabel` (CREDITO → Cartão de crédito, etc.)
+4. Migration aditiva `20260828_phase34_9_formas_pagamento_catalog.sql` para backfill de todos os tenants
 
 ## Decisão arquitetural
 
 | Opção | Decisão |
 |---|---|
 | Empurrar mecânicos/equipe em `fornecedores` | **Não** |
-| Tabela única party polimórfica | **Não** (neste sprint) |
 | `financeiro_beneficiarios` + tipagem em CAP | **Sim** |
-| Preservar `fornecedor_id` + `fornecedor_nome` | **Sim** (legado) |
-| Novos enums/colunas de forma de pagamento | **Não** — match em catálogo existente |
-
-### Modelo
-
-- **Fornecedor** → `fornecedor_id` (compras)
-- **Mecânico** → `mecanico_id` + nome em `fornecedor_nome` (display)
-- **Funcionário/vendedor** → `beneficiario_profile_id` + nome display
-- **Prestador/locador/concessionária/governo/outro** → `financeiro_beneficiarios` + `beneficiario_id`
-- **Nome livre** → `fornecedor_nome` (lançamento pontual)
-- **`beneficiario_tipo`** tipifica o pagamento
-
-Display em listagens continua usando `resolveFornecedorNome` (rótulo UI: **Beneficiário**).
-
-### Presets
-
-Templates em `lib/financeiro/despesa-presets.ts` — resolvem categoria/plano por match de nome/`dre_linha` no catálogo do tenant. **Não inventam IDs.** Se faltar: “Pendente de classificação”.
+| Preservar `fornecedor_id` + `fornecedor_nome` | **Sim** |
+| Hardcode de formas no select | **Não** — tabela `formas_pagamento` |
+| Completar catálogo faltante | **Sim** (ensure + migration) |
 
 ### Forma de pagamento contextual
 
-`lib/financeiro/despesa-forma-pagamento.ts`:
+Preset **sugere**; usuário altera. Sem acoplar à DRE.
 
-| Grupo de despesa | Prioridade sugerida (se existir no tenant) |
-|---|---|
-| Salários / pró-labore / comissões | PIX → transferência → TED → depósito → dinheiro → débito em conta |
-| Prestadores / aluguel | PIX → transferência → boleto → débito em conta → dinheiro |
-| Energia / água / internet / telefone / condomínio | Boleto → PIX → débito automático → cartão |
-| Contabilidade / royalties / marketing / software | PIX → transferência → boleto → cartão → débito automático |
-| Combustível / material / manutenção / frete | PIX → cartão → boleto → transferência → dinheiro |
-| Impostos / taxas | PIX → guia/código de barras → débito em conta → transferência |
+## Migrations
 
-- Apenas **sugestão**; usuário pode alterar.
-- Seleção manual é preservada ao trocar preset (não sobrescreve).
-- Sem acoplamento com DRE/categoria — `forma_pagamento_id` continua operacional.
-- Listagem de CAP passa a carregar `tipo` só para ranquear opções.
+1. `supabase/migrations/20260827_phase34_9_contas_pagar_beneficiarios.sql` — beneficiários
+2. `supabase/migrations/20260828_phase34_9_formas_pagamento_catalog.sql` — catálogo formas
 
-### Recorrência
-
-Já existe `despesas_recorrentes` — **não** geramos títulos futuros novos nesta sprint. UX de CAP aponta classificação; motor complexo fora de escopo.
-
-### Folha / comissão
-
-Sem cálculo de encargos ou comissão automática.
-
-## Migration
-
-`supabase/migrations/20260827_phase34_9_contas_pagar_beneficiarios.sql`
-
-- Aditiva, idempotente, sem DELETE
-- RLS finance helpers 33.1 quando existirem
-- **PRODUCTION: NÃO EXECUTADA** — Renato aplica após revisão
-
-**Forma contextual:** **NENHUMA** migration adicional.
-
-Fallback de insert no service: se colunas 34.9 ausentes, grava legado (`fornecedor_*`) para não quebrar ambientes sem migration.
+**PRODUCTION: NÃO EXECUTADAS automaticamente** — Renato aplica após revisão.
 
 ## Testes
 
 `npm run test:phase34-9-contas-pagar-beneficiarios`
+Inclui prova da fonte real do select + catálogo a partir do legado CREDITO/DEBITO/DINHEIRO/PIX.
 
-## Homologação manual (após migration)
+## Homologação manual (após migrations)
 
-1. Salário → mecânico ou equipe + conferir forma sugerida (PIX/transf se cadastradas)
-2. Prestador (cadastro rápido) + forma sugerida
-3. Aluguel → locador
-4. Energia → concessionária + boleto/PIX priorizados
-5. Água
-6. Royalties
-7. Marketing
-8. Fornecedor tradicional
-9. Troca de empresa (isolamento)
-10. Mobile web
-11. Alterar manualmente a forma sugerida e salvar
-
-**Não** lançar despesas reais de cliente beta sem necessidade.
-
-## Critérios
-
-| Item | Status |
-|---|---|
-| BENEFICIÁRIO | **PASS** |
-| FORNECEDOR | **PASS** |
-| FUNCIONÁRIO/EQUIPE | **PASS** (lista se RLS permitir; senão nome livre) |
-| MECÂNICO | **PASS** |
-| PRESTADOR | **PASS** |
-| BENEFICIÁRIO LIVRE | **PASS** |
-| SALÁRIOS / ALUGUEL / ENERGIA / ÁGUA / ROYALTIES / MARKETING | **PASS** (presets + forma) |
-| FORMA PAGAMENTO CONTEXTUAL | **PASS** (sugestão; sem migration) |
-| DRE / PLANO / CATEGORIA | **PASS** (mapping existente + pendência honesta) |
-| CENTRO / RATEIO | **PASS** (preservados) |
-| TENANT / CROSS / RBAC | **PASS** (contratos) |
-| LEGACY | **PASS** |
-| MOBILE | **PARTIAL** (layout chips + selects + optgroups) |
+1. Nova conta → select deve listar Transferência, Boleto, Débito automático, Depósito (além das legadas com label amigável)
+2. Salários → prioriza PIX / Transferência
+3. Energia → prioriza Boleto / PIX / Débito automático
+4. Alterar forma manualmente e salvar
+5. Demais itens do smoke 34.9 (beneficiário, tenant, mobile)
 
 ## Billing
 
@@ -122,4 +68,4 @@ Fallback de insert no service: se colunas 34.9 ausentes, grava legado (`forneced
 
 ## Próxima ação
 
-Renato: (1) aplicar `20260827_phase34_9_contas_pagar_beneficiarios.sql` se ainda não aplicou; (2) smoke checklist incluindo forma sugerida por despesa e alteração manual.
+Renato: aplicar **as duas** migrations 34.9 em production (se 20260827 ainda não); abrir Nova conta e validar o select completo + sugestão por preset.

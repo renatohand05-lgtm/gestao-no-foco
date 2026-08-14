@@ -6,7 +6,7 @@
 
 const CANONICAL: Record<string, string> = {
   dinheiro: "Dinheiro",
-  pix: "Pix",
+  pix: "PIX",
   cartao_credito: "Cartão de crédito",
   cartao_debito: "Cartão de débito",
   boleto: "Boleto",
@@ -16,6 +16,9 @@ const CANONICAL: Record<string, string> = {
   crediario: "Crediário",
   outro: "Outro",
   outros: "Outros",
+  // Legado em caixa alta / códigos curtos
+  credito: "Cartão de crédito",
+  debito: "Cartão de débito",
 };
 
 export function getPaymentMethodLabel(code: string | null | undefined): string {

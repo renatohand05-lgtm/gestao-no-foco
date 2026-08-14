@@ -25,13 +25,18 @@ describe("34.9 migration + schema contracts", () => {
     assert.ok(!/\bDROP TABLE\b/i.test(sql));
   });
 
-  it("forma contextual não exige migration nova", () => {
-    const formaMod = read("lib/financeiro/despesa-forma-pagamento.ts");
-    assert.match(formaMod, /suggestFormaPagamentoId/);
-    assert.match(formaMod, /DESPESA_FORMA_PREFERENCIAS/);
-    assert.ok(!formaMod.includes("create table"));
-    const service = read("lib/financeiro/conta-pagar-service.ts");
-    assert.match(service, /select\("id, nome, tipo"\)/);
+  it("migration catálogo formas CAP é aditiva e preserva legado", () => {
+    const path =
+      "supabase/migrations/20260828_phase34_9_formas_pagamento_catalog.sql";
+    assert.ok(existsSync(join(root, path)));
+    const sql = read(path);
+    assert.match(sql, /Transferência bancária/);
+    assert.match(sql, /Boleto/);
+    assert.match(sql, /Débito automático/);
+    assert.match(sql, /Depósito bancário/);
+    assert.match(sql, /credito/);
+    assert.ok(!/\bDELETE FROM\b/i.test(sql));
+    assert.ok(!/\bDROP TABLE\b/i.test(sql));
   });
 });
 
@@ -192,6 +197,102 @@ describe("34.9 forma de pagamento contextual", () => {
     assert.match(fields, /mecanico_id/);
     assert.match(fields, /beneficiario_profile_id/);
     assert.match(fields, /Não cria fornecedor/);
+  });
+});
+
+describe("34.9 fonte REAL do select Forma de pagamento", () => {
+  it("Nova conta carrega formas via listFormasPagamento (tabela formas_pagamento)", () => {
+    const nova = read(
+      "app/(app)/[tenant]/financeiro/contas-pagar/nova/page.tsx",
+    );
+    assert.match(nova, /listFormasPagamento/);
+    assert.match(nova, /formasPagamento=\{formasPagamento\}/);
+    assert.doesNotMatch(nova, /CREDITO.*DEBITO.*DINHEIRO/);
+    assert.doesNotMatch(nova, /VENDA_FORMA_PAGAMENTO_OPTIONS/);
+
+    const service = read("lib/financeiro/conta-pagar-service.ts");
+    assert.match(service, /ensureContasPagarFormasCatalog/);
+    assert.match(service, /\.from\("formas_pagamento"\)/);
+    assert.match(service, /formatFormaPagamentoLabel/);
+    assert.match(service, /missingContasPagarFormas/);
+  });
+
+  it("catálogo CAP completa boleto/transferência/débito automático sem apagar legado", async () => {
+    const {
+      missingContasPagarFormas,
+      CONTAS_PAGAR_FORMAS_CATALOG,
+      CONTAS_PAGAR_FORMAS_UI_LABELS_REQUIRED,
+    } = await import(
+      pathToFileURL(join(root, "lib/financeiro/formas-pagamento-catalog.ts"))
+        .href + `?t=${Date.now()}`
+    );
+
+    const legacyOnly = [
+      { id: "1", nome: "CREDITO", tipo: "cartao_credito" },
+      { id: "2", nome: "DEBITO", tipo: "cartao_debito" },
+      { id: "3", nome: "DINHEIRO", tipo: "dinheiro" },
+      { id: "4", nome: "PIX", tipo: "pix" },
+    ];
+    const missing = missingContasPagarFormas(legacyOnly);
+    const keys = missing.map((m) => m.key);
+    assert.ok(keys.includes("transferencia"));
+    assert.ok(keys.includes("boleto"));
+    assert.ok(keys.includes("debito_automatico"));
+    assert.ok(keys.includes("deposito"));
+    assert.ok(!keys.includes("pix"));
+    assert.ok(!keys.includes("cartao_credito"));
+    assert.ok(!keys.includes("dinheiro"));
+    assert.ok(!CONTAS_PAGAR_FORMAS_CATALOG.some((c) => /doc/i.test(c.nome)));
+    assert.ok(CONTAS_PAGAR_FORMAS_UI_LABELS_REQUIRED.includes("Boleto"));
+    assert.ok(
+      CONTAS_PAGAR_FORMAS_UI_LABELS_REQUIRED.includes("Transferência bancária"),
+    );
+  });
+
+  it("labels amigáveis para CREDITO/DEBITO/DINHEIRO/PIX", async () => {
+    const { formatFormaPagamentoLabel } = await import(
+      pathToFileURL(join(root, "lib/financeiro/payment-method-label.ts"))
+        .href + `?t=${Date.now()}`
+    );
+    assert.equal(
+      formatFormaPagamentoLabel({ nome: "CREDITO", tipo: "cartao_credito" }),
+      "Cartão de crédito",
+    );
+    assert.equal(
+      formatFormaPagamentoLabel({ nome: "DEBITO", tipo: "cartao_debito" }),
+      "Cartão de débito",
+    );
+    assert.equal(
+      formatFormaPagamentoLabel({ nome: "DINHEIRO", tipo: "dinheiro" }),
+      "Dinheiro",
+    );
+    assert.equal(
+      formatFormaPagamentoLabel({ nome: "PIX", tipo: "pix" }),
+      "PIX",
+    );
+  });
+
+  it("com catálogo completo, salário sugere PIX e energia sugere boleto; manual permanece possível", async () => {
+    const { suggestFormaPagamentoId, resolveFormasForPreset } = await import(
+      pathToFileURL(join(root, "lib/financeiro/despesa-forma-pagamento.ts"))
+        .href + `?t=${Date.now()}`
+    );
+    const full = [
+      { id: "pix", nome: "PIX", tipo: "pix" },
+      { id: "tr", nome: "Transferência bancária", tipo: "transferencia" },
+      { id: "bol", nome: "Boleto", tipo: "boleto" },
+      { id: "da", nome: "Débito automático", tipo: "outros" },
+      { id: "dep", nome: "Depósito bancário", tipo: "outros" },
+      { id: "din", nome: "Dinheiro", tipo: "dinheiro" },
+      { id: "cc", nome: "CREDITO", tipo: "cartao_credito" },
+    ];
+    assert.equal(suggestFormaPagamentoId(full, "salarios"), "pix");
+    assert.equal(suggestFormaPagamentoId(full, "energia"), "bol");
+    const energia = resolveFormasForPreset(full, "energia");
+    assert.equal(energia.ordered[0].id, "bol");
+    assert.ok(energia.ordered.some((f) => f.id === "da"));
+    // Usuário pode escolher qualquer id do catálogo (não há lock).
+    assert.ok(full.some((f) => f.id === "cc"));
   });
 });
 

@@ -38,6 +38,20 @@ describe("34.9 migration + schema contracts", () => {
     assert.ok(!/\bDELETE FROM\b/i.test(sql));
     assert.ok(!/\bDROP TABLE\b/i.test(sql));
   });
+
+  it("migration categorias CAP é aditiva e preserva customizações", () => {
+    const path =
+      "supabase/migrations/20260829_phase34_9_finance_categories_catalog.sql";
+    assert.ok(existsSync(join(root, path)));
+    const sql = read(path);
+    assert.match(sql, /Salários/);
+    assert.match(sql, /Energia elétrica/);
+    assert.match(sql, /Marketing \/ publicidade/);
+    assert.match(sql, /despesas_pessoal/);
+    assert.ok(!/\bDELETE FROM\b/i.test(sql));
+    assert.ok(!/\bUPDATE\s+public\.categorias_financeiras\b/i.test(sql));
+    assert.ok(!/\bDROP TABLE\b/i.test(sql));
+  });
 });
 
 describe("34.9 presets + classificação", () => {
@@ -293,6 +307,154 @@ describe("34.9 fonte REAL do select Forma de pagamento", () => {
     assert.ok(energia.ordered.some((f) => f.id === "da"));
     // Usuário pode escolher qualquer id do catálogo (não há lock).
     assert.ok(full.some((f) => f.id === "cc"));
+  });
+});
+
+describe("34.9 fonte REAL do select Categoria financeira", () => {
+  it("Nova conta carrega categorias via listCategorias (tabela categorias_financeiras)", () => {
+    const nova = read(
+      "app/(app)/[tenant]/financeiro/contas-pagar/nova/page.tsx",
+    );
+    assert.match(nova, /listCategorias/);
+    assert.match(nova, /categorias=\{categorias\}/);
+    const service = read("lib/financeiro/conta-pagar-service.ts");
+    assert.match(service, /ensureContasPagarCategoriasCatalog/);
+    assert.match(service, /\.from\("categorias_financeiras"\)/);
+    assert.match(service, /missingContasPagarCategorias/);
+    assert.match(service, /\.in\("tipo", \["despesa", "ambos"\]\)/);
+  });
+
+  it("catálogo mínimo cobre atalhos 34.9 e não duplica ENERGIA", async () => {
+    const {
+      CONTAS_PAGAR_CATEGORIAS_CATALOG,
+      missingContasPagarCategorias,
+      findCategoriaForPreset,
+    } = await import(
+      pathToFileURL(
+        join(root, "lib/financeiro/categorias-financeiras-catalog.ts"),
+      ).href + `?t=${Date.now()}`
+    );
+
+    assert.ok(CONTAS_PAGAR_CATEGORIAS_CATALOG.length >= 20);
+
+    const sparse = [
+      { id: "1", nome: "ENERGIA", tipo: "despesa", dre_linha: null },
+      { id: "2", nome: "DESPESAS GERAIS", tipo: "despesa", dre_linha: null },
+    ];
+    const missing = missingContasPagarCategorias(sparse);
+    assert.ok(!missing.some((m) => m.key === "energia"));
+    assert.ok(missing.some((m) => m.key === "salarios"));
+    assert.ok(missing.some((m) => m.key === "aluguel"));
+    assert.ok(missing.some((m) => m.key === "marketing"));
+
+    const withCustom = [
+      ...sparse,
+      {
+        id: "9",
+        nome: "Marketing Digital Loja X",
+        tipo: "despesa",
+        dre_linha: "despesas_comerciais",
+      },
+    ];
+    const missing2 = missingContasPagarCategorias(withCustom);
+    assert.ok(
+      !missing2.some((m) => m.key === "marketing"),
+      "custom marketing equivalente preservada",
+    );
+
+    for (const presetId of [
+      "salarios",
+      "aluguel",
+      "energia",
+      "agua",
+      "royalties",
+      "marketing",
+      "prestadores",
+    ]) {
+      const hit = findCategoriaForPreset(presetId, [
+        ...CONTAS_PAGAR_CATEGORIAS_CATALOG.map((c, i) => ({
+          id: String(i),
+          nome: c.nome,
+          tipo: c.tipo,
+          dre_linha: c.dre_linha,
+        })),
+      ]);
+      assert.ok(hit, presetId);
+    }
+  });
+
+  it("atalhos resolvem categoria+DRE no catálogo completo; plano pode ficar pendente", async () => {
+    const { resolveDespesaPreset } = await import(
+      pathToFileURL(join(root, "lib/financeiro/despesa-presets.ts")).href +
+        `?t=${Date.now()}`
+    );
+    const { CONTAS_PAGAR_CATEGORIAS_CATALOG } = await import(
+      pathToFileURL(
+        join(root, "lib/financeiro/categorias-financeiras-catalog.ts"),
+      ).href + `?t=${Date.now()}`
+    );
+    const categorias = CONTAS_PAGAR_CATEGORIAS_CATALOG.map((c, i) => ({
+      id: `c-${i}`,
+      nome: c.nome,
+      dre_linha: c.dre_linha,
+    }));
+    for (const presetId of [
+      "salarios",
+      "prolabore",
+      "comissoes",
+      "prestadores",
+      "aluguel",
+      "condominio",
+      "energia",
+      "agua",
+      "internet",
+      "telefone",
+      "contabilidade",
+      "royalties",
+      "marketing",
+      "software",
+      "combustivel",
+      "frete",
+      "manutencao",
+      "material_escritorio",
+      "impostos",
+      "seguros",
+      "tarifas_bancarias",
+      "outras",
+    ]) {
+      const r = resolveDespesaPreset(presetId, categorias, []);
+      assert.ok(r?.categoriaId, presetId);
+      assert.equal(r.planoContaId, null, `${presetId} plano pendente ok`);
+    }
+    const sal = resolveDespesaPreset("salarios", categorias, []);
+    assert.equal(
+      categorias.find((c) => c.id === sal.categoriaId)?.dre_linha,
+      "despesas_pessoal",
+    );
+    const ene = resolveDespesaPreset("energia", categorias, []);
+    assert.equal(
+      categorias.find((c) => c.id === ene.categoriaId)?.dre_linha,
+      "despesas_operacionais",
+    );
+  });
+
+  it("tenant isolation: missing é calculado por lista do tenant (sem vazamento)", async () => {
+    const { missingContasPagarCategorias } = await import(
+      pathToFileURL(
+        join(root, "lib/financeiro/categorias-financeiras-catalog.ts"),
+      ).href + `?t=${Date.now()}`
+    );
+    const tenantA = [
+      { id: "a1", nome: "Salários", tipo: "despesa" },
+      { id: "a2", nome: "Aluguel", tipo: "despesa" },
+    ];
+    const tenantB = [{ id: "b1", nome: "ENERGIA ELETRICA", tipo: "despesa" }];
+    const missA = missingContasPagarCategorias(tenantA).map((m) => m.key);
+    const missB = missingContasPagarCategorias(tenantB).map((m) => m.key);
+    assert.ok(!missA.includes("salarios"));
+    assert.ok(missA.includes("energia"));
+    assert.ok(missB.includes("salarios"));
+    assert.ok(!missB.includes("energia"));
   });
 });
 

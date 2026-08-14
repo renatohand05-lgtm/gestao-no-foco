@@ -28,6 +28,10 @@ import {
   missingContasPagarFormas,
   type FormaPagamentoExisting,
 } from "@/lib/financeiro/formas-pagamento-catalog";
+import {
+  missingContasPagarCategorias,
+  type CategoriaFinanceiraExisting,
+} from "@/lib/financeiro/categorias-financeiras-catalog";
 import { formatFormaPagamentoLabel } from "@/lib/financeiro/payment-method-label";
 import {
   baixarContaPagarAtomico,
@@ -1044,6 +1048,12 @@ export class ContaPagarService {
   }
 
   async listCategorias(): Promise<CategoriaFinanceiraOption[]> {
+    try {
+      await this.ensureContasPagarCategoriasCatalog();
+    } catch {
+      // Sem escrita ou corrida: lista o que já existe.
+    }
+
     const { data, error } = await this.supabase
       .from("categorias_financeiras")
       .select("id, nome, tipo, dre_linha")
@@ -1056,6 +1066,44 @@ export class ContaPagarService {
     if (error) throw new Error(error.message);
 
     return (data ?? []) as CategoriaFinanceiraOption[];
+  }
+
+  /**
+   * Garante catálogo mínimo de categorias de despesa (idempotente).
+   * Não apaga/renomeia customizações — só completa equivalentes ausentes.
+   * Não define plano_conta_id.
+   */
+  async ensureContasPagarCategoriasCatalog(): Promise<void> {
+    const { data, error } = await this.supabase
+      .from("categorias_financeiras")
+      .select("id, nome, tipo, dre_linha")
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null);
+
+    if (error) throw new Error(error.message);
+
+    const existing = (data ?? []) as CategoriaFinanceiraExisting[];
+    const missing = missingContasPagarCategorias(existing);
+    if (missing.length === 0) return;
+
+    const payload = missing.map((item) => ({
+      tenant_id: this.tenantId,
+      nome: item.nome,
+      tipo: item.tipo,
+      dre_linha: item.dre_linha,
+      dre_detalhe: item.dre_detalhe,
+      dre_classificacao_origem: "sugestao_nome",
+      ativo: true,
+      plano_conta_id: null,
+    }));
+
+    const { error: insertError } = await this.supabase
+      .from("categorias_financeiras")
+      .insert(payload);
+
+    if (insertError && insertError.code !== "23505") {
+      throw new Error(insertError.message);
+    }
   }
 
   async listCentrosCusto(): Promise<CentroCustoOption[]> {

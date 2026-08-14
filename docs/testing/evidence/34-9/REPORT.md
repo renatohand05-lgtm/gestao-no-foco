@@ -3,69 +3,52 @@
 **Data:** 2026-08-14  
 **Branch:** `main`  
 **Tipo:** UX/modelo Contas a Pagar — sem billing / Asaas / 33.11 / auto-migration prod  
-**34.8:** GO (beta controlado aguarda homologação desta melhoria)
 
 ## Status
 
 **SPRINT 34.9: GO (código)** — migrations production **PENDING** · homologação manual **PENDING**
 
-### Correção de homologação — forma de pagamento
+### Correção final — categorias financeiras
 
-**NO-GO manual** identificado: select mostrava só `CREDITO` / `DEBITO` / `DINHEIRO` / `PIX`.
+**Problema:** select "Categoria financeira" em Nova conta mostrava poucas opções (~2).
 
 #### CAUSA RAIZ
 
-O select de Nova conta **não** usa enum hardcoded. A fonte real é:
+Fonte real: `nova/page.tsx` → `listCategorias()` → tabela `categorias_financeiras` (tenant), filtro `tipo in (despesa, ambos)` + `ativo`.
 
-`nova/page.tsx` → `ContaPagarService.listFormasPagamento()` → tabela `formas_pagamento` (tenant).
-
-A sugestão contextual só **reordena** linhas existentes. Em production o tenant só tinha 4 formas legadas em caixa alta — por isso Boleto / Transferência / Débito automático / Depósito **não apareciam**. Testes anteriores validavam ranking puro, não a fonte real do catálogo.
+Não era bug de UI/enum hardcoded. Tenants de teste nasceram sem catálogo mínimo de despesa (onboarding não semeia categorias). Presets 34.9 só fazem match no que existe — com 2 categorias, a jornada fica incompleta.
 
 #### Correção
 
-1. Catálogo mínimo CAP (`lib/financeiro/formas-pagamento-catalog.ts`)
-2. `ensureContasPagarFormasCatalog()` no `listFormasPagamento` (idempotente; não apaga legado)
-3. Labels amigáveis via `formatFormaPagamentoLabel` (CREDITO → Cartão de crédito, etc.)
-4. Migration aditiva `20260828_phase34_9_formas_pagamento_catalog.sql` para backfill de todos os tenants
+1. `lib/financeiro/categorias-financeiras-catalog.ts` — catálogo mínimo + aliases anti-duplicata + DRE
+2. `ensureContasPagarCategoriasCatalog()` em `listCategorias` (idempotente)
+3. Migration `20260829_phase34_9_finance_categories_catalog.sql` — backfill tenants existentes
+4. **Não** cria plano de contas automaticamente (fica pendente se não houver)
 
-## Decisão arquitetural
+## Catálogo final (despesa)
 
-| Opção | Decisão |
-|---|---|
-| Empurrar mecânicos/equipe em `fornecedores` | **Não** |
-| `financeiro_beneficiarios` + tipagem em CAP | **Sim** |
-| Preservar `fornecedor_id` + `fornecedor_nome` | **Sim** |
-| Hardcode de formas no select | **Não** — tabela `formas_pagamento` |
-| Completar catálogo faltante | **Sim** (ensure + migration) |
+Salários · Pró-labore · Comissões · Benefícios / encargos · Prestadores de serviço · Contabilidade · Aluguel · Condomínio · Energia elétrica · Água / saneamento · Internet · Telefonia · Marketing / publicidade · Royalties · Software / assinaturas · Combustível · Frete · Manutenção · Material de escritório · Material de consumo · Impostos / taxas · Seguros · Tarifas bancárias · Outras despesas
 
-### Forma de pagamento contextual
+## Migrations 34.9 (aplicar em ordem)
 
-Preset **sugere**; usuário altera. Sem acoplar à DRE.
+1. `20260827_phase34_9_contas_pagar_beneficiarios.sql`
+2. `20260828_phase34_9_formas_pagamento_catalog.sql`
+3. `20260829_phase34_9_finance_categories_catalog.sql`
 
-## Migrations
+**PRODUCTION: NÃO EXECUTADAS automaticamente.**
 
-1. `supabase/migrations/20260827_phase34_9_contas_pagar_beneficiarios.sql` — beneficiários
-2. `supabase/migrations/20260828_phase34_9_formas_pagamento_catalog.sql` — catálogo formas
+## Homologação (após migrations + deploy)
 
-**PRODUCTION: NÃO EXECUTADAS automaticamente** — Renato aplica após revisão.
-
-## Testes
-
-`npm run test:phase34-9-contas-pagar-beneficiarios`
-Inclui prova da fonte real do select + catálogo a partir do legado CREDITO/DEBITO/DINHEIRO/PIX.
-
-## Homologação manual (após migrations)
-
-1. Nova conta → select deve listar Transferência, Boleto, Débito automático, Depósito (além das legadas com label amigável)
-2. Salários → prioriza PIX / Transferência
-3. Energia → prioriza Boleto / PIX / Débito automático
-4. Alterar forma manualmente e salvar
-5. Demais itens do smoke 34.9 (beneficiário, tenant, mobile)
+1. Nova conta → Categoria financeira com lista ampla
+2. Lançamento rápido Salários/Energia/Marketing pré-preenche categoria
+3. Sem duplicar ENERGIA / ENERGIA ELÉTRICA
+4. Troca de empresa (isolamento)
+5. Formas de pagamento (correção anterior)
 
 ## Billing
 
-**FROZEN SAFE** · Cliente beta: **NO-GO** até homologar 34.9 · Cliente pago: **NO-GO**
+**FROZEN SAFE** · Beta **NO-GO** até homologar 34.9 · Pago **NO-GO**
 
 ## Próxima ação
 
-Renato: aplicar **as duas** migrations 34.9 em production (se 20260827 ainda não); abrir Nova conta e validar o select completo + sugestão por preset.
+Renato: aplicar `20260829_phase34_9_finance_categories_catalog.sql` (e as anteriores 34.9 se faltarem); validar select de Categoria financeira em Nova conta.

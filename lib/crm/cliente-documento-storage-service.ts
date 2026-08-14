@@ -155,6 +155,14 @@ export class ClienteDocumentoStorageService {
     if (!doc) throw new Error("Documento não encontrado.");
 
     const storagePath = (doc as { storage_path: string }).storage_path;
+    if (
+      !storagePath.startsWith(`${this.tenantId}/`) ||
+      storagePath.includes("..")
+    ) {
+      throw new Error("Documento inválido para este tenant.");
+    }
+
+    // Preferir client da sessão (RLS storage 34.3). Admin só se path já validado.
     const storageClient = isAdminClientAvailable()
       ? createAdminClient()
       : this.supabase;

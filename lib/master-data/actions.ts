@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createFornecedorService } from "@/lib/financeiro/fornecedor-service";
 import { masterCacheInvalidate, MASTER_CACHE_BUCKETS } from "@/lib/master-data";
 import { createMasterDataService } from "@/lib/master-data";
+import { requireTenantMutationPermission } from "@/lib/rbac/mutation-auth";
 import { toActionError } from "@/lib/supabase/friendly-error";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult } from "@/types/action-result";
@@ -56,7 +57,10 @@ export async function deleteFornecedorAction(
   id: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const { tenant } = await requireTenantMutationPermission(
+      tenantSlug,
+      "compras.excluir",
+    );
     const service = await createFornecedorService(tenant.id);
     await service.softDelete(id);
     masterCacheInvalidate(tenant.id, MASTER_CACHE_BUCKETS.fornecedores);

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { normalizeProdutoFormValues } from "@/lib/produtos/mappers";
 import { createProdutoService } from "@/lib/produtos/produto-service";
 import { produtoFormSchema } from "@/lib/produtos/validations";
+import { requireTenantMutationPermission } from "@/lib/rbac/mutation-auth";
 import { toActionError } from "@/lib/supabase/friendly-error";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult } from "@/types/action-result";
@@ -58,7 +59,10 @@ export async function deleteProdutoAction(
   produtoId: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const { tenant } = await requireTenantMutationPermission(
+      tenantSlug,
+      "produtos.excluir",
+    );
     const service = await createProdutoService(tenant.id);
     await service.softDelete(produtoId);
 

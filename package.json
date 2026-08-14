@@ -547,7 +547,8 @@
     "test:phase33-8-readiness": "node --experimental-strip-types --test scripts/phase33-8-production-readiness-tests.mjs",
     "test:phase33-9-provisioning": "node --experimental-strip-types --test scripts/phase33-9-provisioning-tests.mjs",
     "test:phase33-10-cutover-prep": "node --experimental-strip-types --test scripts/phase33-10-cutover-prep-tests.mjs",
-    "test:phase34-2-p0-tenant-rls": "node --experimental-strip-types --test scripts/phase34-2-p0-tenant-rls-tests.mjs"
+    "test:phase34-2-p0-tenant-rls": "node --experimental-strip-types --test scripts/phase34-2-p0-tenant-rls-tests.mjs",
+    "test:phase34-3-p1-mutation-auth": "node --experimental-strip-types --test scripts/phase34-3-p1-mutation-auth-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

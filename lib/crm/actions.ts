@@ -17,6 +17,7 @@ import {
   CRM_TAREFA_TIPOS,
 } from "@/lib/crm/constants";
 import { toActionError } from "@/lib/supabase/friendly-error";
+import { requireTenantMutationPermission } from "@/lib/rbac/mutation-auth";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult } from "@/types/action-result";
 
@@ -329,8 +330,10 @@ export async function uploadClienteDocumentoAction(
   formData: FormData,
 ): Promise<ActionResult & { signedUrl?: string }> {
   try {
-    const tenant = await requireTenant(tenantSlug);
-    const user = await getCurrentUser();
+    const { tenant, userId } = await requireTenantMutationPermission(
+      tenantSlug,
+      ["clientes.editar", "crm.editar"],
+    );
     const file = formData.get("file");
     const clienteId = String(formData.get("clienteId") ?? "");
     const categoria = String(formData.get("categoria") ?? "outro");
@@ -351,7 +354,7 @@ export async function uploadClienteDocumentoAction(
         categoria,
         legenda: legenda || file.name,
       },
-      user?.id ?? null,
+      userId,
     );
 
     try {
@@ -362,7 +365,7 @@ export async function uploadClienteDocumentoAction(
         titulo: `Documento anexado: ${doc.legenda ?? doc.nome_arquivo}`,
         referencia_tipo: "cliente_documento",
         referencia_id: doc.id,
-        userId: user?.id ?? null,
+        userId,
       });
     } catch {
       /* opcional */
@@ -381,7 +384,10 @@ export async function deleteClienteDocumentoAction(
   clienteId: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const { tenant } = await requireTenantMutationPermission(tenantSlug, [
+      "clientes.excluir",
+      "crm.excluir",
+    ]);
     const service = await createClienteDocumentoStorageService(tenant.id);
     await service.softDelete(documentoId);
     revalidateCrmPaths(tenantSlug, clienteId);
@@ -396,7 +402,10 @@ export async function getClienteDocumentoSignedUrlAction(
   documentoId: string,
 ): Promise<ActionResult & { signedUrl?: string }> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const { tenant } = await requireTenantMutationPermission(tenantSlug, [
+      "clientes.visualizar",
+      "crm.visualizar",
+    ]);
     const service = await createClienteDocumentoStorageService(tenant.id);
     const { signedUrl } = await service.createSignedUrl(documentoId);
     return { success: true, signedUrl };

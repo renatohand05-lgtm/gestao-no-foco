@@ -6,6 +6,7 @@ import { normalizeMovimentacaoFormValues } from "@/lib/estoque/mappers";
 import { createEstoqueService } from "@/lib/estoque/estoque-service";
 import { movimentacaoFormSchema } from "@/lib/estoque/validations";
 import { getCurrentProfile } from "@/lib/auth/session";
+import { requireTenantMutationPermission } from "@/lib/rbac/mutation-auth";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult } from "@/types/action-result";
 
@@ -50,7 +51,10 @@ export async function deleteMovimentacaoAction(
   movimentacaoId: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const { tenant } = await requireTenantMutationPermission(
+      tenantSlug,
+      "estoque.excluir",
+    );
     const service = await createEstoqueService(tenant.id);
     await service.softDeleteMovimentacao(movimentacaoId);
 

@@ -1,6 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  requireActiveTenantIdMutation,
+  requireTenantMutationPermission,
+} from "@/lib/rbac/mutation-auth";
+import type { PermissionKey } from "@/lib/rbac";
 import { probeTaxSchema } from "./persistence/schema.ts";
 import {
   createNewVersionFromPublished,
@@ -35,12 +40,20 @@ import {
 } from "./executive.ts";
 import type { TaxIntelligenceIntent, TaxRuleStatus } from "./types.ts";
 
+async function guardTax(
+  tenantId: string,
+  required: PermissionKey | readonly PermissionKey[],
+) {
+  return requireActiveTenantIdMutation(tenantId, required);
+}
+
 export async function getTaxPersistenceStatusAction() {
   const client = await createClient();
   return probeTaxSchema(client);
 }
 
 export async function listTaxRulesAction(tenantId: string) {
+  await guardTax(tenantId, ["tax.visualizar", "financeiro.tributos.visualizar"]);
   const client = await createClient();
   const res = await listTaxRules(client, tenantId);
   if (!res.ok) return { ready: false as const, message: res.message, rules: [] };
@@ -52,6 +65,7 @@ export async function listTaxRulesAction(tenantId: string) {
 }
 
 export async function getTaxRuleAction(tenantId: string, ruleId: string) {
+  await guardTax(tenantId, ["tax.visualizar", "financeiro.tributos.visualizar"]);
   const client = await createClient();
   const res = await getTaxRule(client, tenantId, ruleId);
   if (!res.ok) return { ready: false as const, message: res.message, rule: null };
@@ -63,6 +77,11 @@ export async function getTaxRuleAction(tenantId: string, ruleId: string) {
 }
 
 export async function bootstrapTaxDemoRefsAction(tenantId: string) {
+  const { userId } = await guardTax(tenantId, [
+    "tax.configurar",
+    "tax.criar_regra",
+  ]);
+  void userId;
   const client = await createClient();
   const type = await ensureStructuralTaxType(client);
   const regime = await ensureDemoRegime(client, tenantId);
@@ -86,6 +105,7 @@ export async function createTaxRuleDraftAction(input: {
   state?: string | null;
   jurisdiction?: string;
 }) {
+  const { userId } = await guardTax(input.tenantId, "tax.criar_regra");
   const client = await createClient();
   const type = await ensureStructuralTaxType(client);
   const regime = await ensureDemoRegime(client, input.tenantId);
@@ -97,7 +117,7 @@ export async function createTaxRuleDraftAction(input: {
   }
   const res = await createTaxRuleDraft(client, {
     tenantId: input.tenantId,
-    createdBy: input.userId,
+    createdBy: userId,
     code: input.code,
     name: input.name,
     regimeId: regime.data.id,
@@ -126,11 +146,12 @@ export async function updateTaxRuleDraftAction(input: {
   priority?: number;
   sourceReference?: string;
 }) {
+  const { userId } = await guardTax(input.tenantId, "tax.editar_draft");
   const client = await createClient();
   const res = await updateTaxRuleDraft(client, {
     tenantId: input.tenantId,
     ruleId: input.ruleId,
-    actorId: input.userId,
+    actorId: userId,
     patch: {
       name: input.name,
       priority: input.priority,
@@ -147,11 +168,18 @@ export async function transitionTaxRuleAction(input: {
   ruleId: string;
   to: TaxRuleStatus;
 }) {
+  const { userId } = await guardTax(input.tenantId, [
+    "tax.revisar",
+    "tax.aprovar",
+    "tax.publicar",
+    "tax.suspender",
+    "tax.configurar",
+  ]);
   const client = await createClient();
   const res = await transitionTaxRule(client, {
     tenantId: input.tenantId,
     ruleId: input.ruleId,
-    actorId: input.userId,
+    actorId: userId,
     to: input.to,
   });
   if (!res.ok) return { ok: false as const, message: res.message, code: res.code };
@@ -164,11 +192,12 @@ export async function createTaxRuleVersionAction(input: {
   ruleId: string;
   changeReason: string;
 }) {
+  const { userId } = await guardTax(input.tenantId, "tax.versionar");
   const client = await createClient();
   const res = await createNewVersionFromPublished(client, {
     tenantId: input.tenantId,
     ruleId: input.ruleId,
-    actorId: input.userId,
+    actorId: userId,
     changeReason: input.changeReason,
   });
   if (!res.ok) return { ok: false as const, message: res.message };
@@ -180,11 +209,16 @@ export async function softDeleteTaxRuleAction(input: {
   userId: string;
   ruleId: string;
 }) {
+  const { userId } = await guardTax(input.tenantId, [
+    "tax.editar_draft",
+    "tax.configurar",
+  ]);
   const client = await createClient();
-  return softDeleteTaxRule(client, input.tenantId, input.ruleId, input.userId);
+  return softDeleteTaxRule(client, input.tenantId, input.ruleId, userId);
 }
 
 export async function getTaxAuditAction(tenantId: string) {
+  await guardTax(tenantId, ["tax.ver_auditoria", "tax.visualizar"]);
   const client = await createClient();
   const res = await listTaxAuditEvents(client, tenantId);
   if (!res.ok) return { ready: false as const, message: res.message, rows: [] };
@@ -192,6 +226,7 @@ export async function getTaxAuditAction(tenantId: string) {
 }
 
 export async function getTaxVersionsAction(tenantId: string, ruleId?: string) {
+  await guardTax(tenantId, ["tax.visualizar", "tax.versionar"]);
   const client = await createClient();
   const res = await listTaxRuleVersions(client, tenantId, ruleId);
   if (!res.ok) return { ready: false as const, message: res.message, rows: [] };
@@ -203,6 +238,7 @@ export async function diagnoseTaxPrecedenceAction(input: {
   asOf: string;
   state?: string | null;
 }) {
+  await guardTax(input.tenantId, ["tax.visualizar", "tax.simular"]);
   const client = await createClient();
   const list = await listTaxRules(client, input.tenantId);
   if (!list.ok) return { ready: false as const, message: list.message, result: null };
@@ -221,6 +257,7 @@ export async function diffTaxRulesAction(input: {
   previousId: string;
   currentId: string;
 }) {
+  await guardTax(input.tenantId, ["tax.visualizar", "tax.versionar"]);
   const client = await createClient();
   const prev = await getTaxRule(client, input.tenantId, input.previousId);
   const curr = await getTaxRule(client, input.tenantId, input.currentId);
@@ -247,9 +284,10 @@ export async function runTaxSimulationAction(input: {
   }>;
   ruleVersionIds: string[];
 }) {
+  const { userId } = await guardTax(input.tenantId, "tax.simular");
   const shell = createSimulationShell({
     tenantId: input.tenantId,
-    createdBy: input.userId,
+    createdBy: userId,
     name: "[TESTE] Simulação homologação 26.10.1",
     baselinePeriod: "2026-01",
     targetPeriod: "2026-12",
@@ -286,7 +324,7 @@ export async function runTaxSimulationAction(input: {
   const client = await createClient();
   const persisted = await createTaxSimulation(client, {
     tenantId: input.tenantId,
-    createdBy: input.userId,
+    createdBy: userId,
     name: shell.name,
     baselinePeriod: shell.baselinePeriod,
     targetPeriod: shell.targetPeriod,
@@ -315,8 +353,15 @@ export async function getTaxExecutiveBundleAction(input: {
   tenantId: string;
   tenantSlug: string;
 }) {
+  const { tenant } = await requireTenantMutationPermission(input.tenantSlug, [
+    "tax.executivo",
+    "tax.visualizar",
+  ]);
+  if (tenant.id !== input.tenantId) {
+    throw new Error("PERMISSION_DENIED");
+  }
   const client = await createClient();
-  const rulesRes = await listTaxRules(client, input.tenantId);
+  const rulesRes = await listTaxRules(client, tenant.id);
   const rules = rulesRes.ok ? rulesRes.data.map(mapRuleRow) : [];
   const asOf = new Date().toISOString();
   const cockpit = buildExecutiveCockpitSkeleton({
@@ -352,6 +397,10 @@ export async function askTaxIntelligenceAction(input: {
   ruleId?: string;
   version?: number;
 }) {
+  await requireTenantMutationPermission(input.tenantSlug, [
+    "tax.visualizar",
+    "tax.executivo",
+  ]);
   return answerTaxIntelligence({
     intent: input.intent,
     evidence: input.evidence,
@@ -370,5 +419,12 @@ export async function createTaxActionPlanAction(input: {
   evidence: string[];
   steps: string[];
 }) {
+  // Sem tenant no contrato legado — exige sessão autenticada via getUserTenants indireto:
+  // caller deve estar autenticado; plano é só texto local.
+  const { getCurrentProfile } = await import("@/lib/auth/session");
+  const profile = await getCurrentProfile();
+  if (!profile?.id) {
+    throw new Error("PERMISSION_DENIED");
+  }
   return draftTaxActionPlan(input);
 }

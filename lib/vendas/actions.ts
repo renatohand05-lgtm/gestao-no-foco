@@ -9,6 +9,7 @@ import {
   faturarEReceberVendaFormSchema,
   vendaFormSchema,
 } from "@/lib/vendas/validations";
+import { requireTenantMutationPermission } from "@/lib/rbac/mutation-auth";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult } from "@/types/action-result";
 
@@ -78,7 +79,10 @@ export async function deleteVendaAction(
   vendaId: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const { tenant } = await requireTenantMutationPermission(
+      tenantSlug,
+      "vendas.excluir",
+    );
     const service = await createVendaService(tenant.id);
     await service.softDelete(vendaId);
 
@@ -155,10 +159,12 @@ export async function cancelarVendaAction(
   vendaId: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
-    const profile = await getCurrentProfile();
+    const { tenant, userId } = await requireTenantMutationPermission(
+      tenantSlug,
+      "vendas.cancelar",
+    );
     const service = await createVendaService(tenant.id);
-    await service.cancelar(vendaId, profile?.id ?? null);
+    await service.cancelar(vendaId, userId);
 
     revalidateVendaPaths(tenantSlug, vendaId);
     return { success: true, id: vendaId };

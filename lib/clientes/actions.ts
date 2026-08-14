@@ -6,6 +6,7 @@ import { createClienteService } from "@/lib/clientes/cliente-service";
 import { normalizeClienteFormValues } from "@/lib/clientes/mappers";
 import { clienteFormSchema } from "@/lib/clientes/validations";
 import { ensureCrmDefaultTags } from "@/lib/crm/crm-tags";
+import { requireTenantMutationPermission } from "@/lib/rbac/mutation-auth";
 import { toActionError } from "@/lib/supabase/friendly-error";
 import { requireTenant } from "@/lib/tenants";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -96,7 +97,10 @@ export async function deleteClienteAction(
   clienteId: string,
 ): Promise<ActionResult> {
   try {
-    const tenant = await requireTenant(tenantSlug);
+    const { tenant } = await requireTenantMutationPermission(
+      tenantSlug,
+      "clientes.excluir",
+    );
     const service = await createClienteService(tenant.id);
     await service.softDelete(clienteId);
 

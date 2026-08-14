@@ -20,6 +20,11 @@ import {
   hashInviteToken,
   inviteTokenPrefix,
 } from "./token";
+import {
+  assertInvitableRole,
+  isValidInviteEmail,
+  normalizeInviteEmail,
+} from "./invite-rules";
 import type { CreateInvitationInput, CreateInvitationResult, Invitation, MembershipRole } from "./types";
 
 function buildInviteAbsoluteUrl(tenantSlug: string, token: string): string {
@@ -104,15 +109,11 @@ export async function createInvitation(input: {
   invitedBy: string;
   data: CreateInvitationInput;
 }): Promise<CreateInvitationResult> {
-  const email = input.data.email.trim().toLowerCase();
-  if (!email || !email.includes("@") || email.includes(" ")) {
+  const email = normalizeInviteEmail(input.data.email);
+  if (!isValidInviteEmail(email)) {
     throw new Error("E-mail inválido.");
   }
-  if (input.data.membershipRole === "owner") {
-    throw new Error(
-      "Não é permitido convidar como Proprietário. Transfira a propriedade por fluxo dedicado.",
-    );
-  }
+  assertInvitableRole(input.data.membershipRole);
 
   const validadeHoras = input.data.validadeHoras ?? DEFAULT_VALIDADE_HORAS;
   const token = generateInviteToken();
@@ -134,7 +135,7 @@ export async function createInvitation(input: {
 
   const { data: existingMember } = await client
     .from("tenant_members")
-    .select("id, user_id")
+    .select("id, user_id, status")
     .eq("tenant_id", input.tenantId);
 
   if (existingMember?.length) {
@@ -143,10 +144,15 @@ export async function createInvitation(input: {
       .from("profiles")
       .select("id, email")
       .in("id", userIds);
-    const already = (profiles ?? []).some(
-      (p) => (p.email ?? "").trim().toLowerCase() === email,
+    const profileById = new Map(
+      (profiles ?? []).map((p) => [p.id, (p.email ?? "").trim().toLowerCase()] as const),
     );
-    if (already) {
+    const activeMatch = existingMember.some((m) => {
+      const memberEmail = profileById.get(m.user_id);
+      if (memberEmail !== email) return false;
+      return (m.status ?? "active") !== "inactive";
+    });
+    if (activeMatch) {
       throw new Error("Este e-mail já é membro deste tenant.");
     }
   }
@@ -171,6 +177,7 @@ export async function createInvitation(input: {
     .single();
   if (error) throw new Error(error.message);
 
+  // Envio automático ainda não implementado — sempre falso (admin copia o link).
   return {
     invitation: mapInvitation(data as unknown as RawInvitationRow),
     inviteUrl: buildInviteAbsoluteUrl(input.tenantSlug, token),
@@ -333,16 +340,20 @@ export async function acceptInvitation(input: {
   const client = createAdminClient();
   const { data: existing } = await client
     .from("tenant_members")
-    .select("id")
+    .select("id, status")
     .eq("tenant_id", invitation.tenantId)
     .eq("user_id", input.userId)
     .maybeSingle();
+
+  const role =
+    invitation.membershipRole === "owner" ? "member" : invitation.membershipRole;
 
   if (!existing) {
     const insertPayload: Record<string, unknown> = {
       tenant_id: invitation.tenantId,
       user_id: input.userId,
-      role: invitation.membershipRole === "owner" ? "member" : invitation.membershipRole,
+      role,
+      status: "active",
     };
     if (invitation.teamId) insertPayload.team_id = invitation.teamId;
     if (invitation.jobTitleId) insertPayload.job_title_id = invitation.jobTitleId;
@@ -362,7 +373,37 @@ export async function acceptInvitation(input: {
         { onConflict: "team_id,user_id" },
       );
     }
+  } else if ((existing.status ?? "active") === "inactive") {
+    // Reativação explícita autorizada pelo aceite de convite legítimo (admin/owner).
+    const updatePayload: Record<string, unknown> = {
+      status: "active",
+      deactivated_at: null,
+      role,
+    };
+    if (invitation.teamId !== undefined) updatePayload.team_id = invitation.teamId;
+    if (invitation.jobTitleId !== undefined) {
+      updatePayload.job_title_id = invitation.jobTitleId;
+    }
+
+    const { error: reactivateError } = await client
+      .from("tenant_members")
+      .update(updatePayload as never)
+      .eq("id", existing.id)
+      .eq("tenant_id", invitation.tenantId);
+    if (reactivateError) throw new Error(reactivateError.message);
+
+    if (invitation.teamId) {
+      await client.from("tenant_team_members" as never).upsert(
+        {
+          tenant_id: invitation.tenantId,
+          team_id: invitation.teamId,
+          user_id: input.userId,
+        } as never,
+        { onConflict: "team_id,user_id" },
+      );
+    }
   }
+  // Membro já ativo: idempotente — não duplica membership; só finaliza o convite.
 
   const now = new Date().toISOString();
   const { data: updated, error: updateError } = await client

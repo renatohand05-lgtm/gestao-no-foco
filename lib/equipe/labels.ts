@@ -92,3 +92,12 @@ export const MEMBERSHIP_ROLE_OPTIONS: readonly {
   value,
   label: MEMBERSHIP_ROLE_LABELS[value],
 }));
+
+/** Opções de papel no formulário de convite (sem Proprietário). */
+export const INVITABLE_MEMBERSHIP_ROLE_OPTIONS: readonly {
+  value: Exclude<MembershipRole, "owner">;
+  label: string;
+}[] = MEMBERSHIP_ROLE_OPTIONS.filter(
+  (option): option is { value: Exclude<MembershipRole, "owner">; label: string } =>
+    option.value !== "owner",
+);

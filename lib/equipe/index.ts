@@ -27,6 +27,7 @@ export type {
 
 export {
   getDepartmentPresets,
+  INVITABLE_MEMBERSHIP_ROLE_OPTIONS,
   INVITATION_STATUS_LABELS,
   invitationStatusLabel,
   JOB_TITLE_STATUS_LABELS,
@@ -40,6 +41,14 @@ export {
   TEAM_STATUS_LABELS,
   teamStatusLabel,
 } from "./labels";
+
+export {
+  assertInvitableRole,
+  INVITABLE_ROLES,
+  isInvitableRole,
+  isValidInviteEmail,
+  normalizeInviteEmail,
+} from "./invite-rules";
 
 export {
   assertCanChangeRole,

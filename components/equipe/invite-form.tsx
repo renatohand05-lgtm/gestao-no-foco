@@ -17,7 +17,7 @@ import {
   resendInvitationAction,
 } from "@/lib/equipe/actions";
 import {
-  MEMBERSHIP_ROLE_OPTIONS,
+  INVITABLE_MEMBERSHIP_ROLE_OPTIONS,
   invitationStatusLabel,
   type CreateInvitationResult,
   type Invitation,
@@ -119,23 +119,24 @@ export function InviteForm({
 
   return (
     <div className="space-y-4">
-      {!emailConfigured ? (
-        <Card className="border-amber-500/30 bg-amber-500/5">
-          <CardContent className="py-3 text-sm text-muted-foreground">
-            Nenhum provedor de e-mail configurado (RESEND_API_KEY / SMTP_HOST). O convite não é
-            enviado automaticamente — copie o link gerado e envie manualmente ao convidado.
-          </CardContent>
-        </Card>
-      ) : null}
+      <Card className="border-amber-500/30 bg-amber-500/5">
+        <CardContent className="py-3 text-sm text-muted-foreground">
+          {emailConfigured
+            ? "Provedor de e-mail detectado nas envs, mas o envio automático de convite ainda não está ativo. Copie o link gerado e envie manualmente ao convidado."
+            : "Nenhum provedor de e-mail configurado (RESEND_API_KEY / SMTP_HOST). O convite não é enviado automaticamente — copie o link gerado e envie manualmente ao convidado."}
+        </CardContent>
+      </Card>
 
       {lastResult ? (
         <Card className="border-emerald-500/30 bg-emerald-500/5">
           <CardContent className="space-y-2 py-4">
             <p className="text-sm font-medium text-foreground">
               Convite criado para {lastResult.invitation.email}
+              {lastResult.emailSent ? "." : ". Copie e envie este link ao usuário."}
             </p>
             <p className="text-xs text-muted-foreground">
-              Este link só é exibido uma vez. Copie e envie ao convidado agora.
+              Este link só é exibido uma vez. Expira em{" "}
+              {new Date(lastResult.invitation.expiresAt).toLocaleString("pt-BR")}.
             </p>
             <div className="flex items-center gap-2">
               <Input readOnly value={lastResult.inviteUrl} className="font-mono text-xs" />
@@ -150,9 +151,9 @@ export function InviteForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Convidar membro</CardTitle>
+          <CardTitle>Convidar usuário</CardTitle>
           <CardDescription>
-            O convidado recebe um link único para aceitar e criar acesso ao tenant.
+            Gera um link único e expirável para o convidado aceitar e obter acesso ao tenant.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,7 +181,7 @@ export function InviteForm({
                 value={role}
                 onChange={(event) => setRole(event.target.value as MembershipRole)}
               >
-                {MEMBERSHIP_ROLE_OPTIONS.map((option) => (
+                {INVITABLE_MEMBERSHIP_ROLE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -231,7 +232,7 @@ export function InviteForm({
             <div className="sm:col-span-2">
               <Button type="submit" disabled={isPending}>
                 <Send className="mr-2 size-4" />
-                {isPending ? "Enviando..." : "Enviar convite"}
+                {isPending ? "Criando…" : "Convidar usuário"}
               </Button>
             </div>
           </form>

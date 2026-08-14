@@ -143,10 +143,10 @@ export function LoginForm() {
             Lembrar acesso
           </label>
           <Link
-            href="/login?recuperar=1"
+            href="/recuperar"
             className="text-[var(--brand-gold)] underline-offset-4 hover:underline"
           >
-            Recuperar senha
+            Esqueci minha senha
           </Link>
         </div>
 

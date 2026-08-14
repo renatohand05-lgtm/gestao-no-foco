@@ -1,6 +1,8 @@
 const RESERVED_SEGMENTS = new Set([
   "login",
   "register",
+  "recuperar",
+  "nova-senha",
   "onboarding",
   "empresas",
   "inspecao",

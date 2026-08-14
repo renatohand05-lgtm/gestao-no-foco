@@ -6,12 +6,14 @@ export const APP_ROUTES = {
   dashboard: (tenant: string) => `/${tenant}/dashboard`,
 } as const;
 
-export const AUTH_ROUTES = ["/login", "/register"] as const;
+/** Rotas de auth que redirecionam usuário já logado para o app. */
+export const AUTH_ROUTES = ["/login", "/register", "/recuperar"] as const;
 
 /** Rotas públicas (sem login). Inclui inspeção pública e manutenção. */
 export const PUBLIC_ROUTES = [
   "/",
   ...AUTH_ROUTES,
+  "/nova-senha",
   "/inspecao",
   "/manutencao",
 ] as const;

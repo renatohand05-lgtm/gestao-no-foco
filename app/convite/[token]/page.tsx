@@ -131,7 +131,19 @@ export default async function AceitarConvitePage({ params }: PageProps) {
             </FeedbackMessage>
           ) : null}
 
-          {expired || invitation.status !== "pending" ? (
+          {expired || invitation.status === "expired" ? (
+            <FeedbackMessage variant="warning">
+              Este convite expirou. Peça um novo link ao administrador.
+            </FeedbackMessage>
+          ) : invitation.status === "cancelled" ? (
+            <FeedbackMessage variant="warning">
+              Este convite foi revogado e não pode mais ser aceito.
+            </FeedbackMessage>
+          ) : invitation.status === "accepted" ? (
+            <FeedbackMessage variant="warning">
+              Este convite já foi utilizado.
+            </FeedbackMessage>
+          ) : invitation.status !== "pending" ? (
             <FeedbackMessage variant="warning">
               Este convite não pode ser aceito no estado atual.
             </FeedbackMessage>

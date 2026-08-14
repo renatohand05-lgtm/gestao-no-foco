@@ -12,7 +12,7 @@ export default async function Page({
     <AnalyticsExecutivoPageInner
       tenantSlug={tenant}
       title="Analytics — Operações"
-      description="OS e produtividade a partir dos dashboards operacionais."
+      description="Mesmo núcleo do Analytics Executivo. OS por status: módulo Ordens."
     />
   );
 }

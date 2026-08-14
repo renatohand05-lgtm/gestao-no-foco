@@ -12,7 +12,7 @@ export default async function Page({
     <AnalyticsExecutivoPageInner
       tenantSlug={tenant}
       title="Analytics — Vendas"
-      description="Indicadores comerciais a partir do Commercial Intelligence."
+      description="Mesmo núcleo do Analytics Executivo (filtros de período). Detalhe comercial operacional permanece em Vendas."
     />
   );
 }

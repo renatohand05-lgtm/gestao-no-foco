@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { suggestReposicao } from "@/lib/estoque/abc/abc-curve";
+import { mapDatabaseErrorToUserMessage } from "@/lib/supabase/friendly-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -77,7 +78,9 @@ export default async function EstoqueReposicaoPage({
         <Card>
           <CardHeader>
             <CardTitle>Erro</CardTitle>
-            <CardDescription>{error.message}</CardDescription>
+            <CardDescription>
+              {mapDatabaseErrorToUserMessage(error)}
+            </CardDescription>
           </CardHeader>
         </Card>
       ) : null}

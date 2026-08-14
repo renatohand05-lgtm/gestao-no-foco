@@ -456,7 +456,7 @@ export class DashboardService {
       this.applyVendasFilters(
         this.supabase
           .from("vendas")
-          .select("data_venda, subtotal")
+          .select("data_venda, total")
           .eq("tenant_id", this.tenantId)
           .is("deleted_at", null)
           .eq("status", "faturado")
@@ -480,7 +480,8 @@ export class DashboardService {
 
     for (const row of vendasResult.data ?? []) {
       const key = String(row.data_venda).slice(0, 10);
-      map.set(key, (map.get(key) ?? 0) + Number(row.subtotal));
+      // Alinhado a faturamento-agregacao: líquido (`total`), não bruto (`subtotal`).
+      map.set(key, (map.get(key) ?? 0) + Number(row.total));
     }
 
     for (const row of crResult.data ?? []) {

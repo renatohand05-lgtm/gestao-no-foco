@@ -1,7 +1,14 @@
 /**
- * Fase 23 — Resolução de períodos (sem hardcode de metas).
+ * Fase 23 / 34.7 — Resolução de períodos (sem hardcode de metas).
+ * Períodos analíticos usam fuso padrão do produto (America/Sao_Paulo),
+ * alinhado ao dashboard — evita virada de dia em UTC.
  */
 
+import {
+  civilDateInTimezone,
+  DEFAULT_TENANT_TIMEZONE,
+  shiftCivilDate,
+} from "../../dashboard/tenant-timezone.ts";
 import type {
   AnalyticsDateRange,
   AnalyticsPeriodPreset,
@@ -22,15 +29,31 @@ function parseISO(iso: string): Date {
 }
 
 function addDays(iso: string, days: number): string {
-  const dt = parseISO(iso);
-  dt.setUTCDate(dt.getUTCDate() + days);
-  return toISO(dt);
+  return shiftCivilDate(iso, days);
 }
 
+/** @deprecated Prefer civilDateInTimezone — mantido para APIs existentes (UTC). */
 export function todayUtc(now = new Date()): string {
   return toISO(
     new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())),
   );
+}
+
+function weekdayInTimezone(now: Date, timeZone: string): number {
+  const wd = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+  }).format(now);
+  const map: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  return map[wd] ?? 0;
 }
 
 const LABELS: Record<AnalyticsPeriodPreset, string> = {
@@ -50,16 +73,28 @@ const LABELS: Record<AnalyticsPeriodPreset, string> = {
 
 export function resolvePeriodPreset(
   preset: AnalyticsPeriodPreset,
-  options?: { now?: Date; customFrom?: string; customTo?: string },
+  options?: {
+    now?: Date;
+    customFrom?: string;
+    customTo?: string;
+    timeZone?: string;
+  },
 ): AnalyticsDateRange {
   const now = options?.now ?? new Date();
-  const today = todayUtc(now);
-  const y = now.getUTCFullYear();
-  const m = now.getUTCMonth();
+  const timeZone = options?.timeZone ?? DEFAULT_TENANT_TIMEZONE;
+  const today = civilDateInTimezone(now, timeZone);
+  const [yStr, mStr] = today.split("-");
+  const y = Number(yStr);
+  const m = Number(mStr) - 1; // 0-based
 
   if (preset === "custom") {
-    const from = options?.customFrom ?? today;
-    const to = options?.customTo ?? today;
+    let from = options?.customFrom ?? today;
+    let to = options?.customTo ?? today;
+    if (from > to) {
+      const tmp = from;
+      from = to;
+      to = tmp;
+    }
     return { from, to, preset, label: LABELS.custom };
   }
 
@@ -71,7 +106,7 @@ export function resolvePeriodPreset(
       return { from: yday, to: yday, preset, label: LABELS.yesterday };
     }
     case "week": {
-      const dow = now.getUTCDay();
+      const dow = weekdayInTimezone(now, timeZone);
       const mondayOffset = dow === 0 ? -6 : 1 - dow;
       const from = addDays(today, mondayOffset);
       return { from, to: today, preset, label: LABELS.week };

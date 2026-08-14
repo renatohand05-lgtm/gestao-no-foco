@@ -49,35 +49,55 @@ export default async function FinanceiroAgingPage({
 
   const hoje = civilDateInTimezone(new Date(), DEFAULT_TENANT_TIMEZONE);
   const cr = await createContaReceberService(auth.tenant.id);
-  const list = await cr.list({
-    page: 1,
-    perPage: 50,
-    status: "all",
-    sort: "data_vencimento",
-    order: "asc",
-  });
 
-  const titulos = list.data
-    .filter(
-      (i) =>
-        i.status_exibicao === "aberto" || i.status_exibicao === "vencido",
-    )
-    .map((i) => ({
-      id: i.id,
-      clienteId: i.cliente_id,
-      clienteNome: i.cliente?.nome ?? null,
-      valor: Math.max(
-        Number(i.valor_original ?? 0) +
-          Number(i.juros ?? 0) +
-          Number(i.multa ?? 0) -
-          Number(i.desconto ?? 0) -
-          Number(i.valor_recebido ?? 0),
-        0,
-      ),
-      dataVencimento: i.data_vencimento,
-      status: i.status_exibicao,
-    }));
+  // Sprint 34.7 — aging precisa de todos os títulos abertos/vencidos (não só 1 página).
+  const MAX_AGING_PAGES = 40; // 40 × 50 = 2000 títulos
+  const titulos: Array<{
+    id: string;
+    clienteId: string | null;
+    clienteNome: string | null;
+    valor: number;
+    dataVencimento: string;
+    status: string;
+  }> = [];
+  let truncated = false;
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const list = await cr.list({
+      page,
+      perPage: 50,
+      status: "all",
+      sort: "data_vencimento",
+      order: "asc",
+    });
+    totalPages = list.totalPages;
+    for (const i of list.data) {
+      if (i.status_exibicao !== "aberto" && i.status_exibicao !== "vencido") {
+        continue;
+      }
+      titulos.push({
+        id: i.id,
+        clienteId: i.cliente_id,
+        clienteNome: i.cliente?.nome ?? null,
+        valor: Math.max(
+          Number(i.valor_original ?? 0) +
+            Number(i.juros ?? 0) +
+            Number(i.multa ?? 0) -
+            Number(i.desconto ?? 0) -
+            Number(i.valor_recebido ?? 0),
+          0,
+        ),
+        dataVencimento: i.data_vencimento,
+        status: i.status_exibicao,
+      });
+    }
+    page += 1;
+  } while (page <= totalPages && page <= MAX_AGING_PAGES);
 
+  if (totalPages > MAX_AGING_PAGES) {
+    truncated = true;
+  }
   const report = buildAgingReport(titulos, hoje);
 
   return (
@@ -88,6 +108,16 @@ export default async function FinanceiroAgingPage({
         title="Aging / Inadimplência"
         description={`Referência ${hoje} · contas a receber em aberto/vencido. Sem conciliação automática.`}
       />
+
+      {truncated ? (
+        <p
+          className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-100"
+          role="status"
+        >
+          Totais limitados aos primeiros {MAX_AGING_PAGES * 50} títulos abertos.
+          Refine o cadastro ou use a listagem de contas a receber para o restante.
+        </p>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Metric title="Total geral" value={formatCurrency(report.totalGeral)} />

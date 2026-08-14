@@ -12,7 +12,7 @@ export default async function Page({
     <AnalyticsExecutivoPageInner
       tenantSlug={tenant}
       title="Analytics — Relatórios"
-      description="CSV disponível; Excel/PDF em preparação (feature flags)."
+      description="Exportação CSV do núcleo executivo quando habilitada; Excel/PDF em preparação (flags). Sem BI paralelo."
     />
   );
 }

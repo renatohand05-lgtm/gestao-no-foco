@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SituacaoBadge } from "@/components/dashboard/resumo-situacao-badge";
+import { csvEscapeCell } from "@/lib/analytics/core/csv-safe";
 import { formatCurrency, formatPercent } from "@/lib/dashboard/format";
 import {
   classifySituacao,
@@ -82,19 +83,21 @@ export function ResumoDiaDrawer({
       "liquido",
     ];
     const lines = [
-      header.join(";"),
+      `\uFEFF${header.map(csvEscapeCell).join(";")}`,
       ...filtered.map((v) =>
         [
           v.horario,
           v.numero,
-          `"${v.cliente.replace(/"/g, '""')}"`,
-          `"${(v.vendedor ?? "").replace(/"/g, '""')}"`,
+          v.cliente,
+          v.vendedor ?? "",
           v.origem,
           v.status,
           v.valor_bruto,
           v.desconto,
           v.valor_liquido,
-        ].join(";"),
+        ]
+          .map(csvEscapeCell)
+          .join(";"),
       ),
     ];
     const blob = new Blob([lines.join("\n")], {

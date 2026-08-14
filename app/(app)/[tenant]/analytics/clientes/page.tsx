@@ -12,7 +12,7 @@ export default async function Page({
     <AnalyticsExecutivoPageInner
       tenantSlug={tenant}
       title="Analytics — Clientes"
-      description="Carteira e riscos a partir do CRM Executivo."
+      description="Mesmo núcleo do Analytics Executivo. Cadastro e CRM operacional permanecem em Clientes."
     />
   );
 }

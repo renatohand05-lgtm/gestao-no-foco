@@ -12,7 +12,7 @@ export default async function Page({
     <AnalyticsExecutivoPageInner
       tenantSlug={tenant}
       title="Analytics — Financeiro"
-      description="KPIs financeiros a partir de DRE, FI e Cash Intelligence."
+      description="Mesmo núcleo do Analytics Executivo. Contas a receber/pagar e aging estão em Financeiro."
     />
   );
 }

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { classifyAbcCurve } from "@/lib/estoque/abc/abc-curve";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { mapDatabaseErrorToUserMessage } from "@/lib/supabase/friendly-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -79,7 +80,9 @@ export default async function EstoqueAbcPage({
         <Card>
           <CardHeader>
             <CardTitle>Erro</CardTitle>
-            <CardDescription>{error.message}</CardDescription>
+            <CardDescription>
+              {mapDatabaseErrorToUserMessage(error)}
+            </CardDescription>
           </CardHeader>
         </Card>
       ) : null}

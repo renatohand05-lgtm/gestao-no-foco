@@ -1,3 +1,4 @@
+import { csvEscapeCell } from "@/lib/analytics/core/csv-safe";
 import {
   formatCurrency,
   formatNumber,
@@ -8,22 +9,15 @@ import type { DashboardExecutiveData } from "@/types/dashboard-executive";
 
 type ExportRow = Record<string, string | number | null>;
 
-function escapeCsvValue(value: string | number | null): string {
-  if (value === null || value === undefined) return "";
-  const text = String(value);
-  if (/[",\n\r]/.test(text)) {
-    return `"${text.replace(/"/g, '""')}"`;
-  }
-  return text;
-}
-
 function rowsToCsv(rows: ExportRow[]): string {
   if (rows.length === 0) return "";
 
   const headers = Object.keys(rows[0]!);
   const lines = [
-    headers.map(escapeCsvValue).join(","),
-    ...rows.map((row) => headers.map((header) => escapeCsvValue(row[header] ?? null)).join(",")),
+    headers.map((h) => csvEscapeCell(h)).join(","),
+    ...rows.map((row) =>
+      headers.map((header) => csvEscapeCell(row[header] ?? null)).join(","),
+    ),
   ];
 
   return `\uFEFF${lines.join("\n")}`;

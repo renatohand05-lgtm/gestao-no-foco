@@ -12,7 +12,7 @@ export default async function Page({
     <AnalyticsExecutivoPageInner
       tenantSlug={tenant}
       title="Analytics — Estoque"
-      description="Estoque executivo — sem curva ABC inventada."
+      description="Mesmo núcleo do Analytics Executivo. Posição e baixo estoque: Estoque → Dashboard."
     />
   );
 }

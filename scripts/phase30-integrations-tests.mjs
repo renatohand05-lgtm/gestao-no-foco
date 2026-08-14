@@ -82,12 +82,16 @@ const pageSrc = readFileSync(
   "utf8",
 );
 check(
-  "page importa IntegrationHubView",
-  /IntegrationHubView/.test(pageSrc),
+  "page piloto honesto (sem hub mock ativo)",
+  /ComingSoonPanel|data-integration-hub="pilot"/.test(pageSrc),
 );
 check(
-  "page renderiza IntegrationHubView",
-  /<IntegrationHubView/.test(pageSrc),
+  "page aponta importação real",
+  /integracoes\/importar|integrationsImportPath|Ir para importação/.test(pageSrc),
+);
+check(
+  "IntegrationHubView permanece no código (não deletado)",
+  existsSync(join(root, "components/integracoes/integration-hub-view.tsx")),
 );
 
 const hubSrc = readFileSync(

@@ -191,14 +191,14 @@ export function ExecutiveCashDashboardClient({
         kind === "investment"
           ? {
               kind: "investment",
-              name: "Investimento simulado",
+              name: "Cenário de investimento",
               amount: 10_000,
               disbursementDate: today,
               horizonDays: horizon,
             }
           : {
               kind: "loan",
-              name: "Empréstimo simulado",
+              name: "Cenário de empréstimo",
               principal: 20_000,
               releaseDate: today,
               rateMonthlyPct: 1.5,

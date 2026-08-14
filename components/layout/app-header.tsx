@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Bell,
   HelpCircle,
   MoreHorizontal,
   Search,
@@ -121,18 +120,6 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
             <Zap className="size-4" />
           </Button>
         ) : null}
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-9 shrink-0 text-muted-foreground hover:text-[var(--brand-gold)]"
-          aria-label="Notificações"
-          disabled
-          title="Notificações em breve"
-        >
-          <Bell className="size-4" />
-        </Button>
 
         {slug ? (
           <Button

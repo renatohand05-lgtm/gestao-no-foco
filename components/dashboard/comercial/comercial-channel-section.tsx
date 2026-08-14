@@ -7,17 +7,16 @@ type Props = {
   data: CommercialPanelData;
 };
 
-export function ComercialChannelSection({ data }: Props) {
+export function ComercialChannelSection(_props: Props) {
   return (
     <div className={exStack[16]}>
       <ExecutiveSection title="Por canal">
         <ExecutiveCard padding={20} className={exAnimations.fade}>
           <div className="flex min-h-[5rem] flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/20 px-4 text-center">
             <p className={cn(exTypography.caption, "max-w-lg")}>
-              O modelo de vendas ainda não possui campo de canal/origem
-              {data.auditoria.tem_canal ? "" : " (auditoria: tem_canal=false)"}
-              . A tabela fica preparada e vazia até existir estrutura aprovada —
-              sem mock e sem migration nesta sprint.
+              A dimensão de canal/origem ainda não está disponível nas vendas.
+              Quando estiver habilitada, este painel mostrará a distribuição real
+              por canal — sem inventar números.
             </p>
           </div>
         </ExecutiveCard>
@@ -27,12 +26,9 @@ export function ComercialChannelSection({ data }: Props) {
         <ExecutiveCard padding={20} className={exAnimations.fade}>
           <div className="flex min-h-[5rem] flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/20 px-4 text-center">
             <p className={cn(exTypography.caption, "max-w-lg")}>
-              Indisponível sem dimensão de canal
-              {data.share_modo === "indisponivel"
-                ? " (share_modo=indisponivel)"
-                : ""}
-              . Quando o canal existir, este gráfico exibirá a participação mensal
-              por canal (mês atual + 12 anteriores).
+              Indisponível enquanto não houver canal nas vendas. Assim que a
+              estrutura existir, o gráfico exibirá a participação mensal por canal
+              (mês atual + 12 anteriores).
             </p>
           </div>
         </ExecutiveCard>

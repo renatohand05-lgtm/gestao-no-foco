@@ -60,7 +60,14 @@ check("dry-run cenários botão", /Dry-run cenários/.test(ui));
 const pagePath = join(root, "app/(app)/[tenant]/automacoes/page.tsx");
 check("página automacoes existe", existsSync(pagePath));
 const page = readFileSync(pagePath, "utf8");
-check("page importa AutomacoesCentral", /AutomacoesCentral/.test(page));
+check(
+  "page piloto Em breve (34.5) ou AutomacoesCentral",
+  /ComingSoonPanel|AutomacoesCentral|coming-soon/.test(page),
+);
+check(
+  "AutomacoesCentral permanece no código",
+  existsSync(uiPath),
+);
 
 console.log(`\nResultado: ${pass} PASS · ${fail} FAIL\n`);
 process.exit(fail > 0 ? 1 : 0);

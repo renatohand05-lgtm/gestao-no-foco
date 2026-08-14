@@ -1,59 +1,52 @@
-import { AutomacoesCentral } from "@/components/automacoes/automacoes-central";
-import { getAutomacoesCentralAction } from "@/lib/automacoes/actions";
-import { getAutomationSegmentCopy } from "@/lib/automacoes/multisector";
+import { Workflow } from "lucide-react";
+
+import { ComingSoonPanel } from "@/components/pilot/coming-soon-panel";
+import { PageHeader } from "@/components/ui/page-header";
 import { requireTenant } from "@/lib/tenants";
 
 export const metadata = {
   title: "Automações",
-  description: "Central de Automações Enterprise",
+  description: "Automações internas — em breve",
 };
 
+/**
+ * Sprint 34.5 — Automações ocultas da sidebar e sem seed demo.
+ * Rota profunda mostra estado honesto "Em breve".
+ */
 export default async function AutomacoesPage({
   params,
 }: {
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  let tenant;
   try {
-    tenant = await requireTenant(tenantSlug);
+    await requireTenant(tenantSlug);
   } catch {
     return (
       <div className="space-y-4 p-4 sm:p-6" data-automacoes-page="auth">
-        <h1 className="text-xl font-semibold">Central de Automações</h1>
+        <h1 className="text-xl font-semibold">Automações</h1>
         <p className="text-sm text-destructive" role="alert">
-          Sessão ou tenant indisponível.
-        </p>
-      </div>
-    );
-  }
-
-  const res = await getAutomacoesCentralAction(tenantSlug);
-  const copy = getAutomationSegmentCopy(tenant.segment);
-
-  if (!res.success) {
-    return (
-      <div className="space-y-4 p-4 sm:p-6" data-automacoes-page="error">
-        <h1 className="text-xl font-semibold">Central de Automações</h1>
-        <p className="text-sm text-destructive" role="alert">
-          {res.error}
+          Sessão ou empresa indisponível.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6" data-automacoes-page="ok">
-      <AutomacoesCentral
-        tenantSlug={tenantSlug}
-        initialSnapshot={res.snapshot}
-        templates={[...res.templates]}
-        triggers={res.triggers}
-        allowedActions={res.allowedActions}
-        blockedActions={[...res.blockedActions]}
-        probeMessage={res.probe.message}
-        segmentTitle={copy.title}
-        segmentHighlights={copy.highlights}
+    <div className="space-y-6 p-4 sm:p-6" data-automacoes-page="coming-soon">
+      <PageHeader
+        title="Automações"
+        description="Regras e fluxos internos para reduzir trabalho manual."
+      />
+      <ComingSoonPanel
+        icon={Workflow}
+        title="Automações em breve"
+        description="Este módulo ainda não está liberado no piloto. Não há regras ativas nem envio automático de e-mails ou ações externas."
+        primaryAction={{
+          label: "Voltar ao dashboard",
+          href: `/${tenantSlug}/dashboard`,
+        }}
+        testId="automacoes-coming-soon"
       />
     </div>
   );

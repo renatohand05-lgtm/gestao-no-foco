@@ -237,10 +237,10 @@ export function getTenantNav(
     {
       id: "integrations",
       title: "Integrações",
-      href: `${base}/integracoes`,
+      href: `${base}/integracoes/importar`,
       icon: Plug,
       group: "inteligencia",
-      description: "Hub de integrações Enterprise",
+      description: "Importação de arquivos e dados",
       requiredAnyPermissions: [
         "integracoes.visualizar",
         "integracoes.administrar",
@@ -287,7 +287,11 @@ export function getTenantNav(
     },
   ];
 
+  // Sprint 34.5 — piloto: ocultar módulos mock/parcial que aparentam prontidão.
+  const PILOT_HIDDEN_IDS = new Set(["automacoes"]);
+
   return items.filter((item) => {
+    if (PILOT_HIDDEN_IDS.has(item.id)) return false;
     if (item.id === "mechanics" && !labels.showTeamNavItem) return false;
     if (item.id === "work-orders" && !labels.showWorkOrders) return false;
     return true;

@@ -1,18 +1,19 @@
-import { Suspense } from "react";
+import { Plug, Upload } from "lucide-react";
 
-import { IntegrationHubView } from "@/components/integracoes/integration-hub-view";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getIntegrationHubAction } from "@/lib/integracoes/actions";
+import { ComingSoonPanel } from "@/components/pilot/coming-soon-panel";
+import { PageHeader } from "@/components/ui/page-header";
+import { integrationsImportPath } from "@/lib/pilot/readiness";
 import { requireIntegracoesAccess } from "@/lib/integracoes/page-auth";
 
 export const metadata = {
-  title: "Integration Hub",
-  description: "Integration Hub Enterprise — arquitetura sem I/O externo",
+  title: "Integrações",
+  description: "Importação de arquivos e integrações externas",
 };
 
 /**
- * Sprint 30.8 — Integration Hub na rota canônica /integracoes.
- * Importação de arquivos permanece em /integracoes/importar.
+ * Sprint 34.5 — Hub mock substituído por landing honesta.
+ * Importação real permanece em /integracoes/importar.
+ * Marketplace / webhooks / scheduler externos: Em breve.
  */
 export default async function IntegracoesPage({
   params,
@@ -20,34 +21,34 @@ export default async function IntegracoesPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  // RBAC + tenant isolation (requireTenant via page-auth)
   await requireIntegracoesAccess(tenantSlug);
-  const res = await getIntegrationHubAction(tenantSlug);
-
-  if (!res.success) {
-    return (
-      <div className="space-y-4 p-4 sm:p-6" data-integration-hub="error">
-        <h1 className="text-xl font-semibold">Integration Hub Enterprise</h1>
-        <p className="text-sm text-destructive" role="alert">
-          {res.error}
-        </p>
-      </div>
-    );
-  }
+  const importHref = integrationsImportPath(tenantSlug);
 
   return (
-    <div className="p-4 sm:p-6">
-      <Suspense
-        fallback={
-          <Skeleton
-            className="h-96 w-full"
-            aria-busy="true"
-            data-integration-hub-loading=""
-          />
-        }
-      >
-        <IntegrationHubView tenantSlug={tenantSlug} snapshot={res.snapshot} />
-      </Suspense>
+    <div className="space-y-6 p-4 sm:p-6" data-integration-hub="pilot">
+      <PageHeader
+        title="Integrações"
+        description="Importe planilhas e arquivos agora. Conexões externas com ERPs e marketplaces chegam em breve."
+      />
+
+      <ComingSoonPanel
+        icon={Upload}
+        title="Importação de arquivos disponível"
+        description="Use a importação para trazer clientes, produtos, vendas e financeiro a partir de arquivos. Não há integrações externas ativas neste momento."
+        primaryAction={{ label: "Ir para importação", href: importHref }}
+        testId="integrations-import-cta"
+      />
+
+      <ComingSoonPanel
+        icon={Plug}
+        title="Conexões externas"
+        description="Omie, Conta Azul, Bling e demais conectores ainda não estão disponíveis para configuração. Quando forem liberados, aparecerão aqui com status claro (Em breve / Disponível / Ativa)."
+        secondaryAction={{
+          label: "Voltar ao dashboard",
+          href: `/${tenantSlug}/dashboard`,
+        }}
+        testId="integrations-external-coming-soon"
+      />
     </div>
   );
 }

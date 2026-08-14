@@ -39,14 +39,15 @@ export default async function ConfiguracoesPage({
               <span className="text-muted-foreground">Nome:</span> {tenant.name}
             </p>
             <p>
-              <span className="text-muted-foreground">Slug:</span> {tenant.slug}
+              <span className="text-muted-foreground">Identificador:</span>{" "}
+              {tenant.slug}
             </p>
             <p>
               <span className="text-muted-foreground">Segmento:</span>{" "}
               {tenant.segment ?? "Não definido"}
             </p>
             <p>
-              <span className="text-muted-foreground">Seu papel:</span>{" "}
+              <span className="text-muted-foreground">Seu perfil:</span>{" "}
               <span className="capitalize">{tenant.role}</span>
             </p>
           </CardContent>
@@ -75,13 +76,12 @@ export default async function ConfiguracoesPage({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Seu papel atual:{" "}
+              Seu perfil atual:{" "}
               <span className="font-medium capitalize text-foreground">
                 {tenant.role}
               </span>
-              . Gerencie membros, convites, equipes, cargos e a matriz de papéis
-              em um único lugar. Permissões de acesso são aplicadas no servidor
-              (RBAC).
+              . Gerencie membros, convites, equipes e cargos em um único lugar.
+              As permissões de acesso são aplicadas no servidor.
             </p>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -109,7 +109,7 @@ export default async function ConfiguracoesPage({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              A assinatura pertence à empresa (tenant), não ao usuário. OWNER
+              A assinatura pertence à empresa, não ao usuário. O proprietário
               gerencia; membros comuns não alteram cobrança.
             </p>
             {tenant.role === "owner" || tenant.role === "admin" ? (
@@ -129,27 +129,7 @@ export default async function ConfiguracoesPage({
           </CardContent>
         </Card>
 
-        {tenant.role === "owner" || tenant.role === "admin" ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Design System</CardTitle>
-              <CardDescription>
-                Biblioteca oficial — acesso técnico interno
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Showcase de tokens e componentes. Sem dados de negócio.
-              </p>
-              <Button
-                variant="outline"
-                render={<Link href={`/${tenantSlug}/design-system`} />}
-              >
-                Abrir Design System
-              </Button>
-            </CardContent>
-          </Card>
-        ) : null}
+        {/* Design System: oculto no piloto (34.5) — acesso interno via URL direta. */}
       </div>
     </div>
   );

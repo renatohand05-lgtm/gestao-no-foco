@@ -22,7 +22,6 @@ import {
   memoryUnlock,
   memoryUpsertApproval,
   memoryUpsertRule,
-  seedDemoRules,
 } from "./memory-store.ts";
 import {
   dbAddAudit,
@@ -158,7 +157,7 @@ export async function loadAutomationCentral(args: {
     client: args.client,
   };
   if (!args.schemaReady) {
-    seedDemoRules(args.tenantId, args.userId);
+    // Sprint 34.5 — sem seed demo: empresa permanece vazia até o usuário criar regras.
   }
 
   const rules = await listRules(mode, args.tenantId);

@@ -2,6 +2,7 @@
 
 **Data:** 2026-08-14  
 **Branch:** `main`  
+**Commit:** `ba09b2e`  
 **Tipo:** P1 acesso — sem billing / Asaas / Storage 34.3 / mobile / 34.5  
 **34.3:** HOMOLOGADA (sem regressão intencional)
 

@@ -1,13 +1,17 @@
 # Sprint 34.5 — UX primeiro uso + isolamento de mocks + prontidão de piloto
 
-**Data:** 2026-08-14
+**Data fechamento código:** 2026-08-14
+**Data homologação visual production:** 2026-08-14
 **Branch:** `main`
+**Commit feat:** `09cd7b5`
 **Tipo:** UX piloto — sem billing / Asaas / Vercel / 34.6 / redesign
 **34.4:** HOMOLOGADA
 
-## Status
+## Status final
 
-**SPRINT 34.5: GO (código)** — homologação visual/manual a critério de Renato
+**SPRINT 34.5: HOMOLOGADA — GO**
+
+**HOMOLOGADA PRODUCTION:** **SIM** (smoke visual em dispositivo móvel real)
 
 | Critério | Status |
 |---|---|
@@ -18,14 +22,36 @@
 | ONBOARDING | **PASS** |
 | EMPTY STATES | **PASS** |
 | NAVIGATION | **PASS** |
-| RESPONSIVE | **PARTIAL** (sem blocker; padrões premium existentes) |
-| ACCESSIBILITY | **PARTIAL** (labels/ARIA existentes; sem WCAG full) |
+| MENU | **PASS** |
+| DASHBOARD | **PASS** |
+| FORMULÁRIOS | **PASS** |
+| RESPONSIVE | **PASS** (smoke mobile real) |
+| MOBILE WEB | **PASS** |
+| ACCESSIBILITY | **PARTIAL** (dívida P2; sem blocker no smoke) |
 | DASHBOARD DATA HONESTY | **PASS** |
 | TENANT CLEAN START | **PASS** |
 | RBAC UI | **PASS** |
-| MULTIEMPRESA | **PASS** (preservado) |
+| MULTIEMPRESA | **PASS** |
 | P0 REGRESSION | **PASS** |
 | Billing | **FROZEN SAFE** |
+
+## Homologação visual production (evidência Renato)
+
+Smoke manual em **dispositivo móvel real** na aplicação production.
+
+| Item | Resultado |
+|---|---|
+| Smoke geral | **PASS** |
+| Responsividade | **PASS** — sem problemas bloqueantes |
+| Mobile web | **PASS** |
+| Navegação / menu | **PASS** |
+| Dashboard | **PASS** |
+| Formulários | **PASS** |
+| Multiempresa | **PASS** |
+| First use UX | **PASS** |
+| Accessibility | **PARTIAL** — sem blocker; dívida P2 mantida |
+
+Nenhuma alteração automática em Supabase / Vercel / Asaas nesta homologação.
 
 ## Inventário de mocks (ação)
 
@@ -53,11 +79,10 @@ Preservada e reforçada:
 
 ## Responsividade / a11y
 
-- Não houve redesign; mantidos padrões do layout premium (sidebar, header, empty states com `role="status"`, botões com `aria-label`).
-- Classificado **PARTIAL** sem blocker crítico.
-- Prioridade futura (P2): smoke visual em 1366/tablet/mobile web.
+- Smoke production em mobile real: **PASS** (sem blocker de usabilidade/responsividade).
+- Accessibility: **PARTIAL** — labels/ARIA existentes; WCAG completo permanece P2.
 
-## Testes (revalidação)
+## Testes (revalidação pós-homologação)
 
 | Suite | Resultado |
 |---|---|
@@ -66,7 +91,7 @@ Preservada e reforçada:
 | `test:phase34-3-p1-mutation-auth` | **9 PASS** |
 | `test:phase34-2-p0-tenant-rls` | **12 PASS** |
 | `test:rbac` | **92 PASS** |
-| lint | **PASS** (0 errors) |
+| lint | **PASS** (0 errors, 31 warnings pré-existentes) |
 | typecheck (`tsc` via `next build`) | **PASS** |
 | build | **PASS** |
 | `git diff --check` | **PASS** |
@@ -79,11 +104,13 @@ Preservada e reforçada:
 
 **NENHUMA**
 
-## P1
+## P0 / P1
 
-**Internos abertos:** 0 novos
+**P0 abertos:** 0
 
-**Externos:** `ASAAS_PRODUCTION_API_KEY_BLOCKER` (billing congelado)
+**P1 internos abertos:** 0
+
+**P1 externo:** `ASAAS_PRODUCTION_API_KEY_BLOCKER` (billing congelado)
 
 ## Billing
 
@@ -91,4 +118,4 @@ Preservada e reforçada:
 
 ## Próxima sprint
 
-**34.6** — observabilidade / backup / PITR / runbooks — **somente após homologação 34.5** (não iniciada automaticamente).
+**34.6** — observabilidade / backup / PITR / runbooks — **recomendado iniciar após este fechamento** (não iniciada automaticamente aqui).

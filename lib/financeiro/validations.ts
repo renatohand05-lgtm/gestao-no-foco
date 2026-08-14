@@ -209,6 +209,11 @@ export type ReceberContaFormValues = z.output<typeof receberContaFormSchema>;
 
 export const contaPagarFormSchema = z
   .object({
+    beneficiario_tipo: optionalText,
+    beneficiario_id: optionalUuid,
+    mecanico_id: optionalUuid,
+    beneficiario_profile_id: optionalUuid,
+    despesa_preset_id: optionalText,
     fornecedor_id: optionalUuid,
     fornecedor_nome: optionalText,
     forma_pagamento_id: optionalUuid,
@@ -243,6 +248,47 @@ export const contaPagarFormSchema = z
         code: "custom",
         message: "Vencimento não pode ser anterior à emissão.",
         path: ["data_vencimento"],
+      });
+    }
+
+    const tipo = data.beneficiario_tipo?.trim() || "";
+    const nomeLivre = data.fornecedor_nome?.trim() || "";
+    if (tipo === "fornecedor" && !data.fornecedor_id && !nomeLivre) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Selecione um fornecedor ou informe o nome do beneficiário.",
+        path: ["fornecedor_id"],
+      });
+    }
+    if (tipo === "mecanico" && !data.mecanico_id && !nomeLivre) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Selecione o mecânico ou informe o nome.",
+        path: ["mecanico_id"],
+      });
+    }
+    if (
+      (tipo === "funcionario" || tipo === "vendedor") &&
+      !data.beneficiario_profile_id &&
+      !nomeLivre
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Selecione a pessoa da equipe ou informe o nome.",
+        path: ["beneficiario_profile_id"],
+      });
+    }
+    if (
+      ["prestador", "locador", "concessionaria", "governo", "outro"].includes(
+        tipo,
+      ) &&
+      !data.beneficiario_id &&
+      !nomeLivre
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Selecione ou cadastre o beneficiário, ou informe o nome livre.",
+        path: ["beneficiario_id"],
       });
     }
 

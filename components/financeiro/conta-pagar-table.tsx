@@ -48,7 +48,7 @@ export function ContaPagarTable({
     },
     {
       id: "fornecedor",
-      header: "Fornecedor",
+      header: "Beneficiário",
       className: "hidden sm:table-cell",
       cell: (item) => resolveFornecedorNome(item),
     },

@@ -141,9 +141,9 @@ export function ContaPagarDetail({
 </>} />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <ExecutiveSection title="Fornecedor e vínculos" panel>
+        <ExecutiveSection title="Beneficiário e vínculos" panel>
           <FormGrid>
-            <DetailItem label="Fornecedor" value={resolveFornecedorNome(item)} />
+            <DetailItem label="Beneficiário" value={resolveFornecedorNome(item)} />
             <DetailItem
               label="Documento"
               value={item.fornecedor?.documento || "—"}

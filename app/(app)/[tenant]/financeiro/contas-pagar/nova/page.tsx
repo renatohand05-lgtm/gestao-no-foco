@@ -51,6 +51,10 @@ export default async function NovaPage({
 
   const { tenant } = auth;
   const service = await createContaPagarService(tenant.id);
+  const { createFinanceiroBeneficiarioService } = await import(
+    "@/lib/financeiro/beneficiario-service"
+  );
+  const benefService = await createFinanceiroBeneficiarioService(tenant.id);
 
   const [
     fornecedores,
@@ -58,12 +62,18 @@ export default async function NovaPage({
     categorias,
     centrosCusto,
     planoContas,
+    beneficiarios,
+    mecanicos,
+    equipe,
   ] = await Promise.all([
     service.listFornecedores(),
     service.listFormasPagamento(),
     service.listCategorias(),
     service.listCentrosCusto(),
     service.listPlanoContas(),
+    benefService.listAtivos(),
+    benefService.listMecanicosAtivos(),
+    benefService.listEquipeAtiva(),
   ]);
 
   return (
@@ -76,17 +86,23 @@ export default async function NovaPage({
           },
           { label: "Nova conta" },
         ]} />
-      <ExecutiveHeader title="Nova conta a pagar" description={`Cadastro em ${tenant.name}`} />
+      <ExecutiveHeader
+        title="Nova conta a pagar"
+        description={`Despesa + beneficiário em ${tenant.name}`}
+      />
 
       <ExecutiveSection
         title="Cadastro"
-        description="Preencha os dados do título a pagar."
+        description="Lançamento rápido, beneficiário e classificação."
         panel
       >
         <ContaPagarForm
           tenantSlug={tenantSlug}
           mode="create"
           fornecedores={fornecedores}
+          beneficiarios={beneficiarios}
+          mecanicos={mecanicos}
+          equipe={equipe}
           formasPagamento={formasPagamento}
           categorias={categorias}
           centrosCusto={centrosCusto}

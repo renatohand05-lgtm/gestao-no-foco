@@ -76,6 +76,10 @@ export default async function EditarPage({
 
   const { tenant } = auth;
   const service = await createContaPagarService(tenant.id);
+  const { createFinanceiroBeneficiarioService } = await import(
+    "@/lib/financeiro/beneficiario-service"
+  );
+  const benefService = await createFinanceiroBeneficiarioService(tenant.id);
   const item = await service.getById(id);
 
   if (!item) {
@@ -101,12 +105,18 @@ export default async function EditarPage({
     categorias,
     centrosCusto,
     planoContas,
+    beneficiarios,
+    mecanicos,
+    equipe,
   ] = await Promise.all([
     service.listFornecedores(),
     service.listFormasPagamento(),
     service.listCategorias(),
     service.listCentrosCusto(),
     service.listPlanoContas(),
+    benefService.listAtivos(),
+    benefService.listMecanicosAtivos(),
+    benefService.listEquipeAtiva(),
   ]);
 
   return (
@@ -142,6 +152,9 @@ export default async function EditarPage({
           item={item}
           classificacaoOnly={classificacaoOnly}
           fornecedores={fornecedores}
+          beneficiarios={beneficiarios}
+          mecanicos={mecanicos}
+          equipe={equipe}
           formasPagamento={formasPagamento}
           categorias={categorias}
           centrosCusto={centrosCusto}

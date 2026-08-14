@@ -2466,6 +2466,10 @@ export type Database = {
           numero: number;
           fornecedor_id: string | null;
           fornecedor_nome: string | null;
+          beneficiario_tipo: string | null;
+          beneficiario_id: string | null;
+          mecanico_id: string | null;
+          beneficiario_profile_id: string | null;
           forma_pagamento_id: string | null;
           categoria_financeira_id: string | null;
           centro_custo_id: string | null;
@@ -2498,6 +2502,10 @@ export type Database = {
           numero?: number;
           fornecedor_id?: string | null;
           fornecedor_nome?: string | null;
+          beneficiario_tipo?: string | null;
+          beneficiario_id?: string | null;
+          mecanico_id?: string | null;
+          beneficiario_profile_id?: string | null;
           forma_pagamento_id?: string | null;
           categoria_financeira_id?: string | null;
           centro_custo_id?: string | null;
@@ -2530,6 +2538,10 @@ export type Database = {
           numero?: number;
           fornecedor_id?: string | null;
           fornecedor_nome?: string | null;
+          beneficiario_tipo?: string | null;
+          beneficiario_id?: string | null;
+          mecanico_id?: string | null;
+          beneficiario_profile_id?: string | null;
           forma_pagamento_id?: string | null;
           categoria_financeira_id?: string | null;
           centro_custo_id?: string | null;

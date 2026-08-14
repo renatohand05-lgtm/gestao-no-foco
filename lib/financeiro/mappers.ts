@@ -363,9 +363,17 @@ export function normalizeReceberContaFormValues(
 export function normalizeContaPagarFormValues(
   values: ContaPagarFormValues,
 ): CreateContaPagarInput {
+  const tipo = emptyToNull(values.beneficiario_tipo);
   return {
-    fornecedor_id: emptyToNull(values.fornecedor_id),
+    fornecedor_id:
+      tipo === "fornecedor" || !tipo
+        ? emptyToNull(values.fornecedor_id)
+        : null,
     fornecedor_nome: emptyToNull(values.fornecedor_nome),
+    beneficiario_tipo: tipo,
+    beneficiario_id: emptyToNull(values.beneficiario_id),
+    mecanico_id: emptyToNull(values.mecanico_id),
+    beneficiario_profile_id: emptyToNull(values.beneficiario_profile_id),
     forma_pagamento_id: emptyToNull(values.forma_pagamento_id),
     categoria_financeira_id: values.categoria_financeira_id,
     centro_custo_id: values.centro_custo_id,
@@ -394,6 +402,11 @@ export function contaPagarToFormValues(
   item: ContaPagarDetail,
 ): ContaPagarFormValues {
   return {
+    beneficiario_tipo: item.beneficiario_tipo ?? "",
+    beneficiario_id: item.beneficiario_id ?? "",
+    mecanico_id: item.mecanico_id ?? "",
+    beneficiario_profile_id: item.beneficiario_profile_id ?? "",
+    despesa_preset_id: "",
     fornecedor_id: item.fornecedor_id ?? "",
     fornecedor_nome: item.fornecedor_nome ?? "",
     forma_pagamento_id: item.forma_pagamento_id ?? "",
@@ -422,6 +435,10 @@ export function buildContaPagarPayload(input: CreateContaPagarInput) {
   return {
     fornecedor_id: input.fornecedor_id ?? null,
     fornecedor_nome: input.fornecedor_nome ?? null,
+    beneficiario_tipo: input.beneficiario_tipo ?? null,
+    beneficiario_id: input.beneficiario_id ?? null,
+    mecanico_id: input.mecanico_id ?? null,
+    beneficiario_profile_id: input.beneficiario_profile_id ?? null,
     forma_pagamento_id: input.forma_pagamento_id ?? null,
     categoria_financeira_id: input.categoria_financeira_id,
     centro_custo_id: input.centro_custo_id,

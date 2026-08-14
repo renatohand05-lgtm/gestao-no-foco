@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
+import { ContaPagarBeneficiarioFields } from "@/components/financeiro/conta-pagar-beneficiario-fields";
 import { ContaPagarRateioFields } from "@/components/financeiro/conta-pagar-rateio-fields";
 import { CancelButton } from "@/components/ui/cancel-button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -21,6 +22,11 @@ import {
   updateClassificacaoContaPagarAction,
   updateContaPagarAction,
 } from "@/lib/financeiro/actions";
+import type {
+  BeneficiarioOption,
+  EquipePayeeOption,
+  MecanicoPayeeOption,
+} from "@/lib/financeiro/beneficiario-service";
 import { todayISO } from "@/lib/financeiro/conta-pagar-utils";
 import { DRE_LINHA_LABELS, type DreLinhaEconomica } from "@/lib/dre";
 import { contaPagarToFormValues } from "@/lib/financeiro/mappers";
@@ -30,9 +36,6 @@ import {
   type ContaPagarFormInput,
   type ContaPagarFormValues,
 } from "@/lib/financeiro/validations";
-import { getFornecedorAutofillAction } from "@/lib/master-data/actions";
-import { mergeAutofillWithoutOverwrite } from "@/lib/master-data/master-data-suggestions";
-import type { ContaPagarAutofillSuggestion } from "@/lib/master-data/master-data-types";
 import type {
   CategoriaFinanceiraOption,
   CentroCustoOption,
@@ -42,20 +45,15 @@ import type {
   PlanoContaOption,
 } from "@/types/contas-pagar";
 
-const AUTOFILL_KEYS = [
-  "categoria_financeira_id",
-  "plano_conta_id",
-  "centro_custo_id",
-  "forma_pagamento_id",
-] as const;
-
 type Props = {
   tenantSlug: string;
   mode: "create" | "edit";
   item?: ContaPagarDetail;
-  /** Quando true, só classificação contábil é editável (ex.: título já pago). */
   classificacaoOnly?: boolean;
   fornecedores: FornecedorOption[];
+  beneficiarios?: BeneficiarioOption[];
+  mecanicos?: MecanicoPayeeOption[];
+  equipe?: EquipePayeeOption[];
   formasPagamento: FormaPagamentoOption[];
   categorias: CategoriaFinanceiraOption[];
   centrosCusto: CentroCustoOption[];
@@ -81,6 +79,9 @@ export function ContaPagarForm({
   item,
   classificacaoOnly = false,
   fornecedores,
+  beneficiarios = [],
+  mecanicos = [],
+  equipe = [],
   formasPagamento,
   categorias,
   centrosCusto,
@@ -89,12 +90,6 @@ export function ContaPagarForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [autofillHint, setAutofillHint] = useState<{
-    suggestion: ContaPagarAutofillSuggestion;
-    applied: string[];
-    skipped: string[];
-  } | null>(null);
-  const [autofillLoading, setAutofillLoading] = useState(false);
   const lockFinanceiro = classificacaoOnly;
 
   const form = useForm<ContaPagarFormInput, unknown, ContaPagarFormValues>({
@@ -107,6 +102,11 @@ export function ContaPagarForm({
     defaultValues: item
       ? contaPagarToFormValues(item)
       : {
+          beneficiario_tipo: "",
+          beneficiario_id: "",
+          mecanico_id: "",
+          beneficiario_profile_id: "",
+          despesa_preset_id: "",
           fornecedor_id: "",
           fornecedor_nome: "",
           forma_pagamento_id: "",
@@ -132,10 +132,6 @@ export function ContaPagarForm({
     name: "categoria_financeira_id",
   });
   const planoId = useWatch({ control: form.control, name: "plano_conta_id" });
-  const fornecedorIdWatch = useWatch({
-    control: form.control,
-    name: "fornecedor_id",
-  });
 
   const linhaDre = useMemo(() => {
     const plano = planoContas.find((p) => p.id === planoId);
@@ -182,48 +178,6 @@ export function ContaPagarForm({
     );
   }
 
-  async function handleFornecedorChange(fornecedorId: string) {
-    form.setValue("fornecedor_id", fornecedorId);
-    setAutofillHint(null);
-
-    if (!fornecedorId || lockFinanceiro) return;
-
-    const selected = fornecedores.find((f) => f.id === fornecedorId);
-    const nomeLivre = form.getValues("fornecedor_nome");
-    if (selected && (!nomeLivre || !String(nomeLivre).trim())) {
-      form.setValue("fornecedor_nome", selected.nome);
-    }
-
-    setAutofillLoading(true);
-    const result = await getFornecedorAutofillAction(tenantSlug, fornecedorId);
-    setAutofillLoading(false);
-
-    if (!result.success || !result.suggestion) return;
-
-    const suggestion = result.suggestion;
-    const current = form.getValues() as Record<string, unknown>;
-
-    // Baixa confiança: só exibe dica — não aplica IDs.
-    if (suggestion.confidence === "low") {
-      setAutofillHint({ suggestion, applied: [], skipped: [] });
-      return;
-    }
-
-    const { next, applied, skipped } = mergeAutofillWithoutOverwrite(
-      current,
-      suggestion,
-      [...AUTOFILL_KEYS],
-    );
-
-    for (const [key, value] of Object.entries(next)) {
-      form.setValue(key as keyof ContaPagarFormInput, value as never, {
-        shouldDirty: true,
-      });
-    }
-
-    setAutofillHint({ suggestion, applied, skipped });
-  }
-
   return (
     <div className="relative">
       <LoadingOverlay loading={loading} label="Salvando..." />
@@ -239,96 +193,33 @@ export function ContaPagarForm({
             </p>
           ) : null}
 
+          {!lockFinanceiro ? (
+            <FormSection
+              title="Despesa e beneficiário"
+              description="Quem recebe o pagamento — não precisa ser fornecedor de compras."
+            >
+              <ContaPagarBeneficiarioFields
+                tenantSlug={tenantSlug}
+                disabled={lockFinanceiro}
+                fornecedores={fornecedores}
+                beneficiarios={beneficiarios}
+                mecanicos={mecanicos}
+                equipe={equipe}
+                categorias={categorias}
+                planoContas={planoContas}
+              />
+            </FormSection>
+          ) : null}
+
           <FormSection
-            title="Identificação"
+            title="Classificação"
             description={
               classificacaoOnly
                 ? "Ajuste a classificação do título."
-                : "Fornecedor e classificação do título."
+                : "Categoria, plano, centro de custo e DRE."
             }
           >
             <FormGrid>
-              <FormField label="Fornecedor cadastrado" htmlFor="fornecedor_id">
-                <select
-                  id="fornecedor_id"
-                  value={fornecedorIdWatch ?? ""}
-                  onChange={(event) =>
-                    void handleFornecedorChange(event.target.value)
-                  }
-                  className={gofControl}
-                  disabled={lockFinanceiro}
-                >
-                  <option value="">Sem vínculo</option>
-                  {fornecedores.map((fornecedor) => (
-                    <option key={fornecedor.id} value={fornecedor.id}>
-                      {fornecedor.nome}
-                      {fornecedor.documento ? ` · ${fornecedor.documento}` : ""}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
-
-              <FormField
-                label="Nome do fornecedor (livre)"
-                htmlFor="fornecedor_nome"
-              >
-                <Input
-                  id="fornecedor_nome"
-                  {...form.register("fornecedor_nome")}
-                  placeholder="Quando não houver cadastro"
-                  disabled={lockFinanceiro}
-                />
-              </FormField>
-
-              {autofillLoading ? (
-                <p className="sm:col-span-2 text-sm text-muted-foreground">
-                  Carregando sugestões do fornecedor…
-                </p>
-              ) : null}
-
-              {autofillHint ? (
-                <div className="sm:col-span-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-100">
-                  <p className="font-medium">
-                    Sugestão do cadastro
-                    {autofillHint.suggestion.confidence === "low"
-                      ? " (baixa confiança — confirme manualmente)"
-                      : ""}
-                  </p>
-                  <ul className="mt-1 list-inside list-disc text-xs opacity-90">
-                    {autofillHint.suggestion.reasons.map((reason) => (
-                      <li key={reason}>{reason}</li>
-                    ))}
-                    {autofillHint.suggestion.dre_path_label ? (
-                      <li>DRE: {autofillHint.suggestion.dre_path_label}</li>
-                    ) : null}
-                    {autofillHint.suggestion.recorrente ? (
-                      <li>
-                        Recorrente
-                        {autofillHint.suggestion.frequencia
-                          ? ` · ${autofillHint.suggestion.frequencia}`
-                          : ""}
-                      </li>
-                    ) : null}
-                    {autofillHint.applied.length > 0 ? (
-                      <li>
-                        Preenchido automaticamente:{" "}
-                        {autofillHint.applied.join(", ")}
-                      </li>
-                    ) : null}
-                    {autofillHint.skipped.length > 0 ? (
-                      <li>
-                        Mantido (já preenchido):{" "}
-                        {autofillHint.skipped.join(", ")}
-                      </li>
-                    ) : null}
-                  </ul>
-                  <p className="mt-1 text-xs opacity-80">
-                    Campos já preenchidos não são sobrescritos. Você pode alterar
-                    qualquer valor.
-                  </p>
-                </div>
-              ) : null}
-
               <FormField
                 label="Forma de pagamento"
                 htmlFor="forma_pagamento_id"

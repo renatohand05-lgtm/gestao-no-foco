@@ -77,7 +77,7 @@ export function ContaPagarFilters({
         </select>
       </ExecutiveFilterField>
 
-      <ExecutiveFilterField label="Fornecedor" htmlFor="filter-fornecedor">
+      <ExecutiveFilterField label="Beneficiário" htmlFor="filter-fornecedor">
         <select
           id="filter-fornecedor"
           value={currentFornecedorId}

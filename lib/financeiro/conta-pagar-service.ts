@@ -488,11 +488,51 @@ export class ContaPagarService {
 
     const { data, error } = await this.supabase
       .from("contas_pagar")
-      .insert(rows)
+      .insert(rows as never)
       .select("id, parcela_numero, valor_original")
       .order("parcela_numero", { ascending: true });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Migration 34.9 ainda não aplicada: tenta sem colunas novas.
+      if (/beneficiario_|mecanico_id|column/i.test(error.message)) {
+        const legacyRows = rows.map((row) => {
+          const {
+            beneficiario_tipo: _t,
+            beneficiario_id: _b,
+            mecanico_id: _m,
+            beneficiario_profile_id: _p,
+            ...rest
+          } = row as Record<string, unknown>;
+          return rest;
+        });
+        const retry = await this.supabase
+          .from("contas_pagar")
+          .insert(legacyRows as never)
+          .select("id, parcela_numero, valor_original")
+          .order("parcela_numero", { ascending: true });
+        if (retry.error) throw new Error(retry.error.message);
+        const createdLegacy = retry.data ?? [];
+        const createdIdLegacy = createdLegacy[0]?.id as string | undefined;
+        if (!createdIdLegacy) {
+          throw new Error("Erro ao criar conta a pagar.");
+        }
+        if (rateios && rateios.length > 0) {
+          for (const parcela of createdLegacy) {
+            await this.replaceRateios(
+              parcela.id as string,
+              rateios,
+              Number(parcela.valor_original),
+            );
+          }
+        }
+        const detailLegacy = await this.getById(createdIdLegacy);
+        if (!detailLegacy) {
+          throw new Error("Erro ao carregar conta a pagar criada.");
+        }
+        return detailLegacy;
+      }
+      throw new Error(error.message);
+    }
 
     const created = data ?? [];
     const createdId = created[0]?.id as string | undefined;

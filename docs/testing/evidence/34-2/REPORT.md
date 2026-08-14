@@ -1,108 +1,95 @@
 # Sprint 34.2 — P0 isolamento / RLS / revogação de acesso
 
-**Data:** 2026-08-13  
-**Branch:** `main`  
-**Tipo:** CORREÇÃO P0 — sem billing, sem Asaas, sem Vercel envs, sem mobile app  
-**Migrations executadas em production:** **NÃO** (manual Renato)  
-**33.11:** não iniciada  
+**Data fechamento:** 2026-08-13
+**Branch:** `main`
+**Tipo:** CORREÇÃO P0 — sem billing, sem Asaas, sem Vercel envs, sem mobile app
+**Migrations em production:** **SIM** — Renato aplicou `20260825_phase34_2_p0_tenant_rls_hardening.sql`
+**33.11 / 34.3:** não iniciadas
 
-## Decisão
+## Status final
 
-| Critério | Resultado |
+**SPRINT 34.2: HOMOLOGADA — GO**
+
+| Critério | Status |
 |---|---|
-| P0-1 self-join | **PASS** (código + migration; production pending apply) |
-| P0-2 inactive | **PASS** (app + RLS SELECT) |
-| P0-3 Enterprise RBAC write | **PASS** (migration) |
-| Onboarding legítimo | **PASS** (RPC `create_tenant_with_owner`) |
+| P0-1 SELF-JOIN | **PASS** |
+| P0-2 INACTIVE ACCESS | **PASS** |
+| P0-3 ENTERPRISE RBAC | **PASS** |
+| Tenant isolation | **PASS** |
+| Cross-tenant | **PASS** |
+| RBAC (Enterprise write) | **PASS** |
+| RLS production | **PASS** |
+| Onboarding (RPC path) | **PASS** (código + funções A1) |
+| Multiempresa | **PASS** (inactive em um tenant; ativo em outro) |
 | Billing | **FROZEN SAFE** |
-| Cliente pago | **NO-GO** até migration aplicada + homologação |
-| Cliente beta | **GO CONTROLADO** após Renato aplicar SQL |
+| Backup diário | **PASS** |
+| PITR | **NÃO HABILITADO** (não bloqueante) |
 
-## Estado confirmado (antes)
+## Homologação production (evidência Renato)
 
-| Item | Evidência |
+| Item | Resultado | Evidência |
+|---|---|---|
+| P0-1 | PASS | `legacy_self_join_policy = 0` |
+| P0-2 | PASS | Membership inactive em `teste-renato-01`: usuário não visualiza nem acessa esse tenant; permanece com acesso ao tenant ativo `Primewhash` |
+| P0-3 | PASS | Smoke SQL sob contexto member: alteração `tenant_user_roles` bloqueada; Success; No rows returned; **ROLLBACK** executado |
+| Seção A (A1–A5) | PASS | `POST_MIGRATION_SMOKE.sql` |
+| RLS PRODUCTION | PASS | Policies/funções 34.2 ativas |
+| Backup diário | PASS | Confirmado manualmente no painel Supabase |
+| PITR | NÃO HABILITADO | Add-on disponível; não bloqueante para 34.2 |
+
+**34.2 HOMOLOGADA:** **SIM**
+
+## Decisão de prontidão (pós-34.2)
+
+| Audiência | Status |
 |---|---|
-| Policy INSERT permissiva | `schema.sql` + `fix-tenant-members-policies.sql`: `with check (auth.uid() = user_id)` — **nenhuma migration posterior dropava** |
-| SELECT 30.2 | `tenant_members_select_self_or_admin` — self **sem** filtro de status |
-| Onboarding | `createTenantWithOwner` fazia `tenants.insert` + `tenant_members.insert` no client |
-| Convite | já usava `createAdminClient()` (service role) |
-| `getUserTenants` / `getUserTenantSlugs` | sem filtro `status` / `deactivated_at` |
-| Enterprise RBAC | `20260807_enterprise_rls.sql` FOR ALL qualquer membro |
+| Piloto interno | **GO** |
+| Cliente beta | **GO CONTROLADO** (P0 isolamento fechados; P1 jornada ainda abertos) |
+| Cliente pago | **NO-GO** (P1: convite e-mail, recover senha, deletes member, storage CRM, billing key) |
+| Escala | **NO-GO** |
 
-## Correções
+## Correções entregues (resumo)
 
 ### P0-1
-- Drop policy `"Usuário pode se vincular como owner ao criar empresa"`.
-- INSERT em `tenant_members` só via `is_tenant_admin`.
-- RPC `public.create_tenant_with_owner(name, slug, segment)` SECURITY DEFINER cria tenant + owner `active`.
-- `lib/onboarding/create-tenant.ts` passa a chamar a RPC (valida `user.id === input.userId`).
+- Drop INSERT permissivo em `tenant_members`.
+- RPC `create_tenant_with_owner` SECURITY DEFINER.
+- App: `lib/onboarding/create-tenant.ts` via RPC.
 
 ### P0-2
-- SELECT `tenant_members`: self só se `active` e `deactivated_at is null`; admin vê peers.
-- Cascata: policies de negócio com `exists (tenant_members…)` deixam de ver linha inactive → **BLOCK** em dados.
-- App: `isActiveMembershipRow` em `getUserTenants`, `getUserTenantSlugs`, mobile membership, CRM team select.
+- SELECT self só se active / sem `deactivated_at`.
+- App: `isActiveMembershipRow` em `getUserTenants` / `getUserTenantSlugs`.
 
 ### P0-3
-- `tenant_roles`, `tenant_rbac_role_permissions`, `tenant_user_roles`, `tenant_user_permission_overrides`:
-  - SELECT: `is_active_tenant_member`
-  - ALL write: `is_tenant_admin`
+- Enterprise RBAC: member SELECT; owner/admin write (`is_tenant_admin`).
 
 ## Migration
 
-**Arquivo:** `supabase/migrations/20260825_phase34_2_p0_tenant_rls_hardening.sql`  
-**Production:** **NÃO EXECUTADA** por este agente.  
-**Diagnóstico (read-only):** `docs/testing/evidence/34-2/DIAGNOSTIC_QUERIES.sql`
+**Arquivo:** `supabase/migrations/20260825_phase34_2_p0_tenant_rls_hardening.sql`
+**Production:** aplicada manualmente.
+**Diagnóstico / smoke:** `DIAGNOSTIC_QUERIES.sql`, `POST_MIGRATION_SMOKE.sql`
 
-## Service role
-
-- Continua server-only (`lib/supabase/admin.ts`, `server-only`).
-- Convite/accept e equipe usam admin após `assertEquipeAdmin`.
-- RPC de onboarding **não** usa service role — usa `auth.uid()` no DEFINER.
-- Nenhuma secret `NEXT_PUBLIC_`.
-
-## Gates
+## Gates (fechamento)
 
 | Gate | Resultado |
 |---|---|
 | `test:phase34-2-p0-tenant-rls` | 12 PASS |
 | `test:rbac` | 92 PASS |
 | `test:phase33-10-cutover-prep` | 6 PASS |
-| `tsc --noEmit` | PASS |
 | lint | PASS (0 errors, 30 warnings) |
+| typecheck | PASS |
 | build | PASS |
-| `git diff --check` | PASS (warnings CRLF) |
+| `git diff --check` | PASS |
 
-**Commit:** `ccef7b7ad480ef80ba8d238655d12e7930d2319b`  
-**HEAD == origin/main:** SIM  
-**Migration production:** NÃO EXECUTADA
+## Blockers restantes (não impedem fechar 34.2)
 
-## Backup / PITR
+1. P1 jornada: recuperar senha web; convite sem e-mail (`emailSent: false`).
+2. P1 RBAC mutações core (member delete cliente/venda).
+3. P1 storage CRM sem policy `storage.objects`.
+4. `ASAAS_PRODUCTION_API_KEY_BLOCKER` — cobrança real OFF (intencional).
+5. PITR opcional.
 
-**VERIFICAÇÃO MANUAL NECESSÁRIA** no painel Supabase (fora do repo).
+## Próxima sprint
 
-## Arquivos alterados
+**34.3** — P1 RBAC nas mutações + tax `requireTenant` + storage CRM.
 
-- `supabase/migrations/20260825_phase34_2_p0_tenant_rls_hardening.sql` (novo)
-- `supabase/schema.sql` (remove INSERT permissivo do bootstrap)
-- `lib/onboarding/create-tenant.ts`
-- `lib/tenants.ts`
-- `lib/tenants/membership-status.ts` (novo)
-- `lib/auth/redirect.ts`
-- `lib/mobile/membership.ts`
-- `lib/crm/tenant-team-service.ts`
-- `scripts/phase34-2-p0-tenant-rls-tests.mjs` (novo)
-- `package.json` (script teste)
-- `docs/testing/evidence/34-2/*`
-
-## Riscos residuais
-
-- Até a migration rodar em production, P0-1/P0-3 RLS **permanecem abertos no banco**; o app já filtra inactive e usa RPC (RPC falha se migration não aplicada → onboarding quebra até apply).
-- Homologar: register → onboarding → criar 2ª empresa → inativar membro → URL direta → tentativa de escalate.
-
-## Ação manual Renato
-
-1. Rodar `DIAGNOSTIC_QUERIES.sql` (read-only).  
-2. Snapshot/PITR confirmado.  
-3. Aplicar `20260825_phase34_2_p0_tenant_rls_hardening.sql` no SQL Editor.  
-4. Re-rodar diagnósticos (legacy self-join policy count = 0).  
-5. Smoke: onboarding + inativar membro + member não escreve RBAC.
+Não iniciar automaticamente — liberada após este fechamento documentado.

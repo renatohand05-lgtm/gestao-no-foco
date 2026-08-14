@@ -1,37 +1,67 @@
 # Sprint 34.4 — Jornada de acesso (recuperar senha + convite + e-mail)
 
-**Data:** 2026-08-14  
-**Branch:** `main`  
-**Commit:** `ba09b2e`  
-**Tipo:** P1 acesso — sem billing / Asaas / Storage 34.3 / mobile / 34.5  
+**Data fechamento código:** 2026-08-14
+**Data homologação production:** 2026-08-14
+**Branch:** `main`
+**Commit feat:** `ba09b2e`
+**Tipo:** P1 acesso — sem billing / Asaas / Storage 34.3 / mobile / 34.5
 **34.3:** HOMOLOGADA (sem regressão intencional)
 
-## Status
+## Status final
 
-**SPRINT 34.4: GO (código READY; e-mail/redirects com pendências manuais documentadas)**
+**SPRINT 34.4: HOMOLOGADA — GO**
+
+**HOMOLOGADA PRODUCTION:** **SIM**
 
 | Critério | Status |
 |---|---|
 | RECOVER PASSWORD | **PASS** |
-| RESET PASSWORD | **PASS** (contrato + UI; e-mail depende Supabase Auth) |
-| PASSWORD EMAIL | **MANUAL PENDING** (templates/redirect URLs no painel) |
+| RESET PASSWORD | **PASS** |
+| PASSWORD EMAIL | **PASS** (e-mail real via Supabase Auth) |
+| REDIRECTS | **PASS** |
+| CALLBACK | **PASS** |
+| NOVA SENHA | **PASS** |
+| LOGIN COM NOVA SENHA | **PASS** |
 | INVITE CREATE | **PASS** |
 | INVITE EMAIL | **FALLBACK LINK** (sem envio automático) |
 | INVITE ACCEPT | **PASS** |
-| EXISTING USER | **PASS** (contrato) |
-| NEW USER | **PASS** (login → aceite) |
-| MULTIEMPRESA INVITE | **PASS** (nova membership no tenant B) |
+| EXISTING USER | **PASS** |
+| NEW USER | **PASS** |
+| MULTIEMPRESA INVITE | **PASS** |
 | ROLE VALIDATION | **PASS** |
 | PRIVILEGE ESCALATION | **PASS** |
 | CROSS-TENANT | **PASS** |
 | INACTIVE | **PASS** (reativação explícita no aceite) |
-| REDIRECTS | **MANUAL PENDING** (allow-list Supabase) |
 | P0 REGRESSION | **PASS** |
 | Billing | **FROZEN SAFE** |
 
+## Homologação production (evidência Renato)
+
+Fluxo validado de ponta a ponta:
+
+1. Solicitar recuperação (`/recuperar`)
+2. Receber e-mail real (Supabase Auth)
+3. Clicar no link
+4. Callback (`/api/auth/callback?next=/nova-senha`)
+5. Tela `/nova-senha`
+6. Definir nova senha
+7. Login com a nova senha
+
+### Supabase URL Configuration (confirmado — não alterar)
+
+| Item | Valor |
+|---|---|
+| Site URL | `https://gestao-no-foco.vercel.app` |
+| Redirect URLs | `gof://auth/reset` |
+| | `gof://auth/callback` |
+| | `https://gestao-no-foco.vercel.app/api/auth/callback` |
+| | `https://gestao-no-foco.vercel.app/api/auth/callback?next=/nova-senha` |
+
+Nenhuma alteração automática no painel Supabase / Vercel / Asaas nesta homologação.
+
 ## Fluxo antigo (34.1)
 
-1. Login → link ` /login?recuperar=1 ` **morto** (query ignorada).
+1. Login → link `/login?recuperar=1` **morto** (query ignorada).
 2. Sem páginas web `/recuperar` / `/nova-senha`.
 3. Convite: `emailSent: false` sempre; UI já sugeria copiar link, mas CTA dizia “Enviar”.
 4. Aceite em `/convite/[token]` já existia (hash de token, expiração, e-mail match).
@@ -61,7 +91,7 @@
 
 | Canal | Situação |
 |---|---|
-| Password recovery | **Supabase Auth** (nativo) — depende SMTP/Auth do projeto |
+| Password recovery | **Supabase Auth** — **PASS** em production (e-mail real recebido) |
 | Convite equipe | **FALLBACK LINK** — sem Resend/SMTP send no código |
 | `EMAIL_PROVIDER` / `RESEND_API_KEY` / `SMTP_HOST` | Detectados só para mensagem; **não enviam** |
 
@@ -75,26 +105,11 @@ Supabase Auth aplica rate limit em `resetPasswordForEmail`. UI trata mensagem de
 - Membro **inactive**: createInvite **permite**.
 - Aceite de convite legítimo: **reativa** membership (explícito no código/comentário). Não é reativação silenciosa fora do fluxo de convite.
 
-## Redirects / Site URL (ação manual Renato)
-
-No **Supabase Dashboard → Authentication → URL Configuration**:
-
-1. **Site URL:** `https://gestao-no-foco.vercel.app`
-2. **Redirect URLs** (adicionar se faltar):
-   - `https://gestao-no-foco.vercel.app/api/auth/callback`
-   - `https://gestao-no-foco.vercel.app/api/auth/callback?next=/nova-senha`
-   - `https://gestao-no-foco.vercel.app/nova-senha`
-   - (dev opcional) `http://localhost:3000/api/auth/callback**`
-
-Templates (password recovery): CTA deve apontar para o link gerado pelo Auth (não hardcodar localhost). Customização visual **não** é requisito desta sprint.
-
-**Não alterar Vercel envs** nesta sprint (APP_URL já documentado em `.env.example`).
-
 ## Migration
 
 **NENHUMA** — `tenant_invitations` e auth existentes bastam.
 
-## Testes
+## Testes (revalidação pós-homologação)
 
 | Suite | Resultado |
 |---|---|
@@ -104,20 +119,19 @@ Templates (password recovery): CTA deve apontar para o link gerado pelo Auth (n�
 | `test:rbac` | **92 PASS** |
 | lint | **PASS** (0 errors, 30 warnings pré-existentes) |
 | typecheck (`tsc` via `next build`) | **PASS** |
-| build | **PASS** (`/recuperar`, `/nova-senha` listados) |
+| build | **PASS** |
 | `git diff --check` | **PASS** |
 
 ## P1
 
-**Fechados nesta sprint (código):**
+**Fechados nesta sprint:**
 
-1. Recuperar senha web  
-2. Convite com fallback honesto de link  
+1. Recuperar senha web (código + homologação production)
+2. Convite com fallback honesto de link
 
 **Restantes:**
 
-1. `ASAAS_PRODUCTION_API_KEY_BLOCKER` (externo / billing congelado)  
-2. Homologação manual: Redirect URLs + teste real de e-mail de recovery no Supabase  
+1. `ASAAS_PRODUCTION_API_KEY_BLOCKER` (externo / billing congelado)
 
 ## Billing
 
@@ -125,4 +139,4 @@ Templates (password recovery): CTA deve apontar para o link gerado pelo Auth (n�
 
 ## Próxima sprint
 
-**34.5** — UX primeiro uso + mocks — **somente após homologação 34.4** (não iniciada aqui).
+**34.5** — UX primeiro uso + mocks — **recomendado iniciar após este fechamento** (não iniciada automaticamente aqui).

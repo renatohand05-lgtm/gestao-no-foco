@@ -2,6 +2,7 @@
 
 **Data:** 2026-08-14  
 **Branch:** `main`  
+**Commit:** `4bb0eef7bce4c6064d18be25e3f1070d0d1c010f`  
 **Tipo:** Auditoria final RC — sem features de negócio / billing / Asaas / PITR / 33.11  
 **34.7:** GO + homologação production **PASS** (informado)
 

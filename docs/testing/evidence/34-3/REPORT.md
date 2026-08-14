@@ -1,14 +1,47 @@
 # Sprint 34.3 — P1 mutation RBAC + tax guards + storage CRM
 
-**Data:** 2026-08-14
+**Data fechamento:** 2026-08-14
 **Branch:** `main`
 **Tipo:** HARDENING P1 — sem billing / Asaas / Vercel / mobile / recover / convite
 **34.2:** HOMOLOGADA (sem regressão)
-**Migration production:** **NÃO EXECUTADA** (manual Renato)
+**34.4:** não iniciada
 
-## Status
+## Status final
 
-**SPRINT 34.3: GO** (código + testes; storage RLS aguarda apply manual)
+**SPRINT 34.3: HOMOLOGADA — GO**
+
+| Critério | Status |
+|---|---|
+| CORE DELETE AUTH | **PASS** |
+| CLIENTES DELETE | **PASS** |
+| VENDAS DELETE | **PASS** |
+| OUTROS DELETES CORE | **PASS** |
+| MUTATION RBAC | **PASS** |
+| TENANT GUARDS | **PASS** |
+| TRIBUTÁRIO | **PASS** |
+| STORAGE CRM | **PASS** |
+| STORAGE RLS | **PASS** |
+| SERVICE ROLE | **PASS** |
+| CROSS-TENANT | **PASS** |
+| INACTIVE MEMBER | **PASS** |
+| P0 REGRESSION | **PASS** |
+| RBAC | **PASS** |
+| RLS | **PASS** |
+| Billing | **FROZEN SAFE** |
+
+**HOMOLOGADA PRODUCTION:** **SIM**
+
+## Homologação production (evidência Renato)
+
+| Item | Resultado | Nota |
+|---|---|---|
+| Migration `20260826_phase34_3_p1_auth_storage_hardening.sql` | **APLICADA** | Manual no Supabase Production |
+| POST_MIGRATION_SMOKE | **PASS** | Estrutural |
+| STORAGE-1 Policies CRM | **PASS** | 4 policies `crm_docs_*` |
+| STORAGE-2 Bucket privado | **PASS** | `public = false` |
+| STORAGE-3 Limite 10 MB | **PASS** | `10485760` bytes |
+| STORAGE-4 Bucket existe | **PASS** | `cliente-documentos` |
+| STORAGE RLS | **PASS** | |
 
 ## Inventário (resumo)
 
@@ -21,30 +54,12 @@
 | estoque | `deleteMovimentacaoAction` | MISSING_PERMISSION | SAFE (`estoque.excluir`) |
 | CRM docs | upload/delete/signedUrl | MISSING_PERMISSION | SAFE (editar/excluir/visualizar) |
 | fornecedores | `deleteFornecedorAction` | MISSING_PERMISSION | SAFE (`compras.excluir`) |
-| financeiro | deletes | SAFE (já `requireFinanceiroAction`) | SAFE |
-| agenda | delete | SAFE (`requireAgendaPerm`) | SAFE |
-| equipe | mutações | SAFE (`assertEquipeAdmin`) | SAFE |
-| tax/* | actions com `tenantId` | MISSING_TENANT (+ userId client) | SAFE (`requireActiveTenantIdMutation` + sessão) |
+| financeiro | deletes | SAFE | SAFE |
+| agenda | delete | SAFE | SAFE |
+| equipe | mutações | SAFE | SAFE |
+| tax/* | actions com `tenantId` | MISSING_TENANT | SAFE |
 
-## Correções
-
-### Helper
-- `lib/rbac/mutation-auth.ts` — `requireTenantMutationPermission` / `requireActiveTenantIdMutation`
-- Fail-closed: auth + membership ativa (34.2) + permission do catálogo
-
-### Storage CRM
-- Migration: `supabase/migrations/20260826_phase34_3_p1_auth_storage_hardening.sql`
-- Policies SELECT/INSERT/UPDATE/DELETE em `storage.objects` para bucket `cliente-documentos`
-- Path inalterado: `{tenant_id}/clientes/...`
-- App: valida `storage_path` prefix do tenant antes de signed URL
-- Bucket permanece **private**
-
-### Tax
-- Toda action com `tenantId` valida membership ativa + permission
-- `userId` do cliente **ignorado**; usa sessão
-- `getTaxExecutiveBundleAction` exige slug + match de id
-
-## Testes
+## Gates (fechamento homologação)
 
 | Gate | Resultado |
 |---|---|
@@ -54,28 +69,31 @@
 | lint | PASS (0 errors, 30 warnings) |
 | typecheck | PASS |
 | build | PASS |
+| `git diff --check` | PASS |
 
 ## Billing
 
 **FROZEN SAFE** — nenhuma env alterada; 33.11 não iniciada.
 
-## P1 fechados nesta sprint
+## P1 fechados
 
-1. Member delete clientes/vendas (e padrão em produtos/estoque/CRM docs/fornecedor)
-2. RBAC de mutação via helper + catálogo existente
-3. Tax actions sem requireTenant / userId trust
-4. Storage CRM policies + path check
+1. Member delete clientes/vendas (+ produtos/estoque/CRM docs/fornecedor)
+2. Mutation RBAC via helper + catálogo
+3. Tax tenant guards + userId da sessão
+4. Storage CRM policies + bucket private
 
 ## P1 restantes (34.4+)
 
 1. Recuperar senha web
 2. Convite e-mail (`emailSent: false`)
-3. ASAAS_PRODUCTION_API_KEY_BLOCKER (externo)
+3. `ASAAS_PRODUCTION_API_KEY_BLOCKER` (externo)
 
 ## P0 abertos
 
 0
 
-## Ação Renato
+## Próxima sprint
 
-Aplicar `20260826_phase34_3_p1_auth_storage_hardening.sql` no SQL Editor (após review). Não iniciar 34.4 até homologar storage + smoke deletes member.
+**34.4** — recuperação de senha + convite/e-mail.
+
+Não iniciada automaticamente — liberada após este fechamento.

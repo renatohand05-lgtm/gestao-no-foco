@@ -211,6 +211,8 @@ export type FornecedorOption = {
 export type FormaPagamentoOption = {
   id: string;
   nome: string;
+  /** Presente após 34.9 list — usado só para priorizar sugestão de CAP. */
+  tipo?: string | null;
 };
 
 export type CategoriaFinanceiraOption = {

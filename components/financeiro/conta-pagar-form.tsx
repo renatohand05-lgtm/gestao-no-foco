@@ -29,6 +29,10 @@ import type {
 } from "@/lib/financeiro/beneficiario-service";
 import { todayISO } from "@/lib/financeiro/conta-pagar-utils";
 import { DRE_LINHA_LABELS, type DreLinhaEconomica } from "@/lib/dre";
+import {
+  resolveFormasForPreset,
+} from "@/lib/financeiro/despesa-forma-pagamento";
+import type { DespesaPresetId } from "@/lib/financeiro/despesa-presets";
 import { contaPagarToFormValues } from "@/lib/financeiro/mappers";
 import {
   classificacaoContaPagarFormSchema,
@@ -132,6 +136,26 @@ export function ContaPagarForm({
     name: "categoria_financeira_id",
   });
   const planoId = useWatch({ control: form.control, name: "plano_conta_id" });
+  const presetId = useWatch({
+    control: form.control,
+    name: "despesa_preset_id",
+  }) as DespesaPresetId | "" | undefined;
+
+  const formasResolvidas = useMemo(
+    () => resolveFormasForPreset(formasPagamento, presetId || null),
+    [formasPagamento, presetId],
+  );
+
+  const formasOrdered = formasResolvidas.ordered as FormaPagamentoOption[];
+
+  const preferredFormaIds = useMemo(() => {
+    if (!presetId || formasResolvidas.preferredCount === 0) {
+      return new Set<string>();
+    }
+    return new Set(
+      formasOrdered.slice(0, formasResolvidas.preferredCount).map((f) => f.id),
+    );
+  }, [formasOrdered, formasResolvidas.preferredCount, presetId]);
 
   const linhaDre = useMemo(() => {
     const plano = planoContas.find((p) => p.id === planoId);
@@ -207,6 +231,7 @@ export function ContaPagarForm({
                 equipe={equipe}
                 categorias={categorias}
                 planoContas={planoContas}
+                formasPagamento={formasPagamento}
               />
             </FormSection>
           ) : null}
@@ -231,12 +256,41 @@ export function ContaPagarForm({
                   disabled={lockFinanceiro}
                 >
                   <option value="">Não informada</option>
-                  {formasPagamento.map((forma) => (
-                    <option key={forma.id} value={forma.id}>
-                      {forma.nome}
-                    </option>
-                  ))}
+                  {preferredFormaIds.size > 0 ? (
+                    <>
+                      <optgroup label="Sugeridas para este lançamento">
+                        {formasOrdered
+                          .filter((forma) => preferredFormaIds.has(forma.id))
+                          .map((forma) => (
+                            <option key={forma.id} value={forma.id}>
+                              {forma.nome}
+                            </option>
+                          ))}
+                      </optgroup>
+                      <optgroup label="Outras formas">
+                        {formasOrdered
+                          .filter((forma) => !preferredFormaIds.has(forma.id))
+                          .map((forma) => (
+                            <option key={forma.id} value={forma.id}>
+                              {forma.nome}
+                            </option>
+                          ))}
+                      </optgroup>
+                    </>
+                  ) : (
+                    formasOrdered.map((forma) => (
+                      <option key={forma.id} value={forma.id}>
+                        {forma.nome}
+                      </option>
+                    ))
+                  )}
                 </select>
+                {presetId && preferredFormaIds.size > 0 ? (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Prioridade sugerida pelo lançamento rápido — você pode
+                    alterar.
+                  </p>
+                ) : null}
               </FormField>
 
               <FormField

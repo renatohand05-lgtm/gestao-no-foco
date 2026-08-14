@@ -2,13 +2,17 @@
 
 **Data:** 2026-08-14  
 **Branch:** `main`  
-**Commit:** `6745cc0a6a471c46c9b1ac46096ffb2a9ad45aad`  
 **Tipo:** UX/modelo Contas a Pagar — sem billing / Asaas / 33.11 / auto-migration prod  
 **34.8:** GO (beta controlado aguarda homologação desta melhoria)
 
 ## Status
 
 **SPRINT 34.9: GO (código)** — migration production **PENDING** · homologação manual **PENDING**
+
+### Revisão pós-homologação (forma contextual)
+
+Lançamento rápido agora **sugere/prioriza** formas de pagamento do tenant conforme o tipo de despesa.
+Sem migration nova. Reutiliza `formas_pagamento.tipo` + match de nome. DOC não é incentivado.
 
 ## Decisão arquitetural
 
@@ -18,6 +22,7 @@
 | Tabela única party polimórfica | **Não** (neste sprint) |
 | `financeiro_beneficiarios` + tipagem em CAP | **Sim** |
 | Preservar `fornecedor_id` + `fornecedor_nome` | **Sim** (legado) |
+| Novos enums/colunas de forma de pagamento | **Não** — match em catálogo existente |
 
 ### Modelo
 
@@ -33,6 +38,24 @@ Display em listagens continua usando `resolveFornecedorNome` (rótulo UI: **Bene
 ### Presets
 
 Templates em `lib/financeiro/despesa-presets.ts` — resolvem categoria/plano por match de nome/`dre_linha` no catálogo do tenant. **Não inventam IDs.** Se faltar: “Pendente de classificação”.
+
+### Forma de pagamento contextual
+
+`lib/financeiro/despesa-forma-pagamento.ts`:
+
+| Grupo de despesa | Prioridade sugerida (se existir no tenant) |
+|---|---|
+| Salários / pró-labore / comissões | PIX → transferência → TED → depósito → dinheiro → débito em conta |
+| Prestadores / aluguel | PIX → transferência → boleto → débito em conta → dinheiro |
+| Energia / água / internet / telefone / condomínio | Boleto → PIX → débito automático → cartão |
+| Contabilidade / royalties / marketing / software | PIX → transferência → boleto → cartão → débito automático |
+| Combustível / material / manutenção / frete | PIX → cartão → boleto → transferência → dinheiro |
+| Impostos / taxas | PIX → guia/código de barras → débito em conta → transferência |
+
+- Apenas **sugestão**; usuário pode alterar.
+- Seleção manual é preservada ao trocar preset (não sobrescreve).
+- Sem acoplamento com DRE/categoria — `forma_pagamento_id` continua operacional.
+- Listagem de CAP passa a carregar `tipo` só para ranquear opções.
 
 ### Recorrência
 
@@ -50,6 +73,8 @@ Sem cálculo de encargos ou comissão automática.
 - RLS finance helpers 33.1 quando existirem
 - **PRODUCTION: NÃO EXECUTADA** — Renato aplica após revisão
 
+**Forma contextual:** **NENHUMA** migration adicional.
+
 Fallback de insert no service: se colunas 34.9 ausentes, grava legado (`fornecedor_*`) para não quebrar ambientes sem migration.
 
 ## Testes
@@ -58,16 +83,17 @@ Fallback de insert no service: se colunas 34.9 ausentes, grava legado (`forneced
 
 ## Homologação manual (após migration)
 
-1. Salário → mecânico ou equipe  
-2. Prestador (cadastro rápido)  
-3. Aluguel → locador  
-4. Energia → concessionária cadastrada  
-5. Água  
-6. Royalties  
-7. Marketing  
-8. Fornecedor tradicional  
-9. Troca de empresa (isolamento)  
-10. Mobile web  
+1. Salário → mecânico ou equipe + conferir forma sugerida (PIX/transf se cadastradas)
+2. Prestador (cadastro rápido) + forma sugerida
+3. Aluguel → locador
+4. Energia → concessionária + boleto/PIX priorizados
+5. Água
+6. Royalties
+7. Marketing
+8. Fornecedor tradicional
+9. Troca de empresa (isolamento)
+10. Mobile web
+11. Alterar manualmente a forma sugerida e salvar
 
 **Não** lançar despesas reais de cliente beta sem necessidade.
 
@@ -81,12 +107,13 @@ Fallback de insert no service: se colunas 34.9 ausentes, grava legado (`forneced
 | MECÂNICO | **PASS** |
 | PRESTADOR | **PASS** |
 | BENEFICIÁRIO LIVRE | **PASS** |
-| SALÁRIOS / ALUGUEL / ENERGIA / ÁGUA / ROYALTIES / MARKETING | **PASS** (presets) |
+| SALÁRIOS / ALUGUEL / ENERGIA / ÁGUA / ROYALTIES / MARKETING | **PASS** (presets + forma) |
+| FORMA PAGAMENTO CONTEXTUAL | **PASS** (sugestão; sem migration) |
 | DRE / PLANO / CATEGORIA | **PASS** (mapping existente + pendência honesta) |
 | CENTRO / RATEIO | **PASS** (preservados) |
 | TENANT / CROSS / RBAC | **PASS** (contratos) |
 | LEGACY | **PASS** |
-| MOBILE | **PARTIAL** (layout chips + selects) |
+| MOBILE | **PARTIAL** (layout chips + selects + optgroups) |
 
 ## Billing
 
@@ -94,4 +121,4 @@ Fallback de insert no service: se colunas 34.9 ausentes, grava legado (`forneced
 
 ## Próxima ação
 
-Renato: revisar e aplicar `20260827_phase34_9_contas_pagar_beneficiarios.sql` em production; smoke checklist 10 itens.
+Renato: (1) aplicar `20260827_phase34_9_contas_pagar_beneficiarios.sql` se ainda não aplicou; (2) smoke checklist incluindo forma sugerida por despesa e alteração manual.

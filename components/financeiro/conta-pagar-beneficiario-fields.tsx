@@ -22,6 +22,7 @@ import {
   resolveDespesaPreset,
   type DespesaPresetId,
 } from "@/lib/financeiro/despesa-presets";
+import { suggestFormaPagamentoId } from "@/lib/financeiro/despesa-forma-pagamento";
 import type { ContaPagarFormInput } from "@/lib/financeiro/validations";
 import { getFornecedorAutofillAction } from "@/lib/master-data/actions";
 import { mergeAutofillWithoutOverwrite } from "@/lib/master-data/master-data-suggestions";
@@ -33,6 +34,7 @@ import type {
 } from "@/lib/financeiro/beneficiario-service";
 import type {
   CategoriaFinanceiraOption,
+  FormaPagamentoOption,
   FornecedorOption,
   PlanoContaOption,
 } from "@/types/contas-pagar";
@@ -53,6 +55,7 @@ type Props = {
   equipe: EquipePayeeOption[];
   categorias: CategoriaFinanceiraOption[];
   planoContas: PlanoContaOption[];
+  formasPagamento?: FormaPagamentoOption[];
   onBeneficiariosChange?: (next: BeneficiarioOption[]) => void;
 };
 
@@ -65,10 +68,14 @@ export function ContaPagarBeneficiarioFields({
   equipe,
   categorias,
   planoContas,
+  formasPagamento = [],
   onBeneficiariosChange,
 }: Props) {
   const form = useFormContext<ContaPagarFormInput>();
   const [presetHint, setPresetHint] = useState<string | null>(null);
+  const [lastSuggestedFormaId, setLastSuggestedFormaId] = useState<
+    string | null
+  >(null);
   const [autofillHint, setAutofillHint] = useState<{
     suggestion: ContaPagarAutofillSuggestion;
     applied: string[];
@@ -156,10 +163,34 @@ export function ContaPagarBeneficiarioFields({
     if (resolved.planoContaId) {
       form.setValue("plano_conta_id", resolved.planoContaId);
     }
+
+    const suggestedFormaId = suggestFormaPagamentoId(
+      formasPagamento,
+      presetId,
+    );
+    const currentForma = String(form.getValues("forma_pagamento_id") ?? "");
+    const canApplyForma =
+      Boolean(suggestedFormaId) &&
+      (!currentForma || currentForma === lastSuggestedFormaId);
+    if (canApplyForma && suggestedFormaId) {
+      form.setValue("forma_pagamento_id", suggestedFormaId, {
+        shouldDirty: true,
+      });
+      setLastSuggestedFormaId(suggestedFormaId);
+    } else if (!suggestedFormaId) {
+      setLastSuggestedFormaId(null);
+    }
+
+    const formaHint = suggestedFormaId
+      ? canApplyForma
+        ? "Forma de pagamento sugerida (você pode alterar)."
+        : "Forma sugerida disponível — mantida a seleção manual atual."
+      : "Nenhuma forma cadastrada casa com a sugestão deste tipo — escolha manualmente.";
+
     setPresetHint(
       resolved.classificacaoPendente
-        ? `Pendente de classificação — ${resolved.matchReason}. Configure categoria/plano manualmente.`
-        : `Classificação sugerida — ${resolved.matchReason}`,
+        ? `Pendente de classificação — ${resolved.matchReason}. Configure categoria/plano manualmente. ${formaHint}`
+        : `Classificação sugerida — ${resolved.matchReason}. ${formaHint}`,
     );
     setAutofillHint(null);
   }

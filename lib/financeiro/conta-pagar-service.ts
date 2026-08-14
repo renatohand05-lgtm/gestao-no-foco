@@ -977,7 +977,7 @@ export class ContaPagarService {
   async listFormasPagamento(): Promise<FormaPagamentoOption[]> {
     const { data, error } = await this.supabase
       .from("formas_pagamento")
-      .select("id, nome")
+      .select("id, nome, tipo")
       .eq("tenant_id", this.tenantId)
       .is("deleted_at", null)
       .eq("ativo", true)

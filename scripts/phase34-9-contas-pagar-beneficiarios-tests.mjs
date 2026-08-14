@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 34.9 — Contas a Pagar: beneficiários + presets.
+ * Sprint 34.9 — Contas a Pagar: beneficiários + presets + forma contextual.
  */
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -23,6 +23,15 @@ describe("34.9 migration + schema contracts", () => {
     assert.match(sql, /fornecedor_id/);
     assert.ok(!/\bDELETE FROM\b/i.test(sql));
     assert.ok(!/\bDROP TABLE\b/i.test(sql));
+  });
+
+  it("forma contextual não exige migration nova", () => {
+    const formaMod = read("lib/financeiro/despesa-forma-pagamento.ts");
+    assert.match(formaMod, /suggestFormaPagamentoId/);
+    assert.match(formaMod, /DESPESA_FORMA_PREFERENCIAS/);
+    assert.ok(!formaMod.includes("create table"));
+    const service = read("lib/financeiro/conta-pagar-service.ts");
+    assert.match(service, /select\("id, nome, tipo"\)/);
   });
 });
 
@@ -82,6 +91,110 @@ describe("34.9 presets + classificação", () => {
   });
 });
 
+describe("34.9 forma de pagamento contextual", () => {
+  const catalog = [
+    { id: "fp-pix", nome: "PIX", tipo: "pix" },
+    { id: "fp-ted", nome: "TED", tipo: "transferencia" },
+    { id: "fp-transf", nome: "Transferência bancária", tipo: "transferencia" },
+    { id: "fp-dep", nome: "Depósito bancário", tipo: "outros" },
+    { id: "fp-din", nome: "Dinheiro", tipo: "dinheiro" },
+    { id: "fp-bol", nome: "Boleto", tipo: "boleto" },
+    { id: "fp-da", nome: "Débito automático", tipo: "outros" },
+    { id: "fp-card", nome: "Cartão crédito", tipo: "cartao_credito" },
+    { id: "fp-deb", nome: "Débito em conta", tipo: "outros" },
+    { id: "fp-guia", nome: "Guia / código de barras", tipo: "outros" },
+    { id: "fp-doc", nome: "DOC", tipo: "transferencia" },
+    { id: "fp-cheque", nome: "Cheque", tipo: "cheque" },
+  ];
+
+  it("salário / prestador / aluguel / energia / água / royalties / marketing", async () => {
+    const {
+      suggestFormaPagamentoId,
+      orderFormasPagamentoForPreset,
+      isFormaPagamentoDoc,
+    } = await import(
+      pathToFileURL(join(root, "lib/financeiro/despesa-forma-pagamento.ts"))
+        .href + `?t=${Date.now()}`
+    );
+
+    assert.equal(suggestFormaPagamentoId(catalog, "salarios"), "fp-pix");
+    assert.equal(suggestFormaPagamentoId(catalog, "prestadores"), "fp-pix");
+    assert.equal(suggestFormaPagamentoId(catalog, "aluguel"), "fp-pix");
+    assert.equal(suggestFormaPagamentoId(catalog, "energia"), "fp-bol");
+    assert.equal(suggestFormaPagamentoId(catalog, "agua"), "fp-bol");
+    assert.equal(suggestFormaPagamentoId(catalog, "royalties"), "fp-pix");
+    assert.equal(suggestFormaPagamentoId(catalog, "marketing"), "fp-pix");
+    assert.equal(suggestFormaPagamentoId(catalog, "impostos"), "fp-pix");
+
+    const orderedSalario = orderFormasPagamentoForPreset(catalog, "salarios");
+    assert.equal(orderedSalario[0].id, "fp-pix");
+    assert.ok(
+      orderedSalario.findIndex((f) => f.id === "fp-doc") >
+        orderedSalario.findIndex((f) => f.id === "fp-transf"),
+    );
+    assert.equal(
+      isFormaPagamentoDoc(catalog.find((f) => f.id === "fp-doc")),
+      true,
+    );
+  });
+
+  it("não inventa forma quando catálogo não casa", async () => {
+    const { suggestFormaPagamentoId } = await import(
+      pathToFileURL(join(root, "lib/financeiro/despesa-forma-pagamento.ts"))
+        .href + `?t=${Date.now()}`
+    );
+    assert.equal(
+      suggestFormaPagamentoId(
+        [{ id: "x", nome: "Cheque avulso", tipo: "cheque" }],
+        "salarios",
+      ),
+      null,
+    );
+  });
+
+  it("energia prioriza boleto sobre cartão; DOC nunca sugerido", async () => {
+    const { suggestFormaPagamentoId, formaMatchesPreferencia } = await import(
+      pathToFileURL(join(root, "lib/financeiro/despesa-forma-pagamento.ts"))
+        .href + `?t=${Date.now()}`
+    );
+    const subset = [
+      { id: "card", nome: "Cartão", tipo: "cartao_credito" },
+      { id: "bol", nome: "Boleto", tipo: "boleto" },
+      { id: "doc", nome: "DOC", tipo: "transferencia" },
+    ];
+    assert.equal(suggestFormaPagamentoId(subset, "energia"), "bol");
+    assert.equal(
+      formaMatchesPreferencia(
+        { id: "doc", nome: "DOC", tipo: "transferencia" },
+        "transferencia",
+      ),
+      false,
+    );
+  });
+
+  it("UX aplica sugestão sem travar alteração manual", () => {
+    const fields = read(
+      "components/financeiro/conta-pagar-beneficiario-fields.tsx",
+    );
+    assert.match(fields, /suggestFormaPagamentoId/);
+    assert.match(fields, /lastSuggestedFormaId/);
+    assert.match(fields, /você pode alterar/);
+    const form = read("components/financeiro/conta-pagar-form.tsx");
+    assert.match(form, /Sugeridas para este lançamento/);
+    assert.match(form, /resolveFormasForPreset/);
+    assert.match(form, /formasPagamento=\{formasPagamento\}/);
+  });
+
+  it("beneficiário equipe/mecânico permanece sem virar fornecedor", () => {
+    const fields = read(
+      "components/financeiro/conta-pagar-beneficiario-fields.tsx",
+    );
+    assert.match(fields, /mecanico_id/);
+    assert.match(fields, /beneficiario_profile_id/);
+    assert.match(fields, /Não cria fornecedor/);
+  });
+});
+
 describe("34.9 beneficiário types + form wiring", () => {
   it("tipos e labels cobrem jornada", async () => {
     const mod = await import(
@@ -124,7 +237,7 @@ describe("34.9 beneficiário types + form wiring", () => {
   });
 });
 
-describe("34.9 evidence + billing freeze", () => {
+describe("34.9 evidence + billing freeze + tenant/RBAC contracts", () => {
   it("REPORT 34-9 presente", () => {
     assert.ok(existsSync(join(root, "docs/testing/evidence/34-9/REPORT.md")));
   });
@@ -135,5 +248,14 @@ describe("34.9 evidence + billing freeze", () => {
     );
     const status = await healthMod.buildSystemStatus(false);
     assert.equal(status.billing.frozen, true);
+  });
+
+  it("CAP actions mantêm gate de tenant/permissão", () => {
+    const actions = read("lib/financeiro/actions.ts");
+    assert.match(actions, /createContaPagarAction/);
+    assert.match(actions, /requireFinanceiroAction/);
+    const benefActions = read("lib/financeiro/beneficiario-actions.ts");
+    assert.match(benefActions, /requireFinanceiroAction/);
+    assert.match(benefActions, /financeiro\.criar/);
   });
 });

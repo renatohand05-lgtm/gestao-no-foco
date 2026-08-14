@@ -2,6 +2,7 @@
 
 **Data:** 2026-08-14  
 **Branch:** `main`  
+**Commit:** `660982c4fd42461bd95ae28df095477e07a32efe`  
 **Tipo:** Honestidade de KPIs/relatórios essenciais — sem BI completo / billing / Asaas / 34.8  
 **34.6:** GO
 

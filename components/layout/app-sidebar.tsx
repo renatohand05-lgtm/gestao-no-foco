@@ -56,13 +56,16 @@ export function AppSidebar({
   const dark = resolved === "dark";
 
   const groups = useMemo(() => {
-    const raw = getTenantNav(tenant.slug, tenant.segment);
+    const raw = getTenantNav(tenant.slug, tenant.segment, {
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    });
     const items =
       permissions === undefined
         ? raw
         : filterNavByPermissions(raw, permissions);
     return buildSidebarNavGroups(items);
-  }, [tenant.slug, tenant.segment, permissions]);
+  }, [tenant.slug, tenant.segment, tenant.segment_version, tenant.segment_config, permissions]);
 
   return (
     <Sidebar

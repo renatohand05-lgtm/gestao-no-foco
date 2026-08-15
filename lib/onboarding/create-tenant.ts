@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/types/database";
 import type { TenantSegment } from "@/types";
+import { SEGMENT_ENGINE_VERSION } from "@/lib/segments";
 
 type CreateTenantInput = {
   name: string;
@@ -74,6 +75,18 @@ export async function createTenantWithOwner(
       success: false,
       error: { message: "Falha ao criar empresa (resposta vazia)." },
     };
+  }
+
+  try {
+    await supabase
+      .from("tenants")
+      .update({
+        segment_version: SEGMENT_ENGINE_VERSION,
+        segment_config: {},
+      })
+      .eq("id", tenantId);
+  } catch {
+    // Colunas 35.0 podem ainda não existir — tenant permanece legado-compatible.
   }
 
   return { success: true, tenantId, slug };

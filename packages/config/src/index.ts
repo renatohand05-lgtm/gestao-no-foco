@@ -10,7 +10,16 @@ export const APP_ENV_VALUES: readonly AppEnv[] = [
   "production",
 ] as const;
 
-export type SegmentId = "oficina" | "varejo" | "servicos" | "generico";
+export type SegmentId =
+  | "oficina"
+  | "varejo"
+  | "servicos"
+  | "generico"
+  | "barbearia"
+  | "lava_rapido"
+  | "consultoria"
+  | "clinica_estetica"
+  | "consultorio_odontologico";
 
 export const MOCK_TENANTS = [
   { id: "tenant-demo-1", slug: "demo-oficina", name: "Oficina Demo", segmentId: "oficina" as SegmentId },

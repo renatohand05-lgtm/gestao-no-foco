@@ -139,6 +139,37 @@ const PACKS: Record<EnterpriseSegmentId, Omit<SegmentTemplatePack, "segmentId">>
       { category: "indicadores", label: "Indicadores", examples: ["OPs abertas"] },
     ],
   },
+  barbearia: {
+    title: "Template Barbearia",
+    description: "Serviços, agenda, comissões e categorias financeiras sugeridas.",
+    items: [
+      { category: "agenda", label: "Agenda", examples: ["Corte", "Barba"] },
+      { category: "servicos", label: "Serviços", examples: ["Corte", "Barba", "Combo"] },
+      { category: "profissionais", label: "Barbeiros", examples: ["Profissional 1"] },
+      { category: "produtos", label: "Produtos", examples: ["Pomada", "Shampoo"] },
+      { category: "categorias", label: "Categorias financeiras", examples: ["Salários", "Comissões", "Aluguel"] },
+    ],
+  },
+  clinica_estetica: {
+    title: "Template Clínica de estética",
+    description: "Procedimentos, pacotes e financeiro — sem prontuário clínico nesta versão.",
+    items: [
+      { category: "agenda", label: "Agenda", examples: ["Avaliação", "Procedimento"] },
+      { category: "servicos", label: "Procedimentos", examples: ["Limpeza de pele", "Pacote mensal"] },
+      { category: "produtos", label: "Produtos", examples: ["Cosméticos"] },
+      { category: "categorias", label: "Categorias financeiras", examples: ["Salários", "Materiais", "Aluguel"] },
+    ],
+  },
+  consultorio_odontologico: {
+    title: "Template Consultório odontológico",
+    description: "Pacientes, agenda e financeiro — sem odontograma nesta versão.",
+    items: [
+      { category: "clientes", label: "Pacientes", examples: ["Paciente"] },
+      { category: "agenda", label: "Agenda", examples: ["Consulta", "Retorno"] },
+      { category: "servicos", label: "Procedimentos", examples: ["Avaliação", "Limpeza"] },
+      { category: "categorias", label: "Categorias financeiras", examples: ["Salários", "Materiais", "Aluguel"] },
+    ],
+  },
   outro: {
     title: "Template Genérico",
     description: "Base mínima adaptável a qualquer negócio.",

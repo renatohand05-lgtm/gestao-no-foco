@@ -29,7 +29,7 @@ const labels = ENTERPRISE_SEGMENTS.map((s) => s.label);
 for (const expected of [
   "Oficina Mecânica",
   "Auto Center",
-  "Lava Rápido",
+  "Lava-rápido / Estética automotiva",
   "Comércio",
   "Restaurante",
   "Serviços",

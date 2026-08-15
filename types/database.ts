@@ -42,6 +42,8 @@ export type Database = {
           name: string;
           slug: string;
           segment: string | null;
+          segment_version: number | null;
+          segment_config: Json;
           logo_url: string | null;
           created_at: string;
           updated_at: string;
@@ -51,6 +53,8 @@ export type Database = {
           name: string;
           slug: string;
           segment?: string | null;
+          segment_version?: number | null;
+          segment_config?: Json;
           logo_url?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -60,6 +64,8 @@ export type Database = {
           name?: string;
           slug?: string;
           segment?: string | null;
+          segment_version?: number | null;
+          segment_config?: Json;
           logo_url?: string | null;
           created_at?: string;
           updated_at?: string;

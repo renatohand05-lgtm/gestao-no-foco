@@ -14,6 +14,10 @@ export type Tenant = {
   name: string;
   slug: string;
   segment: TenantSegment | null;
+  /** Sprint 35.0 — null = comportamento legado. */
+  segment_version?: number | null;
+  /** Overrides de capabilities/terminologia do tenant. */
+  segment_config?: Record<string, unknown> | null;
   logo_url: string | null;
   created_at: string;
   updated_at: string;
@@ -25,7 +29,11 @@ export type TenantSegment =
   | "comercio"
   | "consultoria"
   | "servicos"
-  | "outro";
+  | "outro"
+  | "lava_rapido"
+  | "barbearia"
+  | "clinica_estetica"
+  | "consultorio_odontologico";
 
 export type TenantMember = {
   id: string;

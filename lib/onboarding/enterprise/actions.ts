@@ -6,9 +6,9 @@ import type { CompanyProfile } from "@/config/onboarding/company-fields";
 import type { EnterpriseOnboardingStepId } from "@/config/onboarding/flow";
 import {
   getEnterpriseSegment,
-  toNavSegmentId,
   type EnterpriseSegmentId,
 } from "@/config/onboarding/segments";
+import { SEGMENT_ENGINE_VERSION } from "@/lib/segments";
 import type { ImportChannelId } from "@/config/onboarding/import-channels";
 import type { ImplantationItemId } from "@/config/onboarding/implantation-checklist";
 import {
@@ -26,7 +26,6 @@ import {
 } from "@/lib/onboarding/onboarding-progress";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth, requireTenant } from "@/lib/tenants";
-import type { TenantSegment } from "@/types";
 
 async function persistEnterpriseMeta(params: {
   tenantId: string;
@@ -131,13 +130,16 @@ export async function saveEnterpriseOnboardingAction(input: {
 
   // Atualiza segmento canônico do tenant (nav) sem tocar módulos de negócio
   if (next.segmentId) {
-    const navSegment = toNavSegmentId(next.segmentId) as TenantSegment;
     const supabase = await createClient();
     const patch: {
-      segment: TenantSegment;
+      segment: string;
+      segment_version: number;
       name?: string;
       logo_url?: string | null;
-    } = { segment: navSegment };
+    } = {
+      segment: next.segmentId,
+      segment_version: SEGMENT_ENGINE_VERSION,
+    };
 
     const displayName =
       next.company.tradeName.trim() || next.company.legalName.trim();
@@ -148,7 +150,19 @@ export async function saveEnterpriseOnboardingAction(input: {
       patch.logo_url = next.company.logoUrl.trim();
     }
 
-    await supabase.from("tenants").update(patch).eq("id", tenant.id);
+    const { error: segmentError } = await supabase
+      .from("tenants")
+      .update(patch)
+      .eq("id", tenant.id);
+
+    if (segmentError) {
+      const legacyPatch: { segment: string; name?: string; logo_url?: string | null } = {
+        segment: patch.segment,
+      };
+      if (patch.name) legacyPatch.name = patch.name;
+      if (patch.logo_url !== undefined) legacyPatch.logo_url = patch.logo_url;
+      await supabase.from("tenants").update(legacyPatch).eq("id", tenant.id);
+    }
   }
 
   const saved = await persistEnterpriseMeta({

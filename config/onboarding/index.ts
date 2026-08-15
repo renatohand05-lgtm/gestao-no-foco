@@ -4,6 +4,8 @@ export {
   isEnterpriseSegmentId,
   searchEnterpriseSegments,
   toNavSegmentId,
+  listProductOnboardingSegments,
+  PRODUCT_ONBOARDING_SEGMENT_IDS,
   type EnterpriseSegmentDef,
   type EnterpriseSegmentId,
   type NavSegmentId,

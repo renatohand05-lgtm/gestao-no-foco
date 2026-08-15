@@ -7,6 +7,9 @@ export type EnterpriseSegmentId =
   | "oficina"
   | "auto_center"
   | "lava_rapido"
+  | "barbearia"
+  | "clinica_estetica"
+  | "consultorio_odontologico"
   | "comercio"
   | "restaurante"
   | "servicos"
@@ -54,10 +57,34 @@ export const ENTERPRISE_SEGMENTS: readonly EnterpriseSegmentDef[] = [
   },
   {
     id: "lava_rapido",
-    label: "Lava Rápido",
+    label: "Lava-rápido / Estética automotiva",
     shortDescription: "Lavagem, estética e agenda de boxes",
     icon: "Droplets",
-    searchTerms: ["lava", "lavagem", "estetica", "box"],
+    searchTerms: ["lava", "lavagem", "estetica", "box", "detalhamento"],
+    navSegment: "servicos",
+  },
+  {
+    id: "barbearia",
+    label: "Barbearia",
+    shortDescription: "Agenda, barbeiros, serviços e comissões",
+    icon: "CalendarClock",
+    searchTerms: ["barbearia", "barbearo", "cabelo", "barba"],
+    navSegment: "servicos",
+  },
+  {
+    id: "clinica_estetica",
+    label: "Clínica de estética",
+    shortDescription: "Agenda, procedimentos, pacotes e produtos",
+    icon: "CalendarClock",
+    searchTerms: ["clinica", "estetica", "beleza", "procedimento"],
+    navSegment: "servicos",
+  },
+  {
+    id: "consultorio_odontologico",
+    label: "Consultório odontológico",
+    shortDescription: "Pacientes, agenda, procedimentos e financeiro",
+    icon: "Briefcase",
+    searchTerms: ["odontologico", "dentista", "consultorio", "paciente"],
     navSegment: "servicos",
   },
   {
@@ -155,4 +182,18 @@ export function searchEnterpriseSegments(
       .toLowerCase();
     return hay.includes(q);
   });
+}
+
+/** Sprint 35.0 — os 6 segmentos de produto da fundação (onboarding). */
+export const PRODUCT_ONBOARDING_SEGMENT_IDS = [
+  "oficina",
+  "barbearia",
+  "lava_rapido",
+  "consultoria",
+  "clinica_estetica",
+  "consultorio_odontologico",
+] as const;
+
+export function listProductOnboardingSegments(): readonly EnterpriseSegmentDef[] {
+  return PRODUCT_ONBOARDING_SEGMENT_IDS.map((id) => BY_ID[id]);
 }

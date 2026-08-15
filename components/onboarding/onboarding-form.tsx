@@ -15,16 +15,14 @@ import {
 } from "@/lib/onboarding/create-tenant";
 import { createClient } from "@/lib/supabase/client";
 import { buildLastTenantCookie } from "@/lib/tenant/active-tenant";
+import { listProductOnboardingSegments } from "@/config/onboarding/segments";
 import type { TenantSegment } from "@/types";
 
-const segments: { value: TenantSegment; label: string }[] = [
-  { value: "oficina", label: "Oficina mecânica" },
-  { value: "restaurante", label: "Restaurante" },
-  { value: "comercio", label: "Comércio" },
-  { value: "consultoria", label: "Consultoria" },
-  { value: "servicos", label: "Prestador de serviços" },
-  { value: "outro", label: "Outro" },
-];
+const segments: { value: TenantSegment; label: string }[] =
+  listProductOnboardingSegments().map((s) => ({
+    value: s.id as TenantSegment,
+    label: s.label,
+  }));
 
 type OnboardingFormProps = {
   mode?: "first" | "additional";
@@ -33,7 +31,7 @@ type OnboardingFormProps = {
 export function OnboardingForm({ mode = "first" }: OnboardingFormProps) {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [segment, setSegment] = useState<TenantSegment>("comercio");
+  const [segment, setSegment] = useState<TenantSegment>("oficina");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -125,7 +123,7 @@ export function OnboardingForm({ mode = "first" }: OnboardingFormProps) {
           </p>
         ) : null}
 
-        <AuthField id="segment" label="Segmento">
+        <AuthField id="segment" label="Qual é o seu tipo de negócio?">
           <select
             id="segment"
             value={segment}

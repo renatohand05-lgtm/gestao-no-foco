@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 
 import { getSegmentNavLabels } from "./segment-labels";
+import { filterNavByCapabilities } from "../lib/segments/nav.ts";
+import { resolveSegmentContext } from "../lib/segments/resolve.ts";
 
 /**
  * Alinhado a lib/rbac/executive-access (EXECUTIVE_DASHBOARD_ANY_OF).
@@ -75,9 +77,28 @@ export const NAV_GROUP_ORDER: readonly NavGroupId[] = [
 export function getTenantNav(
   tenantSlug: string,
   segment?: string | null,
+  options?: {
+    segmentVersion?: number | null;
+    segmentConfig?: unknown;
+  },
 ): NavItem[] {
   const base = `/${tenantSlug}`;
-  const labels = getSegmentNavLabels(segment);
+  const segmentCtx = resolveSegmentContext({
+    segment,
+    segmentVersion: options?.segmentVersion,
+    segmentConfig: options?.segmentConfig,
+  });
+  const labels = (() => {
+    const baseLabels = getSegmentNavLabels(segment);
+    if (!segmentCtx.usesCapabilityEngine) return baseLabels;
+    return {
+      ...baseLabels,
+      team: segmentCtx.terminology.professionals,
+      teamDescription: `${segmentCtx.terminology.professionals} e produtividade`,
+      workOrders: segmentCtx.terminology.workOrder,
+      workOrdersDescription: segmentCtx.terminology.workOrder,
+    };
+  })();
 
   const items: NavItem[] = [
     {
@@ -151,7 +172,9 @@ export function getTenantNav(
     },
     {
       id: "clients",
-      title: "Clientes",
+      title: segmentCtx.usesCapabilityEngine
+        ? segmentCtx.terminology.customers
+        : "Clientes",
       href: `${base}/clientes`,
       icon: Users,
       group: "operacao",
@@ -160,7 +183,9 @@ export function getTenantNav(
     },
     {
       id: "products",
-      title: "Produtos & Serviços",
+      title: segmentCtx.usesCapabilityEngine
+        ? segmentCtx.terminology.catalog
+        : "Produtos & Serviços",
       href: `${base}/produtos`,
       icon: Package,
       group: "operacao",
@@ -290,12 +315,16 @@ export function getTenantNav(
   // Sprint 34.5 — piloto: ocultar módulos mock/parcial que aparentam prontidão.
   const PILOT_HIDDEN_IDS = new Set(["automacoes"]);
 
-  return items.filter((item) => {
+  const byLegacyLabels = items.filter((item) => {
     if (PILOT_HIDDEN_IDS.has(item.id)) return false;
-    if (item.id === "mechanics" && !labels.showTeamNavItem) return false;
-    if (item.id === "work-orders" && !labels.showWorkOrders) return false;
+    if (!segmentCtx.usesCapabilityEngine) {
+      if (item.id === "mechanics" && !labels.showTeamNavItem) return false;
+      if (item.id === "work-orders" && !labels.showWorkOrders) return false;
+    }
     return true;
   });
+
+  return filterNavByCapabilities(byLegacyLabels, segmentCtx);
 }
 
 export const marketingNav = [

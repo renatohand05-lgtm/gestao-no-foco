@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import {
+  listProductOnboardingSegments,
   searchEnterpriseSegments,
   type EnterpriseSegmentId,
 } from "@/config/onboarding/segments";
@@ -44,10 +45,11 @@ type Props = {
 
 export function SegmentPicker({ value, onChange }: Props) {
   const [query, setQuery] = useState("");
-  const segments = useMemo(
-    () => searchEnterpriseSegments(query),
-    [query],
-  );
+  const segments = useMemo(() => {
+    const q = query.trim();
+    if (q) return searchEnterpriseSegments(q);
+    return listProductOnboardingSegments();
+  }, [query]);
 
   return (
     <div className="space-y-4">
@@ -59,7 +61,7 @@ export function SegmentPicker({ value, onChange }: Props) {
           id="segment-search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ex: oficina, restaurante, consultoria…"
+          placeholder="Ex: oficina, barbearia, consultoria…"
           className={cn("mt-1 min-h-11", gofFocusRing)}
           autoComplete="off"
         />
@@ -111,6 +113,10 @@ export function SegmentPicker({ value, onChange }: Props) {
       {segments.length === 0 ? (
         <p className={gofTypography.caption} role="status">
           Nenhum segmento encontrado para “{query}”.
+        </p>
+      ) : !query.trim() ? (
+        <p className={gofTypography.caption}>
+          Os 6 tipos de negócio da fundação. Pesquise para ver outras opções.
         </p>
       ) : null}
     </div>

@@ -554,7 +554,8 @@
     "test:phase34-6-ops-readiness": "node --experimental-strip-types --test scripts/phase34-6-ops-readiness-tests.mjs",
     "test:phase34-7-reports-integrity": "node --experimental-strip-types --test scripts/phase34-7-reports-integrity-tests.mjs",
     "test:phase34-8-release-candidate": "node --experimental-strip-types --test scripts/phase34-8-release-candidate-tests.mjs",
-    "test:phase34-9-contas-pagar-beneficiarios": "node --experimental-strip-types --test scripts/phase34-9-contas-pagar-beneficiarios-tests.mjs"
+    "test:phase34-9-contas-pagar-beneficiarios": "node --experimental-strip-types --test scripts/phase34-9-contas-pagar-beneficiarios-tests.mjs",
+    "test:phase35-0-segment-architecture": "node --experimental-strip-types --test scripts/phase35-0-segment-architecture-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

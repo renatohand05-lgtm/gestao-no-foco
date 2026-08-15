@@ -45,7 +45,7 @@ const navSrc = readFileSync(resolve("config/navigation.ts"), "utf8");
 const sidebar = readFileSync(resolve("components/layout/app-sidebar.tsx"), "utf8");
 check("navigation usa getSegmentNavLabels", /getSegmentNavLabels/.test(navSrc));
 check("navigation filtra mechanics", /item\.id === "mechanics"/.test(navSrc));
-check("sidebar passa tenant.segment", /getTenantNav\(tenant\.slug,\s*tenant\.segment\)/.test(sidebar));
+check("sidebar passa tenant.segment", /getTenantNav\(tenant\.slug,\s*tenant\.segment/.test(sidebar));
 check("rota interna mecanicos preservada", /oficina\/mecanicos/.test(navSrc));
 
 console.log(`\nResultado: ${pass} PASS · ${fail} FAIL`);

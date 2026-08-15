@@ -2,17 +2,18 @@
 
 **Data:** 2026-08-15  
 **Branch:** `main`  
+**Commit código:** `f6c81beace30a683ab9a3d8c1b018bfec208604c`  
 **Tipo:** Fundação de produto — sem billing / Asaas / 35.1 / auto-migration prod
 
 ## Status
 
-**SPRINT 35.0: GO (código)** · homologação **PENDING** · migration production **PENDING**
+**SPRINT 35.0: GO** · homologação visual **PASS** · migration production **PASS**
 
 ## Decisão
 
 Reuso de `tenants.segment` (já existia). Colunas aditivas: `segment_version`, `segment_config`. Motor central em `lib/segments/` (capabilities, não `if (segment === …)` espalhado). Tenant legado (`segment_version` nulo) mantém a UX atual.
 
-## Gates
+## Gates (código)
 
 | Gate | Resultado |
 |---|---|
@@ -40,12 +41,35 @@ Arquivo: `supabase/migrations/20260830_phase35_0_tenant_segment_config.sql`
 - Aditiva (`ADD COLUMN IF NOT EXISTS`)
 - Sem `DELETE` / `DROP TABLE`
 - RPC `create_tenant_with_owner` mesma assinatura; tenants novos nascem com `segment_version = 1`
-- **Não aplicada em production**
+- **Production: PASS** (aplicada por Renato)
 
-## Homologação manual (Renato)
+## Homologação manual
 
-1. Aplicar a migration acima no projeto Supabase.
-2. Criar empresa nova e escolher cada um dos 6 tipos de negócio.
-3. Conferir sidebar: consultoria sem Mecânicos/estoque; barbearia sem nomenclatura de oficina; oficina igual ao atual em tenant legado.
-4. Conferir mobile (membership `segmentId` nulo e preenchido).
-5. Não iniciar Sprint 35.1 até este checklist.
+**HOMOLOGAÇÃO VISUAL 35.0: PASS**
+
+### MIGRATION PRODUCTION: PASS
+
+### TENANT LEGADO / OFICINA
+
+- experiência anterior preservada: **PASS**
+- Ordens de Serviço: **PASS**
+- Mecânicos: **PASS**
+- módulos automotivos preservados: **PASS**
+
+### CONSULTORIA
+
+- segmentação aplicada: **PASS**
+- módulos automotivos ocultos: **PASS**
+- Serviços: **PASS**
+- Clientes: **PASS**
+- Vendas: **PASS**
+- Agenda: **PASS**
+- CRM: **PASS**
+- Financeiro: **PASS**
+- Analytics / Relatórios: **PASS**
+
+### CROSS-TENANT UX
+
+- oficina ≠ consultoria: **PASS**
+
+Sprint 35.1 **não** iniciada neste fechamento.

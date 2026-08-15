@@ -1,7 +1,7 @@
 # Sprint 35.1 — Presets por segmento + override por tenant
 
 **Data:** 2026-08-15  
-**Commit código:** (preenchido após push)  
+**Commit código:** `0f06c2d`  
 **Branch:** `main`  
 **Tipo:** Hardening de apresentação — sem billing / Asaas / 35.2 / auto-migration prod
 

@@ -635,6 +635,9 @@ export async function composeMobileIntelligencePack(
       tenantId: input.tenantId,
       tenantSlug: input.tenantSlug,
       permissions: input.permissions,
+      segment: input.segment,
+      segmentVersion: input.segmentVersion,
+      segmentConfig: input.segmentConfig,
     }),
   );
 

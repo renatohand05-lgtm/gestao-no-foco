@@ -20,6 +20,7 @@ export {
   usesCapabilityEngine,
   hasCapability,
   resolveSegmentContext,
+  applyOverrides,
   type ResolveSegmentInput,
 } from "./resolve.ts";
 export {
@@ -31,4 +32,28 @@ export {
   getFinancePresetsForSegment,
   financePresetsReuseCatalog,
   uniqueFinancePresetIds,
+  orderDespesaPresetsForSegment,
 } from "./finance-presets.ts";
+export {
+  CAPABILITY_DEFS,
+  CAPABILITY_ALIASES,
+  canonicalizeCapability,
+  FUTURE_CAPABILITIES,
+  ESSENTIAL_NAV_IDS,
+  type CapabilityDef,
+} from "./capabilities.ts";
+export {
+  setCapabilityOverride,
+  resetSegmentConfig,
+  hasTenantOverrides,
+  configAfterSegmentChange,
+  canEnableCapability,
+} from "./overrides.ts";
+export { listSegmentModuleRows, type SegmentModuleRow } from "./matrix.ts";
+export { resolveMobileModuleFlags, isOpsActionRelevant } from "./mobile-tabs.ts";
+export {
+  segmentDashboardFlags,
+  filterDashboardSurface,
+  isDashboardSurfaceRelevant,
+} from "./dashboard.ts";
+export { getSegmentGaps, listAllSegmentGaps } from "./gaps.ts";

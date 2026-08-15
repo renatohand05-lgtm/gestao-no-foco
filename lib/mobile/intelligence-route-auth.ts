@@ -26,6 +26,8 @@ export type IntelligenceRouteAuth = {
   tenantSlug: string;
   tenantName: string;
   segment: TenantSegment | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
   displayName: string | null;
   permissions: string[];
   role: TenantRole | string;
@@ -64,7 +66,7 @@ export async function authorizeIntelligenceRoute(
 
     const { data: tenant, error } = await auth.supabase
       .from("tenants")
-      .select("id, slug, name, segment")
+      .select("id, slug, name, segment, segment_version, segment_config")
       .eq("id", tenantId)
       .maybeSingle();
 
@@ -100,6 +102,11 @@ export async function authorizeIntelligenceRoute(
         tenantSlug: tenant.slug,
         tenantName: tenant.name,
         segment: (tenant.segment as TenantSegment | null) ?? null,
+        segmentVersion:
+          (tenant as { segment_version?: number | null }).segment_version ??
+          null,
+        segmentConfig:
+          (tenant as { segment_config?: unknown }).segment_config ?? {},
         displayName:
           profile?.full_name ?? profile?.email ?? auth.user.email ?? null,
         permissions: resolved.permissions,

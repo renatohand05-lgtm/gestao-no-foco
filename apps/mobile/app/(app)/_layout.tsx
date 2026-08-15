@@ -32,12 +32,15 @@ export default function AppLayout() {
   const canStock = useHasAnyPermission(STOCK_VIEW_PERMS);
   const canOps = useHasAnyPermission(OPS_VIEW_PERMS);
   const canFinance = useHasAnyPermission(FINANCE_VIEW_PERMS);
+  const modules = useTenantStore((s) => s.modules);
 
   const tabOptions = buildTabScreenOptions(resolved);
 
   /** Durante hydrate: mantém abas visíveis (evita Dashboard sumir no cold start). */
   const hrefIf = (allowed: boolean) =>
     !rbacReady || allowed ? undefined : null;
+  const hrefIfModule = (rbacOk: boolean, moduleOk: boolean | undefined) =>
+    hrefIf(rbacOk && (modules == null || moduleOk !== false));
 
   return (
     <Tabs
@@ -66,7 +69,7 @@ export default function AppLayout() {
           tabBarLabel: "Intel.",
           tabBarAccessibilityLabel: "Inteligência",
           headerShown: false,
-          href: hrefIf(canExec),
+          href: hrefIfModule(canExec, modules?.intelligence),
         }}
       />
       <Tabs.Screen
@@ -76,7 +79,7 @@ export default function AppLayout() {
           tabBarLabel: "CRM",
           tabBarAccessibilityLabel: "CRM",
           headerShown: false,
-          href: hrefIf(canCrm),
+          href: hrefIfModule(canCrm, modules?.crm),
         }}
       />
       <Tabs.Screen
@@ -86,7 +89,7 @@ export default function AppLayout() {
           tabBarLabel: "Estoq.",
           tabBarAccessibilityLabel: "Estoque",
           headerShown: false,
-          href: hrefIf(canStock),
+          href: hrefIfModule(canStock, modules?.stock),
         }}
       />
       <Tabs.Screen
@@ -96,7 +99,7 @@ export default function AppLayout() {
           tabBarLabel: "Ops",
           tabBarAccessibilityLabel: "Operação",
           headerShown: false,
-          href: hrefIf(canOps),
+          href: hrefIfModule(canOps, modules?.ops),
         }}
       />
       <Tabs.Screen
@@ -106,7 +109,7 @@ export default function AppLayout() {
           tabBarLabel: "Financ.",
           tabBarAccessibilityLabel: "Financeiro",
           headerShown: false,
-          href: hrefIf(canFinance),
+          href: hrefIfModule(canFinance, modules?.finance),
         }}
       />
       <Tabs.Screen

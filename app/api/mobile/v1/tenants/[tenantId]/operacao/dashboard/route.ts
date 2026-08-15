@@ -22,6 +22,9 @@ export async function GET(request: Request, context: RouteContext) {
       tenantId: auth.ctx.tenantId,
       tenantSlug: auth.ctx.tenantSlug,
       permissions: auth.ctx.permissions,
+      segment: auth.ctx.segment,
+      segmentVersion: auth.ctx.segmentVersion,
+      segmentConfig: auth.ctx.segmentConfig,
     });
     return mobileJson(dto);
   } catch (err) {

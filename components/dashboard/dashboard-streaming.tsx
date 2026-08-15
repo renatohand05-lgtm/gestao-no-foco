@@ -65,6 +65,8 @@ export type DashboardStreamCtx = {
   tenantSlug: string;
   tenantName: string;
   segment: TenantSegment | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
   filters: DashboardFilters;
   greeting: string;
   filterOptions: DashboardFilterOptions;
@@ -369,6 +371,9 @@ async function ChartsMainRowBlock({
     primary,
     charts,
     tenantSlug: ctx.tenantSlug,
+    segment: ctx.segment,
+    segmentVersion: ctx.segmentVersion,
+    segmentConfig: ctx.segmentConfig,
   });
 
   return (
@@ -462,6 +467,8 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
         tenantName={ctx.tenantName}
         greeting={ctx.greeting}
         segment={ctx.segment}
+        segmentVersion={ctx.segmentVersion}
+        segmentConfig={ctx.segmentConfig}
         hoje={hojeData}
         primary={primary}
         charts={null}

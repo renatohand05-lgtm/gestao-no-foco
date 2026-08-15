@@ -13,6 +13,15 @@ export type MembershipItem = {
   name: string;
   role: string;
   segmentId: string | null;
+  segmentVersion?: number | null;
+  modules?: {
+    dashboard: boolean;
+    intelligence: boolean;
+    crm: boolean;
+    stock: boolean;
+    ops: boolean;
+    finance: boolean;
+  } | null;
 };
 
 export type MembershipsResponse = {

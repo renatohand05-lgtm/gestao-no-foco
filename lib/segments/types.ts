@@ -85,7 +85,10 @@ export function parseSegmentConfig(raw: unknown): TenantSegmentConfig {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   const o = raw as Record<string, unknown>;
   const enabled = Array.isArray(o.enabledCapabilities)
-    ? (o.enabledCapabilities.filter((x) => typeof x === "string") as ProductCapability[])
+    ? (o.enabledCapabilities
+        .filter((x) => typeof x === "string")
+        .map((x) => x as string)
+        .filter(Boolean) as ProductCapability[])
     : undefined;
   const disabled = Array.isArray(o.disabledCapabilities)
     ? (o.disabledCapabilities.filter((x) => typeof x === "string") as ProductCapability[])

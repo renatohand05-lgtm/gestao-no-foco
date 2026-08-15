@@ -342,6 +342,8 @@ export type ComposeMobileDashboardInput = {
   tenantSlug: string;
   tenantName: string;
   segment: TenantSegment | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
   displayName: string | null;
   branchId: string | null;
   branchName: string | null;
@@ -394,6 +396,9 @@ export async function composeMobileExecutiveDashboard(
     primary,
     charts: null,
     tenantSlug: input.tenantSlug,
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
   });
 
   const kpisRaw = buildCockpitKpis({
@@ -403,6 +408,8 @@ export async function composeMobileExecutiveDashboard(
     cockpit,
     tenantSlug: input.tenantSlug,
     segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
   });
 
   const alerts = buildCockpitAlerts({

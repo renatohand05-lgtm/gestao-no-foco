@@ -31,6 +31,15 @@ export type AuthErrorCode =
   | "refresh_failed"
   | "unknown";
 
+export type TenantModuleFlags = {
+  dashboard: boolean;
+  intelligence: boolean;
+  crm: boolean;
+  stock: boolean;
+  ops: boolean;
+  finance: boolean;
+};
+
 export type TenantContext = {
   tenantId: string;
   tenantSlug: string;
@@ -38,6 +47,7 @@ export type TenantContext = {
   branchId: string | null;
   branchName: string | null;
   segmentId: string | null;
+  modules?: TenantModuleFlags | null;
   permissions: readonly string[];
 };
 

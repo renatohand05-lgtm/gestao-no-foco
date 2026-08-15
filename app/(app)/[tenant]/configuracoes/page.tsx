@@ -130,7 +130,26 @@ export default async function ConfiguracoesPage({
           </CardContent>
         </Card>
 
-        {/* Design System: oculto no piloto (34.5) — acesso interno via URL direta. */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Módulos e experiência</CardTitle>
+            <CardDescription>
+              Preset do tipo de negócio e personalizações desta empresa
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Esconda módulos que não fazem sentido ou ligue opcionais. Nada é
+              apagado ao desativar.
+            </p>
+            <Button
+              variant="outline"
+              render={<Link href={`/${tenantSlug}/configuracoes/modulos`} />}
+            >
+              Personalizar experiência
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

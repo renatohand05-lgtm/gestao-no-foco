@@ -17,6 +17,7 @@ type TenantStore = TenantContext & {
     tenantSlug: string;
     tenantName: string;
     segmentId: SegmentId | null;
+    modules?: TenantContext["modules"];
     permissions?: readonly string[];
   }) => void;
   setBranch: (branchId: string, branchName: string) => void;
@@ -60,6 +61,7 @@ export const useTenantStore = create<TenantStore>((set, get) => ({
       tenantSlug: input.tenantSlug,
       tenantName: input.tenantName,
       segmentId: input.segmentId,
+      modules: input.modules ?? null,
       branchId: null,
       branchName: null,
       permissions,

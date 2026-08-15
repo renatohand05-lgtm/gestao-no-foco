@@ -59,9 +59,18 @@ function Card({
 type Props = {
   tenantSlug: string;
   data: OperacionalOverview;
+  showWorkOrders?: boolean;
+  showInventory?: boolean;
+  showCrm?: boolean;
 };
 
-export function DashboardOperacionalStrip({ tenantSlug, data }: Props) {
+export function DashboardOperacionalStrip({
+  tenantSlug,
+  data,
+  showWorkOrders = true,
+  showInventory = true,
+  showCrm = true,
+}: Props) {
   return (
     <div className="space-y-4">
       <div>
@@ -118,6 +127,7 @@ export function DashboardOperacionalStrip({ tenantSlug, data }: Props) {
         </div>
       </div>
 
+      {showWorkOrders ? (
       <div>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold">Operação — Ordens de Serviço</h2>
@@ -176,8 +186,10 @@ export function DashboardOperacionalStrip({ tenantSlug, data }: Props) {
           />
         </div>
       </div>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
+        {showInventory ? (
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold">Estoque</h2>
@@ -202,6 +214,7 @@ export function DashboardOperacionalStrip({ tenantSlug, data }: Props) {
             />
           </div>
         </div>
+        ) : null}
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold">Financeiro</h2>
@@ -237,6 +250,7 @@ export function DashboardOperacionalStrip({ tenantSlug, data }: Props) {
         </div>
       </div>
 
+      {showCrm ? (
       <div>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold">CRM</h2>
@@ -266,6 +280,7 @@ export function DashboardOperacionalStrip({ tenantSlug, data }: Props) {
           />
         </div>
       </div>
+      ) : null}
     </div>
   );
 }

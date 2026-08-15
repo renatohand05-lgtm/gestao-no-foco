@@ -18,10 +18,10 @@ import {
 } from "@/lib/financeiro/beneficiario-types";
 import { createFinanceiroBeneficiarioAction } from "@/lib/financeiro/beneficiario-actions";
 import {
-  DESPESA_PRESETS,
   resolveDespesaPreset,
   type DespesaPresetId,
 } from "@/lib/financeiro/despesa-presets";
+import { orderDespesaPresetsForSegment } from "@/lib/segments/finance-presets.ts";
 import { suggestFormaPagamentoId } from "@/lib/financeiro/despesa-forma-pagamento";
 import type { ContaPagarFormInput } from "@/lib/financeiro/validations";
 import { getFornecedorAutofillAction } from "@/lib/master-data/actions";
@@ -48,6 +48,7 @@ const AUTOFILL_KEYS = [
 
 type Props = {
   tenantSlug: string;
+  segment?: string | null;
   disabled?: boolean;
   fornecedores: FornecedorOption[];
   beneficiarios: BeneficiarioOption[];
@@ -61,6 +62,7 @@ type Props = {
 
 export function ContaPagarBeneficiarioFields({
   tenantSlug,
+  segment,
   disabled = false,
   fornecedores,
   beneficiarios,
@@ -313,7 +315,7 @@ export function ContaPagarBeneficiarioFields({
           Lançamento rápido
         </p>
         <div className="flex flex-wrap gap-2">
-          {DESPESA_PRESETS.map((p) => (
+          {orderDespesaPresetsForSegment(segment).map((p) => (
             <button
               key={p.id}
               type="button"

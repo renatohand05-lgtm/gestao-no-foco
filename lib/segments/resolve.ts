@@ -1,4 +1,6 @@
 import {
+  canonicalizeCapability,
+  FUTURE_CAPABILITIES,
   isProductCapability,
   type ProductCapability,
 } from "./capabilities.ts";
@@ -54,26 +56,34 @@ export function usesCapabilityEngine(
   return NEW_PRODUCT_IDS.includes(id);
 }
 
-function applyOverrides(
+const FUTURE_SET = new Set<ProductCapability>(FUTURE_CAPABILITIES);
+
+export function applyOverrides(
   base: ReadonlySet<ProductCapability>,
   config: TenantSegmentConfig,
 ): Set<ProductCapability> {
   const next = new Set(base);
-  for (const c of config.enabledCapabilities ?? []) {
-    if (isProductCapability(c)) next.add(c);
+  for (const raw of config.enabledCapabilities ?? []) {
+    const c = canonicalizeCapability(raw) ?? (isProductCapability(raw) ? raw : null);
+    if (!c || FUTURE_SET.has(c)) continue;
+    next.add(c);
   }
-  for (const c of config.disabledCapabilities ?? []) {
-    if (isProductCapability(c)) next.delete(c);
+  for (const raw of config.disabledCapabilities ?? []) {
+    const c = canonicalizeCapability(raw) ?? (isProductCapability(raw) ? raw : null);
+    if (!c) continue;
+    next.delete(c);
   }
   return next;
 }
 
 export function hasCapability(
   ctx: ResolvedSegmentContext,
-  capability: ProductCapability,
+  capability: ProductCapability | string,
 ): boolean {
   if (!ctx.usesCapabilityEngine) return true;
-  return ctx.capabilities.has(capability);
+  const id = canonicalizeCapability(capability);
+  if (!id) return false;
+  return ctx.capabilities.has(id);
 }
 
 export type ResolveSegmentInput = {

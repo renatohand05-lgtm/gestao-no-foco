@@ -98,6 +98,7 @@ export default async function NovaPage({
       >
         <ContaPagarForm
           tenantSlug={tenantSlug}
+          segment={tenant.segment}
           mode="create"
           fornecedores={fornecedores}
           beneficiarios={beneficiarios}

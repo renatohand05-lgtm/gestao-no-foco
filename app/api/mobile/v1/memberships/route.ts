@@ -11,6 +11,7 @@ import {
   readMobileRequestId,
 } from "@/lib/mobile/response";
 import { mapDatabaseErrorToUserMessage } from "@/lib/supabase/friendly-error";
+import { resolveMobileModuleFlags } from "@/lib/segments/mobile-tabs.ts";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
     const tenantIds = active.map((m) => m.tenant_id);
     const { data: tenants, error: tenantsError } = await supabase
       .from("tenants")
-      .select("id, name, slug, segment")
+      .select("id, name, slug, segment, segment_version, segment_config")
       .in("id", tenantIds);
 
     if (tenantsError) {
@@ -66,6 +67,17 @@ export async function GET(request: Request) {
         name: tenant.name,
         role: membership.role as TenantRole,
         segmentId: tenant.segment,
+        segmentVersion:
+          (tenant as { segment_version?: number | null }).segment_version ??
+          null,
+        modules: resolveMobileModuleFlags({
+          segment: tenant.segment,
+          segmentVersion:
+            (tenant as { segment_version?: number | null }).segment_version ??
+            null,
+          segmentConfig:
+            (tenant as { segment_config?: unknown }).segment_config ?? {},
+        }),
       };
     });
 

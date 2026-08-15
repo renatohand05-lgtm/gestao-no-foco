@@ -17,6 +17,7 @@ import {
 import { PremiumOpsStrip } from "@/components/dashboard/premium/premium-kpi-strip";
 import { GFExecutiveHeader } from "@/components/gf/gf-executive-header";
 import { getSegmentQuickActions } from "@/config/dashboard/cockpit-v2";
+import { filterDashboardSurface } from "@/lib/segments/dashboard.ts";
 import type { DashboardHojeSnapshot } from "@/lib/dashboard/vendas-dia-service";
 import type {
   DashboardCharts,
@@ -46,6 +47,8 @@ type Props = {
   tenantName: string;
   greeting: string;
   segment: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
   hoje: DashboardHojeSnapshot;
   primary: DashboardPrimaryData | null;
   charts: DashboardCharts | null;
@@ -78,6 +81,8 @@ export function PremiumDashboardView({
   tenantName,
   greeting,
   segment,
+  segmentVersion,
+  segmentConfig,
   hoje,
   primary,
   charts,
@@ -97,6 +102,9 @@ export function PremiumDashboardView({
     primary,
     charts,
     tenantSlug,
+    segment,
+    segmentVersion,
+    segmentConfig,
   });
   const ops = buildPremiumOpsCards({
     hoje,
@@ -104,6 +112,9 @@ export function PremiumDashboardView({
     intelligence,
     estoqueAbaixoMinimo,
     tenantSlug,
+    segment,
+    segmentVersion,
+    segmentConfig,
   });
   const kpis = buildCockpitKpis({
     primary,
@@ -112,6 +123,8 @@ export function PremiumDashboardView({
     cockpit,
     tenantSlug,
     segment,
+    segmentVersion,
+    segmentConfig,
   });
   const alerts = buildCockpitAlerts({ insights, decision, tenantSlug });
   const brief = buildExecutiveBriefV2({
@@ -123,7 +136,10 @@ export function PremiumDashboardView({
   const meta = buildMetaPanel({ hoje, tenantSlug });
   const dre = buildDreExecutiveCard({ primary, charts, tenantSlug });
   const cash = buildCashExecutiveCard({ cockpit, tenantSlug });
-  const quickActions = getSegmentQuickActions(segment);
+  const quickActions = filterDashboardSurface(
+    getSegmentQuickActions(segment),
+    { segment, segmentVersion, segmentConfig },
+  );
   const emptyStates = getCockpitEmptyStates(segment);
 
   const activeEmpty: Array<(typeof emptyStates)[number]["domain"]> = [];

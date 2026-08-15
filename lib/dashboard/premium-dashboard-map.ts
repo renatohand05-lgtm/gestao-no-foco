@@ -12,6 +12,7 @@ import type { ExecutiveFinancialCockpitData } from "@/lib/dashboard/executive-fi
 import type { ExecutiveIntelligenceData } from "@/lib/dashboard/executive-intelligence-types";
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import { formatCurrency, formatCurrencyCompact, formatPercent } from "@/lib/dashboard/format";
+import { segmentDashboardFlags } from "@/lib/segments/dashboard.ts";
 import {
   composeEnterpriseInsights,
   presentEnterpriseInsightCards,
@@ -154,6 +155,9 @@ export function buildPremiumInsights(input: {
   /** Séries já calculadas — sinais 29.4 (sem novo I/O). */
   charts?: DashboardCharts | null;
   tenantSlug: string;
+  segment?: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
 }): PremiumInsightCard[] {
   const {
     cockpit,
@@ -164,6 +168,11 @@ export function buildPremiumInsights(input: {
     charts = null,
     tenantSlug,
   } = input;
+  const flags = segmentDashboardFlags({
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
   const cards: PremiumInsightCard[] = [];
 
   cards.push({
@@ -202,35 +211,40 @@ export function buildPremiumInsights(input: {
     });
   }
 
-  cards.push({
-    id: "estoque",
-    title: "Estoque abaixo do mínimo",
-    body:
-      estoqueAbaixoMinimo != null
-        ? `${estoqueAbaixoMinimo} SKU(s) abaixo do mínimo cadastrado.`
-        : "Indicador de estoque mínimo indisponível neste ciclo.",
-    origem: "Estoque · dashboard",
-    periodo: "Hoje",
-    confianca: estoqueAbaixoMinimo != null ? "Alta" : "Baixa",
-    severity:
-      estoqueAbaixoMinimo != null && estoqueAbaixoMinimo > 0
-        ? "warning"
-        : "info",
-    href: `/${tenantSlug}/estoque`,
-  });
+  if (flags.inventory) {
+    cards.push({
+      id: "estoque",
+      title: "Estoque abaixo do mínimo",
+      body:
+        estoqueAbaixoMinimo != null
+          ? `${estoqueAbaixoMinimo} SKU(s) abaixo do mínimo cadastrado.`
+          : "Indicador de estoque mínimo indisponível neste ciclo.",
+      origem: "Estoque · dashboard",
+      periodo: "Hoje",
+      confianca: estoqueAbaixoMinimo != null ? "Alta" : "Baixa",
+      severity:
+        estoqueAbaixoMinimo != null && estoqueAbaixoMinimo > 0
+          ? "warning"
+          : "info",
+      href: `/${tenantSlug}/estoque`,
+    });
+  }
 
   const op = intelligence.saudeOperacao;
+  const operacaoBody =
+    op.status === "unavailable"
+      ? "Indicadores operacionais indisponíveis."
+      : flags.workOrders
+        ? `${op.osAbertas ?? "—"} OS abertas · ${op.osAtrasadas ?? "—"} atrasadas · ${op.osAguardandoCliente ?? op.clientesAguardandoRetorno ?? "—"} aguardando cliente`
+        : `${op.clientesAguardandoRetorno ?? op.osAguardandoCliente ?? "—"} aguardando retorno`;
   cards.push({
     id: "operacao",
     title: "Clientes sem retorno / aguardando",
-    body:
-      op.status === "unavailable"
-        ? "Indicadores operacionais indisponíveis."
-        : `${op.osAbertas ?? "—"} OS abertas · ${op.osAtrasadas ?? "—"} atrasadas · ${op.osAguardandoCliente ?? op.clientesAguardandoRetorno ?? "—"} aguardando cliente`,
+    body: operacaoBody,
     origem: "Centro de Operações",
     periodo: "Hoje",
     confianca: op.status === "available" ? "Alta" : "Parcial",
-    severity: (op.osAtrasadas ?? 0) > 0 ? "warning" : "info",
+    severity: flags.workOrders && (op.osAtrasadas ?? 0) > 0 ? "warning" : "info",
     href: `/${tenantSlug}/centro-operacoes`,
   });
 
@@ -343,11 +357,19 @@ export function buildPremiumOpsCards(input: {
   intelligence: ExecutiveIntelligenceData;
   estoqueAbaixoMinimo: number | null;
   tenantSlug: string;
+  segment?: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
 }): PremiumOpsCard[] {
   const { hoje, primary, intelligence, estoqueAbaixoMinimo, tenantSlug } =
     input;
+  const flags = segmentDashboardFlags({
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
   const op = intelligence.saudeOperacao;
-  return [
+  const cards: PremiumOpsCard[] = [
     {
       id: "vendas-hoje",
       title: "Vendas de hoje",
@@ -364,7 +386,9 @@ export function buildPremiumOpsCards(input: {
                 : "Meta não cadastrada",
       href: `/${tenantSlug}/vendas`,
     },
-    {
+  ];
+  if (flags.workOrders) {
+    cards.push({
       id: "pedidos",
       title: "Pedidos / OS em aberto",
       value: op.osAbertas != null ? String(op.osAbertas) : "Indisponível",
@@ -374,8 +398,10 @@ export function buildPremiumOpsCards(input: {
           : "Centro de operações",
       href: `/${tenantSlug}/ordens`,
       unavailable: op.osAbertas == null,
-    },
-    {
+    });
+  }
+  if (flags.inventory) {
+    cards.push({
       id: "estoque",
       title: "Estoque baixo",
       value:
@@ -388,17 +414,18 @@ export function buildPremiumOpsCards(input: {
           : "Indicador de estoque não carregado",
       href: `/${tenantSlug}/estoque`,
       unavailable: estoqueAbaixoMinimo == null,
-    },
-    {
-      id: "clientes",
-      title: "Clientes ativos",
-      value:
-        primary?.kpis.quantidade_clientes != null
-          ? String(primary.kpis.quantidade_clientes)
-          : "Indisponível",
-      hint: "Clientes com movimento no período",
-      href: `/${tenantSlug}/clientes`,
-      unavailable: primary?.kpis.quantidade_clientes == null,
-    },
-  ];
+    });
+  }
+  cards.push({
+    id: "clientes",
+    title: "Clientes ativos",
+    value:
+      primary?.kpis.quantidade_clientes != null
+        ? String(primary.kpis.quantidade_clientes)
+        : "Indisponível",
+    hint: "Clientes com movimento no período",
+    href: `/${tenantSlug}/clientes`,
+    unavailable: primary?.kpis.quantidade_clientes == null,
+  });
+  return cards;
 }

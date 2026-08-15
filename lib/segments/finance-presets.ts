@@ -10,7 +10,7 @@ import type { ProductSegmentId } from "./types.ts";
  * Não duplica categorias; não inventa IDs.
  */
 export function getFinancePresetsForSegment(
-  input: ResolveSegmentInput | ProductSegmentId | null | undefined,
+  input: ResolveSegmentInput | string | null | undefined,
 ): readonly DespesaPresetId[] {
   if (typeof input === "string" || input == null) {
     const ctx = resolveSegmentContext({ segment: input });
@@ -35,4 +35,24 @@ export function uniqueFinancePresetIds(
   ids: readonly DespesaPresetId[],
 ): DespesaPresetId[] {
   return [...new Set(ids)];
+}
+
+export function orderDespesaPresetsForSegment(
+  input: ResolveSegmentInput | string | null | undefined,
+) {
+  const prioritized = getFinancePresetsForSegment(input);
+  const byId = new Map(DESPESA_PRESETS.map((p) => [p.id, p]));
+  const seen = new Set<string>();
+  const ordered = [];
+  for (const id of prioritized) {
+    const preset = byId.get(id);
+    if (preset) {
+      ordered.push(preset);
+      seen.add(id);
+    }
+  }
+  for (const preset of DESPESA_PRESETS) {
+    if (!seen.has(preset.id)) ordered.push(preset);
+  }
+  return ordered;
 }

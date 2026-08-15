@@ -26,6 +26,9 @@ export type OpsRouteAuth = {
   tenantName: string;
   permissions: string[];
   role: TenantRole | string;
+  segment: string | null;
+  segmentVersion: number | null;
+  segmentConfig: unknown;
 };
 
 export async function authorizeOpsRoute(
@@ -52,7 +55,7 @@ export async function authorizeOpsRoute(
 
     const { data: tenant, error } = await auth.supabase
       .from("tenants")
-      .select("id, slug, name")
+      .select("id, slug, name, segment, segment_version, segment_config")
       .eq("id", tenantId)
       .maybeSingle();
 
@@ -83,6 +86,12 @@ export async function authorizeOpsRoute(
         tenantName: tenant.name,
         permissions: resolved.permissions,
         role: resolved.role,
+        segment: (tenant as { segment?: string | null }).segment ?? null,
+        segmentVersion:
+          (tenant as { segment_version?: number | null }).segment_version ??
+          null,
+        segmentConfig:
+          (tenant as { segment_config?: unknown }).segment_config ?? {},
       },
     };
   } catch (err) {

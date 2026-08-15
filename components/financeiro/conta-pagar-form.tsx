@@ -51,6 +51,7 @@ import type {
 
 type Props = {
   tenantSlug: string;
+  segment?: string | null;
   mode: "create" | "edit";
   item?: ContaPagarDetail;
   classificacaoOnly?: boolean;
@@ -79,6 +80,7 @@ function dreLabel(value: string | null | undefined) {
 
 export function ContaPagarForm({
   tenantSlug,
+  segment,
   mode,
   item,
   classificacaoOnly = false,
@@ -224,6 +226,7 @@ export function ContaPagarForm({
             >
               <ContaPagarBeneficiarioFields
                 tenantSlug={tenantSlug}
+                segment={segment}
                 disabled={lockFinanceiro}
                 fornecedores={fornecedores}
                 beneficiarios={beneficiarios}

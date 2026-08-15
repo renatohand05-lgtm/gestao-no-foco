@@ -3,6 +3,8 @@
  * Sem imports de path alias — seguro para Next e testes Node.
  */
 
+import { hasCapability, resolveSegmentContext } from "../lib/segments/resolve.ts";
+
 export type SegmentId =
   | "oficina"
   | "restaurante"
@@ -160,10 +162,20 @@ export function getOrgTeamLabels(segment: string | null | undefined): OrgTeamLab
 
 export function getOpsCenterCopy(
   segment: string | null | undefined,
+  options?: {
+    segmentVersion?: number | null;
+    segmentConfig?: unknown;
+  },
 ): OpsCenterCopy {
   const resolved = resolveSegment(segment);
+  const ctx = resolveSegmentContext({
+    segment,
+    segmentVersion: options?.segmentVersion,
+    segmentConfig: options?.segmentConfig,
+  });
+  let copy: OpsCenterCopy;
   if (resolved === "oficina") {
-    return {
+    copy = {
       pageDescription: "Visão rápida do que está acontecendo na oficina agora",
       openOrdersLabel: "OS abertas",
       assetsInOpsLabel: "Carros na oficina",
@@ -176,9 +188,8 @@ export function getOpsCenterCopy(
       showVehicleFields: true,
       assigneeLabel: "Mecânico",
     };
-  }
-  if (resolved === "restaurante") {
-    return {
+  } else if (resolved === "restaurante") {
+    copy = {
       pageDescription: "Visão rápida do salão e da produção agora",
       openOrdersLabel: "Pedidos abertos",
       assetsInOpsLabel: "Em produção / salão",
@@ -191,9 +202,8 @@ export function getOpsCenterCopy(
       showVehicleFields: false,
       assigneeLabel: "Responsável",
     };
-  }
-  if (resolved === "comercio") {
-    return {
+  } else if (resolved === "comercio") {
+    copy = {
       pageDescription: "Visão rápida da operação da loja agora",
       openOrdersLabel: "Atendimentos abertos",
       assetsInOpsLabel: "Em operação",
@@ -206,9 +216,8 @@ export function getOpsCenterCopy(
       showVehicleFields: false,
       assigneeLabel: "Responsável",
     };
-  }
-  if (resolved === "consultoria") {
-    return {
+  } else if (resolved === "consultoria") {
+    copy = {
       pageDescription: "Visão rápida dos projetos e entregas agora",
       openOrdersLabel: "Entregas abertas",
       assetsInOpsLabel: "Em andamento",
@@ -221,18 +230,26 @@ export function getOpsCenterCopy(
       showVehicleFields: false,
       assigneeLabel: "Consultor",
     };
+  } else {
+    copy = {
+      pageDescription: "Visão rápida do que está acontecendo na operação agora",
+      openOrdersLabel: "Ordens abertas",
+      assetsInOpsLabel: "Em operação",
+      boardTitle: "Quadro da operação",
+      boardDescriptionCanEdit:
+        "Arraste os cartões entre etapas quando a regra permitir. Clique para abrir.",
+      boardDescriptionReadOnly:
+        "Clique no cartão para abrir. Sem permissão para alterar status pelo quadro.",
+      resourcesLinkLabel: "Recursos",
+      showVehicleFields: false,
+      assigneeLabel: "Profissional",
+    };
   }
+
+  if (!ctx.usesCapabilityEngine) return copy;
   return {
-    pageDescription: "Visão rápida do que está acontecendo na operação agora",
-    openOrdersLabel: "Ordens abertas",
-    assetsInOpsLabel: "Em operação",
-    boardTitle: "Quadro da operação",
-    boardDescriptionCanEdit:
-      "Arraste os cartões entre etapas quando a regra permitir. Clique para abrir.",
-    boardDescriptionReadOnly:
-      "Clique no cartão para abrir. Sem permissão para alterar status pelo quadro.",
-    resourcesLinkLabel: "Recursos",
-    showVehicleFields: false,
-    assigneeLabel: "Profissional",
+    ...copy,
+    showVehicleFields: hasCapability(ctx, "vehicles"),
+    assigneeLabel: ctx.terminology.professional,
   };
 }

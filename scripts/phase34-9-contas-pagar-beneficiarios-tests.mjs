@@ -477,7 +477,7 @@ describe("34.9 beneficiário types + form wiring", () => {
     const fields = read(
       "components/financeiro/conta-pagar-beneficiario-fields.tsx",
     );
-    assert.match(fields, /DESPESA_PRESETS/);
+    assert.match(fields, /orderDespesaPresetsForSegment/);
     assert.match(fields, /Tipo de beneficiário/);
     assert.match(fields, /Novo beneficiário/);
     const nova = read("app/(app)/[tenant]/financeiro/contas-pagar/nova/page.tsx");

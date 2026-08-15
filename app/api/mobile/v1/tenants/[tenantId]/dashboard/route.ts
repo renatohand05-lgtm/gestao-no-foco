@@ -47,7 +47,7 @@ export async function GET(request: Request, context: RouteContext) {
 
     const { data: tenant, error: tenantError } = await auth.supabase
       .from("tenants")
-      .select("id, slug, name, segment")
+      .select("id, slug, name, segment, segment_version, segment_config")
       .eq("id", tenantId)
       .maybeSingle();
 
@@ -77,6 +77,10 @@ export async function GET(request: Request, context: RouteContext) {
       tenantSlug: tenant.slug,
       tenantName: tenant.name,
       segment: (tenant.segment as TenantSegment | null) ?? null,
+      segmentVersion:
+        (tenant as { segment_version?: number | null }).segment_version ?? null,
+      segmentConfig:
+        (tenant as { segment_config?: unknown }).segment_config ?? {},
       displayName: profile?.full_name ?? profile?.email ?? auth.user.email ?? null,
       branchId,
       branchName,

@@ -23,6 +23,8 @@ export async function GET(request: Request, context: RouteContext) {
       tenantSlug: auth.ctx.tenantSlug,
       tenantName: auth.ctx.tenantName,
       segment: auth.ctx.segment,
+      segmentVersion: auth.ctx.segmentVersion,
+      segmentConfig: auth.ctx.segmentConfig,
       displayName: auth.ctx.displayName,
       branchId: auth.ctx.branchId,
       branchName: auth.ctx.branchName,

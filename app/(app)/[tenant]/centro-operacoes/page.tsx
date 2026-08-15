@@ -32,7 +32,10 @@ export default async function CentroOperacoesPage({
 }) {
   const { tenant: tenantSlug } = await params;
   const tenant = await requireTenant(tenantSlug);
-  const copy = getOpsCenterCopy(tenant.segment);
+  const copy = getOpsCenterCopy(tenant.segment, {
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
 
   // Sprint 30.1 — paralelizar authz + perfil (antes eram sequenciais com getData).
   const [profile, centroPerms] = await Promise.all([

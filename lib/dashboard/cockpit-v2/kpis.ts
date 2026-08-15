@@ -13,6 +13,7 @@ import {
   type PremiumKpiItem,
 } from "@/lib/dashboard/premium-dashboard-map";
 import { formatCurrencyCompact, formatPercent } from "@/lib/dashboard/format";
+import { filterDashboardSurface } from "@/lib/segments/dashboard.ts";
 
 export type CockpitKpiItem = PremiumKpiItem & {
   comparisonLabel: string;
@@ -42,6 +43,8 @@ export function buildCockpitKpis(input: {
   cockpit: ExecutiveFinancialCockpitData;
   tenantSlug: string;
   segment: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
 }): CockpitKpiItem[] {
   const { primary, hoje, intelligence, cockpit, tenantSlug, segment } = input;
   const copy = getSegmentCockpitCopy(segment);
@@ -167,7 +170,12 @@ export function buildCockpitKpis(input: {
     "meta",
   ];
   const all = [...mapped, ...extras];
-  return order
+  const ordered = order
     .map((id) => all.find((k) => k.id === id))
     .filter((x): x is CockpitKpiItem => Boolean(x));
+  return filterDashboardSurface(ordered, {
+    segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
 }

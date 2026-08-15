@@ -24,6 +24,8 @@ import { OrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import { VeiculoService } from "@/lib/ordens/veiculo-service";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
+import { isOpsActionRelevant } from "@/lib/segments/mobile-tabs.ts";
+import type { ResolveSegmentInput } from "@/lib/segments/resolve.ts";
 
 export function resolveOpsDataClient(
   userClient: SupabaseClient<Database>,
@@ -201,8 +203,9 @@ export type MobileOpsWorkOrderDetail = {
 function buildQuickActions(
   slug: string,
   permissions: readonly string[],
+  segment?: ResolveSegmentInput,
 ): MobileOpsQuickAction[] {
-  return [
+  const all = [
     {
       id: "ordens",
       label: "Ordens",
@@ -262,6 +265,8 @@ function buildQuickActions(
       opensWeb: true,
     },
   ];
+  if (!segment) return all;
+  return all.filter((action) => isOpsActionRelevant(action.id, segment));
 }
 
 export async function composeOpsDashboard(input: {
@@ -269,6 +274,9 @@ export async function composeOpsDashboard(input: {
   tenantId: string;
   tenantSlug: string;
   permissions: readonly string[];
+  segment?: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
 }): Promise<MobileOpsDashboard> {
   assertOpsView(input.permissions);
   const client = resolveOpsDataClient(input.client);
@@ -346,7 +354,11 @@ export async function composeOpsDashboard(input: {
       category: a.tipo,
       href: a.href,
     })),
-    quickActions: buildQuickActions(input.tenantSlug, input.permissions),
+    quickActions: buildQuickActions(input.tenantSlug, input.permissions, {
+      segment: input.segment,
+      segmentVersion: input.segmentVersion,
+      segmentConfig: input.segmentConfig,
+    }),
     unavailable,
   };
 }

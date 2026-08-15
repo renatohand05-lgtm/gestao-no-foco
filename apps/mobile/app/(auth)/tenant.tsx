@@ -97,6 +97,7 @@ export default function TenantScreen() {
       tenantSlug: tenant.slug,
       tenantName: tenant.name,
       segmentId: tenant.segmentId as SegmentId | null,
+      modules: tenant.modules ?? null,
       permissions: perms.data.permissions,
     });
     mobileTelemetry.track("TENANT_SELECTED");

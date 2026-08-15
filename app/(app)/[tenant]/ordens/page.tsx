@@ -9,6 +9,7 @@ import {
 } from "@/components/ordens/os-central-state";
 import { OsCentralTable } from "@/components/ordens/os-central-table";
 import { OsSubnav } from "@/components/ordens/os-subnav";
+import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
 import { SectionCard } from "@/components/ui/section-card";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createCentroOperacoesService } from "@/lib/operacoes/centro-operacoes-service";
@@ -46,7 +47,20 @@ import {
 } from "@/components/executive";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
-export const metadata = { title: "Central de Ordens de Serviço" };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tenant: string }>;
+}) {
+  const { tenant: tenantSlug } = await params;
+  const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  return { title: ui.workOrdersHubTitle };
+}
 
 type PageProps = {
   params: Promise<{ tenant: string }>;
@@ -88,6 +102,12 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
   const { tenant: tenantSlug } = await params;
   const sp = await searchParams;
   const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const subnav = osSubnavFromCopy(ui);
   const sort = resolveOsCentralSort(sp.sort);
   const page = Math.max(1, Number(sp.page) || 1);
   const perPage = parsePerPage(sp.perPage);
@@ -162,8 +182,8 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
       error instanceof Error ? error.message : "Falha ao carregar dados.";
     return (
       <ExecutivePage width="wide" spacing="loose">
-        <Breadcrumbs items={[{ label: "Ordens" }]} />
-      <ExecutiveHeader title="Central de Ordens de Serviço" description={`Visão operacional enterprise · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" />} />
+        <Breadcrumbs items={[{ label: ui.workOrders }]} />
+      <ExecutiveHeader title={ui.workOrdersHubTitle} description={`Visão operacional · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" copy={subnav} />} />
         <OsCentralErrorState tenantSlug={tenantSlug} message={message} />
       </ExecutivePage>
     );
@@ -236,12 +256,12 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
 
   return (
     <ExecutivePage width="wide" spacing="loose">
-      <Breadcrumbs items={[{ label: "Ordens" }]} />
-      <ExecutiveHeader title="Central de Ordens de Serviço" description={`Visão operacional enterprise · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" />} />
+      <Breadcrumbs items={[{ label: ui.workOrders }]} />
+      <ExecutiveHeader title={ui.workOrdersHubTitle} description={`Visão operacional · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" copy={subnav} />} />
 
       <OsCentralKpis tenantSlug={tenantSlug} kpis={kpis} />
 
-      <form aria-label="Filtros da Central de OS">
+      <form aria-label={`Filtros da Central de ${ui.workOrders}`}>
         {/* Reset page on filter submit */}
         <input type="hidden" name="page" value="1" />
         <input type="hidden" name="perPage" value={String(perPage)} />
@@ -414,6 +434,13 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
           canArquivar={canArquivar}
           canExcluirRascunho={canExcluirRascunho}
           canRestaurar={canRestaurar}
+          copy={{
+            workOrder: ui.workOrder,
+            workOrders: ui.workOrders,
+            newWorkOrder: ui.newWorkOrder,
+            emptyWorkOrdersTitle: ui.emptyWorkOrdersTitle,
+            emptyWorkOrdersBody: ui.emptyWorkOrdersBody,
+          }}
         />
         <OsCentralPaginationBar
           pagination={pagination}

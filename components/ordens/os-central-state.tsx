@@ -9,9 +9,18 @@ import { gofColors, gofGrid } from "@/lib/design-system";
 import { gofCardSurface } from "@/lib/design-system/primitives";
 import { cn } from "@/lib/utils";
 
+type EmptyCopy = {
+  workOrder: string;
+  workOrders: string;
+  newWorkOrder: string;
+  emptyWorkOrdersTitle: string;
+  emptyWorkOrdersBody: string;
+};
+
 type EmptyProps = {
   tenantSlug: string;
   hasFilters: boolean;
+  copy?: EmptyCopy;
 };
 
 export function OsCentralLoading() {
@@ -35,14 +44,19 @@ export function OsCentralLoading() {
   );
 }
 
-export function OsCentralEmptyState({ tenantSlug, hasFilters }: EmptyProps) {
+export function OsCentralEmptyState({
+  tenantSlug,
+  hasFilters,
+  copy,
+}: EmptyProps) {
+  const cta = copy?.newWorkOrder ?? "Nova OS";
   if (hasFilters) {
     return (
       <div data-os-state="empty-filtered">
         <ExecutiveEmptyState
           icon={ClipboardList}
-          title="Nenhuma OS com os filtros atuais"
-          description="Ajuste os filtros ou limpe para ver todas as ordens."
+          title={`Nenhum ${copy?.workOrder ?? "registro"} com os filtros atuais`}
+          description="Ajuste os filtros ou limpe para ver todos os registros."
           action={{
             label: "Limpar filtros",
             href: `/${tenantSlug}/ordens`,
@@ -56,10 +70,13 @@ export function OsCentralEmptyState({ tenantSlug, hasFilters }: EmptyProps) {
     <div data-os-state="empty">
       <ExecutiveEmptyState
         icon={ClipboardList}
-        title="Nenhuma ordem de serviço cadastrada"
-        description="Abra a primeira OS para começar a operação."
+        title={copy?.emptyWorkOrdersTitle ?? "Nenhuma ordem de serviço cadastrada"}
+        description={
+          copy?.emptyWorkOrdersBody ??
+          "Abra a primeira OS para começar a operação."
+        }
         action={{
-          label: "Nova OS",
+          label: cta,
           href: `/${tenantSlug}/ordens/nova`,
         }}
       />

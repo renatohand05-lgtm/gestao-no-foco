@@ -19,8 +19,22 @@ import {
   ExecutivePage,
 } from "@/components/executive";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 
-export const metadata = { title: "Detalhe da OS" };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tenant: string }>;
+}) {
+  const { tenant: tenantSlug } = await params;
+  const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  return { title: ui.workOrder };
+}
 
 export default async function OsDetailPage({
   params,
@@ -29,6 +43,11 @@ export default async function OsDetailPage({
 }) {
   const { tenant: tenantSlug, id } = await params;
   const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
   const service = await createOrdemServicoService(tenant.id);
   const os = await service.getById(id);
   if (!os) notFound();
@@ -182,13 +201,15 @@ export default async function OsDetailPage({
   return (
     <ExecutivePage width="wide" spacing="loose">
       <Breadcrumbs items={[
-          { label: "Ordens", href: `/${tenantSlug}/ordens` },
+          { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
           { label: `#${os.numero}` },
         ]} />
-      <ExecutiveHeader title={`OS #${os.numero}`} description={`${os.cliente_nome ?? "Cliente"} · ${os.placa ?? "sem placa"}`} />
+      <ExecutiveHeader title={ui.workOrderDetailTitle(os.numero)} description={`${os.cliente_nome ?? ui.customer} · ${os.placa ?? "sem placa"}`} />
       <OsWorkspaceLazy
         tenantSlug={tenantSlug}
         os={os}
+        professionalLabel={ui.professional}
+        professionalsLabel={ui.professionals}
         produtos={(produtos ?? []).map((p) => ({ id: p.id, nome: p.nome }))}
         formasPagamento={(formas ?? []).map((f) => ({
           id: f.id,

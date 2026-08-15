@@ -30,6 +30,13 @@ type Props = {
   canArquivar?: boolean;
   canExcluirRascunho?: boolean;
   canRestaurar?: boolean;
+  copy?: {
+    workOrder: string;
+    workOrders: string;
+    newWorkOrder: string;
+    emptyWorkOrdersTitle: string;
+    emptyWorkOrdersBody: string;
+  };
 };
 
 const SLA_TONE: Record<OsSlaTone, ExecutiveBadgeTone> = {
@@ -53,18 +60,23 @@ export function OsCentralTable({
   canArquivar = false,
   canExcluirRascunho = false,
   canRestaurar = false,
+  copy,
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   if (rows.length === 0) {
     return (
-      <OsCentralEmptyState tenantSlug={tenantSlug} hasFilters={hasFilters} />
+      <OsCentralEmptyState
+        tenantSlug={tenantSlug}
+        hasFilters={hasFilters}
+        copy={copy}
+      />
     );
   }
 
   return (
     <div data-os-block="central-lista">
-      <ul className="space-y-3 lg:hidden" aria-label="Lista de ordens de serviço">
+      <ul className="space-y-3 lg:hidden" aria-label={copy?.workOrders ?? "Lista de ordens de serviço"}>
         {rows.map((item) => (
           <li
             key={item.id}

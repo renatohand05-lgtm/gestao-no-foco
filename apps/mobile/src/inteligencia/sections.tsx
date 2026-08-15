@@ -12,8 +12,8 @@ function toneForLevel(level: string): BadgeTone {
   return "default";
 }
 
-const OPS_ROWS: {
-  key: Exclude<keyof MobileIntelligencePack["operational"], "unavailable">;
+const DEFAULT_OPS_ROWS: {
+  key: Exclude<keyof MobileIntelligencePack["operational"], "unavailable" | "labels">;
   label: string;
 }[] = [
   { key: "producaoDia", label: "Produção do dia" },
@@ -37,12 +37,16 @@ export function OperationalSection({
     <Card style={styles.section}>
       <Text variant="subtitle">Dashboard Operacional</Text>
       <View style={styles.kpiGrid}>
-        {OPS_ROWS.map((row) => {
+        {DEFAULT_OPS_ROWS.map((row) => {
           const value = operational[row.key];
+          const label =
+            operational.labels && row.key in operational.labels
+              ? operational.labels[row.key as keyof NonNullable<typeof operational.labels>]
+              : row.label;
           return (
             <View key={row.key} style={styles.kpiCard}>
               <Text variant="caption" muted>
-                {row.label}
+                {label}
               </Text>
               <Text variant="title">{value ? value : "—"}</Text>
             </View>

@@ -1,6 +1,6 @@
 import { ProfessionalsDetailScreen } from "@/components/mecanicos/professionals-detail-screen";
 
-export default async function MecanicoDetailPage({
+export default async function ProfissionalDetailPage({
   params,
 }: {
   params: Promise<{ tenant: string; id: string }>;
@@ -10,7 +10,7 @@ export default async function MecanicoDetailPage({
     <ProfessionalsDetailScreen
       tenantSlug={tenantSlug}
       id={id}
-      routePath="/oficina/mecanicos"
+      routePath="/profissionais"
     />
   );
 }

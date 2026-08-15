@@ -13,6 +13,7 @@ export type SegmentDashboardFlags = {
   workOrders: boolean;
   inventory: boolean;
   purchases: boolean;
+  vehicles: boolean;
 };
 
 export function segmentDashboardFlags(
@@ -25,6 +26,7 @@ export function segmentDashboardFlags(
       workOrders: true,
       inventory: true,
       purchases: true,
+      vehicles: true,
     };
   }
   return {
@@ -32,6 +34,7 @@ export function segmentDashboardFlags(
     workOrders: hasCapability(ctx, "work_orders"),
     inventory: hasCapability(ctx, "inventory"),
     purchases: hasCapability(ctx, "purchases"),
+    vehicles: hasCapability(ctx, "vehicles"),
   };
 }
 
@@ -39,11 +42,12 @@ export function isDashboardSurfaceRelevant(
   id: string,
   flags: SegmentDashboardFlags,
 ): boolean {
-  if (id === "ordens" || id === "pedidos" || id === "os") {
+  if (id === "ordens" || id === "pedidos" || id === "os" || id === "nova-os") {
     return flags.workOrders;
   }
   if (id === "estoque") return flags.inventory;
   if (id === "compra") return flags.purchases;
+  if (id === "novo-veiculo" || id === "veiculos") return flags.vehicles;
   return true;
 }
 

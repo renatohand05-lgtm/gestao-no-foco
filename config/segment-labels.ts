@@ -4,6 +4,7 @@
  */
 
 import { hasCapability, resolveSegmentContext } from "../lib/segments/resolve.ts";
+import { getSegmentUiCopy } from "../lib/segments/copy.ts";
 
 export type SegmentId =
   | "oficina"
@@ -247,9 +248,14 @@ export function getOpsCenterCopy(
   }
 
   if (!ctx.usesCapabilityEngine) return copy;
+  const ui = getSegmentUiCopy(ctx);
   return {
     ...copy,
+    openOrdersLabel: ui.openWorkOrdersLabel,
+    assetsInOpsLabel: hasCapability(ctx, "vehicles")
+      ? copy.assetsInOpsLabel
+      : "Em operação",
     showVehicleFields: hasCapability(ctx, "vehicles"),
-    assigneeLabel: ctx.terminology.professional,
+    assigneeLabel: ui.assigneeLabel,
   };
 }

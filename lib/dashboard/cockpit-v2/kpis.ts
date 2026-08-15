@@ -14,6 +14,7 @@ import {
 } from "@/lib/dashboard/premium-dashboard-map";
 import { formatCurrencyCompact, formatPercent } from "@/lib/dashboard/format";
 import { filterDashboardSurface } from "@/lib/segments/dashboard.ts";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 
 export type CockpitKpiItem = PremiumKpiItem & {
   comparisonLabel: string;
@@ -48,6 +49,11 @@ export function buildCockpitKpis(input: {
 }): CockpitKpiItem[] {
   const { primary, hoje, intelligence, cockpit, tenantSlug, segment } = input;
   const copy = getSegmentCockpitCopy(segment);
+  const ui = getSegmentUiCopy({
+    segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
   const base = buildPremiumTopKpis({ primary, hoje, tenantSlug });
   const k = primary?.kpis;
   const c = primary?.comparisons;
@@ -117,7 +123,7 @@ export function buildCockpitKpis(input: {
     withContext(
       {
         id: "ordens",
-        title: copy.kpiOrdersTitle,
+        title: ui.engine ? ui.openWorkOrdersLabel : copy.kpiOrdersTitle,
         value: op.osAbertas != null ? String(op.osAbertas) : "Indisponível",
         supportingText:
           op.osAtrasadas != null

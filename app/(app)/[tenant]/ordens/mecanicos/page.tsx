@@ -15,8 +15,22 @@ import { createMecanicosDashboardService } from "@/lib/operacoes/mecanicos-dashb
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { requireTenant } from "@/lib/tenants";
+import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
 
-export const metadata = { title: "Dashboard de mecânicos" };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tenant: string }>;
+}) {
+  const { tenant: tenantSlug } = await params;
+  const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  return { title: `Produtividade · ${ui.professionals}` };
+}
 
 export default async function MecanicosDashboardPage({
   params,
@@ -25,6 +39,12 @@ export default async function MecanicosDashboardPage({
 }) {
   const { tenant: tenantSlug } = await params;
   const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const subnav = osSubnavFromCopy(ui);
 
   let canView =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["dashboard.visualizar_mecanicos"] ??
@@ -40,10 +60,10 @@ export default async function MecanicosDashboardPage({
     return (
       <ExecutivePage width="wide" spacing="default">
         <Breadcrumbs items={[
-            { label: "Ordens", href: `/${tenantSlug}/ordens` },
-            { label: "Mecânicos" },
+            { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
+            { label: ui.professionals },
           ]} />
-      <ExecutiveHeader title="Mecânicos" />
+      <ExecutiveHeader title={ui.professionals} />
         <p className="text-sm text-muted-foreground">Sem permissão.</p>
       </ExecutivePage>
     );
@@ -55,17 +75,17 @@ export default async function MecanicosDashboardPage({
   return (
     <ExecutivePage width="wide" spacing="loose">
       <Breadcrumbs items={[
-          { label: "Ordens", href: `/${tenantSlug}/ordens` },
-          { label: "Mecânicos" },
+          { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
+          { label: ui.professionals },
         ]} />
-      <ExecutiveHeader title="Produtividade da oficina" description="Indicadores para gestão e desenvolvimento — não para punição automática" actions={<>
+      <ExecutiveHeader title={`Produtividade · ${ui.professionals}`} description="Indicadores para gestão e desenvolvimento — não para punição automática" actions={<>
 <div className="flex flex-wrap gap-2">
-          <OsSubnav tenantSlug={tenantSlug} active="mecanicos" />
+          <OsSubnav tenantSlug={tenantSlug} active="mecanicos" copy={subnav} />
           <Link
-            href={`/${tenantSlug}/oficina/mecanicos`}
+            href={`/${tenantSlug}${ui.professionalsListPath}`}
             className="text-sm underline self-center"
           >
-            Cadastro de mecânicos
+            Cadastro de {ui.professionals.toLowerCase()}
           </Link>
         </div>
 </>} />
@@ -74,7 +94,7 @@ export default async function MecanicosDashboardPage({
         className={gofGrid.metrics}
         data-os-block="mecanicos-kpis"
         role="region"
-        aria-label="Resumo de custo de mecânicos"
+        aria-label={`Resumo de custo de ${ui.professionals.toLowerCase()}`}
       >
         <MetricCard
           label="Cadastro ativos"
@@ -135,7 +155,7 @@ export default async function MecanicosDashboardPage({
             <table className="w-full min-w-[1100px] text-left text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr className="border-b">
-                  <th className="p-3 font-medium">Mecânico</th>
+                  <th className="p-3 font-medium">{ui.professional}</th>
                   <th className="p-3 font-medium">Atrib.</th>
                   <th className="p-3 font-medium">Concl.</th>
                   <th className="p-3 font-medium">Atraso</th>

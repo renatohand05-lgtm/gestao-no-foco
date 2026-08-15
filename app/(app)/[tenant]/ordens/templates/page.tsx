@@ -16,6 +16,7 @@ import {
   WORK_ORDER_TIPO_LABELS,
 } from "@/lib/ordens/work-order/templates";
 import { requireTenant } from "@/lib/tenants";
+import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
 
 export const metadata = { title: "Templates · Ordem de Trabalho" };
 
@@ -25,21 +26,31 @@ export default async function OrdensTemplatesPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  await requireTenant(tenantSlug);
+  const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const subnav = osSubnavFromCopy(ui);
 
   return (
     <div data-phase28="work-order-templates">
     <ExecutivePage width="wide" spacing="loose">
       <Breadcrumbs
         items={[
-          { label: "Ordens", href: `/${tenantSlug}/ordens` },
+          { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
           { label: "Templates" },
         ]}
       />
       <ExecutiveHeader
-        title="Templates de Ordem de Trabalho"
-        description="Segmentos configuráveis. Interface permanece “Ordem de Serviço” para oficina. Persistência tenant em migration 28.4."
-        actions={<OsSubnav tenantSlug={tenantSlug} active="templates" />}
+        title={`Templates de ${ui.workOrder}`}
+        description={
+          ui.engine
+            ? `Modelos reutilizados da operação. ${ui.workOrders} usam a mesma estrutura.`
+            : "Segmentos configuráveis. Interface permanece “Ordem de Serviço” para oficina. Persistência tenant em migration 28.4."
+        }
+        actions={<OsSubnav tenantSlug={tenantSlug} active="templates" copy={subnav} />}
       />
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">

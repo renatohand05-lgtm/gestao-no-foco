@@ -59,7 +59,11 @@ UI de override: `/[tenant]/configuracoes/modulos` (owner/admin). Server action e
 
 Aliases: `auto_center` → oficina; `odontologia` → consultório.
 
-Nav: `filterNavByCapabilities` usa as capabilities resolvidas (preset + override). Itens essenciais (`dashboard`, `search`, `settings`) não somem. Equipe da barbearia reusa `professionals` no mesmo módulo de mecânicos.
+Nav: `filterNavByCapabilities` usa as capabilities resolvidas (preset + override). Itens essenciais (`dashboard`, `search`, `settings`) não somem.
+
+Equipe reusa o cadastro `mecanicos`. Oficina abre `/oficina/mecanicos` (Mecânicos). Barbearia, lava-rápido e demais segmentos com motor ligado abrem `/profissionais` (Barbeiros / Profissionais) — **sem duplicar tabelas**.
+
+Lava-rápido reusa `ordens_servico` como **Atendimentos** (checklist no mesmo backend). Copy de apresentação vive em `lib/segments/copy.ts`.
 
 ## Sprint 35.1
 

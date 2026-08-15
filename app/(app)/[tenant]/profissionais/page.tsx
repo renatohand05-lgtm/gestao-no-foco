@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 
 import { ProfessionalsListScreen } from "@/components/mecanicos/professionals-list-screen";
 
-export const metadata: Metadata = { title: "Mecânicos" };
+export const metadata: Metadata = { title: "Profissionais" };
 
-export default async function OficinaMecanicosPage({
+export default async function ProfissionaisPage({
   params,
 }: {
   params: Promise<{ tenant: string }>;
@@ -13,7 +13,7 @@ export default async function OficinaMecanicosPage({
   return (
     <ProfessionalsListScreen
       tenantSlug={tenantSlug}
-      routePath="/oficina/mecanicos"
+      routePath="/profissionais"
     />
   );
 }

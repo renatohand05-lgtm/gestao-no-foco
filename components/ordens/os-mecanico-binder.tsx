@@ -33,6 +33,8 @@ type Props = {
   canAtribuir: boolean;
   canTransferir: boolean;
   canApontar: boolean;
+  professionalLabel?: string;
+  professionalsLabel?: string;
 };
 
 export function OsMecanicoBinder({
@@ -44,6 +46,8 @@ export function OsMecanicoBinder({
   canAtribuir,
   canTransferir,
   canApontar,
+  professionalLabel = "Mecânico",
+  professionalsLabel = "Mecânicos",
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -70,12 +74,12 @@ export function OsMecanicoBinder({
   return (
     <div className="rounded-lg border bg-card p-3 space-y-3">
       <p className="text-xs font-medium text-muted-foreground">
-        Mecânicos da OS
+        {professionalsLabel} do atendimento
       </p>
       {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
       {alocacoes.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhum mecânico vinculado.</p>
+        <p className="text-sm text-muted-foreground">Nenhum {professionalLabel.toLowerCase()} vinculado.</p>
       ) : (
         <ul className="space-y-2 text-sm">
           {alocacoes.map((a) => (
@@ -199,12 +203,12 @@ export function OsMecanicoBinder({
       {canAtribuir ? (
         <div className="flex flex-wrap items-end gap-2 border-t pt-3">
           <label className="space-y-1 text-xs">
-            <span>Mecânico</span>
+            <span>{professionalLabel}</span>
             <NativeSelect
               className="h-9 min-w-44"
               value={mecanicoId}
               onChange={(e) => setMecanicoId(e.target.value)}
-              aria-label="Mecânico"
+              aria-label={professionalLabel}
             >
               <option value="">Selecionar…</option>
               {mecanicos

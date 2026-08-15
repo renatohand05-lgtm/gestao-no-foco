@@ -25,6 +25,7 @@ import { VeiculoService } from "@/lib/ordens/veiculo-service";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
 import { isOpsActionRelevant } from "@/lib/segments/mobile-tabs.ts";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import type { ResolveSegmentInput } from "@/lib/segments/resolve.ts";
 
 export function resolveOpsDataClient(
@@ -145,6 +146,8 @@ export type MobileOpsWorkOrderDetail = {
   mecanico: string | null;
   previsao: string | null;
   prioridade: string;
+  heading?: string;
+  assigneeLabel?: string;
   fields: Array<{ label: string; value: string }>;
   services: Array<{ id: string; label: string; qty: string; valor: string | null }>;
   parts: Array<{ id: string; label: string; qty: string; valor: string | null }>;
@@ -205,10 +208,13 @@ function buildQuickActions(
   permissions: readonly string[],
   segment?: ResolveSegmentInput,
 ): MobileOpsQuickAction[] {
+  const ui = segment
+    ? getSegmentUiCopy(segment)
+    : null;
   const all = [
     {
       id: "ordens",
-      label: "Ordens",
+      label: ui?.workOrders ?? "Ordens",
       href: "/operacao/ordens",
       permission: "os.visualizar",
       enabled: hasPerm(permissions, "os.visualizar"),
@@ -224,7 +230,7 @@ function buildQuickActions(
     },
     {
       id: "equipe",
-      label: "Equipe",
+      label: ui?.professionals ?? "Equipe",
       href: "/operacao/equipe",
       permission: "mecanicos.visualizar",
       enabled: hasPerm(permissions, "mecanicos.visualizar"),
@@ -408,6 +414,9 @@ export async function composeOpsWorkOrderDetail(input: {
   tenantSlug: string;
   permissions: readonly string[];
   id: string;
+  segment?: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
 }): Promise<MobileOpsWorkOrderDetail> {
   assertOpsView(input.permissions);
   const client = resolveOpsDataClient(input.client);
@@ -544,6 +553,12 @@ export async function composeOpsWorkOrderDetail(input: {
   const canEdit =
     hasPerm(input.permissions, "os.editar") || hasPerm(input.permissions, "*");
 
+  const ui = getSegmentUiCopy({
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
+
   return {
     id: detail.id,
     numero: String(detail.numero),
@@ -554,15 +569,17 @@ export async function composeOpsWorkOrderDetail(input: {
     mecanico: mecanicoNome,
     previsao: detail.previsao_entrega,
     prioridade: detail.prioridade || "normal",
+    heading: ui.workOrderDetailTitle(detail.numero),
+    assigneeLabel: ui.assigneeLabel,
     fields: [
-      { label: "Cliente", value: detail.cliente_nome ?? "—" },
+      { label: ui.customer, value: detail.cliente_nome ?? "—" },
       {
         label: "Veículo",
         value: [detail.placa, detail.modelo].filter(Boolean).join(" ") || "—",
       },
       { label: "Placa", value: detail.placa ?? "—" },
       { label: "Status", value: detail.status || "—" },
-      { label: "Mecânico", value: mecanicoNome ?? "—" },
+      { label: ui.assigneeLabel, value: mecanicoNome ?? "—" },
       { label: "Abertura", value: detail.data_abertura || "—" },
       { label: "Previsão", value: detail.previsao_entrega ?? "—" },
       { label: "Valor", value: money(detail.valor_total) ?? "—" },

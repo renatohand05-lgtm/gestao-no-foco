@@ -6,6 +6,7 @@ import {
 import { defaultDashboardPeriodo } from "@/lib/dashboard/dashboard-service";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/dashboard/format";
 import { requireTenant } from "@/lib/tenants";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import type { DashboardFilters } from "@/types/dashboard-executive";
 
 export const metadata = { title: "Qualidade Operacional" };
@@ -36,6 +37,11 @@ export default async function QualidadeOperacionalPage({
   const { tenant: tenantSlug } = await params;
   const resolvedSearchParams = await searchParams;
   const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
   const filters = resolveFilters(resolvedSearchParams);
 
   let data;
@@ -120,11 +126,11 @@ export default async function QualidadeOperacionalPage({
             <tr>
               <th className="px-4 py-3">Cliente</th>
               <th className="px-4 py-3">Veículo</th>
-              <th className="px-4 py-3">OS original</th>
+              <th className="px-4 py-3">{ui.workOrder} original</th>
               <th className="px-4 py-3">Data retorno</th>
               <th className="px-4 py-3">Dias</th>
               <th className="px-4 py-3">Motivo</th>
-              <th className="px-4 py-3">Mecânico</th>
+              <th className="px-4 py-3">{ui.assigneeLabel}</th>
               <th className="px-4 py-3">Valor</th>
               <th className="px-4 py-3">Cobertura</th>
             </tr>

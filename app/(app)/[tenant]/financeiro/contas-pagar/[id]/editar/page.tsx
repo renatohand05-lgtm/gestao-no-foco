@@ -149,6 +149,7 @@ export default async function EditarPage({
         <ContaPagarForm
           tenantSlug={tenantSlug}
           segment={tenant.segment}
+          segmentVersion={tenant.segment_version}
           mode="edit"
           item={item}
           classificacaoOnly={classificacaoOnly}

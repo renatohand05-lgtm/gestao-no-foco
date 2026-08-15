@@ -21,26 +21,50 @@ import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+type CopyHint = {
+  professional: string;
+  professionals: string;
+  newProfessional: string;
+  automotiveSpecialties: boolean;
+};
+
+const OFICINA_COPY: CopyHint = {
+  professional: "Mecânico",
+  professionals: "Mecânicos",
+  newProfessional: "Novo mecânico",
+  automotiveSpecialties: true,
+};
+
 type Props = {
   tenantSlug: string;
   mecanicos: Mecanico[];
   canCreate: boolean;
   canEdit: boolean;
+  listPath?: "/oficina/mecanicos" | "/profissionais";
+  copy?: CopyHint;
 };
+
+function specialtyLabel(id: string, automotive: boolean): string {
+  if (!automotive) return "Geral";
+  return MECANICO_ESPECIALIDADE_LABELS[id as MecanicoEspecialidade] ?? id;
+}
 
 export function MecanicosManager({
   tenantSlug,
   mecanicos,
   canCreate,
   canEdit,
+  listPath = "/oficina/mecanicos",
+  copy = OFICINA_COPY,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [nome, setNome] = useState("");
-  const [especialidade, setEspecialidade] =
-    useState<MecanicoEspecialidade>("mecanica_geral");
+  const [especialidade, setEspecialidade] = useState<MecanicoEspecialidade>(
+    copy.automotiveSpecialties ? "mecanica_geral" : "outras",
+  );
   const [vinculo, setVinculo] = useState<MecanicoVinculo>("clt");
   const [codigo, setCodigo] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -89,7 +113,10 @@ export function MecanicosManager({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
-          {mecanicos.length} mecânico(s)
+          {mecanicos.length}{" "}
+          {mecanicos.length === 1
+            ? copy.professional.toLowerCase()
+            : copy.professionals.toLowerCase()}
         </p>
         {canCreate ? (
           <button
@@ -97,7 +124,7 @@ export function MecanicosManager({
             className={cn(buttonVariants({ size: "sm" }))}
             onClick={() => setShowForm((v) => !v)}
           >
-            {showForm ? "Cancelar" : "Novo mecânico"}
+            {showForm ? "Cancelar" : copy.newProfessional}
           </button>
         ) : null}
       </div>
@@ -130,9 +157,12 @@ export function MecanicosManager({
                   setEspecialidade(e.target.value as MecanicoEspecialidade)
                 }
               >
-                {MECANICO_ESPECIALIDADES.map((e) => (
+                { (copy.automotiveSpecialties
+                  ? MECANICO_ESPECIALIDADES
+                  : (["outras"] as const)
+                ).map((e) => (
                   <option key={e} value={e}>
-                    {MECANICO_ESPECIALIDADE_LABELS[e]}
+                    {specialtyLabel(e, copy.automotiveSpecialties)}
                   </option>
                 ))}
               </select>
@@ -188,7 +218,7 @@ export function MecanicosManager({
               <tr key={m.id} className="border-t">
                 <td className="px-3 py-2">
                   <Link
-                    href={`/${tenantSlug}/oficina/mecanicos/${m.id}`}
+                    href={`/${tenantSlug}${listPath}/${m.id}`}
                     className="font-medium underline-offset-2 hover:underline"
                   >
                     {m.nome_completo}
@@ -200,8 +230,7 @@ export function MecanicosManager({
                   ) : null}
                 </td>
                 <td className="px-3 py-2">
-                  {MECANICO_ESPECIALIDADE_LABELS[m.especialidade] ??
-                    m.especialidade}
+                  {specialtyLabel(m.especialidade, copy.automotiveSpecialties)}
                 </td>
                 <td className="px-3 py-2">
                   {MECANICO_VINCULO_LABELS[m.tipo_vinculo] ?? m.tipo_vinculo}
@@ -258,7 +287,7 @@ export function MecanicosManager({
                   colSpan={6}
                   className="px-3 py-6 text-center text-muted-foreground"
                 >
-                  Nenhum mecânico cadastrado.
+                  Nenhum {copy.professional.toLowerCase()} cadastrado.
                 </td>
               </tr>
             ) : null}

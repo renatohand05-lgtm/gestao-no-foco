@@ -57,3 +57,10 @@ export {
   isDashboardSurfaceRelevant,
 } from "./dashboard.ts";
 export { getSegmentGaps, listAllSegmentGaps } from "./gaps.ts";
+export {
+  getSegmentUiCopy,
+  osSubnavFromCopy,
+  professionalsHref,
+  countProfessionalsLabel,
+  type SegmentUiCopy,
+} from "./copy.ts";

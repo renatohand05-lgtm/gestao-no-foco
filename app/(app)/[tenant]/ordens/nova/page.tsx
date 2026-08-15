@@ -1,5 +1,6 @@
 import { OsOpenForm } from "@/components/ordens/os-open-form";
 import { OsSubnav } from "@/components/ordens/os-subnav";
+import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { requireTenant } from "@/lib/tenants";
@@ -10,7 +11,20 @@ import {
 } from "@/components/executive";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
-export const metadata = { title: "Nova OS" };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tenant: string }>;
+}) {
+  const { tenant: tenantSlug } = await params;
+  const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  return { title: ui.newWorkOrder };
+}
 
 export default async function NovaOsPage({
   params,
@@ -19,6 +33,12 @@ export default async function NovaOsPage({
 }) {
   const { tenant: tenantSlug } = await params;
   const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const subnav = osSubnavFromCopy(ui);
 
   let canForceDuplicate =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.criar_cliente_forcado"];
@@ -33,13 +53,13 @@ export default async function NovaOsPage({
   return (
     <ExecutivePage width="wide" spacing="loose">
       <Breadcrumbs items={[
-          { label: "Ordens", href: `/${tenantSlug}/ordens` },
-          { label: "Nova" },
+          { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
+          { label: ui.newWorkOrder },
         ]} />
-      <ExecutiveHeader title="Nova ordem de serviço" description="Identifique o cliente e o veículo — ou cadastre na hora" actions={<OsSubnav tenantSlug={tenantSlug} active="nova" />} />
+      <ExecutiveHeader title={ui.newWorkOrder} description={ui.newWorkOrderDescription} actions={<OsSubnav tenantSlug={tenantSlug} active="nova" copy={subnav} />} />
       {!canCreate ? (
         <p className="text-sm text-muted-foreground">
-          Sem permissão para criar OS.
+          Sem permissão para criar {ui.workOrder.toLowerCase()}.
         </p>
       ) : (
         <ExecutiveSection

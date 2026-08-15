@@ -13,6 +13,7 @@ import type { ExecutiveIntelligenceData } from "@/lib/dashboard/executive-intell
 import type { ExecutiveDecisionResult } from "@/lib/dashboard/executive-decision-types";
 import { formatCurrency, formatCurrencyCompact, formatPercent } from "@/lib/dashboard/format";
 import { segmentDashboardFlags } from "@/lib/segments/dashboard.ts";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import {
   composeEnterpriseInsights,
   presentEnterpriseInsightCards,
@@ -368,6 +369,11 @@ export function buildPremiumOpsCards(input: {
     segmentVersion: input.segmentVersion,
     segmentConfig: input.segmentConfig,
   });
+  const ui = getSegmentUiCopy({
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
   const op = intelligence.saudeOperacao;
   const cards: PremiumOpsCard[] = [
     {
@@ -390,7 +396,7 @@ export function buildPremiumOpsCards(input: {
   if (flags.workOrders) {
     cards.push({
       id: "pedidos",
-      title: "Pedidos / OS em aberto",
+      title: flags.engine ? ui.inProgressWorkOrdersLabel : "Pedidos / OS em aberto",
       value: op.osAbertas != null ? String(op.osAbertas) : "Indisponível",
       hint:
         op.osAtrasadas != null

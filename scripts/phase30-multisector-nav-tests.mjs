@@ -2,7 +2,7 @@
 /**
  * Sprint 30.1 — navegação multissetorial (sem importar lucide via navigation.ts).
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   getOpsCenterCopy,
@@ -46,7 +46,11 @@ const sidebar = readFileSync(resolve("components/layout/app-sidebar.tsx"), "utf8
 check("navigation usa getSegmentNavLabels", /getSegmentNavLabels/.test(navSrc));
 check("navigation filtra mechanics", /item\.id === "mechanics"/.test(navSrc));
 check("sidebar passa tenant.segment", /getTenantNav\(tenant\.slug,\s*tenant\.segment/.test(sidebar));
-check("rota interna mecanicos preservada", /oficina\/mecanicos/.test(navSrc));
+check(
+  "rota interna mecanicos preservada",
+  existsSync(resolve("app/(app)/[tenant]/oficina/mecanicos/page.tsx")) &&
+    /professionalsListPath/.test(navSrc),
+);
 
 console.log(`\nResultado: ${pass} PASS · ${fail} FAIL`);
 process.exit(fail > 0 ? 1 : 0);

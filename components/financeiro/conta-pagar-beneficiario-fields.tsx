@@ -22,6 +22,7 @@ import {
   type DespesaPresetId,
 } from "@/lib/financeiro/despesa-presets";
 import { orderDespesaPresetsForSegment } from "@/lib/segments/finance-presets.ts";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { suggestFormaPagamentoId } from "@/lib/financeiro/despesa-forma-pagamento";
 import type { ContaPagarFormInput } from "@/lib/financeiro/validations";
 import { getFornecedorAutofillAction } from "@/lib/master-data/actions";
@@ -49,6 +50,7 @@ const AUTOFILL_KEYS = [
 type Props = {
   tenantSlug: string;
   segment?: string | null;
+  segmentVersion?: number | null;
   disabled?: boolean;
   fornecedores: FornecedorOption[];
   beneficiarios: BeneficiarioOption[];
@@ -63,6 +65,7 @@ type Props = {
 export function ContaPagarBeneficiarioFields({
   tenantSlug,
   segment,
+  segmentVersion,
   disabled = false,
   fornecedores,
   beneficiarios,
@@ -74,6 +77,9 @@ export function ContaPagarBeneficiarioFields({
   onBeneficiariosChange,
 }: Props) {
   const form = useFormContext<ContaPagarFormInput>();
+  const ui = getSegmentUiCopy({ segment, segmentVersion });
+  const tipoLabel = (t: BeneficiarioTipo) =>
+    t === "mecanico" ? ui.assigneeLabel : BENEFICIARIO_TIPO_LABEL[t];
   const [presetHint, setPresetHint] = useState<string | null>(null);
   const [lastSuggestedFormaId, setLastSuggestedFormaId] = useState<
     string | null
@@ -351,7 +357,7 @@ export function ContaPagarBeneficiarioFields({
             <option value="">Selecionar…</option>
             {BENEFICIARIO_TIPOS.map((t) => (
               <option key={t} value={t}>
-                {BENEFICIARIO_TIPO_LABEL[t]}
+                {tipoLabel(t)}
               </option>
             ))}
           </select>
@@ -396,7 +402,7 @@ export function ContaPagarBeneficiarioFields({
 
         {tipo === "mecanico" ? (
           <FormField
-            label="Mecânico"
+            label={ui.assigneeLabel}
             htmlFor="mecanico_id"
             error={form.formState.errors.mecanico_id?.message}
           >
@@ -407,7 +413,7 @@ export function ContaPagarBeneficiarioFields({
               {...form.register("mecanico_id")}
               onChange={(e) => handleMecanicoChange(e.target.value)}
             >
-              <option value="">Selecionar mecânico</option>
+              <option value="">Selecionar {ui.assigneeLabel.toLowerCase()}</option>
               {filteredMecanicos.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.nome}
@@ -446,8 +452,8 @@ export function ContaPagarBeneficiarioFields({
             </select>
             {equipe.length === 0 ? (
               <p className="mt-1 text-xs text-muted-foreground">
-                Lista de equipe indisponível ou vazia — use nome livre. Mecânicos
-                têm tipo próprio.
+                Lista de equipe indisponível ou vazia — use nome livre.{" "}
+                {ui.professionals} têm tipo próprio.
               </p>
             ) : null}
           </FormField>

@@ -23,7 +23,7 @@ export function WorkOrderHeader({
   const { colors } = useTheme();
   return (
     <Card style={styles.section}>
-      <Text variant="title">OS {data.numero}</Text>
+      <Text variant="title">{data.heading ?? `OS ${data.numero}`}</Text>
       <View style={styles.row}>
         <Badge label={data.status} />
         <Badge label={data.prioridade} />
@@ -35,7 +35,8 @@ export function WorkOrderHeader({
         {data.placa ? ` · ${data.placa}` : ""}
       </Text>
       <Text variant="caption" style={{ color: colors.textMuted }}>
-        Mecânico: {data.mecanico ?? "—"} · Previsão: {data.previsao ?? "—"}
+        {data.assigneeLabel ?? "Mecânico"}: {data.mecanico ?? "—"} · Previsão:{" "}
+        {data.previsao ?? "—"}
       </Text>
       {offlineMinutes != null ? (
         <Text variant="caption" style={{ color: colors.primary, marginTop: 6 }}>

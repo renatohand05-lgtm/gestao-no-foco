@@ -994,6 +994,8 @@ export type MobileOpsWorkOrderDetail = {
   mecanico: string | null;
   previsao: string | null;
   prioridade: string;
+  heading?: string;
+  assigneeLabel?: string;
   fields: { label: string; value: string }[];
   services: { id: string; label: string; qty: string; valor: string | null }[];
   parts: { id: string; label: string; qty: string; valor: string | null }[];
@@ -1410,6 +1412,12 @@ export type MobileIntelligencePack = {
     servicosPendentes: string | null;
     eficienciaOperacional: string | null;
     unavailable: string[];
+    labels?: {
+      mecanicosAtivos: string;
+      ordensAbertas: string;
+      ordensAtrasadas: string;
+      tempoMedioOs: string;
+    };
   };
   executiveBrief: MobileExecutiveDashboard["brief"];
   decision: MobileExecutiveDashboard["decision"];

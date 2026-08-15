@@ -44,6 +44,7 @@ import {
 } from "@/lib/rbac/executive-access";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 
 async function soft<T>(fn: () => Promise<T>): Promise<T | null> {
   try {
@@ -89,6 +90,12 @@ export type MobileOperationalExecutive = {
   servicosPendentes: string | null;
   eficienciaOperacional: string | null;
   unavailable: string[];
+  labels?: {
+    mecanicosAtivos: string;
+    ordensAbertas: string;
+    ordensAtrasadas: string;
+    tempoMedioOs: string;
+  };
 };
 
 export type MobileAlertCenterItem = {
@@ -318,6 +325,9 @@ async function composeOperationalExecutive(input: {
   client: SupabaseClient<Database>;
   tenantId: string;
   tenantSlug: string;
+  segment?: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
 }): Promise<MobileOperationalExecutive> {
   const client = resolveOpsDataClient(input.client);
   const centro = new CentroOperacoesService(client, input.tenantId);
@@ -366,6 +376,11 @@ async function composeOperationalExecutive(input: {
 
   const tempo = dash?.kpis.tempoMedioConclusaoDias;
   const pendentes = dash?.kpis.pendentes ?? null;
+  const ui = getSegmentUiCopy({
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
 
   return {
     producaoDia:
@@ -390,6 +405,16 @@ async function composeOperationalExecutive(input: {
           ? `${ocup.kpis.taxaOcupacao}% ocupação`
           : null,
     unavailable,
+    labels: {
+      mecanicosAtivos: `${ui.professionals} ativos`,
+      ordensAbertas: ui.openWorkOrdersLabel,
+      ordensAtrasadas: ui.engine
+        ? `${ui.workOrders} atrasados`
+        : "Ordens atrasadas",
+      tempoMedioOs: ui.engine
+        ? `Tempo médio por ${ui.workOrder.toLowerCase()}`
+        : "Tempo médio por OS",
+    },
   };
 }
 
@@ -606,6 +631,9 @@ export async function composeMobileIntelligencePack(
         client,
         tenantId: input.tenantId,
         tenantSlug: input.tenantSlug,
+        segment: input.segment,
+        segmentVersion: input.segmentVersion,
+        segmentConfig: input.segmentConfig,
       }),
     ),
     soft(() =>
@@ -758,6 +786,9 @@ export async function composeMobileOperationalDashboardOnly(
         client,
         tenantId: input.tenantId,
         tenantSlug: input.tenantSlug,
+        segment: input.segment,
+        segmentVersion: input.segmentVersion,
+        segmentConfig: input.segmentConfig,
       }),
     )) ?? {
       producaoDia: null,

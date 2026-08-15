@@ -12,9 +12,20 @@ type Props = {
     | "mecanicos"
     | "cadastro"
     | "templates";
+  copy?: {
+    professionals: string;
+    newWorkOrder: string;
+    professionalsListPath: "/oficina/mecanicos" | "/profissionais";
+  };
 };
 
-export function OsSubnav({ tenantSlug, active }: Props) {
+const OFICINA_SUBNAV = {
+  professionals: "Mecânicos",
+  newWorkOrder: "Nova OS",
+  professionalsListPath: "/oficina/mecanicos" as const,
+};
+
+export function OsSubnav({ tenantSlug, active, copy = OFICINA_SUBNAV }: Props) {
   const items = [
     { key: "lista" as const, href: `/${tenantSlug}/ordens`, label: "Central" },
     {
@@ -25,22 +36,22 @@ export function OsSubnav({ tenantSlug, active }: Props) {
     {
       key: "mecanicos" as const,
       href: `/${tenantSlug}/ordens/mecanicos`,
-      label: "Mecânicos",
+      label: copy.professionals,
     },
     {
       key: "cadastro" as const,
-      href: `/${tenantSlug}/oficina/mecanicos`,
+      href: `/${tenantSlug}${copy.professionalsListPath}`,
       label: "Cadastro",
     },
     {
       key: "templates" as const,
       href: `/${tenantSlug}/ordens/templates`,
-      label: "Templates OT",
+      label: "Templates",
     },
     {
       key: "nova" as const,
       href: `/${tenantSlug}/ordens/nova`,
-      label: "Nova OS",
+      label: copy.newWorkOrder,
     },
   ];
 

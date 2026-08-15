@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { getSegmentNavLabels } from "./segment-labels";
+import { getSegmentUiCopy } from "../lib/segments/copy.ts";
 import { filterNavByCapabilities } from "../lib/segments/nav.ts";
 import { resolveSegmentContext } from "../lib/segments/resolve.ts";
 
@@ -88,15 +89,16 @@ export function getTenantNav(
     segmentVersion: options?.segmentVersion,
     segmentConfig: options?.segmentConfig,
   });
+  const ui = getSegmentUiCopy(segmentCtx);
   const labels = (() => {
     const baseLabels = getSegmentNavLabels(segment);
     if (!segmentCtx.usesCapabilityEngine) return baseLabels;
     return {
       ...baseLabels,
-      team: segmentCtx.terminology.professionals,
-      teamDescription: `${segmentCtx.terminology.professionals} e produtividade`,
-      workOrders: segmentCtx.terminology.workOrder,
-      workOrdersDescription: segmentCtx.terminology.workOrder,
+      team: ui.professionals,
+      teamDescription: ui.professionalsDescription,
+      workOrders: ui.workOrders,
+      workOrdersDescription: ui.workOrdersHubDescription,
     };
   })();
 
@@ -240,7 +242,7 @@ export function getTenantNav(
     {
       id: "mechanics",
       title: labels.team,
-      href: `${base}/oficina/mecanicos`,
+      href: `${base}${ui.professionalsListPath}`,
       icon: Users,
       group: "operacao",
       description: labels.teamDescription,

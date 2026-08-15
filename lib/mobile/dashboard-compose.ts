@@ -56,6 +56,8 @@ import { hasExecutiveDashboardAccess } from "@/lib/rbac/executive-access";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
 import type { TenantSegment } from "@/types";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { filterDashboardSurface } from "@/lib/segments/dashboard.ts";
 
 async function soft<T>(fn: () => Promise<T>): Promise<T | null> {
   try {
@@ -268,8 +270,14 @@ function formatDateLabel(civilDate: string): string {
 function buildQuickActions(
   tenantSlug: string,
   permissions: readonly string[],
+  segment: {
+    segment?: string | null;
+    segmentVersion?: number | null;
+    segmentConfig?: unknown;
+  },
 ): MobileQuickAction[] {
   const root = `/${tenantSlug}`;
+  const ui = getSegmentUiCopy(segment);
   const can = (perm: string | null) =>
     !perm ||
     permissions.includes("*") ||
@@ -277,7 +285,7 @@ function buildQuickActions(
     hasExecutiveDashboardAccess(permissions);
 
   const items: Array<Omit<MobileQuickAction, "enabled">> = [
-    { id: "nova-os", label: "Nova OS", href: `${root}/ordens/nova`, permission: "ordens.criar" },
+    { id: "nova-os", label: ui.newWorkOrder, href: `${root}/ordens/nova`, permission: "ordens.criar" },
     {
       id: "novo-cliente",
       label: "Novo Cliente",
@@ -312,8 +320,8 @@ function buildQuickActions(
     },
     {
       id: "equipe",
-      label: "Equipe",
-      href: `${root}/configuracoes/equipe`,
+      label: ui.professionals,
+      href: `${root}${ui.professionalsListPath}`,
       permission: "usuarios.visualizar",
     },
     {
@@ -330,7 +338,7 @@ function buildQuickActions(
     },
   ];
 
-  return items.map((item) => ({
+  return filterDashboardSurface(items, segment).map((item) => ({
     ...item,
     enabled: can(item.permission),
   }));
@@ -508,7 +516,11 @@ export async function composeMobileExecutiveDashboard(
       day: dayMeta,
       week: weekMeta,
     },
-    quickActions: buildQuickActions(input.tenantSlug, input.permissions),
+    quickActions: buildQuickActions(input.tenantSlug, input.permissions, {
+      segment: input.segment,
+      segmentVersion: input.segmentVersion,
+      segmentConfig: input.segmentConfig,
+    }),
     updatedAtLabel: hoje.atualizado_em_label,
   };
 }

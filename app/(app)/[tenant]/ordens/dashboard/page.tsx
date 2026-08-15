@@ -20,6 +20,7 @@ import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import { cn } from "@/lib/utils";
+import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
 
 export const metadata = { title: "Dashboard de OS" };
 
@@ -94,6 +95,12 @@ export default async function OrdensDashboardPage({
   const { tenant: tenantSlug } = await params;
   const sp = await searchParams;
   const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const subnav = osSubnavFromCopy(ui);
 
   let canView = DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.visualizar_dashboard"];
   try {
@@ -166,10 +173,10 @@ export default async function OrdensDashboardPage({
   return (
     <ExecutivePage width="wide" spacing="loose">
       <Breadcrumbs items={[
-          { label: "Ordens", href: `/${tenantSlug}/ordens` },
+          { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
           { label: "Dashboard" },
         ]} />
-      <ExecutiveHeader title="Dashboard de OS" description="Visão gerencial do ciclo da oficina" actions={<OsSubnav tenantSlug={tenantSlug} active="dashboard" />} />
+      <ExecutiveHeader title={`Dashboard de ${ui.workOrders}`} description={ui.workOrdersHubDescription} actions={<OsSubnav tenantSlug={tenantSlug} active="dashboard" copy={subnav} />} />
 
       <form>
         <ExecutiveFilter

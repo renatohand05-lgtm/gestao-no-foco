@@ -174,9 +174,9 @@ export const CAPABILITY_DEFS: readonly CapabilityDef[] = [
   {
     id: "professionals",
     label: "Profissionais",
-    description: "Reusa Equipe/mecânicos (mesmo cadastro)",
+    description: "Reusa Equipe/mecânicos (mesmo cadastro; UI em /profissionais)",
     navIds: ["mechanics"],
-    href: "/oficina/mecanicos",
+    href: "/profissionais",
     availability: "backend",
     overridable: true,
     essential: false,

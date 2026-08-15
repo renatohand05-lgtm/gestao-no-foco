@@ -83,6 +83,8 @@ type Props = {
   canAtribuirMecanico?: boolean;
   canTransferirMecanico?: boolean;
   canApontarHoras?: boolean;
+  professionalLabel?: string;
+  professionalsLabel?: string;
 };
 
 const TABS = [
@@ -142,6 +144,8 @@ export function OsWorkspace({
   canAtribuirMecanico = false,
   canTransferirMecanico = false,
   canApontarHoras = false,
+  professionalLabel = "Mecânico",
+  professionalsLabel = "Mecânicos",
 }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
@@ -292,6 +296,8 @@ export function OsWorkspace({
         canAtribuir={canAtribuirMecanico && canEditOs(os)}
         canTransferir={canTransferirMecanico && canEditOs(os)}
         canApontar={canApontarHoras}
+        professionalLabel={professionalLabel}
+        professionalsLabel={professionalsLabel}
       />
 
       <div className="flex flex-wrap gap-1.5">

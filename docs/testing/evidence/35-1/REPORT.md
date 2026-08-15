@@ -1,6 +1,7 @@
 # Sprint 35.1 — Presets por segmento + override por tenant
 
 **Data:** 2026-08-15  
+**Commit código:** `28066a60073c2121b213f20ae7724f58483bac28`  
 **Branch:** `main`  
 **Tipo:** Experiência por segmento — sem billing / Asaas / 35.2 / auto-migration prod
 

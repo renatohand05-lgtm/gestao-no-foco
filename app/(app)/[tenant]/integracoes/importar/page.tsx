@@ -11,6 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import {
+  hasCapability,
+  resolveSegmentContext,
+} from "@/lib/segments/resolve.ts";
 import { requireTenant } from "@/lib/tenants";
 
 export const metadata = { title: "Importar Arquivos" };
@@ -21,7 +26,14 @@ export default async function ImportarArquivosPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  await requireTenant(tenantSlug);
+  const tenant = await requireTenant(tenantSlug);
+  const ctx = resolveSegmentContext({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const ui = getSegmentUiCopy(ctx);
+  const showWorkOrders = hasCapability(ctx, "work_orders");
 
   const modules = [
     {
@@ -38,13 +50,17 @@ export default async function ImportarArquivosPage({
       icon: ShoppingCart,
       href: `/${tenantSlug}/integracoes/importar/vendas`,
     },
-    {
-      key: "ordens",
-      title: "Ordens de Serviço",
-      description: "Ordens de serviço da oficina via Excel ou CSV.",
-      icon: Wrench,
-      href: `/${tenantSlug}/integracoes/importar/ordens`,
-    },
+    ...(showWorkOrders
+      ? [
+          {
+            key: "ordens",
+            title: ui.importModuleTitle,
+            description: ui.importModuleDescription,
+            icon: Wrench,
+            href: `/${tenantSlug}/integracoes/importar/ordens`,
+          },
+        ]
+      : []),
   ];
 
   return (

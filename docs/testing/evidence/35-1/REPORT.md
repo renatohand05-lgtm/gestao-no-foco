@@ -1,13 +1,37 @@
 # Sprint 35.1 — Presets por segmento + override por tenant
 
 **Data:** 2026-08-16  
-**Commit código:** `402cb2a`  
+**Commit código:** (preenchido após o commit deste closeout)  
 **Branch:** `main`  
 **Tipo:** Hardening de apresentação — sem billing / Asaas / 35.2 / auto-migration prod
 
 ## Status
 
-**SPRINT 35.1 COPY HARDENING: GO (código)** · homologação visual residual **PENDING** · **P0: 0** · **P1: 0** · **P2 residual de copy profunda** · migration **NENHUMA**
+**SPRINT 35.1 FINAL CLOSEOUT: GO (código)** · homologação visual **PENDING (Renato)** · **P0: 0** · **P1: 0** · **P2 documentado fora da jornada principal** · migration **NENHUMA**
+
+## Auditoria global de copy (closeout)
+
+Executada busca por OS / Ordens de Serviço / Mecânico / diagnóstico / peças / placa / quilometragem / workspace da OS.
+
+Classificação:
+- **Interno (mantido):** `osAbertas`, `work_orders`, tabelas `ordens_servico`/`mecanicos`, rotas `/ordens`, permissão `os.criar`, adapter.id `service-orders`.
+- **Oficina/legado (mantido):** copy hoje da OS/Mecânicos/diagnóstico/peças quando engine off ou segmento oficina.
+- **Capability (gated):** import `/integracoes/importar/ordens` → `notFound()` se `work_orders` OFF; hub de importação esconde o card.
+- **Adapter:** `getSegmentUiCopy` / `segmentCopyForClient` / `listSegmentModuleRows` overlay.
+- **Vazamentos reais desta passagem (corrigidos):**
+  1. Skeleton/lazy-load `"Carregando workspace da OS"` — agora `uiCopy.workspaceLoadingAria` (lava: `"Carregando atendimento"`).
+  2. Hub e wizard de importação de OS visíveis em tenants com Integrações (consultoria) — card some com work_orders OFF; copy do wizard via adapter.
+  3. Hub de conectores `"Ordens de Serviço"` — filtrado/renomeado.
+  4. Matriz Configurações → Personalizar experiência: labels `"Mecânicos"` / descrição `"Reusa Equipe/mecânicos"` — overlay pelo adapter.
+  5. Km/combustível/picker de veículo no workspace quando `showVehicles === false`.
+
+Onboarding 30.x: o tour antigo (`OnboardingTour` com “Ordens de Serviço”) **não é renderizado** em `primeiro-acesso`. O wizard enterprise usa `getSegmentSetup` já fatiado por segmento (lava/barbearia/consultoria corretos). Não reescrito.
+
+P2 residual (não jornada principal / não copy de UI operacional):
+- Copiloto enterprise `generateInsightsFromSnapshot` ainda gera título interno “Ordens de serviço em aberto”.
+- Catálogo analítico `METRIC_CATALOG` / `metric-registry` name `"OS abertas"` (id técnico `os.abertas`).
+- Comentários e IDs do import-engine.
+- Public inspeção/token se usado fora do tenant (legado oficina).
 
 ## Copy hardening final (2026-08-16)
 
@@ -32,7 +56,7 @@ Gaps grandes (prontuário, odontograma, folha, fidelidade, projetos) **não** fo
 
 | Gate | Resultado |
 |---|---|
-| `test:phase35-1-segment-presets` | **26/26 PASS** (`ℹ tests 26` · `ℹ pass 26` · `ℹ fail 0`) |
+| `test:phase35-1-segment-presets` | **31/31 PASS** (`ℹ tests 31` · `ℹ pass 31` · `ℹ fail 0`) |
 | `test:phase35-0-segment-architecture` | **13 PASS · 0 FAIL** |
 | `test:phase34-9-contas-pagar-beneficiarios` | 25 PASS · 0 FAIL |
 | `test:phase34-2-p0-tenant-rls` | 12 PASS · 0 FAIL |
@@ -136,14 +160,14 @@ Gaps grandes (prontuário, odontograma, folha, fidelidade, projetos) **não** fo
 
 Já homologado: oficina UX automotiva, consultoria sem módulos automotivos, barbearia Barbeiros, lava Pacotes/Atendimentos/Profissionais, agenda.
 
-Validar agora:
-1. Lava-rápido → Atendimentos: KPIs **"Atendimentos abertos"** e **"Valor estimado dos atendimentos em andamento."** (não “OS”)
-2. Lava-rápido → abrir um atendimento: aba **Análise** (não Diagnóstico); toasts/faturamento sem “OS”
-3. Oficina: ainda **OS abertas**, Mecânicos, diagnóstico/peças
-4. Barbearia: menu **Barbeiros**; sem Mecânicos/OS na UI visível
-5. Consultoria: Relatórios sem card “Ordens de serviço”; sem nav automotiva
-6. Tenant legado (`segment_version` NULL): copy de oficina intacta
-7. Override em Configurações → Personalizar experiência liga/desliga módulo sem vocabulário indevido
+Validar agora (fechamento):
+1. Lava-rápido → Atendimentos: KPIs **Atendimentos abertos** e **Valor estimado dos atendimentos em andamento**
+2. Lava-rápido → abrir atendimento: loading **Carregando atendimento**, aba **Análise**, sem toast “OS”
+3. Oficina: **OS abertas**, Mecânicos, diagnóstico, peças, skeleton “workspace da OS”
+4. Barbearia: menu **Barbeiros**; Personalizar experiência sem linha “Mecânicos”
+5. Consultoria: Relatórios sem OS; Importar Arquivos **sem** card de ordens; 404 em `/integracoes/importar/ordens`
+6. Tenant legado: copy automotiva intacta
+7. Override: ligar/desligar não troca vocabulário do segmento
 
 ## Não feito (conforme escopo)
 

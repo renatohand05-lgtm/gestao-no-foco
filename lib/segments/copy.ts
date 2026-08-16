@@ -79,6 +79,13 @@ export type SegmentUiCopy = {
   diagnosisSectionTitle: string;
   diagnosisSectionDescription: string;
   workspaceTabLabels: Record<string, string>;
+  importModuleTitle: string;
+  importModuleDescription: string;
+  importUploadTitle: string;
+  importUploadHint: string;
+  importHistoryDescription: string;
+  importReviewDescription: string;
+  connectorsOsName: string;
 };
 
 const OFICINA_TAB_LABELS: Record<string, string> = {
@@ -229,6 +236,17 @@ export function getSegmentUiCopy(
       diagnosisSectionDescription:
         "Não gera movimentação financeira. Ao salvar a partir de Rascunho, a OS avança Rascunho → Aguardando diagnóstico → Diagnóstico concluído.",
       workspaceTabLabels: OFICINA_TAB_LABELS,
+      importModuleTitle: "Ordens de Serviço",
+      importModuleDescription:
+        "Ordens de serviço da oficina via Excel ou CSV.",
+      importUploadTitle: "Enviar arquivo de ordens de serviço",
+      importUploadHint:
+        "Excel (.xlsx / .xls) ou CSV. Histórico e mapeamentos gravam no Supabase. OS — nenhuma ordem real é criada nesta etapa.",
+      importHistoryDescription:
+        "Últimas importações de ordens de serviço deste tenant.",
+      importReviewDescription:
+        "Confirme as linhas. Nesta fase, a confirmação regista as linhas em staging + histórico — a criação de OS reais será ligada aos services existentes numa sprint seguinte.",
+      connectorsOsName: "Ordens de Serviço",
     };
   }
 
@@ -334,6 +352,13 @@ export function getSegmentUiCopy(
       ...OFICINA_TAB_LABELS,
       diagnostico: "Análise",
     },
+    importModuleTitle: workOrders,
+    importModuleDescription: `Importar ${workOrdersLc} via Excel ou CSV.`,
+    importUploadTitle: `Enviar arquivo de ${workOrdersLc}`,
+    importUploadHint: `Excel (.xlsx / .xls) ou CSV. Histórico e mapeamentos gravam no Supabase. Nenhum ${workOrderLc} real é criado nesta etapa.`,
+    importHistoryDescription: `Últimas importações de ${workOrdersLc} deste tenant.`,
+    importReviewDescription: `Confirme as linhas. Nesta fase, a confirmação regista as linhas em staging + histórico — a criação de ${workOrdersLc} reais será ligada aos services existentes numa sprint seguinte.`,
+    connectorsOsName: workOrders,
   };
 }
 

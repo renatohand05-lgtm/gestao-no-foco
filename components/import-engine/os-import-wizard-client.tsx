@@ -46,9 +46,29 @@ type Step = "upload" | "preview" | "mapping" | "review" | "done";
 type Props = {
   tenantSlug: string;
   initialHistory: ImportHistoryEntry[];
+  copy?: {
+    uploadTitle: string;
+    uploadHint: string;
+    reviewDescription: string;
+    historyDescription: string;
+  };
 };
 
-export function OsImportWizardClient({ tenantSlug, initialHistory }: Props) {
+const OFICINA_IMPORT_COPY = {
+  uploadTitle: "Enviar arquivo de ordens de serviço",
+  uploadHint:
+    "Excel (.xlsx / .xls) ou CSV. Histórico e mapeamentos gravam no Supabase. Staging de linhas confirmadas é EXPLÍCITO em memória até ligação ao módulo OS — nenhuma ordem real é criada nesta etapa.",
+  reviewDescription:
+    "Confirme as linhas. Nesta fase, a confirmação regista as linhas em staging + histórico — a criação de OS reais será ligada aos services existentes numa sprint seguinte.",
+  historyDescription:
+    "Últimas importações de ordens de serviço deste tenant.",
+};
+
+export function OsImportWizardClient({
+  tenantSlug,
+  initialHistory,
+  copy = OFICINA_IMPORT_COPY,
+}: Props) {
   const [step, setStep] = useState<Step>("upload");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -235,12 +255,8 @@ export function OsImportWizardClient({ tenantSlug, initialHistory }: Props) {
       {step === "upload" ? (
         <Card>
           <CardHeader>
-            <CardTitle>Enviar arquivo de ordens de serviço</CardTitle>
-            <CardDescription>
-              Excel (.xlsx / .xls) ou CSV. Histórico e mapeamentos gravam no Supabase.
-              Staging de linhas confirmadas é EXPLÍCITO em memória até ligação ao módulo
-              OS — nenhuma ordem real é criada nesta etapa.
-            </CardDescription>
+            <CardTitle>{copy.uploadTitle}</CardTitle>
+            <CardDescription>{copy.uploadHint}</CardDescription>
           </CardHeader>
           <CardContent>
             <ImportUploadZone disabled={pending} onFile={upload} />
@@ -349,11 +365,7 @@ export function OsImportWizardClient({ tenantSlug, initialHistory }: Props) {
         <Card>
           <CardHeader>
             <CardTitle>Revisão e classificação</CardTitle>
-            <CardDescription>
-              Confirme as linhas. Nesta fase, a confirmação regista as linhas em
-              staging + histórico — a criação de OS reais será ligada aos
-              services existentes numa sprint seguinte.
-            </CardDescription>
+            <CardDescription>{copy.reviewDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="overflow-x-auto rounded-lg border">
@@ -452,7 +464,7 @@ export function OsImportWizardClient({ tenantSlug, initialHistory }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>Histórico de importações</CardTitle>
-          <CardDescription>Últimas importações de ordens de serviço deste tenant.</CardDescription>
+          <CardDescription>{copy.historyDescription}</CardDescription>
         </CardHeader>
         <CardContent>
           <ImportHistoryTable history={history} />

@@ -6,8 +6,14 @@ import {
   type CapabilityDef,
   type ModuleStatusReal,
 } from "./capabilities.ts";
+import { getSegmentUiCopy } from "./copy.ts";
 import { originForCapability } from "./overrides.ts";
-import { hasCapability, resolveSegmentContext, type ResolveSegmentInput } from "./resolve.ts";
+import {
+  hasCapability,
+  resolveSegmentContext,
+  type ResolveSegmentInput,
+} from "./resolve.ts";
+import type { ResolvedSegmentContext } from "./types.ts";
 import type { ProductCapability } from "./capabilities.ts";
 
 export type SegmentModuleRow = {
@@ -24,9 +30,16 @@ export type SegmentModuleRow = {
 };
 
 export function listSegmentModuleRows(
-  input: ResolveSegmentInput,
+  input: ResolveSegmentInput | ResolvedSegmentContext,
 ): SegmentModuleRow[] {
-  const ctx = resolveSegmentContext(input);
+  const ctx =
+    typeof input === "object" &&
+    input !== null &&
+    "usesCapabilityEngine" in input &&
+    "terminology" in input
+      ? (input as ResolvedSegmentContext)
+      : resolveSegmentContext(input);
+  const ui = getSegmentUiCopy(ctx);
   const preset = ctx.profile?.capabilities ?? [];
   const presetSet = new Set(preset);
   return CAPABILITY_DEFS.filter((d) => d.availability !== "future").map((d) => {
@@ -34,10 +47,11 @@ export function listSegmentModuleRows(
     const currentOn = ctx.usesCapabilityEngine
       ? hasCapability(ctx, d.id)
       : true;
+    const presented = presentCapabilityRow(d.id, d.label, d.description, ui);
     return {
       capability: d.id,
-      module: d.label,
-      description: d.description,
+      module: presented.module,
+      description: presented.description,
       defaultOn,
       currentOn,
       origin: ctx.usesCapabilityEngine
@@ -49,4 +63,37 @@ export function listSegmentModuleRows(
       navIds: d.navIds,
     };
   });
+}
+
+function presentCapabilityRow(
+  id: string,
+  label: string,
+  description: string,
+  ui: ReturnType<typeof getSegmentUiCopy>,
+): { module: string; description: string } {
+  if (!ui.engine || ui.automotiveWorkflow) {
+    return { module: label, description };
+  }
+  if (id === "work_orders") {
+    return { module: ui.workOrders, description: ui.workOrdersHubDescription };
+  }
+  if (id === "workshop_mechanics" || id === "professionals") {
+    return { module: ui.professionals, description: ui.professionalsDescription };
+  }
+  if (id === "service_checklist") {
+    return {
+      module: label,
+      description: `Checklist vinculado aos ${ui.workOrders.toLowerCase()}`,
+    };
+  }
+  if (id === "commissions") {
+    return {
+      module: label,
+      description: `Comissão de ${ui.professionals.toLowerCase()}`,
+    };
+  }
+  if (id === "vehicles") {
+    return { module: label, description: "Cadastro de veículos" };
+  }
+  return { module: label, description };
 }

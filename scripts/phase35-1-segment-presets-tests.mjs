@@ -481,6 +481,94 @@ describe("35.1 copy sem vazamento na UI", () => {
     assert.equal(legado.engine, false);
     assert.equal(legado.openWorkOrdersLabel, "OS abertas");
     assert.equal(legado.professionalsListPath, "/oficina/mecanicos");
+    assert.equal(legado.workspaceLoadingAria, "Carregando workspace da OS");
+  });
+
+  it("skeleton do workspace usa copy do adapter", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const lava = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });
+    const oficina = getSegmentUiCopy({ segment: "oficina", ...ENGINE });
+    assert.equal(lava.workspaceLoadingAria, "Carregando atendimento");
+    assert.doesNotMatch(lava.workspaceLoadingAria, /\bOS\b/);
+    assert.match(oficina.workspaceLoadingAria, /\bOS\b/);
+    const lazy = read("components/ordens/os-workspace-lazy.tsx");
+    assert.match(lazy, /workspaceLoadingAria/);
+    assert.doesNotMatch(
+      lazy.replace(/workspaceLoadingAria[\s\S]{0,80}/, ""),
+      /aria-label="Carregando workspace da OS"/,
+    );
+  });
+
+  it("importação de OS some quando work_orders está OFF", async () => {
+    const hub = read("app/(app)/[tenant]/integracoes/importar/page.tsx");
+    assert.match(hub, /hasCapability\(ctx, "work_orders"\)/);
+    assert.match(hub, /ui\.importModuleTitle/);
+    const page = read("app/(app)/[tenant]/integracoes/importar/ordens/page.tsx");
+    assert.match(page, /hasCapability\(ctx, "work_orders"\)/);
+    assert.match(page, /notFound\(\)/);
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const lava = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });
+    const consul = getSegmentUiCopy({ segment: "consultoria", ...ENGINE });
+    assert.doesNotMatch(lava.importModuleTitle, /Ordem de Serviço|OS/);
+    assert.equal(lava.importModuleTitle, "Atendimentos");
+    assert.doesNotMatch(consul.importModuleTitle, /\bOS\b/);
+  });
+
+  it("matriz de módulos não vaza Mecânicos/OS para segmentos do motor", async () => {
+    const { listSegmentModuleRows } = await load("lib/segments/matrix.ts");
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    for (const id of [
+      "barbearia",
+      "lava_rapido",
+      "consultoria",
+      "clinica_estetica",
+      "consultorio_odontologico",
+    ]) {
+      const ctx = resolveSegmentContext({ segment: id, ...ENGINE });
+      const rows = listSegmentModuleRows(ctx);
+      for (const row of rows) {
+        assert.doesNotMatch(row.module, /Mecânicos/, `${id} ${row.capability}`);
+        assert.doesNotMatch(
+          row.description,
+          /equipe\/mecânicos|Equipe técnica da oficina|vinculado à OS existente/i,
+          `${id} ${row.capability}`,
+        );
+      }
+    }
+    const oficinaRows = listSegmentModuleRows(
+      resolveSegmentContext({ segment: "oficina", ...ENGINE }),
+    );
+    assert.ok(oficinaRows.some((r) => r.module === "Mecânicos"));
+    assert.ok(oficinaRows.some((r) => r.module === "Ordens de serviço"));
+  });
+
+  it("estética e odontologia não usam OS na copy do motor", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const { isNavItemRelevant } = await load("lib/segments/nav.ts");
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    for (const id of ["clinica_estetica", "consultorio_odontologico"]) {
+      const ctx = resolveSegmentContext({ segment: id, ...ENGINE });
+      const ui = getSegmentUiCopy(ctx);
+      assert.equal(isNavItemRelevant("work-orders", ctx), false, id);
+      assert.doesNotMatch(ui.openWorkOrdersLabel, /\bOS\b/);
+      assert.doesNotMatch(ui.professionals, /mec[aâ]nico/i);
+      assert.equal(ui.automotiveWorkflow, false);
+    }
+  });
+
+  it("onboarding 30.x visível no primeiro-acesso já tem copy por segmento", () => {
+    assert.match(
+      read("app/(app)/[tenant]/primeiro-acesso/page.tsx"),
+      /EnterpriseOnboardingWizard/,
+    );
+    assert.doesNotMatch(
+      read("app/(app)/[tenant]/primeiro-acesso/page.tsx"),
+      /OnboardingTour/,
+    );
+    const setup = read("config/onboarding/segment-setup.ts");
+    assert.match(setup, /lava_rapido:[\s\S]*Atendimentos/);
+    assert.match(setup, /barbearia:[\s\S]*Barbeiros/);
+    assert.match(setup, /consultoria:[\s\S]*Consultores/);
   });
 
   it("override não troca vocabulário do segmento", async () => {

@@ -57,7 +57,7 @@ import { cn } from "@/lib/utils";
 
 type Option = { id: string; nome: string };
 
-type Props = {
+type OsWorkspaceProps = {
   tenantSlug: string;
   os: OrdemServicoDetail;
   produtos: Option[];
@@ -120,6 +120,8 @@ function canEditOs(os: OrdemServicoDetail) {
   );
 }
 
+export type { OsWorkspaceProps };
+
 export function OsWorkspace({
   tenantSlug,
   os,
@@ -148,7 +150,7 @@ export function OsWorkspace({
   professionalLabel = "Mecânico",
   professionalsLabel = "Mecânicos",
   uiCopy,
-}: Props) {
+}: OsWorkspaceProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
   const [error, setError] = useState<string | null>(null);
@@ -390,26 +392,30 @@ export function OsWorkspace({
                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
               />
               <div className="grid gap-2 md:grid-cols-2">
-                <Input
-                  name="quilometragem_entrada"
-                  type="number"
-                  min={0}
-                  defaultValue={os.quilometragem_entrada ?? ""}
-                  placeholder="Km entrada"
-                  disabled={pending}
-                />
+                {uiCopy?.showVehicles !== false ? (
+                  <Input
+                    name="quilometragem_entrada"
+                    type="number"
+                    min={0}
+                    defaultValue={os.quilometragem_entrada ?? ""}
+                    placeholder="Km entrada"
+                    disabled={pending}
+                  />
+                ) : null}
                 <Input
                   name="previsao_entrega"
                   type="datetime-local"
                   defaultValue={os.previsao_entrega ?? ""}
                   disabled={pending}
                 />
-                <Input
-                  name="nivel_combustivel"
-                  defaultValue={os.nivel_combustivel ?? ""}
-                  placeholder="Nível combustível"
-                  disabled={pending}
-                />
+                {uiCopy?.showVehicles !== false ? (
+                  <Input
+                    name="nivel_combustivel"
+                    defaultValue={os.nivel_combustivel ?? ""}
+                    placeholder="Nível combustível"
+                    disabled={pending}
+                  />
+                ) : null}
                 <NativeSelect
                   name="prioridade"
                   defaultValue={os.prioridade}
@@ -463,17 +469,19 @@ export function OsWorkspace({
               <dt className="text-muted-foreground">Previsão</dt>
               <dd>{os.previsao_entrega ?? "—"}</dd>
             </div>
+            {uiCopy?.showVehicles !== false ? (
             <div>
               <dt className="text-muted-foreground">Km entrada</dt>
               <dd>{os.quilometragem_entrada ?? "—"}</dd>
             </div>
+            ) : null}
             <div>
               <dt className="text-muted-foreground">Prioridade</dt>
               <dd>{os.prioridade}</dd>
             </div>
           </dl>
 
-          {!os.venda_id && os.status !== "cancelado" ? (
+          {!os.venda_id && os.status !== "cancelado" && uiCopy?.showVehicles !== false ? (
             <div className="space-y-2 rounded-lg border p-3">
               <p className="text-sm font-medium">Veículo vinculado</p>
               <OsVeiculoPicker

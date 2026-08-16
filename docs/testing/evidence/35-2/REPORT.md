@@ -51,7 +51,7 @@ BUILD: PASS · /[tenant]/agenda/clientes, /[tenant]/crm/retornos, /api/cron/rete
 P0: 0
 P1: 0
 P2: 2 (homologação visual; mobile nativo de retornos abre o portal)
-COMMIT: (preenchido após commit)
+COMMIT: 094fc58
 HEAD == ORIGIN/MAIN: (após push)
 
 HOMOLOGAÇÃO MANUAL: PENDING

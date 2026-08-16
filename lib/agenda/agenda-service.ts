@@ -9,16 +9,18 @@ import {
   detectAgendaConflicts,
   type AgendaInterval,
 } from "@/lib/agenda/conflict";
+import {
+  CLIENT_APPOINTMENT_STATUSES,
+  NON_BLOCKING_STATUSES,
+  durationMinutesBetween,
+  resolveAgendaNature,
+  type AgendaNature,
+} from "@/lib/retention/natures";
+import { isMissingColumn } from "@/lib/retention/schema-guard";
 import { createClient } from "@/lib/supabase/server";
 import type { Database, Json } from "@/types/database";
 
-export const AGENDA_EVENT_STATUSES = [
-  "agendado",
-  "confirmado",
-  "realizado",
-  "cancelado",
-  "reagendado",
-] as const;
+export const AGENDA_EVENT_STATUSES = CLIENT_APPOINTMENT_STATUSES;
 
 export type AgendaEventStatus = (typeof AGENDA_EVENT_STATUSES)[number];
 
@@ -28,12 +30,19 @@ export type AgendaEventRow =
 export type AgendaEventInput = {
   titulo: string;
   tipo?: string;
+  natureza?: AgendaNature;
   inicio: string;
   fim: string;
   dia_inteiro?: boolean;
   responsavel_id?: string | null;
   recurso_id?: string | null;
   cliente_id?: string | null;
+  servico_id?: string | null;
+  duracao_minutos?: number | null;
+  lembrete_minutos?: number | null;
+  meeting_url?: string | null;
+  participantes_json?: Json | null;
+  return_id?: string | null;
   ordem_servico_id?: string | null;
   venda_id?: string | null;
   observacao?: string | null;
@@ -136,27 +145,41 @@ export class AgendaEventService {
     this.assertInterval(input.inicio, input.fim);
     await this.assertConflicts({ ...input, id });
 
+    const natureza = this.resolveNature(input);
+    const extra = this.extraPayload(input, natureza);
+    const patch = {
+      titulo: input.titulo.trim(),
+      tipo: input.tipo?.trim() || "compromisso",
+      origem: natureza,
+      inicio: input.inicio,
+      fim: input.fim,
+      dia_inteiro: Boolean(input.dia_inteiro),
+      responsavel_id: input.responsavel_id || null,
+      recurso_id: input.recurso_id || null,
+      cliente_id: input.cliente_id || null,
+      ordem_servico_id: input.ordem_servico_id || null,
+      venda_id: input.venda_id || null,
+      observacao: input.observacao?.trim() || null,
+      endereco: input.endereco?.trim() || null,
+      filial_id: input.filial_id || null,
+      empresa_id: input.empresa_id || null,
+      override_conflito: Boolean(input.override_conflito),
+      override_justificativa: input.override_justificativa?.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const first = await this.supabase
+      .from("agenda_eventos")
+      .update({ ...patch, ...extra } as never)
+      .eq("tenant_id", this.tenantId)
+      .eq("id", id)
+      .is("deleted_at", null)
+      .select("*")
+      .single();
+    if (!first.error) return first.data as AgendaEventRow;
+    if (!isMissingColumn(first.error)) throw new Error(first.error.message);
     const { data, error } = await this.supabase
       .from("agenda_eventos")
-      .update({
-        titulo: input.titulo.trim(),
-        tipo: input.tipo?.trim() || "compromisso",
-        inicio: input.inicio,
-        fim: input.fim,
-        dia_inteiro: Boolean(input.dia_inteiro),
-        responsavel_id: input.responsavel_id || null,
-        recurso_id: input.recurso_id || null,
-        cliente_id: input.cliente_id || null,
-        ordem_servico_id: input.ordem_servico_id || null,
-        venda_id: input.venda_id || null,
-        observacao: input.observacao?.trim() || null,
-        endereco: input.endereco?.trim() || null,
-        filial_id: input.filial_id || null,
-        empresa_id: input.empresa_id || null,
-        override_conflito: Boolean(input.override_conflito),
-        override_justificativa: input.override_justificativa?.trim() || null,
-        updated_at: new Date().toISOString(),
-      })
+      .update(patch)
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
       .is("deleted_at", null)
@@ -261,35 +284,72 @@ export class AgendaEventService {
     if (error) throw new Error(error.message);
   }
 
+  private resolveNature(input: AgendaEventInput): AgendaNature {
+    return resolveAgendaNature({
+      natureza: input.natureza,
+      tipo: input.tipo,
+      cliente_id: input.cliente_id,
+    });
+  }
+
+  private extraPayload(input: AgendaEventInput, natureza: AgendaNature) {
+    const duracao =
+      input.duracao_minutos ??
+      durationMinutesBetween(input.inicio, input.fim);
+    return {
+      natureza,
+      servico_id: input.servico_id || null,
+      duracao_minutos: duracao || null,
+      lembrete_minutos: input.lembrete_minutos ?? null,
+      meeting_url: input.meeting_url?.trim() || null,
+      participantes_json: input.participantes_json ?? null,
+      return_id: input.return_id || null,
+    };
+  }
+
   private async insertOne(
     input: AgendaEventInput & { recorrencia_json?: Json | null },
     userId: string | null,
   ): Promise<AgendaEventRow> {
+    const natureza = this.resolveNature(input);
+    const extra = this.extraPayload(input, natureza);
+    const base = {
+      tenant_id: this.tenantId,
+      titulo: input.titulo.trim(),
+      tipo: input.tipo?.trim() || "compromisso",
+      status: "agendado",
+      inicio: input.inicio,
+      fim: input.fim,
+      dia_inteiro: Boolean(input.dia_inteiro),
+      responsavel_id: input.responsavel_id || null,
+      recurso_id: input.recurso_id || null,
+      cliente_id: input.cliente_id || null,
+      ordem_servico_id: input.ordem_servico_id || null,
+      venda_id: input.venda_id || null,
+      observacao: input.observacao?.trim() || null,
+      endereco: input.endereco?.trim() || null,
+      filial_id: input.filial_id || null,
+      empresa_id: input.empresa_id || null,
+      override_conflito: Boolean(input.override_conflito),
+      override_justificativa: input.override_justificativa?.trim() || null,
+      recorrencia_json: {
+        ...((input.recorrencia_json as Record<string, unknown> | null) ?? {}),
+        meta35_2: extra,
+      } as Json,
+      created_by: userId,
+      origem: natureza,
+    };
+    const withExtra = { ...base, ...extra };
+    const first = await this.supabase
+      .from("agenda_eventos")
+      .insert(withExtra as never)
+      .select("*")
+      .single();
+    if (!first.error) return first.data as AgendaEventRow;
+    if (!isMissingColumn(first.error)) throw new Error(first.error.message);
     const { data, error } = await this.supabase
       .from("agenda_eventos")
-      .insert({
-        tenant_id: this.tenantId,
-        titulo: input.titulo.trim(),
-        tipo: input.tipo?.trim() || "compromisso",
-        status: "agendado",
-        inicio: input.inicio,
-        fim: input.fim,
-        dia_inteiro: Boolean(input.dia_inteiro),
-        responsavel_id: input.responsavel_id || null,
-        recurso_id: input.recurso_id || null,
-        cliente_id: input.cliente_id || null,
-        ordem_servico_id: input.ordem_servico_id || null,
-        venda_id: input.venda_id || null,
-        observacao: input.observacao?.trim() || null,
-        endereco: input.endereco?.trim() || null,
-        filial_id: input.filial_id || null,
-        empresa_id: input.empresa_id || null,
-        override_conflito: Boolean(input.override_conflito),
-        override_justificativa: input.override_justificativa?.trim() || null,
-        recorrencia_json: input.recorrencia_json ?? null,
-        created_by: userId,
-        origem: "agenda_enterprise",
-      })
+      .insert(base)
       .select("*")
       .single();
     if (error) throw new Error(error.message);
@@ -324,6 +384,9 @@ export class AgendaEventService {
     const windowStart = new Date(Date.parse(input.inicio) - 86400000).toISOString();
     const windowEnd = new Date(Date.parse(input.fim) + 86400000).toISOString();
     const existing = await this.listRange(windowStart, windowEnd);
+    const blocking = existing.filter(
+      (e) => !NON_BLOCKING_STATUSES.has(e.status ?? ""),
+    );
     const candidate: AgendaInterval = {
       id: input.id,
       inicio: input.inicio,
@@ -333,7 +396,7 @@ export class AgendaEventService {
     };
     const conflicts = detectAgendaConflicts(
       candidate,
-      existing.map((e) => ({
+      blocking.map((e) => ({
         id: e.id,
         inicio: e.inicio,
         fim: e.fim,

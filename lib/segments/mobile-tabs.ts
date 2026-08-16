@@ -47,6 +47,7 @@ export const OPS_ACTION_CAPABILITY: Record<string, ProductCapability | ProductCa
   equipe: ["workshop_mechanics", "professionals"],
   veiculos: "vehicles",
   clientes: "customers",
+  retornos: "customer_returns",
 };
 
 export function isOpsActionRelevant(

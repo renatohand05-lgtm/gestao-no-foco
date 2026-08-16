@@ -27,10 +27,16 @@ const SERVICE_PAYEES: readonly BeneficiarioTipo[] = [
   "outro",
 ];
 
+const RETENTION_CAPS: ProductCapability[] = [
+  "customer_returns",
+  "customer_retention",
+  "customer_notifications",
+];
+
 function cap(
   extra: ProductCapability[],
 ): ProductCapability[] {
-  return [...new Set([...BASE_CAPABILITIES, ...extra])];
+  return [...new Set([...BASE_CAPABILITIES, ...RETENTION_CAPS, ...extra])];
 }
 
 const OFICINA_FINANCE: readonly DespesaPresetId[] = [

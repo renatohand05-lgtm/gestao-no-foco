@@ -7,6 +7,8 @@ import { createCliente360Service } from "@/lib/crm/cliente-360-service";
 import { createCrmExecutivoService } from "@/lib/crm/crm-executivo-service";
 import { listTenantMembersForSelect } from "@/lib/crm/tenant-team-service";
 import { createClienteService } from "@/lib/clientes/cliente-service";
+import { createCustomerReturnService } from "@/lib/retention/return-service";
+import { createNotificationOutboxService } from "@/lib/retention/outbox-service";
 import { requireTenant } from "@/lib/tenants";
 import type { ClienteSuccessMessage } from "@/types/clientes";
 
@@ -29,23 +31,33 @@ export default async function ClienteDetailPage({
     notFound();
   }
 
-  const [data360, consultores, execService] = await Promise.all([
+  const [data360, consultores, execService, retSvc, outboxSvc] = await Promise.all([
     createCliente360Service(tenant.id).then((s) => s.load(id)),
     listTenantMembersForSelect(tenant.id),
     createCrmExecutivoService(tenant.id),
+    createCustomerReturnService(tenant.id),
+    createNotificationOutboxService(tenant.id),
   ]);
 
-  const perfilExecutivo = await execService.loadPerfilFrom360(
-    {
-      id: cliente.id,
-      nome: cliente.nome,
-      telefone: cliente.telefone,
-      whatsapp: cliente.whatsapp,
-      ativo: cliente.ativo,
-      created_at: cliente.created_at,
-    },
-    data360,
-  );
+  const [perfilExecutivo, retornos] = await Promise.all([
+    execService.loadPerfilFrom360(
+      {
+        id: cliente.id,
+        nome: cliente.nome,
+        telefone: cliente.telefone,
+        whatsapp: cliente.whatsapp,
+        ativo: cliente.ativo,
+        created_at: cliente.created_at,
+      },
+      data360,
+    ),
+    retSvc.listByCliente(id),
+  ]);
+  const retornoMensagens = (
+    await Promise.all(
+      retornos.map((r) => outboxSvc.listByEntity("retorno", r.id)),
+    )
+  ).flat();
 
   const consultorNome =
     consultores.find((c) => c.id === cliente.consultor_id)?.nome ?? null;
@@ -63,6 +75,8 @@ export default async function ClienteDetailPage({
         data360={data360}
         consultorNome={consultorNome}
         perfilExecutivo={perfilExecutivo}
+        retornos={retornos}
+        retornoMensagens={retornoMensagens}
       />
     </div>
   );

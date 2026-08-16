@@ -18,7 +18,9 @@ import type { ActionResult } from "@/types/action-result";
 
 function revalidateAgenda(tenantSlug: string, id?: string) {
   revalidatePath(`/${tenantSlug}/agenda`);
+  revalidatePath(`/${tenantSlug}/agenda/clientes`);
   revalidatePath(`/${tenantSlug}/crm/agenda`);
+  revalidatePath(`/${tenantSlug}/crm/retornos`);
   revalidatePath(`/${tenantSlug}/clientes/agenda`);
   if (id) revalidatePath(`/${tenantSlug}/agenda/${id}`);
 }
@@ -52,6 +54,12 @@ function toInput(parsed: ReturnType<typeof agendaEventFormSchema.parse>) {
   return {
     titulo: parsed.titulo,
     tipo: parsed.tipo,
+    natureza: parsed.natureza,
+    servico_id: parsed.servico_id,
+    duracao_minutos: parsed.duracao_minutos,
+    lembrete_minutos: parsed.lembrete_minutos,
+    meeting_url: parsed.meeting_url,
+    return_id: parsed.return_id,
     inicio: parsed.inicio,
     fim: parsed.fim,
     dia_inteiro: parsed.dia_inteiro,
@@ -89,6 +97,9 @@ export async function createAgendaEventAction(
       "crm.criar",
     ]);
     const parsed = agendaEventFormSchema.parse(values);
+    if (parsed.override_conflito) {
+      await requireAgendaPerm(tenantSlug, ["agenda.sobrescrever_conflito"]);
+    }
     const svc = await createAgendaEventService(tenant.id);
     const rows = await svc.create(toInput(parsed), profile.id);
     revalidateAgenda(tenantSlug, rows[0]?.id);

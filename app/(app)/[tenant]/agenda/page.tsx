@@ -11,11 +11,16 @@ import {
 } from "@/components/ui/card";
 import { detectAgendaConflicts } from "@/lib/agenda/conflict";
 import { createAgendaEventService } from "@/lib/agenda/agenda-service";
+import { createClienteService } from "@/lib/clientes/cliente-service";
 import {
   civilDateInTimezone,
   DEFAULT_TENANT_TIMEZONE,
   shiftCivilDate,
 } from "@/lib/dashboard/tenant-timezone";
+import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
+import { createProdutoService } from "@/lib/produtos/produto-service";
+import { clientAppointmentKpis } from "@/lib/retention/kpis";
+import { resolveAgendaNature } from "@/lib/retention/natures";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -59,6 +64,8 @@ export default async function AgendaPage({
     status: string;
     responsavelId: string | null;
     recursoId: string | null;
+    cliente_id: string | null;
+    origem: string | null;
   }> = [];
   let schemaReady = false;
   let bridgeNote: string | null = null;
@@ -79,6 +86,8 @@ export default async function AgendaPage({
       status: r.status ?? "agendado",
       responsavelId: r.responsavel_id ?? null,
       recursoId: r.recurso_id ?? null,
+      cliente_id: r.cliente_id,
+      origem: r.origem,
     }));
   } catch {
     bridgeNote =
@@ -107,6 +116,8 @@ export default async function AgendaPage({
           status: String(r.status ?? "agendado"),
           responsavelId: (r.responsavel_id as string | null) ?? null,
           recursoId: null,
+          cliente_id: (r.cliente_id as string | null) ?? null,
+          origem: "cliente",
         };
       });
     }
@@ -134,6 +145,24 @@ export default async function AgendaPage({
       ).length
     );
   }, 0);
+
+  const kpis = clientAppointmentKpis(events, hoje, DEFAULT_TENANT_TIMEZONE);
+  const negocioCount = events.filter(
+    (e) => resolveAgendaNature(e) === "negocio",
+  ).length;
+  const internoCount = events.filter(
+    (e) => resolveAgendaNature(e) === "interno",
+  ).length;
+
+  const [clientesRes, servicosRes, profsRes] = schemaReady
+    ? await Promise.all([
+        createClienteService(tenant.id).then((s) => s.list({ perPage: 100 })),
+        createProdutoService(tenant.id).then((s) =>
+          s.list({ tipo: "servico", perPage: 100, ativo: true }),
+        ),
+        createMecanicoService(tenant.id).then((s) => s.listDisponiveis()),
+      ])
+    : [null, null, null];
 
   const views = [
     { key: "dia", label: "Dia" },
@@ -171,6 +200,18 @@ export default async function AgendaPage({
             </Link>
           ))}
           <Link
+            href={`/${tenantSlug}/agenda/clientes`}
+            className="rounded-md border px-3 py-1.5 hover:bg-muted"
+          >
+            Clientes agendados
+          </Link>
+          <Link
+            href={`/${tenantSlug}/crm/retornos`}
+            className="rounded-md border px-3 py-1.5 hover:bg-muted"
+          >
+            Retornos
+          </Link>
+          <Link
             href={`/${tenantSlug}/crm/agenda`}
             className="rounded-md border px-3 py-1.5 hover:bg-muted"
           >
@@ -179,34 +220,59 @@ export default async function AgendaPage({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-phase35="agenda-kpis">
         <Card>
           <CardHeader className="pb-1">
-            <CardDescription>Eventos no período</CardDescription>
+            <CardDescription>Clientes agendados hoje</CardDescription>
             <CardTitle className="text-xl tabular-nums">
-              {events.length}
+              {kpis.agendadosHoje}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-1">
-            <CardDescription>Sinais de conflito</CardDescription>
+            <CardDescription>Confirmados</CardDescription>
             <CardTitle className="text-xl tabular-nums">
-              {conflictCount}
+              {kpis.confirmados}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-1">
-            <CardDescription>Schema 28.5</CardDescription>
-            <CardTitle className="text-xl">
-              {schemaReady ? "Ativo" : "Pendente"}
+            <CardDescription>Em atendimento</CardDescription>
+            <CardTitle className="text-xl tabular-nums">
+              {kpis.emAtendimento}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-1">
+            <CardDescription>Não misturar negócio/interno</CardDescription>
+            <CardTitle className="text-sm font-medium">
+              {negocioCount} negócios · {internoCount} internos · {conflictCount} conflitos
             </CardTitle>
           </CardHeader>
         </Card>
       </div>
 
-      {schemaReady ? <AgendaEventCreateForm tenantSlug={tenantSlug} /> : null}
+      {schemaReady ? (
+        <AgendaEventCreateForm
+          tenantSlug={tenantSlug}
+          clientes={(clientesRes?.data ?? []).map((c) => ({
+            id: c.id,
+            label: c.nome,
+          }))}
+          servicos={(servicosRes?.data ?? []).map((s) => ({
+            id: s.id,
+            label: s.nome,
+            minutes: s.tempo_estimado_minutos ?? null,
+          }))}
+          profissionais={(profsRes ?? []).map((p) => ({
+            id: p.id,
+            label: p.nome_completo,
+          }))}
+        />
+      ) : null}
 
       {view === "semana" || view === "dia" || view === "mes" ? (
         <AgendaWeekBoard

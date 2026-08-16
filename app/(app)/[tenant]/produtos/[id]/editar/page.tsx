@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ProdutoForm } from "@/components/produtos/produto-form";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
+import { ServiceReturnRuleForm } from "@/components/retention/service-return-rule-form";
+import { createServiceReturnRuleService } from "@/lib/retention/rule-service";
 import { createProdutoService } from "@/lib/produtos/produto-service";
 import { getSegmentFormConfig } from "@/lib/segments/form-config.ts";
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
@@ -30,6 +32,13 @@ export default async function EditarProdutoPage({
     notFound();
   }
 
+  const rule =
+    produto.tipo === "servico"
+      ? await createServiceReturnRuleService(tenant.id).then((s) =>
+          s.get(produto.id),
+        )
+      : null;
+
   return (
     <div className="space-y-6">
       <ModuleHeader
@@ -53,6 +62,19 @@ export default async function EditarProdutoPage({
           formConfig={formConfig}
         />
       </SectionCard>
+      {produto.tipo === "servico" && rule ? (
+        <SectionCard
+          title="Regra de retorno (opcional)"
+          description="Não força o serviço. Estética/odonto: use template sem procedimento."
+        >
+          <ServiceReturnRuleForm
+            tenantSlug={tenantSlug}
+            produtoId={produto.id}
+            segment={tenant.segment}
+            initial={rule}
+          />
+        </SectionCard>
+      ) : null}
     </div>
   );
 }

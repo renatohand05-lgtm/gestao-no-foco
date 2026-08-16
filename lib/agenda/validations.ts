@@ -15,6 +15,12 @@ export const agendaEventFormSchema = z
   .object({
     titulo: z.string().trim().min(1, "Informe o título.").max(200),
     tipo: z.string().trim().max(40).default("compromisso"),
+    natureza: z.enum(["cliente", "negocio", "interno"]).default("negocio"),
+    servico_id: optionalUuid,
+    duracao_minutos: z.coerce.number().int().min(1).max(24 * 60).optional().nullable(),
+    lembrete_minutos: z.coerce.number().int().min(0).max(7 * 24 * 60).optional().nullable(),
+    meeting_url: z.string().max(500).optional().nullable(),
+    return_id: optionalUuid,
     inicio: z.string().min(1, "Informe o início."),
     fim: z.string().min(1, "Informe o fim."),
     dia_inteiro: z.boolean().default(false),
@@ -40,6 +46,13 @@ export const agendaEventFormSchema = z
         code: "custom",
         message: "Fim deve ser posterior ao início.",
         path: ["fim"],
+      });
+    }
+    if (v.natureza === "cliente" && !v.cliente_id) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Cliente é obrigatório no agendamento de atendimento.",
+        path: ["cliente_id"],
       });
     }
     if (v.override_conflito && !v.override_justificativa?.trim()) {

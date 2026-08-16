@@ -181,6 +181,9 @@ const OPERACOES_KEYS = unique([
   "estoque.visualizar",
   "estoque.movimentar",
   "crm.visualizar",
+  "crm.retornos.visualizar",
+  "crm.retornos.criar",
+  "crm.retornos.contatar",
   "vendas.visualizar",
   "relatorios.visualizar",
 ]);
@@ -194,6 +197,8 @@ const OFICINA_KEYS = unique([
   "estoque.movimentar",
   "dashboard.operacional",
   "crm.visualizar",
+  "crm.retornos.visualizar",
+  "crm.retornos.contatar",
 ]);
 
 const ESTOQUE_KEYS = unique([
@@ -251,6 +256,9 @@ const ATENDIMENTO_KEYS = unique([
   "vendas.criar",
   "dashboard.comercial",
   "dashboard.operacional",
+  "crm.retornos.visualizar",
+  "crm.retornos.contatar",
+  "crm.retornos.criar",
 ]);
 
 const CAIXA_KEYS = unique([

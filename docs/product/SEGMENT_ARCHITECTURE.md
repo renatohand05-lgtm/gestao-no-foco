@@ -31,6 +31,8 @@ Campos em `tenants` (aditivos, Sprint 35.0):
 
 Sprint 35.1 **não** adicionou migration: o JSON já cobre override/reset.
 
+Sprint 35.2 adiciona `customer_returns`, `customer_retention`, `customer_notifications` (presets em todos os segmentos). Agenda continua em `appointments`. Ver `docs/product/APPOINTMENTS_AND_RETENTION.md`.
+
 ## Motor
 
 Fonte única: `lib/segments/`.

@@ -145,6 +145,11 @@ export const PERMISSION_CATALOG = [
   def("agenda.editar", "agenda", "editar", "Editar eventos na agenda", "escrita", "medio"),
   def("agenda.excluir", "agenda", "excluir", "Excluir eventos na agenda", "exclusao", "alto"),
   def("agenda.sobrescrever_conflito", "agenda", "sobrescrever_conflito", "Sobrescrever conflito de agenda com justificativa", "aprovacao", "alto"),
+  def("crm.retornos.visualizar", "crm", "retornos_visualizar", "Visualizar retornos e fidelização", "leitura", "baixo"),
+  def("crm.retornos.criar", "crm", "retornos_criar", "Criar retornos previstos", "escrita", "medio"),
+  def("crm.retornos.editar", "crm", "retornos_editar", "Editar retornos previstos", "escrita", "medio"),
+  def("crm.retornos.contatar", "crm", "retornos_contatar", "Contatar cliente de retorno (manual/link)", "escrita", "medio"),
+  def("crm.notificacoes.enviar", "crm", "notificacoes_enviar", "Disparar comunicação (outbox; default DRY_RUN/MANUAL_LINK)", "escrita", "alto"),
 
   // Dashboard
   def("dashboard.executivo", "dashboard", "executivo", "Acessar dashboard executivo", "leitura", "medio"),

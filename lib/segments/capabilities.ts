@@ -31,6 +31,9 @@ export const PRODUCT_CAPABILITIES = [
   "projects",
   "accounts_payable",
   "accounts_receivable",
+  "customer_returns",
+  "customer_retention",
+  "customer_notifications",
 ] as const;
 
 export type ProductCapability = (typeof PRODUCT_CAPABILITIES)[number];
@@ -43,6 +46,10 @@ export const CAPABILITY_ALIASES: Record<string, ProductCapability> = {
   vehicle_checklist: "service_checklist",
   mechanics: "workshop_mechanics",
   agenda: "appointments",
+  client_appointments: "appointments",
+  business_calendar: "appointments",
+  staff_availability: "appointments",
+  service_return_rules: "customer_returns",
 };
 
 export type CapabilityAvailability = "ui" | "backend" | "future";
@@ -170,6 +177,39 @@ export const CAPABILITY_DEFS: readonly CapabilityDef[] = [
     overridable: true,
     essential: false,
     defaultStatus: "READY",
+  },
+  {
+    id: "customer_returns",
+    label: "Retornos previstos",
+    description: "Retorno operacional (não reserva horário)",
+    navIds: ["crm"],
+    href: "/crm/retornos",
+    availability: "backend",
+    overridable: true,
+    essential: false,
+    defaultStatus: "READY",
+  },
+  {
+    id: "customer_retention",
+    label: "Fidelização",
+    description: "Painel de retornos e reativação",
+    navIds: ["crm"],
+    href: "/crm/retornos",
+    availability: "backend",
+    overridable: true,
+    essential: false,
+    defaultStatus: "READY",
+  },
+  {
+    id: "customer_notifications",
+    label: "Comunicação automática",
+    description: "Outbox WhatsApp/e-mail (DRY_RUN por padrão)",
+    navIds: ["crm"],
+    href: "/crm/retornos",
+    availability: "backend",
+    overridable: true,
+    essential: false,
+    defaultStatus: "PARTIAL",
   },
   {
     id: "professionals",

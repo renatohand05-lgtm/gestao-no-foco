@@ -30,7 +30,8 @@ const GAPS: Record<ProductSegmentId, SegmentGapRow[]> = {
     { capability: "catalog", module: "Serviços", status: "READY", note: "Catálogo existente" },
     { capability: "professionals", module: "Barbeiros", status: "REUSABLE", note: "Reusa cadastro mecanicos; UI /profissionais" },
     { capability: "commissions", module: "Comissões", status: "PARTIAL", note: "Mesma base da oficina; sem folha" },
-    { capability: "recurring_services", module: "Fidelidade", status: "MISSING", note: "Não implementar nesta sprint" },
+    { capability: "recurring_services", module: "Fidelidade", status: "PARTIAL", note: "Retornos 35.2 cobrem reativação operacional; pacote recorrente continua parcial" },
+    { capability: "customer_returns", module: "Retornos previstos", status: "READY", note: "Sprint 35.2" },
   ],
   lava_rapido: [
     { capability: "vehicles", module: "Veículos", status: "READY", note: "Reusa infra da oficina" },

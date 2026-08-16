@@ -263,6 +263,17 @@ function buildQuickActions(
       opensWeb: false,
     },
     {
+      id: "retornos",
+      label: "Retornos",
+      href: "/crm/retornos",
+      permission: "crm.retornos.visualizar",
+      enabled:
+        hasPerm(permissions, "crm.retornos.visualizar") ||
+        hasPerm(permissions, "crm.visualizar") ||
+        hasPerm(permissions, "agenda.visualizar"),
+      opensWeb: true,
+    },
+    {
       id: "web",
       label: "Continuar no portal",
       href: `/${slug}/centro-operacoes`,

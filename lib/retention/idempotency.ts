@@ -6,7 +6,7 @@
 export function communicationIdempotencyKey(input: {
   tenantId: string;
   clienteId: string;
-  entityType: "retorno" | "agendamento";
+  entityType: "retorno" | "agendamento" | "os";
   entityId: string;
   templateCode: string;
   offsetKey: string;

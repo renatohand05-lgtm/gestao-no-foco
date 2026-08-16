@@ -13,6 +13,8 @@ export const MESSAGE_TEMPLATE_CODES = [
   "RETORNO_HOJE",
   "RETORNO_ATRASADO",
   "REENGAJAMENTO",
+  "SERVICE_READY",
+  "SERVICE_DELIVERED",
 ] as const;
 export type MessageTemplateCode = (typeof MESSAGE_TEMPLATE_CODES)[number];
 
@@ -54,6 +56,10 @@ const BASE: Record<MessageTemplateCode, string> = {
     "Olá, {{cliente_nome}}! Seu retorno recomendado na {{empresa_nome}} já passou. Gostaria de agendar?",
   REENGAJAMENTO:
     "Olá, {{cliente_nome}}! Sentimos sua falta na {{empresa_nome}}. Quer retomar o acompanhamento?",
+  SERVICE_READY:
+    "Olá, {{cliente_nome}}! Tudo bem?\n\nSeu veículo está pronto na {{empresa_nome}}.\n\n{{servico}}\n{{veiculo}}\n\nO serviço foi concluído e o veículo está disponível para retirada.\n\nSe precisar, fale conosco por aqui.",
+  SERVICE_DELIVERED:
+    "Olá, {{cliente_nome}}! Registramos a retirada do veículo na {{empresa_nome}}. Obrigado.",
 };
 
 const PRIVATE: Record<MessageTemplateCode, string> = {
@@ -77,6 +83,10 @@ const PRIVATE: Record<MessageTemplateCode, string> = {
     "Olá, {{cliente_nome}}! Gostaria de agendar seu retorno na {{empresa_nome}}?",
   REENGAJAMENTO:
     "Olá, {{cliente_nome}}! Quando quiser, estamos à disposição na {{empresa_nome}}.",
+  SERVICE_READY:
+    "Olá, {{cliente_nome}}! Seu atendimento na {{empresa_nome}} foi concluído e já está disponível.",
+  SERVICE_DELIVERED:
+    "Olá, {{cliente_nome}}! Registramos a conclusão do atendimento na {{empresa_nome}}.",
 };
 
 const CONSULTORIA: Partial<Record<MessageTemplateCode, string>> = {
@@ -91,6 +101,13 @@ const CONSULTORIA: Partial<Record<MessageTemplateCode, string>> = {
 const OFICINA: Partial<Record<MessageTemplateCode, string>> = {
   RETORNO_D10:
     "Olá, {{cliente_nome}}! Está chegando o período recomendado para o retorno do seu veículo à {{empresa_nome}}. Serviço anterior: {{servico}}. Veículo: {{veiculo}}. Faltam aproximadamente {{dias_para_retorno}} dias. Deseja agendar? Responda SIM para continuarmos.",
+  SERVICE_READY:
+    "Olá, {{cliente_nome}}! Tudo bem?\n\nSeu veículo está pronto na {{empresa_nome}}.\n\n{{servico}}\n{{veiculo}}\n\nO serviço foi concluído e o veículo está disponível para retirada.\n\nSe precisar, fale conosco por aqui.",
+};
+
+const LAVA: Partial<Record<MessageTemplateCode, string>> = {
+  SERVICE_READY:
+    "Olá, {{cliente_nome}}!\nSeu veículo está pronto.\n\nO atendimento realizado pela {{empresa_nome}} foi concluído e o veículo já está disponível para retirada.\n\n{{veiculo}}\n\nAté breve.",
 };
 
 export function templateFor(input: {
@@ -104,6 +121,9 @@ export function templateFor(input: {
   }
   if (input.segment === "oficina" && OFICINA[input.code]) {
     return OFICINA[input.code] as string;
+  }
+  if (input.segment === "lava_rapido" && LAVA[input.code]) {
+    return LAVA[input.code] as string;
   }
   if (
     (input.segment === "clinica_estetica" ||
@@ -119,13 +139,14 @@ export function renderTemplate(
   source: string,
   ctx: TemplateContext,
 ): string {
-  return source.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (_, raw: string) => {
+  const rendered = source.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (_, raw: string) => {
     const key = raw.toLowerCase();
     if (!SAFE_TOKEN.test(key)) return "";
     if (!(TEMPLATE_VARS as readonly string[]).includes(key)) return "";
     const value = ctx[key as TemplateVar];
     return value == null ? "" : String(value);
   });
+  return rendered.replace(/\n{3,}/g, "\n\n").trim();
 }
 
 export function assertNoCodeExecution(source: string): void {

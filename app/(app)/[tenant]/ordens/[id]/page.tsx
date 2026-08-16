@@ -20,6 +20,10 @@ import {
 } from "@/components/executive";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { getSegmentUiCopy, segmentCopyForClient } from "@/lib/segments/copy.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
+import { serviceReadyAllowed } from "@/lib/retention/service-ready";
+import { createCommunicationSettingsService } from "@/lib/retention/settings-service";
+import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 
 export async function generateMetadata({
   params,
@@ -198,6 +202,21 @@ export default async function OsDetailPage({
   }
   if (recorrenciaResult) recorrencia = recorrenciaResult;
 
+  const [canFinalize, canNotify, commSettings] = await Promise.all([
+    tenantHasMutationPermission(tenantSlug, "os.finalizar"),
+    tenantHasMutationPermission(tenantSlug, "crm.notificacoes.enviar"),
+    createCommunicationSettingsService(tenant.id)
+      .then((s) => s.get())
+      .catch(() => ({ notifyReadyAuto: false })),
+  ]);
+  const serviceReadyEnabled = serviceReadyAllowed(
+    resolveSegmentContext({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    }),
+  );
+
   return (
     <ExecutivePage width="wide" spacing="loose">
       <Breadcrumbs items={[
@@ -241,6 +260,12 @@ export default async function OsDetailPage({
         canAtribuirMecanico={canAtribuirMecanico}
         canTransferirMecanico={canTransferirMecanico}
         canApontarHoras={canApontarHoras}
+        serviceReadyEnabled={serviceReadyEnabled}
+        canFinalize={canFinalize}
+        canNotify={canNotify}
+        notifyReadyAuto={Boolean(commSettings.notifyReadyAuto)}
+        empresaNome={tenant.name}
+        tenantSegment={tenant.segment}
       />
     </ExecutivePage>
   );

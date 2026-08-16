@@ -13,6 +13,7 @@ import { createCustomerReturnService } from "./return-service";
 import { createServiceReturnRuleService } from "./rule-service";
 import { createNotificationOutboxService } from "./outbox-service";
 import { EMPTY_RETURN_RULE } from "./returns";
+import { createCommunicationSettingsService } from "./settings-service";
 import { renderTemplate, templateFor, type MessageTemplateCode } from "./templates";
 import {
   manualReturnSchema,
@@ -305,6 +306,239 @@ export async function openAppointmentWhatsAppAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erro ao gerar WhatsApp.",
+    };
+  }
+}
+
+function segmentInput(tenant: {
+  segment?: string | null;
+  segment_version?: number | null;
+  segment_config?: Record<string, unknown> | null;
+}) {
+  return {
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  };
+}
+
+export async function finalizeServiceReadyAction(
+  tenantSlug: string,
+  values: unknown,
+): Promise<
+  ActionResultWith<{
+    status: string;
+    note?: string;
+    waLink?: string;
+    duplicated?: boolean;
+  }>
+> {
+  try {
+    const parsed = (await import("./validations")).finalizeServiceReadySchema.parse(
+      values,
+    );
+    const needed = parsed.notify
+      ? (["os.finalizar", "crm.notificacoes.enviar"] as const)
+      : (["os.finalizar"] as const);
+    const { tenant, userId } = await requireTenantMutationPermission(
+      tenantSlug,
+      needed,
+    );
+    const { resolveSegmentContext } = await import("@/lib/segments/resolve.ts");
+    const { serviceReadyAllowed } = await import("./service-ready");
+    const ctx = resolveSegmentContext(segmentInput(tenant));
+    if (!serviceReadyAllowed(ctx)) {
+      return {
+        success: false,
+        error: "Serviço pronto não se aplica a este segmento.",
+      };
+    }
+    const { createOrdemServicoService } = await import(
+      "@/lib/ordens/ordem-servico-service"
+    );
+    const osSvc = await createOrdemServicoService(tenant.id);
+    const os = await osSvc.getById(parsed.osId);
+    if (!os) {
+      return { success: false, error: "Atendimento não encontrado neste tenant." };
+    }
+    await osSvc.marcarAguardandoRetirada(parsed.osId, userId);
+    let note = "Finalizado sem notificar o cliente.";
+    let waLink: string | undefined;
+    let duplicated = false;
+    let status = "pronto_para_entrega";
+    if (parsed.notify) {
+      const { enqueueCustomerNotification } = await import("./notify");
+      const { osServiceSummary, osVehicleSummary } = await import(
+        "./os-message-context"
+      );
+      const result = await enqueueCustomerNotification({
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        segment: tenant.segment,
+        clienteId: os.cliente_id,
+        entityType: "os",
+        entityId: os.id,
+        templateCode: "SERVICE_READY",
+        offsetKey: "SERVICE_READY",
+        messageCtx: {
+          servico: osServiceSummary(os.itens, tenant.segment),
+          veiculo: osVehicleSummary({
+            marca: os.marca,
+            modelo: os.modelo,
+            placa: os.placa,
+          }),
+        },
+        userId,
+        forceChannel: parsed.channel,
+        explicit: true,
+      });
+      note = result.note;
+      waLink = result.waLink;
+      duplicated = result.duplicated;
+      status = result.status;
+    }
+    revalidateRetention(tenantSlug, os.cliente_id);
+    revalidatePath(`/${tenantSlug}/ordens/${os.id}`);
+    return { success: true, id: os.id, status, note, waLink, duplicated };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro ao finalizar.",
+    };
+  }
+}
+
+export async function registerOsPickupAction(
+  tenantSlug: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const parsed = (await import("./validations")).registerPickupSchema.parse(
+      values,
+    );
+    const { tenant, userId } = await requireTenantMutationPermission(tenantSlug, [
+      "os.finalizar",
+    ]);
+    const { createOrdemServicoService } = await import(
+      "@/lib/ordens/ordem-servico-service"
+    );
+    const osSvc = await createOrdemServicoService(tenant.id);
+    const os = await osSvc.registrarRetirada(
+      parsed.osId,
+      userId,
+      parsed.observacao,
+    );
+    if (!os) {
+      return { success: false, error: "Atendimento não encontrado neste tenant." };
+    }
+    const settings = await createCommunicationSettingsService(tenant.id).then((s) =>
+      s.get(),
+    );
+    if (settings.sendDelivery) {
+      const { enqueueCustomerNotification } = await import("./notify");
+      await enqueueCustomerNotification({
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        segment: tenant.segment,
+        clienteId: os.cliente_id,
+        entityType: "os",
+        entityId: os.id,
+        templateCode: "SERVICE_DELIVERED",
+        offsetKey: "SERVICE_DELIVERED",
+        messageCtx: {},
+        userId,
+      });
+    }
+    revalidateRetention(tenantSlug, os.cliente_id);
+    revalidatePath(`/${tenantSlug}/ordens/${os.id}`);
+    return { success: true, id: os.id };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro ao registrar retirada.",
+    };
+  }
+}
+
+export async function notifyServiceReadyAgainAction(
+  tenantSlug: string,
+  osId: string,
+): Promise<
+  ActionResultWith<{ note: string; duplicated?: boolean; waLink?: string }>
+> {
+  try {
+    const { tenant, userId } = await requireTenantMutationPermission(tenantSlug, [
+      "crm.notificacoes.enviar",
+    ]);
+    const { createOrdemServicoService } = await import(
+      "@/lib/ordens/ordem-servico-service"
+    );
+    const os = await (await createOrdemServicoService(tenant.id)).getById(osId);
+    if (!os) {
+      return { success: false, error: "Atendimento não encontrado neste tenant." };
+    }
+    const { enqueueCustomerNotification } = await import("./notify");
+    const { osServiceSummary, osVehicleSummary } = await import(
+      "./os-message-context"
+    );
+    const result = await enqueueCustomerNotification({
+      tenantId: tenant.id,
+      tenantName: tenant.name,
+      segment: tenant.segment,
+      clienteId: os.cliente_id,
+      entityType: "os",
+      entityId: os.id,
+      templateCode: "SERVICE_READY",
+      offsetKey: "SERVICE_READY",
+      messageCtx: {
+        servico: osServiceSummary(os.itens, tenant.segment),
+        veiculo: osVehicleSummary({
+          marca: os.marca,
+          modelo: os.modelo,
+          placa: os.placa,
+        }),
+      },
+      userId,
+      explicit: true,
+    });
+    revalidateRetention(tenantSlug, os.cliente_id);
+    return {
+      success: true,
+      id: os.id,
+      note: result.duplicated
+        ? "Mensagem já registrada — reenvio bloqueado."
+        : result.note,
+      duplicated: result.duplicated,
+      waLink: result.waLink,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro ao notificar.",
+    };
+  }
+}
+
+export async function updateCommunicationSettingsAction(
+  tenantSlug: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const { tenant } = await requireTenantMutationPermission(tenantSlug, [
+      "configuracoes.editar",
+    ]);
+    const parsed = (
+      await import("./validations")
+    ).communicationSettingsSchema.parse(values);
+    const svc = await createCommunicationSettingsService(tenant.id);
+    await svc.upsert(parsed);
+    revalidatePath(`/${tenantSlug}/configuracoes`);
+    revalidatePath(`/${tenantSlug}/configuracoes/comunicacoes`);
+    return { success: true, id: tenant.id };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro ao salvar.",
     };
   }
 }

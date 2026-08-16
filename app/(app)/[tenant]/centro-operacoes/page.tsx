@@ -10,6 +10,15 @@ import { getOpsCenterCopy } from "@/config/segment-labels";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { createCustomerReturnService } from "@/lib/retention/return-service";
+import { createNotificationOutboxService } from "@/lib/retention/outbox-service";
+import { AwaitingPickupPanel } from "@/components/retention/awaiting-pickup-panel";
+import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
+import { serviceReadyAllowed } from "@/lib/retention/service-ready";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { osVehicleSummary } from "@/lib/retention/os-message-context";
+import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
+import { agendaHref } from "@/lib/ux/fast-input";
 import { retentionOpsSummary } from "@/lib/retention/kpis";
 import {
   civilDateInTimezone,
@@ -86,7 +95,8 @@ export default async function CentroOperacoesPage({
   const service = await createCentroOperacoesService(tenant.id);
 
   // Prefs + dados em paralelo (prefs não bloqueia o fetch principal).
-  const [data, prefs, retentionRows] = await Promise.all([
+  const [data, prefs, retentionRows, awaitingOs, serviceReadyOutbox, canNotify, canFinalizeOs] =
+    await Promise.all([
     service.getData(tenantSlug, {
       segment: tenant.segment,
       segmentVersion: tenant.segment_version,
@@ -100,6 +110,14 @@ export default async function CentroOperacoesPage({
     createCustomerReturnService(tenant.id)
       .then((s) => s.list())
       .catch(() => []),
+    createOrdemServicoService(tenant.id)
+      .then((s) => s.list({ status: "pronto_para_entrega", perPage: 50 }))
+      .catch(() => ({ items: [] as Awaited<ReturnType<Awaited<ReturnType<typeof createOrdemServicoService>>["list"]>>["items"] })),
+    createNotificationOutboxService(tenant.id)
+      .then((s) => s.listByTemplate("SERVICE_READY"))
+      .catch(() => []),
+    tenantHasMutationPermission(tenantSlug, "crm.notificacoes.enviar"),
+    tenantHasMutationPermission(tenantSlug, "os.finalizar"),
   ]);
   const today = civilDateInTimezone(new Date(), DEFAULT_TENANT_TIMEZONE);
   const retention = retentionOpsSummary(retentionRows, today);
@@ -138,6 +156,47 @@ export default async function CentroOperacoesPage({
       ["aprovacao", "pronto", "finalizadas_hoje", "retornos"].includes(c.key),
     );
   }
+
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const pickupEnabled = serviceReadyAllowed(
+    resolveSegmentContext({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    }),
+  );
+  const latestReady = new Map<
+    string,
+    (typeof serviceReadyOutbox)[number]
+  >();
+  for (const row of serviceReadyOutbox) {
+    if (row.entity_id && !latestReady.has(row.entity_id)) {
+      latestReady.set(row.entity_id, row);
+    }
+  }
+  const pickupRows = (awaitingOs.items ?? []).map((item) => {
+    const out = latestReady.get(item.id);
+    return {
+      osId: item.id,
+      cliente: item.cliente_nome ?? ui.customer,
+      veiculo: osVehicleSummary({
+        marca: item.marca,
+        modelo: item.modelo,
+        placa: item.placa,
+      }),
+      servico: `${ui.workOrderShort} #${item.numero}`,
+      prontoDesde: item.data_conclusao,
+      mensagem: out?.rendered_preview ?? null,
+      mensagemStatus: out?.status ?? null,
+    };
+  });
+  const scheduleIntent = retentionRows.filter(
+    (r) => r.status === "cliente_respondeu_sim",
+  );
 
   return (
     <ExecutivePage width="wide" spacing="loose">
@@ -222,6 +281,55 @@ export default async function CentroOperacoesPage({
             Ver todos
           </a>
         </div>
+      </SectionCard>
+
+      {pickupEnabled ? (
+        <SectionCard
+          title={ui.awaitingPickupTitle}
+          description="Veículos com serviço concluído, ainda não retirados."
+        >
+          <AwaitingPickupPanel
+            tenantSlug={tenantSlug}
+            title={ui.awaitingPickupTitle}
+            registerLabel={ui.registerPickupLabel}
+            canNotify={canNotify}
+            canFinalize={canFinalizeOs}
+            rows={pickupRows}
+          />
+        </SectionCard>
+      ) : null}
+
+      <SectionCard
+        title="Aguardando agendamento"
+        description="Cliente respondeu SIM. Nenhum horário é criado automaticamente."
+      >
+        <ul className="space-y-2 text-sm" data-phase35="aguardando-agendamento">
+          {scheduleIntent.length === 0 ? (
+            <li className="text-muted-foreground">Nenhuma intenção pendente.</li>
+          ) : (
+            scheduleIntent.map((r) => (
+              <li key={r.id} className="rounded-lg border p-3">
+                <p className="font-medium">{r.motivo ?? "Retorno"}</p>
+                <p className="text-muted-foreground">
+                  {r.last_service_label ?? "Serviço"} · Resposta{" "}
+                  {r.responded_at ?? r.updated_at}
+                </p>
+                <a
+                  className="mt-2 inline-block underline"
+                  href={agendaHref(tenantSlug, {
+                    natureza: "cliente",
+                    clienteId: r.cliente_id,
+                    returnId: r.id,
+                    servicoId: r.produto_id,
+                    profissionalId: r.profissional_id,
+                  })}
+                >
+                  Agendar
+                </a>
+              </li>
+            ))
+          )}
+        </ul>
       </SectionCard>
 
       <SectionCard

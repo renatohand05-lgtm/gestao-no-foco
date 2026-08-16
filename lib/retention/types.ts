@@ -52,6 +52,16 @@ export type OutboxRow = {
   mode: string;
   idempotency_key: string;
   rendered_preview: string | null;
+  provider?: string | null;
+  provider_message_id?: string | null;
+  to_address?: string | null;
+  attempt_count?: number | null;
+  error_code?: string | null;
+  queued_at?: string | null;
+  sent_at?: string | null;
+  delivered_at?: string | null;
+  failed_at?: string | null;
+  created_at?: string | null;
 };
 
 export type RetentionOpsSummary = {

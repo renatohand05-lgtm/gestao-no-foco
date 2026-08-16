@@ -17,6 +17,8 @@ import { AnexosPanel } from "@/components/ordens/inspecao/anexos-panel";
 import { ChecklistVisual } from "@/components/ordens/inspecao/checklist-visual";
 import { InspecaoEnvioPanel } from "@/components/ordens/inspecao/inspecao-envio-panel";
 import { OsVeiculoEditDialog } from "@/components/ordens/os-veiculo-edit-dialog";
+import { ServiceReadyPanel } from "@/components/retention/service-ready-panel";
+import { registerOsPickupAction } from "@/lib/retention/actions";
 import { GFSelect } from "@/components/gf/gf-select";
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -86,6 +88,12 @@ type OsWorkspaceProps = {
   professionalLabel?: string;
   professionalsLabel?: string;
   uiCopy?: import("@/lib/segments/copy.ts").SegmentUiCopyClient;
+  serviceReadyEnabled?: boolean;
+  canFinalize?: boolean;
+  canNotify?: boolean;
+  notifyReadyAuto?: boolean;
+  empresaNome?: string;
+  tenantSegment?: string | null;
 };
 
 const TABS = [
@@ -150,6 +158,12 @@ export function OsWorkspace({
   professionalLabel = "Mecânico",
   professionalsLabel = "Mecânicos",
   uiCopy,
+  serviceReadyEnabled = false,
+  canFinalize = false,
+  canNotify = false,
+  notifyReadyAuto = false,
+  empresaNome = "",
+  tenantSegment = null,
 }: OsWorkspaceProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
@@ -341,6 +355,45 @@ export function OsWorkspace({
 
       {tab === "resumo" ? (
         <ExecutiveSection title="Resumo" panel>
+          <ServiceReadyPanel
+            tenantSlug={tenantSlug}
+            osId={os.id}
+            enabled={serviceReadyEnabled}
+            canFinalize={canFinalize}
+            canNotify={canNotify}
+            notifyReadyAuto={notifyReadyAuto}
+            awaitingPickup={os.status === "pronto_para_entrega"}
+            segment={tenantSegment}
+            clienteNome={os.cliente_nome ?? ""}
+            empresaNome={empresaNome}
+            preview={{
+              itens: os.itens,
+              marca: os.marca,
+              modelo: os.modelo,
+              placa: os.placa,
+            }}
+            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar sem notificar"}
+            finalizeAndNotifyLabel={
+              uiCopy?.finalizeAndNotifyLabel ?? "Finalizar e avisar cliente"
+            }
+            sheetTitle={uiCopy?.serviceReadySheetTitle ?? "Serviço concluído"}
+          />
+          {os.status === "pronto_para_entrega" && canFinalize ? (
+            <button
+              type="button"
+              className={cn(buttonVariants({ size: "sm" }), "mb-3 min-h-11")}
+              disabled={pending}
+              onClick={() =>
+                run(
+                  () =>
+                    registerOsPickupAction(tenantSlug, { osId: os.id }),
+                  uiCopy?.registerPickupLabel ?? "Retirada registrada.",
+                )
+              }
+            >
+              {uiCopy?.registerPickupLabel ?? "Registrar retirada"}
+            </button>
+          ) : null}
           {canEditOs(os) ? (
             <form
               className="space-y-2 rounded-lg border p-3"
@@ -1041,6 +1094,46 @@ export function OsWorkspace({
 
       {tab === "entrega" ? (
         <ExecutiveSection title="Entrega" panel>
+          {os.status === "pronto_para_entrega" && canFinalize ? (
+            <button
+              type="button"
+              className={cn(buttonVariants({ size: "sm" }), "min-h-11")}
+              disabled={pending}
+              onClick={() =>
+                run(
+                  () => registerOsPickupAction(tenantSlug, { osId: os.id }),
+                  uiCopy?.registerPickupLabel ?? "Retirada registrada.",
+                )
+              }
+            >
+              {uiCopy?.registerPickupLabel ?? "Registrar retirada"}
+            </button>
+          ) : null}
+          {canEditOs(os) && os.status !== "pronto_para_entrega" ? (
+          <ServiceReadyPanel
+            tenantSlug={tenantSlug}
+            osId={os.id}
+            enabled={serviceReadyEnabled}
+            canFinalize={canFinalize}
+            canNotify={canNotify}
+            notifyReadyAuto={notifyReadyAuto}
+            awaitingPickup={os.status === "pronto_para_entrega"}
+            segment={tenantSegment}
+            clienteNome={os.cliente_nome ?? ""}
+            empresaNome={empresaNome}
+            preview={{
+              itens: os.itens,
+              marca: os.marca,
+              modelo: os.modelo,
+              placa: os.placa,
+            }}
+            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar sem notificar"}
+            finalizeAndNotifyLabel={
+              uiCopy?.finalizeAndNotifyLabel ?? "Finalizar e avisar cliente"
+            }
+            sheetTitle={uiCopy?.serviceReadySheetTitle ?? "Serviço concluído"}
+          />
+          ) : null}
           {os.previsoes.length > 0 ? (
             <div className="space-y-2 rounded-lg border p-3">
               <p className="text-xs font-medium text-muted-foreground">

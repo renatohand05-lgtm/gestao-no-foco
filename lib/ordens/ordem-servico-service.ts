@@ -56,6 +56,7 @@ export type OrdemServicoListItem = {
   veiculo_id: string | null;
   placa: string | null;
   modelo: string | null;
+  marca?: string | null;
   data_abertura: string;
   previsao_entrega: string | null;
   /** Conclusão técnica (date). */
@@ -568,7 +569,7 @@ export class OrdemServicoService {
     const { data, error } = await this.supabase
       .from("ordens_servico")
       .select(
-        "*, cliente:clientes(nome), veiculo:veiculos(placa, modelo)",
+        "*, cliente:clientes(nome), veiculo:veiculos(placa, modelo, marca)",
       )
       .eq("tenant_id", this.tenantId)
       .eq("id", id)
@@ -621,6 +622,7 @@ export class OrdemServicoService {
     const veiculo = data.veiculo as unknown as {
       placa: string;
       modelo: string | null;
+      marca?: string | null;
     } | null;
     const row = data as unknown as Record<string, unknown>;
 
@@ -633,6 +635,7 @@ export class OrdemServicoService {
       veiculo_id: data.veiculo_id,
       placa: veiculo?.placa ?? null,
       modelo: veiculo?.modelo ?? null,
+      marca: veiculo?.marca ?? null,
       data_abertura: data.data_abertura,
       previsao_entrega: (row.previsao_entrega as string | null) ?? null,
       valor_total: Number(data.valor_total),
@@ -1712,6 +1715,76 @@ export class OrdemServicoService {
       estado_posterior: "entregue",
       motivo: input.motivo_excecao ?? null,
     });
+  }
+
+  /** Conclui o serviço operacionalmente sem registrar retirada do cliente. */
+  async marcarAguardandoRetirada(osId: string, userId: string | null) {
+    const current = await this.getById(osId);
+    if (!current) throw new Error("OS não encontrada.");
+    if (isTerminalCancelado(current.status)) {
+      throw new Error("OS cancelada não pode ser finalizada.");
+    }
+    if (current.status === "entregue" || current.status === "faturado") {
+      throw new Error("OS já entregue.");
+    }
+    if (current.status !== "pronto_para_entrega") {
+      await this.advanceTo(
+        osId,
+        "pronto_para_entrega",
+        userId,
+        "Serviço concluído — aguardando retirada",
+      );
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const { error } = await this.supabase
+      .from("ordens_servico")
+      .update({ data_conclusao: current.data_conclusao ?? today } as never)
+      .eq("id", osId)
+      .eq("tenant_id", this.tenantId);
+    if (error) throw new Error(error.message);
+    await this.recordEvent(osId, userId, {
+      tipo: "status",
+      descricao: "Aguardando retirada",
+      estado_anterior: current.status,
+      estado_posterior: "pronto_para_entrega",
+    });
+    return this.getById(osId);
+  }
+
+  async registrarRetirada(
+    osId: string,
+    userId: string | null,
+    observacao?: string | null,
+  ) {
+    const current = await this.getById(osId);
+    if (!current) throw new Error("OS não encontrada.");
+    if (current.status === "entregue") return current;
+    if (current.status !== "pronto_para_entrega") {
+      throw new Error("Registre a conclusão do serviço antes da retirada.");
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const { error } = await this.supabase
+      .from("ordens_servico")
+      .update({
+        data_conclusao: current.data_conclusao ?? today,
+        aceite_entrega_em: new Date().toISOString(),
+        aceite_entrega_por: userId,
+        observacoes: observacao?.trim()
+          ? [current.observacoes, observacao.trim()].filter(Boolean).join("\n")
+          : current.observacoes,
+      } as never)
+      .eq("id", osId)
+      .eq("tenant_id", this.tenantId);
+    if (error) throw new Error(error.message);
+    await this.advanceTo(osId, "entregue", userId, observacao ?? "Retirada registrada");
+    await this.recordEvent(osId, userId, {
+      tipo: "entrega",
+      descricao: "Retirada registrada",
+      estado_anterior: current.status,
+      estado_posterior: "entregue",
+      motivo: observacao ?? null,
+    });
+    return this.getById(osId);
   }
 
   /**

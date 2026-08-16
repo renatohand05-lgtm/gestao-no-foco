@@ -102,6 +102,37 @@ export async function createAgendaEventAction(
     }
     const svc = await createAgendaEventService(tenant.id);
     const rows = await svc.create(toInput(parsed), profile.id);
+    try {
+      const first = rows[0];
+      if (first?.cliente_id && parsed.natureza === "cliente") {
+        const { enqueueCustomerNotification } = await import(
+          "@/lib/retention/notify"
+        );
+        await enqueueCustomerNotification({
+          tenantId: tenant.id,
+          tenantName: tenant.name,
+          segment: tenant.segment,
+          clienteId: first.cliente_id,
+          entityType: "agendamento",
+          entityId: first.id,
+          templateCode: "AGENDAMENTO_CRIADO",
+          offsetKey: "CREATED",
+          messageCtx: {
+            data: first.inicio?.slice(0, 10) ?? "",
+            hora: first.inicio
+              ? new Date(first.inicio).toLocaleTimeString("pt-BR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "",
+            servico: parsed.titulo,
+          },
+          userId: profile.id,
+        });
+      }
+    } catch {
+      /* outbox não bloqueia o agendamento */
+    }
     revalidateAgenda(tenantSlug, rows[0]?.id);
     return { success: true, id: rows[0]?.id };
   } catch (error) {

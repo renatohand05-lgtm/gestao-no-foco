@@ -1,54 +1,62 @@
-# Runbook — comunicação de agenda/retornos (Sprint 35.2)
+# Runbook — comunicação (35.2 + 35.2.2)
 
-## Modos (`RETENTION_NOTIFY_MODE`)
+## Modos WhatsApp
 
-| Modo | Efeito | Status no outbox |
+| Modo | Efeito | Outbox |
 |---|---|---|
-| `disabled` | Nada sai | `cancelled` |
-| `dry_run` | **Default.** Persiste preview, não envia | `dry_run` |
-| `manual_link` | Gera `wa.me` para o operador | `manual_opened` (**não** `delivered`) |
-| `provider` | Preparado, **não ativo** | `ready` — cron força `dry_run` |
+| `disabled` | Nada | `cancelled` |
+| `dry_run` | Preview | `dry_run` |
+| `manual_link` | `wa.me` | `manual_opened` (não é DELIVERED) |
+| `meta_cloud` | HTTP Graph **somente** se `WHATSAPP_ENABLED=true` | `ready` → `sent`/`failed` |
 
-Não fingir entrega. Retry usa a mesma `idempotency_key`.
+Default produção: DRY_RUN + kill switch OFF.
 
-## Canais
+## E-mail
 
-- WhatsApp: somente link manual até provider oficial aprovado (Meta Cloud API / Twilio / Z-API / 360dialog — **não** contratar neste sprint).
-- E-mail: DRY_RUN. Sem provider transacional de cliente neste fluxo.
+`EMAIL_PROVIDER=disabled|dry_run|resend`. Kill switch `EMAIL_ENABLED`. Remetente = `EMAIL_FROM` verificado no Resend. Sem remetente falso.
 
-## Opt-out
+## Outbox (única fila)
 
-`communication_preferences`: `whatsapp_enabled`, `email_enabled`, `opted_out_at`. Canal off → `cancelled`.
+Estados: `pending`, `ready`, `processing`, `dry_run`, `manual_opened`, `sent`, `delivered`, `read`, `failed`, `cancelled`.
+
+Retry: backoff, máx. 5. `error_code` sanitizado. Sem token no erro.
+
+## Webhook
+
+`/api/webhooks/whatsapp` — assinatura obrigatória. Dedupe `notification_webhook_events (provider, event_id)`.
+
+Inbound `SIM` ligado a retorno ativo → `cliente_respondeu_sim` (**não** cria horário).
 
 ## Cron
 
-- Rota: `GET/POST /api/cron/retention`
-- Auth: `Authorization: Bearer $CRON_SECRET`
-- Sem secret → **401**
-- **PRODUCTION: DISABLED** — não cadastrar na Vercel
-- Janela 08:00–19:00 `America/Sao_Paulo`
-- Worker usa `createAdminClient` se service role existir; senão skip
+`/api/cron/retention` Bearer `CRON_SECRET`. **PRODUCTION: DISABLED.**
 
-## Envs
+Job força `dry_run` no planejamento de retornos. Sem `setInterval` no processo web.
 
-| Env | Necessidade | Notas |
-|---|---|---|
-| `CRON_SECRET` | já existe no ecossistema; **não criada automaticamente** | ausente = cron 401 |
-| `RETENTION_NOTIFY_MODE` | opcional | default código = `dry_run` |
-| `SUPABASE_SERVICE_ROLE_KEY` | já existe | só para o job admin |
+## SERVICE_READY
 
-Nenhuma env nova obrigatória.
+Oficina/lava: finalizar → `pronto_para_entrega`. Entrega é ação à parte (`entregue`).
 
-## Régua (offsets configuráveis por segmento)
+Temas sensíveis (estética/odonto) usam template privado na régua de retorno.
 
-Exemplo oficina: D-10, D-3, D0, D+7. Consultoria usa `REENGAJAMENTO` no D+7.
+## Envs (nomes)
+
+- `RETENTION_NOTIFY_MODE`
+- `WHATSAPP_ENABLED`
+- `WHATSAPP_PROVIDER`
+- `WHATSAPP_ACCESS_TOKEN`
+- `WHATSAPP_PHONE_NUMBER_ID`
+- `WHATSAPP_BUSINESS_ACCOUNT_ID`
+- `WHATSAPP_WEBHOOK_VERIFY_TOKEN`
+- `WHATSAPP_APP_SECRET`
+- `EMAIL_ENABLED`
+- `EMAIL_PROVIDER`
+- `RESEND_API_KEY`
+- `EMAIL_FROM`
+- `CRON_SECRET`
 
 ## Rollback
 
-1. Não aplicar cron.
-2. `RETENTION_NOTIFY_MODE=disabled`.
-3. Outbox permanece auditável.
-
-## Homologação
-
-Não enviar mensagem real para cliente real. Testar DRY_RUN + `wa.me` manual em tenant de homologação após aplicar a migration 35.2.
+1. `WHATSAPP_ENABLED=false` e `EMAIL_ENABLED=false`
+2. Não cadastrar cron na Vercel
+3. Tenant: desligar preferências em Configurações → Comunicações

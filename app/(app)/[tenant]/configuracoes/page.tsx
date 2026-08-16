@@ -150,6 +150,27 @@ export default async function ConfiguracoesPage({
             </Button>
           </CardContent>
         </Card>
+
+        <Card data-phase35="comunicacoes-hub">
+          <CardHeader>
+            <CardTitle>Comunicações</CardTitle>
+            <CardDescription>
+              WhatsApp, e-mail, retornos e aviso de serviço pronto
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Provider real permanece desligado até homologação. Sem credenciais
+              nesta tela.
+            </p>
+            <Button
+              variant="outline"
+              render={<Link href={`/${tenantSlug}/configuracoes/comunicacoes`} />}
+            >
+              Configurar comunicações
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

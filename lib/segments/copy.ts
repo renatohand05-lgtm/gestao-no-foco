@@ -96,6 +96,11 @@ export type SegmentUiCopy = {
   emptyCatalogBody: string;
   compactVehicleVitals: boolean;
   professionalSpecialtySuggestions: string[];
+  finalizeOnlyLabel: string;
+  finalizeAndNotifyLabel: string;
+  awaitingPickupTitle: string;
+  registerPickupLabel: string;
+  serviceReadySheetTitle: string;
 };
 
 const OFICINA_TAB_LABELS: Record<string, string> = {
@@ -266,6 +271,11 @@ export function getSegmentUiCopy(
       emptyCatalogBody: `Comece com nosso catálogo sugerido para ${catalogShort} ou crie seu primeiro serviço manualmente.`,
       compactVehicleVitals: false,
       professionalSpecialtySuggestions: [],
+      finalizeOnlyLabel: "Finalizar OS",
+      finalizeAndNotifyLabel: "Finalizar e avisar cliente",
+      awaitingPickupTitle: "Aguardando retirada",
+      registerPickupLabel: "Registrar retirada",
+      serviceReadySheetTitle: "Serviço concluído",
     };
   }
 
@@ -386,6 +396,11 @@ export function getSegmentUiCopy(
     emptyCatalogBody: `Comece com nosso catálogo sugerido para ${catalogShort} ou crie seu primeiro serviço manualmente.`,
     compactVehicleVitals: id === "lava_rapido",
     professionalSpecialtySuggestions: specialtySuggestionsForSegment(id),
+    finalizeOnlyLabel: "Finalizar atendimento",
+    finalizeAndNotifyLabel: "Finalizar e avisar cliente",
+    awaitingPickupTitle: "Aguardando retirada",
+    registerPickupLabel: "Registrar retirada",
+    serviceReadySheetTitle: "Serviço concluído",
   };
 }
 

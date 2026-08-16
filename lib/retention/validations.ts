@@ -58,3 +58,32 @@ export const serviceRuleSchema = z.object({
   hideProcedure: z.boolean().optional(),
   messageTemplate: z.string().max(2000).optional().nullable(),
 });
+
+export const communicationSettingsSchema = z.object({
+  whatsappMode: z.enum(["disabled", "manual_link", "provider"]),
+  emailMode: z.enum(["disabled", "provider"]),
+  sendAppointmentCreated: z.boolean(),
+  sendAppointmentReminder: z.boolean(),
+  sendAppointmentCancelled: z.boolean(),
+  sendAppointmentRescheduled: z.boolean(),
+  sendReturn: z.boolean(),
+  sendServiceReady: z.boolean(),
+  sendDelivery: z.boolean(),
+  notifyReadyAuto: z.boolean(),
+  preferredChannel: z.enum(["whatsapp", "email"]),
+  fallbackEmail: z.boolean(),
+  windowStartHour: z.coerce.number().int().min(0).max(23),
+  windowEndHour: z.coerce.number().int().min(0).max(23),
+  reminderOffsets: z.array(z.string().max(8)).max(8),
+});
+
+export const finalizeServiceReadySchema = z.object({
+  osId: z.string().uuid(),
+  notify: z.boolean(),
+  channel: z.enum(["whatsapp", "email"]).optional(),
+});
+
+export const registerPickupSchema = z.object({
+  osId: z.string().uuid(),
+  observacao: z.string().max(500).optional().nullable(),
+});

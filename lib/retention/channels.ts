@@ -13,13 +13,15 @@ export type CommMode = (typeof COMM_MODES)[number];
 
 export const OUTBOX_STATUSES = [
   "pending",
-  "dry_run",
   "ready",
+  "processing",
+  "dry_run",
+  "manual_opened",
   "sent",
   "delivered",
+  "read",
   "failed",
   "cancelled",
-  "manual_opened",
 ] as const;
 export type OutboxStatus = (typeof OUTBOX_STATUSES)[number];
 

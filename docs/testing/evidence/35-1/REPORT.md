@@ -42,8 +42,8 @@ TYPECHECK: PASS
 BUILD: PASS · /[tenant]/produtos/catalogo-inicial registado
 
 MIGRATION: 20260901_phase35_1_mecanico_especialidade_text.sql (drop check enum em mecanicos.especialidade — texto livre)
-COMMIT: (preenchido após git)
-HEAD == ORIGIN/MAIN: (preenchido após push)
+COMMIT: 24d94f4
+HEAD == ORIGIN/MAIN: (após push)
 
 HOMOLOGAÇÃO MANUAL: PENDING
 ```

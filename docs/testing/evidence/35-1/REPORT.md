@@ -1,7 +1,7 @@
 # Sprint 35.1 — Presets por segmento + biblioteca de serviços + form config
 
 **Data:** 2026-08-16  
-**Commit código:** *(este avanço)*  
+**Commit código:** `fd4d8d2`  
 **Branch:** `main`  
 **Tipo:** Biblioteca de sugestões + filtragem de formulário — sem billing / Asaas / 35.2 / auto-migration prod
 

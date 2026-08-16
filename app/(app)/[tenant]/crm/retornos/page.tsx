@@ -16,6 +16,8 @@ import {
 } from "@/lib/dashboard/tenant-timezone";
 import { retentionOpsSummary } from "@/lib/retention/kpis";
 import { createCustomerReturnService } from "@/lib/retention/return-service";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { defaultReturnRuleForSegment } from "@/lib/retention/returns";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import { formatCurrency } from "@/lib/format";
@@ -49,8 +51,13 @@ export default async function CrmRetornosPage({
   const cmap = new Map(
     (contato ?? []).map((c) => [c.id, c]),
   );
-  const showVehicle =
-    tenant.segment === "oficina" || tenant.segment === "lava_rapido";
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const showVehicle = ui.showVehicles;
+  const hideProcedure = defaultReturnRuleForSegment(tenant.segment).hideProcedure;
 
   const cards: Array<[string, number | string]> = [
     ["Retornos hoje", summary.hoje],
@@ -98,7 +105,7 @@ export default async function CrmRetornosPage({
       <ReturnsPanel
         tenantSlug={tenantSlug}
         showVehicle={showVehicle}
-        segment={tenant.segment}
+        hideProcedure={hideProcedure}
         clientes={clientes.data.map((c) => ({
           id: c.id,
           nome: c.nome,

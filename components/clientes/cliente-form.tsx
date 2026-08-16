@@ -15,6 +15,8 @@ import { FormGrid } from "@/components/ui/form-grid";
 import { FormSection } from "@/components/ui/form-section";
 import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import { FastInputCtaBar, MoreDetails } from "@/components/ui/more-details";
+import { PostSaveActions } from "@/components/ui/post-save-actions";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -49,6 +51,10 @@ import {
   clienteFormSchema,
   type ClienteFormValues,
 } from "@/lib/clientes/validations";
+import {
+  agendaHref,
+  shouldReturnToAgenda,
+} from "@/lib/ux/fast-input";
 import type { Cliente } from "@/types/clientes";
 
 type ClienteFormProps = {
@@ -58,6 +64,8 @@ type ClienteFormProps = {
   consultores?: TenantMemberOption[];
   tags?: TagRecord[];
   initialTagIds?: string[];
+  from?: string | null;
+  customerLabel?: string;
 };
 
 const selectClassName =
@@ -70,10 +78,13 @@ export function ClienteForm({
   consultores = [],
   tags = [],
   initialTagIds = [],
+  from = null,
+  customerLabel = "Cliente",
 }: ClienteFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
 
   const form = useForm<ClienteFormValues>({
     resolver: zodResolver(clienteFormSchema),
@@ -122,11 +133,19 @@ export function ClienteForm({
     setLoading(true);
     setError(null);
 
+    const whatsapp = values.whatsapp?.trim() || values.telefone?.trim() || "";
+    const telefone = values.telefone?.trim() || whatsapp;
+    const payload: ClienteFormValues = {
+      ...values,
+      whatsapp,
+      telefone,
+    };
+
     const dup = await checkClienteDuplicatesAction(tenantSlug, {
       excludeId: cliente?.id,
-      documento: values.documento,
-      email: values.email,
-      telefone: values.telefone,
+      documento: payload.documento,
+      email: payload.email,
+      telefone: payload.telefone,
     });
 
     if (dup.success && dup.result.hasDuplicates) {
@@ -142,8 +161,8 @@ export function ClienteForm({
 
     const action =
       mode === "create"
-        ? createClienteAction(tenantSlug, values)
-        : updateClienteAction(tenantSlug, cliente!.id, values);
+        ? createClienteAction(tenantSlug, payload)
+        : updateClienteAction(tenantSlug, cliente!.id, payload);
 
     const result = await action;
 
@@ -155,6 +174,15 @@ export function ClienteForm({
     }
 
     const success = mode === "create" ? "created" : "updated";
+    if (mode === "create" && result.id) {
+      if (shouldReturnToAgenda(from)) {
+        router.push(agendaHref(tenantSlug, { clienteId: result.id, natureza: "cliente" }));
+        return;
+      }
+      setCreatedId(result.id);
+      setLoading(false);
+      return;
+    }
     router.push(
       `/${tenantSlug}/clientes/${result.id}?success=${success}`,
     );
@@ -168,6 +196,36 @@ export function ClienteForm({
     );
   }
 
+  if (createdId && mode === "create") {
+    return (
+      <PostSaveActions
+        title="Cliente criado"
+        actions={[
+          {
+            href: agendaHref(tenantSlug, {
+              clienteId: createdId,
+              natureza: "cliente",
+            }),
+            label: "Agendar atendimento",
+            primary: true,
+          },
+          {
+            label: "Adicionar outro",
+            onClick: () => {
+              form.reset();
+              setCreatedId(null);
+              setError(null);
+            },
+          },
+          {
+            href: `/${tenantSlug}/clientes/${createdId}`,
+            label: `Ver ${customerLabel.toLowerCase()}`,
+          },
+        ]}
+      />
+    );
+  }
+
   return (
     <div className="relative">
       <LoadingOverlay loading={loading} label="Salvando..." />
@@ -176,6 +234,71 @@ export function ClienteForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
+        <div data-fast-input="essentials">
+        <FormSection
+          title="Cadastro rápido"
+          description="Cadastre o mínimo agora. Complete depois."
+        >
+          <FormGrid>
+            <FormField
+              label={getNomeLabel(tipoPessoa)}
+              htmlFor="nome"
+              required
+              error={form.formState.errors.nome?.message}
+              className="md:col-span-2"
+            >
+              <Input
+                id="nome"
+                {...form.register("nome")}
+                placeholder={
+                  tipoPessoa === "pf" ? "Nome completo" : "Razão social / nome"
+                }
+              />
+            </FormField>
+
+            <FormField label="WhatsApp / telefone" htmlFor="whatsapp">
+              <Controller
+                control={form.control}
+                name="whatsapp"
+                render={({ field }) => (
+                  <MaskedInput
+                    id="whatsapp"
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    mask={maskTelefone}
+                    placeholder="(00) 00000-0000"
+                  />
+                )}
+              />
+            </FormField>
+
+            <FormField
+              label="E-mail"
+              htmlFor="email"
+              error={form.formState.errors.email?.message}
+            >
+              <Input
+                id="email"
+                type="email"
+                {...form.register("email")}
+                placeholder="cliente@email.com"
+              />
+            </FormField>
+          </FormGrid>
+        </FormSection>
+        </div>
+
+        <FastInputCtaBar>
+          <CancelButton onClick={handleCancel} disabled={loading} />
+          <SaveButton loading={loading}>
+            {mode === "create" ? "Salvar cliente" : "Salvar alterações"}
+          </SaveButton>
+        </FastInputCtaBar>
+
+        <MoreDetails
+          summary="Mais informações"
+          defaultOpen={mode === "edit"}
+        >
         <FormSection
           title="Identificação"
           description="Dados principais do cliente ou empresa."
@@ -215,22 +338,6 @@ export function ClienteForm({
                     ))}
                   </select>
                 )}
-              />
-            </FormField>
-
-            <FormField
-              label={getNomeLabel(tipoPessoa)}
-              htmlFor="nome"
-              required
-              error={form.formState.errors.nome?.message}
-              className="md:col-span-2"
-            >
-              <Input
-                id="nome"
-                {...form.register("nome")}
-                placeholder={
-                  tipoPessoa === "pf" ? "Nome completo" : "Razão social / nome"
-                }
               />
             </FormField>
 
@@ -458,7 +565,7 @@ export function ClienteForm({
           description="Canais de comunicação com o cliente."
         >
           <FormGrid>
-            <FormField label="Telefone" htmlFor="telefone">
+            <FormField label="Telefone (alternativo)" htmlFor="telefone">
               <Controller
                 control={form.control}
                 name="telefone"
@@ -471,36 +578,6 @@ export function ClienteForm({
                     placeholder="(00) 00000-0000"
                   />
                 )}
-              />
-            </FormField>
-
-            <FormField label="WhatsApp" htmlFor="whatsapp">
-              <Controller
-                control={form.control}
-                name="whatsapp"
-                render={({ field }) => (
-                  <MaskedInput
-                    id="whatsapp"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    mask={maskTelefone}
-                    placeholder="(00) 00000-0000"
-                  />
-                )}
-              />
-            </FormField>
-
-            <FormField
-              label="E-mail"
-              htmlFor="email"
-              error={form.formState.errors.email?.message}
-              className="md:col-span-2"
-            >
-              <Input
-                id="email"
-                type="email"
-                {...form.register("email")}
-                placeholder="cliente@email.com"
               />
             </FormField>
           </FormGrid>
@@ -586,13 +663,7 @@ export function ClienteForm({
             />
           </FormField>
         </FormSection>
-
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <CancelButton onClick={handleCancel} disabled={loading} />
-          <SaveButton loading={loading}>
-            {mode === "create" ? "Cadastrar cliente" : "Salvar alterações"}
-          </SaveButton>
-        </div>
+        </MoreDetails>
       </form>
       </FormProvider>
     </div>

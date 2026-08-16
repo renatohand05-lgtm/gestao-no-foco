@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { FastInputCtaBar, MoreDetails } from "@/components/ui/more-details";
+import { PostSaveActions } from "@/components/ui/post-save-actions";
 import { createAgendaEventAction } from "@/lib/agenda/actions";
 import {
   BUSINESS_EVENT_TYPE_LABELS,
@@ -11,8 +12,13 @@ import {
   INTERNAL_EVENT_TYPE_LABELS,
   INTERNAL_EVENT_TYPES,
   endIsoFromDuration,
+  natureRequiresCliente,
   type AgendaNature,
 } from "@/lib/retention/natures";
+import {
+  novoClienteFromAgendaHref,
+  type AgendaCreateContext,
+} from "@/lib/ux/fast-input";
 import { cn } from "@/lib/utils";
 
 export type AgendaSelectOption = {
@@ -27,6 +33,7 @@ type Props = {
   clientes: AgendaSelectOption[];
   servicos: AgendaSelectOption[];
   profissionais: AgendaSelectOption[];
+  initial?: AgendaCreateContext;
 };
 
 const NATURE_LABEL: Record<AgendaNature, string> = {
@@ -35,27 +42,49 @@ const NATURE_LABEL: Record<AgendaNature, string> = {
   interno: "Interno / disponibilidade",
 };
 
+function defaultTipo(natureza: AgendaNature): string {
+  if (natureza === "cliente") return "atendimento";
+  if (natureza === "interno") return "bloqueio";
+  return "compromisso";
+}
+
+function toDatetimeLocalValue(raw: string | null | undefined): string {
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw)) return raw.slice(0, 16);
+  return raw;
+}
+
 export function AgendaEventCreateForm({
   tenantSlug,
   clientes,
   servicos,
   profissionais,
+  initial,
 }: Props) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [natureza, setNatureza] = useState<AgendaNature>("cliente");
+  const [createdId, setCreatedId] = useState<string | null>(null);
+  const initialNatureza: AgendaNature = initial?.natureza ?? "cliente";
+  const [natureza, setNatureza] = useState<AgendaNature>(initialNatureza);
   const [titulo, setTitulo] = useState("");
-  const [tipo, setTipo] = useState("atendimento");
-  const [clienteId, setClienteId] = useState("");
-  const [servicoId, setServicoId] = useState("");
-  const [responsavelId, setResponsavelId] = useState("");
-  const [inicio, setInicio] = useState("");
-  const [duracao, setDuracao] = useState(60);
+  const [tipo, setTipo] = useState(defaultTipo(initialNatureza));
+  const [clienteId, setClienteId] = useState(initial?.clienteId ?? "");
+  const [servicoId, setServicoId] = useState(initial?.servicoId ?? "");
+  const initialMinutes =
+    servicos.find((s) => s.id === initial?.servicoId)?.minutes ?? 60;
+  const [duracao, setDuracao] = useState(initialMinutes);
+  const [inicio, setInicio] = useState(
+    toDatetimeLocalValue(initial?.inicioLocal),
+  );
   const [fim, setFim] = useState("");
+  const [responsavelId, setResponsavelId] = useState(
+    initial?.profissionalId ?? "",
+  );
+  const [returnId] = useState(initial?.returnId ?? "");
   const [endereco, setEndereco] = useState("");
   const [meetingUrl, setMeetingUrl] = useState("");
   const [observacao, setObservacao] = useState("");
+  const [lembrete, setLembrete] = useState("");
   const [freq, setFreq] = useState<"nenhuma" | "diaria" | "semanal" | "mensal">(
     "nenhuma",
   );
@@ -92,6 +121,17 @@ export function AgendaEventCreateForm({
     );
   }
 
+  function resetForm() {
+    setCreatedId(null);
+    setError(null);
+    setTitulo("");
+    setObservacao("");
+    setMeetingUrl("");
+    setEndereco("");
+    setOverride(false);
+    setJustificativa("");
+  }
+
   function submit() {
     setError(null);
     startTransition(async () => {
@@ -116,84 +156,109 @@ export function AgendaEventCreateForm({
         meeting_url: meetingUrl || null,
         endereco: endereco || null,
         observacao: observacao || null,
+        lembrete_minutos: lembrete ? Number(lembrete) : null,
         inicio: inicioIso,
         fim: fimIso,
         recorrencia_frequency: freq,
         recorrencia_count: count,
         override_conflito: override,
         override_justificativa: justificativa || null,
+        return_id: returnId || null,
       });
       if (!res.success) {
         setError(res.error ?? "Falha");
         return;
       }
-      setTitulo("");
-      router.refresh();
+      setCreatedId(res.id ?? "ok");
     });
   }
+
+  if (createdId) {
+    return (
+      <PostSaveActions
+        title="Agendamento criado"
+        actions={[
+          {
+            href: `/${tenantSlug}/agenda`,
+            label: "Ver agenda",
+            primary: true,
+          },
+          {
+            label: "Novo agendamento",
+            onClick: resetForm,
+          },
+          ...(clienteId
+            ? [
+                {
+                  href: `/${tenantSlug}/clientes/${clienteId}`,
+                  label: "Ver cliente",
+                },
+              ]
+            : []),
+        ]}
+      />
+    );
+  }
+
+  const fieldClass =
+    "mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm min-h-11";
 
   return (
     <div
       className="space-y-3 rounded-xl border p-4"
       data-phase28="agenda-create"
       data-phase35="agenda-create"
+      data-fast-input="agenda"
     >
-      <h2 className="text-sm font-semibold">Novo evento</h2>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        <label className="text-xs">
-          Natureza
-          <select
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={natureza}
-            onChange={(e) => {
-              const next = e.target.value as AgendaNature;
-              setNatureza(next);
-              setTipo(
-                next === "cliente"
-                  ? "atendimento"
-                  : next === "interno"
-                    ? "bloqueio"
-                    : "compromisso",
-              );
-            }}
-          >
-            {(Object.keys(NATURE_LABEL) as AgendaNature[]).map((k) => (
-              <option key={k} value={k}>
-                {NATURE_LABEL[k]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-xs">
-          Tipo
-          <select
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-          >
-            {tipoOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-xs">
-          Título
-          <input
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            aria-label="Título do evento"
-          />
-        </label>
+      <h2 className="text-sm font-semibold">Novo agendamento</h2>
+      <div
+        className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+        data-fast-input="essentials"
+      >
+        {!initial?.natureza ? (
+          <label className="text-xs">
+            Natureza
+            <select
+              className={fieldClass}
+              value={natureza}
+              onChange={(e) => {
+                const next = e.target.value as AgendaNature;
+                setNatureza(next);
+                setTipo(defaultTipo(next));
+              }}
+            >
+              {(Object.keys(NATURE_LABEL) as AgendaNature[]).map((k) => (
+                <option key={k} value={k}>
+                  {NATURE_LABEL[k]}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        {natureza !== "cliente" ? (
+          <label className="text-xs">
+            Tipo
+            <select
+              className={fieldClass}
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+            >
+              {tipoOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         {natureza !== "interno" ? (
           <label className="text-xs">
-            Cliente {natureza === "cliente" ? "(obrigatório)" : "(opcional)"}
+            Cliente {natureRequiresCliente(natureza) ? "*" : "(opcional)"}
             <select
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className={fieldClass}
               value={clienteId}
               onChange={(e) => setClienteId(e.target.value)}
+              disabled={Boolean(initial?.clienteId)}
             >
               <option value="">Selecionar cliente</option>
               {clientes.map((c) => (
@@ -202,19 +267,21 @@ export function AgendaEventCreateForm({
                 </option>
               ))}
             </select>
-            <a
-              className="mt-1 inline-block text-[11px] underline"
-              href={`/${tenantSlug}/clientes/novo`}
-            >
-              Cadastrar novo cliente
-            </a>
+            {!initial?.clienteId ? (
+              <a
+                className="mt-1 inline-block text-[11px] underline"
+                href={novoClienteFromAgendaHref(tenantSlug)}
+              >
+                Cadastrar novo cliente
+              </a>
+            ) : null}
           </label>
         ) : null}
         {natureza === "cliente" ? (
           <label className="text-xs">
-            Serviço
+            Serviço *
             <select
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className={fieldClass}
               value={servicoId}
               onChange={(e) => {
                 const id = e.target.value;
@@ -237,25 +304,10 @@ export function AgendaEventCreateForm({
           </label>
         ) : null}
         <label className="text-xs">
-          Profissional responsável
-          <select
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={responsavelId}
-            onChange={(e) => setResponsavelId(e.target.value)}
-          >
-            <option value="">Sem responsável</option>
-            {profissionais.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-xs">
-          Início
+          Data e hora *
           <input
             type="datetime-local"
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+            className={fieldClass}
             value={inicio}
             onChange={(e) => {
               setInicio(e.target.value);
@@ -263,113 +315,189 @@ export function AgendaEventCreateForm({
             }}
           />
         </label>
-        <label className="text-xs">
-          Duração (min)
-          <input
-            type="number"
-            min={5}
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={duracao}
-            onChange={(e) => {
-              const n = Number(e.target.value) || 60;
-              setDuracao(n);
-              applyDuration(inicio, n);
-            }}
-          />
-        </label>
-        <label className="text-xs">
-          Fim
-          <input
-            type="datetime-local"
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={fim}
-            onChange={(e) => setFim(e.target.value)}
-          />
-        </label>
-        {natureza === "negocio" ? (
-          <>
-            <label className="text-xs">
-              Local
-              <input
-                className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-                value={endereco}
-                onChange={(e) => setEndereco(e.target.value)}
-              />
-            </label>
-            <label className="text-xs">
-              Link da reunião
-              <input
-                className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-                value={meetingUrl}
-                onChange={(e) => setMeetingUrl(e.target.value)}
-              />
-            </label>
-          </>
-        ) : null}
-        <label className="text-xs sm:col-span-2">
-          Observações
-          <input
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={observacao}
-            onChange={(e) => setObservacao(e.target.value)}
-          />
-        </label>
-        <label className="text-xs">
-          Recorrência
-          <select
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={freq}
-            onChange={(e) => setFreq(e.target.value as typeof freq)}
-          >
-            <option value="nenhuma">Nenhuma</option>
-            <option value="diaria">Diária</option>
-            <option value="semanal">Semanal</option>
-            <option value="mensal">Mensal</option>
-          </select>
-        </label>
-        {freq !== "nenhuma" ? (
+        {profissionais.length > 0 ? (
           <label className="text-xs">
-            Ocorrências (máx. 52)
-            <input
-              type="number"
-              min={1}
-              max={52}
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-              value={count}
-              onChange={(e) => setCount(Number(e.target.value) || 1)}
-            />
+            Profissional
+            <select
+              className={fieldClass}
+              value={responsavelId}
+              onChange={(e) => setResponsavelId(e.target.value)}
+            >
+              <option value="">Sem responsável</option>
+              {profissionais.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
           </label>
         ) : null}
       </div>
-      <label className="flex items-center gap-2 text-xs">
-        <input
-          type="checkbox"
-          checked={override}
-          onChange={(e) => setOverride(e.target.checked)}
-        />
-        Confirmar override de conflito (owner/admin)
-      </label>
-      {override ? (
-        <input
-          className="w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-          placeholder="Justificativa do override"
-          value={justificativa}
-          onChange={(e) => setJustificativa(e.target.value)}
-        />
-      ) : null}
+
+      <FastInputCtaBar>
+        <button
+          type="button"
+          disabled={pending}
+          className={cn(buttonVariants(), "min-h-11")}
+          onClick={submit}
+        >
+          {pending ? "Salvando..." : "Agendar"}
+        </button>
+      </FastInputCtaBar>
+
+      <MoreDetails summary="Mais opções">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {initial?.natureza ? (
+            <label className="text-xs">
+              Natureza
+              <select
+                className={fieldClass}
+                value={natureza}
+                onChange={(e) => {
+                  const next = e.target.value as AgendaNature;
+                  setNatureza(next);
+                  setTipo(defaultTipo(next));
+                }}
+              >
+                {(Object.keys(NATURE_LABEL) as AgendaNature[]).map((k) => (
+                  <option key={k} value={k}>
+                    {NATURE_LABEL[k]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          {natureza === "cliente" ? (
+            <label className="text-xs">
+              Tipo
+              <select
+                className={fieldClass}
+                value={tipo}
+                onChange={(e) => setTipo(e.target.value)}
+              >
+                {tipoOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="text-xs">
+            Título
+            <input
+              className={fieldClass}
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              aria-label="Título do evento"
+            />
+          </label>
+          <label className="text-xs">
+            Duração (min)
+            <input
+              type="number"
+              min={5}
+              className={fieldClass}
+              value={duracao}
+              onChange={(e) => {
+                const n = Number(e.target.value) || 60;
+                setDuracao(n);
+                applyDuration(inicio, n);
+              }}
+            />
+          </label>
+          <label className="text-xs">
+            Fim
+            <input
+              type="datetime-local"
+              className={fieldClass}
+              value={fim}
+              onChange={(e) => setFim(e.target.value)}
+            />
+          </label>
+          <label className="text-xs">
+            Lembrete personalizado (min antes)
+            <input
+              type="number"
+              min={0}
+              className={fieldClass}
+              value={lembrete}
+              onChange={(e) => setLembrete(e.target.value)}
+            />
+          </label>
+          <label className="text-xs">
+            Local
+            <input
+              className={fieldClass}
+              value={endereco}
+              onChange={(e) => setEndereco(e.target.value)}
+            />
+          </label>
+          <label className="text-xs">
+            Link da reunião
+            <input
+              className={fieldClass}
+              value={meetingUrl}
+              onChange={(e) => setMeetingUrl(e.target.value)}
+            />
+          </label>
+          <label className="text-xs sm:col-span-2">
+            Observações
+            <input
+              className={fieldClass}
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+            />
+          </label>
+          <label className="text-xs">
+            Recorrência
+            <select
+              className={fieldClass}
+              value={freq}
+              onChange={(e) => setFreq(e.target.value as typeof freq)}
+            >
+              <option value="nenhuma">Nenhuma</option>
+              <option value="diaria">Diária</option>
+              <option value="semanal">Semanal</option>
+              <option value="mensal">Mensal</option>
+            </select>
+          </label>
+          {freq !== "nenhuma" ? (
+            <label className="text-xs">
+              Ocorrências (máx. 52)
+              <input
+                type="number"
+                min={1}
+                max={52}
+                className={fieldClass}
+                value={count}
+                onChange={(e) => setCount(Number(e.target.value) || 1)}
+              />
+            </label>
+          ) : null}
+        </div>
+        <label className="mt-3 flex items-center gap-2 text-xs">
+          <input
+            type="checkbox"
+            checked={override}
+            onChange={(e) => setOverride(e.target.checked)}
+          />
+          Confirmar override de conflito (owner/admin)
+        </label>
+        {override ? (
+          <input
+            className={cn(fieldClass, "mt-2")}
+            placeholder="Justificativa do override"
+            value={justificativa}
+            onChange={(e) => setJustificativa(e.target.value)}
+          />
+        ) : null}
+      </MoreDetails>
       {error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}
-      <button
-        type="button"
-        disabled={pending}
-        className={cn(buttonVariants())}
-        onClick={submit}
-      >
-        {pending ? "Salvando..." : "Criar evento"}
-      </button>
     </div>
   );
 }

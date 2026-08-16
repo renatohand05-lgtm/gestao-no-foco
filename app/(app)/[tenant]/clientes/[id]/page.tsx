@@ -9,6 +9,8 @@ import { listTenantMembersForSelect } from "@/lib/crm/tenant-team-service";
 import { createClienteService } from "@/lib/clientes/cliente-service";
 import { createCustomerReturnService } from "@/lib/retention/return-service";
 import { createNotificationOutboxService } from "@/lib/retention/outbox-service";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { defaultReturnRuleForSegment } from "@/lib/retention/returns";
 import { requireTenant } from "@/lib/tenants";
 import type { ClienteSuccessMessage } from "@/types/clientes";
 
@@ -77,6 +79,16 @@ export default async function ClienteDetailPage({
         perfilExecutivo={perfilExecutivo}
         retornos={retornos}
         retornoMensagens={retornoMensagens}
+        showVehicle={
+          getSegmentUiCopy({
+            segment: tenant.segment,
+            segmentVersion: tenant.segment_version,
+            segmentConfig: tenant.segment_config,
+          }).showVehicles
+        }
+        hideProcedure={
+          defaultReturnRuleForSegment(tenant.segment).hideProcedure
+        }
       />
     </div>
   );

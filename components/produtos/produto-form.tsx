@@ -13,6 +13,8 @@ import { FormGrid } from "@/components/ui/form-grid";
 import { FormSection } from "@/components/ui/form-section";
 import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import { FastInputCtaBar, MoreDetails } from "@/components/ui/more-details";
+import { PostSaveActions } from "@/components/ui/post-save-actions";
 import { SaveButton } from "@/components/ui/save-button";
 import { Textarea } from "@/components/ui/textarea";
 import type { ProdutoTipo } from "@/types/produtos";
@@ -74,6 +76,7 @@ export function ProdutoForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const tipoOptions = itemTypeOptionsForForm(
     formConfig ?? {
       segment: "oficina",
@@ -187,6 +190,11 @@ export function ProdutoForm({
     }
 
     const success = mode === "create" ? "created" : "updated";
+    if (mode === "create" && result.id) {
+      setCreatedId(result.id);
+      setLoading(false);
+      return;
+    }
     router.push(
       `/${tenantSlug}/produtos/${result.id}?success=${success}`,
     );
@@ -200,6 +208,30 @@ export function ProdutoForm({
     );
   }
 
+  if (createdId && mode === "create") {
+    const isServico = form.getValues("tipo") === "servico";
+    return (
+      <PostSaveActions
+        title={isServico ? "Serviço criado" : "Item criado"}
+        actions={[
+          {
+            label: isServico ? "Criar outro serviço" : "Criar outro",
+            onClick: () => {
+              form.reset();
+              setCreatedId(null);
+              setError(null);
+            },
+            primary: true,
+          },
+          {
+            href: `/${tenantSlug}/produtos`,
+            label: "Voltar ao catálogo",
+          },
+        ]}
+      />
+    );
+  }
+
   return (
     <div className="relative">
       <LoadingOverlay loading={loading} label="Salvando..." />
@@ -207,6 +239,67 @@ export function ProdutoForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
+        <div data-fast-input="essentials">
+        <FormSection
+          title="Cadastro rápido"
+          description="Cadastre o mínimo agora. Complete depois."
+        >
+          <FormGrid>
+            <FormField
+              label="Nome"
+              htmlFor="nome"
+              required
+              error={form.formState.errors.nome?.message}
+              className="md:col-span-2"
+            >
+              <Input id="nome" {...form.register("nome")} placeholder="Nome do item" />
+            </FormField>
+            <FormField
+              label={tipo === "servico" ? "Preço" : "Preço de venda"}
+              htmlFor="preco_venda"
+              error={form.formState.errors.preco_venda?.message}
+            >
+              <Input
+                id="preco_venda"
+                type="number"
+                step="0.01"
+                min="0"
+                {...form.register("preco_venda", numberFieldOptions)}
+              />
+            </FormField>
+            {tipo === "servico" ? (
+              <FormField
+                label="Duração (minutos)"
+                htmlFor="tempo_estimado_minutos"
+              >
+                <Input
+                  id="tempo_estimado_minutos"
+                  type="number"
+                  min="0"
+                  step="1"
+                  {...form.register("tempo_estimado_minutos", numberFieldOptions)}
+                />
+              </FormField>
+            ) : null}
+          </FormGrid>
+        </FormSection>
+        </div>
+
+        <FastInputCtaBar>
+          <CancelButton onClick={handleCancel} disabled={loading} />
+          <SaveButton loading={loading}>
+            {mode === "create"
+              ? tipo === "servico"
+                ? "Salvar serviço"
+                : "Salvar item"
+              : "Salvar alterações"}
+          </SaveButton>
+        </FastInputCtaBar>
+
+        <MoreDetails
+          summary="Mais informações"
+          defaultOpen={mode === "edit"}
+        >
         <FormSection
           title="Identificação"
           description="Dados principais do produto ou serviço."
@@ -245,16 +338,6 @@ export function ProdutoForm({
                   </option>
                 ))}
               </NativeSelect>
-            </FormField>
-
-            <FormField
-              label="Nome"
-              htmlFor="nome"
-              required
-              error={form.formState.errors.nome?.message}
-              className="md:col-span-2"
-            >
-              <Input id="nome" {...form.register("nome")} placeholder="Nome do item" />
             </FormField>
 
             {!hide("codigo_interno") ? (
@@ -443,21 +526,6 @@ export function ProdutoForm({
                 {...form.register("custo_reposicao", numberFieldOptions)}
               />
             </FormField>
-
-            <FormField
-              label={tipo === "servico" ? "Preço atual" : "Preço de venda"}
-              htmlFor="preco_venda"
-              error={form.formState.errors.preco_venda?.message}
-            >
-              <Input
-                id="preco_venda"
-                type="number"
-                step="0.01"
-                min="0"
-                {...form.register("preco_venda", numberFieldOptions)}
-              />
-            </FormField>
-
             {tipo === "servico" ? (
               <>
                 {!hide("preco_sugerido") ? (
@@ -475,18 +543,6 @@ export function ProdutoForm({
                   />
                 </FormField>
                 ) : null}
-                <FormField
-                  label="Tempo estimado (minutos)"
-                  htmlFor="tempo_estimado_minutos"
-                >
-                  <Input
-                    id="tempo_estimado_minutos"
-                    type="number"
-                    min="0"
-                    step="1"
-                    {...form.register("tempo_estimado_minutos", numberFieldOptions)}
-                  />
-                </FormField>
                 {!hide("especialidade") ? (
                 <FormField label="Especialidade" htmlFor="especialidade">
                   <Input id="especialidade" {...form.register("especialidade")} />
@@ -719,13 +775,7 @@ export function ProdutoForm({
             />
           </FormField>
         </FormSection>
-
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <CancelButton onClick={handleCancel} disabled={loading} />
-          <SaveButton loading={loading}>
-            {mode === "create" ? "Cadastrar item" : "Salvar alterações"}
-          </SaveButton>
-        </div>
+        </MoreDetails>
       </form>
     </div>
   );

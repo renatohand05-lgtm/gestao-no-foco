@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import { shiftCivilDate } from "@/lib/dashboard/tenant-timezone";
+import { agendaHref, slotInicioLocal } from "@/lib/ux/fast-input";
 import { cn } from "@/lib/utils";
 
 type Event = {
@@ -12,9 +15,10 @@ type Event = {
 type Props = {
   weekStart: string;
   events: Event[];
+  tenantSlug: string;
 };
 
-export function AgendaWeekBoard({ weekStart, events }: Props) {
+export function AgendaWeekBoard({ weekStart, events, tenantSlug }: Props) {
   const days = Array.from({ length: 7 }, (_, i) => shiftCivilDate(weekStart, i));
 
   return (
@@ -26,6 +30,10 @@ export function AgendaWeekBoard({ weekStart, events }: Props) {
     >
       {days.map((day) => {
         const dayEvents = events.filter((e) => e.start.slice(0, 10) === day);
+        const slotHref = agendaHref(tenantSlug, {
+          natureza: "cliente",
+          inicioLocal: slotInicioLocal(day),
+        });
         return (
           <section
             key={day}
@@ -40,7 +48,13 @@ export function AgendaWeekBoard({ weekStart, events }: Props) {
             </header>
             <div className="flex flex-1 flex-col gap-1.5">
               {dayEvents.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Livre</p>
+                <Link
+                  href={slotHref}
+                  className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                  data-fast-input="agenda-slot"
+                >
+                  Livre · agendar 09:00
+                </Link>
               ) : (
                 dayEvents.map((ev) => (
                   <article
@@ -56,6 +70,15 @@ export function AgendaWeekBoard({ weekStart, events }: Props) {
                   </article>
                 ))
               )}
+              {dayEvents.length > 0 ? (
+                <Link
+                  href={slotHref}
+                  className="mt-auto text-[11px] text-muted-foreground underline-offset-2 hover:underline"
+                  data-fast-input="agenda-slot"
+                >
+                  Novo neste dia
+                </Link>
+              ) : null}
             </div>
           </section>
         );

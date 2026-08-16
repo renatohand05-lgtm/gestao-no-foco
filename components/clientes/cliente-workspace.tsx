@@ -16,11 +16,8 @@ import { CrmTagBadges } from "@/components/crm/crm-tag-badges";
 import { CrmTimeline } from "@/components/crm/crm-timeline";
 import { CrmTarefasList } from "@/components/crm/crm-tarefas-list";
 import { ReturnHistoryList } from "@/components/retention/return-history";
-import {
-  createManualReturnAction,
-  updateCommunicationPrefsAction,
-} from "@/lib/retention/actions";
-import { RETURN_PRESET_DAYS, RETURN_PRESET_LABELS } from "@/lib/retention/returns";
+import { ReturnQuickCreate } from "@/components/retention/return-quick-create";
+import { updateCommunicationPrefsAction } from "@/lib/retention/actions";
 import type { CustomerReturnRow, OutboxRow } from "@/lib/retention/types";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
@@ -61,6 +58,8 @@ type ClienteWorkspaceProps = {
   perfilExecutivo?: CrmExecPerfil | null;
   retornos?: CustomerReturnRow[];
   retornoMensagens?: OutboxRow[];
+  showVehicle?: boolean;
+  hideProcedure?: boolean;
 };
 
 const TABS = [
@@ -118,6 +117,8 @@ export function ClienteWorkspace({
   perfilExecutivo = null,
   retornos = [],
   retornoMensagens = [],
+  showVehicle = false,
+  hideProcedure = false,
 }: ClienteWorkspaceProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(perfilExecutivo ? "executivo" : "resumo");
@@ -494,28 +495,15 @@ export function ClienteWorkspace({
 
       {tab === "retornos" ? (
         <div className="space-y-4">
-          <SectionCard title="Retorno recomendado">
-            <div className="flex flex-wrap gap-2">
-              {RETURN_PRESET_DAYS.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  disabled={pending}
-                  className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
-                  onClick={() =>
-                    runAction(() =>
-                      createManualReturnAction(tenantSlug, {
-                        clienteId: cliente.id,
-                        presetDays: d,
-                        motivo: "Retorno recomendado",
-                      }),
-                    )
-                  }
-                >
-                  {RETURN_PRESET_LABELS[d]}
-                </button>
-              ))}
-            </div>
+          <SectionCard title="Retorno rápido">
+            <ReturnQuickCreate
+              tenantSlug={tenantSlug}
+              clienteId={cliente.id}
+              clienteLocked
+              showVehicle={showVehicle}
+              hideProcedure={hideProcedure}
+              onCreated={() => router.refresh()}
+            />
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
               <button
                 type="button"

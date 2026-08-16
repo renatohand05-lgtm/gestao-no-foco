@@ -47,12 +47,8 @@ export default async function NovoProdutoPage({
       />
 
       <SectionCard
-        title={isServico ? "Cadastro de serviço" : "Cadastro de produto"}
-        description={
-          isServico
-            ? "Sem estoque físico. Informe custo de mão de obra, preço e tempo estimado."
-            : "Inclui estoque, NCM e fornecedor quando aplicável."
-        }
+        title={isServico ? "Cadastro rápido de serviço" : "Cadastro rápido"}
+        description="Cadastre o mínimo agora. Complete depois. Preço não é inventado."
       >
         <ProdutoForm
           tenantSlug={tenantSlug}

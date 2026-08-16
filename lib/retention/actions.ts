@@ -56,6 +56,7 @@ export async function createManualReturnAction(
       {
         clienteId: parsed.clienteId,
         intervalDays: parsed.presetDays ?? null,
+        intervalMonths: parsed.intervalMonths ?? null,
         specificDate: parsed.specificDate ?? null,
         motivo: parsed.motivo,
         observacao: parsed.observacao,

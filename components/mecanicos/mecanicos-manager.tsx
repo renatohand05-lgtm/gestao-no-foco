@@ -18,6 +18,8 @@ import {
 import type { Mecanico } from "@/lib/mecanicos/mecanico-service";
 import { ProfessionalSpecialtyField } from "@/components/mecanicos/professional-specialty-field";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FastInputCtaBar, MoreDetails } from "@/components/ui/more-details";
+import { PostSaveActions } from "@/components/ui/post-save-actions";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +76,7 @@ export function MecanicosManager({
   const [vinculo, setVinculo] = useState<MecanicoVinculo>("clt");
   const [codigo, setCodigo] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [created, setCreated] = useState(false);
 
   function create() {
     if (!nome.trim()) {
@@ -96,7 +99,7 @@ export function MecanicosManager({
       setNome("");
       setCodigo("");
       setTelefone("");
-      setShowForm(false);
+      setCreated(true);
       router.refresh();
     });
   }
@@ -128,7 +131,10 @@ export function MecanicosManager({
           <button
             type="button"
             className={cn(buttonVariants({ size: "sm" }))}
-            onClick={() => setShowForm((v) => !v)}
+            onClick={() => {
+              setShowForm((v) => !v);
+              setCreated(false);
+            }}
           >
             {showForm ? "Cancelar" : copy.newProfessional}
           </button>
@@ -136,22 +142,30 @@ export function MecanicosManager({
       </div>
 
       {showForm ? (
-        <div className="rounded-lg border bg-card p-4 space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2">
+        created ? (
+          <PostSaveActions
+            title={`${copy.professional} criado`}
+            actions={[
+              {
+                label: "Adicionar outro",
+                primary: true,
+                onClick: () => setCreated(false),
+              },
+              {
+                href: `/${tenantSlug}${listPath}`,
+                label: "Ver equipe",
+              },
+            ]}
+          />
+        ) : (
+        <div className="rounded-lg border bg-card p-4 space-y-3" data-fast-input="professional">
+          <div className="grid gap-3 sm:grid-cols-2" data-fast-input="essentials">
             <label className="space-y-1 text-sm">
-              <span>Nome completo</span>
+              <span>Nome *</span>
               <input
-                className="h-9 w-full rounded-md border border-input bg-transparent px-2"
+                className="h-11 w-full rounded-md border border-input bg-transparent px-2"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-              />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span>Código interno</span>
-              <input
-                className="h-9 w-full rounded-md border border-input bg-transparent px-2"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value)}
               />
             </label>
             <label className="space-y-1 text-sm">
@@ -163,10 +177,31 @@ export function MecanicosManager({
                 suggestions={copy.professionalSpecialtySuggestions}
               />
             </label>
+          </div>
+          <FastInputCtaBar>
+            <button
+              type="button"
+              disabled={pending}
+              className={cn(buttonVariants(), "min-h-11")}
+              onClick={create}
+            >
+              {pending ? "Salvando..." : `Salvar ${copy.professional.toLowerCase()}`}
+            </button>
+          </FastInputCtaBar>
+          <MoreDetails summary="Mais informações">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="space-y-1 text-sm">
+              <span>Código interno</span>
+              <input
+                className="h-11 w-full rounded-md border border-input bg-transparent px-2"
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+              />
+            </label>
             <label className="space-y-1 text-sm">
               <span>Vínculo</span>
               <select
-                className="h-9 w-full rounded-md border border-input bg-transparent px-2"
+                className="h-11 w-full rounded-md border border-input bg-transparent px-2"
                 value={vinculo}
                 onChange={(e) => setVinculo(e.target.value as MecanicoVinculo)}
               >
@@ -180,21 +215,15 @@ export function MecanicosManager({
             <label className="space-y-1 text-sm">
               <span>Telefone</span>
               <input
-                className="h-9 w-full rounded-md border border-input bg-transparent px-2"
+                className="h-11 w-full rounded-md border border-input bg-transparent px-2"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
               />
             </label>
           </div>
-          <button
-            type="button"
-            disabled={pending}
-            className={cn(buttonVariants({ size: "sm" }))}
-            onClick={create}
-          >
-            Salvar
-          </button>
+          </MoreDetails>
         </div>
+        )
       ) : null}
 
       <div className="overflow-x-auto rounded-lg border">

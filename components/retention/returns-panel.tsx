@@ -1,20 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { ReturnQuickCreate } from "@/components/retention/return-quick-create";
 import {
-  createManualReturnAction,
   openReturnWhatsAppAction,
   setReturnStatusAction,
 } from "@/lib/retention/actions";
-import {
-  RETURN_PRESET_DAYS,
-  RETURN_PRESET_LABELS,
-  RETURN_STATUS_LABELS,
-} from "@/lib/retention/returns";
+import { RETURN_STATUS_LABELS } from "@/lib/retention/returns";
 import type { CustomerReturnRow } from "@/lib/retention/types";
+import { agendaHref } from "@/lib/ux/fast-input";
 import { cn } from "@/lib/utils";
 
 type ClienteOpt = { id: string; nome: string; telefone?: string | null; email?: string | null };
@@ -30,7 +27,8 @@ type Props = {
   >;
   clientes: ClienteOpt[];
   showVehicle: boolean;
-  segment: string | null;
+  hideProcedure?: boolean;
+  initialClienteId?: string;
 };
 
 export function ReturnsPanel({
@@ -38,117 +36,24 @@ export function ReturnsPanel({
   rows,
   clientes,
   showVehicle,
-  segment,
+  hideProcedure = false,
+  initialClienteId,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [clienteId, setClienteId] = useState(clientes[0]?.id ?? "");
-  const [preset, setPreset] = useState(30);
-  const [motivo, setMotivo] = useState("Retorno recomendado");
-  const [lastKm, setLastKm] = useState("");
-  const [mileage, setMileage] = useState(segment === "oficina" ? "10000" : "");
-  const [placa, setPlaca] = useState("");
 
   return (
     <div className="space-y-6" data-phase35="retornos-panel">
-      <form
-        className="grid gap-2 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          startTransition(async () => {
-            const res = await createManualReturnAction(tenantSlug, {
-              clienteId,
-              presetDays: preset,
-              motivo,
-              lastKm: lastKm ? Number(lastKm) : null,
-              mileageKm: mileage ? Number(mileage) : null,
-              placa: placa || null,
-              hideProcedure:
-                segment === "clinica_estetica" ||
-                segment === "consultorio_odontologico",
-            });
-            if (!res.success) {
-              alert(res.error);
-              return;
-            }
-            router.refresh();
-          });
-        }}
-      >
-        <label className="text-xs">
-          Cliente
-          <select
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={clienteId}
-            onChange={(e) => setClienteId(e.target.value)}
-          >
-            {clientes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nome}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-xs">
-          Quando
-          <select
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={preset}
-            onChange={(e) => setPreset(Number(e.target.value))}
-          >
-            {RETURN_PRESET_DAYS.map((d) => (
-              <option key={d} value={d}>
-                {RETURN_PRESET_LABELS[d]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-xs">
-          Motivo
-          <input
-            className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-            value={motivo}
-            onChange={(e) => setMotivo(e.target.value)}
-          />
-        </label>
-        {showVehicle ? (
-          <>
-            <label className="text-xs">
-              Placa
-              <input
-                className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-                value={placa}
-                onChange={(e) => setPlaca(e.target.value)}
-              />
-            </label>
-            <label className="text-xs">
-              Km atual
-              <input
-                className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-                value={lastKm}
-                onChange={(e) => setLastKm(e.target.value)}
-              />
-            </label>
-            <label className="text-xs">
-              Intervalo km
-              <input
-                className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-                value={mileage}
-                onChange={(e) => setMileage(e.target.value)}
-              />
-            </label>
-          </>
-        ) : null}
-        <div className="flex items-end">
-          <button
-            type="submit"
-            disabled={pending || !clienteId}
-            className={cn(buttonVariants())}
-          >
-            Criar retorno previsto
-          </button>
-        </div>
-      </form>
+      <div className="rounded-xl border p-4">
+        <ReturnQuickCreate
+          tenantSlug={tenantSlug}
+          clienteId={initialClienteId ?? clientes[0]?.id ?? ""}
+          clientes={clientes}
+          showVehicle={showVehicle}
+          hideProcedure={hideProcedure}
+          onCreated={() => router.refresh()}
+        />
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px] text-left text-sm">
@@ -257,7 +162,13 @@ export function ReturnsPanel({
                         className={cn(
                           buttonVariants({ variant: "outline", size: "sm" }),
                         )}
-                        href={`/${tenantSlug}/agenda`}
+                        href={agendaHref(tenantSlug, {
+                          natureza: "cliente",
+                          clienteId: row.cliente_id,
+                          servicoId: row.produto_id,
+                          profissionalId: row.profissional_id,
+                          returnId: row.id,
+                        })}
                       >
                         Agendar
                       </a>

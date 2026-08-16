@@ -137,6 +137,10 @@ export function isInternalEventType(tipo: string | null | undefined): boolean {
   return INTERNAL_SET.has((tipo ?? "").trim());
 }
 
+export function natureRequiresCliente(natureza: AgendaNature): boolean {
+  return natureza === "cliente";
+}
+
 export function resolveAgendaNature(row: {
   natureza?: string | null;
   origem?: string | null;

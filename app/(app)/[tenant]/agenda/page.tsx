@@ -21,6 +21,7 @@ import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createProdutoService } from "@/lib/produtos/produto-service";
 import { clientAppointmentKpis } from "@/lib/retention/kpis";
 import { resolveAgendaNature } from "@/lib/retention/natures";
+import { parseAgendaCreateContext } from "@/lib/ux/fast-input";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -32,10 +33,21 @@ export default async function AgendaPage({
   searchParams,
 }: {
   params: Promise<{ tenant: string }>;
-  searchParams: Promise<{ view?: string; day?: string }>;
+  searchParams: Promise<{
+    view?: string;
+    day?: string;
+    natureza?: string;
+    cliente_id?: string;
+    servico_id?: string;
+    profissional_id?: string;
+    return_id?: string;
+    inicio?: string;
+    from?: string;
+  }>;
 }) {
   const { tenant: tenantSlug } = await params;
   const sp = await searchParams;
+  const initial = parseAgendaCreateContext(sp);
   const view = sp.view ?? "semana";
   const tenant = await requireTenant(tenantSlug);
   const hoje = civilDateInTimezone(new Date(), DEFAULT_TENANT_TIMEZONE);
@@ -258,6 +270,7 @@ export default async function AgendaPage({
       {schemaReady ? (
         <AgendaEventCreateForm
           tenantSlug={tenantSlug}
+          initial={initial}
           clientes={(clientesRes?.data ?? []).map((c) => ({
             id: c.id,
             label: c.nome,
@@ -276,6 +289,7 @@ export default async function AgendaPage({
 
       {view === "semana" || view === "dia" || view === "mes" ? (
         <AgendaWeekBoard
+          tenantSlug={tenantSlug}
           weekStart={view === "semana" ? rangeStart : rangeStart}
           events={events.map((e) => ({
             id: e.id,

@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 export const manualReturnSchema = z.object({
-  clienteId: z.string().uuid(),
+    clienteId: z.string().uuid(),
   presetDays: z.coerce.number().int().min(1).max(400).optional().nullable(),
+  intervalMonths: z.coerce.number().int().min(1).max(24).optional().nullable(),
   specificDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)

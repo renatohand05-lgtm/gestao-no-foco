@@ -62,6 +62,10 @@ type Props = {
   showWorkOrders?: boolean;
   showInventory?: boolean;
   showCrm?: boolean;
+  workOrdersTitle?: string;
+  openWorkOrdersLabel?: string;
+  ticketMedioLabel?: string;
+  faturamentoLabel?: string;
 };
 
 export function DashboardOperacionalStrip({
@@ -70,6 +74,10 @@ export function DashboardOperacionalStrip({
   showWorkOrders = true,
   showInventory = true,
   showCrm = true,
+  workOrdersTitle = "Operação — Ordens de Serviço",
+  openWorkOrdersLabel = "OS abertas",
+  ticketMedioLabel = "Ticket médio OS",
+  faturamentoLabel = "Faturamento OS",
 }: Props) {
   return (
     <div className="space-y-4">
@@ -130,7 +138,7 @@ export function DashboardOperacionalStrip({
       {showWorkOrders ? (
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Operação — Ordens de Serviço</h2>
+          <h2 className="text-sm font-semibold">{workOrdersTitle}</h2>
           <Link
             href={`/${tenantSlug}/ordens/dashboard`}
             className="text-xs underline"
@@ -140,7 +148,7 @@ export function DashboardOperacionalStrip({
         </div>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
           <Card
-            label="OS abertas"
+            label={openWorkOrdersLabel}
             value={String(data.os.abertas)}
             href={`/${tenantSlug}/ordens?status=aguardando_diagnostico`}
           />
@@ -169,11 +177,11 @@ export function DashboardOperacionalStrip({
           />
           <Card label="Canceladas" value={String(data.os.canceladas)} />
           <Card
-            label="Ticket médio OS"
+            label={ticketMedioLabel}
             value={formatCurrency(data.os.ticketMedio)}
           />
           <Card
-            label="Faturamento OS"
+            label={faturamentoLabel}
             value={formatCurrency(data.os.faturamento)}
           />
           <Card

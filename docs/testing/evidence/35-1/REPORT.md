@@ -1,13 +1,19 @@
 # Sprint 35.1 — Presets por segmento + override por tenant
 
-**Data:** 2026-08-15  
-**Commit código:** `0f06c2d`  
+**Data:** 2026-08-16  
+**Commit código:** (preenchido após o commit deste hardening)  
 **Branch:** `main`  
 **Tipo:** Hardening de apresentação — sem billing / Asaas / 35.2 / auto-migration prod
 
 ## Status
 
-**SPRINT 35.1: GO (código)** · homologação **PENDING** · **P0: 0** · **P1: 0** · migration **NENHUMA**
+**SPRINT 35.1 COPY HARDENING: GO (código)** · homologação visual residual **PENDING** · **P0: 0** · **P1: 0** · **P2 residual de copy profunda** · migration **NENHUMA**
+
+## Copy hardening final (2026-08-16)
+
+Vazamento confirmado na homologação: lava-rápido em Atendimentos ainda mostrava **"OS abertas"** e **"Valor estimado das OS em andamento."** A auditoria varreu os 6 segmentos do motor 35.x. Correções passaram pelo adapter `lib/segments/copy.ts` (sem forks de página e sem `if (segment === …)` na UI).
+
+Oficina (engine off ou segmento `oficina`) permanece OS / Mecânicos / diagnóstico / peças.
 
 ## Decisão
 
@@ -26,7 +32,7 @@ Gaps grandes (prontuário, odontograma, folha, fidelidade, projetos) **não** fo
 
 | Gate | Resultado |
 |---|---|
-| `test:phase35-1-segment-presets` | **19/19 PASS** (`ℹ tests 19` · `ℹ pass 19` · `ℹ fail 0`) |
+| `test:phase35-1-segment-presets` | **26/26 PASS** (`ℹ tests 26` · `ℹ pass 26` · `ℹ fail 0`) |
 | `test:phase35-0-segment-architecture` | **13 PASS · 0 FAIL** |
 | `test:phase34-9-contas-pagar-beneficiarios` | 25 PASS · 0 FAIL |
 | `test:phase34-2-p0-tenant-rls` | 12 PASS · 0 FAIL |
@@ -126,18 +132,18 @@ Gaps grandes (prontuário, odontograma, folha, fidelidade, projetos) **não** fo
 3. Testes nomeados 19/19 (não mais “8/0” ambíguo).
 4. Mobile: labels de assignee/OS vêm do adapter; dashboard filtra `nova-os` / veículo / estoque.
 
-## Smoke (Renato) — homologação ainda PENDING
+## Smoke (Renato) — copy hardening — validar visualmente
 
-1. Oficina — nav completa (OS, Mecânicos em `/oficina/mecanicos`, Tributário)
-2. Consultoria — sem Mecânicos/Estoque/Compras/OS
-3. Barbearia — menu **Barbeiros** em `/profissionais` (não “Mecânicos”, não `/oficina/mecanicos`)
-4. Lava-rápido — Veículos + **Atendimentos** + checklist; sem “Nova OS”
-5. Estética — Procedimentos (label), sem prontuário
-6. Odontologia — Pacientes, sem odontograma
-7. Configurações → Personalizar experiência: ligar/desligar módulo
-8. Restaurar padrão do segmento
-9. Troca de empresa (cross-tenant)
-10. Mobile: consultoria sem aba Estoque; oficina com Estoque; lava com Atendimento no atalho
+Já homologado: oficina UX automotiva, consultoria sem módulos automotivos, barbearia Barbeiros, lava Pacotes/Atendimentos/Profissionais, agenda.
+
+Validar agora:
+1. Lava-rápido → Atendimentos: KPIs **"Atendimentos abertos"** e **"Valor estimado dos atendimentos em andamento."** (não “OS”)
+2. Lava-rápido → abrir um atendimento: aba **Análise** (não Diagnóstico); toasts/faturamento sem “OS”
+3. Oficina: ainda **OS abertas**, Mecânicos, diagnóstico/peças
+4. Barbearia: menu **Barbeiros**; sem Mecânicos/OS na UI visível
+5. Consultoria: Relatórios sem card “Ordens de serviço”; sem nav automotiva
+6. Tenant legado (`segment_version` NULL): copy de oficina intacta
+7. Override em Configurações → Personalizar experiência liga/desliga módulo sem vocabulário indevido
 
 ## Não feito (conforme escopo)
 

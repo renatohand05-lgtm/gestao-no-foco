@@ -8,49 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import {
+  hasCapability,
+  resolveSegmentContext,
+} from "@/lib/segments/resolve.ts";
 import { requireTenant } from "@/lib/tenants";
 
 export const metadata = { title: "Relatórios" };
-
-const LINKS = [
-  {
-    href: "dashboard",
-    title: "Dashboard executivo",
-    description:
-      "KPIs de faturamento (vendas faturadas, líquido), financeiro, clientes e gráficos do período.",
-  },
-  {
-    href: "analytics",
-    title: "Analytics executivo",
-    description:
-      "Visão consolidada com filtros de período. Domínios em /analytics/* reutilizam o mesmo núcleo.",
-  },
-  {
-    href: "vendas",
-    title: "Vendas",
-    description: "Listagem e indicadores operacionais de vendas do tenant.",
-  },
-  {
-    href: "financeiro",
-    title: "Financeiro",
-    description: "Contas a receber/pagar, fluxo e DRE quando disponíveis.",
-  },
-  {
-    href: "financeiro/aging",
-    title: "Aging / inadimplência",
-    description: "Títulos em aberto e vencidos por faixa (contas a receber).",
-  },
-  {
-    href: "estoque/dashboard",
-    title: "Estoque",
-    description: "Posição e alertas de estoque baixo do tenant.",
-  },
-  {
-    href: "ordens",
-    title: "Ordens de serviço",
-    description: "OS por status e valores quando o módulo estiver em uso.",
-  },
-] as const;
 
 export default async function RelatoriosPage({
   params,
@@ -59,7 +24,61 @@ export default async function RelatoriosPage({
 }) {
   const { tenant: tenantSlug } = await params;
   const tenant = await requireTenant(tenantSlug);
+  const ctx = resolveSegmentContext({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const ui = getSegmentUiCopy(ctx);
   const base = `/${tenantSlug}`;
+
+  const links = [
+    {
+      href: "dashboard",
+      title: "Dashboard executivo",
+      description:
+        "KPIs de faturamento (vendas faturadas, líquido), financeiro, clientes e gráficos do período.",
+    },
+    {
+      href: "analytics",
+      title: "Analytics executivo",
+      description:
+        "Visão consolidada com filtros de período. Domínios em /analytics/* reutilizam o mesmo núcleo.",
+    },
+    {
+      href: "vendas",
+      title: "Vendas",
+      description: "Listagem e indicadores operacionais de vendas do tenant.",
+    },
+    {
+      href: "financeiro",
+      title: "Financeiro",
+      description: "Contas a receber/pagar, fluxo e DRE quando disponíveis.",
+    },
+    {
+      href: "financeiro/aging",
+      title: "Aging / inadimplência",
+      description: "Títulos em aberto e vencidos por faixa (contas a receber).",
+    },
+    ...(hasCapability(ctx, "inventory")
+      ? [
+          {
+            href: "estoque/dashboard",
+            title: "Estoque",
+            description: "Posição e alertas de estoque baixo do tenant.",
+          },
+        ]
+      : []),
+    ...(hasCapability(ctx, "work_orders")
+      ? [
+          {
+            href: "ordens",
+            title: ui.workOrdersReportTitle,
+            description: ui.workOrdersReportDescription,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div className="space-y-6">
@@ -79,7 +98,7 @@ export default async function RelatoriosPage({
         </CardHeader>
         <CardContent>
           <ul className="grid gap-3 sm:grid-cols-2">
-            {LINKS.map((item) => (
+            {links.map((item) => (
               <li key={item.href}>
                 <Link
                   href={`${base}/${item.href}`}

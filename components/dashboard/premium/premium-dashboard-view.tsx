@@ -17,6 +17,7 @@ import {
 import { PremiumOpsStrip } from "@/components/dashboard/premium/premium-kpi-strip";
 import { GFExecutiveHeader } from "@/components/gf/gf-executive-header";
 import { getSegmentQuickActions } from "@/config/dashboard/cockpit-v2";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { filterDashboardSurface } from "@/lib/segments/dashboard.ts";
 import type { DashboardHojeSnapshot } from "@/lib/dashboard/vendas-dia-service";
 import type {
@@ -136,11 +137,37 @@ export function PremiumDashboardView({
   const meta = buildMetaPanel({ hoje, tenantSlug });
   const dre = buildDreExecutiveCard({ primary, charts, tenantSlug });
   const cash = buildCashExecutiveCard({ cockpit, tenantSlug });
+  const ui = getSegmentUiCopy({
+    segment,
+    segmentVersion,
+    segmentConfig,
+  });
   const quickActions = filterDashboardSurface(
-    getSegmentQuickActions(segment),
+    getSegmentQuickActions(segment).map((action) =>
+      action.id === "os"
+        ? {
+            ...action,
+            label: ui.newWorkOrder,
+            description: `Abrir ${ui.workOrder.toLowerCase()}`,
+          }
+        : action,
+    ),
     { segment, segmentVersion, segmentConfig },
   );
-  const emptyStates = getCockpitEmptyStates(segment);
+  const emptyStates = getCockpitEmptyStates(segment).map((item) =>
+    item.domain === "vendas" && ui.engine
+      ? {
+          ...item,
+          title: ui.emptySalesTitle,
+          body: ui.emptySalesBody,
+        }
+      : item.domain === "servicos" && ui.engine
+        ? {
+            ...item,
+            body: `Cadastre ${ui.catalog.toLowerCase()} para operar com agenda.`,
+          }
+        : item,
+  );
 
   const activeEmpty: Array<(typeof emptyStates)[number]["domain"]> = [];
   if (hoje.mes.quantidade_vendas === 0 && hoje.hoje.quantidade_vendas === 0) {

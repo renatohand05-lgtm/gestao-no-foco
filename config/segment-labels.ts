@@ -119,6 +119,9 @@ export type OpsCenterCopy = {
   resourcesLinkLabel: string;
   showVehicleFields: boolean;
   assigneeLabel: string;
+  diagnosisLabel: string;
+  waitingPartsLabel: string;
+  boardColumnLabels: Record<string, string>;
 };
 
 /** Sprint 30.2 — nomenclatura e presets de departamento/equipe por segmento. */
@@ -188,6 +191,18 @@ export function getOpsCenterCopy(
       resourcesLinkLabel: "Elevadores / recursos",
       showVehicleFields: true,
       assigneeLabel: "Mecânico",
+      diagnosisLabel: "Em diagnóstico",
+      waitingPartsLabel: "Aguardando peças",
+      boardColumnLabels: {
+        entrada: "Entrada",
+        diagnostico: "Diagnóstico",
+        orcamento: "Orçamento",
+        aprovacao: "Aguardando aprovação",
+        pecas: "Aguardando peças",
+        execucao: "Em execução",
+        pronto: "Pronto para entrega",
+        finalizado: "Finalizado",
+      },
     };
   } else if (resolved === "restaurante") {
     copy = {
@@ -202,6 +217,18 @@ export function getOpsCenterCopy(
       resourcesLinkLabel: "Recursos / estações",
       showVehicleFields: false,
       assigneeLabel: "Responsável",
+      diagnosisLabel: "Em análise",
+      waitingPartsLabel: "Aguardando materiais",
+      boardColumnLabels: {
+        entrada: "Entrada",
+        diagnostico: "Análise",
+        orcamento: "Orçamento",
+        aprovacao: "Aguardando aprovação",
+        pecas: "Aguardando materiais",
+        execucao: "Em execução",
+        pronto: "Pronto para entrega",
+        finalizado: "Finalizado",
+      },
     };
   } else if (resolved === "comercio") {
     copy = {
@@ -216,6 +243,18 @@ export function getOpsCenterCopy(
       resourcesLinkLabel: "Recursos",
       showVehicleFields: false,
       assigneeLabel: "Responsável",
+      diagnosisLabel: "Em análise",
+      waitingPartsLabel: "Aguardando materiais",
+      boardColumnLabels: {
+        entrada: "Entrada",
+        diagnostico: "Análise",
+        orcamento: "Orçamento",
+        aprovacao: "Aguardando aprovação",
+        pecas: "Aguardando materiais",
+        execucao: "Em execução",
+        pronto: "Pronto para entrega",
+        finalizado: "Finalizado",
+      },
     };
   } else if (resolved === "consultoria") {
     copy = {
@@ -230,6 +269,18 @@ export function getOpsCenterCopy(
       resourcesLinkLabel: "Recursos",
       showVehicleFields: false,
       assigneeLabel: "Consultor",
+      diagnosisLabel: "Em análise",
+      waitingPartsLabel: "Aguardando materiais",
+      boardColumnLabels: {
+        entrada: "Entrada",
+        diagnostico: "Análise",
+        orcamento: "Orçamento",
+        aprovacao: "Aguardando aprovação",
+        pecas: "Aguardando materiais",
+        execucao: "Em execução",
+        pronto: "Pronto para entrega",
+        finalizado: "Finalizado",
+      },
     };
   } else {
     copy = {
@@ -244,6 +295,18 @@ export function getOpsCenterCopy(
       resourcesLinkLabel: "Recursos",
       showVehicleFields: false,
       assigneeLabel: "Profissional",
+      diagnosisLabel: "Em análise",
+      waitingPartsLabel: "Aguardando materiais",
+      boardColumnLabels: {
+        entrada: "Entrada",
+        diagnostico: "Análise",
+        orcamento: "Orçamento",
+        aprovacao: "Aguardando aprovação",
+        pecas: "Aguardando materiais",
+        execucao: "Em execução",
+        pronto: "Pronto para entrega",
+        finalizado: "Finalizado",
+      },
     };
   }
 
@@ -253,9 +316,16 @@ export function getOpsCenterCopy(
     ...copy,
     openOrdersLabel: ui.openWorkOrdersLabel,
     assetsInOpsLabel: hasCapability(ctx, "vehicles")
-      ? copy.assetsInOpsLabel
+      ? ui.automotiveWorkflow
+        ? copy.assetsInOpsLabel
+        : "Veículos em operação"
       : "Em operação",
     showVehicleFields: hasCapability(ctx, "vehicles"),
     assigneeLabel: ui.assigneeLabel,
+    diagnosisLabel: ui.diagnosisLabel,
+    waitingPartsLabel: ui.waitingPartsLabel,
+    boardColumnLabels: ui.boardColumnLabels,
+    boardDescriptionCanEdit: ui.boardDescriptionCanEdit,
+    boardDescriptionReadOnly: ui.boardDescriptionReadOnly,
   };
 }

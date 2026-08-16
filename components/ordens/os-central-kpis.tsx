@@ -21,6 +21,14 @@ type KpiDef = {
 type Props = {
   tenantSlug: string;
   kpis: OsCentralKpis;
+  copy?: {
+    openWorkOrdersLabel: string;
+    diagnosisLabel: string;
+    waitingPartsLabel: string;
+    estimatedInProgressHint: string;
+    centralKpisAria: string;
+    automotiveWorkflow?: boolean;
+  };
 };
 
 function formatValue(
@@ -32,13 +40,18 @@ function formatValue(
   return value.toLocaleString("pt-BR");
 }
 
-export function OsCentralKpis({ tenantSlug, kpis }: Props) {
+export function OsCentralKpis({ tenantSlug, kpis, copy }: Props) {
   const base = `/${tenantSlug}/ordens`;
   const defs: KpiDef[] = [
-    { key: "abertas", label: "OS abertas", href: base, emphasize: true },
+    {
+      key: "abertas",
+      label: copy?.openWorkOrdersLabel ?? "OS abertas",
+      href: base,
+      emphasize: true,
+    },
     {
       key: "emDiagnostico",
-      label: "Em diagnóstico",
+      label: copy?.diagnosisLabel ?? "Em diagnóstico",
       href: `${base}?status=aguardando_diagnostico`,
     },
     {
@@ -49,7 +62,7 @@ export function OsCentralKpis({ tenantSlug, kpis }: Props) {
     },
     {
       key: "aguardandoPecas",
-      label: "Aguardando peças",
+      label: copy?.waitingPartsLabel ?? "Aguardando peças",
       href: `${base}?status=aguardando_peca`,
       tone: "warning",
     },
@@ -85,7 +98,8 @@ export function OsCentralKpis({ tenantSlug, kpis }: Props) {
       key: "valorEmProducao",
       label: "Valor em produção",
       format: "currency",
-      supporting: "Valor estimado das OS em andamento.",
+      supporting:
+        copy?.estimatedInProgressHint ?? "Valor estimado das OS em andamento.",
       tone: "info",
     },
   ];
@@ -95,7 +109,7 @@ export function OsCentralKpis({ tenantSlug, kpis }: Props) {
       className={gofGrid.kpis}
       data-os-block="central-kpis"
       role="region"
-      aria-label="Indicadores da Central de OS"
+      aria-label={copy?.centralKpisAria ?? "Indicadores da Central de OS"}
     >
       {defs.map((def) => {
         const raw = kpis[def.key];

@@ -20,6 +20,7 @@ import {
   type OsSlaTone,
 } from "@/lib/ordens/os-central-compose";
 import { OS_STATUS_LABELS, type OsStatus } from "@/lib/ordens/os-status";
+import { labelWorkOrderStatus } from "@/lib/segments/copy.ts";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -36,6 +37,9 @@ type Props = {
     newWorkOrder: string;
     emptyWorkOrdersTitle: string;
     emptyWorkOrdersBody: string;
+    showVehicles?: boolean;
+    vehicleLabel?: string;
+    statusLabels?: Record<string, string>;
   };
 };
 
@@ -63,6 +67,11 @@ export function OsCentralTable({
   copy,
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const showVehicles = copy?.showVehicles !== false;
+  const statusOf = (status: string) =>
+    copy?.statusLabels
+      ? labelWorkOrderStatus(status, { statusLabels: copy.statusLabels })
+      : (OS_STATUS_LABELS[status as OsStatus] ?? status);
 
   if (rows.length === 0) {
     return (
@@ -99,14 +108,12 @@ export function OsCentralTable({
             </div>
             <p className="mt-1 truncate text-sm">{item.cliente_nome ?? "—"}</p>
             <p className="text-xs text-muted-foreground">
-              {[item.placa, item.modelo].filter(Boolean).join(" · ") || "—"}
+              {showVehicles
+                ? [item.placa, item.modelo].filter(Boolean).join(" · ") || "—"
+                : item.responsavel.nome}
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <StatusBadge
-                label={
-                  OS_STATUS_LABELS[item.status as OsStatus] ?? item.status
-                }
-              />
+              <StatusBadge label={statusOf(item.status)} />
               <ExecutiveBadge tone="neutral" variant="soft">
                 {prioridadeLabel(item.prioridade)}
               </ExecutiveBadge>
@@ -152,7 +159,7 @@ export function OsCentralTable({
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "sm" }),
                   )}
-                  aria-label={`Ações da OS #${item.numero}`}
+                  aria-label={`Ações do ${copy?.workOrder ?? "registro"} #${item.numero}`}
                   aria-expanded={openMenuId === item.id}
                   onClick={() =>
                     setOpenMenuId(openMenuId === item.id ? null : item.id)
@@ -190,7 +197,7 @@ export function OsCentralTable({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
             <caption className="sr-only">
-              Lista operacional de ordens de serviço
+              Lista operacional de {copy?.workOrders ?? "ordens de serviço"}
             </caption>
             <thead className="sticky top-0 z-10 border-b border-border/60 bg-muted/80 text-xs text-muted-foreground backdrop-blur-sm">
               <tr>
@@ -200,9 +207,11 @@ export function OsCentralTable({
                 <th scope="col" className="px-3 py-2.5 font-medium">
                   Cliente
                 </th>
+                  {showVehicles ? (
                 <th scope="col" className="px-3 py-2.5 font-medium">
-                  Veículo
+                  {copy?.vehicleLabel ?? "Veículo"}
                 </th>
+                  ) : null}
                 <th scope="col" className="px-3 py-2.5 font-medium">
                   Responsável
                 </th>
@@ -250,21 +259,19 @@ export function OsCentralTable({
                   <td className="max-w-[10rem] truncate px-3 py-2.5">
                     {item.cliente_nome ?? "—"}
                   </td>
+                  {showVehicles ? (
                   <td className="px-3 py-2.5">
                     <div>{item.placa ?? "—"}</div>
                     <div className="text-xs text-muted-foreground">
                       {item.modelo ?? ""}
                     </div>
                   </td>
+                  ) : null}
                   <td className="max-w-[9rem] truncate px-3 py-2.5 text-xs">
                     {item.responsavel.nome}
                   </td>
                   <td className="px-3 py-2.5">
-                    <StatusBadge
-                      label={
-                        OS_STATUS_LABELS[item.status as OsStatus] ?? item.status
-                      }
-                    />
+                    <StatusBadge label={statusOf(item.status)} />
                     {item.arquivado_em ? (
                       <span className="mt-1 block text-[10px] text-muted-foreground">
                         Arquivada
@@ -295,7 +302,7 @@ export function OsCentralTable({
                         className={cn(
                           buttonVariants({ variant: "outline", size: "sm" }),
                         )}
-                        aria-label={`Ações da OS #${item.numero}`}
+                        aria-label={`Ações do ${copy?.workOrder ?? "registro"} #${item.numero}`}
                         aria-expanded={openMenuId === item.id}
                         onClick={() =>
                           setOpenMenuId(openMenuId === item.id ? null : item.id)

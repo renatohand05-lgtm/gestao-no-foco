@@ -16,6 +16,7 @@ type Props = {
   pollSeconds?: number;
   showVehicleFields?: boolean;
   assigneeLabel?: string;
+  boardColumnLabels?: Record<string, string>;
 };
 
 function formatSync(iso: string) {
@@ -33,6 +34,7 @@ export function CentroOpsLivePanel({
   pollSeconds = 60,
   showVehicleFields = true,
   assigneeLabel = "Responsável",
+  boardColumnLabels,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -84,6 +86,7 @@ export function CentroOpsLivePanel({
             canAlterarStatus={canAlterarStatus}
             showVehicleFields={showVehicleFields}
             assigneeLabel={assigneeLabel}
+            boardColumnLabels={boardColumnLabels}
           />
         </div>
       </div>

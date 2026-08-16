@@ -174,6 +174,11 @@ export function buildPremiumInsights(input: {
     segmentVersion: input.segmentVersion,
     segmentConfig: input.segmentConfig,
   });
+  const ui = getSegmentUiCopy({
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
   const cards: PremiumInsightCard[] = [];
 
   cards.push({
@@ -236,7 +241,7 @@ export function buildPremiumInsights(input: {
     op.status === "unavailable"
       ? "Indicadores operacionais indisponíveis."
       : flags.workOrders
-        ? `${op.osAbertas ?? "—"} OS abertas · ${op.osAtrasadas ?? "—"} atrasadas · ${op.osAguardandoCliente ?? op.clientesAguardandoRetorno ?? "—"} aguardando cliente`
+        ? `${op.osAbertas ?? "—"} ${ui.openWorkOrdersLabel} · ${op.osAtrasadas ?? "—"} atrasadas · ${op.osAguardandoCliente ?? op.clientesAguardandoRetorno ?? "—"} aguardando cliente`
         : `${op.clientesAguardandoRetorno ?? op.osAguardandoCliente ?? "—"} aguardando retorno`;
   cards.push({
     id: "operacao",

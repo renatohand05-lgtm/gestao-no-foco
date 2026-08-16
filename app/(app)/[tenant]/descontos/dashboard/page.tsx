@@ -5,6 +5,7 @@ import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { createDescontoDashboardService } from "@/lib/descontos/desconto-dashboard-service";
 import { formatCurrency } from "@/lib/format";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { requireTenant } from "@/lib/tenants";
 
 export const metadata = { title: "Dashboard de descontos" };
@@ -28,6 +29,11 @@ export default async function DescontosDashboardPage({
   const { tenant: tenantSlug } = await params;
   const { de, ate } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
   const service = await createDescontoDashboardService(tenant.id);
   const data = await service.getData(
     de ? `${de}T00:00:00` : undefined,
@@ -80,7 +86,14 @@ export default async function DescontosDashboardPage({
           value={`${data.kpis.percentualSobreFaturamento}%`}
         />
         <Kpi label="Desconto médio" value={formatCurrency(data.kpis.descontoMedio)} />
-        <Kpi label="OS com desconto" value={String(data.kpis.qtdOs)} />
+        <Kpi
+          label={
+            ui.automotiveWorkflow
+              ? "OS com desconto"
+              : `${ui.workOrders} com desconto`
+          }
+          value={String(data.kpis.qtdOs)}
+        />
         <Kpi label="Vendas com desconto" value={String(data.kpis.qtdVendas)} />
         <Kpi label="Maior desconto" value={formatCurrency(data.kpis.maiorDesconto)} />
         <Kpi

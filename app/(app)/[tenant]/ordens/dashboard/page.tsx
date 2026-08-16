@@ -14,15 +14,28 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { gofControl, gofGrid } from "@/lib/design-system";
 import { formatCurrency } from "@/lib/format";
 import { createOsDashboardService } from "@/lib/ordens/os-dashboard-service";
-import { OS_STATUS, OS_STATUS_LABELS } from "@/lib/ordens/os-status";
+import { OS_STATUS } from "@/lib/ordens/os-status";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import { cn } from "@/lib/utils";
-import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
+import { getSegmentUiCopy, osSubnavFromCopy, labelWorkOrderStatus } from "@/lib/segments/copy.ts";
 
-export const metadata = { title: "Dashboard de OS" };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tenant: string }>;
+}) {
+  const { tenant: tenantSlug } = await params;
+  const tenant = await requireTenant(tenantSlug);
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  return { title: ui.dashboardTitle };
+}
 
 function Kpi({
   label,
@@ -114,10 +127,10 @@ export default async function OrdensDashboardPage({
     return (
       <ExecutivePage width="wide" spacing="default">
         <Breadcrumbs items={[
-            { label: "Ordens", href: `/${tenantSlug}/ordens` },
+            { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
             { label: "Dashboard" },
           ]} />
-      <ExecutiveHeader title="Dashboard de OS" />
+      <ExecutiveHeader title={ui.dashboardTitle} />
         <p className="text-sm text-muted-foreground">
           Sem permissão para visualizar o dashboard.
         </p>
@@ -229,7 +242,7 @@ export default async function OrdensDashboardPage({
               <option value="all">Todos</option>
               {OS_STATUS.map((s) => (
                 <option key={s} value={s}>
-                  {OS_STATUS_LABELS[s]}
+                  {labelWorkOrderStatus(s, ui)}
                 </option>
               ))}
             </select>
@@ -272,15 +285,15 @@ export default async function OrdensDashboardPage({
         className={gofGrid.kpis}
         data-os-block="dashboard-kpis"
         role="region"
-        aria-label="Indicadores do Dashboard de OS"
+        aria-label={`Indicadores do ${ui.dashboardTitle}`}
       >
         <Kpi
-          label="Abertas"
+          label={ui.openWorkOrdersLabel}
           value={String(data.kpis.abertas)}
           href={`${listBase}${qs({ status: "aguardando_diagnostico" })}`}
         />
         <Kpi
-          label="Em diagnóstico"
+          label={ui.diagnosisLabel}
           value={String(data.kpis.emDiagnostico)}
           href={`${listBase}${qs({ status: "diagnostico_concluido" })}`}
         />
@@ -357,18 +370,16 @@ export default async function OrdensDashboardPage({
 
       <div className="grid gap-4 lg:grid-cols-2">
         <DashboardBarChart
-          title="OS por status"
+          title={ui.byStatusTitle}
           description="Distribuição no período"
           data={data.porStatus.map((p) => ({
             data: p.label,
-            label:
-              OS_STATUS_LABELS[p.label as keyof typeof OS_STATUS_LABELS] ??
-              p.label,
+            label: labelWorkOrderStatus(p.label, ui),
             value: p.valor,
           }))}
         />
         <DashboardBarChart
-          title="OS abertas por dia"
+          title={ui.openByDayTitle}
           description="Aberturas no período"
           data={data.abertasPorDia.map((p) => ({
             data: p.label,
@@ -377,7 +388,7 @@ export default async function OrdensDashboardPage({
           }))}
         />
         <DashboardBarChart
-          title="OS finalizadas por dia"
+          title={ui.finalizedByDayTitle}
           description="Entregues / faturadas"
           data={data.finalizadasPorDia.map((p) => ({
             data: p.label,
@@ -387,7 +398,7 @@ export default async function OrdensDashboardPage({
         />
         <DashboardBarChart
           title="Faturamento por período"
-          description="OS faturadas"
+          description={`${ui.workOrders} faturados`}
           data={data.faturamentoPorDia.map((p) => ({
             data: p.label,
             label: p.label.slice(5),
@@ -404,7 +415,7 @@ export default async function OrdensDashboardPage({
           }))}
         />
         <DashboardBarChart
-          title="OS por mecânico"
+          title={ui.byAssigneeTitle}
           description="Top 10"
           data={data.porMecanico.map((p) => ({
             data: p.label,
@@ -413,7 +424,7 @@ export default async function OrdensDashboardPage({
           }))}
         />
         <DashboardBarChart
-          title="OS por consultor"
+          title={`${ui.workOrders} por consultor`}
           description="Top 10"
           data={data.porConsultor.map((p) => ({
             data: p.label,
@@ -422,7 +433,7 @@ export default async function OrdensDashboardPage({
           }))}
         />
         <DashboardBarChart
-          title="OS por tipo de serviço"
+          title={ui.byServiceTypeTitle}
           description="Categoria dos itens"
           data={data.porTipoServico.map((p) => ({
             data: p.label,
@@ -432,7 +443,7 @@ export default async function OrdensDashboardPage({
         />
         <DashboardBarChart
           title="Produtos mais usados"
-          description="Peças aplicadas nas OS do período"
+          description={ui.partsAppliedTitle}
           data={data.produtosMaisUsados.map((p) => ({
             data: p.label,
             label: p.label,
@@ -444,9 +455,7 @@ export default async function OrdensDashboardPage({
           description="Com base no histórico de eventos"
           data={data.tempoMedioPorEtapa.map((p) => ({
             data: p.label,
-            label:
-              OS_STATUS_LABELS[p.label as keyof typeof OS_STATUS_LABELS] ??
-              p.label,
+            label: labelWorkOrderStatus(p.label, ui),
             value: p.valor,
           }))}
         />

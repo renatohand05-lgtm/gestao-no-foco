@@ -143,7 +143,13 @@ describe("35.1 lava-rápido", () => {
     const ui = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });
     assert.equal(ui.workOrders, "Atendimentos");
     assert.equal(ui.newWorkOrder, "Novo atendimento");
-    assert.equal(ui.inProgressWorkOrdersLabel, "Serviços em andamento");
+    assert.equal(ui.openWorkOrdersLabel, "Atendimentos abertos");
+    assert.equal(ui.inProgressWorkOrdersLabel, "Atendimentos em andamento");
+    assert.equal(
+      ui.estimatedInProgressHint,
+      "Valor estimado dos atendimentos em andamento.",
+    );
+    assert.doesNotMatch(ui.openWorkOrdersLabel, /\bOS\b/);
     assert.doesNotMatch(ui.newWorkOrder, /Nova OS/);
     assert.doesNotMatch(ui.workOrdersHubTitle, /Ordem de Serviço/);
     assert.equal(ui.professionalsListPath, "/profissionais");
@@ -391,5 +397,125 @@ describe("35.1 finance + mobile + dashboard", () => {
       read("lib/dashboard/cockpit-v2/kpis.ts"),
       /filterDashboardSurface/,
     );
+  });
+});
+
+describe("35.1 copy sem vazamento na UI", () => {
+  it("oficina mantém terminologia automotiva", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const ui = getSegmentUiCopy({ segment: "oficina", ...ENGINE });
+    assert.equal(ui.openWorkOrdersLabel, "OS abertas");
+    assert.equal(ui.estimatedInProgressHint, "Valor estimado das OS em andamento.");
+    assert.equal(ui.assigneeLabel, "Mecânico");
+    assert.equal(ui.professionals, "Mecânicos");
+    assert.equal(ui.diagnosisLabel, "Em diagnóstico");
+    assert.equal(ui.waitingPartsLabel, "Aguardando peças");
+    assert.equal(ui.automotiveWorkflow, true);
+    assert.match(ui.statusLabels.aguardando_diagnostico, /diagnóstico/i);
+  });
+
+  it("barbearia não recebe Mecânicos nem OS na copy visível", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const ui = getSegmentUiCopy({ segment: "barbearia", ...ENGINE });
+    assert.equal(ui.professionals, "Barbeiros");
+    assert.doesNotMatch(ui.professionals, /mec[aâ]nico/i);
+    assert.doesNotMatch(ui.openWorkOrdersLabel, /\bOS\b/);
+    assert.doesNotMatch(ui.estimatedInProgressHint, /\bOS\b/);
+    assert.doesNotMatch(ui.diagnosisLabel, /diagnóstico/i);
+    assert.doesNotMatch(ui.waitingPartsLabel, /peças/i);
+    assert.equal(ui.showVehicles, false);
+    assert.equal(ui.automotiveWorkflow, false);
+  });
+
+  it("lava-rápido usa Atendimentos no lugar de OS nos KPIs", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const ui = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });
+    assert.equal(ui.openWorkOrdersLabel, "Atendimentos abertos");
+    assert.equal(
+      ui.estimatedInProgressHint,
+      "Valor estimado dos atendimentos em andamento.",
+    );
+    assert.doesNotMatch(ui.openWorkOrdersLabel, /\bOS\b/);
+    assert.doesNotMatch(ui.centralKpisAria, /\bOS\b/);
+    assert.doesNotMatch(ui.dashboardTitle, /\bOS\b/);
+    assert.equal(ui.showVehicles, true);
+    assert.equal(ui.automotiveWorkflow, false);
+    assert.match(read("components/ordens/os-central-kpis.tsx"), /copy\?\.openWorkOrdersLabel/);
+    assert.match(read("components/ordens/os-central-kpis.tsx"), /estimatedInProgressHint/);
+    assert.doesNotMatch(ui.openFormSectionDescription, /\bOS\b|peças/i);
+    assert.match(read("app/(app)/[tenant]/ordens/nova/page.tsx"), /openFormSectionDescription/);
+    assert.match(
+      read("lib/dashboard/premium-dashboard-map.ts"),
+      /ui\.openWorkOrdersLabel/,
+    );
+    assert.match(
+      read("components/ordens/os-workspace.tsx"),
+      /uiCopy\?\.alreadyBilledMessage/,
+    );
+    assert.match(
+      read("app/(app)/[tenant]/relatorios/page.tsx"),
+      /hasCapability\(ctx, "work_orders"\)/,
+    );
+  });
+
+  it("consultoria não recebe terminologia automotiva indevida", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const { isNavItemRelevant } = await load("lib/segments/nav.ts");
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    const ctx = resolveSegmentContext({ segment: "consultoria", ...ENGINE });
+    const ui = getSegmentUiCopy(ctx);
+    assert.equal(ui.professionals, "Consultores");
+    assert.doesNotMatch(ui.openWorkOrdersLabel, /\bOS\b|mec[aâ]nico|oficina/i);
+    assert.equal(ui.showVehicles, false);
+    assert.equal(isNavItemRelevant("mechanics", ctx), false);
+    assert.equal(isNavItemRelevant("work-orders", ctx), false);
+    assert.doesNotMatch(ui.openFormSectionDescription, /placa|peças|oficina/i);
+  });
+
+  it("tenant legado preserva copy de oficina", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const legado = getSegmentUiCopy({
+      segment: "consultoria",
+      segmentVersion: null,
+    });
+    assert.equal(legado.engine, false);
+    assert.equal(legado.openWorkOrdersLabel, "OS abertas");
+    assert.equal(legado.professionalsListPath, "/oficina/mecanicos");
+  });
+
+  it("override não troca vocabulário do segmento", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const { setCapabilityOverride } = await load("lib/segments/overrides.ts");
+    const { getSegmentProfile } = await load("lib/segments/profiles.ts");
+    const preset = getSegmentProfile("consultoria").capabilities;
+    const cfg = setCapabilityOverride(preset, {}, "work_orders", true);
+    const ui = getSegmentUiCopy({
+      segment: "consultoria",
+      ...ENGINE,
+      segmentConfig: cfg,
+    });
+    assert.doesNotMatch(ui.openWorkOrdersLabel, /\bOS\b/);
+    assert.doesNotMatch(ui.professionals, /mec[aâ]nico/i);
+  });
+
+  it("navegação dos 6 segmentos respeita capabilities", async () => {
+    const { PRODUCT_SEGMENT_IDS } = await load("lib/segments/types.ts");
+    const { resolveSegmentContext, hasCapability } = await load(
+      "lib/segments/resolve.ts",
+    );
+    const { isNavItemRelevant } = await load("lib/segments/nav.ts");
+    for (const id of PRODUCT_SEGMENT_IDS) {
+      const ctx = resolveSegmentContext({ segment: id, ...ENGINE });
+      assert.equal(
+        isNavItemRelevant("work-orders", ctx),
+        hasCapability(ctx, "work_orders"),
+        id,
+      );
+      assert.equal(
+        isNavItemRelevant("inventory", ctx),
+        hasCapability(ctx, "inventory"),
+        id,
+      );
+    }
   });
 });

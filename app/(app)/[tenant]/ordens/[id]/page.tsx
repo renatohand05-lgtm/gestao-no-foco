@@ -19,7 +19,7 @@ import {
   ExecutivePage,
 } from "@/components/executive";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { getSegmentUiCopy, segmentCopyForClient } from "@/lib/segments/copy.ts";
 
 export async function generateMetadata({
   params,
@@ -204,12 +204,17 @@ export default async function OsDetailPage({
           { label: ui.workOrders, href: `/${tenantSlug}/ordens` },
           { label: `#${os.numero}` },
         ]} />
-      <ExecutiveHeader title={ui.workOrderDetailTitle(os.numero)} description={`${os.cliente_nome ?? ui.customer} · ${os.placa ?? "sem placa"}`} />
+      <ExecutiveHeader title={ui.workOrderDetailTitle(os.numero)} description={
+          ui.showVehicles
+            ? `${os.cliente_nome ?? ui.customer} · ${os.placa ?? ui.missingVehicleLabel}`
+            : (os.cliente_nome ?? ui.customer)
+        } />
       <OsWorkspaceLazy
         tenantSlug={tenantSlug}
         os={os}
         professionalLabel={ui.professional}
         professionalsLabel={ui.professionals}
+        uiCopy={segmentCopyForClient(ui)}
         produtos={(produtos ?? []).map((p) => ({ id: p.id, nome: p.nome }))}
         formasPagamento={(formas ?? []).map((f) => ({
           id: f.id,

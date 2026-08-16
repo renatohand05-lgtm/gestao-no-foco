@@ -22,6 +22,7 @@ type Props = {
   canAlterarStatus: boolean;
   showVehicleFields?: boolean;
   assigneeLabel?: string;
+  boardColumnLabels?: Record<string, string>;
 };
 
 export function OperacaoBoard({
@@ -30,6 +31,7 @@ export function OperacaoBoard({
   canAlterarStatus,
   showVehicleFields = true,
   assigneeLabel = "Responsável",
+  boardColumnLabels,
 }: Props) {
   const router = useRouter();
   const [board, setBoard] = useState(initialBoard);
@@ -109,7 +111,7 @@ export function OperacaoBoard({
             >
               <div className="mb-2 flex items-center justify-between px-1">
                 <h3 className="text-xs font-semibold tracking-tight">
-                  {col.label}
+                  {boardColumnLabels?.[col.key] ?? col.label}
                 </h3>
                 <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] tabular-nums">
                   {cards.length}

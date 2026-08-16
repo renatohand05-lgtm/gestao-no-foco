@@ -62,5 +62,9 @@ export {
   osSubnavFromCopy,
   professionalsHref,
   countProfessionalsLabel,
+  labelWorkOrderStatus,
+  labelBoardColumn,
+  segmentCopyForClient,
   type SegmentUiCopy,
+  type SegmentUiCopyClient,
 } from "./copy.ts";

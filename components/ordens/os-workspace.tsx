@@ -85,6 +85,7 @@ type Props = {
   canApontarHoras?: boolean;
   professionalLabel?: string;
   professionalsLabel?: string;
+  uiCopy?: import("@/lib/segments/copy.ts").SegmentUiCopyClient;
 };
 
 const TABS = [
@@ -146,6 +147,7 @@ export function OsWorkspace({
   canApontarHoras = false,
   professionalLabel = "Mecânico",
   professionalsLabel = "Mecânicos",
+  uiCopy,
 }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
@@ -167,6 +169,14 @@ export function OsWorkspace({
     load: loadVeiculos,
   } = useClienteVeiculos(tenantSlug, veiculosIniciais);
 
+  function statusCopy(status: string) {
+    return (
+      uiCopy?.statusLabels[status] ??
+      OS_STATUS_LABELS[status as OsStatus] ??
+      status
+    );
+  }
+
   const nextStatuses = OS_TRANSITIONS[os.status as OsStatus] ?? [];
   const canDiagnostico = canRegisterDiagnostico(os.status);
   const canOrcamento = canEditOs(os) && canEditOrcamento(os.status);
@@ -177,11 +187,13 @@ export function OsWorkspace({
     os.status !== "cancelada" &&
     canFaturarStatus(os.status);
   const faturarBloqueio = os.venda_id
-    ? "OS já faturada — segundo faturamento bloqueado."
+    ? (uiCopy?.alreadyBilledMessage ??
+      "OS já faturada — segundo faturamento bloqueado.")
     : os.status === "cancelado" || os.status === "cancelada"
-      ? "Não é possível faturar OS cancelada."
+      ? (uiCopy?.cannotBillCanceledMessage ??
+        "Não é possível faturar OS cancelada.")
       : !canFaturarStatus(os.status)
-        ? `Status atual (${OS_STATUS_LABELS[os.status as OsStatus] ?? os.status}) não permite faturar.`
+        ? `Status atual (${statusCopy(os.status)}) não permite faturar.`
         : null;
 
   const aprovados = useMemo(
@@ -207,11 +219,13 @@ export function OsWorkspace({
   }
 
   function handleStatusChange(status: OsStatus) {
-    const label = OS_STATUS_LABELS[status];
+    const label = statusCopy(status);
     if (status === "cancelado") {
       if (
         !window.confirm(
-          "Cancelar esta OS? A ação é irreversível e não pode ser desfeita após confirmação.",
+          uiCopy && !uiCopy.automotiveWorkflow
+            ? `Cancelar este ${uiCopy.workOrder.toLowerCase()}? A ação é irreversível e não pode ser desfeita após confirmação.`
+            : "Cancelar esta OS? A ação é irreversível e não pode ser desfeita após confirmação.",
         )
       ) {
         return;
@@ -246,14 +260,17 @@ export function OsWorkspace({
 
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge
-          label={OS_STATUS_LABELS[os.status as OsStatus] ?? os.status}
+          label={statusCopy(os.status)}
         />
         {os.arquivado_em ? (
           <StatusBadge label="Arquivada" />
         ) : null}
         <span className="text-sm text-muted-foreground">
-          #{os.numero} · {os.cliente_nome} · {os.placa ?? "sem placa"}
-          {os.modelo ? ` · ${os.modelo}` : ""}
+          #{os.numero} · {os.cliente_nome}
+          {uiCopy?.showVehicles !== false
+            ? ` · ${os.placa ?? uiCopy?.missingVehicleLabel ?? "sem placa"}`
+            : ""}
+          {os.modelo && uiCopy?.showVehicles !== false ? ` · ${os.modelo}` : ""}
         </span>
         <span className="ml-auto text-sm font-semibold tabular-nums">
           {formatCurrency(os.valor_total)}
@@ -307,13 +324,13 @@ export function OsWorkspace({
             type="button"
             onClick={() => setTab(t)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium capitalize",
+              "rounded-full border px-3 py-1 text-xs font-medium",
               tab === t
                 ? "border-emerald-600 bg-emerald-600/10 text-emerald-800 dark:text-emerald-300"
                 : "border-border hover:bg-muted",
             )}
           >
-            {t}
+            {uiCopy?.workspaceTabLabels[t] ?? t}
           </button>
         ))}
       </div>
@@ -347,12 +364,14 @@ export function OsWorkspace({
                       origem_atendimento:
                         String(fd.get("origem_atendimento") || "") || null,
                     }),
-                  "Dados da OS salvos.",
+                  uiCopy?.headerSavedMessage ?? "Dados da OS salvos.",
                 );
               }}
             >
               <p className="text-xs font-medium text-muted-foreground">
-                Editar dados da OS
+                {uiCopy && !uiCopy.automotiveWorkflow
+                  ? `Editar dados do ${uiCopy.workOrder.toLowerCase()}`
+                  : "Editar dados da OS"}
               </p>
               <textarea
                 name="reclamacao_cliente"
@@ -520,7 +539,7 @@ export function OsWorkspace({
                   )}
                   onClick={() => handleStatusChange(status)}
                 >
-                  → {OS_STATUS_LABELS[status]}
+                  → {statusCopy(status)}
                 </button>
               ))
             )}
@@ -541,13 +560,18 @@ export function OsWorkspace({
 
       {tab === "diagnostico" ? (
         <ExecutiveSection
-          title="Diagnóstico"
-          description="Não gera movimentação financeira. Ao salvar a partir de Rascunho, a OS avança Rascunho → Aguardando diagnóstico → Diagnóstico concluído."
+          title={uiCopy?.diagnosisSectionTitle ?? "Diagnóstico"}
+          description={
+            uiCopy?.diagnosisSectionDescription ??
+            "Não gera movimentação financeira. Ao salvar a partir de Rascunho, a OS avança Rascunho → Aguardando diagnóstico → Diagnóstico concluído."
+          }
           panel
         >
           {!canDiagnostico ? (
             <p className="mb-3 text-sm text-amber-700 dark:text-amber-400">
-              Status atual não permite novo diagnóstico operacional.
+              {uiCopy && !uiCopy.automotiveWorkflow
+                ? "Status atual não permite nova análise operacional."
+                : "Status atual não permite novo diagnóstico operacional."}
             </p>
           ) : null}
           <form
@@ -568,14 +592,14 @@ export function OsWorkspace({
                     observacoes_cliente:
                       String(fd.get("observacoes_cliente") || "") || null,
                   }),
-                "Diagnóstico salvo.",
+                uiCopy?.diagnosisSavedMessage ?? "Diagnóstico salvo.",
               );
             }}
           >
             <Input name="sintoma_relatado" placeholder="Sintoma relatado" disabled={pending || !canDiagnostico} />
             <textarea
               name="diagnostico_tecnico"
-              placeholder="Diagnóstico técnico"
+              placeholder={uiCopy?.diagnosisPlaceholder ?? "Diagnóstico técnico"}
               rows={3}
               disabled={pending || !canDiagnostico}
               className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
@@ -609,7 +633,9 @@ export function OsWorkspace({
               disabled={pending || !canDiagnostico}
               className={cn(buttonVariants({ size: "sm" }))}
             >
-              Salvar diagnóstico
+              {uiCopy && !uiCopy.automotiveWorkflow
+                ? "Salvar análise"
+                : "Salvar diagnóstico"}
             </button>
           </form>
           {os.diagnosticos[0] ? (
@@ -635,7 +661,9 @@ export function OsWorkspace({
         >
           {!canOrcamento ? (
             <p className="text-sm text-amber-700 dark:text-amber-400">
-              Conclua o diagnóstico antes de montar o orçamento.
+              {uiCopy && !uiCopy.automotiveWorkflow
+                ? "Conclua a análise antes de montar o orçamento."
+                : "Conclua o diagnóstico antes de montar o orçamento."}
             </p>
           ) : null}
           <OsOrcamentoItensPanel
@@ -681,12 +709,18 @@ export function OsWorkspace({
       {tab === "aprovacao" ? (
         <ExecutiveSection
           title="Aprovação do cliente"
-          description="Exige orçamento. A OS avança para Aguardando aprovação e só então para Aprovado / Parcialmente aprovado."
+          description={
+            uiCopy && !uiCopy.automotiveWorkflow
+              ? `Exige orçamento. O ${uiCopy.workOrder.toLowerCase()} avança para Aguardando aprovação e só então para Aprovado / Parcialmente aprovado.`
+              : "Exige orçamento. A OS avança para Aguardando aprovação e só então para Aprovado / Parcialmente aprovado."
+          }
           panel
         >
           {!canAprovar ? (
             <p className="text-sm text-amber-700 dark:text-amber-400">
-              Status atual não permite aprovação. Conclua diagnóstico e orçamento
+              {uiCopy && !uiCopy.automotiveWorkflow
+                ? "Status atual não permite aprovação. Conclua análise e orçamento"
+                : "Status atual não permite aprovação. Conclua diagnóstico e orçamento"}
               primeiro.
             </p>
           ) : null}
@@ -933,7 +967,8 @@ export function OsWorkspace({
                         forma_pagamento_id: formaPagamentoFaturar,
                         data_venda: String(fd.get("data_venda")),
                       }),
-                    "OS faturada. Venda e Contas a Receber geradas pelo motor atual.",
+                    uiCopy?.billedSuccessMessage ??
+                      "OS faturada. Venda e Contas a Receber geradas pelo motor atual.",
                   );
                 }}
               >

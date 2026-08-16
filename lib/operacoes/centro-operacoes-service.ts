@@ -93,11 +93,18 @@ export class CentroOperacoesService {
 
   async getData(
     tenantSlug: string,
-    options?: { segment?: string | null },
+    options?: {
+      segment?: string | null;
+      segmentVersion?: number | null;
+      segmentConfig?: unknown;
+    },
   ): Promise<CentroOperacoesData> {
     const hoje = isoToday();
     const limiarSemUpdate = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
-    const copy = getOpsCenterCopy(options?.segment);
+    const copy = getOpsCenterCopy(options?.segment, {
+      segmentVersion: options?.segmentVersion,
+      segmentConfig: options?.segmentConfig,
+    });
     const selectCols =
       "id, numero, status, data_abertura, previsao_entrega, valor_total, prioridade, mecanico_id, consultor_id, updated_at, ordem_retorno_id, garantia_dias, tipo_abertura, cliente:clientes(nome), veiculo:veiculos(placa, modelo)";
 
@@ -160,7 +167,7 @@ export class CentroOperacoesService {
       },
       {
         key: "diagnostico",
-        label: "Em diagnóstico",
+        label: copy.diagnosisLabel,
         count: countStatus(
           "aguardando_diagnostico",
           "diagnostico_concluido",
@@ -182,7 +189,7 @@ export class CentroOperacoesService {
       },
       {
         key: "pecas",
-        label: "Aguardando peças",
+        label: copy.waitingPartsLabel,
         count: countStatus("aguardando_peca"),
         hrefFilter: qs("aguardando_peca"),
         tone: "warn",

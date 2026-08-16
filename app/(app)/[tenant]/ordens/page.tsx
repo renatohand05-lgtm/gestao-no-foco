@@ -9,7 +9,7 @@ import {
 } from "@/components/ordens/os-central-state";
 import { OsCentralTable } from "@/components/ordens/os-central-table";
 import { OsSubnav } from "@/components/ordens/os-subnav";
-import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
+import { getSegmentUiCopy, osSubnavFromCopy, labelWorkOrderStatus } from "@/lib/segments/copy.ts";
 import { SectionCard } from "@/components/ui/section-card";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createCentroOperacoesService } from "@/lib/operacoes/centro-operacoes-service";
@@ -29,11 +29,7 @@ import {
 } from "@/lib/ordens/os-central-compose";
 import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import { createOsDashboardService } from "@/lib/ordens/os-dashboard-service";
-import {
-  OS_PRIORIDADE_OPTIONS,
-  OS_STATUS,
-  OS_STATUS_LABELS,
-} from "@/lib/ordens/os-status";
+import { OS_PRIORIDADE_OPTIONS, OS_STATUS } from "@/lib/ordens/os-status";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { cn } from "@/lib/utils";
@@ -170,7 +166,11 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
         perPage,
       }),
       mecanicoService.list({ status: "all" }).catch(() => []),
-      centroService.getData(tenantSlug).catch(() => null),
+      centroService.getData(tenantSlug, {
+        segment: tenant.segment,
+        segmentVersion: tenant.segment_version,
+        segmentConfig: tenant.segment_config,
+      }).catch(() => null),
       dashboardService.getData({}).catch(() => null),
       service.countFinalizacaoHoje().catch(() => ({
         finalizadasHoje: 0,
@@ -184,7 +184,11 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
       <ExecutivePage width="wide" spacing="loose">
         <Breadcrumbs items={[{ label: ui.workOrders }]} />
       <ExecutiveHeader title={ui.workOrdersHubTitle} description={`Visão operacional · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" copy={subnav} />} />
-        <OsCentralErrorState tenantSlug={tenantSlug} message={message} />
+        <OsCentralErrorState
+          tenantSlug={tenantSlug}
+          message={message}
+          title={ui.loadErrorTitle}
+        />
       </ExecutivePage>
     );
   }
@@ -259,7 +263,18 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
       <Breadcrumbs items={[{ label: ui.workOrders }]} />
       <ExecutiveHeader title={ui.workOrdersHubTitle} description={`Visão operacional · ${tenant.name}`} actions={<OsSubnav tenantSlug={tenantSlug} active="lista" copy={subnav} />} />
 
-      <OsCentralKpis tenantSlug={tenantSlug} kpis={kpis} />
+      <OsCentralKpis
+        tenantSlug={tenantSlug}
+        kpis={kpis}
+        copy={{
+          openWorkOrdersLabel: ui.openWorkOrdersLabel,
+          diagnosisLabel: ui.diagnosisLabel,
+          waitingPartsLabel: ui.waitingPartsLabel,
+          estimatedInProgressHint: ui.estimatedInProgressHint,
+          centralKpisAria: ui.centralKpisAria,
+          automotiveWorkflow: ui.automotiveWorkflow,
+        }}
+      />
 
       <form aria-label={`Filtros da Central de ${ui.workOrders}`}>
         {/* Reset page on filter submit */}
@@ -293,7 +308,7 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
               <option value="all">Todos os status</option>
               {OS_STATUS.map((s) => (
                 <option key={s} value={s}>
-                  {OS_STATUS_LABELS[s]}
+                  {labelWorkOrderStatus(s, ui)}
                 </option>
               ))}
             </select>
@@ -348,15 +363,17 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
             />
           </ExecutiveFilterField>
 
-          <ExecutiveFilterField label="Veículo" htmlFor="os-filter-veiculo">
+          {ui.showVehicles ? (
+          <ExecutiveFilterField label={ui.vehicleLabel} htmlFor="os-filter-veiculo">
             <input
               id="os-filter-veiculo"
               name="veiculo"
               defaultValue={sp.veiculo ?? ""}
-              placeholder="Veículo (placa ou modelo)"
+              placeholder={ui.vehicleFilterPlaceholder}
               className={cn(gofControl, "w-full")}
             />
           </ExecutiveFilterField>
+          ) : null}
 
           <ExecutiveFilterField
             label="Prioridade"
@@ -401,7 +418,11 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
               id="os-filter-q"
               name="q"
               defaultValue={sp.q ?? ""}
-              placeholder="Pesquisa rápida: nº, cliente, placa…"
+              placeholder={
+                ui.showVehicles
+                  ? `Pesquisa rápida: nº, ${ui.customer.toLowerCase()}, placa…`
+                  : `Pesquisa rápida: nº, ${ui.customer.toLowerCase()}…`
+              }
               className={cn(gofControl, "w-full")}
             />
           </ExecutiveFilterField>
@@ -423,7 +444,7 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
       </form>
 
       <SectionCard
-        title={`Lista operacional · ${pagination.total} OS`}
+        title={`Lista operacional · ${pagination.total} ${ui.workOrderShort}`}
         contentClassName="pt-0"
       >
         <OsCentralTable
@@ -440,6 +461,9 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
             newWorkOrder: ui.newWorkOrder,
             emptyWorkOrdersTitle: ui.emptyWorkOrdersTitle,
             emptyWorkOrdersBody: ui.emptyWorkOrdersBody,
+            showVehicles: ui.showVehicles,
+            vehicleLabel: ui.vehicleLabel,
+            statusLabels: ui.statusLabels,
           }}
         />
         <OsCentralPaginationBar

@@ -23,13 +23,13 @@ type EmptyProps = {
   copy?: EmptyCopy;
 };
 
-export function OsCentralLoading() {
+export function OsCentralLoading({ ariaLabel }: { ariaLabel?: string }) {
   return (
     <ExecutivePage width="wide" spacing="loose">
       <div
         className="space-y-6"
         aria-busy="true"
-        aria-label="Carregando Central de Ordens de Serviço"
+        aria-label={ariaLabel ?? "Carregando Central de Ordens de Serviço"}
       >
         <ExecutiveSkeleton heightClassName="h-10 max-w-md" />
         <div className={gofGrid.kpis}>
@@ -87,9 +87,11 @@ export function OsCentralEmptyState({
 export function OsCentralErrorState({
   tenantSlug,
   message,
+  title,
 }: {
   tenantSlug: string;
   message?: string;
+  title?: string;
 }) {
   return (
     <div
@@ -104,7 +106,7 @@ export function OsCentralErrorState({
       data-os-state="error"
     >
       <p className={cn("text-sm font-medium", gofColors.danger.text)}>
-        Não foi possível carregar a Central de OS
+        {title ?? "Não foi possível carregar a Central de OS"}
       </p>
       <p className="mt-1 text-sm text-muted-foreground">
         {message?.trim() || "Tente novamente em instantes."}

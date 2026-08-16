@@ -81,7 +81,11 @@ export default async function CentroOperacoesPage({
 
   // Prefs + dados em paralelo (prefs não bloqueia o fetch principal).
   const [data, prefs] = await Promise.all([
-    service.getData(tenantSlug, { segment: tenant.segment }),
+    service.getData(tenantSlug, {
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    }),
     profile?.id
       ? createDashboardPreferenciasService(tenant.id, profile.id)
           .then((prefService) => prefService.get("centro_operacoes"))
@@ -174,6 +178,7 @@ export default async function CentroOperacoesPage({
           pollSeconds={60}
           showVehicleFields={copy.showVehicleFields}
           assigneeLabel={copy.assigneeLabel}
+          boardColumnLabels={copy.boardColumnLabels}
         />
       </SectionCard>
     </ExecutivePage>

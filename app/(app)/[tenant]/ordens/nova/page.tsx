@@ -64,7 +64,7 @@ export default async function NovaOsPage({
       ) : (
         <ExecutiveSection
           title="Abertura"
-          description="Cliente existente, novo cliente ou busca por placa. Orçamento e peças vêm depois."
+          description={ui.openFormSectionDescription}
           panel
         >
           <OsOpenForm

@@ -143,9 +143,9 @@ export default async function MecanicosDashboardPage({
       {data.mecanicos.length === 0 ? (
         <SectionCard title="Sem dados">
           <p className="text-sm text-muted-foreground">
-            Nenhuma OS com mecânico atribuído ainda.{" "}
+            {ui.emptyAssigneeBody}{" "}
             <Link href={`/${tenantSlug}/ordens`} className="underline">
-              Abrir ordens
+              {ui.emptyAssigneeCta}
             </Link>
           </p>
         </SectionCard>
@@ -210,8 +210,8 @@ export default async function MecanicosDashboardPage({
 
           <div className="grid gap-4 lg:grid-cols-2">
             <DashboardBarChart
-              title="Faturamento por mecânico"
-              description="OS faturadas"
+              title={ui.billedByAssigneeTitle}
+              description={ui.billedByAssigneeDescription}
               data={data.rankings.faturamento.map((m) => ({
                 data: m.id,
                 label: m.nome,

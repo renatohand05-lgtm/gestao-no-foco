@@ -37,7 +37,7 @@ BUILD: PASS (inclui `/[tenant]/crm/comunicacoes`)
 
 MIGRATION: `supabase/migrations/20260904_phase35_2_3_notification_readiness.sql` (aditiva; não executada em production)
 COMMIT: `057c0a3` (feat) + evidência neste commit
-HEAD == ORIGIN/MAIN: após push
+HEAD == ORIGIN/MAIN: YES (`5e2585d`)
 
 HOMOLOGAÇÃO MANUAL: PREPARADA, NÃO EXECUTADA (roteiro A–N no runbook)
 

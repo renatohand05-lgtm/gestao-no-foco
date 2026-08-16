@@ -1025,7 +1025,8 @@ describe("35.1 lava-rápido atendimento e barbearia profissionais", () => {
     assert.match(manager, /professionalSpecialtySuggestions/);
     assert.match(manager, /ProfessionalSpecialtyField/);
     const field = read("components/mecanicos/professional-specialty-field.tsx");
-    assert.match(field, /datalist/);
+    assert.match(field, /suggestions\.map/);
+    assert.doesNotMatch(field, /<datalist/);
     assert.match(field, /valor personalizado/);
     const list = read("components/mecanicos/professionals-list-screen.tsx");
     assert.match(list, /professionalSpecialtySuggestions/);

@@ -5,6 +5,7 @@ import {
   MECANICO_ESPECIALIDADES,
   type MecanicoEspecialidade,
 } from "@/lib/mecanicos/constants";
+import { OPERATIONAL_AUTOCOMPLETE_PROPS } from "@/lib/ux/browser-autocomplete";
 
 type Props = {
   value: string;
@@ -27,6 +28,7 @@ export function ProfessionalSpecialtyField({
         className="h-9 w-full rounded-md border border-input bg-transparent px-2"
         value={value}
         disabled={disabled}
+        autoComplete="off"
         onChange={(event) => onChange(event.target.value)}
       >
         {MECANICO_ESPECIALIDADES.map((item) => (
@@ -38,23 +40,32 @@ export function ProfessionalSpecialtyField({
     );
   }
 
-  const listId = "professional-specialty-suggestions";
   return (
     <div className="space-y-1">
       <input
         className="h-9 w-full rounded-md border border-input bg-transparent px-2"
         value={value}
         disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        list={suggestions.length > 0 ? listId : undefined}
         placeholder="Especialidade"
+        name="gestoo-professional-specialty"
+        {...OPERATIONAL_AUTOCOMPLETE_PROPS}
+        onChange={(event) => onChange(event.target.value)}
       />
       {suggestions.length > 0 ? (
-        <datalist id={listId}>
+        <ul className="flex flex-wrap gap-1" data-fast-input="specialty-suggest">
           {suggestions.map((item) => (
-            <option key={item} value={item} />
+            <li key={item}>
+              <button
+                type="button"
+                disabled={disabled}
+                className="rounded-md border px-2 py-1 text-xs hover:bg-muted"
+                onClick={() => onChange(item)}
+              >
+                {item}
+              </button>
+            </li>
           ))}
-        </datalist>
+        </ul>
       ) : null}
       <p className="text-xs text-muted-foreground">
         Escolha uma sugestão ou escreva um valor personalizado.

@@ -13,6 +13,7 @@ import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { adoptSegmentLibraryAction } from "@/lib/segments/library-actions.ts";
 import { groupLibraryByCategory } from "@/lib/segments/catalogs/builder.ts";
 import type { SegmentLibraryItem } from "@/lib/segments/catalogs/types.ts";
+import { OPERATIONAL_AUTOCOMPLETE_PROPS } from "@/lib/ux/browser-autocomplete";
 
 type Props = {
   tenantSlug: string;
@@ -136,6 +137,8 @@ export function SegmentCatalogPicker({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Filtrar por nome, categoria ou descrição"
             aria-label="Buscar sugestões"
+            name="gestoo-catalog-search"
+            {...OPERATIONAL_AUTOCOMPLETE_PROPS}
           />
         </label>
         <div className="flex flex-wrap gap-2" aria-label="Categorias">

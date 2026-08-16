@@ -22,6 +22,9 @@ import { createProdutoService } from "@/lib/produtos/produto-service";
 import { clientAppointmentKpis } from "@/lib/retention/kpis";
 import { resolveAgendaNature } from "@/lib/retention/natures";
 import { parseAgendaCreateContext } from "@/lib/ux/fast-input";
+import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
+import { serviceSuggestionsForContext } from "@/lib/segments/catalogs/suggest.ts";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -176,6 +179,18 @@ export default async function AgendaPage({
       ])
     : [null, null, null];
 
+  const ctx = resolveSegmentContext({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const library = schemaReady
+    ? serviceSuggestionsForContext(ctx, { includeCombos: false })
+    : [];
+  const canCreateProduto = schemaReady
+    ? await tenantHasMutationPermission(tenantSlug, "produtos.criar")
+    : false;
+
   const views = [
     { key: "dia", label: "Dia" },
     { key: "semana", label: "Semana" },
@@ -271,6 +286,8 @@ export default async function AgendaPage({
         <AgendaEventCreateForm
           tenantSlug={tenantSlug}
           initial={initial}
+          library={library}
+          canCreateProduto={canCreateProduto}
           clientes={(clientesRes?.data ?? []).map((c) => ({
             id: c.id,
             label: c.nome,

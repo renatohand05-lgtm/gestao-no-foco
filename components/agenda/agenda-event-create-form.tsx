@@ -15,10 +15,12 @@ import {
   natureRequiresCliente,
   type AgendaNature,
 } from "@/lib/retention/natures";
+import { AgendaServiceField } from "@/components/agenda/agenda-service-field";
 import {
   novoClienteFromAgendaHref,
   type AgendaCreateContext,
 } from "@/lib/ux/fast-input";
+import type { CatalogSuggestionDto } from "@/lib/segments/catalogs/suggest.ts";
 import { cn } from "@/lib/utils";
 
 export type AgendaSelectOption = {
@@ -34,6 +36,8 @@ type Props = {
   servicos: AgendaSelectOption[];
   profissionais: AgendaSelectOption[];
   initial?: AgendaCreateContext;
+  library?: CatalogSuggestionDto[];
+  canCreateProduto?: boolean;
 };
 
 const NATURE_LABEL: Record<AgendaNature, string> = {
@@ -60,6 +64,8 @@ export function AgendaEventCreateForm({
   servicos,
   profissionais,
   initial,
+  library = [],
+  canCreateProduto = false,
 }: Props) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +76,7 @@ export function AgendaEventCreateForm({
   const [tipo, setTipo] = useState(defaultTipo(initialNatureza));
   const [clienteId, setClienteId] = useState(initial?.clienteId ?? "");
   const [servicoId, setServicoId] = useState(initial?.servicoId ?? "");
+  const [catalogoServicos, setCatalogoServicos] = useState(servicos);
   const initialMinutes =
     servicos.find((s) => s.id === initial?.servicoId)?.minutes ?? 60;
   const [duracao, setDuracao] = useState(initialMinutes);
@@ -119,6 +126,19 @@ export function AgendaEventCreateForm({
     setFim(
       `${local.getFullYear()}-${pad(local.getMonth() + 1)}-${pad(local.getDate())}T${pad(local.getHours())}:${pad(local.getMinutes())}`,
     );
+  }
+
+  function selectServico(svc: { id: string; label: string; minutes?: number | null }) {
+    if (svc.id) {
+      setCatalogoServicos((prev) =>
+        prev.some((item) => item.id === svc.id) ? prev : [...prev, svc],
+      );
+    }
+    setServicoId(svc.id);
+    if (svc.minutes) {
+      setDuracao(svc.minutes);
+      applyDuration(inicio, svc.minutes);
+    }
   }
 
   function resetForm() {
@@ -278,30 +298,14 @@ export function AgendaEventCreateForm({
           </label>
         ) : null}
         {natureza === "cliente" ? (
-          <label className="text-xs">
-            Serviço *
-            <select
-              className={fieldClass}
-              value={servicoId}
-              onChange={(e) => {
-                const id = e.target.value;
-                setServicoId(id);
-                const svc = servicos.find((s) => s.id === id);
-                if (svc?.minutes) {
-                  setDuracao(svc.minutes);
-                  applyDuration(inicio, svc.minutes);
-                }
-              }}
-            >
-              <option value="">Selecionar serviço</option>
-              {servicos.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                  {s.minutes ? ` (${s.minutes} min)` : ""}
-                </option>
-              ))}
-            </select>
-          </label>
+          <AgendaServiceField
+            tenantSlug={tenantSlug}
+            servicos={catalogoServicos}
+            servicoId={servicoId}
+            onSelect={selectServico}
+            canCreate={canCreateProduto}
+            library={library}
+          />
         ) : null}
         <label className="text-xs">
           Data e hora *

@@ -41,6 +41,12 @@ import {
   itemTypeOptionsForForm,
   type SegmentCatalogFormConfig,
 } from "@/lib/segments/form-config.ts";
+import {
+  unitFromSuggestion,
+  type CatalogSuggestionDto,
+} from "@/lib/segments/catalogs/suggest.ts";
+import { ServiceCatalogSuggest } from "@/components/produtos/service-catalog-suggest";
+import { OPERATIONAL_AUTOCOMPLETE_PROPS } from "@/lib/ux/browser-autocomplete";
 
 type ProdutoFormProps = {
   tenantSlug: string;
@@ -48,6 +54,8 @@ type ProdutoFormProps = {
   produto?: Produto;
   defaultTipo?: ProdutoTipo;
   formConfig?: SegmentCatalogFormConfig;
+  libraryItems?: CatalogSuggestionDto[];
+  existingNames?: string[];
 };
 
 const numberFieldOptions = {
@@ -72,6 +80,8 @@ export function ProdutoForm({
   produto,
   defaultTipo = "produto",
   formConfig,
+  libraryItems = [],
+  existingNames = [],
 }: ProdutoFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -236,7 +246,11 @@ export function ProdutoForm({
     <div className="relative">
       <LoadingOverlay loading={loading} label="Salvando..." />
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
+        autoComplete="off"
+      >
         {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
         <div data-fast-input="essentials">
@@ -252,7 +266,46 @@ export function ProdutoForm({
               error={form.formState.errors.nome?.message}
               className="md:col-span-2"
             >
-              <Input id="nome" {...form.register("nome")} placeholder="Nome do item" />
+              {mode === "create" &&
+              libraryItems.length > 0 &&
+              (tipo === "servico" || tipo === "combo" || tipo === "kit") ? (
+                <Controller
+                  control={form.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <ServiceCatalogSuggest
+                      id="nome"
+                      value={field.value}
+                      onChange={field.onChange}
+                      items={libraryItems}
+                      existingNames={existingNames}
+                      onPickTemplate={(item) => {
+                        field.onChange(item.name);
+                        form.setValue("categoria", item.category);
+                        form.setValue("tipo", item.itemType);
+                        form.setValue(
+                          "tempo_estimado_minutos",
+                          item.defaultDurationMinutes,
+                        );
+                        form.setValue(
+                          "unidade_medida",
+                          unitFromSuggestion(item.suggestedUnit),
+                        );
+                        form.setValue("descricao_resumida", item.description);
+                        form.setValue("preco_venda", null);
+                      }}
+                      onPickCustom={(name) => field.onChange(name)}
+                    />
+                  )}
+                />
+              ) : (
+                <Input
+                  id="nome"
+                  {...form.register("nome")}
+                  placeholder="Nome do item"
+                  {...OPERATIONAL_AUTOCOMPLETE_PROPS}
+                />
+              )}
             </FormField>
             <FormField
               label={tipo === "servico" ? "Preço" : "Preço de venda"}
@@ -266,6 +319,11 @@ export function ProdutoForm({
                 min="0"
                 {...form.register("preco_venda", numberFieldOptions)}
               />
+              {tipo === "servico" && (precoVenda == null || precoVenda === 0) ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Defina o preço cobrado pela sua empresa.
+                </p>
+              ) : null}
             </FormField>
             {tipo === "servico" ? (
               <FormField
@@ -545,7 +603,21 @@ export function ProdutoForm({
                 ) : null}
                 {!hide("especialidade") ? (
                 <FormField label="Especialidade" htmlFor="especialidade">
-                  <Input id="especialidade" {...form.register("especialidade")} />
+                  <Controller
+                    control={form.control}
+                    name="especialidade"
+                    render={({ field }) => (
+                      <Input
+                        id="especialidade"
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                        name="gestoo-service-specialty"
+                        {...OPERATIONAL_AUTOCOMPLETE_PROPS}
+                      />
+                    )}
+                  />
                 </FormField>
                 ) : null}
                 {!hide("equipe_ou_profissional") ? (

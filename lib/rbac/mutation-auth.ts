@@ -109,6 +109,20 @@ export async function requireActiveTenantIdMutation(
   return requireTenantMutationPermission(tenant.slug, required);
 }
 
+/** Leitura de permissão sem lançar — para esconder CTAs de criação. */
+export async function tenantHasMutationPermission(
+  tenantSlug: string,
+  required: PermissionKey | readonly PermissionKey[],
+): Promise<boolean> {
+  try {
+    await requireTenantMutationPermission(tenantSlug, required);
+    return true;
+  } catch (error) {
+    if (isMutationAuthError(error)) return false;
+    throw error;
+  }
+}
+
 export function isMutationAuthError(error: unknown): error is MutationAuthError {
   return (
     error instanceof MutationAuthError ||

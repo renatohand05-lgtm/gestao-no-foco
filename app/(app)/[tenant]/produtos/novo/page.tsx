@@ -3,6 +3,8 @@ import { ProdutoForm } from "@/components/produtos/produto-form";
 import { SectionCard } from "@/components/ui/section-card";
 import { getSegmentFormConfig } from "@/lib/segments/form-config.ts";
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
+import { serviceSuggestionsForContext } from "@/lib/segments/catalogs/suggest.ts";
+import { createProdutoService } from "@/lib/produtos/produto-service";
 import { requireTenant } from "@/lib/tenants";
 import type { ProdutoTipo } from "@/types/produtos";
 
@@ -30,6 +32,9 @@ export default async function NovoProdutoPage({
     ? requested
     : (allowed[0] ?? "servico");
   const isServico = defaultTipo === "servico";
+  const catalog = await createProdutoService(tenant.id);
+  const existing = await catalog.listNamesForDedup();
+  const libraryItems = isServico ? serviceSuggestionsForContext(ctx) : [];
 
   return (
     <div className="space-y-6">
@@ -55,6 +60,8 @@ export default async function NovoProdutoPage({
           mode="create"
           defaultTipo={defaultTipo}
           formConfig={formConfig}
+          libraryItems={libraryItems}
+          existingNames={existing.map((row) => row.nome)}
         />
       </SectionCard>
     </div>

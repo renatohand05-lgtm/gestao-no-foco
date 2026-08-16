@@ -70,6 +70,10 @@ export function planLibraryAdoption(
 
 export function libraryItemToCreateInput(
   item: SegmentLibraryItem,
+  extras?: {
+    preco_venda?: number | null;
+    tempo_estimado_minutos?: number | null;
+  },
 ): CreateProdutoInput {
   const isServico = item.itemType === "servico";
   const unit =
@@ -78,6 +82,10 @@ export function libraryItemToCreateInput(
       : item.suggestedUnit && item.suggestedUnit.length <= 4
         ? item.suggestedUnit
         : "UN";
+  const duration =
+    extras?.tempo_estimado_minutos != null
+      ? extras.tempo_estimado_minutos
+      : (item.defaultDurationMinutes ?? null);
   return {
     nome: item.name,
     tipo: item.itemType,
@@ -85,8 +93,8 @@ export function libraryItemToCreateInput(
     descricao_resumida: item.description,
     unidade_medida: unit,
     unidade_cobranca: item.suggestedUnit ?? (isServico ? "UN" : null),
-    tempo_estimado_minutos: item.defaultDurationMinutes ?? null,
-    preco_venda: null,
+    tempo_estimado_minutos: duration,
+    preco_venda: extras?.preco_venda ?? null,
     preco_sugerido: null,
     custo: null,
     ativo: true,

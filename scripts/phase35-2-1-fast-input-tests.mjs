@@ -78,7 +78,10 @@ describe("35.2.1 cliente / serviço / profissional mínimos", () => {
     assert.match(form, /Salvar serviço/);
     assert.match(form, /Duração \(minutos\)/);
     assert.doesNotMatch(form, /preco_venda: 0/);
-    assert.match(read("lib/segments/library-adopt.ts"), /preco_venda: null/);
+    assert.match(
+      read("lib/segments/library-adopt.ts"),
+      /preco_venda: extras\?\.preco_venda \?\? null/,
+    );
   });
 
   it("biblioteca de serviço reusa metadados e nunca inventa preço", async () => {

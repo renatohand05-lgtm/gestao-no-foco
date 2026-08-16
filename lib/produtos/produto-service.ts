@@ -201,20 +201,20 @@ export class ProdutoService {
     return data as Produto;
   }
 
-  async listNamesForDedup(): Promise<{ nome: string }[]> {
-    const rows: { nome: string }[] = [];
+  async listNamesForDedup(): Promise<{ id: string; nome: string }[]> {
+    const rows: { id: string; nome: string }[] = [];
     const pageSize = 1000;
     let from = 0;
     for (;;) {
       const { data, error } = await this.supabase
         .from("produtos")
-        .select("nome")
+        .select("id, nome")
         .eq("tenant_id", this.tenantId)
         .is("deleted_at", null)
         .range(from, from + pageSize - 1);
       if (error) throw new Error(error.message);
       if (!data?.length) break;
-      rows.push(...(data as { nome: string }[]));
+      rows.push(...(data as { id: string; nome: string }[]));
       if (data.length < pageSize) break;
       from += pageSize;
     }

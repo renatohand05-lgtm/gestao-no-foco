@@ -71,6 +71,7 @@ export {
 export {
   getSegmentServiceLibrary,
   getLibraryForContext,
+  getLibraryItemById,
   librarySegmentForContext,
   groupLibraryByCategory,
   namesAreEquivalent,

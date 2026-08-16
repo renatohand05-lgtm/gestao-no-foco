@@ -558,7 +558,8 @@
     "test:phase35-0-segment-architecture": "node --experimental-strip-types --test scripts/phase35-0-segment-architecture-tests.mjs",
     "test:phase35-1-segment-presets": "node --experimental-strip-types --test scripts/phase35-1-segment-presets-tests.mjs",
     "test:phase35-2-agenda-retention": "node --experimental-strip-types --test scripts/phase35-2-agenda-retention-tests.mjs",
-    "test:phase35-2-1-fast-input": "node --experimental-strip-types --test scripts/phase35-2-1-fast-input-tests.mjs"
+    "test:phase35-2-1-fast-input": "node --experimental-strip-types --test scripts/phase35-2-1-fast-input-tests.mjs",
+    "test:phase35-2-1-service-suggestions": "node --experimental-strip-types --test scripts/phase35-2-1-service-suggestions-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

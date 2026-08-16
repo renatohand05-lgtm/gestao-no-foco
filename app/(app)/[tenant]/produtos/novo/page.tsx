@@ -1,6 +1,8 @@
-import { ProdutoForm } from "@/components/produtos/produto-form";
 import { ModuleHeader } from "@/components/layout/module-header";
+import { ProdutoForm } from "@/components/produtos/produto-form";
 import { SectionCard } from "@/components/ui/section-card";
+import { getSegmentFormConfig } from "@/lib/segments/form-config.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { requireTenant } from "@/lib/tenants";
 import type { ProdutoTipo } from "@/types/produtos";
 
@@ -16,8 +18,17 @@ export default async function NovoProdutoPage({
   const { tenant: tenantSlug } = await params;
   const { tipo } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
-  const defaultTipo: ProdutoTipo =
-    tipo === "servico" ? "servico" : "produto";
+  const ctx = resolveSegmentContext({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const formConfig = getSegmentFormConfig(ctx);
+  const allowed = formConfig.allowedItemTypes.map((option) => option.value);
+  const requested: ProdutoTipo = tipo === "servico" ? "servico" : "produto";
+  const defaultTipo: ProdutoTipo = allowed.includes(requested)
+    ? requested
+    : (allowed[0] ?? "servico");
   const isServico = defaultTipo === "servico";
 
   return (
@@ -47,6 +58,7 @@ export default async function NovoProdutoPage({
           tenantSlug={tenantSlug}
           mode="create"
           defaultTipo={defaultTipo}
+          formConfig={formConfig}
         />
       </SectionCard>
     </div>

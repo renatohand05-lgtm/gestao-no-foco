@@ -1,0 +1,118 @@
+import { defineLibrary } from "./builder.ts";
+import type { SegmentLibraryItem } from "./types.ts";
+
+export const BARBEARIA_LIBRARY: SegmentLibraryItem[] = defineLibrary(
+  "barbearia",
+  [
+    {
+      category: "Cabelo",
+      defaultDurationMinutes: 40,
+      recommendCount: 4,
+      items: [
+        "Corte tradicional",
+        "Corte social",
+        "Corte degradê",
+        "Corte fade",
+        "Corte navalhado",
+        "Corte infantil",
+        "Corte sênior",
+        "Corte máquina",
+        "Corte tesoura",
+        "Acabamento",
+        "Pezinho",
+        "Raspagem completa",
+      ],
+    },
+    {
+      category: "Barba",
+      defaultDurationMinutes: 25,
+      recommendCount: 4,
+      items: [
+        "Barba tradicional",
+        "Barba desenhada",
+        "Barba com toalha quente",
+        "Barba com máquina",
+        "Barba navalhada",
+        "Aparar barba",
+        "Pigmentação de barba",
+        "Hidratação de barba",
+      ],
+    },
+    {
+      category: "Combos",
+      defaultDurationMinutes: 60,
+      recommended: true,
+      items: [
+        "Corte + barba",
+        "Corte + barba + acabamento",
+        "Corte + sobrancelha",
+        "Corte + barba + sobrancelha",
+        "Pai e filho",
+      ],
+    },
+    {
+      category: "Tratamentos",
+      defaultDurationMinutes: 40,
+      items: [
+        "Hidratação capilar",
+        "Reconstrução capilar",
+        "Detox capilar",
+        "Terapia capilar",
+        "Lavagem",
+        "Escova masculina",
+      ],
+    },
+    {
+      category: "Química / Estilo",
+      defaultDurationMinutes: 90,
+      items: [
+        "Pigmentação capilar",
+        "Coloração",
+        "Luzes",
+        "Platinado",
+        "Relaxamento",
+        "Progressiva masculina",
+      ],
+    },
+    {
+      category: "Estética complementar",
+      defaultDurationMinutes: 20,
+      items: [
+        "Sobrancelha",
+        "Limpeza facial básica",
+        "Máscara facial",
+        "Depilação nasal",
+        "Depilação de orelha",
+      ],
+    },
+    {
+      category: "Pacotes",
+      defaultDurationMinutes: 40,
+      recommended: true,
+      defaultItemType: "combo",
+      items: [
+        "Pacote mensal de cortes",
+        "Pacote corte + barba",
+        "Assinatura semanal",
+        "Assinatura quinzenal",
+        "Dia do noivo",
+      ],
+    },
+    {
+      category: "Produtos",
+      defaultItemType: "produto",
+      defaultUnit: "UN",
+      recommendCount: 4,
+      items: [
+        { name: "Pomada", description: "Pomada para cabelo." },
+        { name: "Shampoo", description: "Shampoo de uso profissional ou varejo." },
+        { name: "Condicionador", description: "Condicionador de uso profissional ou varejo." },
+        { name: "Óleo para barba", description: "Óleo para hidratação e brilho da barba." },
+        { name: "Balm", description: "Balm para barba." },
+        { name: "Cera", description: "Cera para cabelo." },
+        { name: "Spray", description: "Spray finalizador." },
+        { name: "Kit de cuidados", itemType: "kit", description: "Kit de cuidados para cabelo ou barba." },
+      ],
+    },
+  ],
+);

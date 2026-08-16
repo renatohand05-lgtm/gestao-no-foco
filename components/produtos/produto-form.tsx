@@ -34,12 +34,18 @@ import {
   type ProdutoFormValues,
 } from "@/lib/produtos/validations";
 import type { Produto } from "@/types/produtos";
+import {
+  isCatalogFieldHidden,
+  itemTypeOptionsForForm,
+  type SegmentCatalogFormConfig,
+} from "@/lib/segments/form-config.ts";
 
 type ProdutoFormProps = {
   tenantSlug: string;
   mode: "create" | "edit";
   produto?: Produto;
   defaultTipo?: ProdutoTipo;
+  formConfig?: SegmentCatalogFormConfig;
 };
 
 const numberFieldOptions = {
@@ -63,11 +69,34 @@ export function ProdutoForm({
   mode,
   produto,
   defaultTipo = "produto",
+  formConfig,
 }: ProdutoFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const initialTipo = defaultTipo === "servico" ? "servico" : defaultTipo;
+  const tipoOptions = itemTypeOptionsForForm(
+    formConfig ?? {
+      segment: "oficina",
+      allowedItemTypes: [...PRODUTO_TIPO_OPTIONS],
+      allowedOperationTypes: ["work_order"],
+      visibleFields: [],
+      hiddenFields: [],
+      optionalFields: [],
+      requiredFields: [],
+      serviceLibrary: "oficina",
+    },
+    produto?.tipo ?? defaultTipo,
+  );
+  const allowedValues = tipoOptions.map((option) => option.value);
+  const fallbackTipo = allowedValues.includes("servico")
+    ? "servico"
+    : (allowedValues[0] ?? "produto");
+  const initialTipo = allowedValues.includes(defaultTipo)
+    ? defaultTipo
+    : fallbackTipo;
+
+  const hide = (field: Parameters<typeof isCatalogFieldHidden>[1]) =>
+    formConfig ? isCatalogFieldHidden(formConfig, field) : false;
 
   const form = useForm<ProdutoFormInput, unknown, ProdutoFormValues>({
     resolver: zodResolver(produtoFormSchema),
@@ -129,9 +158,16 @@ export function ProdutoForm({
     [custo, precoVenda],
   );
 
-  const showEstoque = PRODUTO_TIPOS_COM_ESTOQUE.includes(
-    tipo as (typeof PRODUTO_TIPOS_COM_ESTOQUE)[number],
-  );
+  const showEstoque =
+    PRODUTO_TIPOS_COM_ESTOQUE.includes(
+      tipo as (typeof PRODUTO_TIPOS_COM_ESTOQUE)[number],
+    ) && !hide("estoque");
+  const showFiscal =
+    !hide("ncm") ||
+    !hide("cest") ||
+    !hide("origem_mercadoria") ||
+    !hide("peso_kg") ||
+    !hide("dimensoes");
 
   async function onSubmit(values: ProdutoFormValues) {
     setLoading(true);
@@ -203,8 +239,8 @@ export function ProdutoForm({
                 id="tipo"
                 {...form.register("tipo")}
               >
-                {PRODUTO_TIPO_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
+                {tipoOptions.map((option) => (
+                  <option key={`${option.value}-${option.label}`} value={option.value}>
                     {option.label}
                   </option>
                 ))}
@@ -221,17 +257,23 @@ export function ProdutoForm({
               <Input id="nome" {...form.register("nome")} placeholder="Nome do item" />
             </FormField>
 
+            {!hide("codigo_interno") ? (
             <FormField label="Código interno" htmlFor="codigo_interno">
               <Input id="codigo_interno" {...form.register("codigo_interno")} />
             </FormField>
+            ) : null}
 
+            {!hide("sku") ? (
             <FormField label="SKU" htmlFor="sku">
               <Input id="sku" {...form.register("sku")} />
             </FormField>
+            ) : null}
 
+            {!hide("codigo_barras") ? (
             <FormField label="Código de barras" htmlFor="codigo_barras" className="md:col-span-2">
               <Input id="codigo_barras" {...form.register("codigo_barras")} />
             </FormField>
+            ) : null}
           </FormGrid>
         </FormSection>
 
@@ -248,13 +290,17 @@ export function ProdutoForm({
               <Input id="subcategoria" {...form.register("subcategoria")} />
             </FormField>
 
+            {!hide("marca") ? (
             <FormField label="Marca" htmlFor="marca">
               <Input id="marca" {...form.register("marca")} />
             </FormField>
+            ) : null}
 
+            {!hide("fabricante") ? (
             <FormField label="Fabricante" htmlFor="fabricante">
               <Input id="fabricante" {...form.register("fabricante")} />
             </FormField>
+            ) : null}
 
             <FormField label="Descrição resumida" htmlFor="descricao_resumida" className="md:col-span-2">
               <Input
@@ -279,11 +325,13 @@ export function ProdutoForm({
           </FormGrid>
         </FormSection>
 
+        {showFiscal ? (
         <FormSection
           title="Fiscal e dimensões"
           description="Campos opcionais para Tax Intelligence (NCM/CEST) e logística. Sem inventar impostos."
         >
           <FormGrid>
+            {!hide("ncm") ? (
             <FormField
               label="NCM"
               htmlFor="ncm"
@@ -291,9 +339,13 @@ export function ProdutoForm({
             >
               <Input id="ncm" {...form.register("ncm")} placeholder="8 dígitos" />
             </FormField>
+            ) : null}
+            {!hide("cest") ? (
             <FormField label="CEST" htmlFor="cest">
               <Input id="cest" {...form.register("cest")} />
             </FormField>
+            ) : null}
+            {!hide("origem_mercadoria") ? (
             <FormField label="Origem" htmlFor="origem_mercadoria">
               <Input
                 id="origem_mercadoria"
@@ -301,6 +353,8 @@ export function ProdutoForm({
                 placeholder="Ex.: 0 nacional"
               />
             </FormField>
+            ) : null}
+            {!hide("peso_kg") ? (
             <FormField label="Peso (kg)" htmlFor="peso_kg">
               <Input
                 id="peso_kg"
@@ -310,6 +364,8 @@ export function ProdutoForm({
                 {...form.register("peso_kg", numberFieldOptions)}
               />
             </FormField>
+            ) : null}
+            {!hide("altura_cm") ? (
             <FormField label="Altura (cm)" htmlFor="altura_cm">
               <Input
                 id="altura_cm"
@@ -319,6 +375,8 @@ export function ProdutoForm({
                 {...form.register("altura_cm", numberFieldOptions)}
               />
             </FormField>
+            ) : null}
+            {!hide("largura_cm") ? (
             <FormField label="Largura (cm)" htmlFor="largura_cm">
               <Input
                 id="largura_cm"
@@ -328,6 +386,8 @@ export function ProdutoForm({
                 {...form.register("largura_cm", numberFieldOptions)}
               />
             </FormField>
+            ) : null}
+            {!hide("comprimento_cm") ? (
             <FormField label="Comprimento (cm)" htmlFor="comprimento_cm">
               <Input
                 id="comprimento_cm"
@@ -337,11 +397,15 @@ export function ProdutoForm({
                 {...form.register("comprimento_cm", numberFieldOptions)}
               />
             </FormField>
+            ) : null}
+            {!hide("dimensoes") ? (
             <FormField label="Dimensões (texto)" htmlFor="dimensoes">
               <Input id="dimensoes" {...form.register("dimensoes")} />
             </FormField>
+            ) : null}
           </FormGrid>
         </FormSection>
+        ) : null}
 
         <FormSection
           title="Precificação"
@@ -396,6 +460,7 @@ export function ProdutoForm({
 
             {tipo === "servico" ? (
               <>
+                {!hide("preco_sugerido") ? (
                 <FormField
                   label="Preço sugerido"
                   htmlFor="preco_sugerido"
@@ -409,6 +474,7 @@ export function ProdutoForm({
                     {...form.register("preco_sugerido", numberFieldOptions)}
                   />
                 </FormField>
+                ) : null}
                 <FormField
                   label="Tempo estimado (minutos)"
                   htmlFor="tempo_estimado_minutos"
@@ -421,9 +487,12 @@ export function ProdutoForm({
                     {...form.register("tempo_estimado_minutos", numberFieldOptions)}
                   />
                 </FormField>
+                {!hide("especialidade") ? (
                 <FormField label="Especialidade" htmlFor="especialidade">
                   <Input id="especialidade" {...form.register("especialidade")} />
                 </FormField>
+                ) : null}
+                {!hide("equipe_ou_profissional") ? (
                 <FormField
                   label="Profissional / equipe"
                   htmlFor="equipe_ou_profissional"
@@ -433,6 +502,7 @@ export function ProdutoForm({
                     {...form.register("equipe_ou_profissional")}
                   />
                 </FormField>
+                ) : null}
                 <FormField label="Unidade de cobrança" htmlFor="unidade_cobranca">
                   <Input
                     id="unidade_cobranca"
@@ -561,6 +631,7 @@ export function ProdutoForm({
                   )}
                 />
               </FormField>
+              {!hide("lote") ? (
               <FormField label="Controla lote" htmlFor="controla_lote">
                 <Controller
                   control={form.control}
@@ -577,6 +648,8 @@ export function ProdutoForm({
                   )}
                 />
               </FormField>
+              ) : null}
+              {!hide("serie") ? (
               <FormField label="Controla série" htmlFor="controla_serie">
                 <Controller
                   control={form.control}
@@ -593,6 +666,8 @@ export function ProdutoForm({
                   )}
                 />
               </FormField>
+              ) : null}
+              {!hide("validade") ? (
               <FormField label="Controla validade" htmlFor="controla_validade">
                 <Controller
                   control={form.control}
@@ -609,6 +684,7 @@ export function ProdutoForm({
                   )}
                 />
               </FormField>
+              ) : null}
             </FormGrid>
           </FormSection>
         ) : null}

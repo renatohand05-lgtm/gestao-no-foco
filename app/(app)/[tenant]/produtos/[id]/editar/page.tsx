@@ -4,6 +4,8 @@ import { ProdutoForm } from "@/components/produtos/produto-form";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { createProdutoService } from "@/lib/produtos/produto-service";
+import { getSegmentFormConfig } from "@/lib/segments/form-config.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { requireTenant } from "@/lib/tenants";
 
 export const metadata = { title: "Editar item" };
@@ -15,6 +17,12 @@ export default async function EditarProdutoPage({
 }) {
   const { tenant: tenantSlug, id } = await params;
   const tenant = await requireTenant(tenantSlug);
+  const ctx = resolveSegmentContext({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const formConfig = getSegmentFormConfig(ctx);
   const service = await createProdutoService(tenant.id);
   const produto = await service.getById(id);
 
@@ -38,7 +46,12 @@ export default async function EditarProdutoPage({
         title="Cadastro completo"
         description="Todos os campos do módulo enterprise de produtos e serviços."
       >
-        <ProdutoForm tenantSlug={tenantSlug} mode="edit" produto={produto} />
+        <ProdutoForm
+          tenantSlug={tenantSlug}
+          mode="edit"
+          produto={produto}
+          formConfig={formConfig}
+        />
       </SectionCard>
     </div>
   );

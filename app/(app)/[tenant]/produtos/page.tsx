@@ -12,6 +12,7 @@ import { ProdutoTable } from "@/components/produtos/produto-table";
 import { ActionButton } from "@/components/ui/action-button";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PRODUTOS_DEFAULT_PER_PAGE } from "@/lib/produtos/constants";
 import { createProdutoService } from "@/lib/produtos/produto-service";
 import { requireTenant } from "@/lib/tenants";
@@ -38,6 +39,9 @@ type ProdutosPageProps = {
     precoZerado?: string;
     success?: string;
     error?: string;
+    library?: string;
+    added?: string;
+    skipped?: string;
   }>;
 };
 
@@ -62,6 +66,9 @@ export default async function ProdutosPage({
     precoZerado,
     success,
     error,
+    library,
+    added,
+    skipped,
   } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   const service = await createProdutoService(tenant.id);
@@ -102,6 +109,11 @@ export default async function ProdutosPage({
         breadcrumbs={[{ label: "Produtos & Serviços" }]}
       >
         <ActionButton
+          action="view"
+          label="Sugestões do segmento"
+          href={`/${tenantSlug}/produtos/catalogo-inicial`}
+        />
+        <ActionButton
           action="create"
           label="Importar produtos"
           href={`/${tenantSlug}/produtos/importar?kind=produtos`}
@@ -129,6 +141,17 @@ export default async function ProdutosPage({
       </ModuleHeader>
 
       <ProdutoHubTabs tenantSlug={tenantSlug} currentTipo={tipoFilter} />
+
+      {library === "1" ? (
+        <FeedbackMessage variant="success">
+          {Number(added) > 0
+            ? `${added} item${Number(added) === 1 ? "" : "s"} adicionado${Number(added) === 1 ? "" : "s"} ao catálogo.`
+            : "Nenhum item novo — os selecionados já existiam ou não eram da biblioteca."}
+          {Number(skipped) > 0
+            ? ` ${skipped} equivalente${Number(skipped) === 1 ? "" : "s"} ignorado${Number(skipped) === 1 ? "" : "s"} para evitar duplicata.`
+            : ""}
+        </FeedbackMessage>
+      ) : null}
 
       <ProdutoFeedback
         success={success as ProdutoSuccessMessage | undefined}

@@ -69,6 +69,8 @@ Lava-rápido reusa `ordens_servico` como **Atendimentos** (checklist no mesmo ba
 
 Override no próprio `segment_config` (sem migration nova). UI: Configurações → Personalizar experiência.
 
+Biblioteca inicial de serviços (`lib/segments/catalogs/`): templates por segmento. O tenant **escolhe** o que entra; nada é persistido no `createTenant`. Deduplicação por nome normalizado. Form de catálogo lê `getSegmentFormConfig` (tipos/campos), não `if (segment === …)` nas páginas. Preço não é imposto pela biblioteca.
+
 Reset remove overrides; desativar módulo não apaga dados. Alterar o tipo de negócio aplica o novo preset; overrides compatíveis podem ser preservados se o usuário confirmar.
 
 Mobile: `memberships.modules` + atalhos de operação filtrados por capability.

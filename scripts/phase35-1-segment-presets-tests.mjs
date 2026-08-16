@@ -607,3 +607,241 @@ describe("35.1 copy sem vazamento na UI", () => {
     }
   });
 });
+
+const AUTO_LEAK =
+  /amortecedor|pastilha|óleo do motor|filtro de óleo|disco de freio|scanner automotivo|correia dentada|caixa de direção|peça mecânica|componente automotivo|matéria-prima industrial|quilometragem|\bcombustível\b|ordem de serviço/i;
+const LAVA_MECHANICAL_LEAK =
+  /diagnóstico de motor|diagnóstico mecânico|pastilha|peça mecânica|oficina \/ veículo|troca de óleo do motor|embreagem|correia dentada/i;
+
+describe("35.1 segment service library", () => {
+  it("biblioteca existe só no código e não mistura segmentos", async () => {
+    const { ALL_SEGMENT_LIBRARIES, getSegmentServiceLibrary } = await load(
+      "lib/segments/catalogs/index.ts",
+    );
+    const { PRODUCT_SEGMENT_IDS } = await load("lib/segments/types.ts");
+    const ids = new Set();
+    for (const segment of PRODUCT_SEGMENT_IDS) {
+      const lib = getSegmentServiceLibrary(segment);
+      assert.equal(lib, ALL_SEGMENT_LIBRARIES[segment]);
+      assert.ok(lib.length >= 30, `${segment} too small: ${lib.length}`);
+      for (const item of lib) {
+        assert.equal(item.segment, segment, item.id);
+        assert.equal(item.active, true, item.id);
+        assert.ok(item.name.trim(), item.id);
+        assert.ok(item.category.trim(), item.id);
+        assert.equal(item.preco, undefined);
+        assert.equal(item.price, undefined);
+        assert.ok(!ids.has(item.id), `id duplicado ${item.id}`);
+        ids.add(item.id);
+      }
+    }
+  });
+
+  it("oficina cobre as categorias homologadas", async () => {
+    const { getSegmentServiceLibrary } = await load(
+      "lib/segments/catalogs/index.ts",
+    );
+    const lib = getSegmentServiceLibrary("oficina");
+    const cats = new Set(lib.map((i) => i.category));
+    for (const cat of [
+      "Revisão / Manutenção",
+      "Freios",
+      "Suspensão",
+      "Direção",
+      "Motor",
+      "Elétrica",
+      "Ar-condicionado",
+      "Transmissão",
+      "Pneus",
+    ]) {
+      assert.ok(cats.has(cat), cat);
+    }
+    assert.ok(lib.length >= 70, lib.length);
+    assert.ok(lib.some((i) => i.name === "Revisão básica"));
+    assert.ok(lib.some((i) => i.name === "Troca de óleo do motor"));
+    assert.ok(lib.some((i) => i.name === "Scanner automotivo"));
+  });
+
+  it("barbearia não vaza automotivo e tem produtos de varejo", async () => {
+    const { getSegmentServiceLibrary } = await load(
+      "lib/segments/catalogs/index.ts",
+    );
+    const lib = getSegmentServiceLibrary("barbearia");
+    const blob = lib.map((i) => `${i.name} ${i.description} ${i.category}`).join("\n");
+    assert.doesNotMatch(blob, AUTO_LEAK);
+    assert.doesNotMatch(blob, /veículo|placa|\bkm\b|oficina/i);
+    assert.ok(lib.some((i) => i.name === "Corte degradê"));
+    assert.ok(lib.some((i) => i.name === "Pomada" && i.itemType === "produto"));
+    assert.ok(lib.length >= 50, lib.length);
+  });
+
+  it("lava-rápido preserva estética automotiva sem mecânica", async () => {
+    const { getSegmentServiceLibrary } = await load(
+      "lib/segments/catalogs/index.ts",
+    );
+    const { getSegmentFormConfig } = await load("lib/segments/form-config.ts");
+    const { resolveSegmentContext, hasCapability } = await load(
+      "lib/segments/resolve.ts",
+    );
+    const lib = getSegmentServiceLibrary("lava_rapido");
+    const blob = lib.map((i) => `${i.name} ${i.category}`).join("\n");
+    assert.doesNotMatch(blob, LAVA_MECHANICAL_LEAK);
+    assert.ok(lib.some((i) => i.name === "Lavagem completa"));
+    assert.ok(lib.some((i) => i.name === "Detalhamento completo"));
+    const ctx = resolveSegmentContext({
+      segment: "lava_rapido",
+      ...ENGINE,
+    });
+    assert.equal(hasCapability(ctx, "vehicles"), true);
+    assert.equal(hasCapability(ctx, "service_checklist"), true);
+    const form = getSegmentFormConfig(ctx);
+    assert.ok(form.visibleFields.includes("veiculo"));
+    assert.ok(form.visibleFields.includes("placa"));
+    assert.ok(form.visibleFields.includes("checklist"));
+    assert.ok(form.optionalFields.includes("km"));
+    assert.ok(form.optionalFields.includes("combustivel"));
+    assert.ok(form.hiddenFields.includes("diagnostico_mecanico"));
+    assert.ok(!form.allowedItemTypes.some((t) => t.value === "peca"));
+  });
+
+  it("consultoria, estética e odonto sem peças/veículo/km", async () => {
+    const { getSegmentServiceLibrary } = await load(
+      "lib/segments/catalogs/index.ts",
+    );
+    const { getSegmentFormConfig } = await load("lib/segments/form-config.ts");
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    for (const id of [
+      "consultoria",
+      "clinica_estetica",
+      "consultorio_odontologico",
+    ]) {
+      const lib = getSegmentServiceLibrary(id);
+      const blob = lib.map((i) => `${i.name} ${i.description} ${i.category}`).join("\n");
+      assert.doesNotMatch(blob, AUTO_LEAK, id);
+      assert.doesNotMatch(blob, /veículo|placa|\bkm\b|oficina/i, id);
+      const form = getSegmentFormConfig(
+        resolveSegmentContext({ segment: id, ...ENGINE }),
+      );
+      assert.ok(form.hiddenFields.includes("veiculo"), id);
+      assert.ok(form.hiddenFields.includes("km"), id);
+      assert.ok(form.hiddenFields.includes("pecas_mecanicas"), id);
+      assert.ok(!form.allowedItemTypes.some((t) => t.value === "peca"), id);
+    }
+    assert.ok(
+      getSegmentServiceLibrary("consultoria").some((i) => i.name === "Hora técnica"),
+    );
+    assert.ok(
+      getSegmentServiceLibrary("clinica_estetica").some(
+        (i) => i.name === "Limpeza de pele",
+      ),
+    );
+    assert.ok(
+      getSegmentServiceLibrary("consultorio_odontologico").some(
+        (i) => i.name === "Consulta inicial",
+      ),
+    );
+    const odontoBlob = getSegmentServiceLibrary("consultorio_odontologico")
+      .map((i) => i.description)
+      .join(" ");
+    assert.doesNotMatch(odontoBlob, /prontuário|odontograma|anamnese|prescrição/i);
+  });
+
+  it("legado (engine off) usa biblioteca e form da oficina", async () => {
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    const { getLibraryForContext } = await load("lib/segments/catalogs/index.ts");
+    const { getSegmentFormConfig } = await load("lib/segments/form-config.ts");
+    const ctx = resolveSegmentContext({
+      segment: "consultoria",
+      segmentVersion: null,
+    });
+    assert.equal(ctx.usesCapabilityEngine, false);
+    const lib = getLibraryForContext(ctx);
+    assert.ok(lib.every((i) => i.segment === "oficina"));
+    const form = getSegmentFormConfig(ctx);
+    assert.equal(form.segment, "oficina");
+    assert.ok(form.allowedItemTypes.some((t) => t.value === "peca"));
+  });
+
+  it("seleção, deduplicação e custom sem preço imposto", async () => {
+    const { getSegmentServiceLibrary } = await load(
+      "lib/segments/catalogs/index.ts",
+    );
+    const { planLibraryAdoption, libraryItemToCreateInput } = await load(
+      "lib/segments/library-adopt.ts",
+    );
+    const { namesAreEquivalent } = await load("lib/segments/catalogs/builder.ts");
+    const lib = getSegmentServiceLibrary("barbearia");
+    const corte = lib.find((i) => i.name === "Corte tradicional");
+    const barba = lib.find((i) => i.name === "Barba tradicional");
+    const pomada = lib.find((i) => i.name === "Pomada");
+    assert.ok(corte && barba && pomada);
+    const plan = planLibraryAdoption(
+      "barbearia",
+      [corte.id, barba.id, pomada.id, "oficina-freios-diagnostico-freios"],
+      [{ nome: "corte tradicional" }],
+    );
+    assert.equal(plan.toCreate.length, 2);
+    assert.equal(plan.skippedDuplicate.length, 1);
+    assert.equal(plan.skippedWrongSegment.length, 1);
+    assert.ok(namesAreEquivalent("Troca de ÓLEO do Motor", "troca oleo motor"));
+    const input = libraryItemToCreateInput(barba);
+    assert.equal(input.preco_venda, null);
+    assert.equal(input.nome, "Barba tradicional");
+    assert.equal(input.tenant_id, undefined);
+  });
+
+  it("tenant isolation e RBAC na action; sem auto-seed", () => {
+    const actions = read("lib/segments/library-actions.ts");
+    assert.match(actions, /requireTenantMutationPermission/);
+    assert.match(actions, /produtos\.criar/);
+    assert.match(actions, /createProdutoService\(tenant\.id\)/);
+    assert.doesNotMatch(actions, /asaas/i);
+    const create = read("lib/onboarding/create-tenant.ts");
+    assert.doesNotMatch(create, /adoptSegmentLibrary|getSegmentServiceLibrary/);
+    const service = read("lib/produtos/produto-service.ts");
+    assert.match(service, /eq\("tenant_id", this.tenantId\)/);
+  });
+
+  it("empty state, picker, CTA de tenant existente e custom service", () => {
+    const empty = read("components/produtos/produto-empty-state.tsx");
+    assert.match(empty, /Montar catálogo inicial/);
+    assert.match(empty, /Criar do zero/);
+    assert.match(empty, /catalogo-inicial/);
+    const picker = read("components/produtos/segment-catalog-picker.tsx");
+    assert.match(picker, /Adicionar selecionados/);
+    assert.match(picker, /Selecionar recomendados/);
+    assert.match(picker, /Selecionar categoria/);
+    assert.match(picker, /Criar serviço personalizado/);
+    const hub = read("app/(app)/[tenant]/produtos/page.tsx");
+    assert.match(hub, /Sugestões do segmento/);
+    assert.ok(
+      existsSync(join(root, "app/(app)/[tenant]/produtos/catalogo-inicial/page.tsx")),
+    );
+    const form = read("components/produtos/produto-form.tsx");
+    assert.match(form, /formConfig/);
+    assert.doesNotMatch(form, /segment === ['"]barbearia['"]/);
+  });
+
+  it("form config central: tipos e campos por segmento", async () => {
+    const { getSegmentFormConfig } = await load("lib/segments/form-config.ts");
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    const oficina = getSegmentFormConfig(
+      resolveSegmentContext({ segment: "oficina", ...ENGINE }),
+    );
+    assert.ok(oficina.allowedItemTypes.some((t) => t.value === "peca"));
+    assert.ok(oficina.allowedItemTypes.some((t) => t.value === "composto"));
+    assert.equal(oficina.hiddenFields.length, 0);
+    const barbearia = getSegmentFormConfig(
+      resolveSegmentContext({ segment: "barbearia", ...ENGINE }),
+    );
+    const barbTypes = barbearia.allowedItemTypes.map((t) => t.value);
+    assert.deepEqual(barbTypes.sort(), ["combo", "kit", "produto", "servico"].sort());
+    const consultoria = getSegmentFormConfig(
+      resolveSegmentContext({ segment: "consultoria", ...ENGINE }),
+    );
+    assert.ok(consultoria.allowedOperationTypes.includes("consultation"));
+    assert.ok(
+      consultoria.allowedItemTypes.every((t) => t.value === "servico" || t.value === "combo"),
+    );
+  });
+});

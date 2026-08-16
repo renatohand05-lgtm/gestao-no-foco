@@ -201,6 +201,40 @@ export class ProdutoService {
     return data as Produto;
   }
 
+  async listNamesForDedup(): Promise<{ nome: string }[]> {
+    const rows: { nome: string }[] = [];
+    const pageSize = 1000;
+    let from = 0;
+    for (;;) {
+      const { data, error } = await this.supabase
+        .from("produtos")
+        .select("nome")
+        .eq("tenant_id", this.tenantId)
+        .is("deleted_at", null)
+        .range(from, from + pageSize - 1);
+      if (error) throw new Error(error.message);
+      if (!data?.length) break;
+      rows.push(...(data as { nome: string }[]));
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+    return rows;
+  }
+
+  async createMany(inputs: CreateProdutoInput[]): Promise<Produto[]> {
+    if (inputs.length === 0) return [];
+    const payloads = inputs.map((input) => ({
+      tenant_id: this.tenantId,
+      ...buildProdutoPayload(input),
+    }));
+    const { data, error } = await this.supabase
+      .from("produtos")
+      .insert(payloads)
+      .select("*");
+    if (error) throw new Error(mapUniqueViolation(error));
+    return (data as Produto[]) ?? [];
+  }
+
   async update(id: string, input: UpdateProdutoInput): Promise<Produto> {
     const payload = buildProdutoPayload(input as CreateProdutoInput);
     const { data, error } = await this.supabase

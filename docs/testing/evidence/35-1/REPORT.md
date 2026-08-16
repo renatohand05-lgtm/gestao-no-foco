@@ -1,13 +1,32 @@
-# Sprint 35.1 — Presets por segmento + override por tenant
+# Sprint 35.1 — Presets por segmento + biblioteca de serviços + form config
 
 **Data:** 2026-08-16  
-**Commit código:** `18bbe56`  
+**Commit código:** *(este avanço)*  
 **Branch:** `main`  
-**Tipo:** Hardening de apresentação — sem billing / Asaas / 35.2 / auto-migration prod
+**Tipo:** Biblioteca de sugestões + filtragem de formulário — sem billing / Asaas / 35.2 / auto-migration prod
 
 ## Status
 
-**SPRINT 35.1 FINAL CLOSEOUT: GO (código)** · homologação visual **PENDING (Renato)** · **P0: 0** · **P1: 0** · **P2 documentado fora da jornada principal** · migration **NENHUMA**
+**SPRINT 35.1 SERVICE LIBRARY: GO (código)** · homologação visual **PENDING (Renato)** · **P0: 0** · **P1: 0** · migration **NENHUMA**
+
+## Biblioteca de serviços (2026-08-16)
+
+Templates em `lib/segments/catalogs/` (código versionado). **Não** persiste no `createTenant`. Só entra o que o usuário seleciona. Preço fica a cargo do cliente. Deduplicação por nome normalizado (acentos/stopwords). Legado (`segment_version` NULL) continua com biblioteca/form da oficina.
+
+| Segmento | Sugestões | Status |
+|---|---|---|
+| Oficina | 70 | PASS |
+| Barbearia | 55 | PASS |
+| Lava-rápido | 54 | PASS |
+| Consultoria | 46 | PASS |
+| Clínica estética | 44 | PASS |
+| Consultório odontológico | 36 | PASS |
+
+Onboarding / empty state: **Montar catálogo inicial** + **Criar do zero**. Tenant existente: CTA **Sugestões do segmento**. Form: `getSegmentFormConfig` (tipos/campos visíveis). Action `adoptSegmentLibraryAction` exige `produtos.criar` e grava só em `tenant.id`.
+
+Form config: oficina preserva Peça/Matéria-prima/compostos. Barbearia/consultoria/estética/odonto escondem peça, km, veículo, diagnóstico mecânico. Lava-rápido mantém veículo, placa, checklist; km/combustível opcionais.
+
+Páginas: `/[tenant]/produtos` · `/[tenant]/produtos/catalogo-inicial` · `/[tenant]/produtos/novo` · `/[tenant]/produtos/[id]/editar`
 
 ## Auditoria global de copy (closeout)
 
@@ -56,7 +75,7 @@ Gaps grandes (prontuário, odontograma, folha, fidelidade, projetos) **não** fo
 
 | Gate | Resultado |
 |---|---|
-| `test:phase35-1-segment-presets` | **31/31 PASS** (`ℹ tests 31` · `ℹ pass 31` · `ℹ fail 0`) |
+| `test:phase35-1-segment-presets` | **41/41 PASS** (`ℹ tests 41` · `ℹ pass 41` · `ℹ fail 0`) |
 | `test:phase35-0-segment-architecture` | **13 PASS · 0 FAIL** |
 | `test:phase34-9-contas-pagar-beneficiarios` | 25 PASS · 0 FAIL |
 | `test:phase34-2-p0-tenant-rls` | 12 PASS · 0 FAIL |
@@ -67,11 +86,9 @@ Gaps grandes (prontuário, odontograma, folha, fidelidade, projetos) **não** fo
 | `test:phase34-7-reports-integrity` | 12 PASS · 0 FAIL |
 | `test:phase34-8-release-candidate` | 8 PASS · 0 FAIL |
 | `test:rbac` | 92 PASS · 0 FAIL |
-| `test:phase30-multisector-nav` | 14 PASS · 0 FAIL |
-| `test:phase30-segment-config` | 36 PASS · 0 FAIL |
 | `lint` | PASS (35 warnings pré-existentes) |
 | `npx tsc --noEmit` | PASS |
-| `npm run build` | PASS (`/[tenant]/profissionais` e `/[tenant]/oficina/mecanicos` registrados) |
+| `npm run build` | PASS (`/[tenant]/produtos/catalogo-inicial` registrado) |
 | `git diff --check` | PASS |
 
 ## Matriz segmento × módulo × capability
@@ -160,7 +177,16 @@ Gaps grandes (prontuário, odontograma, folha, fidelidade, projetos) **não** fo
 
 Já homologado: oficina UX automotiva, consultoria sem módulos automotivos, barbearia Barbeiros, lava Pacotes/Atendimentos/Profissionais, agenda.
 
-Validar agora (fechamento):
+Validar agora (biblioteca + form):
+1. Empresa nova (barbearia/consultoria/estética/odonto/lava/oficina) → Produtos: empty state **Montar catálogo inicial** e **Criar do zero**
+2. Picker: selecionar item, categoria, recomendados, todos → **Adicionar selecionados** (preço em branco)
+3. Editar item: nome, categoria, preço, custo, duração, status
+4. **Criar serviço personalizado** fora do template
+5. Tenant com catálogo: CTA **Sugestões do segmento** sem sobrescrever equivalentes
+6. Form novo item: tipos/campos do segmento (barbearia sem Peça; consultoria sem veículo/NCM; lava com veículo no atendimento)
+7. Oficina: tipos Peça/Matéria-prima e UX automotiva intactos
+
+Validar copy (fechamento anterior):
 1. Lava-rápido → Atendimentos: KPIs **Atendimentos abertos** e **Valor estimado dos atendimentos em andamento**
 2. Lava-rápido → abrir atendimento: loading **Carregando atendimento**, aba **Análise**, sem toast “OS”
 3. Oficina: **OS abertas**, Mecânicos, diagnóstico, peças, skeleton “workspace da OS”

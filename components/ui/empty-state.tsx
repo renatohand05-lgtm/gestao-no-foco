@@ -19,18 +19,58 @@ type EmptyStateProps = {
     onClick?: () => void;
     icon?: LucideIcon;
   };
+  secondaryAction?: {
+    label: string;
+    href?: string;
+    onClick?: () => void;
+    icon?: LucideIcon;
+  };
   className?: string;
 };
 
 /**
  * Empty state padronizado — identidade GESTÃO (Gate 19.4 · refinado 26.3).
  */
+function EmptyStateButton({
+  action,
+  className,
+  variant = "default",
+}: {
+  action: NonNullable<EmptyStateProps["action"]>;
+  className?: string;
+  variant?: "default" | "outline";
+}) {
+  if (action.href) {
+    return (
+      <Button
+        className={className}
+        variant={variant}
+        render={<Link href={action.href} />}
+      >
+        {action.icon ? (
+          <DsIcon icon={action.icon} size="md" className="mr-2" />
+        ) : null}
+        {action.label}
+      </Button>
+    );
+  }
+  return (
+    <Button className={className} variant={variant} onClick={action.onClick}>
+      {action.icon ? (
+        <DsIcon icon={action.icon} size="md" className="mr-2" />
+      ) : null}
+      {action.label}
+    </Button>
+  );
+}
+
 export function EmptyState({
   icon: Icon,
   title,
   description,
   impact,
   action,
+  secondaryAction,
   className,
 }: EmptyStateProps) {
   return (
@@ -58,22 +98,19 @@ export function EmptyState({
           Impacto: {impact}
         </p>
       ) : null}
-      {action ? (
-        action.href ? (
-          <Button className="mt-6 min-h-11" render={<Link href={action.href} />}>
-            {action.icon ? (
-              <DsIcon icon={action.icon} size="md" className="mr-2" />
-            ) : null}
-            {action.label}
-          </Button>
-        ) : (
-          <Button className="mt-6 min-h-11" onClick={action.onClick}>
-            {action.icon ? (
-              <DsIcon icon={action.icon} size="md" className="mr-2" />
-            ) : null}
-            {action.label}
-          </Button>
-        )
+      {action || secondaryAction ? (
+        <div className="mt-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+          {action ? (
+            <EmptyStateButton action={action} className="min-h-11" />
+          ) : null}
+          {secondaryAction ? (
+            <EmptyStateButton
+              action={secondaryAction}
+              className="min-h-11"
+              variant="outline"
+            />
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

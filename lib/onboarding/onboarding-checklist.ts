@@ -106,12 +106,12 @@ export async function buildFirstValueChecklist(params: {
     {
       id: "produto",
       title: "Produtos",
-      description: "Ao menos um item no catálogo.",
-      benefit: "Acelera OS e a primeira venda.",
+      description: "Monte o catálogo inicial ou cadastre um item do zero.",
+      benefit: "Acelera vendas e o fluxo operacional.",
       required: false,
       completed: produtos > 0,
-      href: `${base}/produtos/novo`,
-      ctaLabel: "Novo item",
+      href: `${base}/produtos/catalogo-inicial`,
+      ctaLabel: "Montar catálogo inicial",
     },
     {
       id: "venda",

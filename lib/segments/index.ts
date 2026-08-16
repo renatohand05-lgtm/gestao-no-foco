@@ -68,3 +68,26 @@ export {
   type SegmentUiCopy,
   type SegmentUiCopyClient,
 } from "./copy.ts";
+export {
+  getSegmentServiceLibrary,
+  getLibraryForContext,
+  librarySegmentForContext,
+  groupLibraryByCategory,
+  namesAreEquivalent,
+  normalizeCatalogName,
+  type SegmentLibraryItem,
+} from "./catalogs/index.ts";
+export {
+  getSegmentFormConfig,
+  isCatalogFieldHidden,
+  isCatalogFieldVisible,
+  itemTypeOptionsForForm,
+  type SegmentCatalogFormConfig,
+  type CatalogFieldId,
+  type CatalogOperationType,
+} from "./form-config.ts";
+export {
+  planLibraryAdoption,
+  libraryItemToCreateInput,
+  type AdoptLibraryPlan,
+} from "./library-adopt.ts";

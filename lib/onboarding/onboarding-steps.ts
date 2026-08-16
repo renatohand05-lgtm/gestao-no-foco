@@ -68,7 +68,7 @@ export const ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     estimatedMinutes: 2,
     dataBacked: true,
     checklistId: "produto",
-    hrefSuffix: "/produtos/novo",
+    hrefSuffix: "/produtos/catalogo-inicial",
   },
   {
     id: "first_sale",

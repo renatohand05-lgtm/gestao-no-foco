@@ -1,0 +1,107 @@
+import { defineLibrary } from "./builder.ts";
+import type { SegmentLibraryItem } from "./types.ts";
+
+export const LAVA_RAPIDO_LIBRARY: SegmentLibraryItem[] = defineLibrary(
+  "lava_rapido",
+  [
+    {
+      category: "Lavagem",
+      defaultDurationMinutes: 40,
+      recommendCount: 4,
+      items: [
+        "Lavagem externa",
+        "Lavagem simples",
+        "Lavagem completa",
+        "Lavagem técnica",
+        "Lavagem premium",
+        "Lavagem express",
+        "Lavagem de moto",
+        "Lavagem de utilitário",
+        "Lavagem de SUV",
+        "Lavagem de caminhonete",
+      ],
+    },
+    {
+      category: "Interior",
+      defaultDurationMinutes: 50,
+      items: [
+        "Aspiração interna",
+        "Limpeza interna",
+        "Higienização interna",
+        "Higienização de bancos",
+        "Higienização de teto",
+        "Higienização de carpetes",
+        "Limpeza de painel",
+        "Limpeza de porta-malas",
+        "Remoção de odores",
+        "Oxi-sanitização",
+      ],
+    },
+    {
+      category: "Estofados",
+      defaultDurationMinutes: 70,
+      items: [
+        "Higienização de banco de tecido",
+        "Higienização de banco de couro",
+        "Hidratação de couro",
+        "Impermeabilização de bancos",
+      ],
+    },
+    {
+      category: "Polimento",
+      defaultDurationMinutes: 120,
+      items: [
+        "Polimento comercial",
+        "Polimento técnico",
+        "Polimento de faróis",
+        "Revitalização de pintura",
+        "Remoção de chuva ácida",
+        "Descontaminação de pintura",
+      ],
+    },
+    {
+      category: "Proteção",
+      defaultDurationMinutes: 60,
+      items: [
+        "Cera",
+        "Selante",
+        "Cristalização",
+        "Vitrificação",
+        "Proteção cerâmica",
+        "Impermeabilização",
+        "Proteção de plásticos",
+      ],
+    },
+    {
+      category: "Detalhamento",
+      defaultDurationMinutes: 90,
+      items: [
+        "Detalhamento externo",
+        "Detalhamento interno",
+        "Detalhamento completo",
+        "Limpeza de motor",
+        "Limpeza de rodas",
+        "Limpeza de caixa de roda",
+        "Revitalização de pneus",
+        "Revitalização de plásticos",
+        "Revitalização de cromados",
+      ],
+    },
+    {
+      category: "Pacotes",
+      defaultDurationMinutes: 80,
+      recommended: true,
+      defaultItemType: "combo",
+      items: [
+        "Lavagem + cera",
+        "Lavagem + higienização",
+        "Lavagem + polimento",
+        "Lavagem premium completa",
+        "Plano semanal",
+        "Plano quinzenal",
+        "Plano mensal",
+        "Pacote frota",
+      ],
+    },
+  ],
+);

@@ -1,4 +1,4 @@
-import { Plus, Package } from "lucide-react";
+import { Plus, Library } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -14,26 +14,45 @@ export function ProdutoEmptyState({
   hasFilters,
 }: ProdutoEmptyStateProps) {
   const filtered = hasSearch || hasFilters;
+  const catalogHref = `/${tenantSlug}/produtos/catalogo-inicial`;
+  const createHref = `/${tenantSlug}/produtos/novo`;
 
   return (
     <EmptyState
-      icon={Package}
-      title={filtered ? "Nenhum item encontrado" : "Nenhum item cadastrado"}
+      icon={Library}
+      title={filtered ? "Nenhum item encontrado" : "Monte seu catálogo inicial"}
       description={
         filtered
           ? "Tente ajustar a busca ou os filtros, ou cadastre um novo item."
-          : "Cadastre produtos ou serviços para acelerar a primeira venda."
+          : "Selecionamos serviços comuns para o seu tipo de negócio. Escolha os que sua empresa oferece. Você poderá editar e adicionar outros depois."
       }
       impact={
         filtered
           ? undefined
-          : "Itens do catálogo alimentam vendas e rankings de produtos."
+          : "Itens do catálogo alimentam vendas e o fluxo operacional."
       }
-      action={{
-        label: "Novo item",
-        href: `/${tenantSlug}/produtos/novo`,
-        icon: Plus,
-      }}
+      action={
+        filtered
+          ? {
+              label: "Novo item",
+              href: createHref,
+              icon: Plus,
+            }
+          : {
+              label: "Montar catálogo inicial",
+              href: catalogHref,
+              icon: Library,
+            }
+      }
+      secondaryAction={
+        filtered
+          ? undefined
+          : {
+              label: "Criar do zero",
+              href: createHref,
+              icon: Plus,
+            }
+      }
     />
   );
 }

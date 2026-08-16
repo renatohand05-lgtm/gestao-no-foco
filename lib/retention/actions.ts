@@ -24,6 +24,7 @@ import {
 
 function revalidateRetention(tenantSlug: string, clienteId?: string) {
   revalidatePath(`/${tenantSlug}/crm/retornos`);
+  revalidatePath(`/${tenantSlug}/crm/comunicacoes`);
   revalidatePath(`/${tenantSlug}/centro-operacoes`);
   revalidatePath(`/${tenantSlug}/agenda`);
   revalidatePath(`/${tenantSlug}/agenda/clientes`);
@@ -118,13 +119,17 @@ export async function updateCommunicationPrefsAction(
   values: unknown,
 ): Promise<ActionResult> {
   try {
-    const { tenant } = await requireTenantMutationPermission(tenantSlug, [
+    const { tenant, userId } = await requireTenantMutationPermission(tenantSlug, [
       "crm.retornos.editar",
       "clientes.editar",
     ]);
     const parsed = prefsSchema.parse(values);
     const svc = await createCommunicationPreferenceService(tenant.id);
-    await svc.upsert(parsed.clienteId, parsed);
+    await svc.upsert(parsed.clienteId, {
+      ...parsed,
+      origin: "manual",
+      userId,
+    });
     revalidateRetention(tenantSlug, parsed.clienteId);
     return { success: true, id: parsed.clienteId };
   } catch (error) {
@@ -398,6 +403,7 @@ export async function finalizeServiceReadyAction(
       status = result.status;
     }
     revalidateRetention(tenantSlug, os.cliente_id);
+    revalidatePath(`/${tenantSlug}/crm/comunicacoes`);
     revalidatePath(`/${tenantSlug}/ordens/${os.id}`);
     return { success: true, id: os.id, status, note, waLink, duplicated };
   } catch (error) {
@@ -539,6 +545,62 @@ export async function updateCommunicationSettingsAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erro ao salvar.",
+    };
+  }
+}
+
+export async function resendFailedNotificationAction(
+  tenantSlug: string,
+  outboxId: string,
+): Promise<ActionResultWith<{ note: string }>> {
+  try {
+    const { tenant, userId } = await requireTenantMutationPermission(tenantSlug, [
+      "crm.notificacoes.enviar",
+    ]);
+    const parsed = (await import("./validations")).resendNotificationSchema.parse({
+      outboxId,
+    });
+    const outbox = await createNotificationOutboxService(tenant.id);
+    const row = await outbox.getById(parsed.outboxId);
+    if (!row) {
+      return { success: false, error: "Mensagem não encontrada neste tenant." };
+    }
+    const { canManualResend } = await import("./resend");
+    const prefsSvc = await createCommunicationPreferenceService(tenant.id);
+    const prefs = row.cliente_id ? await prefsSvc.get(row.cliente_id) : null;
+    const optedIn = prefs
+      ? prefsSvc.isChannelAllowed(prefs, row.channel as "whatsapp" | "email")
+      : false;
+    const guard = canManualResend({
+      actorTenantId: tenant.id,
+      rowTenantId: row.tenant_id,
+      status: row.status,
+      failureKind: row.failure_kind,
+      optedIn,
+      hasDestination: Boolean(row.to_address),
+    });
+    if (!guard.ok) {
+      return { success: false, error: guard.note };
+    }
+    await outbox.auditResend(row.id, userId);
+    await outbox.patchSameRow(row.id, {
+      status: "queued",
+      error_message: null,
+      error_code: null,
+      processed_at: new Date().toISOString(),
+    });
+    if (row.cliente_id) {
+      revalidateRetention(tenantSlug, row.cliente_id);
+    }
+    return {
+      success: true,
+      id: row.id,
+      note: "Reenvio preparado. Não duplica a mensagem original.",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro ao reenviar.",
     };
   }
 }

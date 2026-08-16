@@ -10,6 +10,7 @@ const CRM_LINKS = [
   { href: "clientes/tarefas", label: "Tarefas" },
   { href: "clientes/agenda", label: "Agenda" },
   { href: "crm/retornos", label: "Retornos" },
+  { href: "crm/comunicacoes", label: "Comunicações" },
   { href: "clientes/dashboard", label: "Dashboard" },
 ] as const;
 

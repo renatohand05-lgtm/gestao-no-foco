@@ -94,6 +94,8 @@ type OsWorkspaceProps = {
   notifyReadyAuto?: boolean;
   empresaNome?: string;
   tenantSegment?: string | null;
+  clientePhone?: string | null;
+  clienteEmail?: string | null;
 };
 
 const TABS = [
@@ -164,6 +166,8 @@ export function OsWorkspace({
   notifyReadyAuto = false,
   empresaNome = "",
   tenantSegment = null,
+  clientePhone = null,
+  clienteEmail = null,
 }: OsWorkspaceProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
@@ -366,6 +370,8 @@ export function OsWorkspace({
             segment={tenantSegment}
             clienteNome={os.cliente_nome ?? ""}
             empresaNome={empresaNome}
+            clientePhone={clientePhone}
+            clienteEmail={clienteEmail}
             preview={{
               itens: os.itens,
               marca: os.marca,
@@ -1121,6 +1127,8 @@ export function OsWorkspace({
             segment={tenantSegment}
             clienteNome={os.cliente_nome ?? ""}
             empresaNome={empresaNome}
+            clientePhone={clientePhone}
+            clienteEmail={clienteEmail}
             preview={{
               itens: os.itens,
               marca: os.marca,

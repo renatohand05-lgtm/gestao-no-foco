@@ -87,3 +87,7 @@ export const registerPickupSchema = z.object({
   osId: z.string().uuid(),
   observacao: z.string().max(500).optional().nullable(),
 });
+
+export const resendNotificationSchema = z.object({
+  outboxId: z.string().uuid(),
+});

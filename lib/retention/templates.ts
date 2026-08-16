@@ -23,6 +23,7 @@ export const TEMPLATE_VARS = [
   "empresa_nome",
   "data",
   "hora",
+  "data_hora",
   "servico",
   "profissional",
   "veiculo",
@@ -90,12 +91,27 @@ const PRIVATE: Record<MessageTemplateCode, string> = {
 };
 
 const CONSULTORIA: Partial<Record<MessageTemplateCode, string>> = {
+  AGENDAMENTO_CRIADO:
+    "Olá, {{cliente_nome}}. Sua reunião está confirmada para {{data_hora}}.",
+  AGENDAMENTO_CONFIRMADO:
+    "Olá, {{cliente_nome}}. Sua reunião está confirmada para {{data_hora}}.",
+  LEMBRETE:
+    "Olá, {{cliente_nome}}! Lembrete da reunião com a {{empresa_nome}} em {{data_hora}}.",
   RETORNO_D10:
     "Olá, {{cliente_nome}}! Está chegando a data de follow-up combinada com a {{empresa_nome}} ({{dias_para_retorno}} dias). Podemos marcar a reunião?",
   RETORNO_HOJE:
     "Olá, {{cliente_nome}}! Hoje é a data prevista para o follow-up com a {{empresa_nome}}.",
   REENGAJAMENTO:
     "Olá, {{cliente_nome}}! Queremos alinhar o próximo passo com a {{empresa_nome}}. Responda SIM para agendarmos.",
+};
+
+const BARBEARIA: Partial<Record<MessageTemplateCode, string>> = {
+  AGENDAMENTO_CRIADO:
+    "Olá, {{cliente_nome}}. Seu horário está confirmado para {{data_hora}}.",
+  AGENDAMENTO_CONFIRMADO:
+    "Olá, {{cliente_nome}}. Seu horário está confirmado para {{data_hora}}.",
+  LEMBRETE:
+    "Olá, {{cliente_nome}}! Lembrete: seu horário na {{empresa_nome}} é {{data_hora}}.",
 };
 
 const OFICINA: Partial<Record<MessageTemplateCode, string>> = {
@@ -119,6 +135,9 @@ export function templateFor(input: {
   if (input.segment === "consultoria" && CONSULTORIA[input.code]) {
     return CONSULTORIA[input.code] as string;
   }
+  if (input.segment === "barbearia" && BARBEARIA[input.code]) {
+    return BARBEARIA[input.code] as string;
+  }
   if (input.segment === "oficina" && OFICINA[input.code]) {
     return OFICINA[input.code] as string;
   }
@@ -126,9 +145,8 @@ export function templateFor(input: {
     return LAVA[input.code] as string;
   }
   if (
-    (input.segment === "clinica_estetica" ||
-      input.segment === "consultorio_odontologico") &&
-    input.code.startsWith("RETORNO")
+    input.segment === "clinica_estetica" ||
+    input.segment === "consultorio_odontologico"
   ) {
     return PRIVATE[input.code];
   }
@@ -137,8 +155,12 @@ export function templateFor(input: {
 
 export function renderTemplate(
   source: string,
-  ctx: TemplateContext,
+  input: TemplateContext,
 ): string {
+  const ctx: TemplateContext = { ...input };
+  if (!ctx.data_hora && (ctx.data || ctx.hora)) {
+    ctx.data_hora = [ctx.data, ctx.hora].filter(Boolean).join(" às ");
+  }
   const rendered = source.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (_, raw: string) => {
     const key = raw.toLowerCase();
     if (!SAFE_TOKEN.test(key)) return "";

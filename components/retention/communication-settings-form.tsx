@@ -9,7 +9,7 @@ import { updateCommunicationSettingsAction } from "@/lib/retention/actions";
 import type { CommunicationTenantSettings } from "@/lib/retention/settings";
 import { cn } from "@/lib/utils";
 
-type Health = { label: string; status: string };
+type Health = { label: string; status: string; operatorLabel: string };
 
 type Props = {
   tenantSlug: string;
@@ -54,6 +54,7 @@ export function CommunicationSettingsForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-lg border p-3">
           <p className="text-sm font-medium">WhatsApp</p>
+          <p className="text-lg font-semibold">{whatsapp.operatorLabel}</p>
           <p className="text-sm text-muted-foreground">{whatsapp.label}</p>
           <NativeSelect
             className="mt-2 h-10"
@@ -69,6 +70,7 @@ export function CommunicationSettingsForm({
         </div>
         <div className="rounded-lg border p-3">
           <p className="text-sm font-medium">E-mail</p>
+          <p className="text-lg font-semibold">{email.operatorLabel}</p>
           <p className="text-sm text-muted-foreground">{email.label}</p>
           <NativeSelect
             className="mt-2 h-10"
@@ -87,11 +89,11 @@ export function CommunicationSettingsForm({
         <legend className="text-sm font-medium">Preferências</legend>
         {(
           [
-            ["sendAppointmentCreated", "Confirmação de agendamento"],
+            ["sendAppointmentCreated", "Agendamento criado"],
             ["sendAppointmentReminder", "Lembrete de agendamento"],
-            ["sendReturn", "Retornos"],
+            ["sendReturn", "Retorno próximo"],
             ["sendServiceReady", "Serviço pronto"],
-            ["sendDelivery", "Notificação de entrega"],
+            ["sendDelivery", "Retirada concluída"],
             ["notifyReadyAuto", "Notificar automaticamente quando o serviço estiver pronto"],
             ["fallbackEmail", "Fallback para e-mail se WhatsApp indisponível"],
           ] as const

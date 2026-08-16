@@ -1,6 +1,10 @@
 import { CommunicationSettingsForm } from "@/components/retention/communication-settings-form";
 import { PageHeader } from "@/components/ui/page-header";
 import { emailHealth, whatsappHealth } from "@/lib/retention/providers/runtime";
+import {
+  operatorChannelLabel,
+  resolveCommunicationMode,
+} from "@/lib/retention/test-mode";
 import { createCommunicationSettingsService } from "@/lib/retention/settings-service";
 import { requireTenant } from "@/lib/tenants";
 
@@ -18,6 +22,17 @@ export default async function ComunicoesPage({
   );
   const wa = whatsappHealth();
   const em = emailHealth();
+  const commMode = resolveCommunicationMode();
+  const whatsappOperator = operatorChannelLabel({
+    communicationMode: commMode,
+    configured: wa.status !== "NOT_CONFIGURED",
+    killSwitchOff: !wa.canSendReal,
+  });
+  const emailOperator = operatorChannelLabel({
+    communicationMode: commMode,
+    configured: em.status !== "NOT_CONFIGURED",
+    killSwitchOff: !em.canSendReal,
+  });
 
   return (
     <div className="space-y-6" data-phase35="comunicacoes">
@@ -28,8 +43,16 @@ export default async function ComunicoesPage({
       <CommunicationSettingsForm
         tenantSlug={tenantSlug}
         initial={settings}
-        whatsapp={{ label: wa.label, status: wa.status }}
-        email={{ label: em.label, status: em.status }}
+        whatsapp={{
+          label: wa.label,
+          status: wa.status,
+          operatorLabel: whatsappOperator,
+        }}
+        email={{
+          label: em.label,
+          status: em.status,
+          operatorLabel: emailOperator,
+        }}
       />
     </div>
   );

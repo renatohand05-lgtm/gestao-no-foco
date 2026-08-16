@@ -203,9 +203,9 @@ export const CAPABILITY_DEFS: readonly CapabilityDef[] = [
   {
     id: "customer_notifications",
     label: "Comunicação automática",
-    description: "Outbox WhatsApp/e-mail (DRY_RUN por padrão)",
+    description: "Central de comunicações (WhatsApp/e-mail; DRY_RUN por padrão)",
     navIds: ["crm"],
-    href: "/crm/retornos",
+    href: "/crm/comunicacoes",
     availability: "backend",
     overridable: true,
     essential: false,

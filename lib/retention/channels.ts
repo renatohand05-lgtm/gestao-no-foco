@@ -22,6 +22,10 @@ export const OUTBOX_STATUSES = [
   "read",
   "failed",
   "cancelled",
+  "draft",
+  "scheduled",
+  "queued",
+  "suppressed",
 ] as const;
 export type OutboxStatus = (typeof OUTBOX_STATUSES)[number];
 

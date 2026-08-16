@@ -70,6 +70,7 @@ export function AgendaEventCreateForm({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [createdId, setCreatedId] = useState<string | null>(null);
+  const [commNote, setCommNote] = useState<string | null>(null);
   const initialNatureza: AgendaNature = initial?.natureza ?? "cliente";
   const [natureza, setNatureza] = useState<AgendaNature>(initialNatureza);
   const [titulo, setTitulo] = useState("");
@@ -143,6 +144,7 @@ export function AgendaEventCreateForm({
 
   function resetForm() {
     setCreatedId(null);
+    setCommNote(null);
     setError(null);
     setTitulo("");
     setObservacao("");
@@ -190,6 +192,7 @@ export function AgendaEventCreateForm({
         return;
       }
       setCreatedId(res.id ?? "ok");
+      setCommNote(res.commNote ?? null);
     });
   }
 
@@ -197,6 +200,7 @@ export function AgendaEventCreateForm({
     return (
       <PostSaveActions
         title="Agendamento criado"
+        description={commNote ?? undefined}
         actions={[
           {
             href: `/${tenantSlug}/agenda`,

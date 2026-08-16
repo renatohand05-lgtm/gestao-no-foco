@@ -9,8 +9,23 @@ import {
   type CommChannel,
   type CommMode,
 } from "./channels";
+import { persistOutboxStatus } from "./pipeline";
+import { originFromTemplate } from "./origin";
+import { correlationId, logCommunication, maskAddress } from "./observability";
+import { classifyFailure } from "./failures";
 import { isMissingColumn, isMissingRelation } from "./schema-guard";
 import type { OutboxRow } from "./types";
+
+const OPTIONAL_ENQUEUE_FIELDS = [
+  "queued_at",
+  "to_address",
+  "attempt_count",
+  "origin_kind",
+  "correlation_id",
+  "failure_kind",
+  "next_retry_at",
+  "resend_count",
+] as const;
 
 export type EnqueueOutboxInput = {
   clienteId: string;
@@ -26,6 +41,8 @@ export type EnqueueOutboxInput = {
   optedIn: boolean;
   mode?: CommMode;
   userId?: string | null;
+  originKind?: string;
+  correlationId?: string;
 };
 
 export class NotificationOutboxService {
@@ -102,7 +119,15 @@ export class NotificationOutboxService {
       email: input.email,
       message: input.message,
     });
-    const status = decision.status;
+    const status = persistOutboxStatus({
+      decisionStatus: decision.status,
+      optedIn: input.optedIn,
+      mode,
+      note: decision.note,
+    });
+    const failureKind = !decision.ok
+      ? classifyFailure({ message: decision.note })
+      : null;
     const payload = {
       tenant_id: this.tenantId,
       cliente_id: input.clienteId,
@@ -117,6 +142,9 @@ export class NotificationOutboxService {
       payload_json: {
         note: decision.note,
         waLink: "waLink" in decision ? decision.waLink : null,
+        cta: input.templateCode.startsWith("RETORNO")
+          ? { type: "schedule_return" }
+          : null,
       },
       rendered_preview: input.message,
       created_by: input.userId ?? null,
@@ -128,6 +156,9 @@ export class NotificationOutboxService {
           ? (input.phone ?? "").replace(/\D/g, "") || null
           : input.email ?? null,
       attempt_count: 0,
+      origin_kind: input.originKind ?? originFromTemplate(input.templateCode),
+      correlation_id: input.correlationId ?? correlationId(),
+      failure_kind: failureKind,
     };
     const { error } = await this.supabase
       .from("notification_outbox" as never)
@@ -144,10 +175,8 @@ export class NotificationOutboxService {
         throw new Error("Outbox pendente (migration 35.2).");
       }
       if (isMissingColumn(error)) {
-        const lean = { ...payload };
-        delete (lean as { queued_at?: unknown }).queued_at;
-        delete (lean as { to_address?: unknown }).to_address;
-        delete (lean as { attempt_count?: unknown }).attempt_count;
+        const lean = { ...payload } as Record<string, unknown>;
+        for (const field of OPTIONAL_ENQUEUE_FIELDS) delete lean[field];
         const retry = await this.supabase
           .from("notification_outbox" as never)
           .insert(lean as never);
@@ -162,6 +191,14 @@ export class NotificationOutboxService {
       }
       throw new Error(error.message);
     }
+    logCommunication({
+      event: "queued",
+      tenantId: this.tenantId,
+      correlationId: payload.correlation_id,
+      channel: input.channel,
+      status,
+      note: maskAddress(payload.to_address as string | null),
+    });
     return {
       status,
       note: decision.note,
@@ -177,7 +214,7 @@ export class NotificationOutboxService {
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", this.tenantId)
       .gte("created_at", since)
-      .not("status", "in", "(cancelled,dry_run)");
+      .not("status", "in", "(cancelled,dry_run,suppressed)");
     if (error) {
       if (isMissingRelation(error, "notification_outbox")) return 0;
       throw new Error(error.message);
@@ -210,6 +247,107 @@ export class NotificationOutboxService {
       throw new Error(error.message);
     }
     return Boolean(data);
+  }
+
+  async getById(id: string): Promise<OutboxRow | null> {
+    const { data, error } = await this.supabase
+      .from("notification_outbox" as never)
+      .select(
+        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview, error_message, error_code, attempt_count, failure_kind, origin_kind, correlation_id, created_at, created_by, to_address, provider_message_id, payload_json, resend_count, next_retry_at, last_attempt_at",
+      )
+      .eq("tenant_id", this.tenantId)
+      .eq("id", id)
+      .maybeSingle();
+    if (error) {
+      if (isMissingRelation(error, "notification_outbox")) return null;
+      throw new Error(error.message);
+    }
+    return (data as OutboxRow | null) ?? null;
+  }
+
+  async listByCliente(clienteId: string, limit = 50): Promise<OutboxRow[]> {
+    const { data, error } = await this.supabase
+      .from("notification_outbox" as never)
+      .select(
+        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview, origin_kind, created_at, created_by, failure_kind, error_message",
+      )
+      .eq("tenant_id", this.tenantId)
+      .eq("cliente_id", clienteId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) {
+      if (isMissingRelation(error, "notification_outbox")) return [];
+      throw new Error(error.message);
+    }
+    return (data ?? []) as OutboxRow[];
+  }
+
+  async listCenter(filters: {
+    from?: string;
+    to?: string;
+    clienteId?: string;
+    channel?: string;
+    status?: string;
+    origin?: string;
+    createdBy?: string;
+    limit?: number;
+  }): Promise<OutboxRow[]> {
+    let q = this.supabase
+      .from("notification_outbox" as never)
+      .select(
+        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview, origin_kind, created_at, created_by, failure_kind, error_code, attempt_count, next_retry_at, to_address",
+      )
+      .eq("tenant_id", this.tenantId)
+      .order("created_at", { ascending: false })
+      .limit(filters.limit ?? 80);
+    if (filters.from) q = q.gte("created_at", filters.from);
+    if (filters.to) q = q.lte("created_at", filters.to);
+    if (filters.clienteId) q = q.eq("cliente_id", filters.clienteId);
+    if (filters.channel) q = q.eq("channel", filters.channel);
+    if (filters.status) q = q.eq("status", filters.status);
+    if (filters.origin) q = q.eq("origin_kind", filters.origin);
+    if (filters.createdBy) q = q.eq("created_by", filters.createdBy);
+    const { data, error } = await q;
+    if (error) {
+      if (isMissingRelation(error, "notification_outbox")) return [];
+      throw new Error(error.message);
+    }
+    return (data ?? []) as OutboxRow[];
+  }
+
+  async patchSameRow(
+    id: string,
+    patch: Record<string, unknown>,
+  ): Promise<boolean> {
+    const { error } = await this.supabase
+      .from("notification_outbox" as never)
+      .update(patch as never)
+      .eq("tenant_id", this.tenantId)
+      .eq("id", id);
+    if (error) {
+      if (isMissingRelation(error, "notification_outbox")) return false;
+      throw new Error(error.message);
+    }
+    return true;
+  }
+
+  async auditResend(id: string, userId: string | null): Promise<boolean> {
+    const row = await this.getById(id);
+    if (!row) return false;
+    const now = new Date().toISOString();
+    const prev =
+      row.payload_json && typeof row.payload_json === "object"
+        ? row.payload_json
+        : {};
+    return this.patchSameRow(id, {
+      last_attempt_at: now,
+      resend_count: (row.resend_count ?? 0) + 1,
+      payload_json: {
+        ...prev,
+        last_resend_at: now,
+        last_resend_by: userId,
+      },
+    });
   }
 
   async findLatestByToAddress(address: string): Promise<OutboxRow | null> {

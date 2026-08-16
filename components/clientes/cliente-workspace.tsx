@@ -17,8 +17,13 @@ import { CrmTimeline } from "@/components/crm/crm-timeline";
 import { CrmTarefasList } from "@/components/crm/crm-tarefas-list";
 import { ReturnHistoryList } from "@/components/retention/return-history";
 import { ReturnQuickCreate } from "@/components/retention/return-quick-create";
+import { CommunicationTimeline } from "@/components/retention/communication-timeline";
 import { updateCommunicationPrefsAction } from "@/lib/retention/actions";
-import type { CustomerReturnRow, OutboxRow } from "@/lib/retention/types";
+import type {
+  CommunicationPreferenceRow,
+  CustomerReturnRow,
+  OutboxRow,
+} from "@/lib/retention/types";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { ActionButton } from "@/components/ui/action-button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -58,6 +63,9 @@ type ClienteWorkspaceProps = {
   perfilExecutivo?: CrmExecPerfil | null;
   retornos?: CustomerReturnRow[];
   retornoMensagens?: OutboxRow[];
+  comunicacoes?: OutboxRow[];
+  communicationPrefs?: CommunicationPreferenceRow | null;
+  canSeeCommDetails?: boolean;
   showVehicle?: boolean;
   hideProcedure?: boolean;
 };
@@ -74,6 +82,7 @@ const TABS = [
   "agenda",
   "tarefas",
   "retornos",
+  "comunicacoes",
   "observacoes",
   "contatos",
   "documentos",
@@ -93,6 +102,7 @@ const TAB_LABELS: Record<Tab, string> = {
   agenda: "Agenda",
   tarefas: "Tarefas",
   retornos: "Retornos",
+  comunicacoes: "Comunicações",
   observacoes: "Observações",
   contatos: "Contatos",
   documentos: "Documentos",
@@ -117,6 +127,9 @@ export function ClienteWorkspace({
   perfilExecutivo = null,
   retornos = [],
   retornoMensagens = [],
+  comunicacoes = [],
+  communicationPrefs = null,
+  canSeeCommDetails = false,
   showVehicle = false,
   hideProcedure = false,
 }: ClienteWorkspaceProps) {
@@ -539,6 +552,101 @@ export function ClienteWorkspace({
           </SectionCard>
           <SectionCard title="Histórico de retornos">
             <ReturnHistoryList returns={retornos} messages={retornoMensagens} />
+          </SectionCard>
+        </div>
+      ) : null}
+
+      {tab === "comunicacoes" ? (
+        <div className="space-y-4">
+          <SectionCard title="Preferências de comunicação">
+            <p className="mb-3 text-sm text-muted-foreground">
+              Permitido ou opt-out. Sem consentimento fictício.
+            </p>
+            <div className="flex flex-col gap-2">
+              <label className="flex min-h-11 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={
+                    !communicationPrefs?.opted_out_at &&
+                    communicationPrefs?.whatsapp_enabled !== false
+                  }
+                  onChange={(e) =>
+                    runAction(() =>
+                      updateCommunicationPrefsAction(tenantSlug, {
+                        clienteId: cliente.id,
+                        whatsappEnabled: e.target.checked,
+                      }),
+                    )
+                  }
+                />
+                WhatsApp {communicationPrefs?.whatsapp_enabled === false ? "não permitido" : "permitido"}
+              </label>
+              <label className="flex min-h-11 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={
+                    !communicationPrefs?.opted_out_at &&
+                    communicationPrefs?.email_enabled !== false
+                  }
+                  onChange={(e) =>
+                    runAction(() =>
+                      updateCommunicationPrefsAction(tenantSlug, {
+                        clienteId: cliente.id,
+                        emailEnabled: e.target.checked,
+                      }),
+                    )
+                  }
+                />
+                E-mail {communicationPrefs?.email_enabled === false ? "não permitido" : "permitido"}
+              </label>
+            </div>
+            {communicationPrefs?.channel_updated_at ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Última alteração:{" "}
+                {new Date(communicationPrefs.channel_updated_at).toLocaleString("pt-BR")}
+                {communicationPrefs.opted_out_origin
+                  ? ` · origem ${communicationPrefs.opted_out_origin}`
+                  : ""}
+              </p>
+            ) : null}
+            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+              <button
+                type="button"
+                className="min-h-11 underline"
+                onClick={() =>
+                  runAction(() =>
+                    updateCommunicationPrefsAction(tenantSlug, {
+                      clienteId: cliente.id,
+                      optOut: true,
+                    }),
+                  )
+                }
+              >
+                Opt-out comunicação
+              </button>
+              <button
+                type="button"
+                className="min-h-11 underline"
+                onClick={() =>
+                  runAction(() =>
+                    updateCommunicationPrefsAction(tenantSlug, {
+                      clienteId: cliente.id,
+                      optOut: false,
+                      whatsappEnabled: true,
+                      emailEnabled: true,
+                    }),
+                  )
+                }
+              >
+                Reativar canais
+              </button>
+            </div>
+          </SectionCard>
+          <SectionCard title="Comunicações">
+            <CommunicationTimeline
+              rows={comunicacoes}
+              canSeeDetails={canSeeCommDetails}
+            />
           </SectionCard>
         </div>
       ) : null}

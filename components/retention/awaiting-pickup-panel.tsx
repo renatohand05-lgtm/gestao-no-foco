@@ -1,12 +1,14 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { NotifyPreviewDialog } from "@/components/retention/notify-preview-dialog";
 import {
   notifyServiceReadyAgainAction,
   registerOsPickupAction,
 } from "@/lib/retention/actions";
+import { operatorStatusLabel } from "@/lib/retention/pipeline";
 import { cn } from "@/lib/utils";
 
 export type AwaitingPickupRow = {
@@ -38,6 +40,7 @@ export function AwaitingPickupPanel({
   rows,
 }: Props) {
   const [pending, start] = useTransition();
+  const [previewOs, setPreviewOs] = useState<AwaitingPickupRow | null>(null);
   return (
     <div className="space-y-3" data-phase35="awaiting-pickup">
       <div className="flex items-baseline justify-between gap-2">
@@ -56,7 +59,9 @@ export function AwaitingPickupPanel({
               </p>
               <p className="text-xs text-muted-foreground">
                 Pronto desde {row.prontoDesde ?? "—"} · Mensagem:{" "}
-                {row.mensagemStatus ?? "não enviada"}
+                {row.mensagemStatus
+                  ? operatorStatusLabel(row.mensagemStatus)
+                  : "não enviada"}
               </p>
               <div className="flex flex-wrap gap-2">
                 {canNotify ? (
@@ -64,11 +69,7 @@ export function AwaitingPickupPanel({
                     type="button"
                     disabled={pending}
                     className={cn(buttonVariants({ size: "sm", variant: "outline" }), "min-h-11")}
-                    onClick={() =>
-                      start(async () => {
-                        await notifyServiceReadyAgainAction(tenantSlug, row.osId);
-                      })
-                    }
+                    onClick={() => setPreviewOs(row)}
                   >
                     Avisar cliente
                   </button>
@@ -102,6 +103,19 @@ export function AwaitingPickupPanel({
           ))}
         </ul>
       )}
+      <NotifyPreviewDialog
+        open={Boolean(previewOs)}
+        onOpenChange={(open) => {
+          if (!open) setPreviewOs(null);
+        }}
+        title="Avisar cliente"
+        message={previewOs?.mensagem || "O serviço foi concluído e o veículo está disponível para retirada."}
+        allowChannelSelect={false}
+        onConfirm={async () => {
+          if (!previewOs) return { success: false, error: "OS ausente." };
+          return notifyServiceReadyAgainAction(tenantSlug, previewOs.osId);
+        }}
+      />
     </div>
   );
 }

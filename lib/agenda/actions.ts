@@ -14,7 +14,7 @@ import {
 import { createRbacSupabaseAdapter } from "@/lib/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
-import type { ActionResult } from "@/types/action-result";
+import type { ActionResult, ActionResultWith } from "@/types/action-result";
 
 function revalidateAgenda(tenantSlug: string, id?: string) {
   revalidatePath(`/${tenantSlug}/agenda`);
@@ -90,7 +90,7 @@ function toInput(parsed: ReturnType<typeof agendaEventFormSchema.parse>) {
 export async function createAgendaEventAction(
   tenantSlug: string,
   values: unknown,
-): Promise<ActionResult> {
+): Promise<ActionResultWith<{ commNote?: string }>> {
   try {
     const { tenant, profile } = await requireAgendaPerm(tenantSlug, [
       "agenda.criar",
@@ -102,13 +102,14 @@ export async function createAgendaEventAction(
     }
     const svc = await createAgendaEventService(tenant.id);
     const rows = await svc.create(toInput(parsed), profile.id);
+    let commNote: string | undefined;
     try {
       const first = rows[0];
       if (first?.cliente_id && parsed.natureza === "cliente") {
         const { enqueueCustomerNotification } = await import(
           "@/lib/retention/notify"
         );
-        await enqueueCustomerNotification({
+        const queued = await enqueueCustomerNotification({
           tenantId: tenant.id,
           tenantName: tenant.name,
           segment: tenant.segment,
@@ -129,12 +130,17 @@ export async function createAgendaEventAction(
           },
           userId: profile.id,
         });
+        commNote =
+          queued.status === "suppressed" ||
+          queued.note.includes("sem canal")
+            ? "Cliente sem canal disponível"
+            : "Confirmação preparada";
       }
     } catch {
       /* outbox não bloqueia o agendamento */
     }
     revalidateAgenda(tenantSlug, rows[0]?.id);
-    return { success: true, id: rows[0]?.id };
+    return { success: true, id: rows[0]?.id, commNote };
   } catch (error) {
     return {
       success: false,

@@ -1,6 +1,6 @@
-# Notificações de cliente (Sprint 35.2.2)
+# Notificações de cliente (Sprint 35.2.3)
 
-Infraestrutura em cima da **outbox 35.2**. Não há fila paralela. Billing não é alterado.
+Infraestrutura em cima da **outbox 35.2 / 35.2.2**. Não há fila paralela. Billing não é alterado.
 
 ## Estado desta entrega
 
@@ -9,41 +9,28 @@ Infraestrutura em cima da **outbox 35.2**. Não há fila paralela. Billing não 
 | WhatsApp real | **MANUAL PENDING** (kill switch OFF) |
 | E-mail real | **MANUAL PENDING** (kill switch OFF) |
 | Cron | **DISABLED** |
+| `COMMUNICATION_MODE` | **test** (nunca `live` nesta sprint) |
 | Default | DRY_RUN / wa.me |
 
-Nenhum provider real envia sem `WHATSAPP_ENABLED=true` / `EMAIL_ENABLED=true` **e** homologação explícita.
+Nenhum provider real envia sem `WHATSAPP_ENABLED=true` / `EMAIL_ENABLED=true`, destinatário na allowlist em `test`, **e** homologação explícita.
 
-## Providers
+`COMMUNICATION_MODE=disabled|test|live`
+`COMMUNICATION_TEST_ALLOWLIST` — telefones/e-mails autorizados (nomes só; valores fora do git).
 
-Contrato: `NotificationProvider` (`send`, `getStatus`, `handleWebhook`, `validateConfiguration`).
+## Central e timeline
 
-WhatsApp: `DISABLED` | `DRY_RUN` | `MANUAL_LINK` | `META_CLOUD`  
-E-mail: `DISABLED` | `DRY_RUN` | `PROVIDER` (Resend)
+CRM → Comunicações: KPIs e filtros por tenant. Cadastro do cliente: aba Comunicações (status operacional Aguardando / Enviado / Entregue / Falhou). “Ver detalhes” só com `crm.notificacoes.enviar`.
 
-A regra de negócio (Agenda, OS, Retornos) não chama a Graph API.
+## Pipeline
 
-## Eventos
+draft / scheduled / queued / processing / sent / delivered / read / failed / cancelled / suppressed
 
-`AGENDAMENTO_CRIADO`, `AGENDAMENTO_CONFIRMADO`, `LEMBRETE`, `REAGENDAMENTO`, `CANCELAMENTO`, `RETORNO_D10/D3/HOJE/ATRASADO`, `REENGAJAMENTO`, `SERVICE_READY`, `SERVICE_DELIVERED`.
+`delivered` e `read` só com webhook do provider. `sent` = provider aceitou. Opt-out / sem canal persistidos como `suppressed`. Retry automático só transiente, na mesma linha.
 
-Automação por tenant começa **OFF**. Clique do operador em “Finalizar e avisar” é explícito e respeita opt-out.
+## SERVICE_READY / agenda / retornos
 
-## SERVICE_READY
-
-Capability `work_orders` (oficina e lava-rápido). Não aparece em consultoria, odontologia, barbearia nem estética, salvo override futuro da capability.
-
-Status existentes:
-
-`em_execucao` → `pronto_para_entrega` (aguardando retirada) → `entregue`
-
-“Finalizar sem notificar” permanece sempre disponível.
-
-## Opt-out, fallback, rate limit
-
-- `communication_preferences.opted_out_at` cancela automação operacional.
-- Fallback e-mail só com `fallbackEmail` e WhatsApp indisponível. Nunca dual-send default.
-- ~80 envios reais / tenant / hora; anomalia pausa a fila.
+Preservados 35.2.2. Confirmação de agendamento: “Confirmação preparada” ou “Cliente sem canal disponível”. Retornos reutilizam a outbox; metadata `cta.schedule_return` para evolução futura (sem chatbot).
 
 ## Variáveis de template
 
-`cliente_nome`, `empresa_nome`, `data`, `hora`, `servico`, `profissional`, `veiculo`, `placa`, `dias_para_retorno`. Sem eval/JS/SQL. E-mail HTML é escapado.
+`cliente_nome`, `empresa_nome`, `data`, `hora`, `data_hora`, `servico`, `profissional`, `veiculo`, `placa`, `dias_para_retorno`. Sem eval/JS/SQL. Estética/odonto usam copy neutro.

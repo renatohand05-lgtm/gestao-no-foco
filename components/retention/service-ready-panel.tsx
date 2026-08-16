@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { finalizeServiceReadyAction } from "@/lib/retention/actions";
 import { buildServiceReadyPreview } from "@/lib/retention/preview";
+import { operatorPhonePreview } from "@/lib/retention/mask";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -35,6 +36,8 @@ type Props = {
   finalizeOnlyLabel: string;
   finalizeAndNotifyLabel: string;
   sheetTitle: string;
+  clientePhone?: string | null;
+  clienteEmail?: string | null;
 };
 
 export function ServiceReadyPanel({
@@ -52,6 +55,8 @@ export function ServiceReadyPanel({
   finalizeOnlyLabel,
   finalizeAndNotifyLabel,
   sheetTitle,
+  clientePhone = null,
+  clienteEmail = null,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [notify, setNotify] = useState(notifyReadyAuto && canNotify);
@@ -80,9 +85,9 @@ export function ServiceReadyPanel({
         </SheetTrigger>
         <SheetContent side="bottom" className="gap-3 p-4">
           <SheetHeader>
-            <SheetTitle>{sheetTitle}</SheetTitle>
+            <SheetTitle>Avisar cliente</SheetTitle>
             <SheetDescription>
-              Escolha se o cliente deve ser avisado. A mensagem não é obrigatória.
+              Revise a mensagem. Finalizar sem avisar permanece disponível.
             </SheetDescription>
           </SheetHeader>
           <label className="flex min-h-11 items-center gap-2 text-sm">
@@ -107,33 +112,39 @@ export function ServiceReadyPanel({
           {notify ? (
             <>
               <p className="text-xs text-muted-foreground">Canal</p>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input
-                  type="radio"
-                  name="sr-ch"
+                  type="checkbox"
                   checked={channel === "whatsapp"}
                   onChange={() => setChannel("whatsapp")}
                 />
-                WhatsApp
+                WhatsApp {clientePhone ? operatorPhonePreview(clientePhone) : ""}
               </label>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input
-                  type="radio"
-                  name="sr-ch"
+                  type="checkbox"
                   checked={channel === "email"}
                   onChange={() => setChannel("email")}
                 />
-                E-mail
+                E-mail {clienteEmail ? clienteEmail.replace(/^(.{1}).*(@)/, "$1•••$2") : ""}
               </label>
               <div className="rounded-md bg-muted p-3 text-sm whitespace-pre-wrap">
-                <p className="mb-1 text-xs font-medium">Mensagem que será enviada</p>
+                <p className="mb-1 text-xs font-medium">Mensagem</p>
                 {message}
               </div>
             </>
           ) : null}
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}
-          <button
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              className={cn(buttonVariants({ variant: "outline" }), "min-h-11")}
+              onClick={() => setOpen(false)}
+            >
+              Cancelar
+            </button>
+            <button
             type="button"
             disabled={pending}
             className={cn(buttonVariants(), "min-h-11")}
@@ -154,10 +165,13 @@ export function ServiceReadyPanel({
               });
             }}
           >
-            Finalizar
+            {notify ? "Confirmar aviso" : "Finalizar"}
           </button>
+          </div>
         </SheetContent>
       </Sheet>
+      {note ? <p className="mt-2 text-sm text-muted-foreground">{note}</p> : null}
+      {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
       <button
         type="button"
         className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-2 min-h-11")}

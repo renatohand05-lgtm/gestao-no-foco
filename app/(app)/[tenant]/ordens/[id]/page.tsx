@@ -202,12 +202,18 @@ export default async function OsDetailPage({
   }
   if (recorrenciaResult) recorrencia = recorrenciaResult;
 
-  const [canFinalize, canNotify, commSettings] = await Promise.all([
+  const [canFinalize, canNotify, commSettings, clienteContato] = await Promise.all([
     tenantHasMutationPermission(tenantSlug, "os.finalizar"),
     tenantHasMutationPermission(tenantSlug, "crm.notificacoes.enviar"),
     createCommunicationSettingsService(tenant.id)
       .then((s) => s.get())
       .catch(() => ({ notifyReadyAuto: false })),
+    supabase
+      .from("clientes")
+      .select("telefone, whatsapp, email")
+      .eq("tenant_id", tenant.id)
+      .eq("id", os.cliente_id)
+      .maybeSingle(),
   ]);
   const serviceReadyEnabled = serviceReadyAllowed(
     resolveSegmentContext({
@@ -266,6 +272,8 @@ export default async function OsDetailPage({
         notifyReadyAuto={Boolean(commSettings.notifyReadyAuto)}
         empresaNome={tenant.name}
         tenantSegment={tenant.segment}
+        clientePhone={clienteContato.data?.whatsapp ?? clienteContato.data?.telefone ?? null}
+        clienteEmail={clienteContato.data?.email ?? null}
       />
     </ExecutivePage>
   );

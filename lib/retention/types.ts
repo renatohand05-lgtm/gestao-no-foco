@@ -37,6 +37,10 @@ export type CommunicationPreferenceRow = {
   whatsapp_enabled: boolean;
   email_enabled: boolean;
   opted_out_at: string | null;
+  opted_out_origin?: string | null;
+  opted_out_by?: string | null;
+  channel_updated_at?: string | null;
+  channel_updated_by?: string | null;
 };
 
 export type OutboxRow = {
@@ -62,6 +66,15 @@ export type OutboxRow = {
   delivered_at?: string | null;
   failed_at?: string | null;
   created_at?: string | null;
+  created_by?: string | null;
+  origin_kind?: string | null;
+  correlation_id?: string | null;
+  failure_kind?: string | null;
+  resend_count?: number | null;
+  next_retry_at?: string | null;
+  last_attempt_at?: string | null;
+  error_message?: string | null;
+  payload_json?: Record<string, unknown> | null;
 };
 
 export type RetentionOpsSummary = {

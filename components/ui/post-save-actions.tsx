@@ -14,10 +14,11 @@ export type PostSaveAction = {
 
 type Props = {
   title: string;
+  description?: string;
   actions: PostSaveAction[];
 };
 
-export function PostSaveActions({ title, actions }: Props) {
+export function PostSaveActions({ title, description, actions }: Props) {
   return (
     <div
       className="space-y-4 rounded-xl border bg-card p-4"
@@ -25,6 +26,9 @@ export function PostSaveActions({ title, actions }: Props) {
       role="status"
     >
       <p className="text-base font-semibold">{title}</p>
+      {description ? (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      ) : null}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {actions.map((action) =>
           action.href ? (

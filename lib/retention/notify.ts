@@ -17,6 +17,9 @@ import {
 import { shouldHaltRateLimit } from "./rate-limit";
 import { renderTemplate, templateFor, type MessageTemplateCode } from "./templates";
 import type { CommChannel } from "./channels";
+import { originFromTemplate } from "./origin";
+import { correlationId } from "./observability";
+import { NO_CHANNEL_OPERATOR_COPY } from "./center";
 
 export type NotifyEnqueueResult = {
   duplicated: boolean;
@@ -77,9 +80,12 @@ export async function enqueueCustomerNotification(input: {
       hideProcedure: input.hideProcedure,
     }),
     {
+      ...input.messageCtx,
       cliente_nome: cliente.nome ?? input.messageCtx.cliente_nome ?? "",
       empresa_nome: input.tenantName,
-      ...input.messageCtx,
+      data_hora:
+        input.messageCtx.data_hora ||
+        [input.messageCtx.data, input.messageCtx.hora].filter(Boolean).join(" às "),
     },
   );
   const phone = cliente.whatsapp ?? cliente.telefone;
@@ -93,15 +99,40 @@ export async function enqueueCustomerNotification(input: {
         emailAvailable: Boolean(email?.includes("@")),
         explicit: input.explicit,
       });
+  const outbox = await createNotificationOutboxService(input.tenantId);
   if (channels.length === 0) {
+    const res = await outbox.enqueue({
+      clienteId: input.clienteId,
+      channel: "whatsapp",
+      templateCode: input.templateCode,
+      offsetKey: input.offsetKey,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      idempotencyKey: communicationIdempotencyKey({
+        tenantId: input.tenantId,
+        clienteId: input.clienteId,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        templateCode: input.templateCode,
+        offsetKey: input.offsetKey,
+        channel: "whatsapp",
+      }),
+      message,
+      phone,
+      email,
+      optedIn: true,
+      mode: commModeFromWhatsApp(effectiveWhatsAppMode()),
+      userId: input.userId,
+      originKind: originFromTemplate(input.templateCode),
+      correlationId: correlationId(),
+    });
     return {
-      duplicated: false,
-      status: "cancelled",
-      note: "Nenhum canal disponível.",
+      duplicated: res.duplicated,
+      status: "suppressed",
+      note: NO_CHANNEL_OPERATOR_COPY,
       channel: null,
     };
   }
-  const outbox = await createNotificationOutboxService(input.tenantId);
   const recent = await outbox.countRecent(1);
   const halt = shouldHaltRateLimit({ sentLastHour: recent });
   if (halt.halt) {
@@ -141,15 +172,22 @@ export async function enqueueCustomerNotification(input: {
       optedIn,
       mode,
       userId: input.userId,
+      originKind: originFromTemplate(input.templateCode),
+      correlationId: correlationId(),
     });
     last = {
       duplicated: res.duplicated,
       status: res.status,
-      note: res.note,
+      note:
+        res.status === "suppressed" && /ausente|sem canal/i.test(res.note)
+          ? NO_CHANNEL_OPERATOR_COPY
+          : res.note,
       waLink: res.waLink,
       channel,
     };
-    if (!res.duplicated && res.status !== "cancelled") break;
+    if (!res.duplicated && res.status !== "cancelled" && res.status !== "suppressed") {
+      break;
+    }
   }
   return last;
 }

@@ -11,6 +11,8 @@ import { createCustomerReturnService } from "@/lib/retention/return-service";
 import { createNotificationOutboxService } from "@/lib/retention/outbox-service";
 import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { defaultReturnRuleForSegment } from "@/lib/retention/returns";
+import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
+import { createCommunicationPreferenceService } from "@/lib/retention/prefs-service";
 import { requireTenant } from "@/lib/tenants";
 import type { ClienteSuccessMessage } from "@/types/clientes";
 
@@ -40,6 +42,7 @@ export default async function ClienteDetailPage({
     createCustomerReturnService(tenant.id),
     createNotificationOutboxService(tenant.id),
   ]);
+  const prefsSvc = await createCommunicationPreferenceService(tenant.id);
 
   const [perfilExecutivo, retornos] = await Promise.all([
     execService.loadPerfilFrom360(
@@ -55,6 +58,12 @@ export default async function ClienteDetailPage({
     ),
     retSvc.listByCliente(id),
   ]);
+  const comunicacoes = await outboxSvc.listByCliente(id);
+  const prefs = await prefsSvc.get(id);
+  const canSeeCommDetails = await tenantHasMutationPermission(
+    tenantSlug,
+    "crm.notificacoes.enviar",
+  );
   const retornoMensagens = (
     await Promise.all(
       retornos.map((r) => outboxSvc.listByEntity("retorno", r.id)),
@@ -79,6 +88,9 @@ export default async function ClienteDetailPage({
         perfilExecutivo={perfilExecutivo}
         retornos={retornos}
         retornoMensagens={retornoMensagens}
+        comunicacoes={comunicacoes}
+        communicationPrefs={prefs}
+        canSeeCommDetails={canSeeCommDetails}
         showVehicle={
           getSegmentUiCopy({
             segment: tenant.segment,

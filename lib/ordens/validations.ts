@@ -81,19 +81,10 @@ export const osOpenIntegratedSchema = z
     danos_aparentes: optionalText,
     origem_atendimento: optionalText,
     prioridade: z.enum(["baixa", "normal", "alta", "urgente"]).default("normal"),
-    /** Fase 28.4 — template operacional; default oficina. */
+/** Fase 28.4 + 35.1 — template ou subtipo de atendimento (lava). */
     tipo_ordem: z
-      .enum([
-        "oficina",
-        "assistencia_tecnica",
-        "manutencao",
-        "instalacao",
-        "consultoria",
-        "servicos_gerais",
-        "producao_leve",
-        "estetica",
-        "lava_rapido",
-      ])
+      .string()
+      .min(1)
       .default("oficina"),
   })
   .superRefine((data, ctx) => {

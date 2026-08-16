@@ -59,7 +59,7 @@ export const CONSULTORIA_LIBRARY: SegmentLibraryItem[] = defineLibrary(
       ],
     },
     {
-      category: "Treinamento",
+      category: "Treinamentos",
       defaultDurationMinutes: 120,
       items: [
         "Treinamento individual",

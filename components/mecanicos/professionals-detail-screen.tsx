@@ -158,6 +158,8 @@ export async function ProfessionalsDetailScreen({
             codigo?: string | null;
           }[]
         }
+        automotiveSpecialties={copy.automotiveSpecialties}
+        professionalSpecialtySuggestions={copy.professionalSpecialtySuggestions}
       />
     </ExecutivePage>
   );

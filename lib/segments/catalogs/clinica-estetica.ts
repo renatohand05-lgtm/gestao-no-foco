@@ -56,7 +56,7 @@ export const CLINICA_ESTETICA_LIBRARY: SegmentLibraryItem[] = defineLibrary(
       ],
     },
     {
-      category: "Sobrancelhas / Cílios",
+      category: "Sobrancelhas / cílios",
       defaultDurationMinutes: 40,
       items: [
         "Design de sobrancelhas",

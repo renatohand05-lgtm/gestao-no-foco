@@ -38,9 +38,24 @@ import {
 import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { toActionError } from "@/lib/supabase/friendly-error";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { librarySegmentForContext } from "@/lib/segments/library-segment.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult } from "@/types/action-result";
 import type { TenantRole } from "@/lib/constants";
+import type { TenantWithRole } from "@/types";
+
+function openWorkOrderError(tenant: TenantWithRole): string {
+  const ui = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  return ui.automotiveWorkflow
+    ? "Erro ao abrir OS."
+    : `Erro ao abrir ${ui.workOrder.toLowerCase()}.`;
+}
 
 function revalidateOs(tenantSlug: string, id?: string) {
   revalidatePath(`/${tenantSlug}/ordens`);
@@ -81,8 +96,9 @@ export async function createOrdemServicoAction(
   tenantSlug: string,
   values: unknown,
 ): Promise<ActionResult> {
+  let tenant: TenantWithRole | null = null;
   try {
-    const tenant = await requireTenant(tenantSlug);
+    tenant = await requireTenant(tenantSlug);
     const profile = await getCurrentProfile();
     const parsed = osOpenFormSchema.parse(values);
     const service = await createOrdemServicoService(tenant.id);
@@ -90,7 +106,11 @@ export async function createOrdemServicoAction(
     revalidateOs(tenantSlug, os.id);
     return { success: true, id: os.id };
   } catch (error) {
-    return toActionError(error, "Erro ao abrir OS.", "ordens.create");
+    return toActionError(
+      error,
+      tenant ? openWorkOrderError(tenant) : "Erro ao abrir OS.",
+      "ordens.create",
+    );
   }
 }
 
@@ -102,8 +122,9 @@ export async function createOrdemServicoIntegradaAction(
   tenantSlug: string,
   values: unknown,
 ): Promise<CreateOsIntegratedResult> {
+  let tenant: TenantWithRole | null = null;
   try {
-    const tenant = await requireTenant(tenantSlug);
+    tenant = await requireTenant(tenantSlug);
     const profile = await getCurrentProfile();
     const parsed = osOpenIntegratedSchema.parse(values);
     const supabase = await createClient();
@@ -172,6 +193,20 @@ export async function createOrdemServicoIntegradaAction(
       }
     }
 
+    const ctx = resolveSegmentContext({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    });
+    if (librarySegmentForContext(ctx) === "lava_rapido") {
+      const service = await createOrdemServicoService(tenant.id);
+      await service.applyChecklistTemplate(
+        result.os_id,
+        profile?.id ?? null,
+        "lava_rapido",
+      );
+    }
+
     revalidateOs(tenantSlug, result.os_id);
     revalidatePath(`/${tenantSlug}/clientes`);
     if (result.created_cliente) {
@@ -179,7 +214,11 @@ export async function createOrdemServicoIntegradaAction(
     }
     return { success: true, id: result.os_id };
   } catch (error) {
-    return toActionError(error, "Erro ao abrir OS.", "ordens.createIntegrated");
+    return toActionError(
+      error,
+      tenant ? openWorkOrderError(tenant) : "Erro ao abrir OS.",
+      "ordens.createIntegrated",
+    );
   }
 }
 

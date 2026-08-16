@@ -63,7 +63,7 @@ export const BARBEARIA_LIBRARY: SegmentLibraryItem[] = defineLibrary(
       ],
     },
     {
-      category: "Química / Estilo",
+      category: "Química / estilo",
       defaultDurationMinutes: 90,
       items: [
         "Pigmentação capilar",

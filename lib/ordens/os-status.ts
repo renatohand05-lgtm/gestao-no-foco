@@ -213,6 +213,81 @@ export const OS_CHECKLIST_TEMPLATE = [
   { codigo: "quilometragem", label: "Quilometragem", categoria: "geral", ordem: 28 },
 ] as const;
 
+export const LAVA_RAPIDO_CHECKLIST_TEMPLATE = [
+  { codigo: "riscos", label: "Riscos", categoria: "exterior", ordem: 1 },
+  { codigo: "amassados", label: "Amassados", categoria: "exterior", ordem: 2 },
+  { codigo: "pintura", label: "Pintura", categoria: "exterior", ordem: 3 },
+  { codigo: "para_choques", label: "Para-choques", categoria: "exterior", ordem: 4 },
+  { codigo: "rodas", label: "Rodas", categoria: "exterior", ordem: 5 },
+  { codigo: "pneus", label: "Pneus", categoria: "exterior", ordem: 6 },
+  { codigo: "vidros", label: "Vidros", categoria: "exterior", ordem: 7 },
+  { codigo: "retrovisores", label: "Retrovisores", categoria: "exterior", ordem: 8 },
+  { codigo: "bancos", label: "Bancos", categoria: "interior", ordem: 9 },
+  { codigo: "painel", label: "Painel", categoria: "interior", ordem: 10 },
+  { codigo: "console", label: "Console", categoria: "interior", ordem: 11 },
+  { codigo: "tapetes", label: "Tapetes", categoria: "interior", ordem: 12 },
+  { codigo: "teto", label: "Teto", categoria: "interior", ordem: 13 },
+  { codigo: "porta_malas", label: "Porta-malas", categoria: "interior", ordem: 14 },
+  {
+    codigo: "objetos_veiculo",
+    label: "Objetos deixados no veículo",
+    categoria: "objetos",
+    ordem: 15,
+  },
+  {
+    codigo: "pertences",
+    label: "Pertences pessoais",
+    categoria: "objetos",
+    ordem: 16,
+  },
+  { codigo: "fotos_entrada", label: "Fotos de entrada", categoria: "registro", ordem: 17 },
+  {
+    codigo: "observacoes_entrada",
+    label: "Observações de entrada",
+    categoria: "registro",
+    ordem: 18,
+  },
+  {
+    codigo: "confirmacao_cliente",
+    label: "Confirmação do cliente",
+    categoria: "registro",
+    ordem: 19,
+  },
+  {
+    codigo: "servico_executado",
+    label: "Serviço executado",
+    categoria: "saida",
+    ordem: 20,
+  },
+  {
+    codigo: "conferencia_visual",
+    label: "Conferência visual",
+    categoria: "saida",
+    ordem: 21,
+  },
+  { codigo: "fotos_finais", label: "Fotos finais", categoria: "saida", ordem: 22 },
+  {
+    codigo: "observacoes_entrega",
+    label: "Observações da entrega",
+    categoria: "saida",
+    ordem: 23,
+  },
+] as const;
+
+export type OsChecklistSeedItem = {
+  codigo: string;
+  label: string;
+  categoria: string;
+  ordem: number;
+};
+
+export function getOsChecklistTemplate(
+  kind: "oficina" | "lava_rapido",
+): readonly OsChecklistSeedItem[] {
+  if (kind === "lava_rapido") return LAVA_RAPIDO_CHECKLIST_TEMPLATE;
+  return OS_CHECKLIST_TEMPLATE;
+}
+
 export const OS_PRIORIDADE_OPTIONS = [
   { value: "baixa", label: "Baixa" },
   { value: "normal", label: "Normal" },

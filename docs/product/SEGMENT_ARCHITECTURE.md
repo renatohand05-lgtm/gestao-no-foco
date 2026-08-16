@@ -69,7 +69,7 @@ Lava-rápido reusa `ordens_servico` como **Atendimentos** (checklist no mesmo ba
 
 Override no próprio `segment_config` (sem migration nova). UI: Configurações → Personalizar experiência.
 
-Biblioteca inicial de serviços (`lib/segments/catalogs/`): templates por segmento. O tenant **escolhe** o que entra; nada é persistido no `createTenant`. Deduplicação por nome normalizado. Form de catálogo lê `getSegmentFormConfig` (tipos/campos), não `if (segment === …)` nas páginas. Preço não é imposto pela biblioteca.
+Biblioteca inicial de serviços (`lib/segments/catalogs/`): templates por segmento, montados pela página via `buildCatalogPickerView` (mesma função dos testes). Descoberta: empty state **Montar catálogo inicial**, hub **Sugestões do segmento**, onboarding com o mesmo CTA. Nada é persistido no `createTenant`. Deduplicação por nome normalizado. Form de catálogo lê `getSegmentFormConfig`. Lava-rápido usa tipos de atendimento sobre `tipo_ordem` (sem engine paralela) e checklist próprio na tabela `ordem_servico_checklist`. Preço não é imposto pela biblioteca.
 
 Reset remove overrides; desativar módulo não apaga dados. Alterar o tipo de negócio aplica o novo preset; overrides compatíveis podem ser preservados se o usuário confirmar.
 

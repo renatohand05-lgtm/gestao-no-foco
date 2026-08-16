@@ -115,6 +115,8 @@ export async function ProfessionalsListScreen({ tenantSlug, routePath }: Props) 
             professionals: copy.professionals,
             newProfessional: copy.newProfessional,
             automotiveSpecialties: copy.automotiveSpecialties,
+            professionalSpecialtySuggestions:
+              copy.professionalSpecialtySuggestions,
           }}
         />
       )}

@@ -45,6 +45,7 @@ export async function createMecanicoAction(
     const svc = await createMecanicoService(g.tenantId);
     const row = await svc.create(input);
     revalidatePath(`/${tenantSlug}/oficina/mecanicos`);
+    revalidatePath(`/${tenantSlug}/profissionais`);
     return { success: true, id: row.id };
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : "Erro" };
@@ -63,6 +64,8 @@ export async function updateMecanicoAction(
     await svc.update(id, input);
     revalidatePath(`/${tenantSlug}/oficina/mecanicos`);
     revalidatePath(`/${tenantSlug}/oficina/mecanicos/${id}`);
+    revalidatePath(`/${tenantSlug}/profissionais`);
+    revalidatePath(`/${tenantSlug}/profissionais/${id}`);
     return { success: true, id };
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : "Erro" };

@@ -13,20 +13,18 @@ import { assertClassificacaoCustoIds } from "@/lib/mecanicos/classificacao";
 import {
   MECANICO_DISPONIBILIDADE,
   MECANICO_DISPONIBILIDADE_LABELS,
-  MECANICO_ESPECIALIDADE_LABELS,
-  MECANICO_ESPECIALIDADES,
   MECANICO_VINCULO_LABELS,
   MECANICO_VINCULOS,
   calcCustoHora,
   calcCustoMensal,
   type MecanicoDisponibilidade,
-  type MecanicoEspecialidade,
   type MecanicoVinculo,
 } from "@/lib/mecanicos/constants";
 import { vigenciaSobrepoeCompetencia } from "@/lib/mecanicos/vigencia";
 import type { MecanicoCompetencia } from "@/lib/mecanicos/competencia-service";
 import type { MecanicoCusto } from "@/lib/mecanicos/custo-service";
 import type { Mecanico, MecanicoAuditoria } from "@/lib/mecanicos/mecanico-service";
+import { ProfessionalSpecialtyField } from "@/components/mecanicos/professional-specialty-field";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { SectionCard } from "@/components/ui/section-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -50,6 +48,8 @@ type Props = {
   centros: Centro[];
   categorias: Cat[];
   planos: Plano[];
+  automotiveSpecialties?: boolean;
+  professionalSpecialtySuggestions?: string[];
 };
 
 function preferId(
@@ -72,6 +72,8 @@ export function MecanicoDetailPanel({
   centros,
   categorias,
   planos,
+  automotiveSpecialties = true,
+  professionalSpecialtySuggestions = [],
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -146,7 +148,7 @@ export function MecanicoDetailPanel({
         cpf: cpf || null,
         telefone: telefone || null,
         email: email || null,
-        especialidade: especialidade as MecanicoEspecialidade,
+        especialidade,
         tipo_vinculo: vinculo as MecanicoVinculo,
         disponibilidade: disponibilidade as MecanicoDisponibilidade,
         centro_custo_id: centroCustoId || null,
@@ -309,20 +311,13 @@ export function MecanicoDetailPanel({
           </label>
           <label className="space-y-1 text-sm">
             <span>Especialidade</span>
-            <select
-              className="h-9 w-full rounded-md border px-2"
+            <ProfessionalSpecialtyField
               value={especialidade}
+              onChange={setEspecialidade}
+              automotive={automotiveSpecialties}
+              suggestions={professionalSpecialtySuggestions}
               disabled={!canEdit}
-              onChange={(e) =>
-                setEspecialidade(e.target.value as MecanicoEspecialidade)
-              }
-            >
-              {MECANICO_ESPECIALIDADES.map((e) => (
-                <option key={e} value={e}>
-                  {MECANICO_ESPECIALIDADE_LABELS[e]}
-                </option>
-              ))}
-            </select>
+            />
           </label>
           <label className="space-y-1 text-sm">
             <span>Vínculo</span>

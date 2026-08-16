@@ -1,4 +1,72 @@
+# Sprint 35.1 — Product experience completion
+
+**Data:** 2026-08-16  
+**Branch:** `main`  
+**Tipo:** Descoberta da biblioteca + lava-rápido sem copy de oficina + especialidades da barbearia — sem billing / 35.2 / prontuário / folha / fidelidade
+
+## Relatório pedido
+
+```
+SPRINT 35.1 — PRODUCT EXPERIENCE COMPLETION
+
+STATUS: GO (código) · homologação manual PENDING
+
+SERVICE LIBRARY VISIBLE: SIM (empty state + hub + onboarding → /produtos/catalogo-inicial)
+OFICINA: ~70 · visível
+BARBEARIA: ~55 · Cabelo/Barba/Combos/Tratamentos/Química / estilo/Estética complementar/Pacotes
+LAVA-RÁPIDO: ~54 · visível
+CONSULTORIA: ~46 · Consultoria/Diagnóstico/Projetos/Assessoria/Treinamentos/Recorrência
+ESTÉTICA: ~44 · Facial/Corporal/Depilação/Sobrancelhas / cílios/Massagens/Pacotes
+ODONTOLOGIA: ~36 · Consultas…Implantodontia · sem odontograma/prontuário/anamnese/prescrição
+
+EMPTY STATE: “Nenhum serviço cadastrado ainda.” + catálogo sugerido por segmento · CTA primário Montar catálogo inicial · secundário Criar serviço do zero
+SUGGESTIONS CTA: permanente “Sugestões do segmento” quando já há itens; “Montar catálogo inicial” no tenant vazio
+CATALOG IMPORT: picker com busca, categorias, recomendados, selecionar categoria/todos, limpar; “Adicionar X serviços”; cards com checkbox/nome/categoria/descrição/duração; sem preço no template
+DEDUPLICATION: equivalentes ignorados · “N adicionados” / “M já existiam e foram ignorados”
+CUSTOM SERVICE: “Criar serviço personalizado” / “Criar serviço do zero”
+MOBILE: cards empilháveis + rodapé fixo no picker (não é tabela desktop)
+
+LAVA-RÁPIDO ATENDIMENTO: Tipo de atendimento · opções de lavagem/higienização/polimento… · default Lava-rápido · CTA Abrir atendimento · sem “Oficina / Veículo” · km/combustível opcionais recolhíveis · aba Diagnóstico oculta · status Em análise / Aguardando materiais
+LAVA-RÁPIDO CHECKLIST: template próprio na tabela ordem_servico_checklist (exterior/interior/objetos/registro/saída)
+BARBEARIA PROFISSIONAIS: sugestões (Corte masculino, Barba, Fade…) + texto livre
+
+P0: 0
+P1: 0
+P2: homologação visual PENDING; evento interno ainda grava “OS aberta”; especialidade livre exige aplicar migration 20260901
+
+TESTES: phase35-1 48/48
+REGRESSÃO: 35.0 13 · 34.2–34.9 PASS
+RBAC: 92 PASS
+LINT: 0 errors / 35 warnings (pré-existentes)
+TYPECHECK: PASS
+BUILD: PASS · /[tenant]/produtos/catalogo-inicial registado
+
+MIGRATION: 20260901_phase35_1_mecanico_especialidade_text.sql (drop check enum em mecanicos.especialidade — texto livre)
+COMMIT: (preenchido após git)
+HEAD == ORIGIN/MAIN: (preenchido após push)
+
+HOMOLOGAÇÃO MANUAL: PENDING
+```
+
+Smoke de production a executar:
+
+1. tenant novo → Produtos → Montar catálogo
+2. verificar sugestões reais do segmento
+3. importar 3 itens
+4. confirmar catálogo + Definir preços
+5. reabrir Sugestões do segmento
+6. tentar importar item duplicado
+7. criar custom
+8. lava-rápido → Novo atendimento (sem Oficina/OS)
+9. barbearia → Novo barbeiro (especialidades reais)
+10. mobile (picker utilizável)
+
+**NÃO iniciar 35.2.**
+
+---
+
 # Sprint 35.1 — Presets por segmento + biblioteca de serviços + form config
+
 
 **Data:** 2026-08-16  
 **Commit código:** `fd4d8d2`  

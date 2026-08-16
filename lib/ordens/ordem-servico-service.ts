@@ -9,7 +9,7 @@ import {
   canFaturarStatus,
   findTransitionPath,
   isTerminalCancelado,
-  OS_CHECKLIST_TEMPLATE,
+  getOsChecklistTemplate,
   OS_STATUS_LABELS,
   type OsStatus,
 } from "@/lib/ordens/os-status";
@@ -1968,8 +1968,12 @@ export class OrdemServicoService {
       .eq("tenant_id", this.tenantId);
   }
 
-  private async seedChecklist(osId: string, userId: string | null) {
-    const rows = OS_CHECKLIST_TEMPLATE.map((item) => ({
+  private async seedChecklist(
+    osId: string,
+    userId: string | null,
+    kind: "oficina" | "lava_rapido" = "oficina",
+  ) {
+    const rows = getOsChecklistTemplate(kind).map((item) => ({
       tenant_id: this.tenantId,
       ordem_servico_id: osId,
       item_codigo: item.codigo,
@@ -1981,6 +1985,19 @@ export class OrdemServicoService {
       responsavel_id: userId,
     }));
     await this.supabase.from("ordem_servico_checklist" as never).insert(rows as never);
+  }
+
+  async applyChecklistTemplate(
+    osId: string,
+    userId: string | null,
+    kind: "oficina" | "lava_rapido",
+  ): Promise<void> {
+    await this.supabase
+      .from("ordem_servico_checklist" as never)
+      .delete()
+      .eq("tenant_id", this.tenantId)
+      .eq("ordem_servico_id", osId);
+    await this.seedChecklist(osId, userId, kind);
   }
 
   private async recordEvent(

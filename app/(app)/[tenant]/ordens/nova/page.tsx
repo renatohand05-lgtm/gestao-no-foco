@@ -1,6 +1,11 @@
 import { OsOpenForm } from "@/components/ordens/os-open-form";
 import { OsSubnav } from "@/components/ordens/os-subnav";
 import { getSegmentUiCopy, osSubnavFromCopy } from "@/lib/segments/copy.ts";
+import {
+  attendanceOptionsForContext,
+  defaultAttendanceType,
+} from "@/lib/segments/attendance-types.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { tryResolvePermissions } from "@/lib/permissoes/authorization";
 import { requireTenant } from "@/lib/tenants";
@@ -38,6 +43,11 @@ export default async function NovaOsPage({
     segmentVersion: tenant.segment_version,
     segmentConfig: tenant.segment_config,
   });
+  const ctx = resolveSegmentContext({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
   const subnav = osSubnavFromCopy(ui);
 
   let canForceDuplicate =
@@ -70,6 +80,12 @@ export default async function NovaOsPage({
           <OsOpenForm
             tenantSlug={tenantSlug}
             canForceDuplicate={canForceDuplicate}
+            operationTypeLabel={ui.operationTypeLabel}
+            openCta={ui.openWorkOrderCta}
+            openingLabel={`Abrindo ${ui.workOrder.toLowerCase()}…`}
+            attendanceOptions={attendanceOptionsForContext(ctx)}
+            defaultAttendanceType={defaultAttendanceType(ctx)}
+            compactVehicleVitals={ui.compactVehicleVitals}
           />
         </ExecutiveSection>
       )}

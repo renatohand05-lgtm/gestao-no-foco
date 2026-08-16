@@ -125,10 +125,10 @@ export const WORK_ORDER_TEMPLATES: WorkOrderTemplateDef[] = [
     key: "lava_rapido",
     nome: "Lava-rápido",
     requiresVeiculo: true,
-    requiresChecklist: false,
+    requiresChecklist: true,
     defaultStatus: "aberta",
     etapas: ["aberta", "em_execucao", "entregue"],
-    campos: ["veiculo", "servicos"],
+    campos: ["veiculo", "checklist", "fotos", "servicos"],
   },
 ];
 

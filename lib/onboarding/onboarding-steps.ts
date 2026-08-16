@@ -62,8 +62,8 @@ export const ONBOARDING_STEPS: OnboardingStepDefinition[] = [
   },
   {
     id: "first_product",
-    title: "Produto ou serviço",
-    description: "Itens do catálogo para a primeira venda.",
+    title: "Monte seu catálogo inicial",
+    description: "Itens sugeridos para o seu tipo de negócio, ou cadastre do zero.",
     required: false,
     estimatedMinutes: 2,
     dataBacked: true,

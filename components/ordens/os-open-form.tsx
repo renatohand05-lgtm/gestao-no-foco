@@ -20,9 +20,9 @@ import {
 } from "@/lib/ordens/actions";
 import type { OsAbrirDuplicate, OsSearchHit } from "@/lib/ordens/os-abrir-rpc";
 import {
-  WORK_ORDER_TIPOS,
-  WORK_ORDER_TIPO_LABELS,
-} from "@/lib/ordens/work-order/templates";
+  OFICINA_ATTENDANCE_OPTIONS,
+  type AttendanceTypeOption,
+} from "@/lib/segments/attendance-types.ts";
 import { cn } from "@/lib/utils";
 
 type Mode = "existente" | "novo_cliente";
@@ -30,11 +30,23 @@ type Mode = "existente" | "novo_cliente";
 type Props = {
   tenantSlug: string;
   canForceDuplicate?: boolean;
+  operationTypeLabel?: string;
+  openCta?: string;
+  openingLabel?: string;
+  attendanceOptions?: AttendanceTypeOption[];
+  defaultAttendanceType?: string;
+  compactVehicleVitals?: boolean;
 };
 
 export function OsOpenForm({
   tenantSlug,
   canForceDuplicate = false,
+  operationTypeLabel = "Tipo de operação",
+  openCta = "Abrir OS",
+  openingLabel = "Abrindo…",
+  attendanceOptions = OFICINA_ATTENDANCE_OPTIONS,
+  defaultAttendanceType = "oficina",
+  compactVehicleVitals = false,
 }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -108,7 +120,7 @@ export function OsOpenForm({
       origem_atendimento: String(fd.get("origem_atendimento") ?? "") || "balcao",
       prioridade: String(fd.get("prioridade") ?? "normal"),
       previsao_entrega: String(fd.get("previsao_entrega") ?? "") || null,
-      tipo_ordem: String(fd.get("tipo_ordem") ?? "oficina") || "oficina",
+      tipo_ordem: String(fd.get("tipo_ordem") ?? defaultAttendanceType) || defaultAttendanceType,
     };
 
     const values =
@@ -424,35 +436,32 @@ export function OsOpenForm({
 
       <div className="grid gap-3 border-t pt-4 md:grid-cols-3">
         <label className="block space-y-1 text-sm md:col-span-3">
-          <span className="text-muted-foreground">
-            Tipo de operação (Ordem de Trabalho)
-          </span>
+          <span className="text-muted-foreground">{operationTypeLabel}</span>
           <NativeSelect
             name="tipo_ordem"
-            defaultValue="oficina"
+            defaultValue={defaultAttendanceType}
             disabled={pending}
             className="h-11"
-            aria-label="Tipo de ordem de trabalho"
+            aria-label={operationTypeLabel}
           >
-            {WORK_ORDER_TIPOS.map((key) => (
-              <option key={key} value={key}>
-                {WORK_ORDER_TIPO_LABELS[key]}
+            {attendanceOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </NativeSelect>
-          <span className="text-xs text-muted-foreground">
-            Persistência de tipos não-oficina depende da migration 28.4.
-          </span>
         </label>
-        <label className="block space-y-1 text-sm">
-          <span className="text-muted-foreground">Km entrada</span>
-          <Input
-            name="quilometragem_entrada"
-            type="number"
-            disabled={pending}
-            className="h-11"
-          />
-        </label>
+        {!compactVehicleVitals ? (
+          <label className="block space-y-1 text-sm">
+            <span className="text-muted-foreground">Km entrada</span>
+            <Input
+              name="quilometragem_entrada"
+              type="number"
+              disabled={pending}
+              className="h-11"
+            />
+          </label>
+        ) : null}
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Prioridade</span>
           <NativeSelect
@@ -480,10 +489,12 @@ export function OsOpenForm({
           <span className="text-muted-foreground">Reclamação / motivo</span>
           <Input name="reclamacao_cliente" disabled={pending} className="h-11" />
         </label>
-        <label className="block space-y-1 text-sm">
-          <span className="text-muted-foreground">Combustível</span>
-          <Input name="nivel_combustivel" disabled={pending} className="h-11" />
-        </label>
+        {!compactVehicleVitals ? (
+          <label className="block space-y-1 text-sm">
+            <span className="text-muted-foreground">Combustível</span>
+            <Input name="nivel_combustivel" disabled={pending} className="h-11" />
+          </label>
+        ) : null}
         <label className="block space-y-1 text-sm">
           <span className="text-muted-foreground">Objetos deixados</span>
           <Input name="objetos_deixados" disabled={pending} className="h-11" />
@@ -496,12 +507,34 @@ export function OsOpenForm({
           <span className="text-muted-foreground">Observações</span>
           <Input name="observacoes" disabled={pending} className="h-11" />
         </label>
+        {compactVehicleVitals ? (
+          <details className="md:col-span-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+            <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
+              Km e combustível (opcional)
+            </summary>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted-foreground">Km entrada</span>
+                <Input
+                  name="quilometragem_entrada"
+                  type="number"
+                  disabled={pending}
+                  className="h-11"
+                />
+              </label>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted-foreground">Combustível</span>
+                <Input name="nivel_combustivel" disabled={pending} className="h-11" />
+              </label>
+            </div>
+          </details>
+        ) : null}
         <input type="hidden" name="origem_atendimento" value="balcao" />
       </div>
 
       <div className="flex flex-wrap gap-3 pt-2">
-        <SaveButton loading={pending} loadingText="Abrindo…">
-          Abrir OS
+        <SaveButton loading={pending} loadingText={openingLabel}>
+          {openCta}
         </SaveButton>
         <Link
           href={`/${tenantSlug}/ordens`}

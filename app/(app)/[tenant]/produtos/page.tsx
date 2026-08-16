@@ -16,6 +16,8 @@ import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PRODUTOS_DEFAULT_PER_PAGE } from "@/lib/produtos/constants";
 import { createProdutoService } from "@/lib/produtos/produto-service";
 import { requireTenant } from "@/lib/tenants";
+import { buildCatalogPickerView } from "@/lib/segments/catalogs/view-model.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import type {
   ProdutoSortField,
   ProdutoSuccessMessage,
@@ -71,6 +73,13 @@ export default async function ProdutosPage({
     skipped,
   } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
+  const catalogView = buildCatalogPickerView(
+    resolveSegmentContext({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    }),
+  );
   const service = await createProdutoService(tenant.id);
 
   const currentPage = Number(page) > 0 ? Number(page) : 1;
@@ -108,11 +117,17 @@ export default async function ProdutosPage({
         description={`Catálogo separado por tipo em ${tenant.name}`}
         breadcrumbs={[{ label: "Produtos & Serviços" }]}
       >
-        <ActionButton
-          action="view"
-          label="Sugestões do segmento"
-          href={`/${tenantSlug}/produtos/catalogo-inicial`}
-        />
+        {catalogView.hasLibrary ? (
+          <ActionButton
+            action="view"
+            label={
+              !hasFilters && result.total === 0
+                ? "Montar catálogo inicial"
+                : "Sugestões do segmento"
+            }
+            href={`/${tenantSlug}/produtos/catalogo-inicial`}
+          />
+        ) : null}
         <ActionButton
           action="create"
           label="Importar produtos"
@@ -145,11 +160,22 @@ export default async function ProdutosPage({
       {library === "1" ? (
         <FeedbackMessage variant="success">
           {Number(added) > 0
-            ? `${added} item${Number(added) === 1 ? "" : "s"} adicionado${Number(added) === 1 ? "" : "s"} ao catálogo.`
-            : "Nenhum item novo — os selecionados já existiam ou não eram da biblioteca."}
+            ? `${added} adicionado${Number(added) === 1 ? "" : "s"}.`
+            : "Nenhum item novo foi cadastrado."}
           {Number(skipped) > 0
-            ? ` ${skipped} equivalente${Number(skipped) === 1 ? "" : "s"} ignorado${Number(skipped) === 1 ? "" : "s"} para evitar duplicata.`
+            ? ` ${skipped} já existiam e foram ignorados.`
             : ""}
+          {Number(added) > 0 ? (
+            <>
+              {" "}
+              <a
+                className="font-medium underline underline-offset-2"
+                href={`/${tenantSlug}/produtos?precoZerado=1`}
+              >
+                Definir preços
+              </a>
+            </>
+          ) : null}
         </FeedbackMessage>
       ) : null}
 
@@ -184,6 +210,9 @@ export default async function ProdutosPage({
           tenantSlug={tenantSlug}
           hasSearch={Boolean(q)}
           hasFilters={hasFilters}
+          hasLibrary={catalogView.hasLibrary}
+          title={catalogView.emptyCatalogTitle}
+          description={`${catalogView.emptyCatalogBody} ${catalogView.description}`}
         />
       ) : (
         <>

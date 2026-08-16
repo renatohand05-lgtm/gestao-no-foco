@@ -320,7 +320,9 @@ export function OsWorkspace({
       />
 
       <div className="flex flex-wrap gap-1.5">
-        {TABS.map((t) => (
+        {TABS.filter(
+          (t) => t !== "diagnostico" || uiCopy?.automotiveWorkflow !== false,
+        ).map((t) => (
           <button
             key={t}
             type="button"
@@ -392,7 +394,7 @@ export function OsWorkspace({
                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
               />
               <div className="grid gap-2 md:grid-cols-2">
-                {uiCopy?.showVehicles !== false ? (
+                {uiCopy?.showVehicles !== false && !uiCopy?.compactVehicleVitals ? (
                   <Input
                     name="quilometragem_entrada"
                     type="number"
@@ -408,7 +410,7 @@ export function OsWorkspace({
                   defaultValue={os.previsao_entrega ?? ""}
                   disabled={pending}
                 />
-                {uiCopy?.showVehicles !== false ? (
+                {uiCopy?.showVehicles !== false && !uiCopy?.compactVehicleVitals ? (
                   <Input
                     name="nivel_combustivel"
                     defaultValue={os.nivel_combustivel ?? ""}
@@ -446,6 +448,29 @@ export function OsWorkspace({
                   disabled={pending}
                   className="md:col-span-2"
                 />
+                {uiCopy?.compactVehicleVitals && uiCopy.showVehicles !== false ? (
+                  <details className="md:col-span-2 rounded-md border border-border/60 p-2">
+                    <summary className="cursor-pointer text-xs text-muted-foreground">
+                      Km e combustível (opcional)
+                    </summary>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      <Input
+                        name="quilometragem_entrada"
+                        type="number"
+                        min={0}
+                        defaultValue={os.quilometragem_entrada ?? ""}
+                        placeholder="Km entrada"
+                        disabled={pending}
+                      />
+                      <Input
+                        name="nivel_combustivel"
+                        defaultValue={os.nivel_combustivel ?? ""}
+                        placeholder="Nível combustível"
+                        disabled={pending}
+                      />
+                    </div>
+                  </details>
+                ) : null}
               </div>
               <button
                 type="submit"

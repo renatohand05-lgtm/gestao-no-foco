@@ -10,13 +10,13 @@ import {
 } from "@/lib/mecanicos/actions";
 import {
   MECANICO_ESPECIALIDADE_LABELS,
-  MECANICO_ESPECIALIDADES,
   MECANICO_VINCULO_LABELS,
   MECANICO_VINCULOS,
   type MecanicoEspecialidade,
   type MecanicoVinculo,
 } from "@/lib/mecanicos/constants";
 import type { Mecanico } from "@/lib/mecanicos/mecanico-service";
+import { ProfessionalSpecialtyField } from "@/components/mecanicos/professional-specialty-field";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ type CopyHint = {
   professionals: string;
   newProfessional: string;
   automotiveSpecialties: boolean;
+  professionalSpecialtySuggestions: string[];
 };
 
 const OFICINA_COPY: CopyHint = {
@@ -33,6 +34,7 @@ const OFICINA_COPY: CopyHint = {
   professionals: "Mecânicos",
   newProfessional: "Novo mecânico",
   automotiveSpecialties: true,
+  professionalSpecialtySuggestions: [],
 };
 
 type Props = {
@@ -45,8 +47,10 @@ type Props = {
 };
 
 function specialtyLabel(id: string, automotive: boolean): string {
-  if (!automotive) return "Geral";
-  return MECANICO_ESPECIALIDADE_LABELS[id as MecanicoEspecialidade] ?? id;
+  if (automotive) {
+    return MECANICO_ESPECIALIDADE_LABELS[id as MecanicoEspecialidade] ?? id;
+  }
+  return id?.trim() || "Geral";
 }
 
 export function MecanicosManager({
@@ -62,8 +66,10 @@ export function MecanicosManager({
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [nome, setNome] = useState("");
-  const [especialidade, setEspecialidade] = useState<MecanicoEspecialidade>(
-    copy.automotiveSpecialties ? "mecanica_geral" : "outras",
+  const [especialidade, setEspecialidade] = useState(
+    copy.automotiveSpecialties
+      ? "mecanica_geral"
+      : (copy.professionalSpecialtySuggestions[0] ?? "Geral"),
   );
   const [vinculo, setVinculo] = useState<MecanicoVinculo>("clt");
   const [codigo, setCodigo] = useState("");
@@ -150,22 +156,12 @@ export function MecanicosManager({
             </label>
             <label className="space-y-1 text-sm">
               <span>Especialidade</span>
-              <select
-                className="h-9 w-full rounded-md border border-input bg-transparent px-2"
+              <ProfessionalSpecialtyField
                 value={especialidade}
-                onChange={(e) =>
-                  setEspecialidade(e.target.value as MecanicoEspecialidade)
-                }
-              >
-                { (copy.automotiveSpecialties
-                  ? MECANICO_ESPECIALIDADES
-                  : (["outras"] as const)
-                ).map((e) => (
-                  <option key={e} value={e}>
-                    {specialtyLabel(e, copy.automotiveSpecialties)}
-                  </option>
-                ))}
-              </select>
+                onChange={setEspecialidade}
+                automotive={copy.automotiveSpecialties}
+                suggestions={copy.professionalSpecialtySuggestions}
+              />
             </label>
             <label className="space-y-1 text-sm">
               <span>Vínculo</span>

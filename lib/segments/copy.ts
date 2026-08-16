@@ -8,6 +8,9 @@ import {
   resolveSegmentContext,
   type ResolveSegmentInput,
 } from "./resolve.ts";
+import { CATALOG_SEGMENT_SHORT_LABEL } from "./catalog-labels.ts";
+import { librarySegmentForContext } from "./library-segment.ts";
+import { specialtySuggestionsForSegment } from "./professional-specialties.ts";
 
 export type SegmentUiCopy = {
   engine: boolean;
@@ -86,6 +89,13 @@ export type SegmentUiCopy = {
   importHistoryDescription: string;
   importReviewDescription: string;
   connectorsOsName: string;
+  openWorkOrderCta: string;
+  operationTypeLabel: string;
+  catalogSegmentShort: string;
+  emptyCatalogTitle: string;
+  emptyCatalogBody: string;
+  compactVehicleVitals: boolean;
+  professionalSpecialtySuggestions: string[];
 };
 
 const OFICINA_TAB_LABELS: Record<string, string> = {
@@ -147,6 +157,8 @@ export function getSegmentUiCopy(
   const engine = ctx.usesCapabilityEngine;
   const oficinaUx = !engine || id === "oficina" || id == null;
   const showVehicles = oficinaUx || hasCapability(ctx, "vehicles");
+  const catalogShort =
+    CATALOG_SEGMENT_SHORT_LABEL[librarySegmentForContext(ctx)] ?? "o seu negócio";
 
   if (oficinaUx) {
     return {
@@ -247,6 +259,13 @@ export function getSegmentUiCopy(
       importReviewDescription:
         "Confirme as linhas. Nesta fase, a confirmação regista as linhas em staging + histórico — a criação de OS reais será ligada aos services existentes numa sprint seguinte.",
       connectorsOsName: "Ordens de Serviço",
+      openWorkOrderCta: "Abrir OS",
+      operationTypeLabel: "Tipo de operação",
+      catalogSegmentShort: catalogShort,
+      emptyCatalogTitle: "Nenhum serviço cadastrado ainda.",
+      emptyCatalogBody: `Comece com nosso catálogo sugerido para ${catalogShort} ou crie seu primeiro serviço manualmente.`,
+      compactVehicleVitals: false,
+      professionalSpecialtySuggestions: [],
     };
   }
 
@@ -359,6 +378,14 @@ export function getSegmentUiCopy(
     importHistoryDescription: `Últimas importações de ${workOrdersLc} deste tenant.`,
     importReviewDescription: `Confirme as linhas. Nesta fase, a confirmação regista as linhas em staging + histórico — a criação de ${workOrdersLc} reais será ligada aos services existentes numa sprint seguinte.`,
     connectorsOsName: workOrders,
+    openWorkOrderCta: `Abrir ${workOrderLc}`,
+    operationTypeLabel:
+      id === "lava_rapido" ? "Tipo de atendimento" : "Tipo de operação",
+    catalogSegmentShort: catalogShort,
+    emptyCatalogTitle: "Nenhum serviço cadastrado ainda.",
+    emptyCatalogBody: `Comece com nosso catálogo sugerido para ${catalogShort} ou crie seu primeiro serviço manualmente.`,
+    compactVehicleVitals: id === "lava_rapido",
+    professionalSpecialtySuggestions: specialtySuggestionsForSegment(id),
   };
 }
 

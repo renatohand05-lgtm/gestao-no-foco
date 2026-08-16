@@ -2,7 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type {
   MecanicoDisponibilidade,
-  MecanicoEspecialidade,
   MecanicoStatus,
   MecanicoVinculo,
 } from "@/lib/mecanicos/constants";
@@ -23,7 +22,7 @@ export type Mecanico = {
   codigo_interno: string | null;
   funcao: string | null;
   nivel: string | null;
-  especialidade: MecanicoEspecialidade;
+  especialidade: string;
   data_admissao: string | null;
   tipo_vinculo: MecanicoVinculo;
   unidade_id: string | null;
@@ -50,7 +49,7 @@ export type MecanicoInput = {
   codigo_interno?: string | null;
   funcao?: string | null;
   nivel?: string | null;
-  especialidade?: MecanicoEspecialidade;
+  especialidade?: string;
   data_admissao?: string | null;
   tipo_vinculo?: MecanicoVinculo;
   unidade_id?: string | null;

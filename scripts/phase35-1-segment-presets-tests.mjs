@@ -805,18 +805,24 @@ describe("35.1 segment service library", () => {
   it("empty state, picker, CTA de tenant existente e custom service", () => {
     const empty = read("components/produtos/produto-empty-state.tsx");
     assert.match(empty, /Montar catálogo inicial/);
-    assert.match(empty, /Criar do zero/);
+    assert.match(empty, /Criar serviço do zero/);
     assert.match(empty, /catalogo-inicial/);
+    assert.match(empty, /hasLibrary/);
     const picker = read("components/produtos/segment-catalog-picker.tsx");
-    assert.match(picker, /Adicionar selecionados/);
-    assert.match(picker, /Selecionar recomendados/);
+    assert.match(picker, /Adicionar \$\{selectedCount\} serviço/);
+    assert.match(picker, /Limpar seleção/);
     assert.match(picker, /Selecionar categoria/);
     assert.match(picker, /Criar serviço personalizado/);
+    assert.match(picker, /sm:grid-cols-2/);
+    assert.match(picker, /sticky|fixed inset-x-0 bottom-0/);
+    assert.doesNotMatch(picker, /preco_venda|R\$/);
     const hub = read("app/(app)/[tenant]/produtos/page.tsx");
     assert.match(hub, /Sugestões do segmento/);
-    assert.ok(
-      existsSync(join(root, "app/(app)/[tenant]/produtos/catalogo-inicial/page.tsx")),
-    );
+    assert.match(hub, /buildCatalogPickerView/);
+    assert.match(hub, /Definir preços/);
+    const page = read("app/(app)/[tenant]/produtos/catalogo-inicial/page.tsx");
+    assert.match(page, /buildCatalogPickerView/);
+    assert.match(page, /Criar serviço do zero/);
     const form = read("components/produtos/produto-form.tsx");
     assert.match(form, /formConfig/);
     assert.doesNotMatch(form, /segment === ['"]barbearia['"]/);
@@ -843,5 +849,201 @@ describe("35.1 segment service library", () => {
     assert.ok(
       consultoria.allowedItemTypes.every((t) => t.value === "servico" || t.value === "combo"),
     );
+    const lava = getSegmentFormConfig(
+      resolveSegmentContext({ segment: "lava_rapido", ...ENGINE }),
+    );
+    const lavaTypes = lava.allowedItemTypes.map((t) => t.value).sort();
+    assert.deepEqual(lavaTypes, ["combo", "kit", "materia_prima", "produto", "servico"].sort());
+    assert.ok(!lava.hiddenFields.includes("veiculo"));
+    assert.ok(lava.hiddenFields.includes("diagnostico_mecanico"));
+    const estetica = getSegmentFormConfig(
+      resolveSegmentContext({ segment: "clinica_estetica", ...ENGINE }),
+    );
+    const estTypes = estetica.allowedItemTypes.map((t) => t.value).sort();
+    assert.deepEqual(
+      estTypes,
+      ["combo", "kit", "materia_prima", "produto", "servico"].sort(),
+    );
+    const odonto = getSegmentFormConfig(
+      resolveSegmentContext({ segment: "consultorio_odontologico", ...ENGINE }),
+    );
+    assert.ok(odonto.allowedItemTypes.some((t) => /insumo/i.test(t.label)));
+    assert.ok(odonto.hiddenFields.includes("veiculo"));
+  });
+});
+
+describe("35.1 biblioteca visível na camada da página", () => {
+  it("route → resolver → library → view não vazia nos 6 segmentos", async () => {
+    const page = read("app/(app)/[tenant]/produtos/catalogo-inicial/page.tsx");
+    assert.match(page, /buildCatalogPickerView/);
+    assert.match(page, /view\.items|view\.hasLibrary/);
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    const { buildCatalogPickerView, MIN_LIBRARY_COUNTS } = await load(
+      "lib/segments/catalogs/view-model.ts",
+    );
+    const { PRODUCT_SEGMENT_IDS } = await load("lib/segments/types.ts");
+    for (const id of PRODUCT_SEGMENT_IDS) {
+      const view = buildCatalogPickerView(
+        resolveSegmentContext({ segment: id, ...ENGINE }),
+      );
+      assert.equal(view.hasLibrary, true, id);
+      assert.ok(view.items.length >= MIN_LIBRARY_COUNTS[id], `${id} count`);
+      assert.ok(view.categories.length > 0, `${id} categories`);
+      assert.match(view.title, new RegExp(view.segmentLabel));
+      assert.equal(view.items.some((i) => !i.active), false, id);
+    }
+  });
+
+  it("categorias da biblioteca batem com o ramo (sem vazamento automotivo)", async () => {
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    const { buildCatalogPickerView } = await load(
+      "lib/segments/catalogs/view-model.ts",
+    );
+    const barb = buildCatalogPickerView(
+      resolveSegmentContext({ segment: "barbearia", ...ENGINE }),
+    );
+    for (const cat of [
+      "Cabelo",
+      "Barba",
+      "Combos",
+      "Tratamentos",
+      "Química / estilo",
+      "Estética complementar",
+      "Pacotes",
+    ]) {
+      assert.ok(barb.categories.includes(cat), cat);
+    }
+    assert.equal(barb.categories.some((c) => /freios|motor|suspensão/i.test(c)), false);
+    const lava = buildCatalogPickerView(
+      resolveSegmentContext({ segment: "lava_rapido", ...ENGINE }),
+    );
+    assert.ok(lava.items.length >= 54);
+    assert.equal(lava.items.some((i) => /freios|diagnóstico de motor/i.test(i.name)), false);
+    const cons = buildCatalogPickerView(
+      resolveSegmentContext({ segment: "consultoria", ...ENGINE }),
+    );
+    for (const cat of [
+      "Consultoria",
+      "Diagnóstico",
+      "Projetos",
+      "Assessoria",
+      "Treinamentos",
+      "Recorrência",
+    ]) {
+      assert.ok(cons.categories.includes(cat), cat);
+    }
+    assert.equal(cons.items.some((i) => /lavagem|placa|oficina/i.test(i.name)), false);
+    const est = buildCatalogPickerView(
+      resolveSegmentContext({ segment: "clinica_estetica", ...ENGINE }),
+    );
+    for (const cat of ["Facial", "Corporal", "Depilação", "Sobrancelhas / cílios", "Massagens", "Pacotes"]) {
+      assert.ok(est.categories.includes(cat), cat);
+    }
+    const odonto = buildCatalogPickerView(
+      resolveSegmentContext({ segment: "consultorio_odontologico", ...ENGINE }),
+    );
+    for (const cat of [
+      "Consultas",
+      "Prevenção",
+      "Restauração",
+      "Periodontia",
+      "Endodontia",
+      "Cirurgia",
+      "Prótese",
+      "Estética",
+      "Ortodontia",
+      "Implantodontia",
+    ]) {
+      assert.ok(odonto.categories.includes(cat), cat);
+    }
+    const blob = odonto.items.map((i) => `${i.name} ${i.description}`).join(" ");
+    assert.doesNotMatch(blob, /odontograma|prontuário|anamnese|prescrição/i);
+  });
+
+  it("segmento sem biblioteca não quebra a rota", () => {
+    const page = read("app/(app)/[tenant]/produtos/catalogo-inicial/page.tsx");
+    assert.match(page, /view\.hasLibrary/);
+    assert.match(page, /Não há sugestões/);
+    const empty = read("components/produtos/produto-empty-state.tsx");
+    assert.match(empty, /hasLibrary/);
+  });
+});
+
+describe("35.1 lava-rápido atendimento e barbearia profissionais", () => {
+  it("form de abertura usa adapter, sem Oficina / Veículo no lava", async () => {
+    const form = read("components/ordens/os-open-form.tsx");
+    assert.match(form, /attendanceOptions/);
+    assert.match(form, /openCta/);
+    assert.match(form, /\{openCta\}/);
+    assert.doesNotMatch(form, /Tipo de operação \(Ordem de Trabalho\)/);
+    const nova = read("app/(app)/[tenant]/ordens/nova/page.tsx");
+    assert.match(nova, /attendanceOptionsForContext/);
+    assert.match(nova, /openWorkOrderCta/);
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    const { attendanceOptionsForContext, defaultAttendanceType } = await load(
+      "lib/segments/attendance-types.ts",
+    );
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const lava = resolveSegmentContext({ segment: "lava_rapido", ...ENGINE });
+    const options = attendanceOptionsForContext(lava);
+    assert.equal(options.some((o) => o.label === "Oficina / Veículo"), false);
+    assert.ok(options.some((o) => o.label === "Lavagem simples"));
+    assert.ok(options.some((o) => o.label === "Pacote / plano"));
+    assert.equal(defaultAttendanceType(lava), "lava_rapido");
+    const ui = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });
+    assert.equal(ui.operationTypeLabel, "Tipo de atendimento");
+    assert.equal(ui.openWorkOrderCta, "Abrir atendimento");
+    assert.equal(ui.compactVehicleVitals, true);
+    assert.equal(ui.automotiveWorkflow, false);
+  });
+
+  it("checklist lava reusa a mesma tabela e template próprio", () => {
+    const status = read("lib/ordens/os-status.ts");
+    assert.match(status, /LAVA_RAPIDO_CHECKLIST_TEMPLATE/);
+    assert.match(status, /getOsChecklistTemplate/);
+    assert.match(status, /objetos_veiculo/);
+    assert.match(status, /fotos_entrada/);
+    const service = read("lib/ordens/ordem-servico-service.ts");
+    assert.match(service, /applyChecklistTemplate/);
+    assert.match(service, /getOsChecklistTemplate/);
+    const actions = read("lib/ordens/actions.ts");
+    assert.match(actions, /applyChecklistTemplate/);
+    assert.match(actions, /lava_rapido/);
+    const workspace = read("components/ordens/os-workspace.tsx");
+    assert.match(workspace, /automotiveWorkflow/);
+    assert.match(workspace, /compactVehicleVitals/);
+  });
+
+  it("barbearia oferece especialidades reais, não só Geral", async () => {
+    const { BARBER_SPECIALTY_SUGGESTIONS } = await load(
+      "lib/segments/professional-specialties.ts",
+    );
+    assert.ok(BARBER_SPECIALTY_SUGGESTIONS.includes("Corte masculino"));
+    assert.ok(BARBER_SPECIALTY_SUGGESTIONS.includes("Fade / degradê"));
+    assert.ok(BARBER_SPECIALTY_SUGGESTIONS.includes("Geral"));
+    const manager = read("components/mecanicos/mecanicos-manager.tsx");
+    assert.match(manager, /professionalSpecialtySuggestions/);
+    assert.match(manager, /ProfessionalSpecialtyField/);
+    const field = read("components/mecanicos/professional-specialty-field.tsx");
+    assert.match(field, /datalist/);
+    assert.match(field, /valor personalizado/);
+    const list = read("components/mecanicos/professionals-list-screen.tsx");
+    assert.match(list, /professionalSpecialtySuggestions/);
+  });
+
+  it("oficina permanece com OS, Km e diagnóstico visíveis", async () => {
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const ui = getSegmentUiCopy({ segment: "oficina", ...ENGINE });
+    assert.equal(ui.openWorkOrderCta, "Abrir OS");
+    assert.equal(ui.automotiveWorkflow, true);
+    assert.equal(ui.compactVehicleVitals, false);
+    const { attendanceOptionsForContext } = await load(
+      "lib/segments/attendance-types.ts",
+    );
+    const { resolveSegmentContext } = await load("lib/segments/resolve.ts");
+    const options = attendanceOptionsForContext(
+      resolveSegmentContext({ segment: "oficina", ...ENGINE }),
+    );
+    assert.ok(options.some((o) => o.label === "Oficina / Veículo"));
   });
 });

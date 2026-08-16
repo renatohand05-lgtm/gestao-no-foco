@@ -6,25 +6,37 @@ type ProdutoEmptyStateProps = {
   tenantSlug: string;
   hasSearch: boolean;
   hasFilters: boolean;
+  hasLibrary?: boolean;
+  title?: string;
+  description?: string;
 };
 
 export function ProdutoEmptyState({
   tenantSlug,
   hasSearch,
   hasFilters,
+  hasLibrary = true,
+  title,
+  description,
 }: ProdutoEmptyStateProps) {
   const filtered = hasSearch || hasFilters;
   const catalogHref = `/${tenantSlug}/produtos/catalogo-inicial`;
   const createHref = `/${tenantSlug}/produtos/novo`;
+  const showLibrary = !filtered && hasLibrary;
 
   return (
     <EmptyState
       icon={Library}
-      title={filtered ? "Nenhum item encontrado" : "Monte seu catálogo inicial"}
+      title={
+        filtered
+          ? "Nenhum item encontrado"
+          : (title ?? "Monte seu catálogo inicial")
+      }
       description={
         filtered
           ? "Tente ajustar a busca ou os filtros, ou cadastre um novo item."
-          : "Selecionamos serviços comuns para o seu tipo de negócio. Escolha os que sua empresa oferece. Você poderá editar e adicionar outros depois."
+          : (description ??
+            "Selecionamos serviços comuns para o seu tipo de negócio. Escolha os que sua empresa oferece e personalize preços e duração.")
       }
       impact={
         filtered
@@ -38,17 +50,23 @@ export function ProdutoEmptyState({
               href: createHref,
               icon: Plus,
             }
-          : {
-              label: "Montar catálogo inicial",
-              href: catalogHref,
-              icon: Library,
-            }
+          : showLibrary
+            ? {
+                label: "Montar catálogo inicial",
+                href: catalogHref,
+                icon: Library,
+              }
+            : {
+                label: "Criar serviço do zero",
+                href: createHref,
+                icon: Plus,
+              }
       }
       secondaryAction={
-        filtered
+        filtered || !showLibrary
           ? undefined
           : {
-              label: "Criar do zero",
+              label: "Criar serviço do zero",
               href: createHref,
               icon: Plus,
             }

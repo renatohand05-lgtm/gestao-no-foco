@@ -9,7 +9,7 @@ import { listTenantMembersForSelect } from "@/lib/crm/tenant-team-service";
 import { createClienteService } from "@/lib/clientes/cliente-service";
 import { createCustomerReturnService } from "@/lib/retention/return-service";
 import { createNotificationOutboxService } from "@/lib/retention/outbox-service";
-import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { client360Surface } from "@/lib/segments/client-360.ts";
 import { defaultReturnRuleForSegment } from "@/lib/retention/returns";
 import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 import { createCommunicationPreferenceService } from "@/lib/retention/prefs-service";
@@ -91,13 +91,11 @@ export default async function ClienteDetailPage({
         comunicacoes={comunicacoes}
         communicationPrefs={prefs}
         canSeeCommDetails={canSeeCommDetails}
-        showVehicle={
-          getSegmentUiCopy({
-            segment: tenant.segment,
-            segmentVersion: tenant.segment_version,
-            segmentConfig: tenant.segment_config,
-          }).showVehicles
-        }
+        client360={client360Surface({
+          segment: tenant.segment,
+          segmentVersion: tenant.segment_version,
+          segmentConfig: tenant.segment_config,
+        })}
         hideProcedure={
           defaultReturnRuleForSegment(tenant.segment).hideProcedure
         }

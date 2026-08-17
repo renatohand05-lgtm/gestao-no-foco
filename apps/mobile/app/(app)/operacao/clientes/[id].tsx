@@ -126,17 +126,17 @@ export default function OperacaoClienteDetailScreen() {
         ) : null}
         {data.recentOrders.length > 0 ? (
           <Card>
-            <Text variant="subtitle">Ordens recentes</Text>
+            <Text variant="subtitle">{data.workOrdersLabel ?? "Atendimentos"}</Text>
             {data.recentOrders.map((o) => (
               <Pressable
                 key={o.id}
                 onPress={() => router.push(`/operacao/ordens/${o.id}`)}
                 accessibilityRole="button"
-                accessibilityLabel={`Abrir ordem ${o.numero}`}
+                accessibilityLabel={`Abrir ${data.workOrderShort ?? "atendimento"} ${o.numero}`}
                 style={{ marginTop: 10 }}
               >
                 <Text variant="body">
-                  OS {o.numero} · {o.status}
+                  {data.workOrderShort ?? "Atendimento"} {o.numero} · {o.status}
                 </Text>
               </Pressable>
             ))}

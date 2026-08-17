@@ -118,14 +118,14 @@ export function pickChannels(input: {
     (input.explicit || waMode === "manual_link" || waMode === "provider");
   const emOk = input.emailAvailable && (input.explicit || emMode === "provider");
   const first = input.settings.preferredChannel || input.preferred;
-  if (first === "whatsapp" && waOk) return ["whatsapp"];
-  if (first === "email" && emOk) return ["email"];
-  if (input.settings.fallbackEmail && emOk && first === "whatsapp" && !waOk) {
-    return ["email"];
+  const channels: Array<"whatsapp" | "email"> = [];
+  if (waOk) channels.push("whatsapp");
+  if (emOk) channels.push("email");
+  if (channels.length === 0) return [];
+  if (first === "email" && channels.includes("email")) {
+    return ["email", ...channels.filter((c) => c !== "email")];
   }
-  if (waOk) return ["whatsapp"];
-  if (emOk) return ["email"];
-  return [];
+  return channels;
 }
 
 export function automationEventEnabled(

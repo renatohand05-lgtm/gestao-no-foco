@@ -4,9 +4,14 @@ import {
 } from "@/lib/crm/crm-executivo-compose";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { Client360Surface } from "@/lib/segments/client-360";
 
 type Props = {
   perfil: CrmExecPerfil;
+  client360?: Pick<
+    Client360Surface,
+    "showVehicles" | "showWorkOrders" | "workOrdersLabel" | "vehiclesLabel" | "workOrderShort"
+  >;
 };
 
 function formatDate(iso: string | null): string {
@@ -29,11 +34,16 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function CrmExecutivoPerfil({ perfil }: Props) {
+export function CrmExecutivoPerfil({ perfil, client360 }: Props) {
   const maxEvolucao = Math.max(
     1,
     ...perfil.evolucaoMensal.map((m) => m.value),
   );
+  const showWorkOrders = client360?.showWorkOrders !== false;
+  const showVehicles = client360?.showVehicles !== false;
+  const visitaLabel = showWorkOrders
+    ? `${client360?.workOrderShort ?? "OS"}/venda`
+    : "visita";
 
   return (
     <div className="space-y-6">
@@ -59,11 +69,27 @@ export function CrmExecutivoPerfil({ perfil }: Props) {
           label="Faturamento total"
           value={formatCurrency(perfil.faturamentoTotal)}
         />
-        <Metric label="Quantidade de OS" value={String(perfil.quantidadeOs)} />
+        {showWorkOrders ? (
+          <Metric
+            label={`Quantidade de ${client360?.workOrdersLabel ?? "OS"}`}
+            value={String(perfil.quantidadeOs)}
+          />
+        ) : null}
         <Metric label="Ticket médio" value={formatCurrency(perfil.ticketMedio)} />
-        <Metric label="Veículos" value={String(perfil.veiculos)} />
-        <Metric label="Última OS/venda (proxy)" value={formatDate(perfil.ultimaVisita)} />
-        <Metric label="Primeira OS/venda (proxy)" value={formatDate(perfil.primeiraVisita)} />
+        {showVehicles ? (
+          <Metric
+            label={client360?.vehiclesLabel ?? "Veículos"}
+            value={String(perfil.veiculos)}
+          />
+        ) : null}
+        <Metric
+          label={`Última ${visitaLabel} (proxy)`}
+          value={formatDate(perfil.ultimaVisita)}
+        />
+        <Metric
+          label={`Primeira ${visitaLabel} (proxy)`}
+          value={formatDate(perfil.primeiraVisita)}
+        />
         <Metric
           label="Dias sem retorno"
           value={perfil.diasSemRetorno != null ? String(perfil.diasSemRetorno) : "—"}

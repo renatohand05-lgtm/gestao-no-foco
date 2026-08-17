@@ -185,9 +185,6 @@ export async function enqueueCustomerNotification(input: {
       waLink: res.waLink,
       channel,
     };
-    if (!res.duplicated && res.status !== "cancelled" && res.status !== "suppressed") {
-      break;
-    }
   }
   return last;
 }

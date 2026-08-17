@@ -52,6 +52,15 @@ export {
 export { listSegmentModuleRows, type SegmentModuleRow } from "./matrix.ts";
 export { resolveMobileModuleFlags, isOpsActionRelevant } from "./mobile-tabs.ts";
 export {
+  client360Surface,
+  visibleClient360Tabs,
+  client360TabLabel,
+  client360QuoteOriginLabel,
+  CLIENT_360_TAB_IDS,
+  type Client360Surface,
+  type Client360TabId,
+} from "./client-360.ts";
+export {
   segmentDashboardFlags,
   filterDashboardSurface,
   isDashboardSurfaceRelevant,

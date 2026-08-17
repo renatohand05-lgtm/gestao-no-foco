@@ -54,6 +54,13 @@ import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Cliente360Data } from "@/types/crm";
 import type { Cliente } from "@/types/clientes";
+import type { Client360Surface } from "@/lib/segments/client-360";
+import {
+  client360QuoteOriginLabel,
+  client360TabLabel,
+  visibleClient360Tabs,
+  type Client360TabId,
+} from "@/lib/segments/client-360";
 
 type ClienteWorkspaceProps = {
   tenantSlug: string;
@@ -66,47 +73,11 @@ type ClienteWorkspaceProps = {
   comunicacoes?: OutboxRow[];
   communicationPrefs?: CommunicationPreferenceRow | null;
   canSeeCommDetails?: boolean;
-  showVehicle?: boolean;
+  client360: Client360Surface;
   hideProcedure?: boolean;
 };
 
-const TABS = [
-  "executivo",
-  "resumo",
-  "cadastro",
-  "financeiro",
-  "ordens",
-  "vendas",
-  "veiculos",
-  "timeline",
-  "agenda",
-  "tarefas",
-  "retornos",
-  "comunicacoes",
-  "observacoes",
-  "contatos",
-  "documentos",
-] as const;
-
-type Tab = (typeof TABS)[number];
-
-const TAB_LABELS: Record<Tab, string> = {
-  executivo: "Executivo",
-  resumo: "Resumo",
-  cadastro: "Cadastro",
-  financeiro: "Financeiro",
-  ordens: "Ordens de serviço",
-  vendas: "Vendas",
-  veiculos: "Veículos",
-  timeline: "Timeline",
-  agenda: "Agenda",
-  tarefas: "Tarefas",
-  retornos: "Retornos",
-  comunicacoes: "Comunicações",
-  observacoes: "Observações",
-  contatos: "Contatos",
-  documentos: "Documentos",
-};
+type Tab = Client360TabId;
 
 function DetailItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -130,10 +101,15 @@ export function ClienteWorkspace({
   comunicacoes = [],
   communicationPrefs = null,
   canSeeCommDetails = false,
-  showVehicle = false,
+  client360,
   hideProcedure = false,
 }: ClienteWorkspaceProps) {
   const router = useRouter();
+  const visibleTabs = visibleClient360Tabs({
+    showVehicles: client360.showVehicles,
+    showWorkOrders: client360.showWorkOrders,
+    hasExecutivo: Boolean(perfilExecutivo),
+  });
   const [tab, setTab] = useState<Tab>(perfilExecutivo ? "executivo" : "resumo");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -191,12 +167,16 @@ export function ClienteWorkspace({
             {formatCurrency(data360.resumo.ticket_medio)}
           </p>
         </SectionCard>
-        <SectionCard title="Ordens de serviço">
-          <p className="text-xl font-semibold tabular-nums">{data360.resumo.ordens_total}</p>
-        </SectionCard>
-        <SectionCard title="Veículos">
-          <p className="text-xl font-semibold tabular-nums">{data360.resumo.veiculos_total}</p>
-        </SectionCard>
+        {client360.showWorkOrders ? (
+          <SectionCard title={client360.workOrdersLabel}>
+            <p className="text-xl font-semibold tabular-nums">{data360.resumo.ordens_total}</p>
+          </SectionCard>
+        ) : null}
+        {client360.showVehicles ? (
+          <SectionCard title={client360.vehiclesLabel}>
+            <p className="text-xl font-semibold tabular-nums">{data360.resumo.veiculos_total}</p>
+          </SectionCard>
+        ) : null}
         <SectionCard title="Última compra">
           <p className="text-sm font-medium">
             {data360.resumo.ultima_compra
@@ -236,7 +216,7 @@ export function ClienteWorkspace({
       {success ? <FeedbackMessage variant="success">{success}</FeedbackMessage> : null}
 
       <div className="flex flex-wrap gap-2 border-b pb-2">
-        {TABS.filter((t) => t !== "executivo" || perfilExecutivo).map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t}
             type="button"
@@ -248,13 +228,13 @@ export function ClienteWorkspace({
                 : "text-muted-foreground hover:bg-muted",
             )}
           >
-            {TAB_LABELS[t]}
+            {client360TabLabel(t, client360)}
           </button>
         ))}
       </div>
 
       {tab === "executivo" && perfilExecutivo ? (
-        <CrmExecutivoPerfil perfil={perfilExecutivo} />
+        <CrmExecutivoPerfil perfil={perfilExecutivo} client360={client360} />
       ) : null}
 
       {tab === "resumo" ? (
@@ -267,7 +247,19 @@ export function ClienteWorkspace({
               <p className="text-sm text-muted-foreground">Nenhum orçamento aberto.</p>
             ) : (
               <ul className="divide-y">
-                {data360.orcamentos.slice(0, 5).map((row) => (
+                {data360.orcamentos
+                  .filter(
+                    (row) =>
+                      row.origem === "venda" || client360.showWorkOrders,
+                  )
+                  .slice(0, 5)
+                  .map((row) => {
+                    const originLabel = client360QuoteOriginLabel(
+                      row.origem,
+                      client360,
+                    );
+                    if (!originLabel) return null;
+                    return (
                   <li key={`${row.origem}-${row.id}`} className="flex justify-between py-2 text-sm">
                     <Link
                       href={
@@ -277,11 +269,12 @@ export function ClienteWorkspace({
                       }
                       className="text-primary hover:underline"
                     >
-                      {row.origem === "venda" ? "Venda" : "OS"} #{row.numero ?? row.id.slice(0, 8)}
+                      {originLabel} #{row.numero ?? row.id.slice(0, 8)}
                     </Link>
                     <span>{formatCurrency(row.total)}</span>
                   </li>
-                ))}
+                    );
+                  })}
               </ul>
             )}
           </SectionCard>
@@ -367,16 +360,16 @@ export function ClienteWorkspace({
         </SectionCard>
       ) : null}
 
-      {tab === "ordens" ? (
-        <SectionCard title="Ordens de serviço">
+      {tab === "ordens" && client360.showWorkOrders ? (
+        <SectionCard title={client360.workOrdersLabel}>
           {data360.ordens.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma OS.</p>
+            <p className="text-sm text-muted-foreground">{client360.emptyWorkOrders}</p>
           ) : (
             <ul className="divide-y">
               {data360.ordens.map((row) => (
                 <li key={row.id} className="flex justify-between py-2 text-sm">
                   <Link href={`/${tenantSlug}/ordens/${row.id}`} className="text-primary hover:underline">
-                    OS #{row.numero ?? row.id.slice(0, 8)}
+                    {client360.workOrderShort} #{row.numero ?? row.id.slice(0, 8)}
                   </Link>
                   <span>
                     {formatCurrency(row.valor_total)} · {row.status}
@@ -409,8 +402,8 @@ export function ClienteWorkspace({
         </SectionCard>
       ) : null}
 
-      {tab === "veiculos" ? (
-        <SectionCard title="Veículos">
+      {tab === "veiculos" && client360.showVehicles ? (
+        <SectionCard title={client360.vehiclesLabel}>
           {data360.veiculos.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum veículo vinculado.</p>
           ) : (
@@ -513,7 +506,7 @@ export function ClienteWorkspace({
               tenantSlug={tenantSlug}
               clienteId={cliente.id}
               clienteLocked
-              showVehicle={showVehicle}
+              showVehicle={client360.showVehicles}
               hideProcedure={hideProcedure}
               onCreated={() => router.refresh()}
             />

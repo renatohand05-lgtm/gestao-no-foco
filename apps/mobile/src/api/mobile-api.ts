@@ -1124,6 +1124,8 @@ export type MobileOpsCustomerDetail = {
   fields: { label: string; value: string }[];
   vehicles: { id: string; label: string }[];
   recentOrders: { id: string; numero: string; status: string }[];
+  workOrderShort?: string;
+  workOrdersLabel?: string;
 };
 
 async function opsGet<T>(

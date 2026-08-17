@@ -31,6 +31,7 @@ const ALIASES: Record<string, ProductSegmentId> = {
   consultorio_odontologico: "consultorio_odontologico",
   odontologia: "consultorio_odontologico",
   estetica: "clinica_estetica",
+  clinica: "clinica_estetica",
 };
 
 export function mapStoredSegmentToProduct(
@@ -53,7 +54,7 @@ export function usesCapabilityEngine(
   if (!product) return false;
   if (segmentVersion != null && Number(segmentVersion) >= 1) return true;
   const id = (storedSegment ?? "").trim().toLowerCase();
-  return NEW_PRODUCT_IDS.includes(id);
+  return NEW_PRODUCT_IDS.includes(id) || NEW_PRODUCT_IDS.includes(product);
 }
 
 const FUTURE_SET = new Set<ProductCapability>(FUTURE_CAPABILITIES);

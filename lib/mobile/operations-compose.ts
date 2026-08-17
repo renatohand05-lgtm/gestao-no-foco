@@ -26,6 +26,7 @@ import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin"
 import type { Database } from "@/types/database";
 import { isOpsActionRelevant } from "@/lib/segments/mobile-tabs.ts";
 import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { client360Surface } from "@/lib/segments/client-360.ts";
 import type { ResolveSegmentInput } from "@/lib/segments/resolve.ts";
 
 export function resolveOpsDataClient(
@@ -934,12 +935,17 @@ export async function composeOpsCustomerDetail(input: {
   tenantId: string;
   permissions: readonly string[];
   id: string;
+  segment?: string | null;
+  segmentVersion?: number | null;
+  segmentConfig?: unknown;
 }): Promise<{
   id: string;
   nome: string;
   fields: Array<{ label: string; value: string }>;
   vehicles: Array<{ id: string; label: string }>;
   recentOrders: Array<{ id: string; numero: string; status: string }>;
+  workOrderShort: string;
+  workOrdersLabel: string;
 }> {
   assertOpsView(input.permissions);
   if (
@@ -954,17 +960,26 @@ export async function composeOpsCustomerDetail(input: {
   );
   if (!cliente) throw new Error("NOT_FOUND");
 
+  const surface = client360Surface({
+    segment: input.segment,
+    segmentVersion: input.segmentVersion,
+    segmentConfig: input.segmentConfig,
+  });
   const [veiculos, orders] = await Promise.all([
-    soft(() =>
-      new VeiculoService(client, input.tenantId).listByCliente(input.id),
-    ),
-    soft(() =>
-      new OrdemServicoService(client, input.tenantId).list({
-        cliente_id: input.id,
-        page: 1,
-        perPage: 15,
-      }),
-    ),
+    surface.showVehicles
+      ? soft(() =>
+          new VeiculoService(client, input.tenantId).listByCliente(input.id),
+        )
+      : Promise.resolve([]),
+    surface.showWorkOrders
+      ? soft(() =>
+          new OrdemServicoService(client, input.tenantId).list({
+            cliente_id: input.id,
+            page: 1,
+            perPage: 15,
+          }),
+        )
+      : Promise.resolve(null),
   ]);
 
   return {
@@ -976,15 +991,21 @@ export async function composeOpsCustomerDetail(input: {
       { label: "Cidade", value: cliente.cidade ?? "—" },
       { label: "Documento", value: cliente.documento ?? "—" },
     ],
-    vehicles: (veiculos ?? []).map((v) => ({
-      id: v.id,
-      label: [v.placa, v.modelo].filter(Boolean).join(" · ") || v.id.slice(0, 8),
-    })),
-    recentOrders: (orders?.items ?? []).map((o) => ({
-      id: o.id,
-      numero: String(o.numero),
-      status: o.status,
-    })),
+    vehicles: surface.showVehicles
+      ? (veiculos ?? []).map((v) => ({
+          id: v.id,
+          label: [v.placa, v.modelo].filter(Boolean).join(" · ") || v.id.slice(0, 8),
+        }))
+      : [],
+    recentOrders: surface.showWorkOrders
+      ? (orders?.items ?? []).map((o) => ({
+          id: o.id,
+          numero: String(o.numero),
+          status: o.status,
+        }))
+      : [],
+    workOrderShort: surface.workOrderShort,
+    workOrdersLabel: surface.workOrdersLabel,
   };
 }
 

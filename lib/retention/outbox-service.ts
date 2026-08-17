@@ -14,6 +14,11 @@ import { originFromTemplate } from "./origin";
 import { correlationId, logCommunication, maskAddress } from "./observability";
 import { classifyFailure } from "./failures";
 import { isMissingColumn, isMissingRelation } from "./schema-guard";
+import {
+  mapSendToOutboxPatch,
+  sendViaChannelProvider,
+  shouldDispatchReal,
+} from "./dispatch";
 import type { OutboxRow } from "./types";
 
 const OPTIONAL_ENQUEUE_FIELDS = [
@@ -119,7 +124,7 @@ export class NotificationOutboxService {
       email: input.email,
       message: input.message,
     });
-    const status = persistOutboxStatus({
+    let status = persistOutboxStatus({
       decisionStatus: decision.status,
       optedIn: input.optedIn,
       mode,
@@ -128,6 +133,24 @@ export class NotificationOutboxService {
     const failureKind = !decision.ok
       ? classifyFailure({ message: decision.note })
       : null;
+    const toAddress =
+      input.channel === "whatsapp"
+        ? (input.phone ?? "").replace(/\D/g, "") || null
+        : input.email ?? null;
+    const canSendNow =
+      decision.ok &&
+      Boolean(toAddress) &&
+      mode === "provider" &&
+      shouldDispatchReal({
+        channel: input.channel,
+        to: toAddress ?? undefined,
+      });
+    let note = decision.note;
+    if (mode === "provider" && decision.ok && !canSendNow) {
+      status = "suppressed";
+      note = "Destinatário fora da allowlist de teste.";
+    }
+    if (canSendNow) status = "queued";
     const payload = {
       tenant_id: this.tenantId,
       cliente_id: input.clienteId,
@@ -140,7 +163,7 @@ export class NotificationOutboxService {
       mode,
       idempotency_key: input.idempotencyKey,
       payload_json: {
-        note: decision.note,
+        note,
         waLink: "waLink" in decision ? decision.waLink : null,
         cta: input.templateCode.startsWith("RETORNO")
           ? { type: "schedule_return" }
@@ -149,20 +172,19 @@ export class NotificationOutboxService {
       rendered_preview: input.message,
       created_by: input.userId ?? null,
       processed_at: new Date().toISOString(),
-      error_message: decision.ok ? null : decision.note,
+      error_message: decision.ok && status !== "suppressed" ? null : note,
       queued_at: new Date().toISOString(),
-      to_address:
-        input.channel === "whatsapp"
-          ? (input.phone ?? "").replace(/\D/g, "") || null
-          : input.email ?? null,
+      to_address: toAddress,
       attempt_count: 0,
       origin_kind: input.originKind ?? originFromTemplate(input.templateCode),
       correlation_id: input.correlationId ?? correlationId(),
       failure_kind: failureKind,
     };
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from("notification_outbox" as never)
-      .insert(payload as never);
+      .insert(payload as never)
+      .select("id")
+      .maybeSingle();
     if (error) {
       if (/duplicate|unique/i.test(error.message)) {
         return {
@@ -179,11 +201,20 @@ export class NotificationOutboxService {
         for (const field of OPTIONAL_ENQUEUE_FIELDS) delete lean[field];
         const retry = await this.supabase
           .from("notification_outbox" as never)
-          .insert(lean as never);
+          .insert(lean as never)
+          .select("id")
+          .maybeSingle();
         if (!retry.error) {
+          const dispatched = await this.dispatchIfAllowed({
+            id: (retry.data as { id?: string } | null)?.id ?? null,
+            canSendNow,
+            to: toAddress,
+            channel: input.channel,
+            body: input.message,
+          });
           return {
-            status,
-            note: decision.note,
+            status: dispatched.status ?? status,
+            note: dispatched.note ?? note,
             waLink: "waLink" in decision ? decision.waLink : undefined,
             duplicated: false,
           };
@@ -199,12 +230,48 @@ export class NotificationOutboxService {
       status,
       note: maskAddress(payload.to_address as string | null),
     });
+    const dispatched = await this.dispatchIfAllowed({
+      id: (data as { id?: string } | null)?.id ?? null,
+      canSendNow,
+      to: toAddress,
+      channel: input.channel,
+      body: input.message,
+    });
     return {
-      status,
-      note: decision.note,
+      status: dispatched.status ?? status,
+      note: dispatched.note ?? note,
       waLink: "waLink" in decision ? decision.waLink : undefined,
       duplicated: false,
     };
+  }
+
+  private async dispatchIfAllowed(input: {
+    id: string | null;
+    canSendNow: boolean;
+    to: string | null;
+    channel: CommChannel;
+    body: string;
+  }): Promise<{ status?: string; note?: string }> {
+    if (!input.canSendNow || !input.id || !input.to) return {};
+    const result = await sendViaChannelProvider({
+      channel: input.channel,
+      to: input.to,
+      body: input.body,
+      tenantId: this.tenantId,
+    });
+    const patch = mapSendToOutboxPatch(result);
+    await this.patchSameRow(input.id, {
+      status: patch.status,
+      provider_message_id: patch.providerMessageId,
+      error_code: patch.errorCode,
+      sent_at: patch.sentAt,
+      failed_at: patch.failedAt,
+      processed_at: new Date().toISOString(),
+      last_attempt_at: new Date().toISOString(),
+      attempt_count: 1,
+      error_message: result.status === "failed" ? result.message : null,
+    });
+    return { status: result.status, note: result.message };
   }
 
   async countRecent(hours = 1): Promise<number> {

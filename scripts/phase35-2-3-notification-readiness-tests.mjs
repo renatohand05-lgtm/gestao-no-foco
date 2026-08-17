@@ -36,6 +36,7 @@ describe("35.2.3 evidência e segurança", () => {
     assert.doesNotMatch(env, /COMMUNICATION_MODE=live/);
     assert.match(read("app/api/cron/retention/route.ts"), /production: "DISABLED"/);
     assert.doesNotMatch(read("lib/retention/process.ts"), /mode: "provider"/);
+    assert.doesNotMatch(read("lib/retention/process.ts"), /sendViaChannelProvider/);
     for (const f of [
       "lib/retention/process.ts",
       "lib/retention/actions.ts",
@@ -213,6 +214,43 @@ describe("35.2.3 webhook / test mode", () => {
       }),
       false,
     );
+    const { shouldDispatchReal, blockedProviderSendResult } = await load(
+      "lib/retention/dispatch.ts",
+    );
+    const hotEnv = {
+      COMMUNICATION_MODE: "test",
+      COMMUNICATION_TEST_ALLOWLIST: "11988887777,dono@example.com",
+      WHATSAPP_ENABLED: "true",
+      WHATSAPP_PROVIDER: "meta_cloud",
+      WHATSAPP_ACCESS_TOKEN: "tok",
+      WHATSAPP_PHONE_NUMBER_ID: "123",
+    };
+    assert.equal(
+      shouldDispatchReal({
+        channel: "whatsapp",
+        to: "11900000000",
+        env: hotEnv,
+      }),
+      false,
+    );
+    assert.equal(
+      blockedProviderSendResult({
+        channel: "whatsapp",
+        to: "11900000000",
+        env: hotEnv,
+      }).status,
+      "suppressed",
+    );
+    assert.equal(
+      shouldDispatchReal({
+        channel: "whatsapp",
+        to: "11988887777",
+        env: hotEnv,
+      }),
+      true,
+    );
+    assert.match(read("lib/retention/dispatch.ts"), /blockedProviderSendResult/);
+    assert.match(read("lib/retention/dispatch.ts"), /shouldDispatchReal/);
   });
 });
 

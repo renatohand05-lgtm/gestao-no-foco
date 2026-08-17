@@ -10,23 +10,70 @@ import {
   effectiveEmailMode,
   effectiveWhatsAppMode,
 } from "./providers/runtime.ts";
-import { allowRealProviderSend } from "./test-mode.ts";
-import { logCommunication } from "./observability.ts";
+import {
+  allowRealProviderSend,
+  isTestAllowlisted,
+  resolveCommunicationMode,
+} from "./test-mode.ts";
 import type { ProviderSendResult } from "./providers/types.ts";
+
+async function logDispatch(input: Parameters<
+  typeof import("./observability.ts").logCommunication
+>[0]) {
+  const { logCommunication } = await import("./observability.ts");
+  logCommunication(input);
+}
 
 export function shouldDispatchReal(input: {
   channel: "whatsapp" | "email";
   to?: string;
+  env?: NodeJS.ProcessEnv;
 }): boolean {
+  const env = input.env ?? process.env;
   const phone = input.channel === "whatsapp" ? input.to : null;
   const email = input.channel === "email" ? input.to : null;
-  if (!allowRealProviderSend({ channel: input.channel, phone, email })) {
+  if (!allowRealProviderSend({ channel: input.channel, phone, email, env })) {
     return false;
   }
   if (input.channel === "whatsapp") {
-    return effectiveWhatsAppMode() === "meta_cloud";
+    return effectiveWhatsAppMode(env) === "meta_cloud";
   }
-  return effectiveEmailMode() === "provider";
+  return effectiveEmailMode(env) === "provider";
+}
+
+/** Nunca chama o adapter real quando a allowlist/kill switch bloquear. */
+export function blockedProviderSendResult(input: {
+  channel: "whatsapp" | "email";
+  to?: string;
+  env?: NodeJS.ProcessEnv;
+}): ProviderSendResult {
+  const env = input.env ?? process.env;
+  const mode = resolveCommunicationMode(env);
+  const phone = input.channel === "whatsapp" ? input.to : null;
+  const email = input.channel === "email" ? input.to : null;
+  if (mode === "disabled") {
+    return {
+      simulated: true,
+      status: "cancelled",
+      provider: "none",
+      message: "Comunicação desligada.",
+    };
+  }
+  if (mode === "test" && !isTestAllowlisted({ phone, email, env })) {
+    return {
+      simulated: true,
+      status: "suppressed",
+      provider: "none",
+      errorCode: "not_allowlisted",
+      message: "Destinatário fora da allowlist de teste.",
+    };
+  }
+  return {
+    simulated: true,
+    status: "dry_run",
+    provider: "none",
+    message: "Envio real bloqueado (kill switch ou provider).",
+  };
 }
 
 export function mapSendToOutboxPatch(
@@ -59,15 +106,16 @@ export async function sendViaChannelProvider(input: {
   to: string;
   body: string;
   tenantId: string;
+  env?: NodeJS.ProcessEnv;
 }): Promise<ProviderSendResult> {
-  if (!shouldDispatchReal({ channel: input.channel, to: input.to })) {
-    const provider = createChannelProvider(input.channel);
-    const result = await provider.send({
+  const env = input.env ?? process.env;
+  if (!shouldDispatchReal({ channel: input.channel, to: input.to, env })) {
+    const result = blockedProviderSendResult({
+      channel: input.channel,
       to: input.to,
-      body: input.body,
-      tenantId: input.tenantId,
+      env,
     });
-    logCommunication({
+    await logDispatch({
       event: "provider_request",
       tenantId: input.tenantId,
       channel: input.channel,
@@ -76,8 +124,8 @@ export async function sendViaChannelProvider(input: {
     });
     return result;
   }
-  const provider = createChannelProvider(input.channel);
-  logCommunication({
+  const provider = createChannelProvider(input.channel, env);
+  await logDispatch({
     event: "provider_request",
     tenantId: input.tenantId,
     channel: input.channel,
@@ -87,7 +135,7 @@ export async function sendViaChannelProvider(input: {
     body: input.body,
     tenantId: input.tenantId,
   });
-  logCommunication({
+  await logDispatch({
     event: result.status === "failed" ? "failed" : "provider_accepted",
     tenantId: input.tenantId,
     channel: input.channel,

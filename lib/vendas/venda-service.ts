@@ -14,6 +14,7 @@ import {
   VENDAS_MAX_PER_PAGE,
 } from "@/lib/vendas/constants";
 import { buildVendaHeaderPayload } from "@/lib/vendas/mappers";
+import { listActiveFormasPagamento } from "@/lib/financeiro/formas-pagamento-ensure";
 import { validateFormaPagamentoParaFaturamento } from "@/lib/vendas/venda-faturamento-validation";
 import { todayISO } from "@/lib/financeiro/conta-receber-utils";
 import type { Database } from "@/types/database";
@@ -465,19 +466,13 @@ export class VendaService {
   }
 
   async listFormasPagamentoParaVenda(): Promise<FormaPagamentoOption[]> {
-    const { data, error } = await this.supabase
-      .from("formas_pagamento")
-      .select("id, nome, tipo, ativo")
-      .eq("tenant_id", this.tenantId)
-      .is("deleted_at", null)
-      .eq("ativo", true)
-      .order("nome", { ascending: true });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return (data ?? []) as FormaPagamentoOption[];
+    const rows = await listActiveFormasPagamento(this.supabase, this.tenantId);
+    return rows.map((row) => ({
+      id: row.id,
+      nome: row.nome,
+      tipo: row.tipo ?? "",
+      ativo: row.ativo,
+    }));
   }
 
   async listCategoriasFinanceirasParaVenda(): Promise<

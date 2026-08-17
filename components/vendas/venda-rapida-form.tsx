@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 import { GFSelect } from "@/components/gf/gf-select";
+import { FormasPagamentoEmptyHint } from "@/components/financeiro/formas-pagamento-empty-hint";
 import { NativeSelect } from "@/components/ui/native-select";
+import { PAYMENT_METHODS_EMPTY_TEXT } from "@/lib/financeiro/formas-pagamento-catalog";
 import { formatFormaPagamentoLabel } from "@/lib/financeiro/payment-method-label";
 import { buildCatalogItemSelectLabel } from "@/lib/produtos/service-commercial";
 import { buttonVariants } from "@/components/ui/button";
@@ -51,6 +53,7 @@ type Props = {
   clientes: Option[];
   formasPagamento: Option[];
   contasBancarias: Option[];
+  canConfigureFormas?: boolean;
 };
 
 export function VendaRapidaForm({
@@ -59,6 +62,7 @@ export function VendaRapidaForm({
   clientes,
   formasPagamento,
   contasBancarias,
+  canConfigureFormas = false,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -594,12 +598,19 @@ export function VendaRapidaForm({
                 onValueChange={setFormaId}
                 placeholder="Selecione…"
                 aria-label="Forma de pagamento"
+                emptyText={PAYMENT_METHODS_EMPTY_TEXT}
                 triggerClassName="h-11"
                 options={formasPagamento.map((f) => ({
                   value: f.id,
                   label: formatFormaPagamentoLabel(f),
                 }))}
               />
+              {formasPagamento.length === 0 ? (
+                <FormasPagamentoEmptyHint
+                  tenantSlug={tenantSlug}
+                  canConfigure={canConfigureFormas}
+                />
+              ) : null}
             </label>
             <label className="flex items-center gap-2 text-sm md:pt-6">
               <input
@@ -649,6 +660,7 @@ export function VendaRapidaForm({
                     }
                     placeholder="Selecione…"
                     aria-label={`Forma de pagamento ${idx + 1}`}
+                    emptyText={PAYMENT_METHODS_EMPTY_TEXT}
                     triggerClassName="h-11"
                     options={formasPagamento.map((f) => ({
                       value: f.id,

@@ -4,6 +4,7 @@ import { VendaForm } from "@/components/vendas/venda-form";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { VENDA_STATUS_EDITAVEIS } from "@/lib/vendas/constants";
+import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 import { createVendaService } from "@/lib/vendas/venda-service";
 import { requireTenant } from "@/lib/tenants";
 
@@ -31,13 +32,14 @@ export default async function EditarVendaPage({
     redirect(`/${tenantSlug}/vendas/${id}`);
   }
 
-  const [clientes, produtos, formasPagamento, categoriasFinanceiras, centrosCusto] =
+  const [clientes, produtos, formasPagamento, categoriasFinanceiras, centrosCusto, canConfigureFormas] =
     await Promise.all([
       service.listClientesParaVenda(),
       service.listProdutosParaVenda(),
       service.listFormasPagamentoParaVenda(),
       service.listCategoriasFinanceirasParaVenda(),
       service.listCentrosCustoParaVenda(),
+      tenantHasMutationPermission(tenantSlug, "financeiro.editar"),
     ]);
 
   return (
@@ -68,6 +70,7 @@ export default async function EditarVendaPage({
           formasPagamento={formasPagamento}
           categoriasFinanceiras={categoriasFinanceiras}
           centrosCusto={centrosCusto}
+          canConfigureFormas={canConfigureFormas}
         />
       </SectionCard>
     </div>

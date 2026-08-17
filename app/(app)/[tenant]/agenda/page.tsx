@@ -19,10 +19,12 @@ import {
 } from "@/lib/dashboard/tenant-timezone";
 import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createProdutoService } from "@/lib/produtos/produto-service";
+import { createVeiculoService } from "@/lib/ordens/veiculo-service";
 import { clientAppointmentKpis } from "@/lib/retention/kpis";
 import { resolveAgendaNature } from "@/lib/retention/natures";
 import { parseAgendaCreateContext } from "@/lib/ux/fast-input";
 import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { serviceSuggestionsForContext } from "@/lib/segments/catalogs/suggest.ts";
 import { createClient } from "@/lib/supabase/server";
@@ -81,6 +83,8 @@ export default async function AgendaPage({
     recursoId: string | null;
     cliente_id: string | null;
     origem: string | null;
+    natureza?: string | null;
+    ordem_servico_id?: string | null;
   }> = [];
   let schemaReady = false;
   let bridgeNote: string | null = null;
@@ -103,6 +107,8 @@ export default async function AgendaPage({
       recursoId: r.recurso_id ?? null,
       cliente_id: r.cliente_id,
       origem: r.origem,
+      natureza: (r as { natureza?: string | null }).natureza ?? r.origem,
+      ordem_servico_id: r.ordem_servico_id,
     }));
   } catch {
     bridgeNote =
@@ -184,12 +190,23 @@ export default async function AgendaPage({
     segmentVersion: tenant.segment_version,
     segmentConfig: tenant.segment_config,
   });
+  const ui = getSegmentUiCopy(ctx);
   const library = schemaReady
     ? serviceSuggestionsForContext(ctx, { includeCombos: false })
     : [];
   const canCreateProduto = schemaReady
     ? await tenantHasMutationPermission(tenantSlug, "produtos.criar")
     : false;
+  const canStartAttendance = ui.createsWorkOrderFromAgenda
+    ? await tenantHasMutationPermission(tenantSlug, "os.criar")
+    : true;
+
+  let initialVeiculos: import("@/lib/ordens/veiculo-shared").VeiculoOption[] =
+    [];
+  if (schemaReady && ui.showVehicles && initial.clienteId) {
+    const veiculoSvc = await createVeiculoService(tenant.id);
+    initialVeiculos = await veiculoSvc.listOptionsByCliente(initial.clienteId);
+  }
 
   const views = [
     { key: "dia", label: "Dia" },
@@ -301,6 +318,8 @@ export default async function AgendaPage({
             id: p.id,
             label: p.nome_completo,
           }))}
+          showVehicles={ui.showVehicles}
+          initialVeiculos={initialVeiculos}
         />
       ) : null}
 
@@ -320,6 +339,15 @@ export default async function AgendaPage({
 
       <AgendaEventListActions
         tenantSlug={tenantSlug}
+        canStartAttendance={canStartAttendance}
+        copy={{
+          confirmAppointmentLabel: ui.confirmAppointmentLabel,
+          clientArrivedLabel: ui.clientArrivedLabel,
+          startAttendanceLabel: ui.startAttendanceLabel,
+          rescheduleAppointmentLabel: ui.rescheduleAppointmentLabel,
+          noShowLabel: ui.noShowLabel,
+          workOrder: ui.workOrder,
+        }}
         events={events.map((e) => ({
           id: e.id,
           titulo: e.titulo,
@@ -327,6 +355,9 @@ export default async function AgendaPage({
           fim: e.fim,
           tipo: e.tipo,
           status: e.status,
+          natureza: e.natureza ?? e.origem,
+          origem: e.origem,
+          ordem_servico_id: e.ordem_servico_id ?? null,
         }))}
       />
     </div>

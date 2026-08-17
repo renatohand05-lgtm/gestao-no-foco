@@ -28,6 +28,7 @@ import {
   missingContasPagarFormas,
   type FormaPagamentoExisting,
 } from "@/lib/financeiro/formas-pagamento-catalog";
+import { ensureFormasPagamentoCatalog } from "@/lib/financeiro/formas-pagamento-ensure";
 import {
   missingContasPagarCategorias,
   type CategoriaFinanceiraExisting,
@@ -1012,39 +1013,13 @@ export class ContaPagarService {
   }
 
   /**
-   * Garante catálogo mínimo CAP no tenant (idempotente).
-   * Não apaga/renomeia CREDITO/DEBITO/DINHEIRO/PIX legados — só completa faltantes.
+   * Garante catálogo mínimo no tenant (idempotente).
+   * Delegado à fonte única `formas_pagamento` — não cria catálogo paralelo.
    */
   async ensureContasPagarFormasCatalog(): Promise<void> {
-    const { data, error } = await this.supabase
-      .from("formas_pagamento")
-      .select("id, nome, tipo")
-      .eq("tenant_id", this.tenantId)
-      .is("deleted_at", null);
-
-    if (error) throw new Error(error.message);
-
-    const existing = (data ?? []) as FormaPagamentoExisting[];
-    const missing = missingContasPagarFormas(existing);
-    if (missing.length === 0) return;
-
-    const payload = missing.map((item) => ({
-      tenant_id: this.tenantId,
-      nome: item.nome,
-      tipo: item.tipo,
-      ativo: true,
-      gera_financeiro: true,
-      dias_compensacao: 0,
-    }));
-
-    const { error: insertError } = await this.supabase
-      .from("formas_pagamento")
-      .insert(payload);
-
-    // Corrida / unique: outro request pode ter inserido — listagem seguinte cobre.
-    if (insertError && insertError.code !== "23505") {
-      throw new Error(insertError.message);
-    }
+    // Fonte única: ensureFormasPagamentoCatalog usa missingContasPagarFormas.
+    void missingContasPagarFormas;
+    await ensureFormasPagamentoCatalog(this.supabase, this.tenantId);
   }
 
   async listCategorias(): Promise<CategoriaFinanceiraOption[]> {

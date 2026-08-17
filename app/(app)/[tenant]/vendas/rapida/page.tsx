@@ -2,6 +2,7 @@ import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { VendaRapidaForm } from "@/components/vendas/venda-rapida-form";
 import { createClient } from "@/lib/supabase/server";
+import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 import { requireTenant } from "@/lib/tenants";
 import { createVendaRapidaService } from "@/lib/vendas/venda-rapida-service";
 import { createVendaService } from "@/lib/vendas/venda-service";
@@ -19,7 +20,8 @@ export default async function VendaRapidaPage({
   const vendaSvc = await createVendaService(tenant.id);
   const balcao = await createVendaRapidaService(tenant.id);
 
-  const [produtos, clientes, formas, contas] = await Promise.all([
+  const [produtos, clientes, formas, contas, canConfigureFormas] =
+    await Promise.all([
     balcao.listProdutosBalcao(),
     vendaSvc.listClientesParaVenda(),
     vendaSvc.listFormasPagamentoParaVenda(),
@@ -30,6 +32,7 @@ export default async function VendaRapidaPage({
       .eq("ativo", true)
       .is("deleted_at", null)
       .order("nome"),
+    tenantHasMutationPermission(tenantSlug, "financeiro.editar"),
   ]);
 
   return (
@@ -59,6 +62,7 @@ export default async function VendaRapidaPage({
             id: c.id,
             nome: c.nome,
           }))}
+          canConfigureFormas={canConfigureFormas}
         />
       </SectionCard>
     </div>

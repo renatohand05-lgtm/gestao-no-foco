@@ -56,6 +56,7 @@ function toInput(parsed: ReturnType<typeof agendaEventFormSchema.parse>) {
     tipo: parsed.tipo,
     natureza: parsed.natureza,
     servico_id: parsed.servico_id,
+    veiculo_id: parsed.veiculo_id,
     duracao_minutos: parsed.duracao_minutos,
     lembrete_minutos: parsed.lembrete_minutos,
     meeting_url: parsed.meeting_url,

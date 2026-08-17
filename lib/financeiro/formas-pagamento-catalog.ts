@@ -145,6 +145,16 @@ export function missingContasPagarFormas(
 }
 
 /** Labels esperados na UI após ensure (amigáveis + legado mapeado). */
+export const PAYMENT_METHODS_EMPTY_TEXT = "Configure as formas de pagamento";
+
+/** Parcelamento só nas formas que o catálogo já trata como parceláveis. Sem inventar adquirente. */
+export function allowsInstallmentsForFormaTipo(
+  tipo: string | null | undefined,
+): boolean {
+  const t = (tipo ?? "").trim().toLowerCase();
+  return t === "cartao_credito" || t === "crediario";
+}
+
 export const CONTAS_PAGAR_FORMAS_UI_LABELS_REQUIRED = [
   "PIX",
   "Cartão de crédito",

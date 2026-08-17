@@ -4,6 +4,7 @@ import {
   FINANCEIRO_DEFAULT_PER_PAGE,
   FINANCEIRO_MAX_PER_PAGE,
 } from "@/lib/financeiro/constants";
+import { ensureFormasPagamentoCatalog } from "@/lib/financeiro/formas-pagamento-ensure";
 import { buildFormaPagamentoPayload } from "@/lib/financeiro/mappers";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -63,6 +64,14 @@ export class FormaPagamentoService {
     const to = from + perPage - 1;
     const search = params.search?.trim();
     const { column, ascending } = resolveSort(params.sort, params.order);
+
+    if (!search && (!params.tipo || params.tipo === "all")) {
+      try {
+        await ensureFormasPagamentoCatalog(this.supabase, this.tenantId);
+      } catch {
+        // Sem escrita ou corrida: lista o que já existe.
+      }
+    }
 
     let query = this.supabase
       .from("formas_pagamento")

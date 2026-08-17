@@ -141,6 +141,8 @@ export function useClienteVeiculos(
       }
       setVeiculos(result.veiculos);
       if (selectId) onSelect?.(selectId);
+      else if (result.veiculos.length === 1)
+        onSelect?.(result.veiculos[0].id);
     });
   }
 

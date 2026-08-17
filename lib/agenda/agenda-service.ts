@@ -43,6 +43,7 @@ export type AgendaEventInput = {
   meeting_url?: string | null;
   participantes_json?: Json | null;
   return_id?: string | null;
+  veiculo_id?: string | null;
   ordem_servico_id?: string | null;
   venda_id?: string | null;
   observacao?: string | null;
@@ -299,6 +300,7 @@ export class AgendaEventService {
     return {
       natureza,
       servico_id: input.servico_id || null,
+      veiculo_id: input.veiculo_id || null,
       duracao_minutos: duracao || null,
       lembrete_minutos: input.lembrete_minutos ?? null,
       meeting_url: input.meeting_url?.trim() || null,

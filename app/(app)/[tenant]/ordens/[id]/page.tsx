@@ -12,6 +12,7 @@ import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createOsMecanicoService } from "@/lib/mecanicos/os-mecanico-service";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { tryResolvePermissions } from "@/lib/permissoes/authorization";
+import { listActiveFormasPagamento } from "@/lib/financeiro/formas-pagamento-ensure";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import {
@@ -64,11 +65,12 @@ export default async function OsDetailPage({
 
   const [
     { data: produtos },
-    { data: formas },
+    formas,
     veiculosIniciais,
     anexos,
     orcamentoVersoes,
     compartilhamentos,
+    canConfigureFormas,
   ] = await Promise.all([
     supabase
       .from("produtos")
@@ -78,17 +80,12 @@ export default async function OsDetailPage({
       .eq("ativo", true)
       .order("nome")
       .limit(500),
-    supabase
-      .from("formas_pagamento")
-      .select("id, nome")
-      .eq("tenant_id", tenant.id)
-      .is("deleted_at", null)
-      .eq("ativo", true)
-      .order("nome"),
+    listActiveFormasPagamento(supabase, tenant.id),
     veiculoService.listOptionsByCliente(os.cliente_id),
     inspecaoStorage.listAnexos(id),
     orcamentoService.listVersions(id),
     compartilhamentoService.listShares(id),
+    tenantHasMutationPermission(tenantSlug, "financeiro.editar"),
   ]);
 
   let canApplyDesconto =
@@ -231,7 +228,13 @@ export default async function OsDetailPage({
         ]} />
       <ExecutiveHeader title={ui.workOrderDetailTitle(os.numero)} description={
           ui.showVehicles
-            ? `${os.cliente_nome ?? ui.customer} · ${os.placa ?? ui.missingVehicleLabel}`
+            ? [
+                os.cliente_nome ?? ui.customer,
+                [os.marca, os.modelo].filter(Boolean).join(" "),
+                os.placa ?? ui.missingVehicleLabel,
+              ]
+                .filter(Boolean)
+                .join(" · ")
             : (os.cliente_nome ?? ui.customer)
         } />
       <OsWorkspaceLazy
@@ -241,10 +244,11 @@ export default async function OsDetailPage({
         professionalsLabel={ui.professionals}
         uiCopy={segmentCopyForClient(ui)}
         produtos={(produtos ?? []).map((p) => ({ id: p.id, nome: p.nome }))}
-        formasPagamento={(formas ?? []).map((f) => ({
+        formasPagamento={formas.map((f) => ({
           id: f.id,
           nome: f.nome,
         }))}
+        canConfigureFormas={canConfigureFormas}
         veiculosIniciais={veiculosIniciais}
         anexos={anexos}
         orcamentoVersoes={orcamentoVersoes}

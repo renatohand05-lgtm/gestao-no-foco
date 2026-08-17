@@ -17,6 +17,10 @@ import {
 } from "@/lib/retention/natures";
 import { AgendaServiceField } from "@/components/agenda/agenda-service-field";
 import {
+  OsVeiculoPicker,
+  useClienteVeiculos,
+} from "@/components/ordens/os-veiculo-picker";
+import {
   novoClienteFromAgendaHref,
   type AgendaCreateContext,
 } from "@/lib/ux/fast-input";
@@ -38,6 +42,8 @@ type Props = {
   initial?: AgendaCreateContext;
   library?: CatalogSuggestionDto[];
   canCreateProduto?: boolean;
+  showVehicles?: boolean;
+  initialVeiculos?: import("@/lib/ordens/veiculo-shared").VeiculoOption[];
 };
 
 const NATURE_LABEL: Record<AgendaNature, string> = {
@@ -66,6 +72,8 @@ export function AgendaEventCreateForm({
   initial,
   library = [],
   canCreateProduto = false,
+  showVehicles = false,
+  initialVeiculos = [],
 }: Props) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +84,11 @@ export function AgendaEventCreateForm({
   const [titulo, setTitulo] = useState("");
   const [tipo, setTipo] = useState(defaultTipo(initialNatureza));
   const [clienteId, setClienteId] = useState(initial?.clienteId ?? "");
+  const [veiculoId, setVeiculoId] = useState(
+    initialVeiculos.length === 1 ? initialVeiculos[0].id : "",
+  );
+  const { veiculos, error: veiculoError, loading: veiculoLoading, load: loadVeiculos } =
+    useClienteVeiculos(tenantSlug, initialVeiculos);
   const [servicoId, setServicoId] = useState(initial?.servicoId ?? "");
   const [catalogoServicos, setCatalogoServicos] = useState(servicos);
   const initialMinutes =
@@ -172,6 +185,7 @@ export function AgendaEventCreateForm({
         tipo,
         natureza,
         cliente_id: clienteId || null,
+        veiculo_id: showVehicles ? veiculoId || null : null,
         servico_id: servicoId || null,
         responsavel_id: responsavelId || null,
         duracao_minutos: duracao,
@@ -281,7 +295,12 @@ export function AgendaEventCreateForm({
             <select
               className={fieldClass}
               value={clienteId}
-              onChange={(e) => setClienteId(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value;
+                setClienteId(next);
+                setVeiculoId("");
+                if (showVehicles) loadVeiculos(next, undefined, setVeiculoId);
+              }}
               disabled={Boolean(initial?.clienteId)}
             >
               <option value="">Selecionar cliente</option>
@@ -300,6 +319,20 @@ export function AgendaEventCreateForm({
               </a>
             ) : null}
           </label>
+        ) : null}
+        {showVehicles && natureza === "cliente" ? (
+          <div className="text-xs sm:col-span-2">
+            <OsVeiculoPicker
+              tenantSlug={tenantSlug}
+              clienteId={clienteId}
+              value={veiculoId}
+              onChange={setVeiculoId}
+              veiculos={veiculos}
+              loading={veiculoLoading}
+              error={veiculoError}
+              onRefresh={(id) => loadVeiculos(clienteId, id, setVeiculoId)}
+            />
+          </div>
         ) : null}
         {natureza === "cliente" ? (
           <AgendaServiceField

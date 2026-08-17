@@ -1045,6 +1045,7 @@ export type Database = {
           recurso_id: string | null;
           cliente_id: string | null;
           ordem_servico_id: string | null;
+          veiculo_id?: string | null;
           venda_id: string | null;
           origem: string | null;
           observacao: string | null;
@@ -1072,6 +1073,7 @@ export type Database = {
           recurso_id?: string | null;
           cliente_id?: string | null;
           ordem_servico_id?: string | null;
+          veiculo_id?: string | null;
           venda_id?: string | null;
           origem?: string | null;
           observacao?: string | null;
@@ -1099,6 +1101,7 @@ export type Database = {
           recurso_id?: string | null;
           cliente_id?: string | null;
           ordem_servico_id?: string | null;
+          veiculo_id?: string | null;
           venda_id?: string | null;
           origem?: string | null;
           observacao?: string | null;

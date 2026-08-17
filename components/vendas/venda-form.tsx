@@ -7,6 +7,8 @@ import { useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import { GFSelect } from "@/components/gf/gf-select";
+import { FormasPagamentoEmptyHint } from "@/components/financeiro/formas-pagamento-empty-hint";
+import { PAYMENT_METHODS_EMPTY_TEXT } from "@/lib/financeiro/formas-pagamento-catalog";
 import { formatFormaPagamentoLabel } from "@/lib/financeiro/payment-method-label";
 import { buildCatalogItemSelectLabel } from "@/lib/produtos/service-commercial";
 import { CancelButton } from "@/components/ui/cancel-button";
@@ -56,6 +58,7 @@ type VendaFormProps = {
   formasPagamento: FormaPagamentoOption[];
   categoriasFinanceiras: VendaCategoriaFinanceiraOption[];
   centrosCusto: VendaCentroCustoOption[];
+  canConfigureFormas?: boolean;
 };
 
 const numberFieldOptions = {
@@ -87,6 +90,7 @@ export function VendaForm({
   formasPagamento,
   categoriasFinanceiras,
   centrosCusto,
+  canConfigureFormas = false,
 }: VendaFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -261,6 +265,7 @@ export function VendaForm({
                     onValueChange={field.onChange}
                     placeholder="Opcional — obrigatória se gera financeiro"
                     aria-label="Forma de pagamento"
+                    emptyText={PAYMENT_METHODS_EMPTY_TEXT}
                     options={formasPagamento.map((forma) => ({
                       value: forma.id,
                       label: formatFormaPagamentoLabel(forma),
@@ -275,9 +280,10 @@ export function VendaForm({
                 )}
               />
               {formasPagamento.length === 0 ? (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Cadastre formas de pagamento em Financeiro para selecionar aqui.
-                </p>
+                <FormasPagamentoEmptyHint
+                  tenantSlug={tenantSlug}
+                  canConfigure={canConfigureFormas}
+                />
               ) : null}
             </FormField>
 

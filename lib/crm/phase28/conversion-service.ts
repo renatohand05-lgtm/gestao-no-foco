@@ -5,8 +5,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createAgendaEventService } from "@/lib/agenda/agenda-service";
+import { agendaEventContext } from "@/lib/agenda/event-context";
+import {
+  agendaStatusAfterOperationalStart,
+  pickScheduledVehicle,
+} from "@/lib/agenda/operational-start";
 import { createClienteTarefaService } from "@/lib/crm/cliente-tarefa-service";
 import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { librarySegmentForContext } from "@/lib/segments/library-segment.ts";
+import {
+  resolveSegmentContext,
+  type ResolveSegmentInput,
+} from "@/lib/segments/resolve.ts";
 import { createClient } from "@/lib/supabase/server";
 import { createVendaService } from "@/lib/vendas/venda-service";
 import type { Database } from "@/types/database";
@@ -319,6 +330,8 @@ export class ConversionService {
   async agendaToOs(
     eventId: string,
     userId: string | null,
+    segmentInput?: ResolveSegmentInput,
+    mode: "arrived" | "start" = "start",
   ): Promise<ConversionExecResult> {
     const agenda = await createAgendaEventService(this.tenantId);
     const ev = await agenda.getById(eventId);
@@ -329,20 +342,54 @@ export class ConversionService {
         message: "Evento não encontrado.",
       };
     }
+    const extra = agendaEventContext(ev);
     if (!ev.cliente_id) {
       return {
         ok: false,
         status: "indisponivel",
-        message: "Vincule um cliente ao evento antes de criar OS.",
+        message: "Vincule um cliente ao evento antes de iniciar o atendimento.",
       };
     }
-    if (ev.ordem_servico_id) {
+
+    const ctx = resolveSegmentContext(
+      segmentInput ?? { segment: null, segmentVersion: null },
+    );
+    const ui = getSegmentUiCopy(ctx);
+    const nextStatus = agendaStatusAfterOperationalStart(mode);
+    const createWorkOrder = ui.createsWorkOrderFromAgenda;
+
+    const linkExisting = async (osId: string, idempotent: boolean) => {
+      await this.supabase
+        .from("agenda_eventos")
+        .update({
+          ordem_servico_id: osId,
+          status: nextStatus,
+          updated_at: new Date().toISOString(),
+        } as never)
+        .eq("id", eventId)
+        .eq("tenant_id", this.tenantId);
       return {
         ok: true,
-        status: "idempotent",
-        message: "Evento já vinculado a uma OS.",
-        id: ev.ordem_servico_id,
-        redirectPath: `/${this.tenantSlug}/ordens/${ev.ordem_servico_id}`,
+        status: idempotent ? ("idempotent" as const) : ("ok" as const),
+        message: idempotent
+          ? "Atendimento já existia para este agendamento."
+          : `${ui.workOrder} criado a partir da agenda.`,
+        id: osId,
+        redirectPath: `/${this.tenantSlug}/ordens/${osId}`,
+      };
+    };
+
+    if (ev.ordem_servico_id) {
+      return linkExisting(ev.ordem_servico_id, true);
+    }
+
+    if (!createWorkOrder) {
+      await agenda.setStatus(eventId, nextStatus);
+      return {
+        ok: true,
+        status: "ok",
+        message: "Agenda atualizada. Este segmento não abre OS.",
+        redirectPath: `/${this.tenantSlug}/agenda`,
       };
     }
 
@@ -356,69 +403,79 @@ export class ConversionService {
       .limit(1)
       .maybeSingle();
     if (existing?.id) {
-      await this.supabase
-        .from("agenda_eventos")
-        .update({
-          ordem_servico_id: existing.id,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", eventId)
-        .eq("tenant_id", this.tenantId);
-      return {
-        ok: true,
-        status: "idempotent",
-        message: "OS já existia para este evento.",
-        id: existing.id,
-        redirectPath: `/${this.tenantSlug}/ordens/${existing.id}`,
-      };
+      return linkExisting(existing.id, true);
     }
 
-    const { data: veiculo } = await this.supabase
+    const { data: veiculos, error: vErr } = await this.supabase
       .from("veiculos")
       .select("id")
       .eq("tenant_id", this.tenantId)
       .eq("cliente_id", ev.cliente_id)
-      .is("deleted_at", null)
-      .limit(1)
-      .maybeSingle();
-    if (!veiculo?.id) {
+      .is("deleted_at", null);
+    if (vErr) throw new Error(vErr.message);
+
+    const picked = pickScheduledVehicle({
+      vehiclesRequired: ui.showVehicles,
+      eventVeiculoId: extra.veiculo_id,
+      clientVehicleIds: (veiculos ?? []).map((row) => row.id),
+    });
+    if (!picked.ok) {
+      return { ok: false, status: "indisponivel", message: picked.message };
+    }
+    if (!picked.veiculoId) {
       return {
         ok: false,
         status: "indisponivel",
-        message: "Cliente sem veículo — cadastre antes de abrir OS.",
+        message: "Cadastre um veículo rápido para este cliente antes de iniciar.",
       };
     }
+
+    const lava = librarySegmentForContext(ctx) === "lava_rapido";
+    const durationMs =
+      extra.duracao_minutos != null
+        ? extra.duracao_minutos * 60_000
+        : Date.parse(ev.fim) - Date.parse(ev.inicio);
+    const previsao = Number.isFinite(durationMs)
+      ? new Date(Date.parse(ev.inicio) + durationMs).toISOString()
+      : null;
 
     const osSvc = await createOrdemServicoService(this.tenantId);
     const os = await osSvc.create(
       {
         cliente_id: ev.cliente_id,
-        veiculo_id: veiculo.id,
-        observacoes: `${marker} ${ev.titulo}`,
+        veiculo_id: picked.veiculoId,
+        mecanico_id: ev.responsavel_id ?? "",
+        observacoes: `${marker} ${ev.titulo}`.trim(),
         reclamacao_cliente: ev.observacao,
         prioridade: "normal",
         origem_atendimento: "agenda",
         centro_custo_id: "",
+        data_hora_entrada: ev.inicio,
+        previsao_entrega: previsao,
       },
       userId,
+      {
+        checklistKind: lava ? "lava_rapido" : "oficina",
+        initialStatus: lava ? "em_execucao" : "rascunho",
+      },
     );
 
-    await this.supabase
-      .from("agenda_eventos")
-      .update({
-        ordem_servico_id: os.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", eventId)
-      .eq("tenant_id", this.tenantId);
+    if (lava) {
+      await this.supabase
+        .from("ordens_servico")
+        .update({ tipo_ordem: "lava_rapido" } as never)
+        .eq("id", os.id)
+        .eq("tenant_id", this.tenantId);
+    }
 
-    return {
-      ok: true,
-      status: "ok",
-      message: "OS criada a partir do evento da agenda.",
-      id: os.id,
-      redirectPath: `/${this.tenantSlug}/ordens/${os.id}`,
-    };
+    if (extra.servico_id) {
+      await osSvc.attachScheduledCatalogItem(os.id, extra.servico_id, userId, {
+        autoApprove: lava || !ui.automotiveWorkflow,
+        mecanicoId: ev.responsavel_id,
+      });
+    }
+
+    return linkExisting(os.id, false);
   }
 }
 

@@ -272,6 +272,18 @@ export const LAVA_RAPIDO_CHECKLIST_TEMPLATE = [
     categoria: "saida",
     ordem: 23,
   },
+  {
+    codigo: "combustivel",
+    label: "Nível de combustível",
+    categoria: "geral",
+    ordem: 24,
+  },
+  {
+    codigo: "quilometragem",
+    label: "Quilometragem",
+    categoria: "geral",
+    ordem: 25,
+  },
 ] as const;
 
 export type OsChecklistSeedItem = {

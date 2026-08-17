@@ -20,6 +20,8 @@ import { OsVeiculoEditDialog } from "@/components/ordens/os-veiculo-edit-dialog"
 import { ServiceReadyPanel } from "@/components/retention/service-ready-panel";
 import { registerOsPickupAction } from "@/lib/retention/actions";
 import { GFSelect } from "@/components/gf/gf-select";
+import { FormasPagamentoEmptyHint } from "@/components/financeiro/formas-pagamento-empty-hint";
+import { PAYMENT_METHODS_EMPTY_TEXT } from "@/lib/financeiro/formas-pagamento-catalog";
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
@@ -64,6 +66,7 @@ type OsWorkspaceProps = {
   os: OrdemServicoDetail;
   produtos: Option[];
   formasPagamento: Option[];
+  canConfigureFormas?: boolean;
   veiculosIniciais: import("@/lib/ordens/veiculo-shared").VeiculoOption[];
   anexos: OsAnexoRecord[];
   orcamentoVersoes: OrcamentoVersaoRecord[];
@@ -136,6 +139,7 @@ export function OsWorkspace({
   tenantSlug,
   os,
   formasPagamento,
+  canConfigureFormas = false,
   veiculosIniciais,
   anexos,
   orcamentoVersoes,
@@ -286,12 +290,22 @@ export function OsWorkspace({
           <StatusBadge label="Arquivada" />
         ) : null}
         <span className="text-sm text-muted-foreground">
-          #{os.numero} · {os.cliente_nome}
-          {uiCopy?.showVehicles !== false
-            ? ` · ${os.placa ?? uiCopy?.missingVehicleLabel ?? "sem placa"}`
-            : ""}
-          {os.modelo && uiCopy?.showVehicles !== false ? ` · ${os.modelo}` : ""}
+          #{os.numero}
         </span>
+        <div className="text-sm">
+          <p className="font-medium">{os.cliente_nome ?? uiCopy?.customer ?? "Cliente"}</p>
+          {uiCopy?.showVehicles !== false ? (
+            <>
+              <p>
+                {[os.marca, os.modelo].filter(Boolean).join(" ") ||
+                  (uiCopy?.vehicleLabel ?? "Veículo")}
+              </p>
+              <p className="font-mono tracking-wide">
+                {os.placa ?? uiCopy?.missingVehicleLabel ?? "sem placa"}
+              </p>
+            </>
+          ) : null}
+        </div>
         <span className="ml-auto text-sm font-semibold tabular-nums">
           {formatCurrency(os.valor_total)}
         </span>
@@ -1071,6 +1085,7 @@ export function OsWorkspace({
                   value={formaPagamentoFaturar || undefined}
                   onValueChange={setFormaPagamentoFaturar}
                   placeholder="Forma de pagamento"
+                  emptyText={PAYMENT_METHODS_EMPTY_TEXT}
                   aria-label="Forma de pagamento"
                   triggerClassName="h-10"
                   options={formasPagamento.map((f) => ({
@@ -1078,6 +1093,12 @@ export function OsWorkspace({
                     label: f.nome,
                   }))}
                 />
+                {formasPagamento.length === 0 ? (
+                  <FormasPagamentoEmptyHint
+                    tenantSlug={tenantSlug}
+                    canConfigure={canConfigureFormas}
+                  />
+                ) : null}
                 <Input
                   name="data_venda"
                   type="date"

@@ -101,6 +101,12 @@ export type SegmentUiCopy = {
   awaitingPickupTitle: string;
   registerPickupLabel: string;
   serviceReadySheetTitle: string;
+  confirmAppointmentLabel: string;
+  clientArrivedLabel: string;
+  startAttendanceLabel: string;
+  rescheduleAppointmentLabel: string;
+  noShowLabel: string;
+  createsWorkOrderFromAgenda: boolean;
 };
 
 const OFICINA_TAB_LABELS: Record<string, string> = {
@@ -135,6 +141,19 @@ const OFICINA_STATUS_LABELS: Record<string, string> = {
   retorno: "Retorno",
   garantia: "Garantia",
 };
+
+function workOrderStartLabel(workOrder: string, oficinaUx: boolean): string {
+  if (oficinaUx) return "Iniciar OS";
+  if (workOrder.includes("/")) return `Iniciar ${workOrder}`;
+  return `Iniciar ${workOrder.toLowerCase()}`;
+}
+
+const AGENDA_ACTION_LABELS = {
+  confirmAppointmentLabel: "Confirmar",
+  clientArrivedLabel: "Cliente chegou",
+  rescheduleAppointmentLabel: "Reagendar",
+  noShowLabel: "Não compareceu",
+} as const;
 
 function workOrdersPhrase(workOrder: string): string {
   if (workOrder.includes("/")) return workOrder;
@@ -276,6 +295,9 @@ export function getSegmentUiCopy(
       awaitingPickupTitle: "Aguardando retirada",
       registerPickupLabel: "Registrar retirada",
       serviceReadySheetTitle: "Serviço concluído",
+      ...AGENDA_ACTION_LABELS,
+      startAttendanceLabel: "Iniciar OS",
+      createsWorkOrderFromAgenda: true,
     };
   }
 
@@ -401,6 +423,9 @@ export function getSegmentUiCopy(
     awaitingPickupTitle: "Aguardando retirada",
     registerPickupLabel: "Registrar retirada",
     serviceReadySheetTitle: "Serviço concluído",
+    ...AGENDA_ACTION_LABELS,
+    startAttendanceLabel: workOrderStartLabel(workOrder, oficinaUx),
+    createsWorkOrderFromAgenda: oficinaUx || hasCapability(ctx, "work_orders"),
   };
 }
 

@@ -735,6 +735,10 @@ export class OrdemServicoService {
   async create(
     input: OsOpenFormValues,
     userId: string | null,
+    options?: {
+      checklistKind?: "oficina" | "lava_rapido";
+      initialStatus?: "rascunho" | "em_execucao";
+    },
   ): Promise<OrdemServicoDetail> {
     await this.assertCliente(input.cliente_id);
 
@@ -750,7 +754,7 @@ export class OrdemServicoService {
         tenant_id: this.tenantId,
         cliente_id: input.cliente_id,
         veiculo_id: veiculoId,
-        status: "rascunho",
+        status: options?.initialStatus ?? "rascunho",
         mecanico_id: emptyUuid(input.mecanico_id),
         consultor_id: emptyUuid(input.consultor_id),
         centro_custo_id: emptyUuid(input.centro_custo_id),
@@ -772,16 +776,81 @@ export class OrdemServicoService {
 
     if (error) throw new Error(error.message);
 
-    await this.seedChecklist(data.id, userId);
+    await this.seedChecklist(
+      data.id,
+      userId,
+      options?.checklistKind ?? "oficina",
+    );
     await this.recordEvent(data.id, userId, {
       tipo: "abertura",
       descricao: "OS aberta",
-      estado_posterior: "rascunho",
+      estado_posterior: options?.initialStatus ?? "rascunho",
     });
 
     const detail = await this.getById(data.id);
     if (!detail) throw new Error("Erro ao carregar OS criada.");
     return detail;
+  }
+
+  /**
+   * Anexa serviço da agenda sem exigir diagnóstico concluído.
+   * Tenant-safe: produto precisa ser do mesmo tenant.
+   */
+  async attachScheduledCatalogItem(
+    osId: string,
+    produtoId: string,
+    userId: string | null,
+    options?: { autoApprove?: boolean; mecanicoId?: string | null },
+  ): Promise<void> {
+    const current = await this.getById(osId);
+    if (!current) throw new Error("OS não encontrada.");
+    if (current.itens.some((item) => item.produto_id === produtoId)) return;
+
+    const { data: prod, error: pErr } = await this.supabase
+      .from("produtos")
+      .select("id, nome, tipo, preco_venda, custo, ativo, tenant_id")
+      .eq("id", produtoId)
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+    if (!prod || !prod.ativo) {
+      throw new Error("Serviço inativo ou não encontrado neste tenant.");
+    }
+
+    const tipoItem =
+      prod.tipo === "servico" || prod.tipo === "serviço" ? "servico" : "produto";
+    const valorUnitario = Number(prod.preco_venda ?? 0);
+    const custo = prod.custo == null ? null : Number(prod.custo);
+    const aprovacao = options?.autoApprove ? "aprovado" : "pendente";
+
+    const { error } = await this.supabase.from("ordem_servico_itens").insert({
+      tenant_id: this.tenantId,
+      ordem_servico_id: osId,
+      produto_id: produtoId,
+      descricao: prod.nome,
+      tipo_item: tipoItem,
+      categoria_item: tipoItem === "servico" ? "servico" : "peca",
+      quantidade: 1,
+      valor_unitario: valorUnitario,
+      desconto: 0,
+      acrescimo: 0,
+      valor_total: valorUnitario,
+      custo_unitario: custo,
+      mecanico_id: emptyUuid(options?.mecanicoId ?? null),
+      peca_origem: "estoque",
+      estoque_status: "nao_aplicavel",
+      aprovacao_status: aprovacao,
+      execucao_status: "pendente",
+      ordem: current.itens.length,
+      is_personalizado: false,
+    });
+    if (error) throw new Error(error.message);
+    await this.recalcTotals(osId);
+    await this.recordEvent(osId, userId, {
+      tipo: "orcamento",
+      descricao: `Serviço da agenda anexado: ${prod.nome}`,
+    });
   }
 
   async updateVeiculoVinculo(

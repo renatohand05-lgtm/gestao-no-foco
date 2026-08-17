@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { allowsInstallmentsForFormaTipo } from "@/lib/financeiro/formas-pagamento-catalog";
 import { resolveLegacyFormaPagamentoId } from "@/lib/vendas/mappers";
 import type { Database } from "@/types/database";
 import type { FormaPagamentoOption, VendaDetail } from "@/types/vendas";
@@ -11,6 +12,7 @@ type FormaFaturamento = {
   id: string;
   gera_financeiro: boolean;
   ativo: boolean;
+  tipo: string | null;
 };
 
 function vendaIndicaExpectativaFinanceira(venda: VendaDetail): boolean {
@@ -28,7 +30,7 @@ async function loadFormaFaturamento(
 ): Promise<FormaFaturamento | null> {
   const { data, error } = await supabase
     .from("formas_pagamento")
-    .select("id, gera_financeiro, ativo")
+    .select("id, gera_financeiro, ativo, tipo")
     .eq("tenant_id", tenantId)
     .eq("id", formaPagamentoId)
     .is("deleted_at", null)
@@ -104,6 +106,15 @@ export async function validateFormaPagamentoParaFaturamento(
 
   if (!forma.ativo) {
     throw new Error("A forma de pagamento selecionada está inativa.");
+  }
+
+  if (
+    (venda.quantidade_parcelas ?? 1) > 1 &&
+    !allowsInstallmentsForFormaTipo(forma.tipo)
+  ) {
+    throw new Error(
+      "Esta forma de pagamento não aceita parcelamento. Use 1 parcela ou Cartão de crédito.",
+    );
   }
 
   if (forma.gera_financeiro && !venda.cliente_id) {

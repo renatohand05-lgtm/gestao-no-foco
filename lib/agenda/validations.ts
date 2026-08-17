@@ -17,6 +17,7 @@ export const agendaEventFormSchema = z
     tipo: z.string().trim().max(40).default("compromisso"),
     natureza: z.enum(["cliente", "negocio", "interno"]).default("negocio"),
     servico_id: optionalUuid,
+    veiculo_id: optionalUuid,
     duracao_minutos: z.coerce.number().int().min(1).max(24 * 60).optional().nullable(),
     lembrete_minutos: z.coerce.number().int().min(0).max(7 * 24 * 60).optional().nullable(),
     meeting_url: z.string().max(500).optional().nullable(),

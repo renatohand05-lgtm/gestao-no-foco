@@ -21,6 +21,7 @@ import {
   listFinanceiroLancamentoEvents,
   recordFinanceiroLancamentoEvent,
 } from "@/lib/financeiro/financeiro-eventos";
+import { listActiveFormasPagamento } from "@/lib/financeiro/formas-pagamento-ensure";
 import { buildContaReceberPayload } from "@/lib/financeiro/mappers";
 import {
   baixarContaReceberAtomico,
@@ -751,17 +752,11 @@ export class ContaReceberService {
   }
 
   async listFormasPagamento(): Promise<FormaPagamentoOption[]> {
-    const { data, error } = await this.supabase
-      .from("formas_pagamento")
-      .select("id, nome")
-      .eq("tenant_id", this.tenantId)
-      .is("deleted_at", null)
-      .eq("ativo", true)
-      .order("nome", { ascending: true });
-
-    if (error) throw new Error(error.message);
-
-    return (data ?? []) as FormaPagamentoOption[];
+    const rows = await listActiveFormasPagamento(this.supabase, this.tenantId);
+    return rows.map((row) => ({
+      id: row.id,
+      nome: row.nome,
+    }));
   }
 
   async listCategorias(): Promise<CategoriaFinanceiraOption[]> {

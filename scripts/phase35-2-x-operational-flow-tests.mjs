@@ -174,6 +174,13 @@ describe("LAVA 15-20", () => {
     const create = read("components/agenda/agenda-event-create-form.tsx");
     assert.match(create, /OsVeiculoPicker/);
     assert.match(create, /veiculo_id/);
+    assert.match(create, /compactCreate/);
+    const picker = read("components/ordens/os-veiculo-picker.tsx");
+    assert.match(picker, /Nenhum veículo cadastrado para este cliente/);
+    const dialog = read("components/ordens/os-veiculo-quick-dialog.tsx");
+    assert.match(dialog, /Salvar e usar/);
+    assert.doesNotMatch(dialog, /desta OS/);
+    assert.doesNotMatch(create, /if \(segment ===/);
   });
 
   it("17-18 checklist lava disponível sem diagnóstico mecânico", async () => {

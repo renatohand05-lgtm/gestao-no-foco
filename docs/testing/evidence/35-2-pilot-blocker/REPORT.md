@@ -1,50 +1,52 @@
-# PILOT BLOCKER CLOSEOUT — SEGMENT LEAKS + TEST ALLOWLIST DISPATCH
+# HOTFIX PILOT BLOCKER — RECOVERY CLOSEOUT
 
 **Data:** 2026-08-17  
 **Branch:** `main`  
-**Tipo:** Hotfix de piloto. Sem Sprint 35.3, sem billing, sem `COMMUNICATION_MODE=live`, sem cron de production, sem envio em massa.
+**Tipo:** Retomada. Sem Sprint 35.3, sem billing, sem `COMMUNICATION_MODE=live`, sem cron de production, sem envio em massa.
 
 ```
-PILOT BLOCKER CLOSEOUT
+RECUPERAÇÃO: PUSH já concluído (7a25fbe == origin/main). Continuado só UX compacta de veículo na agenda.
 
-SEGMENT LEAK CLINIC: PASS (código)
-VEHICLES GATE: PASS
-WORK ORDERS GATE: PASS
+ESTADO ENCONTRADO: main limpo quanto ao hotfix; dirt leftover 31-11-15/33-3/33-1 (NÃO commitado).
+ALTERAÇÕES RECUPERADAS: 540f276 (360 + allowlist dispatch) + 3c7078e + 7a25fbe (report).
+ALTERAÇÕES CONCLUÍDAS: picker/dialog compacto na agenda (Modelo* + Placa + Salvar e usar).
+
+SEGMENT LEAK: PASS (código)
+CLÍNICA VEHICLES: OFF / não renderiza
+CLÍNICA WORK ORDERS: OFF / não renderiza
 CLIENT 360: PASS
-LAVA: PASS
-OFICINA: PASS
+LAVA VEHICLE: PASS (agenda gated por showVehicles)
+LAVA QUICK CREATE: PASS (compacto na agenda)
+LAVA CHECKLIST: PASS (template sem diagnóstico mecânico)
+OFICINA: PASS (OS + veículo + diagnóstico)
 
-WHATSAPP CONFIG: LOCAL MISSING — Vercel CLI ausente nesta máquina
-WHATSAPP TEST MESSAGE: NOT SENT
+APPOINTMENT NOTIFICATION: PREPARED — E2E real PENDING
+OUTBOX: código enqueue+dispatch no commit 540f276
+WHATSAPP CONFIG: LOCAL ALL MISSING; kill switch false; provider dry_run
+WHATSAPP SENT: NÃO
 WHATSAPP RECEIVED: NÃO
-WHATSAPP DELIVERED: NÃO (não inventado)
 WHATSAPP WEBHOOK: NÃO
-
 EMAIL CONFIG: LOCAL MISSING
-EMAIL TEST MESSAGE: NOT SENT
+EMAIL SENT: NÃO
 EMAIL RECEIVED: NÃO
+SERVICE READY: código preservado; E2E real PENDING
 
-APPOINTMENT CREATED: NOT RUN (destinatário/env homologação ausentes)
-SERVICE READY: NOT RUN
-
+COMMUNICATION_MODE: test (default; live não ligado)
 ALLOWLIST: MISSING (local)
-TEST MODE: PRESERVED (COMMUNICATION_MODE default test; live não ligado)
-NO EXTERNAL DELIVERY: PASS (kill switch OFF local; fora da allowlist → suppressed)
-
-P0: 0
-P1: 0
-P2: homologação real WhatsApp/e-mail + smoke production visual PENDING
+NO EXTERNAL DELIVERY: PASS (kill switch OFF; destino fora da lista → suppressed)
 
 TESTES: PASS (13/13 hotfix 360)
+REGRESSÃO: PASS (35.2.x 21 · 35.2.3 14 · 35.2.2 35 · 35.2.1 20+25 · 35.2 19 · 35.1 48)
 RBAC: PASS (92/92)
 LINT: PASS (0 errors; 35 warnings pré-existentes)
 TYPECHECK: PASS
 BUILD: PASS
 
-COMMIT: `540f276` (feat)
-HEAD == ORIGIN/MAIN: NO (antes do push)
+P0: 0
+P1: 0
+P2: homologação visual DR ANDREIA + WhatsApp/e-mail reais PENDING
 
-HOMOLOGAÇÃO: PENDING
+MIGRATION: NENHUMA nesta retomada
 ```
 
 ## Causa raiz — 360 clínica com Veículos/OS

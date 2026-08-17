@@ -23,6 +23,7 @@ type Props = {
   error?: string | null;
   onRefresh: (selectId?: string) => void;
   disabled?: boolean;
+  compactCreate?: boolean;
 };
 
 export function OsVeiculoPicker({
@@ -35,6 +36,7 @@ export function OsVeiculoPicker({
   error,
   onRefresh,
   disabled,
+  compactCreate = false,
 }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -57,7 +59,7 @@ export function OsVeiculoPicker({
       {!loading && veiculos.length === 0 ? (
         <div className="space-y-3 rounded-lg border border-dashed px-3 py-4">
           <p className="text-sm text-muted-foreground">
-            Este cliente ainda não possui veículos ativos.
+            Nenhum veículo cadastrado para este cliente.
           </p>
           <button
             type="button"
@@ -82,7 +84,7 @@ export function OsVeiculoPicker({
               className="h-10"
               aria-label="Veículo"
             >
-              <option value="">Selecione…</option>
+              <option value="">{compactCreate ? "Selecionar veículo" : "Selecione…"}</option>
               {veiculos.map((v) => (
                 <option key={v.id} value={v.id}>
                   {formatVeiculoLabel(v)}
@@ -107,6 +109,7 @@ export function OsVeiculoPicker({
         tenantSlug={tenantSlug}
         clienteId={clienteId}
         onCreated={(id) => onRefresh(id)}
+        compact={compactCreate}
       />
     </div>
   );

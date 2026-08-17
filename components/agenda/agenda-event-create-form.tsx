@@ -331,6 +331,7 @@ export function AgendaEventCreateForm({
               loading={veiculoLoading}
               error={veiculoError}
               onRefresh={(id) => loadVeiculos(clienteId, id, setVeiculoId)}
+              compactCreate
             />
           </div>
         ) : null}

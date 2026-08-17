@@ -23,6 +23,7 @@ type Props = {
   tenantSlug: string;
   clienteId: string;
   onCreated: (veiculoId: string) => void;
+  compact?: boolean;
 };
 
 export function OsVeiculoQuickDialog({
@@ -31,6 +32,7 @@ export function OsVeiculoQuickDialog({
   tenantSlug,
   clienteId,
   onCreated,
+  compact = false,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -78,8 +80,9 @@ export function OsVeiculoQuickDialog({
         <DialogHeader>
           <DialogTitle>Cadastrar veículo</DialogTitle>
           <DialogDescription>
-            O veículo será vinculado ao cliente desta OS. Placa é opcional, mas
-            única no tenant quando informada.
+            {compact
+              ? "O veículo será vinculado ao cliente selecionado. Placa é opcional."
+              : "O veículo será vinculado ao cliente. Placa é opcional, mas única no tenant quando informada."}
           </DialogDescription>
         </DialogHeader>
 
@@ -89,6 +92,19 @@ export function OsVeiculoQuickDialog({
             <FeedbackMessage variant="success">{success}</FeedbackMessage>
           ) : null}
 
+          {compact ? (
+            <div className="grid gap-2">
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Modelo *</span>
+                <Input name="modelo" required disabled={pending} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Placa</span>
+                <Input name="placa" placeholder="ABC1D23" disabled={pending} />
+              </label>
+            </div>
+          ) : (
+            <>
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="space-y-1 text-sm">
               <span className="text-muted-foreground">Placa</span>
@@ -147,6 +163,8 @@ export function OsVeiculoQuickDialog({
             <span className="text-muted-foreground">Observações</span>
             <Input name="observacoes" disabled={pending} />
           </label>
+            </>
+          )}
 
           <DialogFooter>
             <button
@@ -157,7 +175,9 @@ export function OsVeiculoQuickDialog({
             >
               Cancelar
             </button>
-            <SaveButton loading={pending}>Salvar veículo</SaveButton>
+            <SaveButton loading={pending}>
+              {compact ? "Salvar e usar" : "Salvar veículo"}
+            </SaveButton>
           </DialogFooter>
         </form>
       </DialogContent>

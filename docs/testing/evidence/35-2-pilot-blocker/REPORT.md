@@ -44,6 +44,8 @@ BUILD: PASS
 COMMIT: `540f276` (feat)
 HEAD == ORIGIN/MAIN: NO (antes do push)
 
+HOMOLOGAÇÃO: PENDING
+```
 
 ## Causa raiz — 360 clínica com Veículos/OS
 

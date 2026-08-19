@@ -7,6 +7,7 @@ import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { EntityTagsField } from "@/components/crm/entity-tags-field";
 
+import { RelationshipTypeSelector } from "@/components/clientes/relationship-type-selector";
 import { MaskedInput } from "@/components/clientes/masked-input";
 import { CancelButton } from "@/components/ui/cancel-button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -52,6 +53,11 @@ import {
   type ClienteFormValues,
 } from "@/lib/clientes/validations";
 import {
+  origemForRelationship,
+  relationshipFromOrigem,
+  type ClientRelationship,
+} from "@/lib/clientes/relationship";
+import {
   agendaHref,
   shouldReturnToAgenda,
 } from "@/lib/ux/fast-input";
@@ -66,6 +72,8 @@ type ClienteFormProps = {
   initialTagIds?: string[];
   from?: string | null;
   customerLabel?: string;
+  defaultRelationship?: ClientRelationship;
+  allowBusiness?: boolean;
 };
 
 const selectClassName =
@@ -80,11 +88,19 @@ export function ClienteForm({
   initialTagIds = [],
   from = null,
   customerLabel = "Cliente",
+  defaultRelationship,
+  allowBusiness = true,
 }: ClienteFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
+  const [relationship, setRelationship] = useState<ClientRelationship>(
+    () =>
+      defaultRelationship ??
+      relationshipFromOrigem(cliente?.origem) ??
+      "atendimento",
+  );
 
   const form = useForm<ClienteFormValues>({
     resolver: zodResolver(clienteFormSchema),
@@ -110,7 +126,9 @@ export function ClienteForm({
           estado: "",
           segmento: "",
           porte: "",
-          origem: "",
+          origem: origemForRelationship(
+            defaultRelationship ?? relationshipFromOrigem(undefined),
+          ),
           observacoes: "",
           classificacao: "",
           score: 0,
@@ -139,6 +157,7 @@ export function ClienteForm({
       ...values,
       whatsapp,
       telefone,
+      origem: origemForRelationship(relationship),
     };
 
     const dup = await checkClienteDuplicatesAction(tenantSlug, {
@@ -236,12 +255,33 @@ export function ClienteForm({
 
         <div data-fast-input="essentials">
         <FormSection
-          title="Cadastro rápido"
+          title={
+            relationship === "negocio"
+              ? "Cadastro rápido comercial"
+              : "Cadastro rápido"
+          }
           description="Cadastre o mínimo agora. Complete depois."
         >
+          {allowBusiness ? (
+            <RelationshipTypeSelector
+              value={relationship}
+              onChange={(next) => {
+                setRelationship(next);
+                form.setValue("origem", origemForRelationship(next));
+                if (next === "negocio" && !form.getValues("tipo_pessoa")) {
+                  form.setValue("tipo_pessoa", "pj");
+                }
+              }}
+              disabled={loading}
+            />
+          ) : null}
           <FormGrid>
             <FormField
-              label={getNomeLabel(tipoPessoa)}
+              label={
+                relationship === "negocio"
+                  ? "Nome / Razão social"
+                  : getNomeLabel(tipoPessoa)
+              }
               htmlFor="nome"
               required
               error={form.formState.errors.nome?.message}
@@ -251,10 +291,35 @@ export function ClienteForm({
                 id="nome"
                 {...form.register("nome")}
                 placeholder={
-                  tipoPessoa === "pf" ? "Nome completo" : "Razão social / nome"
+                  relationship === "negocio"
+                    ? "Nome ou razão social"
+                    : tipoPessoa === "pf"
+                      ? "Nome completo"
+                      : "Razão social / nome"
                 }
               />
             </FormField>
+
+            {relationship === "negocio" ? (
+              <>
+                <FormField label="Empresa" htmlFor="nome_fantasia">
+                  <Input id="nome_fantasia" {...form.register("nome_fantasia")} />
+                </FormField>
+                <FormField label="Etapa" htmlFor="estagio_funil_quick">
+                  <select
+                    id="estagio_funil_quick"
+                    {...form.register("estagio_funil")}
+                    className={selectClassName}
+                  >
+                    {CRM_FUNIL_STAGES.map((stage) => (
+                      <option key={stage} value={stage}>
+                        {CRM_FUNIL_LABELS[stage]}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+              </>
+            ) : null}
 
             <FormField label="WhatsApp / telefone" htmlFor="whatsapp">
               <Controller

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { getCurrentProfile } from "@/lib/auth/session";
+import { createClienteService } from "@/lib/clientes/cliente-service";
 import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import {
   createVeiculoService,
@@ -126,7 +127,20 @@ export async function createOrdemServicoIntegradaAction(
   try {
     tenant = await requireTenant(tenantSlug);
     const profile = await getCurrentProfile();
-    const parsed = osOpenIntegratedSchema.parse(values);
+    const createPerms = await createPermissionService(
+      tenant.id,
+      (tenant.role ?? "member") as TenantRole,
+    );
+    await createPerms.require("os.criar", "Sem permissão para abrir atendimento/OS.");
+    const ui = getSegmentUiCopy({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    });
+    const parsed = osOpenIntegratedSchema.parse({
+      ...(typeof values === "object" && values ? values : {}),
+      vehiclesRequired: ui.showVehicles,
+    });
     const supabase = await createClient();
 
     if (parsed.force_create) {
@@ -140,20 +154,88 @@ export async function createOrdemServicoIntegradaAction(
       );
     }
 
+    let mode = parsed.mode;
+    let clienteId = parsed.cliente_id || undefined;
+    let veiculoId = parsed.veiculo_id || undefined;
+    const placa = parsed.veiculo?.placa?.trim();
+    if (
+      mode === "novo_cliente" &&
+      ui.showVehicles &&
+      !placa &&
+      parsed.veiculo?.modelo?.trim()
+    ) {
+      const clientes = await createClienteService(tenant.id);
+      if (!parsed.force_create) {
+        const dup = await clientes.checkDuplicates({
+          documento: parsed.cliente?.documento,
+          email: parsed.cliente?.email,
+          telefone: parsed.cliente?.whatsapp || parsed.cliente?.telefone,
+        });
+        if (dup.hasDuplicates) {
+          return {
+            success: false,
+            error: "Possível cadastro duplicado. Revise ou use o existente.",
+            duplicates: dup.matches.map((m) => ({
+              id: m.id,
+              nome: m.label,
+              matched_on: m.matchedOn.join(", "),
+            })),
+          };
+        }
+      }
+      const created = await clientes.create(
+        {
+          nome: parsed.cliente?.nome ?? "",
+          telefone: parsed.cliente?.telefone ?? parsed.cliente?.whatsapp ?? null,
+          whatsapp: parsed.cliente?.whatsapp ?? parsed.cliente?.telefone ?? null,
+          email: parsed.cliente?.email ?? null,
+          documento: parsed.cliente?.documento ?? null,
+          tipo_pessoa: parsed.cliente?.tipo_pessoa ?? "pf",
+          origem: parsed.cliente?.origem || "atendimento",
+          ativo: true,
+        },
+        profile?.id ?? null,
+        { skipDuplicateCheck: true },
+      );
+      const veiculos = await createVeiculoService(tenant.id);
+      const veiculo = await veiculos.create({
+        cliente_id: created.id,
+        placa: null,
+        marca: parsed.veiculo?.marca ?? null,
+        modelo: parsed.veiculo?.modelo ?? null,
+        ano: parsed.veiculo?.ano ?? null,
+        quilometragem: parsed.veiculo?.quilometragem ?? null,
+        ativo: true,
+      });
+      mode = "existente";
+      clienteId = created.id;
+      veiculoId = veiculo.id;
+    }
+
     const result = await abrirOsComClienteAtomico(
       supabase,
       tenant.id,
       {
-        mode: parsed.mode,
-        cliente_id: parsed.cliente_id || undefined,
-        veiculo_id: parsed.veiculo_id || undefined,
-        cliente: parsed.cliente
-          ? {
-              ...parsed.cliente,
-              origem: parsed.cliente.origem || "ordem_de_servico",
-            }
-          : undefined,
-        veiculo: parsed.veiculo,
+        mode,
+        cliente_id: clienteId,
+        veiculo_id: veiculoId,
+        cliente:
+          mode === "novo_cliente" && parsed.cliente
+            ? {
+                ...parsed.cliente,
+                origem: parsed.cliente.origem || "atendimento",
+              }
+            : undefined,
+        veiculo:
+          mode === "novo_cliente" && parsed.veiculo
+            ? {
+                placa: parsed.veiculo.placa ?? "",
+                marca: parsed.veiculo.marca,
+                modelo: parsed.veiculo.modelo,
+                ano: parsed.veiculo.ano,
+                quilometragem: parsed.veiculo.quilometragem,
+              }
+            : undefined,
         os: {
           quilometragem_entrada: parsed.quilometragem_entrada,
           reclamacao_cliente: parsed.reclamacao_cliente,
@@ -193,18 +275,37 @@ export async function createOrdemServicoIntegradaAction(
       }
     }
 
+    if (parsed.mecanico_id) {
+      const mech = await supabase
+        .from("ordens_servico")
+        .update({ mecanico_id: parsed.mecanico_id })
+        .eq("id", result.os_id)
+        .eq("tenant_id", tenant.id);
+      if (mech.error) {
+        console.warn("[ordens] mecanico_id não persistido:", mech.error.message);
+      }
+    }
+
     const ctx = resolveSegmentContext({
       segment: tenant.segment,
       segmentVersion: tenant.segment_version,
       segmentConfig: tenant.segment_config,
     });
+    const osSvc = await createOrdemServicoService(tenant.id);
     if (librarySegmentForContext(ctx) === "lava_rapido") {
-      const service = await createOrdemServicoService(tenant.id);
-      await service.applyChecklistTemplate(
+      await osSvc.applyChecklistTemplate(
         result.os_id,
         profile?.id ?? null,
         "lava_rapido",
       );
+    }
+    const uniqueServicos = [...new Set(parsed.servico_ids ?? [])];
+    const autoApprove = !ui.automotiveWorkflow;
+    for (const produtoId of uniqueServicos) {
+      await osSvc.attachScheduledCatalogItem(result.os_id, produtoId, profile?.id ?? null, {
+        autoApprove,
+        mecanicoId: parsed.mecanico_id || null,
+      });
     }
 
     revalidateOs(tenantSlug, result.os_id);

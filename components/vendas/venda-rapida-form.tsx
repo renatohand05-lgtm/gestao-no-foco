@@ -216,7 +216,10 @@ export function VendaRapidaForm({
           modo === "rapido"
             ? {
                 nome: String(fd.get("rapido_nome") ?? ""),
-                telefone: String(fd.get("rapido_telefone") ?? "") || null,
+                telefone:
+                  String(fd.get("rapido_whatsapp") ?? "") ||
+                  String(fd.get("rapido_telefone") ?? "") ||
+                  null,
                 documento: String(fd.get("rapido_documento") ?? "") || null,
               }
             : undefined,
@@ -352,19 +355,34 @@ export function VendaRapidaForm({
       ) : null}
 
       {modo === "rapido" ? (
-        <div className="grid gap-3 md:grid-cols-3">
-          <label className="block space-y-1 text-sm md:col-span-1">
+        <div className="grid gap-3 md:grid-cols-2" data-quick-client="venda">
+          <label className="block space-y-1 text-sm md:col-span-2">
             <span className="text-muted-foreground">Nome *</span>
             <Input name="rapido_nome" required className="h-11" />
           </label>
           <label className="block space-y-1 text-sm">
-            <span className="text-muted-foreground">Telefone</span>
-            <Input name="rapido_telefone" className="h-11" />
+            <span className="text-muted-foreground">WhatsApp / telefone</span>
+            <Input name="rapido_whatsapp" className="h-11" />
           </label>
           <label className="block space-y-1 text-sm">
-            <span className="text-muted-foreground">CPF/CNPJ</span>
-            <Input name="rapido_documento" className="h-11" />
+            <span className="text-muted-foreground">E-mail</span>
+            <Input name="rapido_email" type="email" className="h-11" />
           </label>
+          <details className="md:col-span-2 rounded-lg border p-3">
+            <summary className="cursor-pointer text-sm text-muted-foreground">
+              Mais informações
+            </summary>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted-foreground">Telefone extra</span>
+                <Input name="rapido_telefone" className="h-11" />
+              </label>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted-foreground">CPF/CNPJ</span>
+                <Input name="rapido_documento" className="h-11" />
+              </label>
+            </div>
+          </details>
         </div>
       ) : null}
 

@@ -52,6 +52,9 @@ export const osOpenIntegratedSchema = z
     force_create: z.boolean().default(false),
     cliente_id: optionalUuid,
     veiculo_id: optionalUuid,
+    mecanico_id: optionalUuid,
+    servico_ids: z.array(z.string().uuid()).default([]),
+    vehiclesRequired: z.boolean().default(true),
     cliente: z
       .object({
         nome: z.string().min(1, "Informe o nome."),
@@ -65,7 +68,7 @@ export const osOpenIntegratedSchema = z
       .optional(),
     veiculo: z
       .object({
-        placa: z.string().min(1, "Informe a placa."),
+        placa: optionalText,
         marca: optionalText,
         modelo: optionalText,
         ano: z.coerce.number().int().min(1950).max(2100).optional().nullable(),
@@ -96,7 +99,7 @@ export const osOpenIntegratedSchema = z
           path: ["cliente_id"],
         });
       }
-      if (!data.veiculo_id) {
+      if (data.vehiclesRequired !== false && !data.veiculo_id) {
         ctx.addIssue({
           code: "custom",
           message: "Selecione ou cadastre um veículo.",
@@ -120,12 +123,16 @@ export const osOpenIntegratedSchema = z
           path: ["cliente", "telefone"],
         });
       }
-      if (!data.veiculo?.placa?.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Informe a placa.",
-          path: ["veiculo", "placa"],
-        });
+      if (data.vehiclesRequired !== false) {
+        const modelo = data.veiculo?.modelo?.trim();
+        const placa = data.veiculo?.placa?.trim();
+        if (!modelo && !placa) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Informe o modelo do veículo.",
+            path: ["veiculo", "modelo"],
+          });
+        }
       }
     }
   });

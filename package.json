@@ -563,7 +563,8 @@
     "test:phase35-2-2-notifications": "node --experimental-strip-types --test scripts/phase35-2-2-notifications-tests.mjs",
     "test:phase35-2-3-notification-readiness": "node --experimental-strip-types --test scripts/phase35-2-3-notification-readiness-tests.mjs",
     "test:phase35-2-x-operational-flow": "node --experimental-strip-types --test scripts/phase35-2-x-operational-flow-tests.mjs",
-    "test:phase35-2-hotfix-client-360": "node --experimental-strip-types --test scripts/phase35-2-hotfix-client-360-tests.mjs"
+    "test:phase35-2-hotfix-client-360": "node --experimental-strip-types --test scripts/phase35-2-hotfix-client-360-tests.mjs",
+    "test:phase35-2-hotfix-unified-input": "node --experimental-strip-types --test scripts/phase35-2-hotfix-unified-input-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

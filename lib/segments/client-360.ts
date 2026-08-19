@@ -56,11 +56,26 @@ export function visibleClient360Tabs(input: {
   showVehicles: boolean;
   showWorkOrders: boolean;
   hasExecutivo: boolean;
+  relationship?: "atendimento" | "negocio" | null;
 }): Client360TabId[] {
   return CLIENT_360_TAB_IDS.filter((tab) => {
-    if (tab === "executivo") return input.hasExecutivo;
-    if (tab === "veiculos") return input.showVehicles;
-    if (tab === "ordens") return input.showWorkOrders;
+    if (tab === "executivo") {
+      if (input.relationship === "atendimento") return false;
+      return input.hasExecutivo;
+    }
+    if (tab === "veiculos") {
+      if (input.relationship === "negocio") return false;
+      return input.showVehicles;
+    }
+    if (tab === "ordens") {
+      if (input.relationship === "negocio") return false;
+      return input.showWorkOrders;
+    }
+    if (tab === "retornos") return input.relationship !== "negocio";
+    if (tab === "tarefas" || tab === "contatos") {
+      if (input.relationship === "atendimento") return false;
+      return true;
+    }
     return true;
   });
 }

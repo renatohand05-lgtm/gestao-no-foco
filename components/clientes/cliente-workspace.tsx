@@ -53,6 +53,7 @@ import {
 } from "@/lib/clientes/format";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { relationshipFromOrigem } from "@/lib/clientes/relationship";
 import type { Cliente360Data } from "@/types/crm";
 import type { Cliente } from "@/types/clientes";
 import type { Client360Surface } from "@/lib/segments/client-360";
@@ -116,12 +117,19 @@ export function ClienteWorkspace({
   agendaCreate,
 }: ClienteWorkspaceProps) {
   const router = useRouter();
+  const relationship = relationshipFromOrigem(cliente.origem);
   const visibleTabs = visibleClient360Tabs({
     showVehicles: client360.showVehicles,
     showWorkOrders: client360.showWorkOrders,
     hasExecutivo: Boolean(perfilExecutivo),
+    relationship,
   });
-  const [tab, setTab] = useState<Tab>(perfilExecutivo ? "executivo" : "resumo");
+  const [tab, setTab] = useState<Tab>(
+    () =>
+      (visibleTabs.includes("executivo")
+        ? "executivo"
+        : visibleTabs[0] ?? "resumo") as Tab,
+  );
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -178,12 +186,12 @@ export function ClienteWorkspace({
             {formatCurrency(data360.resumo.ticket_medio)}
           </p>
         </SectionCard>
-        {client360.showWorkOrders ? (
+        {client360.showWorkOrders && relationship !== "negocio" ? (
           <SectionCard title={client360.workOrdersLabel}>
             <p className="text-xl font-semibold tabular-nums">{data360.resumo.ordens_total}</p>
           </SectionCard>
         ) : null}
-        {client360.showVehicles ? (
+        {client360.showVehicles && relationship !== "negocio" ? (
           <SectionCard title={client360.vehiclesLabel}>
             <p className="text-xl font-semibold tabular-nums">{data360.resumo.veiculos_total}</p>
           </SectionCard>
@@ -202,9 +210,12 @@ export function ClienteWorkspace({
               : "—"}
           </p>
         </SectionCard>
+        {relationship === "negocio" ? (
         <SectionCard title="Consultor">
           <p className="text-sm font-medium">{consultorNome ?? "—"}</p>
         </SectionCard>
+        ) : null}
+        {relationship === "negocio" ? (
         <SectionCard title="Score & funil">
           <CrmScoreBadges
             score={Number(cliente.score ?? 0)}
@@ -213,6 +224,7 @@ export function ClienteWorkspace({
           />
           <CrmTagBadges tags={data360.tags} className="mt-2" />
         </SectionCard>
+        ) : null}
         <SectionCard title="Contas em aberto">
           <p className="text-xl font-semibold tabular-nums">
             {data360.resumo.contas_abertas}

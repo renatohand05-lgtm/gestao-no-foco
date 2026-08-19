@@ -27,7 +27,14 @@ type Props = {
   onSelect: (service: AgendaServiceOption) => void;
   canCreate: boolean;
   library: CatalogSuggestionDto[];
+  multiple?: boolean;
+  selectedIds?: string[];
+  onSelectMany?: (services: AgendaServiceOption[]) => void;
 };
+
+export function ServicePicker(props: Props) {
+  return <AgendaServiceField {...props} />;
+}
 
 export function AgendaServiceField({
   tenantSlug,
@@ -36,13 +43,61 @@ export function AgendaServiceField({
   onSelect,
   canCreate,
   library,
+  multiple = false,
+  selectedIds,
+  onSelectMany,
 }: Props) {
   const [panel, setPanel] = useState<"none" | "suggest" | "create">("none");
   const empty = servicos.length === 0;
+  const picked = new Set(
+    multiple ? (selectedIds ?? []).filter(Boolean) : servicoId ? [servicoId] : [],
+  );
+  const pickedList = servicos.filter((s) => picked.has(s.id));
+
+  function applyMany(next: AgendaServiceOption[]) {
+    onSelectMany?.(next);
+    const last = next[next.length - 1];
+    if (last) onSelect(last);
+    else onSelect({ id: "", label: "" });
+  }
+
+  function addService(svc: AgendaServiceOption) {
+    if (!svc.id) return;
+    if (!multiple) {
+      onSelect(svc);
+      return;
+    }
+    if (picked.has(svc.id)) return;
+    applyMany([...pickedList, svc]);
+  }
+
+  function removeService(id: string) {
+    applyMany(pickedList.filter((s) => s.id !== id));
+  }
 
   return (
-    <div className="text-xs" data-fast-input="agenda-service">
-      <span>Serviço {empty ? "" : "*"}</span>
+    <div className="text-xs" data-fast-input="agenda-service" data-service-picker="">
+      <span>{multiple ? "Serviços" : "Serviço"} {empty ? "" : "*"}</span>
+      {multiple && pickedList.length > 0 ? (
+        <ul className="mt-1 flex flex-wrap gap-1">
+          {pickedList.map((s) => (
+            <li
+              key={s.id}
+              className="flex items-center gap-1 rounded-full border px-2 py-1 text-sm"
+            >
+              {s.label}
+              <button
+                type="button"
+                className="text-muted-foreground"
+                onClick={() => removeService(s.id)}
+                aria-label={`Remover ${s.label}`}
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {empty ? (
         <p className="mt-1 text-sm text-muted-foreground">
           Nenhum serviço cadastrado.
@@ -50,17 +105,21 @@ export function AgendaServiceField({
       ) : (
         <select
           className="mt-1 min-h-11 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
-          value={servicoId}
+          value={multiple ? "" : servicoId}
           autoComplete="off"
           onChange={(event) => {
             const id = event.target.value;
             const svc = servicos.find((s) => s.id === id);
-            if (svc) onSelect(svc);
-            else onSelect({ id: "", label: "" });
+            if (svc) addService(svc);
+            else if (!multiple) onSelect({ id: "", label: "" });
           }}
         >
-          <option value="">Selecionar serviço</option>
-          {servicos.map((s) => (
+          <option value="">
+            {multiple ? "Adicionar serviço" : "Selecionar serviço"}
+          </option>
+          {servicos
+            .filter((s) => (multiple ? !picked.has(s.id) : true))
+            .map((s) => (
             <option key={s.id} value={s.id}>
               {s.label}
               {s.minutes ? ` (${s.minutes} min)` : ""}
@@ -99,7 +158,7 @@ export function AgendaServiceField({
           existingNames={servicos.map((s) => s.label)}
           onCancel={() => setPanel("none")}
           onUsed={(svc) => {
-            onSelect(svc);
+            addService(svc);
             setPanel("none");
           }}
         />
@@ -110,7 +169,7 @@ export function AgendaServiceField({
           tenantSlug={tenantSlug}
           onCancel={() => setPanel("none")}
           onUsed={(svc) => {
-            onSelect(svc);
+            addService(svc);
             setPanel("none");
           }}
         />

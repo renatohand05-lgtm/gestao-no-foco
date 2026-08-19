@@ -8,6 +8,10 @@ import {
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissoes/constants";
 import { tryResolvePermissions } from "@/lib/permissoes/authorization";
+import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
+import { createProdutoService } from "@/lib/produtos/produto-service";
+import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
+import { serviceSuggestionsForContext } from "@/lib/segments/catalogs/suggest.ts";
 import { requireTenant } from "@/lib/tenants";
 import {
   ExecutiveHeader,
@@ -59,6 +63,17 @@ export default async function NovaOsPage({
   ]);
   canForceDuplicate = novaPerms["os.criar_cliente_forcado"];
   canCreate = novaPerms["os.criar"];
+  const [servicosRes, canCreateProduto, mecanicos] = canCreate
+    ? await Promise.all([
+        createProdutoService(tenant.id).then((s) =>
+          s.list({ tipo: "servico", perPage: 100, ativo: true }),
+        ),
+        tenantHasMutationPermission(tenantSlug, "produtos.criar"),
+        ui.automotiveWorkflow
+          ? createMecanicoService(tenant.id).then((s) => s.listDisponiveis())
+          : Promise.resolve([]),
+      ])
+    : [null, false, []];
 
   return (
     <ExecutivePage width="wide" spacing="loose">
@@ -86,6 +101,19 @@ export default async function NovaOsPage({
             attendanceOptions={attendanceOptionsForContext(ctx)}
             defaultAttendanceType={defaultAttendanceType(ctx)}
             compactVehicleVitals={ui.compactVehicleVitals}
+            showVehicles={ui.showVehicles}
+            servicos={(servicosRes?.data ?? []).map((s) => ({
+              id: s.id,
+              label: s.nome,
+              minutes: s.tempo_estimado_minutos ?? null,
+            }))}
+            library={serviceSuggestionsForContext(ctx, { includeCombos: false })}
+            canCreateProduto={canCreateProduto}
+            showMechanic={ui.automotiveWorkflow}
+            profissionais={mecanicos.map((m) => ({
+              id: m.id,
+              label: m.nome_completo,
+            }))}
           />
         </ExecutiveSection>
       )}

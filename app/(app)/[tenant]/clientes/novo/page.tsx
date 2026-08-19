@@ -16,10 +16,10 @@ export default async function NovoClientePage({
   searchParams,
 }: {
   params: Promise<{ tenant: string }>;
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ from?: string; tipo?: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
-  const { from } = await searchParams;
+  const { from, tipo } = await searchParams;
   const tenant = await requireTenant(tenantSlug);
   await ensureCrmDefaultTags(tenant.id);
   const supabase = await createClient();
@@ -57,6 +57,8 @@ export default async function NovoClientePage({
           consultores={consultores}
           from={from}
           customerLabel={ui.customer}
+          defaultRelationship={tipo === "negocio" ? "negocio" : "atendimento"}
+          allowBusiness
         />
       </SectionCard>
     </div>

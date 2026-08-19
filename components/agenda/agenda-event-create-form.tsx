@@ -15,6 +15,7 @@ import {
   natureRequiresCliente,
   type AgendaNature,
 } from "@/lib/retention/natures";
+import { QuickClientCreate } from "@/components/clientes/quick-client-create";
 import { AgendaServiceField } from "@/components/agenda/agenda-service-field";
 import {
   OsVeiculoPicker,
@@ -83,6 +84,7 @@ export function AgendaEventCreateForm({
   const [natureza, setNatureza] = useState<AgendaNature>(initialNatureza);
   const [titulo, setTitulo] = useState("");
   const [tipo, setTipo] = useState(defaultTipo(initialNatureza));
+  const [clientesList, setClientesList] = useState(clientes);
   const [clienteId, setClienteId] = useState(initial?.clienteId ?? "");
   const [veiculoId, setVeiculoId] = useState(
     initialVeiculos.length === 1 ? initialVeiculos[0].id : "",
@@ -308,19 +310,36 @@ export function AgendaEventCreateForm({
               disabled={Boolean(initial?.clienteId)}
             >
               <option value="">Selecionar cliente</option>
-              {clientes.map((c) => (
+              {clientesList.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
               ))}
             </select>
             {!initial?.clienteId ? (
-              <a
-                className="mt-1 inline-block text-[11px] underline"
-                href={novoClienteFromAgendaHref(tenantSlug)}
-              >
-                Cadastrar novo cliente
-              </a>
+              <>
+                <QuickClientCreate
+                  tenantSlug={tenantSlug}
+                  allowBusiness={natureza === "negocio"}
+                  showVehicles={showVehicles}
+                  onCreated={({ id, nome }) => {
+                    setClientesList((prev) =>
+                      prev.some((c) => c.id === id)
+                        ? prev
+                        : [{ id, label: nome }, ...prev],
+                    );
+                    setClienteId(id);
+                    setVeiculoId("");
+                    if (showVehicles) loadVeiculos(id, undefined, setVeiculoId);
+                  }}
+                />
+                <a
+                  className="mt-1 ml-2 inline-block text-[11px] underline"
+                  href={novoClienteFromAgendaHref(tenantSlug)}
+                >
+                  Cadastro completo
+                </a>
+              </>
             ) : null}
           </label>
         ) : null}

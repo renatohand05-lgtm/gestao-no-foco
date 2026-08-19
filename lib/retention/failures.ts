@@ -12,6 +12,8 @@ export const PERMANENT_ERROR_CODES = [
   "blocked",
   "invalid_template",
   "not_configured",
+  "provider_not_configured",
+  "blocked_by_allowlist",
   "no_channel",
 ] as const;
 
@@ -41,13 +43,15 @@ export function classifyFailure(input: {
 }
 
 export function canAutoRetry(input: {
-  failureKind?: FailureKind | null;
+  failureKind?: string | null;
   attemptCount: number;
   lastAttemptAt?: string | null;
   now?: number;
   maxAttempts?: number;
 }): boolean {
-  if (input.failureKind === "permanent") return false;
+  if (input.failureKind === "permanent" || input.failureKind === "blocked_by_allowlist") {
+    return false;
+  }
   return canRetryFailed({
     attemptCount: input.attemptCount,
     lastAttemptAt: input.lastAttemptAt,

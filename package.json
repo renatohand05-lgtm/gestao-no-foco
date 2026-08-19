@@ -570,7 +570,8 @@
     "test:phase35-2-hotfix-office-notify-parity": "node --experimental-strip-types --test scripts/phase35-2-hotfix-office-notify-parity-tests.mjs",
     "test:phase35-2-hotfix-mechanic-fk": "node --experimental-strip-types --test scripts/phase35-2-hotfix-mechanic-fk-tests.mjs",
     "test:phase35-2-hotfix-final-flow": "node --experimental-strip-types --test scripts/phase35-2-hotfix-final-flow-tests.mjs",
-    "test:phase35-3-pilot-communication": "node --experimental-strip-types --test scripts/phase35-3-pilot-communication-tests.mjs"
+    "test:phase35-3-pilot-communication": "node --experimental-strip-types --test scripts/phase35-3-pilot-communication-tests.mjs",
+    "test:phase35-3-1-real-provider-e2e": "node --experimental-strip-types --test scripts/phase35-3-1-real-provider-e2e-tests.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

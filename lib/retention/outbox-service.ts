@@ -136,7 +136,7 @@ export class NotificationOutboxService {
       mode,
       note: decision.note,
     });
-    const failureKind = !decision.ok
+    let failureKind: string | null = !decision.ok
       ? classifyFailure({ message: decision.note })
       : null;
     const toAddress =
@@ -164,6 +164,7 @@ export class NotificationOutboxService {
         status = "blocked";
         note = "Bloqueado pelo modo de teste.";
         errorCode = "blocked_by_allowlist";
+        failureKind = "blocked_by_allowlist";
       } else {
         status = "suppressed";
         note = "Envio real bloqueado (kill switch ou provider).";
@@ -312,6 +313,10 @@ export class NotificationOutboxService {
         status: blocked.status,
         error_code: blocked.errorCode ?? null,
         error_message: blocked.message,
+        failure_kind:
+          blocked.errorCode === "blocked_by_allowlist"
+            ? "blocked_by_allowlist"
+            : "permanent",
         last_attempt_at: new Date().toISOString(),
         processed_at: new Date().toISOString(),
       });
@@ -419,7 +424,7 @@ export class NotificationOutboxService {
     let q = this.supabase
       .from("notification_outbox" as never)
       .select(
-        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview, origin_kind, created_at, created_by, failure_kind, error_code, attempt_count, next_retry_at, to_address",
+        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview, origin_kind, created_at, created_by, failure_kind, error_code, attempt_count, next_retry_at, to_address, provider, provider_message_id",
       )
       .eq("tenant_id", this.tenantId)
       .order("created_at", { ascending: false })

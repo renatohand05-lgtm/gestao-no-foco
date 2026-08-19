@@ -87,17 +87,18 @@ export function mapSendToOutboxPatch(
   failedAt: string | null;
 } {
   const now = new Date().toISOString();
-  const sent =
-    result.status === "sent" ||
-    result.status === "delivered" ||
-    result.status === "read";
+  const status: OutboxStatus =
+    result.status === "delivered" || result.status === "read"
+      ? "sent"
+      : result.status;
+  const sent = status === "sent";
   return {
-    status: result.status,
+    status,
     provider: result.provider,
     providerMessageId: result.providerMessageId ?? null,
     errorCode: result.errorCode ?? null,
     sentAt: sent ? now : null,
-    failedAt: result.status === "failed" ? now : null,
+    failedAt: status === "failed" ? now : null,
   };
 }
 

@@ -11,6 +11,7 @@ import type { CommunicationKpis } from "@/lib/retention/center";
 import { COMMUNICATION_ORIGINS, ORIGIN_LABELS } from "@/lib/retention/origin";
 import { operatorStatusLabel } from "@/lib/retention/pipeline";
 import { originLabel } from "@/lib/retention/origin";
+import { maskAddress } from "@/lib/retention/mask";
 import type { OutboxRow } from "@/lib/retention/types";
 import { cn } from "@/lib/utils";
 
@@ -124,6 +125,7 @@ export function CommunicationCenter({
             <option value="sent">Enviado</option>
             <option value="delivered">Entregue</option>
             <option value="failed">Falhou</option>
+            <option value="blocked">Bloqueado pelo modo de teste</option>
             <option value="cancelled">Cancelada</option>
             <option value="suppressed">Suprimida</option>
           </NativeSelect>
@@ -136,18 +138,28 @@ export function CommunicationCenter({
         {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma comunicação neste período.</p>
         ) : (
-          rows.map((row) => (
+          rows.map((row) => {
+            const clienteNome = clientes.find((c) => c.id === row.cliente_id)?.nome;
+            return (
             <li key={row.id} className="rounded-lg border p-3 text-sm space-y-1">
               <p className="font-medium">
                 {originLabel(row.origin_kind, row.template_code)} ·{" "}
                 {row.channel === "email" ? "E-mail" : "WhatsApp"}
               </p>
+              {clienteNome ? (
+                <p className="text-muted-foreground">Cliente: {clienteNome}</p>
+              ) : null}
               <p className="text-muted-foreground">
-                {operatorStatusLabel(row.status)}
+                {operatorStatusLabel(row.status, row.error_code)}
                 {row.created_at
                   ? ` · ${new Date(row.created_at).toLocaleString("pt-BR")}`
                   : ""}
               </p>
+              {row.to_address ? (
+                <p className="text-xs text-muted-foreground">
+                  Destinatário: {maskAddress(row.to_address)}
+                </p>
+              ) : null}
               {row.rendered_preview ? (
                 <p className="text-xs text-muted-foreground line-clamp-2">
                   {row.rendered_preview}
@@ -157,6 +169,10 @@ export function CommunicationCenter({
                 <details className="text-xs text-muted-foreground">
                   <summary className="min-h-11 cursor-pointer">Ver detalhes</summary>
                   <p>Evento: {row.entity_type}</p>
+                  {row.provider ? <p>Provider: {row.provider}</p> : null}
+                  {row.provider_message_id ? (
+                    <p>Id do provider: {row.provider_message_id}</p>
+                  ) : null}
                   {row.failure_kind ? <p>Tipo de falha: {row.failure_kind}</p> : null}
                   {row.error_message ? <p>{row.error_message}</p> : null}
                   {row.next_retry_at ? (
@@ -167,7 +183,10 @@ export function CommunicationCenter({
                   ) : null}
                 </details>
               ) : null}
-              {canResend && row.status === "failed" && row.failure_kind !== "permanent" ? (
+              {canResend &&
+              row.status === "failed" &&
+              row.failure_kind !== "permanent" &&
+              row.failure_kind !== "blocked_by_allowlist" ? (
                 <button
                   type="button"
                   disabled={pending}
@@ -179,11 +198,12 @@ export function CommunicationCenter({
                     })
                   }
                 >
-                  Reenviar
+                  Tentar novamente
                 </button>
               ) : null}
             </li>
-          ))
+            );
+          })
         )}
       </ul>
     </div>

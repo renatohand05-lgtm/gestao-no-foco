@@ -26,9 +26,22 @@ export function parseTestAllowlist(
     const item = part.trim().toLowerCase();
     if (!item) continue;
     if (item.includes("@")) emails.add(item);
-    else phones.add(item.replace(/\D/g, ""));
+    else {
+      const digits = item.replace(/\D/g, "");
+      if (digits) phones.add(digits);
+    }
   }
   return { phones, emails };
+}
+
+/** +5511912345678 e 11912345678 batem se ambos tiverem ≥10 dígitos. */
+export function phonesAllowlistMatch(candidate: string, listedDigits: string): boolean {
+  const a = (candidate ?? "").replace(/\D/g, "");
+  const b = (listedDigits ?? "").replace(/\D/g, "");
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (a.length < 10 || b.length < 10) return false;
+  return a.endsWith(b) || b.endsWith(a);
 }
 
 export function isTestAllowlisted(input: {
@@ -40,7 +53,11 @@ export function isTestAllowlisted(input: {
   const list = parseTestAllowlist(env.COMMUNICATION_TEST_ALLOWLIST);
   const phone = (input.phone ?? "").replace(/\D/g, "");
   const email = (input.email ?? "").trim().toLowerCase();
-  if (phone && list.phones.has(phone)) return true;
+  if (phone) {
+    for (const listed of list.phones) {
+      if (phonesAllowlistMatch(phone, listed)) return true;
+    }
+  }
   if (email && list.emails.has(email)) return true;
   return false;
 }

@@ -52,6 +52,7 @@ export function createResendEmailAdapter(
 ): NotificationProvider {
   const apiKey = env.RESEND_API_KEY ?? "";
   const from = env.EMAIL_FROM ?? "";
+  const replyTo = (env.EMAIL_REPLY_TO ?? "").trim();
   return {
     id: "resend",
     channel: "email",
@@ -65,12 +66,12 @@ export function createResendEmailAdapter(
           message: "E-mail ausente.",
         };
       }
-      if (!apiKey || !from) {
+      if (!apiKey || !from.includes("@")) {
         return {
           simulated: false,
           status: "failed",
           provider: "resend",
-          errorCode: "not_configured",
+          errorCode: "provider_not_configured",
           message: "E-mail transacional não configurado.",
         };
       }
@@ -86,6 +87,7 @@ export function createResendEmailAdapter(
             to: [input.to],
             subject: "Comunicado",
             html: emailBodyAsSafeHtml(input.body),
+            ...(replyTo.includes("@") ? { reply_to: replyTo } : {}),
           }),
         });
         if (!res.ok) {
@@ -123,7 +125,7 @@ export function createResendEmailAdapter(
     validateConfiguration() {
       const notes: string[] = [];
       if (!apiKey) notes.push("RESEND_API_KEY ausente");
-      if (!from) notes.push("EMAIL_FROM ausente");
+      if (!from.includes("@")) notes.push("EMAIL_FROM ausente");
       return {
         status: notes.length ? "NOT_CONFIGURED" : "CONFIGURED",
         notes,

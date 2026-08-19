@@ -22,7 +22,7 @@ export function canManualResend(input: {
   if (input.status !== "failed") {
     return { ok: false, note: "Só é possível reenviar mensagens que falharam." };
   }
-  if (input.failureKind === "permanent") {
+  if (input.failureKind === "permanent" || input.failureKind === "blocked_by_allowlist") {
     return { ok: false, note: "Falha permanente — reenvio automático e manual bloqueados." };
   }
   if (!input.optedIn) {

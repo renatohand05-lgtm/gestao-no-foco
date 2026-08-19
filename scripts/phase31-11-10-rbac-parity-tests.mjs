@@ -244,7 +244,9 @@ console.log("\nPhase 31.11.10 — RBAC parity Web/Mobile\n");
     "12b. merge Web bridges; sem grant *",
   );
   assert(
-    /useHasAnyPermission/.test(layout) && /href: canExec/.test(layout),
+    /useHasAnyPermission/.test(layout) &&
+      /hrefIf\(canExec\)/.test(layout) &&
+      /hrefIfModule\(canCrm/.test(layout),
     "12c. tab bar oculta módulos sem permissão",
   );
 }

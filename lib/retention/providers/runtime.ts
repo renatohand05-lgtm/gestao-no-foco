@@ -43,21 +43,27 @@ export function isEmailKillSwitchOff(
 export function resolveWhatsAppProviderMode(
   env: NodeJS.ProcessEnv = process.env,
 ): WhatsAppProviderMode {
-  const raw = (env.WHATSAPP_PROVIDER ?? env.RETENTION_NOTIFY_MODE ?? "dry_run")
-    .trim()
-    .toLowerCase();
-  if (raw === "meta_cloud" || raw === "provider") return "meta_cloud";
-  if (raw === "manual_link") return "manual_link";
-  if (raw === "disabled") return "disabled";
+  const explicit = (env.WHATSAPP_PROVIDER ?? "").trim().toLowerCase();
+  if (explicit === "meta_cloud" || explicit === "provider") return "meta_cloud";
+  if (explicit === "manual_link") return "manual_link";
+  if (explicit === "disabled") return "disabled";
+  if (explicit === "dry_run") return "dry_run";
+  if (envFlagEnabled(env.WHATSAPP_ENABLED)) return "meta_cloud";
+  const fallback = (env.RETENTION_NOTIFY_MODE ?? "dry_run").trim().toLowerCase();
+  if (fallback === "meta_cloud" || fallback === "provider") return "meta_cloud";
+  if (fallback === "manual_link") return "manual_link";
+  if (fallback === "disabled") return "disabled";
   return "dry_run";
 }
 
 export function resolveEmailProviderMode(
   env: NodeJS.ProcessEnv = process.env,
 ): EmailProviderMode {
-  const raw = (env.EMAIL_PROVIDER ?? "dry_run").trim().toLowerCase();
-  if (raw === "resend" || raw === "provider") return "provider";
-  if (raw === "disabled") return "disabled";
+  const explicit = (env.EMAIL_PROVIDER ?? "").trim().toLowerCase();
+  if (explicit === "resend" || explicit === "provider") return "provider";
+  if (explicit === "disabled") return "disabled";
+  if (explicit === "dry_run") return "dry_run";
+  if (envFlagEnabled(env.EMAIL_ENABLED)) return "provider";
   return "dry_run";
 }
 
@@ -176,5 +182,6 @@ export const COMMUNICATION_ENV_NAMES = [
   "EMAIL_PROVIDER",
   "RESEND_API_KEY",
   "EMAIL_FROM",
+  "EMAIL_REPLY_TO",
   "CRON_SECRET",
 ] as const;

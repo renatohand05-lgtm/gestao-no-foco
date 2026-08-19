@@ -47,8 +47,8 @@ export default async function CrmComunicacoesPage({
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Comunicações</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Histórico de avisos aos clientes desta empresa. WhatsApp e e-mail reais
-          permanecem desligados até homologação.
+          Histórico de avisos aos clientes desta empresa. Envio real só em
+          COMMUNICATION_MODE=test para destinatários da allowlist.
         </p>
       </div>
       <CommunicationCenter

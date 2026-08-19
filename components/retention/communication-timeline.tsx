@@ -75,7 +75,8 @@ export function CommunicationTimeline({
           {canResend &&
           tenantSlug &&
           row.status === "failed" &&
-          row.failure_kind !== "permanent" ? (
+          row.failure_kind !== "permanent" &&
+          row.failure_kind !== "blocked_by_allowlist" ? (
             <button
               type="button"
               disabled={pending}

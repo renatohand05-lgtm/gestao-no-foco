@@ -130,7 +130,7 @@ export function createMetaCloudWhatsAppAdapter(
           simulated: false,
           status: "failed",
           provider: "meta_cloud",
-          errorCode: "not_configured",
+          errorCode: "provider_not_configured",
           message: "WhatsApp Cloud não configurado.",
         };
       }

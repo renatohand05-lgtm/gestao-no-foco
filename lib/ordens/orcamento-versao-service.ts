@@ -92,6 +92,7 @@ export class OrcamentoVersaoService {
     osId: string,
     input: PublicarOrcamentoInput,
     userId: string | null,
+    options?: { requireDiagnosis?: boolean },
   ): Promise<OrcamentoVersaoDetail> {
     const osService = await createOrdemServicoService(this.tenantId);
     const os = await osService.getById(osId);
@@ -101,7 +102,7 @@ export class OrcamentoVersaoService {
       throw new Error("Adicione itens ao orçamento antes de publicar.");
     }
 
-    if (!canEditOrcamento(os.status) && os.status !== "aguardando_aprovacao") {
+    if (!canEditOrcamento(os.status, options?.requireDiagnosis !== false) && os.status !== "aguardando_aprovacao") {
       throw new Error(
         `Status atual (${OS_STATUS_LABELS[os.status as OsStatus] ?? os.status}) não permite publicar orçamento.`,
       );
@@ -383,7 +384,7 @@ export class OrcamentoVersaoService {
       .select("*")
       .eq("tenant_id", this.tenantId)
       .eq("ordem_servico_id", osId)
-      .eq("status", "publicado")
+      .in("status", ["publicado", "enviado", "pronto"])
       .is("deleted_at", null)
       .order("versao", { ascending: false })
       .limit(1)
@@ -391,6 +392,16 @@ export class OrcamentoVersaoService {
 
     if (error) throw new Error(error.message);
     return (data as unknown as OrcamentoVersaoRecord | null) ?? null;
+  }
+
+  async markEnviado(versionId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from("ordem_servico_orcamento_versoes" as never)
+      .update({ status: "enviado", updated_at: new Date().toISOString() } as never)
+      .eq("id", versionId)
+      .eq("tenant_id", this.tenantId)
+      .in("status", ["publicado", "pronto", "enviado"]);
+    if (error) throw new Error(error.message);
   }
 }
 

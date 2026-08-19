@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { SectionCard } from "@/components/ui/section-card";
 import { formatCurrency } from "@/lib/format";
+import { buildOrcamentoCustomerMessage } from "@/lib/ordens/orcamento-share-copy";
 import type { ShareListItem } from "@/lib/ordens/compartilhamento-service";
 import {
   criarCompartilhamentoAction,
@@ -39,6 +40,9 @@ type Props = {
   onRefresh: () => void;
   disabled?: boolean;
   whatsappPhone?: string | null;
+  clienteEmail?: string | null;
+  clienteNome?: string | null;
+  valorTotal?: number;
 };
 
 function formatDate(value: string | null | undefined) {
@@ -60,6 +64,9 @@ export function InspecaoEnvioPanel({
   onRefresh,
   disabled = false,
   whatsappPhone,
+  clienteEmail,
+  clienteNome,
+  valorTotal,
 }: Props) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +127,19 @@ export function InspecaoEnvioPanel({
         <p>{avisoTexto}</p>
       </div>
 
+      <p className="text-xs text-muted-foreground">
+        Salvar rascunho é automático ao editar itens. Publicar gera versão e link.
+        Enviar ao cliente não bloqueia o orçamento se o canal não estiver configurado.
+      </p>
       <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={disabled || pending}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+          onClick={() => setSuccess("Rascunho já está salvo nos itens da OS.")}
+        >
+          Salvar rascunho
+        </button>
         <button
           type="button"
           disabled={disabled || pending}
@@ -179,18 +198,59 @@ export function InspecaoEnvioPanel({
               <a
                 href={buildWhatsAppDeepLink(
                   whatsappPhone,
-                  `Olá! Segue o link da inspeção da OS #${osNumero}: ${lastLink}`,
+                  buildOrcamentoCustomerMessage({
+                    clienteNome: clienteNome ?? "",
+                    totalLabel: formatCurrency(
+                      valorTotal ?? versaoPublicada?.valor_total ?? 0,
+                    ),
+                    validadeLabel: versaoPublicada?.validade_ate
+                      ? formatDate(versaoPublicada.validade_ate)
+                      : `${validadeHoras}h`,
+                    link: lastLink,
+                  }),
                 )}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
               >
                 <MessageCircle className="size-3.5" />
-                WhatsApp
+                Enviar por WhatsApp
               </a>
-            ) : null}
+            ) : (
+              <span className="inline-flex items-center text-xs text-muted-foreground">
+                WhatsApp não configurado
+              </span>
+            )}
+            {emailConfigured && clienteEmail ? (
+              <a
+                href={`mailto:${encodeURIComponent(clienteEmail)}?subject=${encodeURIComponent("Seu orçamento")}&body=${encodeURIComponent(
+                  buildOrcamentoCustomerMessage({
+                    clienteNome: clienteNome ?? "",
+                    totalLabel: formatCurrency(
+                      valorTotal ?? versaoPublicada?.valor_total ?? 0,
+                    ),
+                    validadeLabel: versaoPublicada?.validade_ate
+                      ? formatDate(versaoPublicada.validade_ate)
+                      : `${validadeHoras}h`,
+                    link: lastLink,
+                  }),
+                )}`}
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+              >
+                <Mail className="size-3.5" />
+                Enviar por e-mail
+              </a>
+            ) : (
+              <span className="inline-flex items-center text-xs text-muted-foreground">
+                E-mail não configurado
+              </span>
+            )}
           </>
-        ) : null}
+        ) : (
+          <span className="text-xs text-muted-foreground">
+            Publique e gere o link para copiar, WhatsApp ou e-mail.
+          </span>
+        )}
 
         <button
           type="button"
@@ -218,19 +278,6 @@ export function InspecaoEnvioPanel({
         >
           <Download className="size-3.5" />
           Baixar PDF
-        </button>
-
-        <button
-          type="button"
-          disabled
-          title={emailConfigured ? undefined : "E-mail não configurado"}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            "gap-1.5 opacity-50",
-          )}
-        >
-          <Mail className="size-3.5" />
-          {emailConfigured ? "E-mail" : "E-mail (não configurado)"}
         </button>
       </div>
 

@@ -98,6 +98,8 @@ export default async function OsDetailPage({
   let canArquivar = DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.arquivar"];
   let canExcluirRascunho =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.excluir_rascunho"];
+  let canExcluirPermanente =
+    DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.excluir_permanente"];
   let canRestaurar = DEFAULT_ROLE_PERMISSIONS[tenant.role]["os.restaurar"];
   let canBindRecurso =
     DEFAULT_ROLE_PERMISSIONS[tenant.role]["centro_operacoes.alterar_status"];
@@ -115,6 +117,7 @@ export default async function OsDetailPage({
     "os.cancelar",
     "os.arquivar",
     "os.excluir_rascunho",
+    "os.excluir_permanente",
     "os.restaurar",
     "centro_operacoes.alterar_status",
     "os.atribuir_mecanico",
@@ -132,6 +135,7 @@ export default async function OsDetailPage({
   canCancel = osPerms["os.cancelar"];
   canArquivar = osPerms["os.arquivar"];
   canExcluirRascunho = osPerms["os.excluir_rascunho"];
+  canExcluirPermanente = osPerms["os.excluir_permanente"];
   canRestaurar = osPerms["os.restaurar"];
   canBindRecurso = osPerms["centro_operacoes.alterar_status"];
   canAtribuirMecanico = osPerms["os.atribuir_mecanico"];
@@ -261,6 +265,7 @@ export default async function OsDetailPage({
         canCancel={canCancel}
         canArquivar={canArquivar}
         canExcluirRascunho={canExcluirRascunho}
+        canExcluirPermanente={canExcluirPermanente}
         canRestaurar={canRestaurar}
         recursos={recursos}
         canBindRecurso={canBindRecurso}

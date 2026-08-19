@@ -222,6 +222,20 @@ export const osConverterItemSchema = z.object({
 
 export const osMotivoFormSchema = z.object({
   motivo: z.string().min(3, "Informe o motivo."),
+  motivo_codigo: z
+    .enum(["engano", "cliente", "duplicada", "nao_compareceu", "outro"])
+    .optional(),
+  substituida_por: optionalUuid,
+  cancelar_agenda: z.boolean().optional().default(false),
+});
+
+export const osExcluirPermanenteSchema = z.object({
+  motivo: z.string().min(3, "Informe o motivo."),
+  confirmacao: z.literal("EXCLUIR"),
+});
+
+export const osSkipDiagnosticoSchema = z.object({
+  justificativa: z.string().min(8, "Informe a justificativa."),
 });
 
 export const osDiagnosticoFormSchema = z.object({

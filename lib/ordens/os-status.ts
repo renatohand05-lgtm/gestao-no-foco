@@ -42,10 +42,11 @@ export const OS_STATUS_LABELS: Record<OsStatus, string> = {
 
 /** Transições válidas (destino permitido a partir de origem). */
 export const OS_TRANSITIONS: Record<OsStatus, OsStatus[]> = {
-  rascunho: ["aguardando_diagnostico", "cancelado"],
+  rascunho: ["aguardando_diagnostico", "aguardando_orcamento", "cancelado"],
   aguardando_diagnostico: [
     "diagnostico_concluido",
     "aguardando_orcamento",
+    "aguardando_aprovacao",
     "cancelado",
   ],
   diagnostico_concluido: ["aguardando_orcamento", "aguardando_aprovacao", "cancelado"],
@@ -155,21 +156,43 @@ export function canRegisterDiagnostico(status: string): boolean {
   );
 }
 
-export function canEditOrcamento(status: string): boolean {
-  return [
+export function canEditOrcamento(
+  status: string,
+  requireDiagnosis = true,
+): boolean {
+  const afterDiagnosis = [
     "diagnostico_concluido",
     "aguardando_orcamento",
     "aguardando_aprovacao",
     "parcialmente_aprovado",
-  ].includes(status);
+  ];
+  if (!requireDiagnosis) {
+    return [
+      "rascunho",
+      "aguardando_diagnostico",
+      ...afterDiagnosis,
+    ].includes(status);
+  }
+  return afterDiagnosis.includes(status);
 }
 
-export function canApplyAprovacao(status: string): boolean {
-  return [
+export function canApplyAprovacao(
+  status: string,
+  requireDiagnosis = true,
+): boolean {
+  const afterDiagnosis = [
     "diagnostico_concluido",
     "aguardando_orcamento",
     "aguardando_aprovacao",
-  ].includes(status);
+  ];
+  if (!requireDiagnosis) {
+    return [
+      "rascunho",
+      "aguardando_diagnostico",
+      ...afterDiagnosis,
+    ].includes(status);
+  }
+  return afterDiagnosis.includes(status);
 }
 
 export function canFaturarStatus(status: string): boolean {

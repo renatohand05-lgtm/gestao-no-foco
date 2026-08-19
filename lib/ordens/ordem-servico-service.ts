@@ -1034,7 +1034,12 @@ export class OrdemServicoService {
     return detail;
   }
 
-  async addItem(osId: string, input: OsItemFormValues, userId: string | null) {
+  async addItem(
+    osId: string,
+    input: OsItemFormValues,
+    userId: string | null,
+    options?: { requireDiagnosis?: boolean; diagnosisOverride?: string | null },
+  ) {
     const current = await this.getById(osId);
     if (!current) throw new Error("OS não encontrada.");
     if (["faturado", "cancelado", "cancelada"].includes(current.status)) {
@@ -1043,12 +1048,21 @@ export class OrdemServicoService {
     if (current.venda_id) {
       throw new Error("OS já faturada — itens bloqueados.");
     }
-    if (["rascunho", "aguardando_diagnostico"].includes(current.status)) {
-      throw new Error(
-        "Conclua o diagnóstico antes de montar o orçamento.",
-      );
+    const requireDiagnosis = options?.requireDiagnosis !== false;
+    const early = ["rascunho", "aguardando_diagnostico"].includes(current.status);
+    if (early && requireDiagnosis) {
+      const override = options?.diagnosisOverride?.trim() ?? "";
+      if (override.length < 8) {
+        throw new Error(
+          "Conclua o diagnóstico antes de montar o orçamento.",
+        );
+      }
     }
-    if (!canEditOrcamento(current.status) && current.status !== "aprovado") {
+    if (
+      !canEditOrcamento(current.status, requireDiagnosis) &&
+      current.status !== "aprovado" &&
+      !(early && requireDiagnosis && (options?.diagnosisOverride?.trim().length ?? 0) >= 8)
+    ) {
       throw new Error(
         `Status atual (${OS_STATUS_LABELS[current.status as OsStatus] ?? current.status}) não permite editar orçamento.`,
       );
@@ -1148,12 +1162,26 @@ export class OrdemServicoService {
 
     if (error) throw new Error(error.message);
 
-    if (current.status === "diagnostico_concluido") {
+    if (early && requireDiagnosis && (options?.diagnosisOverride?.trim().length ?? 0) >= 8) {
+      await this.recordEvent(osId, userId, {
+        tipo: "orcamento",
+        descricao: "Orçamento montado sem concluir diagnóstico",
+        motivo: options?.diagnosisOverride?.trim() ?? null,
+      });
+    }
+
+    if (
+      current.status === "diagnostico_concluido" ||
+      current.status === "rascunho" ||
+      current.status === "aguardando_diagnostico"
+    ) {
       await this.advanceTo(
         osId,
         "aguardando_orcamento",
         userId,
-        "Orçamento iniciado",
+        current.status === "diagnostico_concluido"
+          ? "Orçamento iniciado"
+          : "Orçamento iniciado sem diagnóstico obrigatório",
       );
     }
 
@@ -1335,6 +1363,82 @@ export class OrdemServicoService {
       p_user_id: userId,
     });
     if (error) throw new Error(error.message);
+  }
+
+  async skipDiagnosisForBudget(
+    osId: string,
+    justificativa: string,
+    userId: string | null,
+  ) {
+    const reason = justificativa.trim();
+    if (reason.length < 8) {
+      throw new Error("Informe a justificativa para montar o orçamento sem diagnóstico.");
+    }
+    const current = await this.getById(osId);
+    if (!current) throw new Error("OS não encontrada.");
+    if (["faturado", "cancelado", "cancelada"].includes(current.status)) {
+      throw new Error("Esta OS não permite montar orçamento.");
+    }
+    await this.recordEvent(osId, userId, {
+      tipo: "orcamento",
+      descricao: "Orçamento autorizado sem concluir diagnóstico",
+      motivo: reason,
+    });
+    if (
+      current.status === "rascunho" ||
+      current.status === "aguardando_diagnostico" ||
+      current.status === "diagnostico_concluido"
+    ) {
+      await this.advanceTo(osId, "aguardando_orcamento", userId, reason);
+    }
+  }
+
+  async excluirPermanentemente(
+    osId: string,
+    motivo: string,
+    userId: string | null,
+  ) {
+    const current = await this.getById(osId);
+    if (!current) throw new Error("OS não encontrada neste tenant.");
+    if (current.venda_id || current.status === "faturado") {
+      throw new Error(
+        "OS faturada não pode ser excluída. Cancele ou use o fluxo financeiro existente.",
+      );
+    }
+    if (current.itens.some((i) => i.estoque_status === "consumido")) {
+      throw new Error("Há movimentação de estoque. Exclusão definitiva bloqueada.");
+    }
+    if (
+      current.itens.some((i) =>
+        ["reservado", "separado"].includes(i.estoque_status),
+      )
+    ) {
+      throw new Error("Há reserva/separação de estoque. Exclusão definitiva bloqueada.");
+    }
+
+    const now = new Date().toISOString();
+    const { error } = await this.supabase
+      .from("ordens_servico")
+      .update({ deleted_at: now } as never)
+      .eq("id", osId)
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null);
+    if (error) throw new Error(error.message);
+
+    await this.supabase
+      .from("ordem_servico_itens")
+      .update({ deleted_at: now } as never)
+      .eq("ordem_servico_id", osId)
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null);
+
+    await this.recordEvent(osId, userId, {
+      tipo: "os_excluida",
+      descricao: "OS excluída permanentemente (soft-delete)",
+      motivo,
+      estado_anterior: current.status,
+      estado_posterior: "excluido",
+    });
   }
 
   async arquivarOs(osId: string, motivo: string, userId: string | null) {

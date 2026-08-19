@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ExecutiveSection } from "@/components/executive";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { requiresDiagnosisBeforeBudget } from "@/lib/ordens/budget-gate";
 import {
   applyOsAprovacaoAction,
   changeOsStatusAction,
@@ -35,6 +36,7 @@ import {
   createOsRetornoAction,
   faturarOsAction,
   saveOsDiagnosticoAction,
+  skipDiagnosticoOrcamentoAction,
   updateOsHeaderAction,
   updateOsItemExecucaoAction,
   updateOsPrevisaoAction,
@@ -61,7 +63,7 @@ import { cn } from "@/lib/utils";
 
 type Option = { id: string; nome: string };
 
-type OsWorkspaceProps = {
+export type OsWorkspaceProps = {
   tenantSlug: string;
   os: OrdemServicoDetail;
   produtos: Option[];
@@ -79,6 +81,7 @@ type OsWorkspaceProps = {
   canCancel?: boolean;
   canArquivar?: boolean;
   canExcluirRascunho?: boolean;
+  canExcluirPermanente?: boolean;
   canRestaurar?: boolean;
   recursos?: import("@/lib/operacoes/recursos-service").OficinaRecurso[];
   canBindRecurso?: boolean;
@@ -133,8 +136,6 @@ function canEditOs(os: OrdemServicoDetail) {
   );
 }
 
-export type { OsWorkspaceProps };
-
 export function OsWorkspace({
   tenantSlug,
   os,
@@ -152,6 +153,7 @@ export function OsWorkspace({
   canCancel = false,
   canArquivar = false,
   canExcluirRascunho = false,
+  canExcluirPermanente = false,
   canRestaurar = false,
   recursos = [],
   canBindRecurso = false,
@@ -201,10 +203,15 @@ export function OsWorkspace({
     );
   }
 
-  const nextStatuses = OS_TRANSITIONS[os.status as OsStatus] ?? [];
+  const requireDiagnosis = requiresDiagnosisBeforeBudget({
+    automotiveWorkflow: uiCopy?.automotiveWorkflow,
+  });
   const canDiagnostico = canRegisterDiagnostico(os.status);
-  const canOrcamento = canEditOs(os) && canEditOrcamento(os.status);
-  const canAprovar = canEditOs(os) && canApplyAprovacao(os.status);
+  const canOrcamento = canEditOs(os) && canEditOrcamento(os.status, requireDiagnosis);
+  const canAprovar = canEditOs(os) && canApplyAprovacao(os.status, requireDiagnosis);
+  const nextStatuses = (OS_TRANSITIONS[os.status as OsStatus] ?? []).filter(
+    (s) => s !== "cancelado",
+  );
   const canFaturar =
     !os.venda_id &&
     os.status !== "cancelado" &&
@@ -324,7 +331,13 @@ export function OsWorkspace({
         canCancel={canCancel}
         canArquivar={canArquivar}
         canExcluirRascunho={canExcluirRascunho}
+        canExcluirPermanente={canExcluirPermanente}
         canRestaurar={canRestaurar}
+        cancelLabel={
+          uiCopy && !uiCopy.automotiveWorkflow
+            ? `Cancelar ${uiCopy.workOrder.toLowerCase()}`
+            : "Cancelar OS"
+        }
       />
 
       <OsRecursoBinder
@@ -639,7 +652,7 @@ export function OsWorkspace({
                   disabled={pending}
                   className={cn(
                     buttonVariants({
-                      variant: status === "cancelado" ? "destructive" : "outline",
+                      variant: "outline",
                       size: "sm",
                     }),
                   )}
@@ -766,11 +779,43 @@ export function OsWorkspace({
           panel
         >
           {!canOrcamento ? (
+            <div className="space-y-3">
             <p className="text-sm text-amber-700 dark:text-amber-400">
-              {uiCopy && !uiCopy.automotiveWorkflow
-                ? "Conclua a análise antes de montar o orçamento."
-                : "Conclua o diagnóstico antes de montar o orçamento."}
+              {requireDiagnosis
+                ? "Conclua o diagnóstico antes de montar o orçamento."
+                : "Status atual ainda não permite editar o orçamento."}
             </p>
+            {requireDiagnosis && canEditOs(os) ? (
+              <form
+                className="space-y-2 rounded-lg border p-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget);
+                  run(
+                    () =>
+                      skipDiagnosticoOrcamentoAction(tenantSlug, os.id, {
+                        justificativa: String(fd.get("justificativa") ?? ""),
+                      }),
+                    "Orçamento liberado sem concluir diagnóstico.",
+                  );
+                }}
+              >
+                <p className="text-sm font-medium">
+                  Montar orçamento sem concluir diagnóstico
+                </p>
+                <Input
+                  name="justificativa"
+                  required
+                  minLength={8}
+                  placeholder="Justificativa (obrigatória)"
+                  disabled={pending}
+                />
+                <button type="submit" disabled={pending} className={cn(buttonVariants({ size: "sm", variant: "outline" }))}>
+                  Liberar orçamento
+                </button>
+              </form>
+            ) : null}
+            </div>
           ) : null}
           <OsOrcamentoItensPanel
             tenantSlug={tenantSlug}
@@ -794,6 +839,10 @@ export function OsWorkspace({
             osId={os.id}
             osNumero={os.numero}
             emailConfigured={emailConfigured}
+            whatsappPhone={clientePhone}
+            clienteEmail={clienteEmail}
+            clienteNome={os.cliente_nome}
+            valorTotal={os.valor_total}
             versoes={orcamentoVersoes}
             shares={compartilhamentos}
             onRefresh={() => router.refresh()}

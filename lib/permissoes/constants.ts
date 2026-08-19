@@ -21,6 +21,7 @@ export const PERMISSION_KEYS = [
   "os.converter_item_personalizado",
   "os.excluir_rascunho",
   "os.cancelar",
+  "os.excluir_permanente",
   "os.arquivar",
   "os.restaurar",
   "os.visualizar_canceladas",
@@ -64,7 +65,10 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<
     boolean
   >,
   manager: Object.fromEntries(
-    PERMISSION_KEYS.map((k) => [k, k !== "venda.editar_concluida"]),
+    PERMISSION_KEYS.map((k) => [
+      k,
+      k !== "venda.editar_concluida" && k !== "os.excluir_permanente",
+    ]),
   ) as Record<PermissionKey, boolean>,
   member: Object.fromEntries(
     PERMISSION_KEYS.map((k) => [

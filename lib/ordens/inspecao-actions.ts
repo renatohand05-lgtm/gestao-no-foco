@@ -12,6 +12,7 @@ import {
 import { createInspecaoStorageService } from "@/lib/ordens/inspecao-storage-service";
 import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import { createOrcamentoVersaoService } from "@/lib/ordens/orcamento-versao-service";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import {
   osAnexoUploadMetaSchema,
   osChecklistUpdateSchema,
@@ -137,8 +138,15 @@ export async function publicarOrcamentoVersaoAction(
     const tenant = await requireTenant(tenantSlug);
     const profile = await getCurrentProfile();
     const parsed = osPublicarOrcamentoSchema.parse(values);
+    const ui = getSegmentUiCopy({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    });
     const service = await createOrcamentoVersaoService(tenant.id);
-    const versao = await service.publishVersion(osId, parsed, profile?.id ?? null);
+    const versao = await service.publishVersion(osId, parsed, profile?.id ?? null, {
+      requireDiagnosis: ui.automotiveWorkflow,
+    });
     revalidateOs(tenantSlug, osId);
     return { success: true, id: versao.id, versao: versao.versao };
   } catch (error) {
@@ -170,6 +178,13 @@ export async function criarCompartilhamentoAction(
     const parsed = osCompartilharSchema.parse(values);
     const service = await createCompartilhamentoService(tenant.id);
     const share = await service.createShare(osId, parsed, profile?.id ?? null);
+    const orc = await createOrcamentoVersaoService(tenant.id);
+    const versaoId =
+      parsed.versaoOrcamentoId ||
+      (await orc.listVersions(osId)).find((v) =>
+        ["publicado", "enviado", "pronto"].includes(v.status),
+      )?.id;
+    if (versaoId) await orc.markEnviado(versaoId);
     revalidateOs(tenantSlug, osId);
     return { success: true, ...share };
   } catch (error) {

@@ -22,8 +22,10 @@ type Props = {
   canCancel: boolean;
   canArquivar: boolean;
   canExcluirRascunho: boolean;
+  canExcluirPermanente?: boolean;
   canRestaurar: boolean;
   compact?: boolean;
+  cancelLabel?: string;
 };
 
 export function OsLifecycleMenu({
@@ -39,56 +41,116 @@ export function OsLifecycleMenu({
   canCancel,
   canArquivar,
   canExcluirRascunho,
+  canExcluirPermanente = false,
   canRestaurar,
   compact = false,
+  cancelLabel = "Cancelar OS",
 }: Props) {
   const [mode, setMode] = useState<OsLifecycleMode | null>(null);
+  const [open, setOpen] = useState(false);
 
   const isRascunho = status === "rascunho";
   const isArquivada = Boolean(arquivadoEm);
   const isCancelada = status === "cancelado" || status === "cancelada";
   const isFaturada = status === "faturado" || Boolean(vendaId);
+  const showCancel = canCancel && !isCancelada && !isFaturada && !isArquivada;
+  const showExcluirRascunho = canExcluirRascunho && isRascunho;
+  const showExcluirPermanente =
+    canExcluirPermanente && !isFaturada && !isRascunho;
+  const hasMenu =
+    showCancel ||
+    (canArquivar && !isArquivada && !isRascunho) ||
+    showExcluirRascunho ||
+    showExcluirPermanente ||
+    (canRestaurar && isArquivada);
+
+  if (!hasMenu) return null;
 
   const size = compact ? "sm" : "default";
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {canCancel && !isCancelada && !isFaturada && !isArquivada ? (
-          <button
-            type="button"
-            className={cn(buttonVariants({ variant: "destructive", size }))}
-            onClick={() => setMode("cancelar")}
+      <div className="relative inline-block">
+        <button
+          type="button"
+          className={cn(buttonVariants({ variant: "outline", size }))}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          ⋯
+        </button>
+        {open ? (
+          <div
+            role="menu"
+            className="absolute right-0 z-20 mt-1 min-w-56 rounded-md border bg-background p-1 shadow-md"
           >
-            Cancelar OS
-          </button>
-        ) : null}
-        {canArquivar && !isArquivada && !isRascunho ? (
-          <button
-            type="button"
-            className={cn(buttonVariants({ variant: "outline", size }))}
-            onClick={() => setMode("arquivar")}
-          >
-            Arquivar
-          </button>
-        ) : null}
-        {canExcluirRascunho && isRascunho ? (
-          <button
-            type="button"
-            className={cn(buttonVariants({ variant: "destructive", size }))}
-            onClick={() => setMode("excluir")}
-          >
-            Excluir rascunho
-          </button>
-        ) : null}
-        {canRestaurar && isArquivada ? (
-          <button
-            type="button"
-            className={cn(buttonVariants({ size }))}
-            onClick={() => setMode("restaurar")}
-          >
-            Restaurar
-          </button>
+            {showCancel ? (
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => {
+                  setOpen(false);
+                  setMode("cancelar");
+                }}
+              >
+                {cancelLabel}
+              </button>
+            ) : null}
+            {canArquivar && !isArquivada && !isRascunho ? (
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => {
+                  setOpen(false);
+                  setMode("arquivar");
+                }}
+              >
+                Arquivar
+              </button>
+            ) : null}
+            {showExcluirRascunho ? (
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => {
+                  setOpen(false);
+                  setMode("excluir");
+                }}
+              >
+                Excluir rascunho
+              </button>
+            ) : null}
+            {showExcluirPermanente ? (
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full rounded px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
+                onClick={() => {
+                  setOpen(false);
+                  setMode("excluir_permanente");
+                }}
+              >
+                Excluir permanentemente
+              </button>
+            ) : null}
+            {canRestaurar && isArquivada ? (
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => {
+                  setOpen(false);
+                  setMode("restaurar");
+                }}
+              >
+                Restaurar
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
@@ -103,6 +165,7 @@ export function OsLifecycleMenu({
         vendaId={vendaId}
         open={mode != null}
         mode={mode}
+        cancelLabel={cancelLabel}
         onClose={() => setMode(null)}
       />
     </div>

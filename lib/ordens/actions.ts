@@ -26,6 +26,8 @@ import {
   osHeaderUpdateFormSchema,
   osItemFormSchema,
   osMotivoFormSchema,
+  osExcluirPermanenteSchema,
+  osSkipDiagnosticoSchema,
   osConverterItemSchema,
   osOpenFormSchema,
   osOpenIntegratedSchema,
@@ -533,8 +535,15 @@ export async function addOsItemAction(
     if (parsed.is_personalizado) {
       await perms.require("os.adicionar_item_personalizado");
     }
+    const ui = getSegmentUiCopy({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    });
     const service = await createOrdemServicoService(tenant.id);
-    await service.addItem(id, parsed, profile?.id ?? null);
+    await service.addItem(id, parsed, profile?.id ?? null, {
+      requireDiagnosis: ui.automotiveWorkflow,
+    });
     revalidateOs(tenantSlug, id);
     return { success: true, id };
   } catch (error) {
@@ -659,6 +668,14 @@ export async function cancelarOsAction(
     const parsed = osMotivoFormSchema.parse(values);
     const service = await createOrdemServicoService(tenant.id);
     await service.cancelarOs(osId, parsed.motivo, profile?.id ?? null);
+    if (parsed.cancelar_agenda) {
+      const { createAgendaEventService } = await import("@/lib/agenda/agenda-service");
+      const agenda = await createAgendaEventService(tenant.id);
+      const linked = await agenda.listLinkedToOs(osId);
+      for (const ev of linked) {
+        if (ev.status !== "cancelado") await agenda.cancel(ev.id);
+      }
+    }
     revalidateOs(tenantSlug, osId);
     return { success: true, id: osId };
   } catch (error) {
@@ -707,6 +724,66 @@ export async function excluirRascunhoOsAction(
       error,
       "Erro ao excluir rascunho.",
       "ordens.excluir_rascunho",
+    );
+  }
+}
+
+export async function skipDiagnosticoOrcamentoAction(
+  tenantSlug: string,
+  osId: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const profile = await getCurrentProfile();
+    const perms = await createPermissionService(tenant.id, tenant.role);
+    await perms.require("os.editar");
+    const parsed = osSkipDiagnosticoSchema.parse(values);
+    const service = await createOrdemServicoService(tenant.id);
+    await service.skipDiagnosisForBudget(
+      osId,
+      parsed.justificativa,
+      profile?.id ?? null,
+    );
+    revalidateOs(tenantSlug, osId);
+    return { success: true, id: osId };
+  } catch (error) {
+    return toActionError(
+      error,
+      "Erro ao liberar orçamento.",
+      "ordens.orcamento.skip_diagnostico",
+    );
+  }
+}
+
+export async function excluirPermanentementeOsAction(
+  tenantSlug: string,
+  osId: string,
+  values: unknown,
+): Promise<ActionResult> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const profile = await getCurrentProfile();
+    const perms = await createPermissionService(tenant.id, tenant.role);
+    await perms.require(
+      "os.excluir_permanente",
+      "Sem permissão para exclusão definitiva.",
+    );
+    const parsed = osExcluirPermanenteSchema.parse(values);
+    const service = await createOrdemServicoService(tenant.id);
+    await service.excluirPermanentemente(
+      osId,
+      parsed.motivo,
+      profile?.id ?? null,
+    );
+    revalidatePath(`/${tenantSlug}/ordens`);
+    revalidatePath(`/${tenantSlug}/ordens/dashboard`);
+    return { success: true, id: osId };
+  } catch (error) {
+    return toActionError(
+      error,
+      "Erro ao excluir OS.",
+      "ordens.excluir_permanente",
     );
   }
 }

@@ -246,6 +246,20 @@ export class AgendaEventService {
     return data;
   }
 
+  async listLinkedToOs(osId: string): Promise<AgendaEventRow[]> {
+    const { data, error } = await this.supabase
+      .from("agenda_eventos")
+      .select("*")
+      .eq("tenant_id", this.tenantId)
+      .eq("ordem_servico_id", osId)
+      .is("deleted_at", null);
+    if (error) {
+      if (isMissingColumn(error)) return [];
+      throw new Error(error.message);
+    }
+    return (data ?? []) as AgendaEventRow[];
+  }
+
   async cancel(id: string): Promise<AgendaEventRow> {
     return this.setStatus(id, "cancelado");
   }

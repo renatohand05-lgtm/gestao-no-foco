@@ -50,10 +50,10 @@ import {
 import { formatOsEventoLine } from "@/lib/ordens/os-event-format";
 import { formatCurrency } from "@/lib/format";
 import { requiresDiagnosisBeforeBudget, canAdvanceToApproval } from "@/lib/ordens/budget-gate";
+import { canShowServiceReadyPanel } from "@/lib/retention/service-ready";
 import {
   canEditOrcamento,
   canFaturarStatus,
-  canMarkAguardandoRetirada,
   canMutateOsExecution,
   canRegisterDiagnostico,
   deliveryUiMode,
@@ -234,10 +234,11 @@ export function OsWorkspace({
     osStatus: os.status,
   });
   const canAprovar = canEditOs(os) && approvalGate.ok;
-  const canOpenServiceReady =
-    serviceReadyEnabled &&
-    canFinalize &&
-    canMarkAguardandoRetirada(os.status);
+  const canOpenServiceReady = canShowServiceReadyPanel({
+    workOrdersEnabled: serviceReadyEnabled,
+    osStatus: os.status,
+    canFinalize,
+  });
   const executionLocked = !canMutateOsExecution(os.status);
   const entregaMode = deliveryUiMode(os.status, os.aceite_entrega_em);
   const nextStatuses = (OS_TRANSITIONS[os.status as OsStatus] ?? []).filter(
@@ -261,6 +262,36 @@ export function OsWorkspace({
   const aprovados = useMemo(
     () => os.itens.filter((i) => itemAprovacaoIsApproved(i.aprovacao_status)),
     [os.itens],
+  );
+
+  const serviceReadyPanel = (
+    <ServiceReadyPanel
+      tenantSlug={tenantSlug}
+      osId={os.id}
+      enabled={canOpenServiceReady}
+      canFinalize={canFinalize}
+      canNotify={canNotify}
+      notifyReadyAuto={notifyReadyAuto}
+      awaitingPickup={os.status === "pronto_para_entrega"}
+      segment={tenantSegment}
+      clienteNome={os.cliente_nome ?? ""}
+      empresaNome={empresaNome}
+      clientePhone={clientePhone}
+      clienteEmail={clienteEmail}
+      whatsappProviderConfigured={whatsappProviderConfigured}
+      emailProviderConfigured={emailProviderConfigured}
+      preview={{
+        itens: os.itens,
+        marca: os.marca,
+        modelo: os.modelo,
+        placa: os.placa,
+      }}
+      finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar serviço"}
+      finalizeAndNotifyLabel={
+        uiCopy?.finalizeAndNotifyLabel ?? "Finalizar e avisar cliente"
+      }
+      sheetTitle={uiCopy?.serviceReadySheetTitle ?? "Serviço concluído"}
+    />
   );
 
   function run(
@@ -434,33 +465,7 @@ export function OsWorkspace({
               E-mail: {emailProviderConfigured ? "configurado" : "não configurado"}
             </p>
           </div>
-          <ServiceReadyPanel
-            tenantSlug={tenantSlug}
-            osId={os.id}
-            enabled={canOpenServiceReady}
-            canFinalize={canFinalize}
-            canNotify={canNotify}
-            notifyReadyAuto={notifyReadyAuto}
-            awaitingPickup={os.status === "pronto_para_entrega"}
-            segment={tenantSegment}
-            clienteNome={os.cliente_nome ?? ""}
-            empresaNome={empresaNome}
-            clientePhone={clientePhone}
-            clienteEmail={clienteEmail}
-            whatsappProviderConfigured={whatsappProviderConfigured}
-            emailProviderConfigured={emailProviderConfigured}
-            preview={{
-              itens: os.itens,
-              marca: os.marca,
-              modelo: os.modelo,
-              placa: os.placa,
-            }}
-            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar serviço"}
-            finalizeAndNotifyLabel={
-              uiCopy?.finalizeAndNotifyLabel ?? "Finalizar e avisar cliente"
-            }
-            sheetTitle={uiCopy?.serviceReadySheetTitle ?? "Serviço concluído"}
-          />
+          {serviceReadyPanel}
           {os.status === "pronto_para_entrega" && canFinalize ? (
             <button
               type="button"
@@ -1135,6 +1140,7 @@ export function OsWorkspace({
               ))}
             </ul>
           ) : null}
+          {serviceReadyPanel}
         </ExecutiveSection>
       ) : null}
 
@@ -1244,35 +1250,7 @@ export function OsWorkspace({
               {uiCopy?.registerPickupLabel ?? "Registrar retirada"}
             </button>
           ) : null}
-          {canOpenServiceReady ? (
-          <ServiceReadyPanel
-            tenantSlug={tenantSlug}
-            osId={os.id}
-            enabled={canOpenServiceReady}
-            canFinalize={canFinalize}
-            canNotify={canNotify}
-            notifyReadyAuto={notifyReadyAuto}
-            awaitingPickup={os.status === "pronto_para_entrega"}
-            segment={tenantSegment}
-            clienteNome={os.cliente_nome ?? ""}
-            empresaNome={empresaNome}
-            clientePhone={clientePhone}
-            clienteEmail={clienteEmail}
-            whatsappProviderConfigured={whatsappProviderConfigured}
-            emailProviderConfigured={emailProviderConfigured}
-            preview={{
-              itens: os.itens,
-              marca: os.marca,
-              modelo: os.modelo,
-              placa: os.placa,
-            }}
-            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar serviço"}
-            finalizeAndNotifyLabel={
-              uiCopy?.finalizeAndNotifyLabel ?? "Finalizar e avisar cliente"
-            }
-            sheetTitle={uiCopy?.serviceReadySheetTitle ?? "Serviço concluído"}
-          />
-          ) : null}
+          {canOpenServiceReady ? serviceReadyPanel : null}
           {entregaMode === "done" || entregaMode === "billed" ? (
             <div className="space-y-1 rounded-lg border p-3 text-sm">
               <p className="font-medium">Entrega concluída</p>

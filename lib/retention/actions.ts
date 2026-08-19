@@ -350,7 +350,9 @@ export async function finalizeServiceReadyAction(
       needed,
     );
     const { resolveSegmentContext } = await import("@/lib/segments/resolve.ts");
-    const { serviceReadyAllowed } = await import("./service-ready");
+    const { serviceReadyAllowed, formatServiceReadyFinalizeNote } = await import(
+      "./service-ready"
+    );
     const ctx = resolveSegmentContext(segmentInput(tenant));
     if (!serviceReadyAllowed(ctx)) {
       return {
@@ -387,13 +389,14 @@ export async function finalizeServiceReadyAction(
           modelo: os.modelo ?? "",
           placa: os.placa ?? "",
         };
-        const channels =
+        const requested = (
           parsed.channels && parsed.channels.length > 0
             ? parsed.channels
             : parsed.channel
               ? [parsed.channel]
-              : [undefined];
-        let lastNote = "";
+              : []
+        ).filter((ch): ch is "whatsapp" | "email" => ch === "whatsapp" || ch === "email");
+        const channels = requested.length > 0 ? requested : [undefined];
         for (const ch of channels) {
           const result = await enqueueCustomerNotification({
             tenantId: tenant.id,
@@ -409,15 +412,18 @@ export async function finalizeServiceReadyAction(
             forceChannel: ch,
             explicit: true,
           });
-          lastNote = result.note;
           waLink = result.waLink ?? waLink;
           duplicated = duplicated || result.duplicated;
-          status = result.status;
         }
-        note =
-          status === "failed"
-            ? "OS finalizada. Não foi possível enviar a notificação."
-            : lastNote;
+        const { whatsappHealth, emailHealth } = await import("./providers/runtime.ts");
+        note = formatServiceReadyFinalizeNote({
+          notify: true,
+          requested,
+          whatsappProviderConfigured: whatsappHealth().canSendReal,
+          emailProviderConfigured: emailHealth().canSendReal,
+          duplicated,
+        });
+        status = "pronto_para_entrega";
       } catch {
         note = "OS finalizada. Não foi possível enviar a notificação.";
         status = "pronto_para_entrega";

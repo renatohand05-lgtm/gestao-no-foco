@@ -26,6 +26,8 @@ export function buildServiceReadyPreview(input: {
         modelo: input.modelo,
         placa: input.placa,
       }),
+      modelo: input.modelo ?? "",
+      placa: input.placa ?? "",
     },
   );
 }

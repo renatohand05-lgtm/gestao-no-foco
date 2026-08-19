@@ -121,6 +121,22 @@ export function ServiceReadyPanel({
   return (
     <div className="rounded-lg border p-3" data-phase35="service-ready">
       <p className="text-sm font-medium">{sheetTitle}</p>
+      <div className="mt-2 rounded-md border bg-muted/40 p-3 text-sm" data-phase35="service-ready-channels">
+        <p className="font-medium">Canal do cliente</p>
+        <p className="text-muted-foreground">
+          WhatsApp cadastrado: {hasWhatsapp ? "sim" : "não"}
+        </p>
+        <p className="text-muted-foreground">
+          E-mail cadastrado: {hasEmail ? "sim" : "não"}
+        </p>
+        <p className="mt-2 font-medium">Status do provider</p>
+        <p className="text-muted-foreground">
+          WhatsApp: {whatsappProviderConfigured ? "configurado" : "não configurado"}
+        </p>
+        <p className="text-muted-foreground">
+          E-mail: {emailProviderConfigured ? "configurado" : "não configurado"}
+        </p>
+      </div>
       {!hasAnyChannel ? (
         <p className="mt-2 text-sm text-muted-foreground">
           Cliente sem WhatsApp ou e-mail cadastrado.
@@ -170,7 +186,10 @@ export function ServiceReadyPanel({
             </label>
             {notify ? (
               <>
-                <p className="text-xs text-muted-foreground">Canais do cliente</p>
+                <p className="text-xs text-muted-foreground">Canal do cliente</p>
+                <p className="text-xs text-muted-foreground">
+                  Provider não configurado não impede selecionar o canal.
+                </p>
                 <label className="flex min-h-11 items-center gap-2 text-sm">
                   <input
                     type="checkbox"

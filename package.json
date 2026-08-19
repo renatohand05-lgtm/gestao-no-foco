@@ -567,6 +567,7 @@
     "test:phase35-2-hotfix-unified-input": "node --experimental-strip-types --test scripts/phase35-2-hotfix-unified-input-tests.mjs",
     "test:phase35-2-hotfix-budget-lifecycle": "node --experimental-strip-types --test scripts/phase35-2-hotfix-budget-lifecycle-tests.mjs",
     "test:phase35-2-hotfix-office-pilot": "node --experimental-strip-types --test scripts/phase35-2-hotfix-office-pilot-tests.mjs",
+    "test:phase35-2-hotfix-office-notify-parity": "node --experimental-strip-types --test scripts/phase35-2-hotfix-office-notify-parity-tests.mjs",
     "test:phase35-2-hotfix-mechanic-fk": "node --experimental-strip-types --test scripts/phase35-2-hotfix-mechanic-fk-tests.mjs",
     "test:phase35-2-hotfix-final-flow": "node --experimental-strip-types --test scripts/phase35-2-hotfix-final-flow-tests.mjs",
     "test:phase35-3-pilot-communication": "node --experimental-strip-types --test scripts/phase35-3-pilot-communication-tests.mjs"

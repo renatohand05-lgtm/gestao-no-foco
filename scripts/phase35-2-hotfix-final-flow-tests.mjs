@@ -128,7 +128,8 @@ describe("publish / item / execution / ready order", () => {
     );
     const ws = read("components/ordens/os-workspace.tsx");
     assert.match(ws, /canOpenServiceReady/);
-    assert.match(ws, /canMarkAguardandoRetirada/);
+    assert.match(ws, /canShowServiceReadyPanel/);
+    assert.match(read("lib/retention/service-ready.ts"), /canMarkAguardandoRetirada/);
     assert.match(ws, /deliveryUiMode/);
     assert.match(ws, /Entrega concluída/);
     assert.match(ws, /não há aceite de retirada/);

@@ -64,7 +64,7 @@ const BASE: Record<MessageTemplateCode, string> = {
   REENGAJAMENTO:
     "Olá, {{cliente_nome}}! Sentimos sua falta na {{empresa_nome}}. Quer retomar o acompanhamento?",
   SERVICE_READY:
-    "Olá, {{cliente}}.\nSeu veículo está pronto.\n\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa}}",
+    "Olá, {{cliente}}.\nSeu veículo está pronto.\n\nVeículo: {{modelo}} · {{placa}}\n\nVocê já pode realizar a retirada.\n\n{{empresa}}",
   SERVICE_DELIVERED:
     "Olá, {{cliente_nome}}! Registramos a retirada do veículo na {{empresa_nome}}. Obrigado.",
   BUDGET_PUBLISHED:
@@ -128,7 +128,7 @@ const OFICINA: Partial<Record<MessageTemplateCode, string>> = {
   RETORNO_D10:
     "Olá, {{cliente_nome}}! Está chegando o período recomendado para o retorno do seu veículo à {{empresa_nome}}. Serviço anterior: {{servico}}. Veículo: {{veiculo}}. Faltam aproximadamente {{dias_para_retorno}} dias. Deseja agendar? Responda SIM para continuarmos.",
   SERVICE_READY:
-    "Olá, {{cliente}}.\nSeu veículo está pronto.\n\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa}}",
+    "Olá, {{cliente}}.\nSeu veículo está pronto.\n\nVeículo: {{modelo}} · {{placa}}\n\nVocê já pode realizar a retirada.\n\n{{empresa}}",
   AGENDAMENTO_CRIADO:
     "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} foi realizado.\n\nData: {{data}}\nHorário: {{hora}}\n\nVeículo: {{veiculo}}",
   AGENDAMENTO_CONFIRMADO:

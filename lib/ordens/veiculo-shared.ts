@@ -13,3 +13,10 @@ export function formatVeiculoLabel(v: VeiculoOption) {
     .filter(Boolean)
     .join(" · ");
 }
+
+/** Agenda / lava: "Honda Civic · ABC1D23" */
+export function formatVeiculoAgendaLabel(v: VeiculoOption) {
+  const name = [v.marca, v.modelo].filter(Boolean).join(" ").trim() || "Veículo";
+  const placa = v.placa?.trim();
+  return placa ? `${name} · ${placa}` : name;
+}

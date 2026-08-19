@@ -12,6 +12,9 @@ import {
   agendaEventStatusSchema,
 } from "@/lib/agenda/validations";
 import { createRbacSupabaseAdapter } from "@/lib/enterprise";
+import { formatAppointmentCommNote } from "@/lib/retention/comm-note";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult, ActionResultWith } from "@/types/action-result";
@@ -50,6 +53,22 @@ async function requireAgendaPerm(
   return { tenant, profile };
 }
 
+function withVehiclesRequired(
+  parsed: ReturnType<typeof agendaEventFormSchema.parse>,
+  tenant: { segment?: string | null; segment_version?: number | null; segment_config?: unknown },
+) {
+  const ui = getSegmentUiCopy(
+    resolveSegmentContext({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    }),
+  );
+  const input = toInput(parsed);
+  input.vehiclesRequired = Boolean(ui.showVehicles && parsed.natureza === "cliente");
+  return input;
+}
+
 function toInput(parsed: ReturnType<typeof agendaEventFormSchema.parse>) {
   return {
     titulo: parsed.titulo,
@@ -75,6 +94,7 @@ function toInput(parsed: ReturnType<typeof agendaEventFormSchema.parse>) {
     empresa_id: parsed.empresa_id,
     override_conflito: parsed.override_conflito,
     override_justificativa: parsed.override_justificativa,
+    vehiclesRequired: false,
     recorrencia:
       parsed.recorrencia_frequency === "nenhuma"
         ? null
@@ -102,7 +122,7 @@ export async function createAgendaEventAction(
       await requireAgendaPerm(tenantSlug, ["agenda.sobrescrever_conflito"]);
     }
     const svc = await createAgendaEventService(tenant.id);
-    const rows = await svc.create(toInput(parsed), profile.id);
+    const rows = await svc.create(withVehiclesRequired(parsed, tenant), profile.id);
     let commNote: string | undefined;
     try {
       const first = rows[0];
@@ -131,11 +151,13 @@ export async function createAgendaEventAction(
           },
           userId: profile.id,
         });
-        commNote =
-          queued.status === "suppressed" ||
-          queued.note.includes("sem canal")
-            ? "Cliente sem canal disponível"
-            : "Confirmação preparada";
+        commNote = formatAppointmentCommNote({
+          channels: queued.channels ?? [],
+          emptyNote:
+            queued.status === "suppressed" || queued.note.includes("sem canal")
+              ? queued.note
+              : "Cliente sem canal disponível",
+        });
       }
     } catch {
       /* outbox não bloqueia o agendamento */
@@ -162,7 +184,7 @@ export async function updateAgendaEventAction(
     ]);
     const parsed = agendaEventFormSchema.parse(values);
     const svc = await createAgendaEventService(tenant.id);
-    await svc.update(eventId, toInput(parsed));
+    await svc.update(eventId, withVehiclesRequired(parsed, tenant));
     revalidateAgenda(tenantSlug, eventId);
     return { success: true, id: eventId };
   } catch (error) {

@@ -7,6 +7,45 @@ export type VehiclePickResult =
   | { ok: true; veiculoId: string | null }
   | { ok: false; message: string };
 
+export function requireAgendaVehicleId(input: {
+  vehiclesRequired: boolean;
+  natureza: string;
+  clienteId: string | null | undefined;
+  veiculoId: string | null | undefined;
+}): { ok: true } | { ok: false; message: string } {
+  if (!input.vehiclesRequired || input.natureza !== "cliente") {
+    return { ok: true };
+  }
+  if (!input.clienteId) {
+    return { ok: false, message: "Cliente é obrigatório no agendamento de atendimento." };
+  }
+  if (!input.veiculoId) {
+    return {
+      ok: false,
+      message: "Selecione o veículo para este cliente.",
+    };
+  }
+  return { ok: true };
+}
+
+export function assertVehicleOwnership(input: {
+  currentTenantId: string;
+  veiculoTenantId: string | null | undefined;
+  selectedClienteId: string;
+  veiculoClienteId: string | null | undefined;
+}): { ok: true } | { ok: false; message: string } {
+  if (!input.veiculoTenantId || input.veiculoTenantId !== input.currentTenantId) {
+    return { ok: false, message: "Veículo inválido para este tenant." };
+  }
+  if (!input.veiculoClienteId || input.veiculoClienteId !== input.selectedClienteId) {
+    return {
+      ok: false,
+      message: "Veículo não pertence ao cliente informado.",
+    };
+  }
+  return { ok: true };
+}
+
 export function pickScheduledVehicle(input: {
   vehiclesRequired: boolean;
   eventVeiculoId: string | null;

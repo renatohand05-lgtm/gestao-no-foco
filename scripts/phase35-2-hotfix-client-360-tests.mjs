@@ -111,6 +111,7 @@ describe("hotfix client 360 — UI usa o adapter, não forks", () => {
     assert.match(workspace, /visibleClient360Tabs/);
     assert.match(workspace, /client360\.showVehicles/);
     assert.match(workspace, /client360\.showWorkOrders/);
+    assert.match(workspace, /AgendaEventCreateForm/);
     assert.match(page, /client360Surface/);
     assert.doesNotMatch(workspace, /if \(segment ===/);
     assert.doesNotMatch(page, /if \(segment ===/);

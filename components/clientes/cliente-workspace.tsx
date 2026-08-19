@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { AgendaEventCreateForm } from "@/components/agenda/agenda-event-create-form";
 import { ClienteDeleteButton } from "@/components/clientes/cliente-delete-button";
 import { ClienteContatosPanel } from "@/components/clientes/cliente-contatos-panel";
 import { ClienteStatusBadge } from "@/components/clientes/cliente-status-badge";
@@ -55,6 +56,8 @@ import { cn } from "@/lib/utils";
 import type { Cliente360Data } from "@/types/crm";
 import type { Cliente } from "@/types/clientes";
 import type { Client360Surface } from "@/lib/segments/client-360";
+import type { VeiculoOption } from "@/lib/ordens/veiculo-shared";
+import type { CatalogSuggestionDto } from "@/lib/segments/catalogs/suggest.ts";
 import {
   client360QuoteOriginLabel,
   client360TabLabel,
@@ -75,6 +78,13 @@ type ClienteWorkspaceProps = {
   canSeeCommDetails?: boolean;
   client360: Client360Surface;
   hideProcedure?: boolean;
+  agendaCreate?: {
+    servicos: Array<{ id: string; label: string; minutes?: number | null }>;
+    profissionais: Array<{ id: string; label: string }>;
+    library?: CatalogSuggestionDto[];
+    canCreateProduto?: boolean;
+    initialVeiculos?: VeiculoOption[];
+  };
 };
 
 type Tab = Client360TabId;
@@ -103,6 +113,7 @@ export function ClienteWorkspace({
   canSeeCommDetails = false,
   client360,
   hideProcedure = false,
+  agendaCreate,
 }: ClienteWorkspaceProps) {
   const router = useRouter();
   const visibleTabs = visibleClient360Tabs({
@@ -423,6 +434,20 @@ export function ClienteWorkspace({
       {tab === "agenda" ? (
         <div className="space-y-4">
           <SectionCard title="Novo agendamento">
+            {client360.showVehicles && agendaCreate ? (
+              <AgendaEventCreateForm
+                tenantSlug={tenantSlug}
+                clientes={[{ id: cliente.id, label: cliente.nome }]}
+                servicos={agendaCreate.servicos}
+                profissionais={agendaCreate.profissionais}
+                initial={{ natureza: "cliente", clienteId: cliente.id }}
+                library={agendaCreate.library ?? []}
+                canCreateProduto={agendaCreate.canCreateProduto ?? false}
+                showVehicles
+                initialVeiculos={agendaCreate.initialVeiculos ?? []}
+              />
+            ) : (
+              <>
             <div className="grid gap-3 sm:grid-cols-2">
               <Input
                 placeholder="Título"
@@ -451,6 +476,8 @@ export function ClienteWorkspace({
             >
               Agendar
             </button>
+              </>
+            )}
           </SectionCard>
           <CrmAgendaList tenantSlug={tenantSlug} agendamentos={data360.agendamentos} />
         </div>

@@ -13,6 +13,10 @@ import { client360Surface } from "@/lib/segments/client-360.ts";
 import { defaultReturnRuleForSegment } from "@/lib/retention/returns";
 import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 import { createCommunicationPreferenceService } from "@/lib/retention/prefs-service";
+import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
+import { createProdutoService } from "@/lib/produtos/produto-service";
+import { serviceSuggestionsForContext } from "@/lib/segments/catalogs/suggest.ts";
+import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { requireTenant } from "@/lib/tenants";
 import type { ClienteSuccessMessage } from "@/types/clientes";
 
@@ -73,6 +77,26 @@ export default async function ClienteDetailPage({
   const consultorNome =
     consultores.find((c) => c.id === cliente.consultor_id)?.nome ?? null;
 
+  const client360 = client360Surface({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const ctx = resolveSegmentContext({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  });
+  const [servicosRes, profsRes, canCreateProduto] = client360.showVehicles
+    ? await Promise.all([
+        createProdutoService(tenant.id).then((s) =>
+          s.list({ tipo: "servico", perPage: 100, ativo: true }),
+        ),
+        createMecanicoService(tenant.id).then((s) => s.listDisponiveis()),
+        tenantHasMutationPermission(tenantSlug, "produtos.criar"),
+      ])
+    : [null, null, false];
+
   return (
     <div className="space-y-6">
       <CrmSubnav tenantSlug={tenantSlug} active="clientes" />
@@ -91,13 +115,34 @@ export default async function ClienteDetailPage({
         comunicacoes={comunicacoes}
         communicationPrefs={prefs}
         canSeeCommDetails={canSeeCommDetails}
-        client360={client360Surface({
-          segment: tenant.segment,
-          segmentVersion: tenant.segment_version,
-          segmentConfig: tenant.segment_config,
-        })}
+        client360={client360}
         hideProcedure={
           defaultReturnRuleForSegment(tenant.segment).hideProcedure
+        }
+        agendaCreate={
+          client360.showVehicles
+            ? {
+                servicos: (servicosRes?.data ?? []).map((s) => ({
+                  id: s.id,
+                  label: s.nome,
+                  minutes: s.tempo_estimado_minutos ?? null,
+                })),
+                profissionais: (profsRes ?? []).map((p) => ({
+                  id: p.id,
+                  label: p.nome_completo,
+                })),
+                library: serviceSuggestionsForContext(ctx, { includeCombos: false }),
+                canCreateProduto,
+                initialVeiculos: data360.veiculos.map((v) => ({
+                  id: v.id,
+                  placa: v.placa,
+                  marca: v.marca,
+                  modelo: v.modelo,
+                  ano: v.ano,
+                  cor: null,
+                })),
+              }
+            : undefined
         }
       />
     </div>

@@ -177,10 +177,106 @@ describe("LAVA 15-20", () => {
     assert.match(create, /compactCreate/);
     const picker = read("components/ordens/os-veiculo-picker.tsx");
     assert.match(picker, /Nenhum veículo cadastrado para este cliente/);
+    assert.match(picker, /data-agenda="vehicle"/);
+    assert.match(picker, /\+ Cadastrar veículo/);
     const dialog = read("components/ordens/os-veiculo-quick-dialog.tsx");
     assert.match(dialog, /Salvar e usar/);
+    assert.match(dialog, /Novo veículo/);
+    assert.match(dialog, /Marca \(opcional\)/);
     assert.doesNotMatch(dialog, /desta OS/);
     assert.doesNotMatch(create, /if \(segment ===/);
+    const { formatVeiculoAgendaLabel } = await load(
+      "lib/ordens/veiculo-shared.ts",
+    );
+    assert.equal(
+      formatVeiculoAgendaLabel({
+        id: "1",
+        placa: "ABC1D23",
+        marca: "Honda",
+        modelo: "Civic",
+        ano: 2020,
+        cor: null,
+      }),
+      "Honda Civic · ABC1D23",
+    );
+    const { requireAgendaVehicleId, assertVehicleOwnership } = await load(
+      "lib/agenda/operational-start.ts",
+    );
+    assert.equal(
+      requireAgendaVehicleId({
+        vehiclesRequired: true,
+        natureza: "cliente",
+        clienteId: "c1",
+        veiculoId: null,
+      }).ok,
+      false,
+    );
+    assert.equal(
+      requireAgendaVehicleId({
+        vehiclesRequired: false,
+        natureza: "cliente",
+        clienteId: "c1",
+        veiculoId: null,
+      }).ok,
+      true,
+    );
+    assert.equal(
+      assertVehicleOwnership({
+        currentTenantId: "t1",
+        veiculoTenantId: "t2",
+        selectedClienteId: "c1",
+        veiculoClienteId: "c1",
+      }).ok,
+      false,
+    );
+    assert.equal(
+      assertVehicleOwnership({
+        currentTenantId: "t1",
+        veiculoTenantId: "t1",
+        selectedClienteId: "c1",
+        veiculoClienteId: "c2",
+      }).ok,
+      false,
+    );
+    assert.equal(
+      assertVehicleOwnership({
+        currentTenantId: "t1",
+        veiculoTenantId: "t1",
+        selectedClienteId: "c1",
+        veiculoClienteId: "c1",
+      }).ok,
+      true,
+    );
+    const workspace = read("components/clientes/cliente-workspace.tsx");
+    assert.match(workspace, /AgendaEventCreateForm/);
+    assert.match(workspace, /client360\.showVehicles && agendaCreate/);
+    assert.match(read("lib/agenda/actions.ts"), /vehiclesRequired/);
+    assert.match(read("lib/agenda/agenda-service.ts"), /assertAgendaVehicle/);
+    const { formatAppointmentCommNote } = await load(
+      "lib/retention/comm-note.ts",
+    );
+    const note = formatAppointmentCommNote({
+      channels: [
+        { channel: "whatsapp", status: "queued" },
+        { channel: "email", status: "dry_run" },
+      ],
+    });
+    assert.match(note, /Confirmação preparada/);
+    assert.match(note, /WhatsApp: Aguardando/);
+    assert.match(note, /Email: Aguardando/);
+    assert.doesNotMatch(note, /Entregue/);
+    const { mapStoredSegmentToProduct, getSegmentUiCopy } = await load(
+      "lib/segments/resolve.ts",
+    ).then(async () => {
+      const r = await load("lib/segments/resolve.ts");
+      const c = await load("lib/segments/copy.ts");
+      return { ...r, ...c };
+    });
+    assert.equal(mapStoredSegmentToProduct("estetica_automotiva"), "lava_rapido");
+    const lava = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });
+    assert.equal(lava.showVehicles, true);
+    const clinic = getSegmentUiCopy({ segment: "clinica_estetica", ...ENGINE });
+    assert.equal(clinic.showVehicles, false);
   });
 
   it("17-18 checklist lava disponível sem diagnóstico mecânico", async () => {

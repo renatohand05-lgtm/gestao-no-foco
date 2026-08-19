@@ -16,6 +16,10 @@ import {
   resolveAgendaNature,
   type AgendaNature,
 } from "@/lib/retention/natures";
+import {
+  assertVehicleOwnership,
+  requireAgendaVehicleId,
+} from "@/lib/agenda/operational-start";
 import { isMissingColumn } from "@/lib/retention/schema-guard";
 import { createClient } from "@/lib/supabase/server";
 import type { Database, Json } from "@/types/database";
@@ -52,6 +56,7 @@ export type AgendaEventInput = {
   empresa_id?: string | null;
   override_conflito?: boolean;
   override_justificativa?: string | null;
+  vehiclesRequired?: boolean;
   recorrencia?: {
     frequency: "diaria" | "semanal" | "mensal";
     count: number;
@@ -98,6 +103,7 @@ export class AgendaEventService {
   ): Promise<AgendaEventRow[]> {
     this.assertInterval(input.inicio, input.fim);
     await this.assertConflicts(input);
+    await this.assertAgendaVehicle(input);
 
     const count = Math.min(
       Math.max(input.recorrencia?.count ?? 1, 1),
@@ -145,6 +151,7 @@ export class AgendaEventService {
   ): Promise<AgendaEventRow> {
     this.assertInterval(input.inicio, input.fim);
     await this.assertConflicts({ ...input, id });
+    await this.assertAgendaVehicle(input);
 
     const natureza = this.resolveNature(input);
     const extra = this.extraPayload(input, natureza);
@@ -412,6 +419,34 @@ export class AgendaEventService {
         `Conflito de agenda detectado (${hard.map((c) => c.type).join(", ")}). Ajuste horário ou use override com justificativa.`,
       );
     }
+  }
+
+  private async assertAgendaVehicle(input: AgendaEventInput): Promise<void> {
+    const natureza = this.resolveNature(input);
+    const required = requireAgendaVehicleId({
+      vehiclesRequired: Boolean(input.vehiclesRequired),
+      natureza,
+      clienteId: input.cliente_id,
+      veiculoId: input.veiculo_id,
+    });
+    if (!required.ok) throw new Error(required.message);
+    if (!input.veiculo_id || !input.cliente_id) return;
+
+    const { data, error } = await this.supabase
+      .from("veiculos")
+      .select("id, tenant_id, cliente_id")
+      .eq("tenant_id", this.tenantId)
+      .eq("id", input.veiculo_id)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const owned = assertVehicleOwnership({
+      currentTenantId: this.tenantId,
+      veiculoTenantId: data?.tenant_id ?? null,
+      selectedClienteId: input.cliente_id,
+      veiculoClienteId: data?.cliente_id ?? null,
+    });
+    if (!owned.ok) throw new Error(owned.message);
   }
 }
 

@@ -19,6 +19,7 @@ const NEW_PRODUCT_IDS: readonly string[] = [
   "barbearia",
   "clinica_estetica",
   "consultorio_odontologico",
+  "lava_rapido",
 ];
 
 const ALIASES: Record<string, ProductSegmentId> = {
@@ -26,6 +27,11 @@ const ALIASES: Record<string, ProductSegmentId> = {
   auto_center: "oficina",
   barbearia: "barbearia",
   lava_rapido: "lava_rapido",
+  "lava-rapido": "lava_rapido",
+  lavarapido: "lava_rapido",
+  "lava rapido": "lava_rapido",
+  estetica_automotiva: "lava_rapido",
+  "estetica-automotiva": "lava_rapido",
   consultoria: "consultoria",
   clinica_estetica: "clinica_estetica",
   consultorio_odontologico: "consultorio_odontologico",

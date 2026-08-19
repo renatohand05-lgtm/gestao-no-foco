@@ -21,12 +21,19 @@ import { originFromTemplate } from "./origin";
 import { correlationId } from "./observability";
 import { NO_CHANNEL_OPERATOR_COPY } from "./center";
 
+export type NotifyChannelResult = {
+  channel: CommChannel;
+  status: string;
+  note: string;
+};
+
 export type NotifyEnqueueResult = {
   duplicated: boolean;
   status: string;
   note: string;
   waLink?: string;
   channel: CommChannel | null;
+  channels: NotifyChannelResult[];
 };
 
 export async function enqueueCustomerNotification(input: {
@@ -53,6 +60,7 @@ export async function enqueueCustomerNotification(input: {
       status: "cancelled",
       note: "Preferência automática desligada para este evento.",
       channel: null,
+      channels: [],
     };
   }
   const prefsSvc = await createCommunicationPreferenceService(input.tenantId);
@@ -71,6 +79,7 @@ export async function enqueueCustomerNotification(input: {
       status: "failed",
       note: "Cliente não encontrado neste tenant.",
       channel: null,
+      channels: [],
     };
   }
   const message = renderTemplate(
@@ -131,18 +140,27 @@ export async function enqueueCustomerNotification(input: {
       status: "suppressed",
       note: NO_CHANNEL_OPERATOR_COPY,
       channel: null,
+      channels: [],
     };
   }
   const recent = await outbox.countRecent(1);
   const halt = shouldHaltRateLimit({ sentLastHour: recent });
   if (halt.halt) {
-    return { duplicated: false, status: "failed", note: halt.note, channel: null };
+    return {
+      duplicated: false,
+      status: "failed",
+      note: halt.note,
+      channel: null,
+      channels: [],
+    };
   }
+  const collected: NotifyChannelResult[] = [];
   let last: NotifyEnqueueResult = {
     duplicated: false,
     status: "cancelled",
     note: "Sem envio.",
     channel: null,
+    channels: [],
   };
   for (const channel of channels) {
     const optedIn = prefsSvc.isChannelAllowed(prefs, channel);
@@ -175,6 +193,7 @@ export async function enqueueCustomerNotification(input: {
       originKind: originFromTemplate(input.templateCode),
       correlationId: correlationId(),
     });
+    collected.push({ channel, status: res.status, note: res.note });
     last = {
       duplicated: res.duplicated,
       status: res.status,
@@ -184,6 +203,7 @@ export async function enqueueCustomerNotification(input: {
           : res.note,
       waLink: res.waLink,
       channel,
+      channels: collected,
     };
   }
   return last;

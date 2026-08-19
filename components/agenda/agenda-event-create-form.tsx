@@ -169,6 +169,10 @@ export function AgendaEventCreateForm({
 
   function submit() {
     setError(null);
+    if (showVehicles && natureza === "cliente" && !veiculoId) {
+      setError("Selecione o veículo para este cliente.");
+      return;
+    }
     startTransition(async () => {
       const inicioIso = inicio.includes("T")
         ? new Date(inicio).toISOString()
@@ -320,21 +324,23 @@ export function AgendaEventCreateForm({
             ) : null}
           </label>
         ) : null}
-        {showVehicles && natureza === "cliente" ? (
-          <div className="text-xs sm:col-span-2">
-            <OsVeiculoPicker
-              tenantSlug={tenantSlug}
-              clienteId={clienteId}
-              value={veiculoId}
-              onChange={setVeiculoId}
-              veiculos={veiculos}
-              loading={veiculoLoading}
-              error={veiculoError}
-              onRefresh={(id) => loadVeiculos(clienteId, id, setVeiculoId)}
-              compactCreate
-            />
-          </div>
-        ) : null}
+      </div>
+      {showVehicles && natureza === "cliente" ? (
+        <div className="text-xs">
+          <OsVeiculoPicker
+            tenantSlug={tenantSlug}
+            clienteId={clienteId}
+            value={veiculoId}
+            onChange={setVeiculoId}
+            veiculos={veiculos}
+            loading={veiculoLoading}
+            error={veiculoError}
+            onRefresh={(id) => loadVeiculos(clienteId, id, setVeiculoId)}
+            compactCreate
+          />
+        </div>
+      ) : null}
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {natureza === "cliente" ? (
           <AgendaServiceField
             tenantSlug={tenantSlug}

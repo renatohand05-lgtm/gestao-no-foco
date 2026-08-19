@@ -41,6 +41,10 @@ export function OsVeiculoQuickDialog({
   function onSubmit(formData: FormData) {
     setError(null);
     setSuccess(null);
+    if (compact && !String(formData.get("modelo") ?? "").trim()) {
+      setError("Informe o modelo.");
+      return;
+    }
     const values = {
       cliente_id: clienteId,
       placa: String(formData.get("placa") ?? "") || null,
@@ -78,7 +82,7 @@ export function OsVeiculoQuickDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg" showCloseButton={!pending}>
         <DialogHeader>
-          <DialogTitle>Cadastrar veículo</DialogTitle>
+          <DialogTitle>{compact ? "Novo veículo" : "Cadastrar veículo"}</DialogTitle>
           <DialogDescription>
             {compact
               ? "O veículo será vinculado ao cliente selecionado. Placa é opcional."
@@ -101,6 +105,10 @@ export function OsVeiculoQuickDialog({
               <label className="space-y-1 text-sm">
                 <span className="text-muted-foreground">Placa</span>
                 <Input name="placa" placeholder="ABC1D23" disabled={pending} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Marca (opcional)</span>
+                <Input name="marca" disabled={pending} />
               </label>
             </div>
           ) : (

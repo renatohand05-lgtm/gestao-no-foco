@@ -27,7 +27,7 @@ export function PostSaveActions({ title, description, actions }: Props) {
     >
       <p className="text-base font-semibold">{title}</p>
       {description ? (
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="whitespace-pre-line text-sm text-muted-foreground">{description}</p>
       ) : null}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {actions.map((action) =>

@@ -8,6 +8,7 @@ import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { NativeSelect } from "@/components/ui/native-select";
 import { listVeiculosByClienteAction } from "@/lib/ordens/actions";
 import {
+  formatVeiculoAgendaLabel,
   formatVeiculoLabel,
   type VeiculoOption,
 } from "@/lib/ordens/veiculo-shared";
@@ -42,14 +43,17 @@ export function OsVeiculoPicker({
 
   if (!clienteId) {
     return (
-      <p className="rounded-lg border border-dashed px-3 py-4 text-sm text-muted-foreground">
-        Selecione o cliente para carregar os veículos.
-      </p>
+      <div className="space-y-1" data-agenda="vehicle">
+        <p className="text-xs font-medium">Veículo *</p>
+        <p className="rounded-lg border border-dashed px-3 py-4 text-sm text-muted-foreground">
+          Selecione o cliente para carregar os veículos.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-agenda="vehicle">
       {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
       {loading && veiculos.length === 0 ? (
@@ -58,6 +62,7 @@ export function OsVeiculoPicker({
 
       {!loading && veiculos.length === 0 ? (
         <div className="space-y-3 rounded-lg border border-dashed px-3 py-4">
+          <p className="text-xs font-medium">Veículo *</p>
           <p className="text-sm text-muted-foreground">
             Nenhum veículo cadastrado para este cliente.
           </p>
@@ -67,7 +72,7 @@ export function OsVeiculoPicker({
             className={cn(buttonVariants({ size: "sm" }))}
             onClick={() => setDialogOpen(true)}
           >
-            Cadastrar veículo
+            + Cadastrar veículo
           </button>
         </div>
       ) : null}
@@ -75,7 +80,7 @@ export function OsVeiculoPicker({
       {veiculos.length > 0 ? (
         <>
           <label className="block space-y-1 text-sm">
-            <span className="text-muted-foreground">Veículo</span>
+            <span className="text-xs font-medium">Veículo *</span>
             <NativeSelect
               required
               disabled={disabled || loading}
@@ -87,7 +92,7 @@ export function OsVeiculoPicker({
               <option value="">{compactCreate ? "Selecionar veículo" : "Selecione…"}</option>
               {veiculos.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {formatVeiculoLabel(v)}
+                  {compactCreate ? formatVeiculoAgendaLabel(v) : formatVeiculoLabel(v)}
                 </option>
               ))}
             </NativeSelect>
@@ -98,7 +103,7 @@ export function OsVeiculoPicker({
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             onClick={() => setDialogOpen(true)}
           >
-            Cadastrar novo veículo
+            + Cadastrar novo veículo
           </button>
         </>
       ) : null}

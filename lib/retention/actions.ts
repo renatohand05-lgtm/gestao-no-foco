@@ -372,35 +372,54 @@ export async function finalizeServiceReadyAction(
     let duplicated = false;
     let status = "pronto_para_entrega";
     if (parsed.notify) {
-      const { enqueueCustomerNotification } = await import("./notify");
-      const { osServiceSummary, osVehicleSummary } = await import(
-        "./os-message-context"
-      );
-      const result = await enqueueCustomerNotification({
-        tenantId: tenant.id,
-        tenantName: tenant.name,
-        segment: tenant.segment,
-        clienteId: os.cliente_id,
-        entityType: "os",
-        entityId: os.id,
-        templateCode: "SERVICE_READY",
-        offsetKey: "SERVICE_READY",
-        messageCtx: {
+      try {
+        const { enqueueCustomerNotification } = await import("./notify");
+        const { osServiceSummary, osVehicleSummary } = await import(
+          "./os-message-context"
+        );
+        const messageCtx = {
           servico: osServiceSummary(os.itens, tenant.segment),
           veiculo: osVehicleSummary({
             marca: os.marca,
             modelo: os.modelo,
             placa: os.placa,
           }),
-        },
-        userId,
-        forceChannel: parsed.channel,
-        explicit: true,
-      });
-      note = result.note;
-      waLink = result.waLink;
-      duplicated = result.duplicated;
-      status = result.status;
+        };
+        const channels =
+          parsed.channels && parsed.channels.length > 0
+            ? parsed.channels
+            : parsed.channel
+              ? [parsed.channel]
+              : [undefined];
+        let lastNote = "";
+        for (const ch of channels) {
+          const result = await enqueueCustomerNotification({
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            segment: tenant.segment,
+            clienteId: os.cliente_id,
+            entityType: "os",
+            entityId: os.id,
+            templateCode: "SERVICE_READY",
+            offsetKey: "SERVICE_READY",
+            messageCtx,
+            userId,
+            forceChannel: ch,
+            explicit: true,
+          });
+          lastNote = result.note;
+          waLink = result.waLink ?? waLink;
+          duplicated = duplicated || result.duplicated;
+          status = result.status;
+        }
+        note =
+          status === "failed"
+            ? "OS finalizada. Não foi possível enviar a notificação."
+            : lastNote;
+      } catch {
+        note = "OS finalizada. Não foi possível enviar a notificação.";
+        status = "pronto_para_entrega";
+      }
     }
     revalidateRetention(tenantSlug, os.cliente_id);
     revalidatePath(`/${tenantSlug}/crm/comunicacoes`);

@@ -18,7 +18,10 @@ import { ChecklistVisual } from "@/components/ordens/inspecao/checklist-visual";
 import { InspecaoEnvioPanel } from "@/components/ordens/inspecao/inspecao-envio-panel";
 import { OsVeiculoEditDialog } from "@/components/ordens/os-veiculo-edit-dialog";
 import { ServiceReadyPanel } from "@/components/retention/service-ready-panel";
-import { registerOsPickupAction } from "@/lib/retention/actions";
+import {
+  createManualReturnAction,
+  registerOsPickupAction,
+} from "@/lib/retention/actions";
 import { GFSelect } from "@/components/gf/gf-select";
 import { FormasPagamentoEmptyHint } from "@/components/financeiro/formas-pagamento-empty-hint";
 import { PAYMENT_METHODS_EMPTY_TEXT } from "@/lib/financeiro/formas-pagamento-catalog";
@@ -208,7 +211,12 @@ export function OsWorkspace({
   });
   const canDiagnostico = canRegisterDiagnostico(os.status);
   const canOrcamento = canEditOs(os) && canEditOrcamento(os.status, requireDiagnosis);
-  const canAprovar = canEditOs(os) && canApplyAprovacao(os.status, requireDiagnosis);
+  const publishedBudget = orcamentoVersoes.some(
+    (v) => v.status === "publicado" || v.status === "enviado" || v.status === "pronto",
+  );
+  const canAprovar =
+    canEditOs(os) &&
+    canApplyAprovacao(os.status, requireDiagnosis, { publishedBudget });
   const nextStatuses = (OS_TRANSITIONS[os.status as OsStatus] ?? []).filter(
     (s) => s !== "cancelado",
   );
@@ -354,6 +362,7 @@ export function OsWorkspace({
       <OsMecanicoBinder
         tenantSlug={tenantSlug}
         osId={os.id}
+        osMecanicoId={os.mecanico_id}
         alocacoes={osMecanicos}
         mecanicos={mecanicosCadastro}
         custoReal={osCustoReal}
@@ -1397,6 +1406,35 @@ export function OsWorkspace({
               Registrar retorno
             </button>
           </form>
+          <div className="mt-4 space-y-2 border-t pt-4">
+            <p className="text-sm font-medium">+ Programar retorno</p>
+            <p className="text-xs text-muted-foreground">
+              Ex.: 6 meses, 10.000 km, o que ocorrer primeiro.
+            </p>
+            <button
+              type="button"
+              disabled={pending}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+              onClick={() =>
+                run(
+                  () =>
+                    createManualReturnAction(tenantSlug, {
+                      clienteId: os.cliente_id,
+                      intervalMonths: 6,
+                      mileageKm: 10000,
+                      lastKm: os.quilometragem_saida ?? os.quilometragem_entrada,
+                      veiculoId: os.veiculo_id,
+                      placa: os.placa,
+                      veiculoLabel: [os.marca, os.modelo].filter(Boolean).join(" "),
+                      motivo: "Retorno automotivo",
+                    }),
+                  "Retorno programado (6 meses / 10.000 km).",
+                )
+              }
+            >
+              6 meses / 10.000 km
+            </button>
+          </div>
         </ExecutiveSection>
       ) : null}
 

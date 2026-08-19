@@ -470,7 +470,7 @@ export class ConversionService {
 
     if (extra.servico_id) {
       await osSvc.attachScheduledCatalogItem(os.id, extra.servico_id, userId, {
-        autoApprove: lava || !ui.automotiveWorkflow,
+        autoApprove: false,
         mecanicoId: ev.responsavel_id,
       });
     }

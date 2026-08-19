@@ -60,7 +60,8 @@ export function ServiceReadyPanel({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [notify, setNotify] = useState(notifyReadyAuto && canNotify);
-  const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
+  const [whatsapp, setWhatsapp] = useState(true);
+  const [email, setEmail] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -111,22 +112,22 @@ export function ServiceReadyPanel({
           </label>
           {notify ? (
             <>
-              <p className="text-xs text-muted-foreground">Canal</p>
+              <p className="text-xs text-muted-foreground">Canais</p>
               <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input
                   type="checkbox"
-                  checked={channel === "whatsapp"}
-                  onChange={() => setChannel("whatsapp")}
+                  checked={whatsapp}
+                  onChange={() => setWhatsapp((v) => !v)}
                 />
-                WhatsApp {clientePhone ? operatorPhonePreview(clientePhone) : ""}
+                WhatsApp {clientePhone ? operatorPhonePreview(clientePhone) : "— não configurado"}
               </label>
               <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input
                   type="checkbox"
-                  checked={channel === "email"}
-                  onChange={() => setChannel("email")}
+                  checked={email}
+                  onChange={() => setEmail((v) => !v)}
                 />
-                E-mail {clienteEmail ? clienteEmail.replace(/^(.{1}).*(@)/, "$1•••$2") : ""}
+                E-mail {clienteEmail ? clienteEmail.replace(/^(.{1}).*(@)/, "$1•••$2") : "— não configurado"}
               </label>
               <div className="rounded-md bg-muted p-3 text-sm whitespace-pre-wrap">
                 <p className="mb-1 text-xs font-medium">Mensagem</p>
@@ -151,10 +152,13 @@ export function ServiceReadyPanel({
             onClick={() => {
               setError(null);
               start(async () => {
+                const channels: Array<"whatsapp" | "email"> = [];
+                if (notify && whatsapp) channels.push("whatsapp");
+                if (notify && email) channels.push("email");
                 const res = await finalizeServiceReadyAction(tenantSlug, {
                   osId,
                   notify,
-                  channel: notify ? channel : undefined,
+                  channels: notify ? channels : undefined,
                 });
                 if (!res.success) {
                   setError(res.error);

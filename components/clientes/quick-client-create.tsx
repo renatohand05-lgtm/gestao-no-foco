@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { RelationshipTypeSelector } from "@/components/clientes/relationship-type-selector";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoreDetails } from "@/components/ui/more-details";
 import {
   checkClienteDuplicatesAction,
   createClienteAction,
@@ -14,15 +15,23 @@ import {
   type ClientRelationship,
 } from "@/lib/clientes/relationship";
 import { CRM_FUNIL_LABELS, CRM_FUNIL_STAGES } from "@/lib/crm/constants";
+import { createVeiculoAction } from "@/lib/ordens/actions";
 import { cn } from "@/lib/utils";
 
 type Dup = { id: string; label: string; matchedOn: string[] };
+
+export type QuickClientCreated = {
+  id: string;
+  nome: string;
+  veiculoId?: string;
+};
 
 type Props = {
   tenantSlug: string;
   showVehicles?: boolean;
   allowBusiness?: boolean;
-  onCreated: (input: { id: string; nome: string }) => void;
+  embedded?: boolean;
+  onCreated: (input: QuickClientCreated) => void;
 };
 
 function emptyClientePayload(
@@ -33,6 +42,8 @@ function emptyClientePayload(
     email: string;
     empresa: string;
     estagio: string;
+    origem?: string;
+    consultor?: string;
   },
 ) {
   const empresa = fields.empresa.trim();
@@ -56,11 +67,11 @@ function emptyClientePayload(
     estado: "",
     segmento: "",
     porte: "",
-    origem: origemForRelationship(mode),
+    origem: fields.origem?.trim() || origemForRelationship(mode),
     observacoes: "",
     classificacao: "",
     score: 0,
-    consultor_id: "",
+    consultor_id: fields.consultor ?? "",
     empresa_id: "",
     filial_id: "",
     valor_estimado: null,
@@ -77,10 +88,12 @@ function emptyClientePayload(
 
 export function QuickClientCreate({
   tenantSlug,
+  showVehicles = false,
   allowBusiness = false,
+  embedded = false,
   onCreated,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(embedded);
   const [mode, setMode] = useState<ClientRelationship>("atendimento");
   const [error, setError] = useState<string | null>(null);
   const [dups, setDups] = useState<Dup[]>([]);
@@ -97,6 +110,8 @@ export function QuickClientCreate({
       </button>
     );
   }
+
+  const atendimento = mode === "atendimento";
 
   return (
     <div className="mt-2 space-y-2 rounded-lg border p-3" data-quick-client="">
@@ -121,7 +136,7 @@ export function QuickClientCreate({
                   className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                   onClick={() => {
                     onCreated({ id: d.id, nome: d.label });
-                    setOpen(false);
+                    if (!embedded) setOpen(false);
                     setDups([]);
                   }}
                 >
@@ -134,8 +149,10 @@ export function QuickClientCreate({
       ) : null}
       <form
         className="grid gap-2 sm:grid-cols-2"
+        data-quick-vehicle={showVehicles && atendimento ? "" : undefined}
         onSubmit={(e) => {
           e.preventDefault();
+          e.stopPropagation();
           setError(null);
           setDups([]);
           const fd = new FormData(e.currentTarget);
@@ -144,6 +161,17 @@ export function QuickClientCreate({
           const email = String(fd.get("email") ?? "").trim();
           const empresa = String(fd.get("empresa") ?? "").trim();
           const estagio = String(fd.get("estagio_funil") ?? "lead");
+          const origem = String(fd.get("origem_negocio") ?? "").trim();
+          const consultor = String(fd.get("consultor") ?? "").trim();
+          const modelo = String(fd.get("veiculo_modelo") ?? "").trim();
+          const marca = String(fd.get("veiculo_marca") ?? "").trim();
+          const placa = String(fd.get("veiculo_placa") ?? "").trim();
+          const anoRaw = String(fd.get("veiculo_ano") ?? "").trim();
+          const kmRaw = String(fd.get("veiculo_km") ?? "").trim();
+          if (showVehicles && atendimento && !modelo) {
+            setError("Informe o modelo do veículo.");
+            return;
+          }
           startTransition(async () => {
             const dup = await checkClienteDuplicatesAction(tenantSlug, {
               email: email || null,
@@ -156,14 +184,41 @@ export function QuickClientCreate({
             }
             const result = await createClienteAction(
               tenantSlug,
-              emptyClientePayload(mode, { nome, whatsapp, email, empresa, estagio }),
+              emptyClientePayload(mode, {
+                nome,
+                whatsapp,
+                email,
+                empresa,
+                estagio,
+                origem,
+                consultor,
+              }),
             );
             if (!result.success || !result.id) {
               setError(result.success ? "Falha ao criar." : result.error);
               return;
             }
-            onCreated({ id: result.id, nome });
-            setOpen(false);
+            let veiculoId: string | undefined;
+            if (showVehicles && atendimento && modelo) {
+              const veiculo = await createVeiculoAction(tenantSlug, {
+                cliente_id: result.id,
+                modelo,
+                marca: marca || null,
+                placa: placa || null,
+                ano: anoRaw ? Number(anoRaw) : null,
+                quilometragem: kmRaw ? Number(kmRaw) : null,
+                ativo: true,
+              });
+              if (!veiculo.success) {
+                setError(veiculo.error);
+                onCreated({ id: result.id, nome });
+                if (!embedded) setOpen(false);
+                return;
+              }
+              veiculoId = veiculo.id;
+            }
+            onCreated({ id: result.id, nome, veiculoId });
+            if (!embedded) setOpen(false);
           });
         }}
       >
@@ -174,11 +229,19 @@ export function QuickClientCreate({
         {mode === "negocio" ? (
           <>
             <label className="text-xs sm:col-span-2">
-              Empresa
+              Contato
               <Input name="empresa" disabled={pending} className="mt-1 h-11" />
             </label>
+            <label className="text-xs">
+              Origem
+              <Input name="origem_negocio" disabled={pending} className="mt-1 h-11" />
+            </label>
+            <label className="text-xs">
+              Responsável
+              <Input name="consultor" disabled={pending} className="mt-1 h-11" />
+            </label>
             <label className="text-xs sm:col-span-2">
-              Etapa
+              Funil / oportunidade
               <select
                 name="estagio_funil"
                 defaultValue="lead"
@@ -202,6 +265,38 @@ export function QuickClientCreate({
           E-mail
           <Input name="email" type="email" disabled={pending} className="mt-1 h-11" />
         </label>
+        {showVehicles && atendimento ? (
+          <>
+            <p className="text-xs font-medium sm:col-span-2">Veículo</p>
+            <label className="text-xs sm:col-span-2">
+              Modelo *
+              <Input name="veiculo_modelo" disabled={pending} className="mt-1 h-11" />
+            </label>
+            <label className="text-xs">
+              Marca
+              <Input name="veiculo_marca" disabled={pending} className="mt-1 h-11" />
+            </label>
+            <label className="text-xs">
+              Placa
+              <Input name="veiculo_placa" disabled={pending} className="mt-1 h-11" />
+            </label>
+            <label className="text-xs">
+              Ano
+              <Input name="veiculo_ano" type="number" disabled={pending} className="mt-1 h-11" />
+            </label>
+            <label className="text-xs">
+              Km
+              <Input name="veiculo_km" type="number" disabled={pending} className="mt-1 h-11" />
+            </label>
+          </>
+        ) : null}
+        <div className="sm:col-span-2">
+          <MoreDetails summary="Mais informações">
+            <p className="text-xs text-muted-foreground">
+              Score, funil avançado, empresa, filial e porte ficam no cadastro completo.
+            </p>
+          </MoreDetails>
+        </div>
         {error ? (
           <p className="text-sm text-destructive sm:col-span-2" role="alert">
             {error}
@@ -209,15 +304,17 @@ export function QuickClientCreate({
         ) : null}
         <div className="flex flex-wrap gap-2 sm:col-span-2">
           <button type="submit" disabled={pending} className={cn(buttonVariants(), "min-h-11")}>
-            {pending ? "Salvando…" : "Salvar e usar"}
+            {pending ? "Salvando…" : "Salvar cliente e usar"}
           </button>
-          <button
-            type="button"
-            className={cn(buttonVariants({ variant: "ghost" }), "min-h-11")}
-            onClick={() => setOpen(false)}
-          >
-            Cancelar
-          </button>
+          {!embedded ? (
+            <button
+              type="button"
+              className={cn(buttonVariants({ variant: "ghost" }), "min-h-11")}
+              onClick={() => setOpen(false)}
+            >
+              Cancelar
+            </button>
+          ) : null}
         </div>
       </form>
     </div>

@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   tenantSlug: string;
   osId: string;
+  osMecanicoId?: string | null;
   alocacoes: OrdemServicoMecanico[];
   mecanicos: Mecanico[];
   custoReal: OsCustoReal | null;
@@ -40,6 +41,7 @@ type Props = {
 export function OsMecanicoBinder({
   tenantSlug,
   osId,
+  osMecanicoId = null,
   alocacoes,
   mecanicos,
   custoReal,
@@ -58,6 +60,9 @@ export function OsMecanicoBinder({
   const [transferPara, setTransferPara] = useState("");
 
   const principal = alocacoes.find((a) => a.papel === "principal");
+  const fallbackMecanico = mecanicos.find(
+    (m) => m.id === osMecanicoId || m.profile_id === osMecanicoId,
+  );
 
   function run(fn: () => Promise<{ success: boolean; error?: string }>) {
     setError(null);
@@ -79,7 +84,14 @@ export function OsMecanicoBinder({
       {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
       {alocacoes.length === 0 ? (
+        fallbackMecanico ? (
+          <p className="text-sm">
+            <span className="font-medium">{fallbackMecanico.nome_completo}</span>
+            <span className="ml-2 text-xs text-muted-foreground">principal</span>
+          </p>
+        ) : (
         <p className="text-sm text-muted-foreground">Nenhum {professionalLabel.toLowerCase()} vinculado.</p>
+        )
       ) : (
         <ul className="space-y-2 text-sm">
           {alocacoes.map((a) => (

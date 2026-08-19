@@ -179,7 +179,16 @@ export function canEditOrcamento(
 export function canApplyAprovacao(
   status: string,
   requireDiagnosis = true,
+  extras?: { publishedBudget?: boolean },
 ): boolean {
+  if (extras?.publishedBudget) {
+    return ![
+      "cancelado",
+      "cancelada",
+      "faturado",
+      "entregue",
+    ].includes(status);
+  }
   const afterDiagnosis = [
     "diagnostico_concluido",
     "aguardando_orcamento",
@@ -195,6 +204,29 @@ export function canApplyAprovacao(
   return afterDiagnosis.includes(status);
 }
 
+/** Item não pode aparecer como aprovado antes da OS chegar à aprovação. */
+export function effectiveItemAprovacaoStatus(
+  osStatus: string,
+  itemStatus: string,
+): string {
+  const afterCustomerDecision = [
+    "aguardando_aprovacao",
+    "aprovado",
+    "parcialmente_aprovado",
+    "em_execucao",
+    "aguardando_peca",
+    "aguardando_cliente",
+    "pronto_para_entrega",
+    "entregue",
+    "faturado",
+    "retorno",
+    "garantia",
+  ];
+  if (afterCustomerDecision.includes(osStatus)) return itemStatus;
+  if (itemStatus === "aprovado" || itemStatus === "reprovado") return "pendente";
+  return itemStatus;
+}
+
 export function canFaturarStatus(status: string): boolean {
   return ["entregue", "pronto_para_entrega", "aprovado", "parcialmente_aprovado", "em_execucao"].includes(
     status,
@@ -206,34 +238,46 @@ export function isTerminalCancelado(status: string): boolean {
 }
 
 export const OS_CHECKLIST_TEMPLATE = [
-  { codigo: "pneus", label: "Pneus", categoria: "rodagem", ordem: 1 },
-  { codigo: "rodas", label: "Rodas", categoria: "rodagem", ordem: 2 },
-  { codigo: "estepe", label: "Estepe", categoria: "rodagem", ordem: 3 },
-  { codigo: "freios", label: "Freios", categoria: "freios", ordem: 4 },
-  { codigo: "suspensao", label: "Suspensão", categoria: "suspensao", ordem: 5 },
-  { codigo: "direcao", label: "Direção", categoria: "direcao", ordem: 6 },
-  { codigo: "motor", label: "Motor", categoria: "mecanica", ordem: 7 },
-  { codigo: "fluidos", label: "Fluidos", categoria: "mecanica", ordem: 8 },
-  { codigo: "vazamentos", label: "Vazamentos", categoria: "mecanica", ordem: 9 },
-  { codigo: "bateria", label: "Bateria", categoria: "mecanica", ordem: 10 },
-  { codigo: "transmissao", label: "Transmissão", categoria: "transmissao", ordem: 11 },
-  { codigo: "sistema_eletrico", label: "Sistema elétrico", categoria: "eletrica", ordem: 12 },
-  { codigo: "iluminacao", label: "Iluminação", categoria: "eletrica", ordem: 13 },
-  { codigo: "lanternas", label: "Lanternas", categoria: "eletrica", ordem: 14 },
-  { codigo: "farois", label: "Faróis", categoria: "eletrica", ordem: 15 },
-  { codigo: "vidros", label: "Vidros", categoria: "vidros", ordem: 16 },
-  { codigo: "retrovisores", label: "Retrovisores", categoria: "vidros", ordem: 17 },
-  { codigo: "para_choques", label: "Para-choques", categoria: "lataria", ordem: 18 },
-  { codigo: "lataria", label: "Lataria", categoria: "lataria", ordem: 19 },
-  { codigo: "interior", label: "Interior", categoria: "interior", ordem: 20 },
-  { codigo: "painel", label: "Painel", categoria: "interior", ordem: 21 },
-  { codigo: "ar_condicionado", label: "Ar-condicionado", categoria: "interior", ordem: 22 },
-  { codigo: "ferramentas", label: "Ferramentas", categoria: "acessorios", ordem: 23 },
-  { codigo: "macaco", label: "Macaco", categoria: "acessorios", ordem: 24 },
-  { codigo: "chave_roda", label: "Chave de roda", categoria: "acessorios", ordem: 25 },
-  { codigo: "documentos", label: "Documentos", categoria: "documentacao", ordem: 26 },
-  { codigo: "combustivel", label: "Nível de combustível", categoria: "geral", ordem: 27 },
-  { codigo: "quilometragem", label: "Quilometragem", categoria: "geral", ordem: 28 },
+  { codigo: "ext_frente", label: "Frente", categoria: "externo", ordem: 1 },
+  { codigo: "ext_traseira", label: "Traseira", categoria: "externo", ordem: 2 },
+  { codigo: "ext_lateral_esquerda", label: "Lateral esquerda", categoria: "externo", ordem: 3 },
+  { codigo: "ext_lateral_direita", label: "Lateral direita", categoria: "externo", ordem: 4 },
+  { codigo: "rodas_pneus", label: "Rodas / pneus", categoria: "externo", ordem: 5 },
+  {
+    codigo: "riscos_amassados",
+    label: "Riscos / amassados aparentes",
+    categoria: "externo",
+    ordem: 6,
+  },
+  { codigo: "painel", label: "Painel", categoria: "interno", ordem: 7 },
+  { codigo: "bancos", label: "Bancos", categoria: "interno", ordem: 8 },
+  {
+    codigo: "objetos_veiculo",
+    label: "Objetos deixados no veículo",
+    categoria: "interno",
+    ordem: 9,
+  },
+  {
+    codigo: "cofre_superior",
+    label: "Foto geral do cofre do motor — vista superior",
+    categoria: "motor",
+    ordem: 10,
+  },
+  {
+    codigo: "motor_inferior",
+    label: "Foto inferior do motor / proteção inferior (quando acessível / aplicável)",
+    categoria: "motor",
+    ordem: 11,
+  },
+  { codigo: "placa", label: "Placa", categoria: "dados", ordem: 12 },
+  { codigo: "quilometragem", label: "Km de entrada", categoria: "dados", ordem: 13 },
+  { codigo: "combustivel", label: "Nível de combustível", categoria: "dados", ordem: 14 },
+  { codigo: "observacoes_entrada", label: "Observações", categoria: "dados", ordem: 15 },
+  { codigo: "pneus", label: "Pneus (estado)", categoria: "rodagem", ordem: 16 },
+  { codigo: "freios", label: "Freios", categoria: "freios", ordem: 17 },
+  { codigo: "motor", label: "Motor (inspeção operacional)", categoria: "mecanica", ordem: 18 },
+  { codigo: "fluidos", label: "Fluidos", categoria: "mecanica", ordem: 19 },
+  { codigo: "documentos", label: "Documentos", categoria: "documentacao", ordem: 20 },
 ] as const;
 
 export const LAVA_RAPIDO_CHECKLIST_TEMPLATE = [

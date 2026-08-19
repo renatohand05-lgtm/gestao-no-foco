@@ -12,6 +12,7 @@ import { createMecanicoService } from "@/lib/mecanicos/mecanico-service";
 import { createProdutoService } from "@/lib/produtos/produto-service";
 import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 import { serviceSuggestionsForContext } from "@/lib/segments/catalogs/suggest.ts";
+import { librarySegmentForContext } from "@/lib/segments/library-segment.ts";
 import { requireTenant } from "@/lib/tenants";
 import {
   ExecutiveHeader,
@@ -110,6 +111,7 @@ export default async function NovaOsPage({
             library={serviceSuggestionsForContext(ctx, { includeCombos: false })}
             canCreateProduto={canCreateProduto}
             showMechanic={ui.automotiveWorkflow}
+            allowBusiness={librarySegmentForContext(ctx) === "consultoria"}
             profissionais={mecanicos.map((m) => ({
               id: m.id,
               label: m.nome_completo,

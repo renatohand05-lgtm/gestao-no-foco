@@ -118,7 +118,7 @@ const OFICINA: Partial<Record<MessageTemplateCode, string>> = {
   RETORNO_D10:
     "Olá, {{cliente_nome}}! Está chegando o período recomendado para o retorno do seu veículo à {{empresa_nome}}. Serviço anterior: {{servico}}. Veículo: {{veiculo}}. Faltam aproximadamente {{dias_para_retorno}} dias. Deseja agendar? Responda SIM para continuarmos.",
   SERVICE_READY:
-    "Olá, {{cliente_nome}}! Tudo bem?\n\nSeu veículo está pronto na {{empresa_nome}}.\n\n{{servico}}\n{{veiculo}}\n\nO serviço foi concluído e o veículo está disponível para retirada.\n\nSe precisar, fale conosco por aqui.",
+    "Olá, {{cliente_nome}}.\nSeu veículo está pronto.\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa_nome}}",
 };
 
 const LAVA: Partial<Record<MessageTemplateCode, string>> = {

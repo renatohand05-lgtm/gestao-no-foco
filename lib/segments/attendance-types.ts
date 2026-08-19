@@ -1,6 +1,6 @@
 /**
  * Tipos de atendimento/OS por segmento — mesma coluna tipo_ordem.
- * Sem engine paralela.
+ * Sem engine paralela. Sem if(segment) na UI.
  */
 import {
   WORK_ORDER_TIPOS,
@@ -16,33 +16,50 @@ export type AttendanceTypeOption = {
   label: string;
 };
 
+export const OFICINA_ATTENDANCE_OPTIONS: AttendanceTypeOption[] = [
+  { value: "oficina", label: "Oficina / Veículo" },
+  { value: "manutencao_preventiva", label: "Manutenção preventiva" },
+  { value: "manutencao_corretiva", label: "Manutenção corretiva" },
+  { value: "revisao", label: "Revisão" },
+  { value: "diagnostico", label: "Diagnóstico" },
+  { value: "instalacao_automotiva", label: "Instalação automotiva" },
+  { value: "servico_rapido", label: "Serviço rápido" },
+];
+
 export const LAVA_ATTENDANCE_OPTIONS: AttendanceTypeOption[] = [
   { value: "lava_rapido", label: "Lava-rápido" },
-  { value: "atendimento_automotivo", label: "Atendimento automotivo" },
+  { value: "lavagem", label: "Lavagem" },
   { value: "lavagem_simples", label: "Lavagem simples" },
-  { value: "lavagem_completa", label: "Lavagem completa" },
-  { value: "lavagem_tecnica", label: "Lavagem técnica" },
-  { value: "lavagem_premium", label: "Lavagem premium" },
+  { value: "higienizacao", label: "Higienização" },
   { value: "higienizacao_interna", label: "Higienização interna" },
-  { value: "higienizacao_bancos", label: "Higienização de bancos" },
-  { value: "polimento", label: "Polimento" },
-  { value: "vitrificacao", label: "Vitrificação" },
-  { value: "detalhamento", label: "Detalhamento" },
   { value: "estetica_automotiva", label: "Estética automotiva" },
+  { value: "detalhamento", label: "Detalhamento" },
+  { value: "pacote", label: "Pacote" },
   { value: "pacote_plano", label: "Pacote / plano" },
+  { value: "outro_atendimento_automotivo", label: "Outro atendimento automotivo" },
   { value: "outro_atendimento", label: "Outro atendimento" },
 ];
 
 const LAVA_VALUES = new Set(LAVA_ATTENDANCE_OPTIONS.map((o) => o.value));
+const OFICINA_VALUES = new Set(OFICINA_ATTENDANCE_OPTIONS.map((o) => o.value));
 
-const OFICINA_OPTIONS: AttendanceTypeOption[] = WORK_ORDER_TIPOS.map(
-  (key) => ({
-    value: key,
-    label: WORK_ORDER_TIPO_LABELS[key],
-  }),
-);
+const CONSULTORIA_OPTIONS: AttendanceTypeOption[] = [
+  { value: "consultoria", label: "Consultoria" },
+  { value: "servicos_gerais", label: "Serviços gerais" },
+];
 
-export const OFICINA_ATTENDANCE_OPTIONS = OFICINA_OPTIONS;
+const ESTETICA_OPTIONS: AttendanceTypeOption[] = [
+  { value: "estetica", label: "Estética" },
+  { value: "servicos_gerais", label: "Serviços gerais" },
+];
+
+const BARBEARIA_OPTIONS: AttendanceTypeOption[] = [
+  { value: "servicos_gerais", label: "Serviços gerais" },
+];
+
+const ODONTO_OPTIONS: AttendanceTypeOption[] = [
+  { value: "servicos_gerais", label: "Atendimento" },
+];
 
 export function isLavaAttendanceType(value: string): boolean {
   return LAVA_VALUES.has(value);
@@ -53,7 +70,11 @@ export function attendanceOptionsForContext(
 ): AttendanceTypeOption[] {
   const segment = librarySegmentForContext(ctx);
   if (segment === "lava_rapido") return LAVA_ATTENDANCE_OPTIONS;
-  return OFICINA_OPTIONS;
+  if (segment === "consultoria") return CONSULTORIA_OPTIONS;
+  if (segment === "clinica_estetica") return ESTETICA_OPTIONS;
+  if (segment === "barbearia") return BARBEARIA_OPTIONS;
+  if (segment === "consultorio_odontologico") return ODONTO_OPTIONS;
+  return OFICINA_ATTENDANCE_OPTIONS;
 }
 
 export function defaultAttendanceType(
@@ -63,12 +84,16 @@ export function defaultAttendanceType(
   if (segment === "lava_rapido") return "lava_rapido";
   if (segment === "consultoria") return "consultoria";
   if (segment === "clinica_estetica") return "estetica";
+  if (segment === "barbearia" || segment === "consultorio_odontologico") {
+    return "servicos_gerais";
+  }
   return "oficina";
 }
 
 export function resolveWorkOrderTemplateKey(tipo: string | null | undefined): WorkOrderTipo {
   const value = tipo?.trim() || "oficina";
   if (isLavaAttendanceType(value)) return "lava_rapido";
+  if (OFICINA_VALUES.has(value)) return "oficina";
   return (WORK_ORDER_TIPOS as readonly string[]).includes(value)
     ? (value as WorkOrderTipo)
     : "oficina";
@@ -80,5 +105,12 @@ export function resolveWorkOrderTemplateForTipo(tipo: string | null | undefined)
 
 export const ALLOWED_ATTENDANCE_TYPE_VALUES = [
   ...WORK_ORDER_TIPOS,
+  ...OFICINA_ATTENDANCE_OPTIONS.map((o) => o.value),
   ...LAVA_ATTENDANCE_OPTIONS.map((o) => o.value),
+  ...CONSULTORIA_OPTIONS.map((o) => o.value),
+  ...ESTETICA_OPTIONS.map((o) => o.value),
+  ...BARBEARIA_OPTIONS.map((o) => o.value),
+  ...ODONTO_OPTIONS.map((o) => o.value),
 ] as const;
+
+export { WORK_ORDER_TIPO_LABELS };

@@ -83,11 +83,12 @@ describe("LAVA / OFICINA — service picker na abertura", () => {
   it("5-8 lava: cliente rápido + veículo no mesmo fluxo, checklist reusa veículo", () => {
     const form = read("components/ordens/os-open-form.tsx");
     assert.match(form, /Novo cliente/);
-    assert.match(form, /novo_nome/);
-    assert.match(form, /novo_whatsapp/);
-    assert.match(form, /novo_modelo/);
-    assert.match(form, /compactCreate/);
-    assert.doesNotMatch(form, /name="novo_placa" required/);
+    assert.match(form, /QuickClientCreate/);
+    assert.match(form, /showVehicles/);
+    const quick = read("components/clientes/quick-client-create.tsx");
+    assert.match(quick, /veiculo_modelo/);
+    assert.match(quick, /Salvar cliente e usar/);
+    assert.match(quick, /data-quick-vehicle/);
     const actions = read("lib/ordens/actions.ts");
     assert.match(actions, /applyChecklistTemplate/);
     assert.match(actions, /createVeiculoService/);

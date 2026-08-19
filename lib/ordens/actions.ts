@@ -10,6 +10,7 @@ import {
   type VeiculoOption,
 } from "@/lib/ordens/veiculo-service";
 import { createDescontoService } from "@/lib/descontos/desconto-service";
+import { createOsMecanicoService } from "@/lib/mecanicos/os-mecanico-service";
 import {
   abrirOsComClienteAtomico,
   createOsClienteSearchService,
@@ -42,6 +43,7 @@ import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { toActionError } from "@/lib/supabase/friendly-error";
 import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { createOrcamentoVersaoService } from "@/lib/ordens/orcamento-versao-service";
 import { librarySegmentForContext } from "@/lib/segments/library-segment.ts";
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { requireTenant } from "@/lib/tenants";
@@ -278,13 +280,18 @@ export async function createOrdemServicoIntegradaAction(
     }
 
     if (parsed.mecanico_id) {
-      const mech = await supabase
-        .from("ordens_servico")
-        .update({ mecanico_id: parsed.mecanico_id })
-        .eq("id", result.os_id)
-        .eq("tenant_id", tenant.id);
-      if (mech.error) {
-        console.warn("[ordens] mecanico_id não persistido:", mech.error.message);
+      try {
+        const osMec = await createOsMecanicoService(tenant.id);
+        await osMec.atribuir({
+          ordemId: result.os_id,
+          mecanicoId: parsed.mecanico_id,
+          papel: "principal",
+        });
+      } catch (assignError) {
+        console.warn(
+          "[ordens] mecânico não vinculado na abertura:",
+          assignError instanceof Error ? assignError.message : assignError,
+        );
       }
     }
 
@@ -302,10 +309,8 @@ export async function createOrdemServicoIntegradaAction(
       );
     }
     const uniqueServicos = [...new Set(parsed.servico_ids ?? [])];
-    const autoApprove = !ui.automotiveWorkflow;
     for (const produtoId of uniqueServicos) {
       await osSvc.attachScheduledCatalogItem(result.os_id, produtoId, profile?.id ?? null, {
-        autoApprove,
         mecanicoId: parsed.mecanico_id || null,
       });
     }
@@ -842,7 +847,20 @@ export async function applyOsAprovacaoAction(
     const profile = await getCurrentProfile();
     const parsed = osAprovacaoFormSchema.parse(values);
     const service = await createOrdemServicoService(tenant.id);
-    await service.applyAprovacao(id, parsed, profile?.id ?? null);
+    const ui = getSegmentUiCopy({
+      segment: tenant.segment,
+      segmentVersion: tenant.segment_version,
+      segmentConfig: tenant.segment_config,
+    });
+    const orcamentoService = await createOrcamentoVersaoService(tenant.id);
+    const versoes = await orcamentoService.listVersions(id);
+    const publishedBudget = versoes.some(
+      (v) => v.status === "publicado" || v.status === "enviado" || v.status === "pronto",
+    );
+    await service.applyAprovacao(id, parsed, profile?.id ?? null, {
+      requireDiagnosis: ui.automotiveWorkflow,
+      publishedBudget,
+    });
     revalidateOs(tenantSlug, id);
     return { success: true, id };
   } catch (error) {

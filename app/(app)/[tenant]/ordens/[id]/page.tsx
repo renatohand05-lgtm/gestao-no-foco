@@ -54,6 +54,9 @@ export default async function OsDetailPage({
     segmentConfig: tenant.segment_config,
   });
   const service = await createOrdemServicoService(tenant.id);
+  if (ui.automotiveWorkflow) {
+    await service.ensureChecklistCoverage(id, null, "oficina");
+  }
   const os = await service.getById(id);
   if (!os) notFound();
 

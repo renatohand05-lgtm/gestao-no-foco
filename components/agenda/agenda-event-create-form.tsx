@@ -322,15 +322,15 @@ export function AgendaEventCreateForm({
                   tenantSlug={tenantSlug}
                   allowBusiness={natureza === "negocio"}
                   showVehicles={showVehicles}
-                  onCreated={({ id, nome }) => {
+                  onCreated={({ id, nome, veiculoId }) => {
                     setClientesList((prev) =>
                       prev.some((c) => c.id === id)
                         ? prev
                         : [{ id, label: nome }, ...prev],
                     );
                     setClienteId(id);
-                    setVeiculoId("");
-                    if (showVehicles) loadVeiculos(id, undefined, setVeiculoId);
+                    setVeiculoId(veiculoId ?? "");
+                    if (showVehicles) loadVeiculos(id, veiculoId, setVeiculoId);
                   }}
                 />
                 <a

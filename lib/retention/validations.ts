@@ -81,6 +81,7 @@ export const finalizeServiceReadySchema = z.object({
   osId: z.string().uuid(),
   notify: z.boolean(),
   channel: z.enum(["whatsapp", "email"]).optional(),
+  channels: z.array(z.enum(["whatsapp", "email"])).max(2).optional(),
 });
 
 export const registerPickupSchema = z.object({

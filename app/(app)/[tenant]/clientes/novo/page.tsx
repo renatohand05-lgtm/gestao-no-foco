@@ -1,4 +1,5 @@
 import { ClienteForm } from "@/components/clientes/cliente-form";
+import { QuickClientPageEntry } from "@/components/clientes/quick-client-entry";
 import { CrmSubnav } from "@/components/crm/crm-subnav";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { SectionCard } from "@/components/ui/section-card";
@@ -50,6 +51,13 @@ export default async function NovoClientePage({
         title="Cadastro rápido"
         description="Nome é o suficiente para começar. WhatsApp, e-mail e o restante podem ser completados depois."
       >
+        <QuickClientPageEntry
+          tenantSlug={tenantSlug}
+          showVehicles={ui.showVehicles}
+          allowBusiness
+        />
+        <div className="mt-6 border-t pt-6">
+          <p className="mb-3 text-sm text-muted-foreground">Cadastro completo</p>
         <ClienteForm
           tenantSlug={tenantSlug}
           mode="create"
@@ -60,6 +68,7 @@ export default async function NovoClientePage({
           defaultRelationship={tipo === "negocio" ? "negocio" : "atendimento"}
           allowBusiness
         />
+        </div>
       </SectionCard>
     </div>
   );

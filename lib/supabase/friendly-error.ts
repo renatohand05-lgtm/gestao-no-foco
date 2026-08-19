@@ -70,6 +70,13 @@ export function mapDatabaseErrorToUserMessage(
   }
 
   if (
+    message.includes("unrecognized format()") ||
+    message.includes("format() type specifier")
+  ) {
+    return "Não foi possível vincular o mecânico a esta OS. Tente novamente.";
+  }
+
+  if (
     raw.includes("Possível duplicidade") ||
     raw.includes("não pode") ||
     raw.includes("Informe") ||

@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { AgendaServiceField, type AgendaServiceOption } from "@/components/agenda/agenda-service-field";
+import { QuickClientCreate } from "@/components/clientes/quick-client-create";
 import {
   OsVeiculoPicker,
   useClienteVeiculos,
 } from "@/components/ordens/os-veiculo-picker";
-import { MoreDetails } from "@/components/ui/more-details";
 import { buttonVariants } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,7 @@ type Props = {
   canCreateProduto?: boolean;
   profissionais?: Array<{ id: string; label: string }>;
   showMechanic?: boolean;
+  allowBusiness?: boolean;
 };
 
 export function OsOpenForm({
@@ -61,6 +62,7 @@ export function OsOpenForm({
   canCreateProduto = false,
   profissionais = [],
   showMechanic = false,
+  allowBusiness = false,
 }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -140,9 +142,12 @@ export function OsOpenForm({
       mecanico_id: String(fd.get("mecanico_id") ?? "") || "",
     };
 
-    const values =
-      mode === "existente"
-        ? {
+    if (mode === "novo_cliente") {
+      setError("Salve o cliente e use na OS antes de abrir.");
+      return;
+    }
+
+    const values = {
             mode: "existente" as const,
             force_create: false,
             cliente_id: clienteId,
@@ -150,38 +155,6 @@ export function OsOpenForm({
             servico_ids: servicoIds,
             vehiclesRequired: showVehicles,
             ...osFields,
-          }
-        : {
-            mode: "novo_cliente" as const,
-            force_create: force,
-            cliente: {
-              nome: String(fd.get("novo_nome") ?? ""),
-              telefone: String(fd.get("novo_telefone") ?? "") || String(fd.get("novo_whatsapp") ?? "") || null,
-              whatsapp: String(fd.get("novo_whatsapp") ?? "") || String(fd.get("novo_telefone") ?? "") || null,
-              documento: String(fd.get("novo_documento") ?? "") || null,
-              email: String(fd.get("novo_email") ?? "") || null,
-              tipo_pessoa: (String(fd.get("novo_tipo_pessoa") ?? "pf") as
-                | "pf"
-                | "pj"),
-              origem: String(fd.get("novo_origem") ?? "") || "atendimento",
-            },
-            veiculo: showVehicles
-              ? {
-                  placa: String(fd.get("novo_placa") ?? ""),
-                  marca: String(fd.get("novo_marca") ?? "") || null,
-                  modelo: String(fd.get("novo_modelo") ?? "") || null,
-                  ano: fd.get("novo_ano") ? Number(fd.get("novo_ano")) : null,
-                  quilometragem: fd.get("novo_km")
-                    ? Number(fd.get("novo_km"))
-                    : null,
-                }
-              : undefined,
-            servico_ids: servicoIds,
-            vehiclesRequired: showVehicles,
-            ...osFields,
-            quilometragem_entrada: fd.get("novo_km")
-              ? Number(fd.get("novo_km"))
-              : osFields.quilometragem_entrada,
           };
 
     startTransition(async () => {
@@ -400,63 +373,23 @@ export function OsOpenForm({
           <p className="text-sm text-muted-foreground">
             Cadastre o mínimo agora. Complete depois — sem sair desta tela.
           </p>
-          <div className="grid gap-3 md:grid-cols-2">
-            <label className="block space-y-1 text-sm md:col-span-2">
-              <span className="text-muted-foreground">Nome *</span>
-              <Input name="novo_nome" required disabled={pending} className="h-11" />
-            </label>
-            <label className="block space-y-1 text-sm">
-              <span className="text-muted-foreground">WhatsApp / telefone *</span>
-              <Input name="novo_whatsapp" disabled={pending} className="h-11" />
-            </label>
-            <label className="block space-y-1 text-sm">
-              <span className="text-muted-foreground">E-mail</span>
-              <Input name="novo_email" type="email" disabled={pending} className="h-11" />
-            </label>
-          </div>
-          <MoreDetails summary="Mais informações">
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="block space-y-1 text-sm">
-                <span className="text-muted-foreground">Telefone extra</span>
-                <Input name="novo_telefone" disabled={pending} className="h-11" />
-              </label>
-              <label className="block space-y-1 text-sm">
-                <span className="text-muted-foreground">CPF/CNPJ</span>
-                <Input name="novo_documento" disabled={pending} className="h-11" />
-              </label>
-              <label className="block space-y-1 text-sm">
-                <span className="text-muted-foreground">Tipo</span>
-                <NativeSelect
-                  name="novo_tipo_pessoa"
-                  disabled={pending}
-                  className="h-11"
-                  defaultValue="pf"
-                >
-                  <option value="pf">Pessoa física</option>
-                  <option value="pj">Pessoa jurídica</option>
-                </NativeSelect>
-              </label>
-              <input type="hidden" name="novo_origem" value="atendimento" />
-            </div>
-          </MoreDetails>
-
-          {showVehicles ? (
-          <div className="grid gap-3 border-t pt-4 md:grid-cols-2" data-os-step="veiculo">
-            <p className="text-sm font-medium md:col-span-2">Veículo</p>
-            <label className="block space-y-1 text-sm">
-              <span className="text-muted-foreground">Modelo *</span>
-              <Input name="novo_modelo" required={showVehicles} disabled={pending} className="h-11" />
-            </label>
-            <label className="block space-y-1 text-sm">
-              <span className="text-muted-foreground">Placa</span>
-              <Input name="novo_placa" placeholder="ABC1D23" disabled={pending} className="h-11" />
-            </label>
-            <label className="block space-y-1 text-sm">
-              <span className="text-muted-foreground">Marca (opcional)</span>
-              <Input name="novo_marca" disabled={pending} className="h-11" />
-            </label>
-          </div>
-          ) : null}
+          <QuickClientCreate
+            tenantSlug={tenantSlug}
+            embedded
+            showVehicles={showVehicles}
+            allowBusiness={allowBusiness}
+            onCreated={({ id, nome, veiculoId }) => {
+              setMode("existente");
+              setClienteId(id);
+              setClienteNome(nome);
+              setVeiculoId(veiculoId ?? "");
+              if (showVehicles) {
+                load(id, veiculoId, (selected) => {
+                  if (selected) setVeiculoId(selected);
+                });
+              }
+            }}
+          />
         </div>
       )}
 

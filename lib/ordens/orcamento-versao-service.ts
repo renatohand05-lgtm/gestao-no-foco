@@ -204,13 +204,11 @@ export class OrcamentoVersaoService {
     } as never);
 
     if (os.status !== "aguardando_aprovacao") {
-      await osService.changeStatus(
+      await osService.ensureStatus(
         osId,
-        {
-          status: "aguardando_aprovacao",
-          motivo: `Orçamento v${nextVersao} publicado`,
-        },
+        "aguardando_aprovacao",
         userId,
+        `Orçamento v${nextVersao} publicado`,
       );
     }
 

@@ -17,6 +17,7 @@ import { createOsMecanicoService } from "@/lib/mecanicos/os-mecanico-service";
 import { DEFAULT_ROLE_PERMISSIONS, type PermissionKey } from "@/lib/permissoes/constants";
 import { getPermission } from "@/lib/permissoes/authorization";
 import { requireTenant } from "@/lib/tenants";
+import { toActionError } from "@/lib/supabase/friendly-error";
 
 type ActionResult = { success: boolean; error?: string; id?: string };
 
@@ -171,7 +172,7 @@ export async function atribuirMecanicoOsAction(
     revalidatePath(`/${tenantSlug}/ordens/${ordemId}`);
     return { success: true, id };
   } catch (e) {
-    return { success: false, error: e instanceof Error ? e.message : "Erro" };
+    return toActionError(e, "Não foi possível vincular o mecânico.", "os.atribuir_mecanico");
   }
 }
 

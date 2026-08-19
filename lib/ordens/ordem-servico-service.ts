@@ -11,6 +11,7 @@ import {
   isTerminalCancelado,
   getOsChecklistTemplate,
   OS_STATUS_LABELS,
+  effectiveItemAprovacaoStatus,
   type OsStatus,
 } from "@/lib/ordens/os-status";
 import { formatVeiculoLabel } from "@/lib/ordens/veiculo-shared";
@@ -677,7 +678,10 @@ export class OrdemServicoService {
         valor_total: Number(item.valor_total),
         custo_unitario:
           item.custo_unitario == null ? null : Number(item.custo_unitario),
-        aprovacao_status: String(item.aprovacao_status ?? "pendente"),
+        aprovacao_status: effectiveItemAprovacaoStatus(
+          data.status,
+          String(item.aprovacao_status ?? "pendente"),
+        ),
         estoque_status: String(item.estoque_status ?? "nao_aplicavel"),
         peca_origem: String(item.peca_origem ?? "estoque"),
         execucao_status: String(item.execucao_status ?? "pendente"),
@@ -940,6 +944,18 @@ export class OrdemServicoService {
       estado_posterior: input.status,
       motivo: input.motivo ?? null,
     });
+  }
+
+  /**
+   * Avança status pelas transições adjacentes (sem saltos).
+   */
+  async ensureStatus(
+    osId: string,
+    target: OsStatus,
+    userId: string | null,
+    motivo: string,
+  ) {
+    await this.advanceTo(osId, target, userId, motivo);
   }
 
   /**
@@ -1628,15 +1644,20 @@ export class OrdemServicoService {
     osId: string,
     input: OsAprovacaoFormValues,
     userId: string | null,
+    options?: { requireDiagnosis?: boolean; publishedBudget?: boolean },
   ) {
     const current = await this.getById(osId);
     if (!current) throw new Error("OS não encontrada.");
     if (current.itens.length === 0) {
       throw new Error("Adicione itens ao orçamento antes de aprovar.");
     }
-    if (!canApplyAprovacao(current.status)) {
+    if (
+      !canApplyAprovacao(current.status, options?.requireDiagnosis !== false, {
+        publishedBudget: options?.publishedBudget,
+      })
+    ) {
       throw new Error(
-        `Status atual (${OS_STATUS_LABELS[current.status as OsStatus] ?? current.status}) não permite aprovação. Avance checklist, diagnóstico e orçamento.`,
+        `Status atual (${OS_STATUS_LABELS[current.status as OsStatus] ?? current.status}) não permite aprovação. Publique o orçamento primeiro.`,
       );
     }
 
@@ -2231,6 +2252,41 @@ export class OrdemServicoService {
       responsavel_id: userId,
     }));
     await this.supabase.from("ordem_servico_checklist" as never).insert(rows as never);
+  }
+
+  async ensureChecklistCoverage(
+    osId: string,
+    userId: string | null,
+    kind: "oficina" | "lava_rapido",
+  ): Promise<void> {
+    const { data, error } = await this.supabase
+      .from("ordem_servico_checklist" as never)
+      .select("item_codigo")
+      .eq("tenant_id", this.tenantId)
+      .eq("ordem_servico_id", osId);
+    if (error) return;
+    const have = new Set(
+      ((data ?? []) as Array<{ item_codigo?: string }>).map((r) => String(r.item_codigo)),
+    );
+    const missing = getOsChecklistTemplate(kind).filter((item) => !have.has(item.codigo));
+    if (missing.length === 0) return;
+    const maxOrdem = Math.max(
+      0,
+      ...getOsChecklistTemplate(kind).map((i) => i.ordem),
+    );
+    await this.supabase.from("ordem_servico_checklist" as never).insert(
+      missing.map((item, idx) => ({
+        tenant_id: this.tenantId,
+        ordem_servico_id: osId,
+        item_codigo: item.codigo,
+        item_label: item.label,
+        categoria: item.categoria,
+        ordem: item.ordem || maxOrdem + idx + 1,
+        status: "nao_verificado",
+        classificacao: "nao_verificado",
+        responsavel_id: userId,
+      })) as never,
+    );
   }
 
   async applyChecklistTemplate(

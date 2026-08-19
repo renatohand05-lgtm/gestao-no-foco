@@ -11,6 +11,23 @@ export const FAST_RETURN_PRESETS = [
   { key: "1y", days: 365, months: 12, label: "1 ano" },
 ] as const;
 
+/** Presets de retorno automotivo (data, km ou o que ocorrer primeiro). */
+export const AUTOMOTIVE_RETURN_PRESETS = [
+  { key: "30d", label: "30 dias", presetDays: 30, intervalMonths: null, mileageKm: null },
+  { key: "3m", label: "3 meses", presetDays: null, intervalMonths: 3, mileageKm: null },
+  { key: "6m", label: "6 meses", presetDays: null, intervalMonths: 6, mileageKm: null },
+  { key: "12m", label: "12 meses", presetDays: null, intervalMonths: 12, mileageKm: null },
+  { key: "5k", label: "5.000 km", presetDays: null, intervalMonths: null, mileageKm: 5000 },
+  { key: "10k", label: "10.000 km", presetDays: null, intervalMonths: null, mileageKm: 10000 },
+  {
+    key: "first",
+    label: "6 meses / 10.000 km",
+    presetDays: null,
+    intervalMonths: 6,
+    mileageKm: 10000,
+  },
+] as const;
+
 export type AgendaCreateContext = {
   natureza?: "cliente" | "negocio" | "interno";
   clienteId?: string | null;

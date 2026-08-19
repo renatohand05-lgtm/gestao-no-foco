@@ -128,11 +128,14 @@ begin
     entidade_tipo, entidade_id, user_id, motivo
   ) values (
     p_tenant_id, p_ordem_id, 'atribuicao_mecanico',
-    format(
-      'Mecânico %s atribuído como %s (%s%%)',
+    concat(
+      'Mecânico ',
       v_mec.nome_completo,
+      ' atribuído como ',
       p_papel,
-      trim(to_char(round(p_percentual), '999'))
+      ' (',
+      trim(to_char(round(p_percentual), '999')),
+      '%)'
     ),
     'mecanico', p_mecanico_id, auth.uid(), p_observacao
   );
@@ -147,3 +150,5 @@ begin
   return v_id;
 end;
 $$;
+
+grant execute on function public.os_atribuir_mecanico_atomico(uuid, uuid, uuid, text, numeric, numeric, text, text, boolean) to authenticated;

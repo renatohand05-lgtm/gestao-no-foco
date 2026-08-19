@@ -123,6 +123,7 @@ export function ClienteWorkspace({
     showWorkOrders: client360.showWorkOrders,
     hasExecutivo: Boolean(perfilExecutivo),
     relationship,
+    compactVehicleVitals: client360.compactVehicleVitals,
   });
   const [tab, setTab] = useState<Tab>(
     () =>

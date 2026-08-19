@@ -140,8 +140,135 @@ export class OsMecanicoService {
         p_forcar: params.forcar ?? false,
       } as never,
     );
-    if (error) throw new Error(error.message);
-    return data as string;
+    if (!error) return data as string;
+
+    const raw = error.message ?? "";
+    if (
+      /unrecognized format\(\)|format\(\) type specifier/i.test(raw)
+    ) {
+      return this.atribuirSemRpc(params);
+    }
+    throw new Error(raw);
+  }
+
+  /** Persistência quando a RPC antiga ainda tem format() inválido. */
+  private async atribuirSemRpc(params: {
+    ordemId: string;
+    mecanicoId: string;
+    papel?: OsMecanicoPapel;
+    percentual?: number;
+    horasEstimadas?: number;
+    etapa?: string | null;
+    observacao?: string | null;
+  }): Promise<string> {
+    const papel = params.papel ?? "principal";
+    const percentual =
+      params.percentual ?? (papel === "auxiliar" ? 0 : 100);
+
+    const { data: mec, error: mecErr } = await this.supabase
+      .from("mecanicos" as never)
+      .select("id, profile_id, tenant_id, status")
+      .eq("id", params.mecanicoId)
+      .eq("tenant_id", this.tenantId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (mecErr) throw new Error(mecErr.message);
+    const mechanic = mec as {
+      id: string;
+      profile_id: string | null;
+      status: string;
+    } | null;
+    if (!mechanic) throw new Error("Mecânico não encontrado.");
+    if (mechanic.status !== "ativo") {
+      throw new Error("Mecânico inativo não pode ser atribuído.");
+    }
+
+    const { data: osRow, error: osErr } = await this.supabase
+      .from("ordens_servico")
+      .select("id")
+      .eq("id", params.ordemId)
+      .eq("tenant_id", this.tenantId)
+      .maybeSingle();
+    if (osErr) throw new Error(osErr.message);
+    if (!osRow) throw new Error("OS não encontrada.");
+
+    if (papel === "principal") {
+      await this.supabase
+        .from("ordem_servico_mecanicos" as never)
+        .update({
+          ativo: false,
+          removido_em: new Date().toISOString(),
+          motivo_remocao: "substituido_principal",
+        } as never)
+        .eq("tenant_id", this.tenantId)
+        .eq("ordem_servico_id", params.ordemId)
+        .eq("papel", "principal")
+        .eq("ativo", true)
+        .is("removido_em", null);
+    }
+
+    const { data: existing } = await this.supabase
+      .from("ordem_servico_mecanicos" as never)
+      .select("id")
+      .eq("tenant_id", this.tenantId)
+      .eq("ordem_servico_id", params.ordemId)
+      .eq("mecanico_id", params.mecanicoId)
+      .eq("papel", papel)
+      .is("removido_em", null)
+      .maybeSingle();
+    const existingId = (existing as { id?: string } | null)?.id;
+
+    if (existingId) {
+      const { error: updErr } = await this.supabase
+        .from("ordem_servico_mecanicos" as never)
+        .update({
+          percentual_participacao: percentual,
+          horas_estimadas: params.horasEstimadas ?? 0,
+          etapa: params.etapa ?? null,
+          observacao: params.observacao ?? null,
+          ativo: true,
+          removido_em: null,
+          motivo_remocao: null,
+        } as never)
+        .eq("id", existingId)
+        .eq("tenant_id", this.tenantId);
+      if (updErr) throw new Error(updErr.message);
+      if (papel === "principal" && mechanic.profile_id) {
+        await this.supabase
+          .from("ordens_servico")
+          .update({ mecanico_id: mechanic.profile_id })
+          .eq("id", params.ordemId)
+          .eq("tenant_id", this.tenantId);
+      }
+      return existingId;
+    }
+
+    const { data: auth } = await this.supabase.auth.getUser();
+    const { data: inserted, error: insErr } = await this.supabase
+      .from("ordem_servico_mecanicos" as never)
+      .insert({
+        tenant_id: this.tenantId,
+        ordem_servico_id: params.ordemId,
+        mecanico_id: params.mecanicoId,
+        papel,
+        percentual_participacao: percentual,
+        horas_estimadas: params.horasEstimadas ?? 0,
+        etapa: params.etapa ?? null,
+        observacao: params.observacao ?? null,
+        created_by: auth.user?.id ?? null,
+      } as never)
+      .select("id")
+      .single();
+    if (insErr) throw new Error(insErr.message);
+
+    if (papel === "principal" && mechanic.profile_id) {
+      await this.supabase
+        .from("ordens_servico")
+        .update({ mecanico_id: mechanic.profile_id })
+        .eq("id", params.ordemId)
+        .eq("tenant_id", this.tenantId);
+    }
+    return (inserted as { id: string }).id;
   }
 
   async remover(params: {

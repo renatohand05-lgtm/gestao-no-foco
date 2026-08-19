@@ -987,7 +987,7 @@ describe("35.1 lava-rápido atendimento e barbearia profissionais", () => {
     const lava = resolveSegmentContext({ segment: "lava_rapido", ...ENGINE });
     const options = attendanceOptionsForContext(lava);
     assert.equal(options.some((o) => o.label === "Oficina / Veículo"), false);
-    assert.ok(options.some((o) => o.label === "Lavagem simples"));
+    assert.ok(options.some((o) => o.label === "Lavagem"));
     assert.ok(options.some((o) => o.label === "Pacote / plano"));
     assert.equal(defaultAttendanceType(lava), "lava_rapido");
     const ui = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });

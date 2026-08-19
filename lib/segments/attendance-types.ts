@@ -27,20 +27,22 @@ export const OFICINA_ATTENDANCE_OPTIONS: AttendanceTypeOption[] = [
 ];
 
 export const LAVA_ATTENDANCE_OPTIONS: AttendanceTypeOption[] = [
-  { value: "lava_rapido", label: "Lava-rápido" },
-  { value: "lavagem", label: "Lavagem" },
-  { value: "lavagem_simples", label: "Lavagem simples" },
+  { value: "lava_rapido", label: "Lavagem" },
   { value: "higienizacao", label: "Higienização" },
-  { value: "higienizacao_interna", label: "Higienização interna" },
   { value: "estetica_automotiva", label: "Estética automotiva" },
   { value: "detalhamento", label: "Detalhamento" },
-  { value: "pacote", label: "Pacote" },
   { value: "pacote_plano", label: "Pacote / plano" },
   { value: "outro_atendimento_automotivo", label: "Outro atendimento automotivo" },
-  { value: "outro_atendimento", label: "Outro atendimento" },
 ];
 
-const LAVA_VALUES = new Set(LAVA_ATTENDANCE_OPTIONS.map((o) => o.value));
+const LAVA_VALUES = new Set([
+  ...LAVA_ATTENDANCE_OPTIONS.map((o) => o.value),
+  "lavagem",
+  "lavagem_simples",
+  "higienizacao_interna",
+  "pacote",
+  "outro_atendimento",
+]);
 const OFICINA_VALUES = new Set(OFICINA_ATTENDANCE_OPTIONS.map((o) => o.value));
 
 const CONSULTORIA_OPTIONS: AttendanceTypeOption[] = [

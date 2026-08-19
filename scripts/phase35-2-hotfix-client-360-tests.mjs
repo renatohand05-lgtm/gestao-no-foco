@@ -20,11 +20,12 @@ async function surfaceFor(segment, extra = {}) {
     "lib/segments/client-360.ts",
   );
   const surface = client360Surface({ segment, ...ENGINE, ...extra });
-  const tabs = visibleClient360Tabs({
-    showVehicles: surface.showVehicles,
-    showWorkOrders: surface.showWorkOrders,
-    hasExecutivo: true,
-  });
+    const tabs = visibleClient360Tabs({
+      showVehicles: surface.showVehicles,
+      showWorkOrders: surface.showWorkOrders,
+      hasExecutivo: true,
+      compactVehicleVitals: surface.compactVehicleVitals,
+    });
   return { surface, tabs };
 }
 
@@ -66,6 +67,10 @@ describe("hotfix client 360 — demais segmentos", () => {
     assert.equal(surface.workOrdersLabel.includes("Atendimento"), true);
     assert.doesNotMatch(surface.workOrderShort, /\bOS\b/);
     assert.doesNotMatch(surface.workOrdersLabel, /\bOS\b/);
+    assert.equal(surface.salesLabel, "Compras");
+    assert.equal(surface.compactVehicleVitals, true);
+    assert.ok(tabs.indexOf("ordens") < tabs.indexOf("agenda"));
+    assert.ok(tabs.indexOf("vendas") < tabs.indexOf("financeiro"));
   });
 
   it("oficina: veículos SIM e OS SIM", async () => {

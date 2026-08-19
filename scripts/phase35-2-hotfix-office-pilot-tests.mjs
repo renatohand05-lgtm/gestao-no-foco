@@ -22,7 +22,9 @@ describe("format() / mechanic persistence", () => {
     );
     const body = sql.split("as $$")[1] ?? sql;
     assert.doesNotMatch(body, /%\.[0-9]+f/);
-    assert.match(sql, /Mecânico %s atribuído como %s \(%s%%\)/);
+    assert.doesNotMatch(body, /format\s*\(/);
+    assert.match(sql, /concat\(/);
+    assert.match(sql, /atribuído como/);
     const friendly = read("lib/supabase/friendly-error.ts");
     assert.match(friendly, /unrecognized format\(\)/);
     assert.match(friendly, /vincular o mecânico/);
@@ -36,6 +38,9 @@ describe("format() / mechanic persistence", () => {
     const binder = read("components/ordens/os-mecanico-binder.tsx");
     assert.match(binder, /fallbackMecanico/);
     assert.match(binder, /osMecanicoId/);
+    const mecSvc = read("lib/mecanicos/os-mecanico-service.ts");
+    assert.match(mecSvc, /atribuirSemRpc/);
+    assert.match(mecSvc, /type specifier/);
   });
 });
 
@@ -73,6 +78,9 @@ describe("quick client / operation types", () => {
     assert.equal(lava.some((o) => o.label === "Consultoria"), false);
     assert.ok(lava.some((o) => o.label === "Lavagem"));
     assert.ok(lava.some((o) => o.label === "Detalhamento"));
+    assert.equal(lava.some((o) => o.label === "Oficina / Veículo"), false);
+    assert.equal(lava.some((o) => o.label === "Consultoria"), false);
+    assert.equal(lava.length, 6);
     const form = read("components/ordens/os-open-form.tsx");
     assert.doesNotMatch(form, /if \(segment ===/);
   });
@@ -84,6 +92,8 @@ describe("checklist / budget / finalize", () => {
     assert.match(status, /cofre_superior/);
     assert.match(status, /quando acessível/);
     assert.match(status, /ext_frente/);
+    assert.match(status, /codigo: "placa"/);
+    assert.match(status, /codigo: "acessorios"/);
     const page = read("app/(app)/[tenant]/ordens/[id]/page.tsx");
     assert.match(page, /ensureChecklistCoverage/);
     const storage = read("lib/ordens/inspecao-storage-service.ts");
@@ -125,6 +135,17 @@ describe("checklist / budget / finalize", () => {
     assert.match(entrega, /concluirEntrega/);
     assert.match(entrega, /quilometragem_saida/);
     assert.match(entrega, /aceite_entrega_em/);
+    const ret = read("components/ordens/os-workspace.tsx");
+    assert.match(ret, /AUTOMOTIVE_RETURN_PRESETS/);
+    const presets = read("lib/ux/fast-input.ts");
+    assert.match(presets, /5\.000 km/);
+    assert.match(presets, /10\.000 km/);
+    const picker = read("components/agenda/agenda-service-field.tsx");
+    assert.match(picker, /Escolher das sugestões/);
+    assert.match(picker, /\+ Criar serviço/);
+    const open = read("components/ordens/os-open-form.tsx");
+    assert.match(open, /multiple/);
+    assert.match(open, /servico_ids/);
   });
 });
 

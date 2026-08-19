@@ -341,15 +341,22 @@ export const LAVA_RAPIDO_CHECKLIST_TEMPLATE = [
   },
   {
     codigo: "combustivel",
-    label: "Nível de combustível",
+    label: "Nível de combustível (opcional)",
     categoria: "geral",
     ordem: 24,
   },
   {
     codigo: "quilometragem",
-    label: "Quilometragem",
+    label: "Quilometragem (opcional)",
     categoria: "geral",
     ordem: 25,
+  },
+  { codigo: "placa", label: "Placa", categoria: "dados", ordem: 26 },
+  {
+    codigo: "acessorios",
+    label: "Acessórios",
+    categoria: "objetos",
+    ordem: 27,
   },
 ] as const;
 

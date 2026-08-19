@@ -22,6 +22,7 @@ import {
   createManualReturnAction,
   registerOsPickupAction,
 } from "@/lib/retention/actions";
+import { AUTOMOTIVE_RETURN_PRESETS } from "@/lib/ux/fast-input";
 import { GFSelect } from "@/components/gf/gf-select";
 import { FormasPagamentoEmptyHint } from "@/components/financeiro/formas-pagamento-empty-hint";
 import { PAYMENT_METHODS_EMPTY_TEXT } from "@/lib/financeiro/formas-pagamento-catalog";
@@ -1409,31 +1410,37 @@ export function OsWorkspace({
           <div className="mt-4 space-y-2 border-t pt-4">
             <p className="text-sm font-medium">+ Programar retorno</p>
             <p className="text-xs text-muted-foreground">
-              Ex.: 6 meses, 10.000 km, o que ocorrer primeiro.
+              Data, km ou o que ocorrer primeiro.
             </p>
-            <button
-              type="button"
-              disabled={pending}
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-              onClick={() =>
-                run(
-                  () =>
-                    createManualReturnAction(tenantSlug, {
-                      clienteId: os.cliente_id,
-                      intervalMonths: 6,
-                      mileageKm: 10000,
-                      lastKm: os.quilometragem_saida ?? os.quilometragem_entrada,
-                      veiculoId: os.veiculo_id,
-                      placa: os.placa,
-                      veiculoLabel: [os.marca, os.modelo].filter(Boolean).join(" "),
-                      motivo: "Retorno automotivo",
-                    }),
-                  "Retorno programado (6 meses / 10.000 km).",
-                )
-              }
-            >
-              6 meses / 10.000 km
-            </button>
+            <div className="flex flex-wrap gap-2">
+              {AUTOMOTIVE_RETURN_PRESETS.map((preset) => (
+                <button
+                  key={preset.key}
+                  type="button"
+                  disabled={pending}
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                  onClick={() =>
+                    run(
+                      () =>
+                        createManualReturnAction(tenantSlug, {
+                          clienteId: os.cliente_id,
+                          presetDays: preset.presetDays,
+                          intervalMonths: preset.intervalMonths,
+                          mileageKm: preset.mileageKm,
+                          lastKm: os.quilometragem_saida ?? os.quilometragem_entrada,
+                          veiculoId: os.veiculo_id,
+                          placa: os.placa,
+                          veiculoLabel: [os.marca, os.modelo].filter(Boolean).join(" "),
+                          motivo: "Retorno automotivo",
+                        }),
+                      `Retorno programado (${preset.label}).`,
+                    )
+                  }
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
         </ExecutiveSection>
       ) : null}

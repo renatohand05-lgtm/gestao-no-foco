@@ -14,6 +14,9 @@ export type Client360Surface = {
   vehicleLabel: string;
   vehiclesLabel: string;
   emptyWorkOrders: string;
+  compactVehicleVitals: boolean;
+  automotiveWorkflow: boolean;
+  salesLabel: string;
 };
 
 export function client360Surface(
@@ -29,6 +32,9 @@ export function client360Surface(
     vehicleLabel: ui.vehicleLabel,
     vehiclesLabel: "Veículos",
     emptyWorkOrders: ui.emptyWorkOrdersTitle,
+    compactVehicleVitals: ui.compactVehicleVitals,
+    automotiveWorkflow: ui.automotiveWorkflow,
+    salesLabel: ui.compactVehicleVitals ? "Compras" : "Vendas",
   };
 }
 
@@ -57,6 +63,7 @@ export function visibleClient360Tabs(input: {
   showWorkOrders: boolean;
   hasExecutivo: boolean;
   relationship?: "atendimento" | "negocio" | null;
+  compactVehicleVitals?: boolean;
 }): Client360TabId[] {
   const automotive = input.showVehicles && input.showWorkOrders;
   const tabs = CLIENT_360_TAB_IDS.filter((tab) => {
@@ -80,26 +87,41 @@ export function visibleClient360Tabs(input: {
     return true;
   });
   if (!automotive || input.relationship === "negocio") return tabs;
-  const order: Client360TabId[] = [
-    "resumo",
-    "veiculos",
-    "ordens",
-    "agenda",
-    "financeiro",
-    "retornos",
-    "comunicacoes",
-    "timeline",
-    "cadastro",
-    "vendas",
-    "observacoes",
-    "documentos",
-  ];
+  const order: Client360TabId[] = input.compactVehicleVitals
+    ? [
+        "resumo",
+        "veiculos",
+        "ordens",
+        "agenda",
+        "vendas",
+        "retornos",
+        "comunicacoes",
+        "timeline",
+        "cadastro",
+        "financeiro",
+        "observacoes",
+        "documentos",
+      ]
+    : [
+        "resumo",
+        "veiculos",
+        "ordens",
+        "agenda",
+        "financeiro",
+        "retornos",
+        "comunicacoes",
+        "timeline",
+        "cadastro",
+        "vendas",
+        "observacoes",
+        "documentos",
+      ];
   return [...order.filter((id) => tabs.includes(id)), ...tabs.filter((id) => !order.includes(id))];
 }
 
 export function client360TabLabel(
   tab: Client360TabId,
-  surface: Pick<Client360Surface, "workOrdersLabel" | "vehiclesLabel">,
+  surface: Pick<Client360Surface, "workOrdersLabel" | "vehiclesLabel" | "salesLabel">,
 ): string {
   const labels: Record<Client360TabId, string> = {
     executivo: "Executivo",
@@ -107,9 +129,9 @@ export function client360TabLabel(
     cadastro: "Cadastro",
     financeiro: "Financeiro",
     ordens: surface.workOrdersLabel,
-    vendas: "Vendas",
+    vendas: surface.salesLabel,
     veiculos: surface.vehiclesLabel,
-    timeline: "Timeline",
+    timeline: "Histórico",
     agenda: "Agenda",
     tarefas: "Tarefas",
     retornos: "Retornos",

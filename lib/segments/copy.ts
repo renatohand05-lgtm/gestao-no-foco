@@ -290,7 +290,7 @@ export function getSegmentUiCopy(
       emptyCatalogBody: `Comece com nosso catálogo sugerido para ${catalogShort} ou crie seu primeiro serviço manualmente.`,
       compactVehicleVitals: false,
       professionalSpecialtySuggestions: [],
-      finalizeOnlyLabel: "Finalizar OS",
+      finalizeOnlyLabel: "Finalizar serviço",
       finalizeAndNotifyLabel: "Finalizar e avisar cliente",
       awaitingPickupTitle: "Aguardando retirada",
       registerPickupLabel: "Registrar retirada",

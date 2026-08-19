@@ -27,7 +27,7 @@ Default produção: DRY_RUN + kill switch OFF + `COMMUNICATION_MODE=test`.
 
 ## Outbox (única fila)
 
-Estados 35.2 + `draft`, `scheduled`, `queued`, `suppressed`.
+Estados 35.2 + `draft`, `scheduled`, `queued`, `suppressed`, `blocked` (allowlist em `COMMUNICATION_MODE=test`).
 
 Retry: backoff, máx. 5, **mesma linha**. Falha permanente (opt-out, destino inválido, template) não agenda retry. Reenvio manual exige `crm.notificacoes.enviar` e gera auditoria.
 

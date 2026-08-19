@@ -239,7 +239,7 @@ describe("35.2.3 webhook / test mode", () => {
         to: "11900000000",
         env: hotEnv,
       }).status,
-      "suppressed",
+      "blocked",
     );
     assert.equal(
       shouldDispatchReal({

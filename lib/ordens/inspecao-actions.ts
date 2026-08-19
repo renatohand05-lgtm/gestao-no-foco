@@ -147,6 +147,22 @@ export async function publicarOrcamentoVersaoAction(
     const versao = await service.publishVersion(osId, parsed, profile?.id ?? null, {
       requireDiagnosis: ui.automotiveWorkflow,
     });
+    try {
+      const { enqueueBudgetPublishedAfterPublish } = await import(
+        "@/lib/retention/budget-notify"
+      );
+      await enqueueBudgetPublishedAfterPublish({
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        segment: tenant.segment,
+        osId,
+        versaoId: versao.id,
+        valorTotal: versao.valor_total,
+        userId: profile?.id ?? null,
+      });
+    } catch {
+      /* comunicação não desfaz a publicação */
+    }
     revalidateOs(tenantSlug, osId);
     return { success: true, id: versao.id, versao: versao.versao };
   } catch (error) {

@@ -384,6 +384,8 @@ export async function finalizeServiceReadyAction(
             modelo: os.modelo,
             placa: os.placa,
           }),
+          modelo: os.modelo ?? "",
+          placa: os.placa ?? "",
         };
         const channels =
           parsed.channels && parsed.channels.length > 0
@@ -522,6 +524,8 @@ export async function notifyServiceReadyAgainAction(
           modelo: os.modelo,
           placa: os.placa,
         }),
+        modelo: os.modelo ?? "",
+        placa: os.placa ?? "",
       },
       userId,
       explicit: true,
@@ -602,19 +606,17 @@ export async function resendFailedNotificationAction(
       return { success: false, error: guard.note };
     }
     await outbox.auditResend(row.id, userId);
-    await outbox.patchSameRow(row.id, {
-      status: "queued",
-      error_message: null,
-      error_code: null,
-      processed_at: new Date().toISOString(),
-    });
+    const retried = await outbox.retryDispatch(row);
     if (row.cliente_id) {
       revalidateRetention(tenantSlug, row.cliente_id);
+    }
+    if (row.entity_type === "os" && row.entity_id) {
+      revalidatePath(`/${tenantSlug}/ordens/${row.entity_id}`);
     }
     return {
       success: true,
       id: row.id,
-      note: "Reenvio preparado. Não duplica a mensagem original.",
+      note: retried.note || "Reenvio preparado. Não duplica a mensagem original.",
     };
   } catch (error) {
     return {

@@ -62,10 +62,10 @@ export function blockedProviderSendResult(input: {
   if (mode === "test" && !isTestAllowlisted({ phone, email, env })) {
     return {
       simulated: true,
-      status: "suppressed",
+      status: "blocked",
       provider: "none",
-      errorCode: "not_allowlisted",
-      message: "Destinatário fora da allowlist de teste.",
+      errorCode: "blocked_by_allowlist",
+      message: "Bloqueado pelo modo de teste.",
     };
   }
   return {

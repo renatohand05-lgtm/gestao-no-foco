@@ -15,19 +15,25 @@ export const MESSAGE_TEMPLATE_CODES = [
   "REENGAJAMENTO",
   "SERVICE_READY",
   "SERVICE_DELIVERED",
+  "BUDGET_PUBLISHED",
 ] as const;
 export type MessageTemplateCode = (typeof MESSAGE_TEMPLATE_CODES)[number];
 
 export const TEMPLATE_VARS = [
   "cliente_nome",
   "empresa_nome",
+  "cliente",
+  "empresa",
   "data",
   "hora",
   "data_hora",
   "servico",
   "profissional",
   "veiculo",
+  "modelo",
   "placa",
+  "valor",
+  "secure_link",
   "dias_para_retorno",
 ] as const;
 export type TemplateVar = (typeof TEMPLATE_VARS)[number];
@@ -38,9 +44,9 @@ const SAFE_TOKEN = /^[a-z_]+$/;
 
 const BASE: Record<MessageTemplateCode, string> = {
   AGENDAMENTO_CRIADO:
-    "Olá, {{cliente_nome}}! Seu horário na {{empresa_nome}} está marcado para {{data}} às {{hora}}. Serviço: {{servico}}. Responda se precisar alterar.",
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} foi realizado.\n\nData: {{data}}\nHorário: {{hora}}\n\nVeículo: {{veiculo}}",
   AGENDAMENTO_CONFIRMADO:
-    "Olá, {{cliente_nome}}! Confirmamos seu horário na {{empresa_nome}} em {{data}} às {{hora}}.",
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} está confirmado.\n\nData: {{data}}\nHorário: {{hora}}",
   LEMBRETE:
     "Olá, {{cliente_nome}}! Lembrete: {{empresa_nome}} te espera em {{data}} às {{hora}}.",
   REAGENDAMENTO:
@@ -58,16 +64,18 @@ const BASE: Record<MessageTemplateCode, string> = {
   REENGAJAMENTO:
     "Olá, {{cliente_nome}}! Sentimos sua falta na {{empresa_nome}}. Quer retomar o acompanhamento?",
   SERVICE_READY:
-    "Olá, {{cliente_nome}}! Tudo bem?\n\nSeu veículo está pronto na {{empresa_nome}}.\n\n{{servico}}\n{{veiculo}}\n\nO serviço foi concluído e o veículo está disponível para retirada.\n\nSe precisar, fale conosco por aqui.",
+    "Olá, {{cliente}}.\nSeu veículo está pronto.\n\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa}}",
   SERVICE_DELIVERED:
     "Olá, {{cliente_nome}}! Registramos a retirada do veículo na {{empresa_nome}}. Obrigado.",
+  BUDGET_PUBLISHED:
+    "Olá, {{cliente}}.\nSeu orçamento está disponível.\n\nVeículo: {{modelo}} · {{placa}}\nValor: {{valor}}\n\nAcesse para visualizar e aprovar:\n{{secure_link}}",
 };
 
 const PRIVATE: Record<MessageTemplateCode, string> = {
   AGENDAMENTO_CRIADO:
-    "Olá, {{cliente_nome}}! Seu horário na {{empresa_nome}} está marcado para {{data}} às {{hora}}.",
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} foi realizado.\n\nData: {{data}}\nHorário: {{hora}}",
   AGENDAMENTO_CONFIRMADO:
-    "Olá, {{cliente_nome}}! Confirmamos seu horário na {{empresa_nome}} em {{data}} às {{hora}}.",
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} está confirmado.\n\nData: {{data}}\nHorário: {{hora}}",
   LEMBRETE:
     "Olá, {{cliente_nome}}! Lembrete: {{empresa_nome}} te espera em {{data}} às {{hora}}.",
   REAGENDAMENTO:
@@ -88,6 +96,8 @@ const PRIVATE: Record<MessageTemplateCode, string> = {
     "Olá, {{cliente_nome}}! Seu atendimento na {{empresa_nome}} foi concluído e já está disponível.",
   SERVICE_DELIVERED:
     "Olá, {{cliente_nome}}! Registramos a conclusão do atendimento na {{empresa_nome}}.",
+  BUDGET_PUBLISHED:
+    "Olá, {{cliente}}.\nSeu orçamento está disponível.\nValor: {{valor}}\n\nAcesse para visualizar e aprovar:\n{{secure_link}}",
 };
 
 const CONSULTORIA: Partial<Record<MessageTemplateCode, string>> = {
@@ -118,12 +128,24 @@ const OFICINA: Partial<Record<MessageTemplateCode, string>> = {
   RETORNO_D10:
     "Olá, {{cliente_nome}}! Está chegando o período recomendado para o retorno do seu veículo à {{empresa_nome}}. Serviço anterior: {{servico}}. Veículo: {{veiculo}}. Faltam aproximadamente {{dias_para_retorno}} dias. Deseja agendar? Responda SIM para continuarmos.",
   SERVICE_READY:
-    "Olá, {{cliente_nome}}.\nSeu veículo está pronto.\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa_nome}}",
+    "Olá, {{cliente}}.\nSeu veículo está pronto.\n\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa}}",
+  AGENDAMENTO_CRIADO:
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} foi realizado.\n\nData: {{data}}\nHorário: {{hora}}\n\nVeículo: {{veiculo}}",
+  AGENDAMENTO_CONFIRMADO:
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} está confirmado.\n\nData: {{data}}\nHorário: {{hora}}",
+  BUDGET_PUBLISHED:
+    "Olá, {{cliente}}.\nSeu orçamento está disponível.\n\nVeículo: {{modelo}} · {{placa}}\nValor: {{valor}}\n\nAcesse para visualizar e aprovar:\n{{secure_link}}",
 };
 
 const LAVA: Partial<Record<MessageTemplateCode, string>> = {
   SERVICE_READY:
-    "Olá, {{cliente_nome}}.\nSeu veículo está pronto para retirada.\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa_nome}}",
+    "Olá, {{cliente}}.\nSeu veículo está pronto para retirada.\n\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa}}",
+  AGENDAMENTO_CRIADO:
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} foi realizado.\n\nData: {{data}}\nHorário: {{hora}}\n\nVeículo: {{veiculo}}",
+  AGENDAMENTO_CONFIRMADO:
+    "Olá, {{cliente}}.\nSeu agendamento na {{empresa}} está confirmado.\n\nData: {{data}}\nHorário: {{hora}}",
+  BUDGET_PUBLISHED:
+    "Olá, {{cliente}}.\nSeu orçamento está disponível.\n\nVeículo: {{modelo}} · {{placa}}\nValor: {{valor}}\n\nAcesse para visualizar e aprovar:\n{{secure_link}}",
 };
 
 export function templateFor(input: {
@@ -158,6 +180,14 @@ export function renderTemplate(
   input: TemplateContext,
 ): string {
   const ctx: TemplateContext = { ...input };
+  if (!ctx.cliente && ctx.cliente_nome) ctx.cliente = ctx.cliente_nome;
+  if (!ctx.cliente_nome && ctx.cliente) ctx.cliente_nome = ctx.cliente;
+  if (!ctx.empresa && ctx.empresa_nome) ctx.empresa = ctx.empresa_nome;
+  if (!ctx.empresa_nome && ctx.empresa) ctx.empresa_nome = ctx.empresa;
+  if (!ctx.veiculo && (ctx.modelo || ctx.placa)) {
+    const line = [ctx.modelo, ctx.placa].filter(Boolean).join(" · ");
+    ctx.veiculo = line ? `Veículo: ${line}` : "";
+  }
   if (!ctx.data_hora && (ctx.data || ctx.hora)) {
     ctx.data_hora = [ctx.data, ctx.hora].filter(Boolean).join(" às ");
   }
@@ -168,7 +198,12 @@ export function renderTemplate(
     const value = ctx[key as TemplateVar];
     return value == null ? "" : String(value);
   });
-  return rendered.replace(/\n{3,}/g, "\n\n").trim();
+  return rendered
+    .replace(/\nVeículo:\s*·\s*/g, "\nVeículo: ")
+    .replace(/\nVeículo:\s*\n/g, "\n")
+    .replace(/\nVeículo:\s*$/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 export function assertNoCodeExecution(source: string): void {

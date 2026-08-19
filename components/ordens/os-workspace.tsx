@@ -17,7 +17,9 @@ import { AnexosPanel } from "@/components/ordens/inspecao/anexos-panel";
 import { ChecklistVisual } from "@/components/ordens/inspecao/checklist-visual";
 import { InspecaoEnvioPanel } from "@/components/ordens/inspecao/inspecao-envio-panel";
 import { OsVeiculoEditDialog } from "@/components/ordens/os-veiculo-edit-dialog";
+import { CommunicationTimeline } from "@/components/retention/communication-timeline";
 import { ServiceReadyPanel } from "@/components/retention/service-ready-panel";
+import type { OutboxRow } from "@/lib/retention/types";
 import {
   createManualReturnAction,
   registerOsPickupAction,
@@ -112,6 +114,7 @@ export type OsWorkspaceProps = {
   clienteEmail?: string | null;
   whatsappProviderConfigured?: boolean;
   emailProviderConfigured?: boolean;
+  communications?: OutboxRow[];
 };
 
 const TABS = [
@@ -186,6 +189,7 @@ export function OsWorkspace({
   clienteEmail = null,
   whatsappProviderConfigured = false,
   emailProviderConfigured = false,
+  communications = [],
 }: OsWorkspaceProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
@@ -414,6 +418,22 @@ export function OsWorkspace({
 
       {tab === "resumo" ? (
         <ExecutiveSection title="Resumo" panel>
+          <div className="mb-3 rounded-lg border p-3 text-sm" data-phase35-3="channel-ux">
+            <p className="font-medium">Canal do cliente</p>
+            <p className="text-muted-foreground">
+              WhatsApp cadastrado: {clientePhone?.replace(/\D/g, "") ? "sim" : "não"}
+            </p>
+            <p className="text-muted-foreground">
+              E-mail cadastrado: {clienteEmail?.includes("@") ? "sim" : "não"}
+            </p>
+            <p className="mt-2 font-medium">Status do provider</p>
+            <p className="text-muted-foreground">
+              WhatsApp: {whatsappProviderConfigured ? "configurado" : "não configurado"}
+            </p>
+            <p className="text-muted-foreground">
+              E-mail: {emailProviderConfigured ? "configurado" : "não configurado"}
+            </p>
+          </div>
           <ServiceReadyPanel
             tenantSlug={tenantSlug}
             osId={os.id}
@@ -1407,6 +1427,15 @@ export function OsWorkspace({
       ) : null}
 
       {tab === "historico" ? (
+        <>
+          <ExecutiveSection title="Comunicações" panel>
+            <CommunicationTimeline
+              rows={communications}
+              tenantSlug={tenantSlug}
+              canResend={canNotify}
+              canSeeDetails={canNotify}
+            />
+          </ExecutiveSection>
         <ExecutiveSection title="Histórico" panel>
           <ul className="space-y-2">
             {os.eventos.length === 0 ? (
@@ -1423,6 +1452,7 @@ export function OsWorkspace({
             )}
           </ul>
         </ExecutiveSection>
+        </>
       ) : null}
 
       {tab === "anexos" ? (

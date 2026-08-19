@@ -86,13 +86,32 @@ export function CommunicationSettingsForm({
       </div>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">Preferências</legend>
+        <legend className="text-sm font-medium">Eventos do piloto (default desligado)</legend>
         {(
           [
             ["sendAppointmentCreated", "Agendamento criado"],
+            ["sendAppointmentConfirmed", "Agendamento confirmado"],
+            ["sendBudgetPublished", "Orçamento publicado"],
+            ["sendServiceReady", "Serviço pronto"],
+          ] as const
+        ).map(([key, label]) => (
+          <label key={key} className="flex min-h-11 items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={Boolean(s[key])}
+              onChange={(e) => toggle(key, e.target.checked)}
+            />
+            {label}
+          </label>
+        ))}
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">Outras preferências</legend>
+        {(
+          [
             ["sendAppointmentReminder", "Lembrete de agendamento"],
             ["sendReturn", "Retorno próximo"],
-            ["sendServiceReady", "Serviço pronto"],
             ["sendDelivery", "Retirada concluída"],
             ["notifyReadyAuto", "Notificar automaticamente quando o serviço estiver pronto"],
             ["fallbackEmail", "Fallback para e-mail se WhatsApp indisponível"],

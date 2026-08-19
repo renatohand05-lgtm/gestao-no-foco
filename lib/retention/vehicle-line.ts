@@ -17,6 +17,14 @@ export function vehicleSummaryLine(input: {
   return `Veículo: ${placa}`;
 }
 
+export function vehicleIdentityLine(input: {
+  marca?: string | null;
+  modelo?: string | null;
+  placa?: string | null;
+}): string {
+  return vehicleSummaryLine(input).replace(/^Veículo:\s*/i, "").trim();
+}
+
 function safe(value?: string | null): string {
   if (value == null) return "";
   const trimmed = String(value).trim();

@@ -209,7 +209,9 @@ export async function enqueueCustomerNotification(input: {
       duplicated: res.duplicated,
       status: res.status,
       note:
-        res.status === "suppressed" && /ausente|sem canal/i.test(res.note)
+        res.status === "blocked" || res.status === "suppressed"
+          ? res.note
+          : res.status === "suppressed" && /ausente|sem canal/i.test(res.note)
           ? NO_CHANNEL_OPERATOR_COPY
           : res.note,
       waLink: res.waLink,

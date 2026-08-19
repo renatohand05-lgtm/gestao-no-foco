@@ -15,6 +15,7 @@ export const PIPELINE_STATUSES = [
   "failed",
   "cancelled",
   "suppressed",
+  "blocked",
 ] as const;
 export type PipelineStatus = (typeof PIPELINE_STATUSES)[number];
 
@@ -33,6 +34,7 @@ export const OPERATOR_STATUS_LABELS: Record<string, string> = {
   failed: "Falhou",
   cancelled: "Cancelada",
   suppressed: "Cancelada",
+  blocked: "Bloqueado pelo modo de teste",
 };
 
 const RANK: Record<string, number> = {
@@ -50,9 +52,20 @@ const RANK: Record<string, number> = {
   failed: 90,
   cancelled: 91,
   suppressed: 92,
+  blocked: 93,
 };
 
-export function operatorStatusLabel(status: string): string {
+export function operatorStatusLabel(
+  status: string,
+  errorCode?: string | null,
+): string {
+  if (
+    status === "blocked" ||
+    errorCode === "blocked_by_allowlist" ||
+    errorCode === "not_allowlisted"
+  ) {
+    return "Bloqueado pelo modo de teste";
+  }
   return OPERATOR_STATUS_LABELS[status] ?? "Aguardando";
 }
 
@@ -75,7 +88,9 @@ export function toPipelineStatus(input: {
 /** DELIVERED/READ só avançam. Nunca recua sent←delivered. */
 export function canAdvanceStatus(current: string, next: string): boolean {
   if (current === next) return false;
-  if (current === "cancelled" || current === "suppressed") return false;
+  if (current === "cancelled" || current === "suppressed" || current === "blocked") {
+    return false;
+  }
   const a = RANK[current];
   const b = RANK[next];
   if (a == null || b == null) return false;
@@ -93,7 +108,9 @@ export function kpiBucket(
   if (status === "delivered") return "delivered";
   if (status === "read") return "read";
   if (status === "failed") return "failed";
-  if (status === "cancelled" || status === "suppressed") return "cancelled";
+  if (status === "cancelled" || status === "suppressed" || status === "blocked") {
+    return "cancelled";
+  }
   return "awaiting";
 }
 

@@ -6,11 +6,13 @@ export type CommunicationTenantSettings = {
   whatsappMode: "disabled" | "manual_link" | "provider";
   emailMode: "disabled" | "provider";
   sendAppointmentCreated: boolean;
+  sendAppointmentConfirmed: boolean;
   sendAppointmentReminder: boolean;
   sendAppointmentCancelled: boolean;
   sendAppointmentRescheduled: boolean;
   sendReturn: boolean;
   sendServiceReady: boolean;
+  sendBudgetPublished: boolean;
   sendDelivery: boolean;
   notifyReadyAuto: boolean;
   preferredChannel: "whatsapp" | "email";
@@ -25,11 +27,13 @@ export const DEFAULT_COMMUNICATION_SETTINGS: CommunicationTenantSettings = {
   whatsappMode: "manual_link",
   emailMode: "disabled",
   sendAppointmentCreated: false,
+  sendAppointmentConfirmed: false,
   sendAppointmentReminder: false,
   sendAppointmentCancelled: false,
   sendAppointmentRescheduled: false,
   sendReturn: false,
   sendServiceReady: false,
+  sendBudgetPublished: false,
   sendDelivery: false,
   notifyReadyAuto: false,
   preferredChannel: "whatsapp",
@@ -52,6 +56,9 @@ export function parseCommunicationSettings(
       wa === "manual_link" || wa === "provider" ? wa : "disabled",
     emailMode: em === "provider" ? "provider" : "disabled",
     sendAppointmentCreated: bool(o.send_appointment_created ?? o.sendAppointmentCreated),
+    sendAppointmentConfirmed: bool(
+      o.send_appointment_confirmed ?? o.sendAppointmentConfirmed,
+    ),
     sendAppointmentReminder: bool(o.send_appointment_reminder ?? o.sendAppointmentReminder),
     sendAppointmentCancelled: bool(o.send_appointment_cancelled ?? o.sendAppointmentCancelled),
     sendAppointmentRescheduled: bool(
@@ -59,6 +66,7 @@ export function parseCommunicationSettings(
     ),
     sendReturn: bool(o.send_return ?? o.sendReturn),
     sendServiceReady: bool(o.send_service_ready ?? o.sendServiceReady),
+    sendBudgetPublished: bool(o.send_budget_published ?? o.sendBudgetPublished),
     sendDelivery: bool(o.send_delivery ?? o.sendDelivery),
     notifyReadyAuto: bool(o.notify_ready_auto ?? o.notifyReadyAuto),
     preferredChannel: preferred === "email" ? "email" : "whatsapp",
@@ -77,11 +85,13 @@ export function settingsToRow(tenantId: string, s: CommunicationTenantSettings) 
     whatsapp_mode: s.whatsappMode,
     email_mode: s.emailMode,
     send_appointment_created: s.sendAppointmentCreated,
+    send_appointment_confirmed: s.sendAppointmentConfirmed,
     send_appointment_reminder: s.sendAppointmentReminder,
     send_appointment_cancelled: s.sendAppointmentCancelled,
     send_appointment_rescheduled: s.sendAppointmentRescheduled,
     send_return: s.sendReturn,
     send_service_ready: s.sendServiceReady,
+    send_budget_published: s.sendBudgetPublished,
     send_delivery: s.sendDelivery,
     notify_ready_auto: s.notifyReadyAuto,
     preferred_channel: s.preferredChannel,
@@ -132,8 +142,11 @@ export function automationEventEnabled(
   settings: CommunicationTenantSettings,
   templateCode: string,
 ): boolean {
-  if (templateCode === "AGENDAMENTO_CRIADO" || templateCode === "AGENDAMENTO_CONFIRMADO") {
+  if (templateCode === "AGENDAMENTO_CRIADO") {
     return settings.sendAppointmentCreated;
+  }
+  if (templateCode === "AGENDAMENTO_CONFIRMADO") {
+    return settings.sendAppointmentConfirmed;
   }
   if (templateCode === "LEMBRETE") return settings.sendAppointmentReminder;
   if (templateCode === "CANCELAMENTO") return settings.sendAppointmentCancelled;
@@ -142,6 +155,7 @@ export function automationEventEnabled(
     return settings.sendReturn;
   }
   if (templateCode === "SERVICE_READY") return settings.sendServiceReady;
+  if (templateCode === "BUDGET_PUBLISHED") return settings.sendBudgetPublished;
   if (templateCode === "SERVICE_DELIVERED") return settings.sendDelivery;
   return false;
 }

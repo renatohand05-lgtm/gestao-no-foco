@@ -26,6 +26,7 @@ export const OUTBOX_STATUSES = [
   "scheduled",
   "queued",
   "suppressed",
+  "blocked",
 ] as const;
 export type OutboxStatus = (typeof OUTBOX_STATUSES)[number];
 

@@ -13,6 +13,12 @@ export function canManualResend(input: {
   if (input.actorTenantId !== input.rowTenantId) {
     return { ok: false, note: "Mensagem de outro tenant." };
   }
+  if (input.status === "delivered" || input.status === "read") {
+    return { ok: false, note: "Mensagem já entregue — reenvio bloqueado." };
+  }
+  if (input.status === "sent") {
+    return { ok: false, note: "Mensagem já enviada — não duplicar." };
+  }
   if (input.status !== "failed") {
     return { ok: false, note: "Só é possível reenviar mensagens que falharam." };
   }

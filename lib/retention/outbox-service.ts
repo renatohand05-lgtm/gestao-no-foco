@@ -15,10 +15,15 @@ import { correlationId, logCommunication, maskAddress } from "./observability";
 import { classifyFailure } from "./failures";
 import { isMissingColumn, isMissingRelation } from "./schema-guard";
 import {
+  blockedProviderSendResult,
   mapSendToOutboxPatch,
   sendViaChannelProvider,
   shouldDispatchReal,
 } from "./dispatch";
+import {
+  isTestAllowlisted,
+  resolveCommunicationMode,
+} from "./test-mode";
 import type { OutboxRow } from "./types";
 
 const OPTIONAL_ENQUEUE_FIELDS = [
@@ -30,6 +35,7 @@ const OPTIONAL_ENQUEUE_FIELDS = [
   "failure_kind",
   "next_retry_at",
   "resend_count",
+  "error_code",
 ] as const;
 
 export type EnqueueOutboxInput = {
@@ -95,7 +101,7 @@ export class NotificationOutboxService {
     const { data, error } = await this.supabase
       .from("notification_outbox" as never)
       .select(
-        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview",
+        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview, origin_kind, created_at, error_code, error_message, failure_kind, attempt_count, sent_at, delivered_at, failed_at, provider, provider_message_id, to_address",
       )
       .eq("tenant_id", this.tenantId)
       .eq("entity_type", entityType)
@@ -146,9 +152,22 @@ export class NotificationOutboxService {
         to: toAddress ?? undefined,
       });
     let note = decision.note;
+    let errorCode: string | null = null;
     if (mode === "provider" && decision.ok && !canSendNow) {
-      status = "suppressed";
-      note = "Destinatário fora da allowlist de teste.";
+      if (
+        resolveCommunicationMode() === "test" &&
+        !isTestAllowlisted({
+          phone: input.phone,
+          email: input.email,
+        })
+      ) {
+        status = "blocked";
+        note = "Bloqueado pelo modo de teste.";
+        errorCode = "blocked_by_allowlist";
+      } else {
+        status = "suppressed";
+        note = "Envio real bloqueado (kill switch ou provider).";
+      }
     }
     if (canSendNow) status = "queued";
     const payload = {
@@ -172,7 +191,8 @@ export class NotificationOutboxService {
       rendered_preview: input.message,
       created_by: input.userId ?? null,
       processed_at: new Date().toISOString(),
-      error_message: decision.ok && status !== "suppressed" ? null : note,
+      error_message: decision.ok && status !== "suppressed" && status !== "blocked" ? null : note,
+      error_code: errorCode,
       queued_at: new Date().toISOString(),
       to_address: toAddress,
       attempt_count: 0,
@@ -251,6 +271,7 @@ export class NotificationOutboxService {
     to: string | null;
     channel: CommChannel;
     body: string;
+    attemptCount?: number;
   }): Promise<{ status?: string; note?: string }> {
     if (!input.canSendNow || !input.id || !input.to) return {};
     const result = await sendViaChannelProvider({
@@ -262,16 +283,52 @@ export class NotificationOutboxService {
     const patch = mapSendToOutboxPatch(result);
     await this.patchSameRow(input.id, {
       status: patch.status,
+      provider: patch.provider,
       provider_message_id: patch.providerMessageId,
       error_code: patch.errorCode,
       sent_at: patch.sentAt,
       failed_at: patch.failedAt,
       processed_at: new Date().toISOString(),
       last_attempt_at: new Date().toISOString(),
-      attempt_count: 1,
+      attempt_count: input.attemptCount ?? 1,
       error_message: result.status === "failed" ? result.message : null,
     });
     return { status: result.status, note: result.message };
+  }
+
+  async retryDispatch(row: OutboxRow): Promise<{ status: string; note: string }> {
+    if (row.status === "delivered" || row.status === "read" || row.status === "sent") {
+      return { status: row.status, note: "Mensagem já enviada — não duplicar." };
+    }
+    const channel = row.channel as CommChannel;
+    const to = row.to_address ?? null;
+    if (!to) {
+      return { status: "failed", note: "Destino ausente." };
+    }
+    const canSendNow = shouldDispatchReal({ channel, to });
+    if (!canSendNow) {
+      const blocked = blockedProviderSendResult({ channel, to });
+      await this.patchSameRow(row.id, {
+        status: blocked.status,
+        error_code: blocked.errorCode ?? null,
+        error_message: blocked.message,
+        last_attempt_at: new Date().toISOString(),
+        processed_at: new Date().toISOString(),
+      });
+      return { status: blocked.status, note: blocked.message };
+    }
+    const result = await this.dispatchIfAllowed({
+      id: row.id,
+      canSendNow: true,
+      to,
+      channel,
+      body: row.rendered_preview ?? "",
+      attemptCount: (row.attempt_count ?? 0) + 1,
+    });
+    return {
+      status: result.status ?? row.status,
+      note: result.note ?? "",
+    };
   }
 
   async countRecent(hours = 1): Promise<number> {

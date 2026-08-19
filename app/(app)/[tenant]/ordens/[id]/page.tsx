@@ -25,6 +25,7 @@ import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { serviceReadyAllowed } from "@/lib/retention/service-ready";
 import { emailHealth, whatsappHealth } from "@/lib/retention/providers/runtime.ts";
 import { createCommunicationSettingsService } from "@/lib/retention/settings-service";
+import { createNotificationOutboxService } from "@/lib/retention/outbox-service";
 import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 
 export async function generateMetadata({
@@ -207,7 +208,7 @@ export default async function OsDetailPage({
   }
   if (recorrenciaResult) recorrencia = recorrenciaResult;
 
-  const [canFinalize, canNotify, commSettings, clienteContato] = await Promise.all([
+  const [canFinalize, canNotify, commSettings, clienteContato, communications] = await Promise.all([
     tenantHasMutationPermission(tenantSlug, "os.finalizar"),
     tenantHasMutationPermission(tenantSlug, "crm.notificacoes.enviar"),
     createCommunicationSettingsService(tenant.id)
@@ -219,6 +220,9 @@ export default async function OsDetailPage({
       .eq("tenant_id", tenant.id)
       .eq("id", os.cliente_id)
       .maybeSingle(),
+    createNotificationOutboxService(tenant.id)
+      .then((svc) => svc.listByEntity("os", id))
+      .catch(() => []),
   ]);
   const serviceReadyEnabled = serviceReadyAllowed(
     resolveSegmentContext({
@@ -289,6 +293,7 @@ export default async function OsDetailPage({
         clienteEmail={clienteContato.data?.email ?? null}
         whatsappProviderConfigured={whatsappHealth().canSendReal}
         emailProviderConfigured={emailHealth().canSendReal}
+        communications={communications}
       />
     </ExecutivePage>
   );

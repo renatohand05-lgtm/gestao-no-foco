@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
-import { isMissingRelation } from "./schema-guard";
+import { isMissingColumn, isMissingRelation } from "./schema-guard";
 import {
   DEFAULT_COMMUNICATION_SETTINGS,
   parseCommunicationSettings,
@@ -42,6 +42,16 @@ export class CommunicationSettingsService {
     if (error) {
       if (isMissingRelation(error, "communication_tenant_settings")) {
         throw new Error("Configuração de comunicação pendente (migration 35.2.2).");
+      }
+      if (isMissingColumn(error)) {
+        const lean = { ...row } as Record<string, unknown>;
+        delete lean.send_appointment_confirmed;
+        delete lean.send_budget_published;
+        const retry = await this.supabase
+          .from("communication_tenant_settings" as never)
+          .upsert(lean as never, { onConflict: "tenant_id" });
+        if (retry.error) throw new Error(retry.error.message);
+        return next;
       }
       throw new Error(error.message);
     }

@@ -137,6 +137,24 @@ export async function createAgendaEventAction(
         const { enqueueCustomerNotification } = await import(
           "@/lib/retention/notify"
         );
+        const { appointmentWhen } = await import(
+          "@/lib/retention/appointment-ctx"
+        );
+        const { vehicleIdentityLine } = await import(
+          "@/lib/retention/vehicle-line"
+        );
+        const supabase = await createClient();
+        let veiculo = "";
+        if (first.veiculo_id) {
+          const { data: veh } = await supabase
+            .from("veiculos")
+            .select("marca, modelo, placa")
+            .eq("tenant_id", tenant.id)
+            .eq("id", first.veiculo_id)
+            .maybeSingle();
+          veiculo = vehicleIdentityLine(veh ?? {});
+        }
+        const when = appointmentWhen(first.inicio);
         await enqueueCustomerNotification({
           tenantId: tenant.id,
           tenantName: tenant.name,
@@ -147,18 +165,13 @@ export async function createAgendaEventAction(
           templateCode: "AGENDAMENTO_CRIADO",
           offsetKey: "CREATED",
           messageCtx: {
-            data: first.inicio?.slice(0, 10) ?? "",
-            hora: first.inicio
-              ? new Date(first.inicio).toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "",
+            data: when.data,
+            hora: when.hora,
             servico: parsed.titulo,
+            veiculo,
           },
           userId: profile.id,
         });
-        const supabase = await createClient();
         const { data: cliente } = await supabase
           .from("clientes")
           .select("whatsapp, telefone, email")
@@ -284,7 +297,35 @@ export async function setAgendaEventStatusAction(
     ]);
     const parsed = agendaEventStatusSchema.parse(status);
     const svc = await createAgendaEventService(tenant.id);
-    await svc.setStatus(eventId, parsed as AgendaEventStatus);
+    const row = await svc.setStatus(eventId, parsed as AgendaEventStatus);
+    if (parsed === "confirmado" && row.cliente_id) {
+      try {
+        const { enqueueCustomerNotification } = await import(
+          "@/lib/retention/notify"
+        );
+        const { appointmentWhen } = await import(
+          "@/lib/retention/appointment-ctx"
+        );
+        const when = appointmentWhen(row.inicio);
+        await enqueueCustomerNotification({
+          tenantId: tenant.id,
+          tenantName: tenant.name,
+          segment: tenant.segment,
+          clienteId: row.cliente_id,
+          entityType: "agendamento",
+          entityId: row.id,
+          templateCode: "AGENDAMENTO_CONFIRMADO",
+          offsetKey: "CONFIRMED",
+          messageCtx: {
+            data: when.data,
+            hora: when.hora,
+            servico: row.titulo ?? "",
+          },
+        });
+      } catch {
+        /* outbox não bloqueia a confirmação */
+      }
+    }
     revalidateAgenda(tenantSlug, eventId);
     return { success: true, id: eventId };
   } catch (error) {

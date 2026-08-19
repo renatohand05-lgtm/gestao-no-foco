@@ -1,5 +1,8 @@
 export const COMMUNICATION_ORIGINS = [
   "appointment",
+  "appointment_created",
+  "appointment_confirmed",
+  "budget_published",
   "reminder",
   "return",
   "service_ready",
@@ -10,7 +13,10 @@ export const COMMUNICATION_ORIGINS = [
 export type CommunicationOrigin = (typeof COMMUNICATION_ORIGINS)[number];
 
 export const ORIGIN_LABELS: Record<CommunicationOrigin, string> = {
-  appointment: "Confirmação de agendamento",
+  appointment: "Agendamento",
+  appointment_created: "Agendamento criado",
+  appointment_confirmed: "Agendamento confirmado",
+  budget_published: "Orçamento",
   reminder: "Lembrete de agendamento",
   return: "Retorno/fidelização",
   service_ready: "Serviço pronto",
@@ -21,6 +27,9 @@ export const ORIGIN_LABELS: Record<CommunicationOrigin, string> = {
 
 export function originFromTemplate(code: string): CommunicationOrigin {
   if (code === "LEMBRETE") return "reminder";
+  if (code === "AGENDAMENTO_CRIADO") return "appointment_created";
+  if (code === "AGENDAMENTO_CONFIRMADO") return "appointment_confirmed";
+  if (code === "BUDGET_PUBLISHED") return "budget_published";
   if (code.startsWith("AGENDAMENTO") || code === "REAGENDAMENTO" || code === "CANCELAMENTO") {
     return "appointment";
   }

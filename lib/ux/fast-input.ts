@@ -1,3 +1,5 @@
+import { toStoredWhatsapp } from "../clientes/phone.ts";
+
 /**
  * Sprint 35.2.1 — helpers de cadastro rápido.
  * Sem inventar dados; só reusa contexto da navegação.
@@ -95,8 +97,8 @@ export function contactFromQuickPhone(phone: string): {
   whatsapp: string;
   telefone: string;
 } {
-  const trimmed = phone.trim();
-  return { whatsapp: trimmed, telefone: trimmed };
+  const stored = toStoredWhatsapp(phone) ?? phone.trim();
+  return { whatsapp: stored, telefone: stored };
 }
 
 export const CLIENT_ESSENTIAL_FIELDS = ["nome", "whatsapp", "email"] as const;

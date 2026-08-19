@@ -141,7 +141,8 @@ describe("9-14 agenda não cria OS; iniciar é idempotente e reaproveita context
     const conv = read("lib/crm/phase28/conversion-service.ts");
     assert.match(conv, /cliente_id: ev.cliente_id/);
     assert.match(conv, /extra.servico_id/);
-    assert.match(conv, /mecanico_id: ev.responsavel_id/);
+    assert.match(conv, /resolveOperationalAssignee/);
+    assert.match(conv, /assignee\?\.mechanicId/);
     assert.match(conv, /origem_atendimento: "agenda"/);
   });
 });

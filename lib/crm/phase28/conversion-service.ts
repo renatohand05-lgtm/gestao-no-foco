@@ -11,6 +11,8 @@ import {
   pickScheduledVehicle,
 } from "@/lib/agenda/operational-start";
 import { createClienteTarefaService } from "@/lib/crm/cliente-tarefa-service";
+import { createOsMecanicoService } from "@/lib/mecanicos/os-mecanico-service";
+import { resolveOperationalAssignee } from "@/lib/mecanicos/resolve-operational-assignee.ts";
 import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { librarySegmentForContext } from "@/lib/segments/library-segment.ts";
@@ -440,11 +442,19 @@ export class ConversionService {
       : null;
 
     const osSvc = await createOrdemServicoService(this.tenantId);
+    const assignee = ev.responsavel_id
+      ? await resolveOperationalAssignee({
+          supabase: this.supabase,
+          tenantId: this.tenantId,
+          selectedId: ev.responsavel_id,
+          segmentContext: ctx,
+        })
+      : null;
     const os = await osSvc.create(
       {
         cliente_id: ev.cliente_id,
         veiculo_id: picked.veiculoId,
-        mecanico_id: ev.responsavel_id ?? "",
+        mecanico_id: assignee?.mechanicId ?? "",
         observacoes: `${marker} ${ev.titulo}`.trim(),
         reclamacao_cliente: ev.observacao,
         prioridade: "normal",
@@ -460,6 +470,15 @@ export class ConversionService {
       },
     );
 
+    if (assignee) {
+      const osMec = await createOsMecanicoService(this.tenantId);
+      await osMec.atribuir({
+        ordemId: os.id,
+        mecanicoId: assignee.mechanicId,
+        papel: "principal",
+      });
+    }
+
     if (lava) {
       await this.supabase
         .from("ordens_servico")
@@ -471,7 +490,7 @@ export class ConversionService {
     if (extra.servico_id) {
       await osSvc.attachScheduledCatalogItem(os.id, extra.servico_id, userId, {
         autoApprove: false,
-        mecanicoId: ev.responsavel_id,
+        mecanicoId: assignee?.mechanicId ?? null,
       });
     }
 

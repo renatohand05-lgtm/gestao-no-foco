@@ -70,6 +70,15 @@ export function mapDatabaseErrorToUserMessage(
   }
 
   if (
+    message.includes("23503") ||
+    message.includes("foreign key") ||
+    message.includes("ordens_servico_mecanico_id_fkey") ||
+    message.includes("ordem_servico_itens_mecanico_id_fkey")
+  ) {
+    return "Não foi possível vincular o mecânico selecionado. Atualize a seleção e tente novamente.";
+  }
+
+  if (
     message.includes("unrecognized format()") ||
     message.includes("format() type specifier")
   ) {
@@ -79,6 +88,7 @@ export function mapDatabaseErrorToUserMessage(
   if (
     raw.includes("Possível duplicidade") ||
     raw.includes("não pode") ||
+    raw.includes("não está disponível nesta empresa") ||
     raw.includes("Informe") ||
     raw.includes("Estorne")
   ) {

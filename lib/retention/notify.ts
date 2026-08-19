@@ -99,17 +99,28 @@ export async function enqueueCustomerNotification(input: {
   );
   const phone = cliente.whatsapp ?? cliente.telefone;
   const email = cliente.email;
+  const { resolveCustomerChannels } = await import("./customer-channels.ts");
+  const resolved = resolveCustomerChannels(cliente);
   const channels = input.forceChannel
     ? [input.forceChannel]
     : pickChannels({
         settings,
         preferred: settings.preferredChannel,
-        whatsappAvailable: Boolean(phone),
-        emailAvailable: Boolean(email?.includes("@")),
+        whatsappAvailable: resolved.whatsappAvailable,
+        emailAvailable: resolved.emailAvailable,
         explicit: input.explicit,
       });
   const outbox = await createNotificationOutboxService(input.tenantId);
   if (channels.length === 0) {
+    if (resolved.whatsappAvailable || resolved.emailAvailable) {
+      return {
+        duplicated: false,
+        status: "cancelled",
+        note: "Canais do cliente disponíveis; envio automático desligado ou provider não configurado.",
+        channel: null,
+        channels: [],
+      };
+    }
     const res = await outbox.enqueue({
       clienteId: input.clienteId,
       channel: "whatsapp",

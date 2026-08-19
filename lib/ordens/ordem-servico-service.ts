@@ -14,6 +14,10 @@ import {
   effectiveItemAprovacaoStatus,
   type OsStatus,
 } from "@/lib/ordens/os-status";
+import {
+  osColumnMechanicId,
+  resolveOperationalAssignee,
+} from "@/lib/mecanicos/resolve-operational-assignee.ts";
 import { formatVeiculoLabel } from "@/lib/ordens/veiculo-shared";
 import {
   OS_RESPONSAVEL_FALLBACK,
@@ -752,6 +756,12 @@ export class OrdemServicoService {
     }
     await this.assertVeiculo(veiculoId, input.cliente_id);
 
+    const assignee = await resolveOperationalAssignee({
+      supabase: this.supabase,
+      tenantId: this.tenantId,
+      selectedId: input.mecanico_id,
+    });
+
     const { data, error } = await this.supabase
       .from("ordens_servico")
       .insert({
@@ -759,7 +769,7 @@ export class OrdemServicoService {
         cliente_id: input.cliente_id,
         veiculo_id: veiculoId,
         status: options?.initialStatus ?? "rascunho",
-        mecanico_id: emptyUuid(input.mecanico_id),
+        mecanico_id: osColumnMechanicId(assignee),
         consultor_id: emptyUuid(input.consultor_id),
         centro_custo_id: emptyUuid(input.centro_custo_id),
         quilometragem_entrada: input.quilometragem_entrada ?? null,
@@ -827,6 +837,19 @@ export class OrdemServicoService {
     const valorUnitario = Number(prod.preco_venda ?? 0);
     const custo = prod.custo == null ? null : Number(prod.custo);
     const aprovacao = options?.autoApprove ? "aprovado" : "pendente";
+    const itemAssignee = options?.mecanicoId
+      ? await resolveOperationalAssignee({
+          supabase: this.supabase,
+          tenantId: this.tenantId,
+          selectedId: options.mecanicoId,
+        })
+      : current.mecanico_id
+        ? await resolveOperationalAssignee({
+            supabase: this.supabase,
+            tenantId: this.tenantId,
+            selectedId: current.mecanico_id,
+          }).catch(() => null)
+        : null;
 
     const { error } = await this.supabase.from("ordem_servico_itens").insert({
       tenant_id: this.tenantId,
@@ -841,7 +864,7 @@ export class OrdemServicoService {
       acrescimo: 0,
       valor_total: valorUnitario,
       custo_unitario: custo,
-      mecanico_id: emptyUuid(options?.mecanicoId ?? null),
+      mecanico_id: osColumnMechanicId(itemAssignee),
       peca_origem: "estoque",
       estoque_status: "nao_aplicavel",
       aprovacao_status: aprovacao,
@@ -1155,7 +1178,13 @@ export class OrdemServicoService {
         acrescimo: input.acrescimo,
         valor_total: total,
         custo_unitario: custo,
-        mecanico_id: emptyUuid(input.mecanico_id),
+        mecanico_id: osColumnMechanicId(
+          await resolveOperationalAssignee({
+            supabase: this.supabase,
+            tenantId: this.tenantId,
+            selectedId: input.mecanico_id || current.mecanico_id,
+          }).catch(() => null),
+        ),
         horas_previstas: input.horas_previstas ?? null,
         peca_origem: isPersonalizado ? "outro" : input.peca_origem,
         fornecedor_sugerido_id: emptyUuid(input.fornecedor_sugerido_id),
@@ -1533,7 +1562,13 @@ export class OrdemServicoService {
         acrescimo: input.acrescimo,
         valor_total: total,
         custo_unitario: input.custo_unitario ?? null,
-        mecanico_id: emptyUuid(input.mecanico_id),
+        mecanico_id: osColumnMechanicId(
+          await resolveOperationalAssignee({
+            supabase: this.supabase,
+            tenantId: this.tenantId,
+            selectedId: input.mecanico_id,
+          }).catch(() => null),
+        ),
         horas_previstas: input.horas_previstas ?? null,
         peca_origem: input.peca_origem,
         fornecedor_sugerido_id: emptyUuid(input.fornecedor_sugerido_id),

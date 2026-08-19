@@ -153,8 +153,8 @@ describe("35.2.1 agendamento, smart defaults e negócio sem cliente", () => {
     assert.match(href, /cliente_id=/);
     assert.match(href, /inicio=/);
     const phone = contactFromQuickPhone("11988887777");
-    assert.equal(phone.whatsapp, "11988887777");
-    assert.equal(phone.telefone, "11988887777");
+    assert.equal(phone.whatsapp, "+5511988887777");
+    assert.equal(phone.telefone, "+5511988887777");
     assert.equal(contactFromQuickPhone("").whatsapp, "");
   });
 

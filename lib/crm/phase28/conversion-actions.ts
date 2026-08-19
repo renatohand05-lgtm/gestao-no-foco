@@ -6,6 +6,7 @@ import { getCurrentProfile, getCurrentUser } from "@/lib/auth/session";
 import { createConversionService } from "@/lib/crm/phase28/conversion-service";
 import { requireTenantMutationPermission } from "@/lib/rbac/mutation-auth";
 import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { toActionError } from "@/lib/supabase/friendly-error";
 import { requireTenant } from "@/lib/tenants";
 import type { ActionResult } from "@/types/action-result";
 
@@ -176,12 +177,10 @@ export async function startAttendanceFromAgendaAction(
       redirectPath: res.redirectPath,
     };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao iniciar atendimento a partir da agenda.",
-    };
+    return toActionError(
+      error,
+      "Erro ao iniciar atendimento a partir da agenda.",
+      "agenda.toOs",
+    );
   }
 }

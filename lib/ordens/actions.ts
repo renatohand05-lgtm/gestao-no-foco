@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { getCurrentProfile } from "@/lib/auth/session";
 import { createClienteService } from "@/lib/clientes/cliente-service";
+import { toStoredWhatsapp } from "@/lib/clientes/phone";
 import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import {
   createVeiculoService,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/ordens/veiculo-service";
 import { createDescontoService } from "@/lib/descontos/desconto-service";
 import { createOsMecanicoService } from "@/lib/mecanicos/os-mecanico-service";
+import { resolveOperationalAssignee } from "@/lib/mecanicos/resolve-operational-assignee.ts";
 import {
   abrirOsComClienteAtomico,
   createOsClienteSearchService,
@@ -190,8 +192,12 @@ export async function createOrdemServicoIntegradaAction(
       const created = await clientes.create(
         {
           nome: parsed.cliente?.nome ?? "",
-          telefone: parsed.cliente?.telefone ?? parsed.cliente?.whatsapp ?? null,
-          whatsapp: parsed.cliente?.whatsapp ?? parsed.cliente?.telefone ?? null,
+          telefone:
+            toStoredWhatsapp(parsed.cliente?.telefone) ??
+            toStoredWhatsapp(parsed.cliente?.whatsapp),
+          whatsapp:
+            toStoredWhatsapp(parsed.cliente?.whatsapp) ??
+            toStoredWhatsapp(parsed.cliente?.telefone),
           email: parsed.cliente?.email ?? null,
           documento: parsed.cliente?.documento ?? null,
           tipo_pessoa: parsed.cliente?.tipo_pessoa ?? "pf",
@@ -280,19 +286,27 @@ export async function createOrdemServicoIntegradaAction(
     }
 
     if (parsed.mecanico_id) {
-      try {
-        const osMec = await createOsMecanicoService(tenant.id);
-        await osMec.atribuir({
-          ordemId: result.os_id,
-          mecanicoId: parsed.mecanico_id,
-          papel: "principal",
-        });
-      } catch (assignError) {
-        console.warn(
-          "[ordens] mecânico não vinculado na abertura:",
-          assignError instanceof Error ? assignError.message : assignError,
+      const assignee = await resolveOperationalAssignee({
+        supabase,
+        tenantId: tenant.id,
+        selectedId: parsed.mecanico_id,
+        segmentContext: resolveSegmentContext({
+          segment: tenant.segment,
+          segmentVersion: tenant.segment_version,
+          segmentConfig: tenant.segment_config,
+        }),
+      });
+      if (!assignee) {
+        throw new Error(
+          "O mecânico selecionado não está disponível nesta empresa. Selecione novamente.",
         );
       }
+      const osMec = await createOsMecanicoService(tenant.id);
+      await osMec.atribuir({
+        ordemId: result.os_id,
+        mecanicoId: assignee.mechanicId,
+        papel: "principal",
+      });
     }
 
     const ctx = resolveSegmentContext({

@@ -12,7 +12,14 @@ import {
   agendaEventStatusSchema,
 } from "@/lib/agenda/validations";
 import { createRbacSupabaseAdapter } from "@/lib/enterprise";
-import { formatAppointmentCommNote } from "@/lib/retention/comm-note";
+import {
+  formatCustomerChannelAvailability,
+} from "@/lib/retention/comm-note";
+import { resolveCustomerChannels } from "@/lib/retention/customer-channels";
+import {
+  isEmailKillSwitchOff,
+  isWhatsAppKillSwitchOff,
+} from "@/lib/retention/providers/runtime";
 import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { createClient } from "@/lib/supabase/server";
@@ -130,7 +137,7 @@ export async function createAgendaEventAction(
         const { enqueueCustomerNotification } = await import(
           "@/lib/retention/notify"
         );
-        const queued = await enqueueCustomerNotification({
+        await enqueueCustomerNotification({
           tenantId: tenant.id,
           tenantName: tenant.name,
           segment: tenant.segment,
@@ -151,12 +158,19 @@ export async function createAgendaEventAction(
           },
           userId: profile.id,
         });
-        commNote = formatAppointmentCommNote({
-          channels: queued.channels ?? [],
-          emptyNote:
-            queued.status === "suppressed" || queued.note.includes("sem canal")
-              ? queued.note
-              : "Cliente sem canal disponível",
+        const supabase = await createClient();
+        const { data: cliente } = await supabase
+          .from("clientes")
+          .select("whatsapp, telefone, email")
+          .eq("tenant_id", tenant.id)
+          .eq("id", first.cliente_id)
+          .maybeSingle();
+        const resolved = resolveCustomerChannels(cliente ?? {});
+        commNote = formatCustomerChannelAvailability({
+          whatsappAvailable: resolved.whatsappAvailable,
+          emailAvailable: resolved.emailAvailable,
+          whatsappProviderConfigured: !isWhatsAppKillSwitchOff(),
+          emailProviderConfigured: !isEmailKillSwitchOff(),
         });
       }
     } catch {

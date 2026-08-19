@@ -40,3 +40,28 @@ export function formatAppointmentCommNote(input: {
   );
   return [header, ...lines].join("\n");
 }
+
+/** Canal do cliente ≠ provider configurado. */
+export function formatCustomerChannelAvailability(input: {
+  whatsappAvailable: boolean;
+  emailAvailable: boolean;
+  whatsappProviderConfigured?: boolean;
+  emailProviderConfigured?: boolean;
+}): string {
+  if (!input.whatsappAvailable && !input.emailAvailable) {
+    return "Cliente sem canal disponível";
+  }
+  const waProvider = input.whatsappProviderConfigured === true;
+  const emProvider = input.emailProviderConfigured === true;
+  const wa = input.whatsappAvailable
+    ? waProvider
+      ? "WhatsApp: disponível"
+      : "WhatsApp: disponível · provider não configurado"
+    : "WhatsApp: sem número";
+  const em = input.emailAvailable
+    ? emProvider
+      ? "Email: disponível"
+      : "Email: disponível · provider não configurado"
+    : "Email: sem endereço";
+  return ["Confirmação preparada", wa, em].join("\n");
+}

@@ -1,3 +1,4 @@
+import { toStoredWhatsapp } from "@/lib/clientes/phone";
 import {
   maskCep,
   maskDocumento,
@@ -13,8 +14,9 @@ export function normalizeClienteFormValues(
   values: ClienteFormValues,
 ): CreateClienteInput {
   const documento = onlyDigits(values.documento ?? "");
-  const telefone = onlyDigits(values.telefone ?? "");
-  const whatsapp = onlyDigits(values.whatsapp ?? "");
+  const whatsapp =
+    toStoredWhatsapp(values.whatsapp) ?? toStoredWhatsapp(values.telefone);
+  const telefone = toStoredWhatsapp(values.telefone) ?? whatsapp;
   const cep = onlyDigits(values.cep ?? "");
 
   return {

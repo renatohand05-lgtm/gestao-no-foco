@@ -1,3 +1,5 @@
+import { canAdvanceToApproval } from "./budget-gate.ts";
+
 /** Ciclo oficial da OS — Sprint 13.19 */
 
 export const OS_STATUS = [
@@ -32,7 +34,7 @@ export const OS_STATUS_LABELS: Record<OsStatus, string> = {
   em_execucao: "Em execução",
   aguardando_peca: "Aguardando peça",
   aguardando_cliente: "Aguardando cliente",
-  pronto_para_entrega: "Pronto para entrega",
+  pronto_para_entrega: "Pronto para retirada",
   entregue: "Entregue",
   faturado: "Faturado",
   cancelado: "Cancelado",
@@ -42,7 +44,12 @@ export const OS_STATUS_LABELS: Record<OsStatus, string> = {
 
 /** Transições válidas (destino permitido a partir de origem). */
 export const OS_TRANSITIONS: Record<OsStatus, OsStatus[]> = {
-  rascunho: ["aguardando_diagnostico", "aguardando_orcamento", "cancelado"],
+  rascunho: [
+    "aguardando_diagnostico",
+    "aguardando_orcamento",
+    "aguardando_aprovacao",
+    "cancelado",
+  ],
   aguardando_diagnostico: [
     "diagnostico_concluido",
     "aguardando_orcamento",
@@ -63,6 +70,7 @@ export const OS_TRANSITIONS: Record<OsStatus, OsStatus[]> = {
     "aguardando_peca",
     "aguardando_cliente",
     "pronto_para_entrega",
+    "aguardando_aprovacao",
     "cancelado",
   ],
   aguardando_peca: ["em_execucao", "aguardando_cliente", "cancelado"],
@@ -170,38 +178,70 @@ export function canEditOrcamento(
     return [
       "rascunho",
       "aguardando_diagnostico",
+      "em_execucao",
       ...afterDiagnosis,
     ].includes(status);
   }
   return afterDiagnosis.includes(status);
 }
 
+export function diagnosisCompletedFromOsStatus(status: string): boolean {
+  return !isBeforePipeline(status, "diagnostico_concluido");
+}
+
 export function canApplyAprovacao(
   status: string,
   requireDiagnosis = true,
-  extras?: { publishedBudget?: boolean },
+  extras?: { publishedBudget?: boolean; diagnosisCompleted?: boolean },
 ): boolean {
-  if (extras?.publishedBudget) {
-    return ![
+  return canAdvanceToApproval({
+    workflowConfig: { automotiveWorkflow: requireDiagnosis !== false },
+    budgetPublished: extras?.publishedBudget === true,
+    diagnosisCompleted:
+      extras?.diagnosisCompleted ?? diagnosisCompletedFromOsStatus(status),
+    osStatus: status,
+  }).ok;
+}
+
+export function itemAprovacaoIsApproved(status: string): boolean {
+  return status === "aprovado" || status === "approved";
+}
+
+export function shouldAdvanceToAguardandoAprovacaoOnPublish(input: {
+  osStatus: string;
+  itens: Array<{ aprovacao_status?: string | null }>;
+}): boolean {
+  const status = input.osStatus;
+  if (
+    [
+      "aguardando_aprovacao",
+      "aprovado",
+      "parcialmente_aprovado",
+      "pronto_para_entrega",
+      "entregue",
+      "faturado",
       "cancelado",
       "cancelada",
-      "faturado",
-      "entregue",
-    ].includes(status);
+    ].includes(status)
+  ) {
+    return false;
   }
-  const afterDiagnosis = [
-    "diagnostico_concluido",
-    "aguardando_orcamento",
-    "aguardando_aprovacao",
-  ];
-  if (!requireDiagnosis) {
-    return [
-      "rascunho",
-      "aguardando_diagnostico",
-      ...afterDiagnosis,
-    ].includes(status);
+  if (status === "em_execucao") {
+    return input.itens.every(
+      (item) => !itemAprovacaoIsApproved(String(item.aprovacao_status ?? "pendente")),
+    );
   }
-  return afterDiagnosis.includes(status);
+  return true;
+}
+
+export function canMarkAguardandoRetirada(status: string): boolean {
+  return [
+    "aprovado",
+    "parcialmente_aprovado",
+    "em_execucao",
+    "aguardando_peca",
+    "aguardando_cliente",
+  ].includes(status);
 }
 
 /** Item não pode aparecer como aprovado antes da OS chegar à aprovação. */

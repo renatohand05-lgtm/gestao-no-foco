@@ -123,7 +123,7 @@ const OFICINA: Partial<Record<MessageTemplateCode, string>> = {
 
 const LAVA: Partial<Record<MessageTemplateCode, string>> = {
   SERVICE_READY:
-    "Olá, {{cliente_nome}}!\nSeu veículo está pronto.\n\nO atendimento realizado pela {{empresa_nome}} foi concluído e o veículo já está disponível para retirada.\n\n{{veiculo}}\n\nAté breve.",
+    "Olá, {{cliente_nome}}.\nSeu veículo está pronto para retirada.\n{{veiculo}}\n\nVocê já pode realizar a retirada.\n\n{{empresa_nome}}",
 };
 
 export function templateFor(input: {

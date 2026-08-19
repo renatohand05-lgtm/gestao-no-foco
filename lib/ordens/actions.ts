@@ -45,6 +45,7 @@ import { createPermissionService } from "@/lib/permissoes/permission-service";
 import { createClient } from "@/lib/supabase/server";
 import { toActionError } from "@/lib/supabase/friendly-error";
 import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
+import { diagnosisCompletedFromOsStatus } from "@/lib/ordens/os-status";
 import { createOrcamentoVersaoService } from "@/lib/ordens/orcamento-versao-service";
 import { librarySegmentForContext } from "@/lib/segments/library-segment.ts";
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
@@ -871,9 +872,12 @@ export async function applyOsAprovacaoAction(
     const publishedBudget = versoes.some(
       (v) => v.status === "publicado" || v.status === "enviado" || v.status === "pronto",
     );
+    const os = await service.getById(id);
+    if (!os) throw new Error("OS não encontrada.");
     await service.applyAprovacao(id, parsed, profile?.id ?? null, {
       requireDiagnosis: ui.automotiveWorkflow,
       publishedBudget,
+      diagnosisCompleted: diagnosisCompletedFromOsStatus(os.status),
     });
     revalidateOs(tenantSlug, id);
     return { success: true, id };

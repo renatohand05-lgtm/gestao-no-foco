@@ -39,7 +39,11 @@ describe("budget gate", () => {
     assert.equal(canEditOrcamento("aguardando_diagnostico", false), true);
     assert.equal(canEditOrcamento("aguardando_diagnostico", true), false);
     assert.equal(canEditOrcamento("diagnostico_concluido", true), true);
-    assert.equal(canApplyAprovacao("rascunho", false), true);
+    assert.equal(canApplyAprovacao("rascunho", false), false);
+    assert.equal(
+      canApplyAprovacao("rascunho", false, { publishedBudget: true }),
+      true,
+    );
     for (const segment of [
       "barbearia",
       "clinica_estetica",
@@ -54,7 +58,7 @@ describe("budget gate", () => {
   it("gate central sem if(segment ===) no workspace/service", () => {
     const ws = read("components/ordens/os-workspace.tsx");
     const svc = read("lib/ordens/ordem-servico-service.ts");
-    assert.match(ws, /requiresDiagnosisBeforeBudget/);
+    assert.match(ws, /canAdvanceToApproval/);
     assert.match(ws, /skipDiagnosticoOrcamentoAction/);
     assert.doesNotMatch(ws, /if \(segment ===/);
     assert.match(svc, /requireDiagnosis/);

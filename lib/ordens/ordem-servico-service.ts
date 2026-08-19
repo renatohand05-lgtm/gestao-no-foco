@@ -4,16 +4,19 @@ import { createClient } from "@/lib/supabase/server";
 import { createVendaService } from "@/lib/vendas/venda-service";
 import {
   assertTransition,
-  canApplyAprovacao,
   canEditOrcamento,
   canFaturarStatus,
+  canMarkAguardandoRetirada,
+  diagnosisCompletedFromOsStatus,
   findTransitionPath,
   isTerminalCancelado,
+  itemAprovacaoIsApproved,
   getOsChecklistTemplate,
   OS_STATUS_LABELS,
   effectiveItemAprovacaoStatus,
   type OsStatus,
 } from "@/lib/ordens/os-status";
+import { canAdvanceToApproval } from "@/lib/ordens/budget-gate";
 import {
   osColumnMechanicId,
   resolveOperationalAssignee,
@@ -1679,21 +1682,29 @@ export class OrdemServicoService {
     osId: string,
     input: OsAprovacaoFormValues,
     userId: string | null,
-    options?: { requireDiagnosis?: boolean; publishedBudget?: boolean },
+    options?: {
+      requireDiagnosis?: boolean;
+      publishedBudget?: boolean;
+      diagnosisCompleted?: boolean;
+    },
   ) {
     const current = await this.getById(osId);
     if (!current) throw new Error("OS não encontrada.");
     if (current.itens.length === 0) {
       throw new Error("Adicione itens ao orçamento antes de aprovar.");
     }
-    if (
-      !canApplyAprovacao(current.status, options?.requireDiagnosis !== false, {
-        publishedBudget: options?.publishedBudget,
-      })
-    ) {
-      throw new Error(
-        `Status atual (${OS_STATUS_LABELS[current.status as OsStatus] ?? current.status}) não permite aprovação. Publique o orçamento primeiro.`,
-      );
+    const approvalGate = canAdvanceToApproval({
+      workflowConfig: {
+        automotiveWorkflow: options?.requireDiagnosis !== false,
+      },
+      budgetPublished: options?.publishedBudget === true,
+      diagnosisCompleted:
+        options?.diagnosisCompleted ??
+        diagnosisCompletedFromOsStatus(current.status),
+      osStatus: current.status,
+    });
+    if (!approvalGate.ok) {
+      throw new Error(approvalGate.reason);
     }
 
     if (current.status !== "aguardando_aprovacao") {
@@ -1710,7 +1721,7 @@ export class OrdemServicoService {
 
     if (input.modo === "reprovar") {
       for (const item of current.itens) {
-        await this.supabase
+        const { error } = await this.supabase
           .from("ordem_servico_itens")
           .update({
             aprovacao_status: "reprovado",
@@ -1724,6 +1735,7 @@ export class OrdemServicoService {
           } as never)
           .eq("id", item.id)
           .eq("tenant_id", this.tenantId);
+        if (error) throw new Error("Não foi possível reprovar o item.");
       }
       nextStatus = "aguardando_orcamento";
     } else if (input.modo === "total") {
@@ -1732,7 +1744,7 @@ export class OrdemServicoService {
           item.tipo_item === "produto" &&
           item.peca_origem === "estoque" &&
           item.estoque_status === "disponivel";
-        await this.supabase
+        const { error } = await this.supabase
           .from("ordem_servico_itens")
           .update({
             aprovacao_status: "aprovado",
@@ -1742,6 +1754,7 @@ export class OrdemServicoService {
           } as never)
           .eq("id", item.id)
           .eq("tenant_id", this.tenantId);
+        if (error) throw new Error("Não foi possível aprovar o item.");
       }
       nextStatus = "aprovado";
     } else {
@@ -1756,7 +1769,7 @@ export class OrdemServicoService {
           item.tipo_item === "produto" &&
           item.peca_origem === "estoque" &&
           item.estoque_status === "disponivel";
-        await this.supabase
+        const { error } = await this.supabase
           .from("ordem_servico_itens")
           .update({
             aprovacao_status: ok ? "aprovado" : "reprovado",
@@ -1767,6 +1780,7 @@ export class OrdemServicoService {
           } as never)
           .eq("id", item.id)
           .eq("tenant_id", this.tenantId);
+        if (error) throw new Error("Não foi possível persistir a aprovação do item.");
       }
       nextStatus = "parcialmente_aprovado";
     }
@@ -1793,7 +1807,7 @@ export class OrdemServicoService {
     if (!current) throw new Error("OS não encontrada.");
     const item = current.itens.find((i) => i.id === itemId);
     if (!item) throw new Error("Item não encontrado.");
-    if (item.aprovacao_status !== "aprovado") {
+    if (!itemAprovacaoIsApproved(item.aprovacao_status)) {
       throw new Error("Item não aprovado não entra em execução.");
     }
 
@@ -1890,7 +1904,9 @@ export class OrdemServicoService {
     const current = await this.getById(osId);
     if (!current) throw new Error("OS não encontrada.");
 
-    const aprovados = current.itens.filter((i) => i.aprovacao_status === "aprovado");
+    const aprovados = current.itens.filter((i) =>
+      itemAprovacaoIsApproved(i.aprovacao_status),
+    );
     const pendentes = aprovados.filter((i) => i.execucao_status !== "concluido");
     if (pendentes.length > 0 && !input.forcar) {
       throw new Error(
@@ -1901,15 +1917,13 @@ export class OrdemServicoService {
       throw new Error("Informe o motivo da exceção.");
     }
 
-    if (current.status !== "entregue") {
-      if (current.status === "em_execucao" || current.status === "aguardando_cliente") {
-        await this.advanceTo(
-          osId,
-          "pronto_para_entrega",
-          userId,
-          "Serviços concluídos — pronto para entrega",
-        );
-      }
+    if (current.status === "entregue") {
+      return;
+    }
+    if (current.status !== "pronto_para_entrega") {
+      throw new Error(
+        "Finalize os serviços e marque o veículo como pronto para retirada antes de concluir a entrega.",
+      );
     }
 
     const today = new Date().toISOString().slice(0, 10);
@@ -1928,14 +1942,12 @@ export class OrdemServicoService {
       .eq("tenant_id", this.tenantId);
     if (error) throw new Error(error.message);
 
-    if (current.status !== "entregue") {
-      await this.advanceTo(
-        osId,
-        "entregue",
-        userId,
-        input.motivo_excecao ?? "Entrega ao cliente",
-      );
-    }
+    await this.advanceTo(
+      osId,
+      "entregue",
+      userId,
+      input.motivo_excecao ?? "Entrega ao cliente",
+    );
 
     await this.recordEvent(osId, userId, {
       tipo: "entrega",
@@ -1951,19 +1963,40 @@ export class OrdemServicoService {
     const current = await this.getById(osId);
     if (!current) throw new Error("OS não encontrada.");
     if (isTerminalCancelado(current.status)) {
-      throw new Error("OS cancelada não pode ser finalizada.");
+      throw new Error("Atendimento cancelado não pode ser finalizado.");
     }
     if (current.status === "entregue" || current.status === "faturado") {
-      throw new Error("OS já entregue.");
-    }
-    if (current.status !== "pronto_para_entrega") {
-      await this.advanceTo(
-        osId,
-        "pronto_para_entrega",
-        userId,
-        "Serviço concluído — aguardando retirada",
+      throw new Error(
+        "Este atendimento já foi entregue. A retirada já foi registrada.",
       );
     }
+    if (current.status === "pronto_para_entrega") {
+      return this.getById(osId);
+    }
+    if (!canMarkAguardandoRetirada(current.status)) {
+      throw new Error(
+        "Finalize os serviços antes de marcar o veículo como pronto.",
+      );
+    }
+    const executaveis = current.itens.filter(
+      (item) =>
+        itemAprovacaoIsApproved(item.aprovacao_status) &&
+        item.execucao_status !== "cancelado",
+    );
+    if (executaveis.length === 0) {
+      throw new Error("Não há serviços aprovados para finalizar.");
+    }
+    if (executaveis.some((item) => item.execucao_status !== "concluido")) {
+      throw new Error(
+        "Finalize os serviços antes de marcar o veículo como pronto.",
+      );
+    }
+    await this.advanceTo(
+      osId,
+      "pronto_para_entrega",
+      userId,
+      "Serviço concluído — aguardando retirada",
+    );
     const today = new Date().toISOString().slice(0, 10);
     const { error } = await this.supabase
       .from("ordens_servico")
@@ -2041,7 +2074,9 @@ export class OrdemServicoService {
     }
 
     const aprovados = current.itens.filter(
-      (i) => i.aprovacao_status === "aprovado" && i.execucao_status !== "cancelado",
+      (i) =>
+        itemAprovacaoIsApproved(i.aprovacao_status) &&
+        i.execucao_status !== "cancelado",
     );
     if (aprovados.length === 0) {
       throw new Error("Não há itens aprovados para faturar.");

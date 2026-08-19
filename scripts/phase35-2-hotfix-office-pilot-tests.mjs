@@ -109,6 +109,12 @@ describe("checklist / budget / finalize", () => {
       canApplyAprovacao("aguardando_diagnostico", true, {
         publishedBudget: true,
       }),
+      false,
+    );
+    assert.equal(
+      canApplyAprovacao("diagnostico_concluido", true, {
+        publishedBudget: true,
+      }),
       true,
     );
     assert.equal(

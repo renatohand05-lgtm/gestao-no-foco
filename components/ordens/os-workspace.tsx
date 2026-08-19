@@ -32,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ExecutiveSection } from "@/components/executive";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { requiresDiagnosisBeforeBudget } from "@/lib/ordens/budget-gate";
 import {
   applyOsAprovacaoAction,
   changeOsStatusAction,
@@ -48,11 +47,14 @@ import {
 } from "@/lib/ordens/actions";
 import { formatOsEventoLine } from "@/lib/ordens/os-event-format";
 import { formatCurrency } from "@/lib/format";
+import { requiresDiagnosisBeforeBudget, canAdvanceToApproval } from "@/lib/ordens/budget-gate";
 import {
-  canApplyAprovacao,
   canEditOrcamento,
   canFaturarStatus,
+  canMarkAguardandoRetirada,
   canRegisterDiagnostico,
+  diagnosisCompletedFromOsStatus,
+  itemAprovacaoIsApproved,
   OS_APROVACAO_CANAL_OPTIONS,
   OS_STATUS,
   OS_STATUS_LABELS,
@@ -215,9 +217,15 @@ export function OsWorkspace({
   const publishedBudget = orcamentoVersoes.some(
     (v) => v.status === "publicado" || v.status === "enviado" || v.status === "pronto",
   );
-  const canAprovar =
-    canEditOs(os) &&
-    canApplyAprovacao(os.status, requireDiagnosis, { publishedBudget });
+  const approvalGate = canAdvanceToApproval({
+    workflowConfig: { automotiveWorkflow: uiCopy?.automotiveWorkflow },
+    budgetPublished: publishedBudget,
+    diagnosisCompleted: diagnosisCompletedFromOsStatus(os.status),
+    osStatus: os.status,
+  });
+  const canAprovar = canEditOs(os) && approvalGate.ok;
+  const canOpenServiceReady =
+    serviceReadyEnabled && canMarkAguardandoRetirada(os.status);
   const nextStatuses = (OS_TRANSITIONS[os.status as OsStatus] ?? []).filter(
     (s) => s !== "cancelado",
   );
@@ -237,7 +245,7 @@ export function OsWorkspace({
         : null;
 
   const aprovados = useMemo(
-    () => os.itens.filter((i) => i.aprovacao_status === "aprovado"),
+    () => os.itens.filter((i) => itemAprovacaoIsApproved(i.aprovacao_status)),
     [os.itens],
   );
 
@@ -399,7 +407,7 @@ export function OsWorkspace({
           <ServiceReadyPanel
             tenantSlug={tenantSlug}
             osId={os.id}
-            enabled={serviceReadyEnabled}
+            enabled={canOpenServiceReady}
             canFinalize={canFinalize}
             canNotify={canNotify}
             notifyReadyAuto={notifyReadyAuto}
@@ -883,10 +891,8 @@ export function OsWorkspace({
         >
           {!canAprovar ? (
             <p className="text-sm text-amber-700 dark:text-amber-400">
-              {uiCopy && !uiCopy.automotiveWorkflow
-                ? "Status atual não permite aprovação. Conclua análise e orçamento"
-                : "Status atual não permite aprovação. Conclua diagnóstico e orçamento"}
-              primeiro.
+              {approvalGate.reason ||
+                "Publique o orçamento antes de solicitar aprovação."}
             </p>
           ) : null}
           <label className="block space-y-1 text-sm">
@@ -1195,11 +1201,11 @@ export function OsWorkspace({
               {uiCopy?.registerPickupLabel ?? "Registrar retirada"}
             </button>
           ) : null}
-          {canEditOs(os) && os.status !== "pronto_para_entrega" ? (
+          {canOpenServiceReady ? (
           <ServiceReadyPanel
             tenantSlug={tenantSlug}
             osId={os.id}
-            enabled={serviceReadyEnabled}
+            enabled={canOpenServiceReady}
             canFinalize={canFinalize}
             canNotify={canNotify}
             notifyReadyAuto={notifyReadyAuto}
@@ -1277,6 +1283,12 @@ export function OsWorkspace({
             className="space-y-2 border-t pt-3"
             onSubmit={(e) => {
               e.preventDefault();
+              if (os.status !== "pronto_para_entrega") {
+                setError(
+                  "Finalize os serviços e marque o veículo como pronto para retirada antes de concluir a entrega.",
+                );
+                return;
+              }
               const fd = new FormData(e.currentTarget);
               run(
                 () =>
@@ -1317,7 +1329,7 @@ export function OsWorkspace({
             />
             <button
               type="submit"
-              disabled={pending}
+              disabled={pending || os.status !== "pronto_para_entrega"}
               className={cn(buttonVariants({ size: "sm" }))}
             >
               Concluir entrega

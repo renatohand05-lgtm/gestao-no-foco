@@ -466,7 +466,7 @@ export class ConversionService {
       userId,
       {
         checklistKind: lava ? "lava_rapido" : "oficina",
-        initialStatus: lava ? "em_execucao" : "rascunho",
+        initialStatus: "rascunho",
       },
     );
 

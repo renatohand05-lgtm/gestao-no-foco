@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createOrdemServicoService } from "@/lib/ordens/ordem-servico-service";
 import { DEFAULT_ORCAMENTO_AVISO } from "@/lib/ordens/inspecao-aviso";
-import { canEditOrcamento, OS_STATUS_LABELS, type OsStatus } from "@/lib/ordens/os-status";
+import {
+  canEditOrcamento,
+  shouldAdvanceToAguardandoAprovacaoOnPublish,
+} from "@/lib/ordens/os-status";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -102,9 +105,12 @@ export class OrcamentoVersaoService {
       throw new Error("Adicione itens ao orçamento antes de publicar.");
     }
 
-    if (!canEditOrcamento(os.status, options?.requireDiagnosis !== false) && os.status !== "aguardando_aprovacao") {
+    if (
+      !canEditOrcamento(os.status, options?.requireDiagnosis !== false) &&
+      os.status !== "aguardando_aprovacao"
+    ) {
       throw new Error(
-        `Status atual (${OS_STATUS_LABELS[os.status as OsStatus] ?? os.status}) não permite publicar orçamento.`,
+        "Não é possível publicar o orçamento neste status. Conclua o diagnóstico quando exigido e monte o orçamento primeiro.",
       );
     }
 
@@ -203,7 +209,12 @@ export class OrcamentoVersaoService {
       user_id: userId,
     } as never);
 
-    if (os.status !== "aguardando_aprovacao") {
+    if (
+      shouldAdvanceToAguardandoAprovacaoOnPublish({
+        osStatus: os.status,
+        itens: os.itens,
+      })
+    ) {
       await osService.ensureStatus(
         osId,
         "aguardando_aprovacao",

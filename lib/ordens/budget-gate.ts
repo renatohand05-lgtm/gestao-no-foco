@@ -9,6 +9,48 @@ export function requiresDiagnosisBeforeBudget(input: {
   return input.automotiveWorkflow !== false;
 }
 
+/**
+ * Gate central de aprovação do orçamento.
+ * Lava (sem diagnóstico obrigatório): orçamento publicado → aprovação.
+ * Oficina (com diagnóstico): diagnóstico concluído + orçamento publicado.
+ */
+export function canAdvanceToApproval(input: {
+  workflowConfig: { automotiveWorkflow?: boolean | null };
+  budgetPublished: boolean;
+  diagnosisCompleted?: boolean;
+  osStatus?: string;
+}): { ok: boolean; reason: string } {
+  const status = input.osStatus ?? "";
+  if (["cancelado", "cancelada"].includes(status)) {
+    return { ok: false, reason: "Atendimento cancelado não permite aprovação." };
+  }
+  if (status === "faturado") {
+    return { ok: false, reason: "Atendimento faturado não permite aprovação." };
+  }
+  if (status === "entregue") {
+    return {
+      ok: false,
+      reason: "Este atendimento já foi entregue. A aprovação não se aplica.",
+    };
+  }
+  if (!input.budgetPublished) {
+    return {
+      ok: false,
+      reason: "Publique o orçamento antes de solicitar aprovação.",
+    };
+  }
+  if (
+    requiresDiagnosisBeforeBudget(input.workflowConfig) &&
+    !input.diagnosisCompleted
+  ) {
+    return {
+      ok: false,
+      reason: "Conclua o diagnóstico antes de solicitar aprovação.",
+    };
+  }
+  return { ok: true, reason: "" };
+}
+
 export const ORCAMENTO_VERSION_STATUSES = [
   "rascunho",
   "pronto",

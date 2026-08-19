@@ -24,6 +24,8 @@ const GUARD = [
   "components/ordens/os-workspace.tsx",
   "lib/retention/actions.ts",
   "lib/crm/phase28/conversion-service.ts",
+  "lib/mecanicos/actions.ts",
+  "components/retention/service-ready-panel.tsx",
 ];
 
 describe("canAdvanceToApproval", () => {
@@ -127,7 +129,9 @@ describe("publish / item / execution / ready order", () => {
     const ws = read("components/ordens/os-workspace.tsx");
     assert.match(ws, /canOpenServiceReady/);
     assert.match(ws, /canMarkAguardandoRetirada/);
-    assert.match(ws, /os\.status !== "pronto_para_entrega"/);
+    assert.match(ws, /deliveryUiMode/);
+    assert.match(ws, /Entrega concluída/);
+    assert.match(ws, /não há aceite de retirada/);
     const fin = read("lib/retention/actions.ts");
     assert.match(fin, /marcarAguardandoRetirada/);
     assert.match(fin, /templateCode: "SERVICE_READY"/);
@@ -168,6 +172,8 @@ describe("publish / item / execution / ready order", () => {
     assert.equal(canTransition("em_execucao", "pronto_para_entrega"), true);
     assert.equal(canTransition("pronto_para_entrega", "entregue"), true);
     assert.equal(canTransition("em_execucao", "entregue"), false);
+    assert.equal(canTransition("entregue", "em_execucao"), false);
+    assert.equal(canTransition("faturado", "em_execucao"), false);
     assert.equal(canMarkAguardandoRetirada("em_execucao"), true);
     assert.equal(canMarkAguardandoRetirada("entregue"), false);
     assert.equal(canMarkAguardandoRetirada("rascunho"), false);
@@ -175,6 +181,130 @@ describe("publish / item / execution / ready order", () => {
     assert.match(actions, /requireTenant/);
     const svc = read("lib/ordens/ordem-servico-service.ts");
     assert.match(svc, /eq\("tenant_id", this.tenantId\)/);
+  });
+});
+
+describe("closeout lifecycle + notify restore", () => {
+  it("A-C finalize sem/com aviso não entrega; concluir entrega só em pronto", async () => {
+    const {
+      canMarkAguardandoRetirada,
+      canConcludeDelivery,
+      canTransition,
+    } = await load("lib/ordens/os-status.ts");
+    assert.equal(canMarkAguardandoRetirada("em_execucao"), true);
+    assert.equal(canConcludeDelivery("em_execucao"), false);
+    assert.equal(canConcludeDelivery("pronto_para_entrega"), true);
+    assert.equal(canTransition("em_execucao", "pronto_para_entrega"), true);
+    assert.equal(canTransition("pronto_para_entrega", "entregue"), true);
+    const fin = read("lib/retention/actions.ts");
+    const finalize = fin.slice(
+      fin.indexOf("finalizeServiceReadyAction"),
+      fin.indexOf("registerOsPickupAction"),
+    );
+    assert.match(finalize, /marcarAguardandoRetirada/);
+    assert.match(finalize, /templateCode: "SERVICE_READY"/);
+    assert.doesNotMatch(finalize, /status: "entregue"/);
+    assert.match(
+      finalize,
+      /OS finalizada\. Não foi possível enviar a notificação/,
+    );
+    const svc = read("lib/ordens/ordem-servico-service.ts");
+    assert.match(svc, /canConcludeDelivery/);
+  });
+
+  it("D-G entregue/faturado recusam nova entrega e execução", async () => {
+    const {
+      canMutateOsExecution,
+      canConcludeDelivery,
+      deliveryUiMode,
+      closedOsOperationMessage,
+    } = await load("lib/ordens/os-status.ts");
+    assert.equal(canMutateOsExecution("entregue"), false);
+    assert.equal(canMutateOsExecution("faturado"), false);
+    assert.equal(canMutateOsExecution("em_execucao"), true);
+    assert.equal(canConcludeDelivery("entregue"), false);
+    assert.equal(canConcludeDelivery("faturado"), false);
+    assert.equal(deliveryUiMode("pronto_para_entrega", null), "ready");
+    assert.equal(deliveryUiMode("entregue", "2026-08-19T12:00:00Z"), "done");
+    assert.equal(deliveryUiMode("faturado", "2026-08-19T12:00:00Z"), "billed");
+    assert.equal(deliveryUiMode("faturado", null), "legacy_billed");
+    assert.match(closedOsOperationMessage("faturado"), /faturada/);
+    const svc = read("lib/ordens/ordem-servico-service.ts");
+    assert.match(svc, /já está faturada\. A entrega não pode ser registrada novamente/);
+    assert.match(svc, /canMutateOsExecution/);
+    const apontar = read("lib/mecanicos/actions.ts");
+    assert.match(apontar, /canMutateOsExecution/);
+    assert.match(apontar, /eq\("tenant_id", g\.tenantId\)/);
+    const ws = read("components/ordens/os-workspace.tsx");
+    assert.match(ws, /executionLocked/);
+    assert.match(ws, /entregaMode === "ready"/);
+    assert.match(ws, /canApontarHoras && !executionLocked/);
+  });
+
+  it("H-J canais do cliente ≠ provider; falha de notify não entrega", () => {
+    const ws = read("components/ordens/os-workspace.tsx");
+    const panel = read("components/retention/service-ready-panel.tsx");
+    assert.match(ws, /Finalizar e avisar cliente/);
+    assert.match(panel, /finalizeAndNotifyLabel/);
+    assert.match(panel, /envio não configurado/);
+    assert.match(panel, /Cliente sem WhatsApp ou e-mail cadastrado/);
+    assert.doesNotMatch(panel, /cliente sem canal disponível/i);
+    assert.match(panel, /finalizeOnlyLabel/);
+    const page = read("app/(app)/[tenant]/ordens/[id]/page.tsx");
+    assert.match(page, /whatsappHealth\(\)\.canSendReal/);
+    assert.match(page, /emailHealth\(\)\.canSendReal/);
+    const fin = read("lib/retention/actions.ts");
+    assert.match(fin, /OS finalizada\. Não foi possível enviar a notificação/);
+    assert.match(fin, /status = "pronto_para_entrega"/);
+  });
+
+  it("K legado faturado sem aceite não fabrica timestamp", () => {
+    const ws = read("components/ordens/os-workspace.tsx");
+    assert.match(ws, /legacy_billed/);
+    assert.match(ws, /Nenhum aceite será inventado/);
+    const svc = read("lib/ordens/ordem-servico-service.ts");
+    const concluir = svc
+      .split("async concluirEntrega")[1]
+      .split("async marcarAguardandoRetirada")[0];
+    assert.match(
+      concluir,
+      /if \(current.status === "faturado"\) \{\s*throw new Error/,
+    );
+    assert.match(
+      concluir,
+      /já está faturada\. A entrega não pode ser registrada novamente/,
+    );
+  });
+
+  it("L-M lava sem diagnóstico; oficina com diagnóstico", async () => {
+    const { canAdvanceToApproval, requiresDiagnosisBeforeBudget } = await load(
+      "lib/ordens/budget-gate.ts",
+    );
+    const { getSegmentUiCopy } = await load("lib/segments/copy.ts");
+    const lava = getSegmentUiCopy({ segment: "lava_rapido", ...ENGINE });
+    const oficina = getSegmentUiCopy({ segment: "oficina", ...ENGINE });
+    assert.equal(requiresDiagnosisBeforeBudget(lava), false);
+    assert.equal(
+      canAdvanceToApproval({
+        workflowConfig: lava,
+        budgetPublished: true,
+        diagnosisCompleted: false,
+        osStatus: "aguardando_orcamento",
+      }).ok,
+      true,
+    );
+    assert.equal(requiresDiagnosisBeforeBudget(oficina), true);
+    assert.equal(
+      canAdvanceToApproval({
+        workflowConfig: oficina,
+        budgetPublished: true,
+        diagnosisCompleted: true,
+        osStatus: "diagnostico_concluido",
+      }).ok,
+      true,
+    );
+    const panel = read("components/retention/service-ready-panel.tsx");
+    assert.match(panel, /data-phase35="service-ready"/);
   });
 });
 

@@ -244,6 +244,49 @@ export function canMarkAguardandoRetirada(status: string): boolean {
   ].includes(status);
 }
 
+export function isOsClosedForOperations(status: string): boolean {
+  return ["entregue", "faturado", "cancelado", "cancelada"].includes(status);
+}
+
+export function canMutateOsExecution(status: string): boolean {
+  return !isOsClosedForOperations(status);
+}
+
+export function canConcludeDelivery(status: string): boolean {
+  return status === "pronto_para_entrega";
+}
+
+export function closedOsOperationMessage(status: string): string {
+  if (status === "faturado") {
+    return "Esta OS já está faturada e não pode voltar para execução.";
+  }
+  if (status === "entregue") {
+    return "Esta OS já foi entregue e não pode voltar para execução.";
+  }
+  if (status === "cancelado" || status === "cancelada") {
+    return "Atendimento cancelado não permite novas ações operacionais.";
+  }
+  return "Esta OS não permite esta ação no status atual.";
+}
+
+export type DeliveryUiMode =
+  | "ready"
+  | "done"
+  | "billed"
+  | "legacy_billed"
+  | "hidden";
+
+export function deliveryUiMode(
+  status: string,
+  aceiteEntregaEm: string | null,
+): DeliveryUiMode {
+  if (status === "pronto_para_entrega") return "ready";
+  if (status === "entregue") return "done";
+  if (status === "faturado" && !aceiteEntregaEm) return "legacy_billed";
+  if (status === "faturado") return "billed";
+  return "hidden";
+}
+
 /** Item não pode aparecer como aprovado antes da OS chegar à aprovação. */
 export function effectiveItemAprovacaoStatus(
   osStatus: string,

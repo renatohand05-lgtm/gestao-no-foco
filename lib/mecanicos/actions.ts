@@ -236,6 +236,27 @@ export async function apontarHorasAction(
   const g = await guard(tenantSlug, key);
   if (!g.ok) return { success: false, error: g.error };
   try {
+    if (params.ordemId) {
+      const { createClient } = await import("@/lib/supabase/server");
+      const { canMutateOsExecution, closedOsOperationMessage } = await import(
+        "@/lib/ordens/os-status"
+      );
+      const supabase = await createClient();
+      const { data: os, error } = await supabase
+        .from("ordens_servico")
+        .select("status")
+        .eq("id", params.ordemId)
+        .eq("tenant_id", g.tenantId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!os) return { success: false, error: "OS não encontrada neste tenant." };
+      if (!canMutateOsExecution(String((os as { status: string }).status))) {
+        return {
+          success: false,
+          error: closedOsOperationMessage(String((os as { status: string }).status)),
+        };
+      }
+    }
     const svc = await createMecanicoApontamentoService(g.tenantId);
     const id = await svc.executar(params);
     if (params.ordemId) {

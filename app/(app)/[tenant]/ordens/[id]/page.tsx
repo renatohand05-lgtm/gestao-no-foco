@@ -23,6 +23,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { getSegmentUiCopy, segmentCopyForClient } from "@/lib/segments/copy.ts";
 import { resolveSegmentContext } from "@/lib/segments/resolve.ts";
 import { serviceReadyAllowed } from "@/lib/retention/service-ready";
+import { emailHealth, whatsappHealth } from "@/lib/retention/providers/runtime.ts";
 import { createCommunicationSettingsService } from "@/lib/retention/settings-service";
 import { tenantHasMutationPermission } from "@/lib/rbac/mutation-auth";
 
@@ -286,6 +287,8 @@ export default async function OsDetailPage({
         tenantSegment={tenant.segment}
         clientePhone={clienteContato.data?.whatsapp ?? clienteContato.data?.telefone ?? null}
         clienteEmail={clienteContato.data?.email ?? null}
+        whatsappProviderConfigured={whatsappHealth().canSendReal}
+        emailProviderConfigured={emailHealth().canSendReal}
       />
     </ExecutivePage>
   );

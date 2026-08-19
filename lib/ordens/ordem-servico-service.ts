@@ -7,8 +7,12 @@ import {
   canEditOrcamento,
   canFaturarStatus,
   canMarkAguardandoRetirada,
+  canMutateOsExecution,
+  closedOsOperationMessage,
+  canConcludeDelivery,
   diagnosisCompletedFromOsStatus,
   findTransitionPath,
+  isOsClosedForOperations,
   isTerminalCancelado,
   itemAprovacaoIsApproved,
   getOsChecklistTemplate,
@@ -134,6 +138,7 @@ export type OrdemServicoDetail = OrdemServicoListItem & {
   desconto_total: number;
   acrescimo_total: number;
   garantia_dias: number | null;
+  aceite_entrega_por: string | null;
   arquivado_motivo: string | null;
   itens: OrdemServicoItem[];
   checklist: Array<{
@@ -653,6 +658,8 @@ export class OrdemServicoService {
       data_conclusao: data.data_conclusao,
       aceite_entrega_em:
         (row.aceite_entrega_em as string | null) ?? null,
+      aceite_entrega_por:
+        (row.aceite_entrega_por as string | null) ?? null,
       responsavel: RESPONSAVEL_FALLBACK,
       quilometragem_entrada: (row.quilometragem_entrada as number | null) ?? null,
       quilometragem_saida: (row.quilometragem_saida as number | null) ?? null,
@@ -947,6 +954,9 @@ export class OrdemServicoService {
   ) {
     const current = await this.getById(id);
     if (!current) throw new Error("OS não encontrada.");
+    if (isOsClosedForOperations(current.status) && input.status === "em_execucao") {
+      throw new Error(closedOsOperationMessage(current.status));
+    }
     if (isTerminalCancelado(current.status) && input.status !== current.status) {
       throw new Error("OS cancelada não pode mudar de status.");
     }
@@ -1805,6 +1815,9 @@ export class OrdemServicoService {
   ) {
     const current = await this.getById(osId);
     if (!current) throw new Error("OS não encontrada.");
+    if (!canMutateOsExecution(current.status)) {
+      throw new Error(closedOsOperationMessage(current.status));
+    }
     const item = current.itens.find((i) => i.id === itemId);
     if (!item) throw new Error("Item não encontrado.");
     if (!itemAprovacaoIsApproved(item.aprovacao_status)) {
@@ -1920,7 +1933,12 @@ export class OrdemServicoService {
     if (current.status === "entregue") {
       return;
     }
-    if (current.status !== "pronto_para_entrega") {
+    if (current.status === "faturado") {
+      throw new Error(
+        "Esta OS já está faturada. A entrega não pode ser registrada novamente.",
+      );
+    }
+    if (!canConcludeDelivery(current.status)) {
       throw new Error(
         "Finalize os serviços e marque o veículo como pronto para retirada antes de concluir a entrega.",
       );

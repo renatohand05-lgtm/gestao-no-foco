@@ -52,7 +52,9 @@ import {
   canEditOrcamento,
   canFaturarStatus,
   canMarkAguardandoRetirada,
+  canMutateOsExecution,
   canRegisterDiagnostico,
+  deliveryUiMode,
   diagnosisCompletedFromOsStatus,
   itemAprovacaoIsApproved,
   OS_APROVACAO_CANAL_OPTIONS,
@@ -108,6 +110,8 @@ export type OsWorkspaceProps = {
   tenantSegment?: string | null;
   clientePhone?: string | null;
   clienteEmail?: string | null;
+  whatsappProviderConfigured?: boolean;
+  emailProviderConfigured?: boolean;
 };
 
 const TABS = [
@@ -180,6 +184,8 @@ export function OsWorkspace({
   tenantSegment = null,
   clientePhone = null,
   clienteEmail = null,
+  whatsappProviderConfigured = false,
+  emailProviderConfigured = false,
 }: OsWorkspaceProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("resumo");
@@ -225,7 +231,11 @@ export function OsWorkspace({
   });
   const canAprovar = canEditOs(os) && approvalGate.ok;
   const canOpenServiceReady =
-    serviceReadyEnabled && canMarkAguardandoRetirada(os.status);
+    serviceReadyEnabled &&
+    canFinalize &&
+    canMarkAguardandoRetirada(os.status);
+  const executionLocked = !canMutateOsExecution(os.status);
+  const entregaMode = deliveryUiMode(os.status, os.aceite_entrega_em);
   const nextStatuses = (OS_TRANSITIONS[os.status as OsStatus] ?? []).filter(
     (s) => s !== "cancelado",
   );
@@ -377,7 +387,7 @@ export function OsWorkspace({
         custoReal={osCustoReal}
         canAtribuir={canAtribuirMecanico && canEditOs(os)}
         canTransferir={canTransferirMecanico && canEditOs(os)}
-        canApontar={canApontarHoras}
+        canApontar={canApontarHoras && !executionLocked}
         professionalLabel={professionalLabel}
         professionalsLabel={professionalsLabel}
       />
@@ -417,13 +427,15 @@ export function OsWorkspace({
             empresaNome={empresaNome}
             clientePhone={clientePhone}
             clienteEmail={clienteEmail}
+            whatsappProviderConfigured={whatsappProviderConfigured}
+            emailProviderConfigured={emailProviderConfigured}
             preview={{
               itens: os.itens,
               marca: os.marca,
               modelo: os.modelo,
               placa: os.placa,
             }}
-            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar sem notificar"}
+            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar serviço"}
             finalizeAndNotifyLabel={
               uiCopy?.finalizeAndNotifyLabel ?? "Finalizar e avisar cliente"
             }
@@ -1007,7 +1019,14 @@ export function OsWorkspace({
             <p className="text-sm text-muted-foreground">
               Nenhum item aprovado para execução. Aprove o orçamento primeiro.
             </p>
-          ) : (
+          ) : null}
+          {executionLocked ? (
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              Esta OS já foi encerrada. Histórico de execução permanece visível,
+              sem novas ações.
+            </p>
+          ) : null}
+          {aprovados.length > 0 ? (
             <ul className="space-y-2">
               {aprovados.map((item) => (
                 <li
@@ -1039,7 +1058,7 @@ export function OsWorkspace({
                           [item.id]: e.target.value,
                         }))
                       }
-                      disabled={pending}
+                      disabled={pending || executionLocked}
                       className="h-8 w-28 text-xs"
                     />
                     <div className="flex flex-wrap gap-1">
@@ -1048,7 +1067,11 @@ export function OsWorkspace({
                       <button
                         key={st}
                         type="button"
-                        disabled={pending || item.execucao_status === "cancelado"}
+                        disabled={
+                        pending ||
+                        executionLocked ||
+                        item.execucao_status === "cancelado"
+                      }
                         className={cn(
                           buttonVariants({
                             variant: st === "cancelado" ? "destructive" : "outline",
@@ -1091,7 +1114,7 @@ export function OsWorkspace({
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
         </ExecutiveSection>
       ) : null}
 
@@ -1215,18 +1238,59 @@ export function OsWorkspace({
             empresaNome={empresaNome}
             clientePhone={clientePhone}
             clienteEmail={clienteEmail}
+            whatsappProviderConfigured={whatsappProviderConfigured}
+            emailProviderConfigured={emailProviderConfigured}
             preview={{
               itens: os.itens,
               marca: os.marca,
               modelo: os.modelo,
               placa: os.placa,
             }}
-            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar sem notificar"}
+            finalizeOnlyLabel={uiCopy?.finalizeOnlyLabel ?? "Finalizar serviço"}
             finalizeAndNotifyLabel={
               uiCopy?.finalizeAndNotifyLabel ?? "Finalizar e avisar cliente"
             }
             sheetTitle={uiCopy?.serviceReadySheetTitle ?? "Serviço concluído"}
           />
+          ) : null}
+          {entregaMode === "done" || entregaMode === "billed" ? (
+            <div className="space-y-1 rounded-lg border p-3 text-sm">
+              <p className="font-medium">Entrega concluída</p>
+              {entregaMode === "billed" ? (
+                <p className="text-muted-foreground">Esta OS já está faturada.</p>
+              ) : null}
+              <p className="text-muted-foreground">
+                Aceite:{" "}
+                {os.aceite_entrega_em
+                  ? new Date(os.aceite_entrega_em).toLocaleString("pt-BR")
+                  : "—"}
+              </p>
+              <p className="text-muted-foreground">
+                Registrado por: {os.aceite_entrega_por ?? "—"}
+              </p>
+              <p className="text-muted-foreground">
+                Km saída: {os.quilometragem_saida ?? "—"}
+              </p>
+              <p className="text-muted-foreground">
+                Garantia: {os.garantia_dias != null ? `${os.garantia_dias} dias` : "—"}
+              </p>
+              {os.observacoes ? (
+                <p className="text-muted-foreground">Obs.: {os.observacoes}</p>
+              ) : null}
+            </div>
+          ) : null}
+          {entregaMode === "legacy_billed" ? (
+            <div className="space-y-1 rounded-lg border border-amber-300 p-3 text-sm">
+              <p className="font-medium">OS faturada</p>
+              <p className="text-amber-800 dark:text-amber-400">
+                Entrega histórica inconsistente: não há aceite de retirada
+                registrado. Nenhum aceite será inventado e a entrega não pode
+                ser concluída novamente.
+              </p>
+              {os.venda_id ? (
+                <p className="text-muted-foreground">Já faturada no financeiro.</p>
+              ) : null}
+            </div>
           ) : null}
           {os.previsoes.length > 0 ? (
             <div className="space-y-2 rounded-lg border p-3">
@@ -1246,6 +1310,8 @@ export function OsWorkspace({
               </ul>
             </div>
           ) : null}
+          {entregaMode === "ready" ? (
+            <>
           <form
             className="space-y-2"
             onSubmit={(e) => {
@@ -1335,6 +1401,8 @@ export function OsWorkspace({
               Concluir entrega
             </button>
           </form>
+            </>
+          ) : null}
         </ExecutiveSection>
       ) : null}
 

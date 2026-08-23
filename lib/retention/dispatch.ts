@@ -18,10 +18,10 @@ import {
 import type { ProviderSendResult } from "./providers/types.ts";
 
 async function logDispatch(input: Parameters<
-  typeof import("./observability.ts").logCommunication
+  typeof import("./observability.ts").logCommunicationDispatch
 >[0]) {
-  const { logCommunication } = await import("./observability.ts");
-  logCommunication(input);
+  const { logCommunicationDispatch } = await import("./observability.ts");
+  logCommunicationDispatch(input);
 }
 
 export function shouldDispatchReal(input: {
@@ -108,8 +108,17 @@ export async function sendViaChannelProvider(input: {
   body: string;
   tenantId: string;
   env?: NodeJS.ProcessEnv;
+  event?: string;
+  correlationId?: string;
 }): Promise<ProviderSendResult> {
   const env = input.env ?? process.env;
+  const mode = resolveCommunicationMode(env);
+  const phone = input.channel === "whatsapp" ? input.to : null;
+  const email = input.channel === "email" ? input.to : null;
+  const allowlisted = isTestAllowlisted({ phone, email, env });
+  const providerName =
+    input.channel === "email" ? "resend" : "meta_cloud";
+
   if (!shouldDispatchReal({ channel: input.channel, to: input.to, env })) {
     const result = blockedProviderSendResult({
       channel: input.channel,
@@ -117,30 +126,47 @@ export async function sendViaChannelProvider(input: {
       env,
     });
     await logDispatch({
-      event: "provider_request",
+      event: input.event,
       tenantId: input.tenantId,
+      correlationId: input.correlationId,
       channel: input.channel,
-      status: result.status,
-      note: "blocked_or_test",
+      mode,
+      allowlisted,
+      provider: providerName,
+      dispatch: result.status === "blocked" ? "blocked" : "skipped",
+      failureKind: result.errorCode ?? undefined,
+      note: result.message,
     });
     return result;
   }
-  const provider = createChannelProvider(input.channel, env);
   await logDispatch({
-    event: "provider_request",
+    event: input.event,
     tenantId: input.tenantId,
+    correlationId: input.correlationId,
     channel: input.channel,
+    mode,
+    allowlisted,
+    provider: providerName,
+    dispatch: "started",
   });
+  const provider = createChannelProvider(input.channel, env);
   const result = await provider.send({
     to: input.to,
     body: input.body,
     tenantId: input.tenantId,
   });
   await logDispatch({
-    event: result.status === "failed" ? "failed" : "provider_accepted",
+    event: input.event,
     tenantId: input.tenantId,
+    correlationId: input.correlationId,
     channel: input.channel,
-    status: result.status,
+    mode,
+    allowlisted,
+    provider: result.provider,
+    dispatch: result.status === "failed" ? "failed" : "sent",
+    providerMessageId: result.providerMessageId,
+    failureKind: result.errorCode,
+    note: result.message,
   });
   return result;
 }

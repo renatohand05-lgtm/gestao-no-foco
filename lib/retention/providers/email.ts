@@ -1,7 +1,6 @@
 import type { NotificationProvider, ProviderSendResult } from "./types.ts";
-import { sanitizeProviderError } from "./runtime.ts";
+import { sanitizeProviderError, resolveEmailFromAddress } from "./runtime.ts";
 import type { OutboxStatus } from "../channels.ts";
-
 function simulated(
   status: OutboxStatus,
   message: string,
@@ -51,7 +50,7 @@ export function createResendEmailAdapter(
   fetchImpl: typeof fetch = fetch,
 ): NotificationProvider {
   const apiKey = env.RESEND_API_KEY ?? "";
-  const from = env.EMAIL_FROM ?? "";
+  const from = (env.EMAIL_FROM ?? "").trim();
   const replyTo = (env.EMAIL_REPLY_TO ?? "").trim();
   return {
     id: "resend",
@@ -66,7 +65,7 @@ export function createResendEmailAdapter(
           message: "E-mail ausente.",
         };
       }
-      if (!apiKey || !from.includes("@")) {
+      if (!apiKey || !resolveEmailFromAddress(from)) {
         return {
           simulated: false,
           status: "failed",
@@ -125,7 +124,7 @@ export function createResendEmailAdapter(
     validateConfiguration() {
       const notes: string[] = [];
       if (!apiKey) notes.push("RESEND_API_KEY ausente");
-      if (!from.includes("@")) notes.push("EMAIL_FROM ausente");
+      if (!resolveEmailFromAddress(from)) notes.push("EMAIL_FROM ausente");
       return {
         status: notes.length ? "NOT_CONFIGURED" : "CONFIGURED",
         notes,

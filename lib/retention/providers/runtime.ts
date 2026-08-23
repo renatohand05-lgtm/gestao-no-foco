@@ -27,6 +27,18 @@ export function envFlagEnabled(value?: string | null): boolean {
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
 }
 
+/** Extrai o endereço de EMAIL_FROM (suporta `Nome <email@dominio.com>`). */
+export function resolveEmailFromAddress(raw?: string | null): string {
+  const value = (raw ?? "").trim();
+  const angle = value.match(/<([^>]+)>/);
+  const candidate = (angle?.[1] ?? value).trim();
+  return candidate.includes("@") ? candidate : "";
+}
+
+export function emailFromConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.RESEND_API_KEY && resolveEmailFromAddress(env.EMAIL_FROM));
+}
+
 /** Kill switch global. Ausente = OFF. */
 export function isWhatsAppKillSwitchOff(
   env: NodeJS.ProcessEnv = process.env,
@@ -131,7 +143,7 @@ export function emailHealth(env: NodeJS.ProcessEnv = process.env): ChannelHealth
   if (mode === "dry_run") {
     return { status: "CONFIGURED", label: "Dry run", canSendReal: false };
   }
-  const configured = Boolean(env.RESEND_API_KEY && env.EMAIL_FROM);
+  const configured = emailFromConfigured(env);
   if (!configured) {
     return {
       status: "NOT_CONFIGURED",

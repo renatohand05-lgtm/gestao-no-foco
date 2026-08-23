@@ -397,6 +397,11 @@ export async function finalizeServiceReadyAction(
               : []
         ).filter((ch): ch is "whatsapp" | "email" => ch === "whatsapp" || ch === "email");
         const channels = requested.length > 0 ? requested : [undefined];
+        const channelResults: Array<{
+          channel: "whatsapp" | "email";
+          status: string;
+          note: string;
+        }> = [];
         for (const ch of channels) {
           const result = await enqueueCustomerNotification({
             tenantId: tenant.id,
@@ -414,17 +419,31 @@ export async function finalizeServiceReadyAction(
           });
           waLink = result.waLink ?? waLink;
           duplicated = duplicated || result.duplicated;
+          for (const row of result.channels) {
+            channelResults.push({
+              channel: row.channel as "whatsapp" | "email",
+              status: row.status,
+              note: row.note,
+            });
+          }
         }
         const { whatsappHealth, emailHealth } = await import("./providers/runtime.ts");
         note = formatServiceReadyFinalizeNote({
           notify: true,
           requested,
+          channels: channelResults,
           whatsappProviderConfigured: whatsappHealth().canSendReal,
           emailProviderConfigured: emailHealth().canSendReal,
           duplicated,
         });
         status = "pronto_para_entrega";
-      } catch {
+      } catch (error) {
+        const { logger } = await import("@/lib/observability/logger");
+        logger.error("finalizeServiceReady.notify_failed", {
+          tenantId: tenant.id,
+          osId: parsed.osId,
+          message: error instanceof Error ? error.message : "notify error",
+        });
         note = "OS finalizada. Não foi possível enviar a notificação.";
         status = "pronto_para_entrega";
       }

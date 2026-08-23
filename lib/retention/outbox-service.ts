@@ -11,7 +11,7 @@ import {
 } from "./channels";
 import { persistOutboxStatus } from "./pipeline";
 import { originFromTemplate } from "./origin";
-import { correlationId, logCommunication, maskAddress } from "./observability";
+import { correlationId, logCommunication, logCommunicationDispatch, maskAddress } from "./observability";
 import { classifyFailure } from "./failures";
 import { isMissingColumn, isMissingRelation } from "./schema-guard";
 import {
@@ -115,12 +115,61 @@ export class NotificationOutboxService {
     return (data ?? []) as OutboxRow[];
   }
 
+  async findByIdempotencyKey(idempotencyKey: string): Promise<OutboxRow | null> {
+    const { data, error } = await this.supabase
+      .from("notification_outbox" as never)
+      .select(
+        "id, tenant_id, cliente_id, channel, template_code, offset_key, entity_type, entity_id, status, mode, idempotency_key, rendered_preview, error_message, error_code, attempt_count, failure_kind, origin_kind, correlation_id, created_at, created_by, to_address, provider, provider_message_id, payload_json, resend_count, next_retry_at, last_attempt_at",
+      )
+      .eq("tenant_id", this.tenantId)
+      .eq("idempotency_key", idempotencyKey)
+      .maybeSingle();
+    if (error) {
+      if (isMissingRelation(error, "notification_outbox")) return null;
+      throw new Error(error.message);
+    }
+    return (data as OutboxRow | null) ?? null;
+  }
+
+  private async enqueueExistingRow(
+    existing: OutboxRow,
+    input: EnqueueOutboxInput,
+  ): Promise<{ status: string; note: string; waLink?: string; duplicated: boolean }> {
+    if (["sent", "delivered", "read"].includes(existing.status)) {
+      return {
+        status: existing.status,
+        note: "Já registrado (idempotência).",
+        duplicated: true,
+      };
+    }
+    logCommunicationDispatch({
+      event: input.templateCode,
+      tenantId: this.tenantId,
+      correlationId: existing.correlation_id ?? input.correlationId,
+      channel: input.channel,
+      mode: resolveCommunicationMode(),
+      dispatch: "started",
+      note: "redispatch idempotent row",
+    });
+    const retried = await this.retryDispatch(existing);
+    return {
+      status: retried.status,
+      note: retried.note,
+      duplicated: true,
+    };
+  }
+
   async enqueue(input: EnqueueOutboxInput): Promise<{
     status: string;
     note: string;
     waLink?: string;
     duplicated: boolean;
   }> {
+    const existing = await this.findByIdempotencyKey(input.idempotencyKey);
+    if (existing) {
+      return this.enqueueExistingRow(existing, input);
+    }
+
     const mode = input.mode ?? resolveCommMode(process.env.RETENTION_NOTIFY_MODE);
     const decision = decideDispatch({
       mode,
@@ -208,6 +257,8 @@ export class NotificationOutboxService {
       .maybeSingle();
     if (error) {
       if (/duplicate|unique/i.test(error.message)) {
+        const dup = await this.findByIdempotencyKey(input.idempotencyKey);
+        if (dup) return this.enqueueExistingRow(dup, input);
         return {
           status: "pending",
           note: "Já registrado (idempotência).",
@@ -232,6 +283,8 @@ export class NotificationOutboxService {
             to: toAddress,
             channel: input.channel,
             body: input.message,
+            templateCode: input.templateCode,
+            correlationId: payload.correlation_id as string,
           });
           return {
             status: dispatched.status ?? status,
@@ -257,6 +310,8 @@ export class NotificationOutboxService {
       to: toAddress,
       channel: input.channel,
       body: input.message,
+      templateCode: input.templateCode,
+      correlationId: payload.correlation_id as string,
     });
     return {
       status: dispatched.status ?? status,
@@ -273,15 +328,38 @@ export class NotificationOutboxService {
     channel: CommChannel;
     body: string;
     attemptCount?: number;
+    templateCode?: string;
+    correlationId?: string;
   }): Promise<{ status?: string; note?: string }> {
-    if (!input.canSendNow || !input.id || !input.to) return {};
+    if (!input.canSendNow || !input.id || !input.to) {
+      if (input.templateCode && input.id) {
+        logCommunicationDispatch({
+          event: input.templateCode,
+          tenantId: this.tenantId,
+          correlationId: input.correlationId,
+          channel: input.channel,
+          mode: resolveCommunicationMode(),
+          dispatch: "skipped",
+          note: "dispatch preconditions failed",
+        });
+      }
+      return {};
+    }
     const result = await sendViaChannelProvider({
       channel: input.channel,
       to: input.to,
       body: input.body,
       tenantId: this.tenantId,
+      event: input.templateCode,
+      correlationId: input.correlationId,
     });
     const patch = mapSendToOutboxPatch(result);
+    const failureKind =
+      result.errorCode === "blocked_by_allowlist"
+        ? "blocked_by_allowlist"
+        : result.status === "failed"
+          ? classifyFailure({ errorCode: result.errorCode, message: result.message })
+          : null;
     await this.patchSameRow(input.id, {
       status: patch.status,
       provider: patch.provider,
@@ -292,7 +370,11 @@ export class NotificationOutboxService {
       processed_at: new Date().toISOString(),
       last_attempt_at: new Date().toISOString(),
       attempt_count: input.attemptCount ?? 1,
-      error_message: result.status === "failed" ? result.message : null,
+      failure_kind: failureKind,
+      error_message:
+        result.status === "failed" || result.status === "blocked"
+          ? result.message
+          : null,
     });
     return { status: result.status, note: result.message };
   }
@@ -329,6 +411,8 @@ export class NotificationOutboxService {
       channel,
       body: row.rendered_preview ?? "",
       attemptCount: (row.attempt_count ?? 0) + 1,
+      templateCode: row.template_code,
+      correlationId: row.correlation_id ?? undefined,
     });
     return {
       status: result.status ?? row.status,

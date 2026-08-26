@@ -23,11 +23,8 @@ import {
 import {
   isTestAllowlisted,
   resolveCommunicationMode,
-  allowRealProviderSend,
 } from "./test-mode";
-import { effectiveEmailMode } from "./providers/runtime";
 import type { OutboxRow } from "./types";
-
 const OPTIONAL_ENQUEUE_FIELDS = [
   "queued_at",
   "to_address",
@@ -202,32 +199,7 @@ export class NotificationOutboxService {
         channel: input.channel,
         to: toAddress ?? undefined,
       });
-        if (input.channel === "email") {
-      const raw = process.env.EMAIL_ENABLED ?? null;
-      const allowReal = allowRealProviderSend({
-        channel: "email",
-        phone: null,
-        email: toAddress,
-      });
-      const emMode = effectiveEmailMode();
-      const commMode = resolveCommunicationMode();
-      const allowlisted = isTestAllowlisted({ email: toAddress });
-      // eslint-disable-next-line no-console
-      console.log(
-        "[DIAG_EMAIL_ENABLED_V2]",
-        JSON.stringify({
-          length: raw?.length ?? null,
-          decisionOk: decision.ok,
-          modeVar: mode,
-          toAddress,
-          canSendNow,
-          allowRealProviderSend: allowReal,
-          effectiveEmailMode: emMode,
-          resolveCommunicationMode: commMode,
-          isTestAllowlisted: allowlisted,
-        }),
-      );
-    }   
+        
     let note = decision.note;
     let errorCode: string | null = null;
     if (mode === "provider" && decision.ok && !canSendNow) {

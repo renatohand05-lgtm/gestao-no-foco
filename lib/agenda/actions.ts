@@ -133,7 +133,7 @@ export async function createAgendaEventAction(
     let commNote: string | undefined;
     try {
       const first = rows[0];
-      if (first?.cliente_id && parsed.natureza === "cliente") {
+            if (first?.cliente_id) {
         const { enqueueCustomerNotification } = await import(
           "@/lib/retention/notify"
         );

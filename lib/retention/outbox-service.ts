@@ -200,6 +200,22 @@ export class NotificationOutboxService {
         channel: input.channel,
         to: toAddress ?? undefined,
       });
+        if (input.channel === "email") {
+      const raw = process.env.EMAIL_ENABLED ?? null;
+      // eslint-disable-next-line no-console
+      console.log(
+        "[DIAG_EMAIL_ENABLED]",
+        JSON.stringify({
+          present: raw !== null,
+          length: raw?.length ?? null,
+          codes: raw ? Array.from(raw).map((c) => c.charCodeAt(0)) : null,
+          decisionOk: decision.ok,
+          modeVar: mode,
+          toAddressPresent: Boolean(toAddress),
+          canSendNow,
+        }),
+      );
+    }
     let note = decision.note;
     let errorCode: string | null = null;
     if (mode === "provider" && decision.ok && !canSendNow) {

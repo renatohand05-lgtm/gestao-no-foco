@@ -3,9 +3,8 @@ import { NextResponse } from "next/server";
 import { runRetentionJob } from "@/lib/retention/process";
 
 /**
- * Sprint 35.2 — cron preparado.
- * PRODUCTION: DISABLED (não cadastrar no Vercel até homologação).
- * Auth: Bearer CRON_SECRET (já usado pelo projeto; se ausente → 401).
+ * Cron de retenção — respeita send_return por tenant, allowlist em modo
+ * test, e kill switch por canal. Auth: Bearer CRON_SECRET (ausente → 401).
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -22,8 +21,6 @@ export async function GET(request: Request) {
   const result = await runRetentionJob();
   return NextResponse.json({
     ok: true,
-    production: "DISABLED",
-    notifyMode: "dry_run",
     ...result,
   });
 }

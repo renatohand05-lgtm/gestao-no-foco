@@ -11,10 +11,22 @@ import { DEFAULT_TENANT_TIMEZONE } from "@/lib/dashboard/tenant-timezone";
 import { civilDateInTimezone } from "@/lib/dashboard/tenant-timezone";
 import { renderTemplate, templateFor } from "./templates";
 import type { CustomerReturnRow } from "./types";
+import {
+  DEFAULT_COMMUNICATION_SETTINGS,
+  parseCommunicationSettings,
+} from "./settings";
+import {
+  commModeFromEmail,
+  commModeFromWhatsApp,
+  effectiveEmailMode,
+  effectiveWhatsAppMode,
+} from "./providers/runtime";
+import { shouldHaltRateLimit } from "./rate-limit";
 
 /**
- * Job 35.2 — nunca envia provider real.
- * PRODUCTION: CRON disabled até homologação.
+ * Job 35.2 — respeita a preferência do tenant (send_return) e usa o modo
+ * real de dispatch por canal (provider quando homologado, dry_run/disabled
+ * conforme kill switch e allowlist), com limite de taxa por tenant.
  */
 export async function runRetentionJob(now = new Date()): Promise<{
   skipped?: boolean;
@@ -64,6 +76,15 @@ export async function runRetentionJob(now = new Date()): Promise<{
       .select("id, segment, name")
       .eq("id", tenantId)
       .maybeSingle();
+    const { data: settingsRow } = await admin
+      .from("communication_tenant_settings" as never)
+      .select("*")
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    const settings = settingsRow
+      ? parseCommunicationSettings(settingsRow)
+      : DEFAULT_COMMUNICATION_SETTINGS;
+    if (!settings.sendReturn) continue;
     const returnsSvc = new CustomerReturnService(admin, tenantId);
     const rows = await returnsSvc.list();
     const outbox = new NotificationOutboxService(admin, tenantId);
@@ -75,8 +96,16 @@ export async function runRetentionJob(now = new Date()): Promise<{
       segment: tenant?.segment ?? null,
       returns: rows as CustomerReturnRow[],
       existingKeys: keys,
+      windowStartHour: settings.windowStartHour,
+      windowEndHour: settings.windowEndHour,
+    }).filter((item) => {
+      if (item.channel === "email") return settings.emailMode === "provider";
+      return settings.whatsappMode !== "disabled";
     });
     planned += items.length;
+    const recentSent = await outbox.countRecent(1);
+    const halt = shouldHaltRateLimit({ sentLastHour: recentSent });
+    if (halt.halt) continue;
     const prefs = new CommunicationPreferenceService(admin, tenantId);
     for (const item of items) {
       const row = rows.find((r) => r.id === item.entityId);
@@ -104,8 +133,12 @@ export async function runRetentionJob(now = new Date()): Promise<{
           placa: row.placa ?? "",
         },
       );
+      const commMode =
+        item.channel === "whatsapp"
+          ? commModeFromWhatsApp(effectiveWhatsAppMode())
+          : commModeFromEmail(effectiveEmailMode());
       const decision = decideDispatch({
-        mode: "dry_run",
+        mode: commMode,
         channel: item.channel,
         optedIn: prefs.isChannelAllowed(p, item.channel),
         phone: cliente?.whatsapp ?? cliente?.telefone,
@@ -125,7 +158,7 @@ export async function runRetentionJob(now = new Date()): Promise<{
         phone: cliente?.whatsapp ?? cliente?.telefone,
         email: cliente?.email,
         optedIn: prefs.isChannelAllowed(p, item.channel),
-        mode: "dry_run",
+        mode: commMode,
       });
       if (!res.duplicated) written += 1;
     }

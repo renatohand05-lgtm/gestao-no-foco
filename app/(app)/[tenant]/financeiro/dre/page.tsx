@@ -5,11 +5,15 @@ import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { DreComparativeExportButtons } from "@/components/financeiro/dre-comparative-export-buttons";
 import { DreComparativeFilters } from "@/components/financeiro/dre-comparative-filters";
 import { DreComparativeStatement } from "@/components/financeiro/dre-comparative-statement";
+import { DreCompositionDonut } from "@/components/financeiro/dre-composition-donut";
 import { DreDrillPanel } from "@/components/financeiro/dre-drill-panel";
+import { DreEvolutionChart } from "@/components/financeiro/dre-evolution-chart";
 import { DreFilters } from "@/components/financeiro/dre-filters";
 import { DreGapsPanel } from "@/components/financeiro/dre-gaps-panel";
+import { DreIndicatorsPanel } from "@/components/financeiro/dre-indicators-panel";
 import { DreStatement } from "@/components/financeiro/dre-statement";
 import { DreSummaryCards } from "@/components/financeiro/dre-summary-cards";
+import { DreVerticalAnalysis } from "@/components/financeiro/dre-vertical-analysis";
 import { buttonVariants } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import {
@@ -17,6 +21,12 @@ import {
   buildDreComparativeView,
   MONTH_LABELS_PT,
 } from "@/lib/dre/dre-compare";
+import {
+  getDreComposicaoLucro,
+  getDreEvolution,
+  getDreIndicators,
+  getDreVerticalAnalysis,
+} from "@/lib/dre/dre-insights-service";
 import {
   createDreService,
   defaultDrePeriodo,
@@ -27,6 +37,7 @@ import {
 } from "@/lib/finance/page-auth";
 import { ExecutivePage } from "@/components/executive";
 import { cn } from "@/lib/utils";
+import { formatPeriodoLabel } from "@/lib/dashboard/period";
 
 export const metadata = { title: "DRE Enterprise" };
 
@@ -137,136 +148,3 @@ export default async function DreEnterprisePage({
             if (detalhe === "__none__") return !item.detalhe;
             return item.detalhe === detalhe;
           })
-        : [];
-
-    return (
-      <ExecutivePage width="wide" spacing="loose">
-        <FinancePageHeader
-          tenantSlug={tenantSlug}
-          tenantName={auth.tenant.name}
-          title="DRE — Comparativo Mensal"
-          description="Selecione dois períodos para comparar receitas, custos, resultado e margem."
-          actions={
-            <DreComparativeExportButtons
-              rows={view.rows}
-              mesA={mesALabel}
-              mesB={mesBLabel}
-              empresa={auth.tenant.name}
-            />
-          }
-        />
-
-        <Suspense fallback={<FiltersFallback />}>
-          <DreComparativeFilters
-            tenantSlug={tenantSlug}
-            year={year}
-            mesA={mesA}
-            mesB={mesB}
-          />
-        </Suspense>
-
-        <DreComparativeStatement
-          rows={view.rows}
-          mesALabel={mesALabel}
-          mesBLabel={mesBLabel}
-          tenantSlug={tenantSlug}
-          periodA={periodA}
-          periodB={periodB}
-        />
-
-        {linha ? (
-          <DreDrillPanel
-            tenantSlug={tenantSlug}
-            linha={linha}
-            detalhe={detalhe}
-            items={drill}
-          />
-        ) : null}
-      </ExecutivePage>
-    );
-  }
-
-  const defaults = defaultDrePeriodo();
-  const filters = {
-    centroCustoId: centroCusto || undefined,
-    categoriaId: categoria || undefined,
-    planoContaId: planoConta || undefined,
-    dataDe: dataDe ?? defaults.dataDe,
-    dataAte: dataAte ?? defaults.dataAte,
-  };
-
-  const { resumo, linhas, gaps, filterOptions, drillItems } =
-    await service.getDre(filters);
-
-  const drill =
-    linha && drillItems
-      ? drillItems.filter((item) => {
-          if (item.linha !== linha) return false;
-          if (!detalhe) return true;
-          if (detalhe === "__none__") return !item.detalhe;
-          return item.detalhe === detalhe;
-        })
-      : [];
-
-  return (
-    <ExecutivePage width="wide" spacing="loose">
-      <FinancePageHeader
-        tenantSlug={tenantSlug}
-        tenantName={auth.tenant.name}
-        title="DRE"
-        description="Demonstração do Resultado por competência. Pagamentos alimentam o Fluxo de Caixa."
-        actions={
-          <Link
-            href={`/${tenantSlug}/financeiro/dre?comparativo=1`}
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-          >
-            Comparativo mensal
-          </Link>
-        }
-      />
-
-      <DreSummaryCards resumo={resumo} />
-
-      <Suspense fallback={<FiltersFallback />}>
-        <DreFilters
-          tenantSlug={tenantSlug}
-          centrosCusto={filterOptions.centrosCusto}
-          categorias={filterOptions.categorias}
-          planosConta={filterOptions.planosConta}
-          currentCentroCustoId={centroCusto ?? ""}
-          currentCategoriaId={categoria ?? ""}
-          currentPlanoContaId={planoConta ?? ""}
-          dataDe={filters.dataDe}
-          dataAte={filters.dataAte}
-        />
-      </Suspense>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <DreStatement
-          linhas={linhas}
-          tenantSlug={tenantSlug}
-          query={{
-            dataDe: filters.dataDe,
-            dataAte: filters.dataAte,
-            centroCusto,
-            categoria,
-            planoConta,
-            linha,
-            detalhe,
-          }}
-        />
-        <div className="space-y-6">
-          {linha ? (
-            <DreDrillPanel
-              tenantSlug={tenantSlug}
-              linha={linha}
-              detalhe={detalhe}
-              items={drill}
-            />
-          ) : null}
-          <DreGapsPanel tenantSlug={tenantSlug} gaps={gaps} />
-        </div>
-      </div>
-    </ExecutivePage>
-  );
-}

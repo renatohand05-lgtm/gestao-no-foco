@@ -116,7 +116,7 @@ export function DreCompositionDonut({ composicao, resultadoFinal }: Props) {
                 {arc.label}
               </span>
               <span className="tabular-nums text-muted-foreground">
-                {formatPercent(arc.fraction * 100)}%
+                {formatPercent(arc.fraction * 100)}
               </span>
             </li>
           ))}

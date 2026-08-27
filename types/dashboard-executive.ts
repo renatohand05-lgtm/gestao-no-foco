@@ -66,10 +66,7 @@ export type DashboardComparableKpiKey =
   | "cmv"
   | "quantidade_vendas";
 
-export type DashboardComparisons = Record
-  DashboardComparableKpiKey,
-  DashboardKpiComparison
->;
+export type DashboardComparisons = Record<DashboardComparableKpiKey, DashboardKpiComparison>;
 
 export type DashboardPeriodo = {
   dataDe: string;

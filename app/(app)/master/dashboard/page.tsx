@@ -2,7 +2,10 @@ import Link from "next/link";
 import { Building2, TrendingUp, Users, Wallet } from "lucide-react";
 
 import { requireAuth } from "@/lib/tenants";
-import { getPlatformAccess } from "@/lib/platform/platform-access-service";
+import {
+  getPlatformAccess,
+  type PlatformTenantSummary,
+} from "@/lib/platform/platform-access-service";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/format";
 import { CATALOG_SEGMENT_SHORT_LABEL } from "@/lib/segments/catalog-labels";
 import type { ProductSegmentId } from "@/lib/segments/types";
@@ -107,6 +110,13 @@ export default async function MasterDashboardPage() {
         />
       </div>
 
+      {access.tenants.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <FaturamentoPorEmpresaChart tenants={access.tenants} />
+          <DistribuicaoFaturamentoDonut tenants={access.tenants} />
+        </div>
+      ) : null}
+
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <Users className="size-5 text-[var(--brand-gold,#C9A84C)]" />
@@ -180,6 +190,169 @@ export default async function MasterDashboardPage() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+const CHART_PALETTE = [
+  "var(--brand-gold, #C9A84C)",
+  "var(--brand-silver, #8B93A0)",
+  "#3B82F6",
+  "#10B981",
+  "#F59E0B",
+  "#EC4899",
+  "#8B5CF6",
+  "#06B6D4",
+];
+
+function FaturamentoPorEmpresaChart({
+  tenants,
+}: {
+  tenants: PlatformTenantSummary[];
+}) {
+  const top = tenants.slice(0, 8);
+  const max = Math.max(1, ...top.map((t) => t.faturamento));
+
+  return (
+    <div className="rounded-xl border border-border/70 bg-card/40 p-5">
+      <h3 className="text-sm font-semibold text-foreground">
+        Faturamento por empresa
+      </h3>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Mês corrente · top {top.length}
+      </p>
+      <div className="space-y-3">
+        {top.map((tenant, i) => (
+          <div key={tenant.tenantId}>
+            <div className="mb-1 flex items-center justify-between text-xs">
+              <span className="truncate text-foreground/85">
+                {tenant.tenantName}
+              </span>
+              <span className="tabular-nums text-muted-foreground">
+                {formatCurrencyCompact(tenant.faturamento)}
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${(tenant.faturamento / max) * 100}%`,
+                  backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length],
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DistribuicaoFaturamentoDonut({
+  tenants,
+}: {
+  tenants: PlatformTenantSummary[];
+}) {
+  const total = tenants.reduce((acc, t) => acc + t.faturamento, 0);
+
+  if (total <= 0) {
+    return (
+      <div className="rounded-xl border border-border/70 bg-card/40 p-5">
+        <h3 className="text-sm font-semibold text-foreground">
+          Distribuição do faturamento
+        </h3>
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Sem faturamento neste período para compor o gráfico.
+        </p>
+      </div>
+    );
+  }
+
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  let offsetAcc = 0;
+
+  const top = tenants.slice(0, 8);
+  const arcs = top.map((tenant, i) => {
+    const fraction = tenant.faturamento / total;
+    const dash = fraction * circumference;
+    const arc = {
+      tenant,
+      color: CHART_PALETTE[i % CHART_PALETTE.length],
+      fraction,
+      dashArray: `${dash} ${circumference - dash}`,
+      dashOffset: -offsetAcc,
+    };
+    offsetAcc += dash;
+    return arc;
+  });
+
+  return (
+    <div className="rounded-xl border border-border/70 bg-card/40 p-5">
+      <h3 className="text-sm font-semibold text-foreground">
+        Distribuição do faturamento
+      </h3>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Participação de cada empresa no total
+      </p>
+      <div className="flex flex-col items-center gap-6 sm:flex-row">
+        <div className="relative shrink-0">
+          <svg
+            viewBox="0 0 160 160"
+            className="size-40 -rotate-90"
+            role="img"
+            aria-label="Distribuição do faturamento por empresa"
+          >
+            <circle
+              cx="80"
+              cy="80"
+              r={radius}
+              fill="none"
+              stroke="currentColor"
+              className="text-muted"
+              strokeWidth="20"
+            />
+            {arcs.map((arc) => (
+              <circle
+                key={arc.tenant.tenantId}
+                cx="80"
+                cy="80"
+                r={radius}
+                fill="none"
+                stroke={arc.color}
+                strokeWidth="20"
+                strokeDasharray={arc.dashArray}
+                strokeDashoffset={arc.dashOffset}
+              />
+            ))}
+          </svg>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+            <p className="text-base font-bold tabular-nums text-foreground">
+              {formatCurrencyCompact(total)}
+            </p>
+            <p className="text-[10px] text-muted-foreground">Total</p>
+          </div>
+        </div>
+        <ul className="w-full space-y-2">
+          {arcs.map((arc) => (
+            <li
+              key={arc.tenant.tenantId}
+              className="flex items-center justify-between gap-3 text-sm"
+            >
+              <span className="flex min-w-0 items-center gap-2 text-foreground/85">
+                <span
+                  className="size-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: arc.color }}
+                />
+                <span className="truncate">{arc.tenant.tenantName}</span>
+              </span>
+              <span className="shrink-0 tabular-nums text-muted-foreground">
+                {(arc.fraction * 100).toFixed(1)}%
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   type ResumoMesUiFilters,
 } from "@/components/dashboard/dashboard-streaming";
 import { DashboardOnboardingLead } from "@/components/onboarding/dashboard-onboarding-lead";
+import { MinhasEmpresasSection } from "@/components/platform/minhas-empresas-section";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { defaultDashboardPeriodo } from "@/lib/dashboard/dashboard-service";
 import { fetchDashboardFilterOptions } from "@/lib/dashboard/filter-options";
@@ -142,12 +143,20 @@ export default async function DashboardPage({ params, searchParams }: PageProps)
   const resumoFilters = resolveResumoFilters(resolvedSearchParams);
 
   return (
-    <Suspense fallback={<DashboardExecutiveLoading />}>
-      <DashboardStreamingRoot
-        tenantSlug={tenantSlug}
-        filters={filters}
-        resumoFilters={resumoFilters}
-      />
-    </Suspense>
+    <>
+      <Suspense fallback={<DashboardExecutiveLoading />}>
+        <DashboardStreamingRoot
+          tenantSlug={tenantSlug}
+          filters={filters}
+          resumoFilters={resumoFilters}
+        />
+      </Suspense>
+
+      <div className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+        <Suspense fallback={null}>
+          <MinhasEmpresasSection currentTenantSlug={tenantSlug} />
+        </Suspense>
+      </div>
+    </>
   );
 }

@@ -277,6 +277,7 @@ export class DashboardService {
       "faturamento",
       "receita_liquida",
       "ebitda",
+      "resultado_liquido",
       "ticket_medio",
       "margem_media",
       "cmv",
@@ -337,7 +338,7 @@ export class DashboardService {
               [] as Awaited<ReturnType<DashboardService["fetchFaturamentoDiario"]>>,
             ),
       ]);
-
+    
     const margemMedia =
       dre.resumo.receita_liquida > 0
         ? (dre.resumo.margem_contribuicao / dre.resumo.receita_liquida) * 100
@@ -361,6 +362,7 @@ export class DashboardService {
       faturamento: dre.resumo.receita_bruta,
       receita_liquida: dre.resumo.receita_liquida,
       ebitda: dre.resumo.ebitda,
+      resultado_liquido: dre.resumo.resultado_final,
       cmv: dre.resumo.cmv,
       saldo_bancario: fluxo.resumo.saldo_atual,
       contas_receber_aberto: contasReceber,

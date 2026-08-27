@@ -137,3 +137,90 @@ export async function getPlatformAccess(): Promise<PlatformAccess | null> {
     },
   };
 }
+
+export type PlatformBillingRow = {
+  tenantId: string;
+  tenantName: string;
+  planName: string | null;
+  amountCents: number | null;
+  status: string | null;
+  isPilot: boolean;
+};
+
+export type PlatformBillingSummary = {
+  rows: PlatformBillingRow[];
+  /** Soma mensal (MRR) considerando só assinaturas ativas e pagas (não-piloto). */
+  mrrCents: number;
+  assinaturasAtivas: number;
+};
+
+/**
+ * Quanto cada empresa paga pela sua consultoria/assinatura.
+ * Restrito ao dono da plataforma — nunca chamar para um associado (partner),
+ * mesmo que ele tenha acesso às empresas: esse valor é informação sua, não dele.
+ */
+export async function getPlatformBillingSummary(
+  access: PlatformAccess,
+): Promise<PlatformBillingSummary | null> {
+  if (access.role !== "owner") return null;
+  if (access.tenants.length === 0) {
+    return { rows: [], mrrCents: 0, assinaturasAtivas: 0 };
+  }
+
+  const admin = createAdminClient();
+  const tenantIds = access.tenants.map((t) => t.tenantId);
+
+  const { data: subs } = await admin
+    .from("billing_subscriptions" as never)
+    .select("tenant_id, plan_id, status")
+    .in("tenant_id", tenantIds)
+    .returns
+      { tenant_id: string; plan_id: string | null; status: string | null }[]
+    >();
+
+  const subscriptions = subs ?? [];
+  const planIds = [
+    ...new Set(subscriptions.map((s) => s.plan_id).filter(Boolean)),
+  ] as string[];
+
+  const { data: plansData } =
+    planIds.length > 0
+      ? await admin
+          .from("billing_plans" as never)
+          .select("id, name, amount_cents, is_pilot")
+          .in("id", planIds)
+          .returns
+            {
+              id: string;
+              name: string;
+              amount_cents: number | null;
+              is_pilot: boolean;
+            }[]
+          >()
+      : { data: [] };
+
+  const plansById = new Map((plansData ?? []).map((p) => [p.id, p]));
+  const tenantNameById = new Map(
+    access.tenants.map((t) => [t.tenantId, t.tenantName]),
+  );
+
+  const rows: PlatformBillingRow[] = subscriptions.map((sub) => {
+    const plan = sub.plan_id ? plansById.get(sub.plan_id) : undefined;
+    return {
+      tenantId: sub.tenant_id,
+      tenantName: tenantNameById.get(sub.tenant_id) ?? "—",
+      planName: plan?.name ?? null,
+      amountCents: plan?.amount_cents ?? null,
+      status: sub.status,
+      isPilot: plan?.is_pilot ?? false,
+    };
+  });
+
+  const mrrCents = rows
+    .filter((r) => r.status === "active" && !r.isPilot && r.amountCents)
+    .reduce((acc, r) => acc + (r.amountCents ?? 0), 0);
+
+  const assinaturasAtivas = rows.filter((r) => r.status === "active").length;
+
+  return { rows, mrrCents, assinaturasAtivas };
+}

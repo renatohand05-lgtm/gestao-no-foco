@@ -62,6 +62,29 @@ export async function getPostLoginPath(
   redirectTo?: string | null,
   preferredSlug?: string | null,
 ) {
+  // Se o link de destino aponta para uma empresa específica (ex: convite,
+  // link direto), respeita — mesmo sendo dono/associado da plataforma.
+  if (redirectTo) {
+    const tenantSlugs = await getUserTenantSlugs(supabase, userId);
+    const slug = getTenantSlugFromPath(redirectTo);
+    if (slug && tenantSlugs.includes(slug)) {
+      return redirectTo.startsWith("/") ? redirectTo : `/${redirectTo}`;
+    }
+  }
+
+  // Dono da plataforma ou associado: cai na Visão do Dono, não numa empresa
+  // específica — mesmo padrão de segurança do resto do sistema (checa
+  // platform_partners, nunca assume).
+  const { data: partnerRow } = await supabase
+    .from("platform_partners" as never)
+    .select("role")
+    .eq("user_id", userId)
+    .maybeSingle<{ role: string }>();
+
+  if (partnerRow) {
+    return "/master/dashboard";
+  }
+
   const tenantSlugs = await getUserTenantSlugs(supabase, userId);
   return resolvePostLoginPath(tenantSlugs, redirectTo, preferredSlug);
 }

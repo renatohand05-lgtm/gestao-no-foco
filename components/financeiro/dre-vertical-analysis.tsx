@@ -24,7 +24,7 @@ export function DreVerticalAnalysis({ lines, periodoLabel }: Props) {
               <div className="mb-1 flex items-center justify-between text-sm">
                 <span className="text-foreground/85">{line.label}</span>
                 <span className="tabular-nums text-muted-foreground">
-                  {line.pct != null ? `${formatPercent(line.pct)}%` : "—"}
+                  {line.pct != null ? formatPercent(line.pct) : "—"}
                 </span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">

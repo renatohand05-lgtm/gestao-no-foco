@@ -8,6 +8,41 @@ import { SectionCard } from "@/components/ui/section-card";
 import { formatCurrency } from "@/lib/financeiro/format";
 import type { DreLinha } from "@/types/dre";
 
+/**
+ * Linhas que representam dedução/subtração no DRE (custos, despesas, impostos).
+ * Cobre também os itens filhos do detalhamento de OPEX, que herdam o mesmo dreLinha
+ * do grupo pai mesmo sem o prefixo "(-)" no rótulo.
+ */
+const SUBTRACTION_DRE_LINHAS = new Set([
+  "deducoes",
+  "cmv",
+  "despesas_pessoal",
+  "despesas_operacionais",
+  "despesas_comerciais",
+  "depreciacao_amortizacao",
+  "despesas_financeiras",
+  "impostos_lucro",
+]);
+
+function valueColorClass(linha: DreLinha): string {
+  const isSubtraction = linha.dreLinha
+    ? SUBTRACTION_DRE_LINHAS.has(linha.dreLinha)
+    : false;
+
+  if (isSubtraction) {
+    return "text-rose-700 dark:text-rose-400";
+  }
+  if (linha.destaque) {
+    if (linha.valor > 0) return "text-emerald-700 dark:text-emerald-400";
+    if (linha.valor < 0) return "text-rose-700 dark:text-rose-400";
+    return "text-foreground";
+  }
+  if (linha.valor < 0) {
+    return "text-rose-700 dark:text-rose-400";
+  }
+  return "";
+}
+
 type Props = {
   linhas: DreLinha[];
   tenantSlug: string;
@@ -61,24 +96,21 @@ function Row({
   const isOpen = expanded.has(linha.codigo);
   const hasChildren = (linha.children?.length ?? 0) > 0;
 
+  const colorClass = valueColorClass(linha);
   const valueCell = (
     <div className="flex items-center gap-3">
+      <p className={`text-sm tabular-nums ${colorClass}`}>
+        {formatCurrency(linha.valor)}
+      </p>
       {linha.pctReceitaLiquida != null ? (
-        <span className="hidden text-xs tabular-nums text-muted-foreground sm:inline">
+        <span
+          className={`hidden text-xs tabular-nums sm:inline ${
+            colorClass || "text-muted-foreground"
+          }`}
+        >
           {linha.pctReceitaLiquida.toFixed(1)}% RL
         </span>
       ) : null}
-      <p
-        className={`text-sm tabular-nums ${
-          linha.valor < 0
-            ? "text-rose-700 dark:text-rose-400"
-            : linha.destaque
-              ? "text-foreground"
-              : ""
-        }`}
-      >
-        {formatCurrency(linha.valor)}
-      </p>
     </div>
   );
 

@@ -162,7 +162,7 @@ export function DreEvolutionChart({ points }: Props) {
                   textAnchor="middle"
                   className="fill-[var(--brand-gold,#C9A84C)] text-[10px] font-medium"
                 >
-                  {p.margemPct != null ? `${formatPercent(p.margemPct)}%` : "—"}
+                  {p.margemPct != null ? formatPercent(p.margemPct) : "—"}
                 </text>
               </g>
             );

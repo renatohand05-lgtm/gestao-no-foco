@@ -68,10 +68,20 @@ export function buildPremiumTopKpis(input: {
     {
       id: "lucro",
       title: "Lucro líquido",
-      value: "Indisponível",
-      supportingText: "DRE completo não disponível neste ciclo",
-      tone: "neutral",
-      unavailable: true,
+      value:
+        k?.resultado_liquido != null
+          ? formatCurrencyCompact(k.resultado_liquido)
+          : "Indisponível",
+      supportingText:
+        k?.resultado_liquido != null
+          ? "Resultado líquido do período (DRE)"
+          : "DRE completo não disponível neste ciclo",
+      tone:
+        k?.resultado_liquido != null && k.resultado_liquido < 0
+          ? "danger"
+          : "neutral",
+      unavailable: k?.resultado_liquido == null,
+      trend: trendFromComparison(c?.resultado_liquido),
       href: `${base}/financeiro/dre`,
     },
     {

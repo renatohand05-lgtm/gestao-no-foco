@@ -12,6 +12,9 @@ import type { DreLinha } from "@/types/dre";
  * Linhas que representam dedução/subtração no DRE (custos, despesas, impostos).
  * Cobre também os itens filhos do detalhamento de OPEX, que herdam o mesmo dreLinha
  * do grupo pai mesmo sem o prefixo "(-)" no rótulo.
+ *
+ * Baseado no código interno da linha (dreLinha), não no texto do rótulo —
+ * funciona igual para qualquer segmento de negócio atendido pela plataforma.
  */
 const SUBTRACTION_DRE_LINHAS = new Set([
   "deducoes",
@@ -24,23 +27,57 @@ const SUBTRACTION_DRE_LINHAS = new Set([
   "impostos_lucro",
 ]);
 
-function valueColorClass(linha: DreLinha): string {
-  const isSubtraction = linha.dreLinha
-    ? SUBTRACTION_DRE_LINHAS.has(linha.dreLinha)
-    : false;
+/** O resultado final do DRE (linha mais importante do demonstrativo). */
+function isFinalTotal(linha: DreLinha): boolean {
+  return linha.codigo === "resultado_final";
+}
 
-  if (isSubtraction) {
-    return "text-rose-700 dark:text-rose-400";
-  }
+/** Subtotais intermediários (Receita líquida, Margem, EBITDA, EBIT, etc.). */
+function isSubtotal(linha: DreLinha): boolean {
+  return Boolean(linha.destaque) && !isFinalTotal(linha);
+}
+
+function isSubtractionLine(linha: DreLinha): boolean {
+  return linha.dreLinha ? SUBTRACTION_DRE_LINHAS.has(linha.dreLinha) : false;
+}
+
+type Tone = "positive" | "negative" | "neutral";
+
+function toneFor(linha: DreLinha): Tone {
   if (linha.destaque) {
-    if (linha.valor > 0) return "text-emerald-700 dark:text-emerald-400";
-    if (linha.valor < 0) return "text-rose-700 dark:text-rose-400";
-    return "text-foreground";
+    if (linha.valor > 0) return "positive";
+    if (linha.valor < 0) return "negative";
+    return "neutral";
   }
-  if (linha.valor < 0) {
-    return "text-rose-700 dark:text-rose-400";
+  if (isSubtractionLine(linha)) return "negative";
+  if (linha.valor < 0) return "negative";
+  return "neutral";
+}
+
+/** Cor do valor — saturação cheia nos totais, mais discreta nas linhas de detalhe. */
+function valueColorClass(linha: DreLinha, tone: Tone): string {
+  if (tone === "positive") {
+    return isFinalTotal(linha)
+      ? "text-emerald-700 dark:text-emerald-400"
+      : "text-emerald-700/90 dark:text-emerald-400/90";
   }
-  return "";
+  if (tone === "negative") {
+    return linha.destaque
+      ? "text-rose-700 dark:text-rose-400"
+      : "text-rose-600/80 dark:text-rose-400/75";
+  }
+  return "text-foreground";
+}
+
+/** Pílula de percentual — reforça a leitura sem competir com o valor principal. */
+function pctChipClass(tone: Tone): string {
+  if (tone === "positive") {
+    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+  }
+  if (tone === "negative") {
+    return "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+  }
+  return "bg-muted text-muted-foreground";
 }
 
 type Props = {
@@ -96,17 +133,25 @@ function Row({
   const isOpen = expanded.has(linha.codigo);
   const hasChildren = (linha.children?.length ?? 0) > 0;
 
-  const colorClass = valueColorClass(linha);
+  const finalTotal = isFinalTotal(linha);
+  const subtotal = isSubtotal(linha);
+  const tone = toneFor(linha);
+  const colorClass = valueColorClass(linha, tone);
+
   const valueCell = (
     <div className="flex items-center gap-3">
-      <p className={`text-sm tabular-nums ${colorClass}`}>
+      <p
+        className={`min-w-[112px] text-right text-sm tabular-nums ${colorClass} ${
+          finalTotal ? "text-base font-bold" : subtotal ? "font-semibold" : ""
+        }`}
+      >
         {formatCurrency(linha.valor)}
       </p>
       {linha.pctReceitaLiquida != null ? (
         <span
-          className={`hidden text-xs tabular-nums sm:inline ${
-            colorClass || "text-muted-foreground"
-          }`}
+          className={`hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums sm:inline ${pctChipClass(
+            tone,
+          )}`}
         >
           {linha.pctReceitaLiquida.toFixed(1)}% RL
         </span>
@@ -138,11 +183,13 @@ function Row({
       )}
       <p
         className={
-          linha.destaque
-            ? "truncate text-sm font-semibold"
-            : depth > 0
-              ? "truncate text-sm"
-              : "truncate text-sm text-muted-foreground"
+          finalTotal
+            ? "truncate text-base font-bold"
+            : subtotal
+              ? "truncate text-sm font-semibold"
+              : depth > 0
+                ? "truncate text-xs text-muted-foreground"
+                : "truncate text-sm text-foreground/85"
         }
       >
         {linha.label}
@@ -150,9 +197,13 @@ function Row({
     </div>
   );
 
-  const shellClass = `flex items-center justify-between gap-4 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-    active ? "bg-muted/40" : "hover:bg-muted/30"
-  }`;
+  const shellClass = `flex items-center justify-between gap-4 px-2 outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+    finalTotal
+      ? "mt-1 rounded-md border-t-2 border-foreground/20 bg-muted/30 py-3"
+      : subtotal
+        ? "border-t border-border/70 py-3"
+        : "py-2"
+  } ${active ? "bg-muted/40" : finalTotal ? "" : "hover:bg-muted/30"}`;
 
   return (
     <>
@@ -219,7 +270,7 @@ export function DreStatement({ linhas, tenantSlug, query }: Props) {
       title="Demonstrativo"
       description="DRE por competência — expanda despesas operacionais para grupos e linhas. Clique para drill-down."
     >
-      <div className="divide-y divide-border/70">
+      <div className="flex flex-col">
         {linhas.map((linha) => (
           <Row
             key={linha.codigo}

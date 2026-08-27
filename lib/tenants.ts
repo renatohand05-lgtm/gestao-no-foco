@@ -75,6 +75,17 @@ export const requireTenant = cache(async (slug: string): Promise<TenantWithRole>
       userId: user.id,
       authorizedCount: tenants.length,
     });
+
+    const { data: partnerRow } = await supabase
+      .from("platform_partners" as never)
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle<{ role: string }>();
+
+    if (partnerRow) {
+      redirect("/master/dashboard");
+    }
+
     const fallback = tenants[0]?.slug;
     redirect(fallback ? `/${fallback}/dashboard` : "/onboarding");
   }

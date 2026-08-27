@@ -29,6 +29,8 @@ export type DashboardKpis = {
   faturamento: number;
   receita_liquida: number;
   ebitda: number;
+  /** Resultado líquido do DRE (após despesas, D&A, financeiro e impostos). */
+  resultado_liquido: number;
   cmv: number;
   saldo_bancario: number;
   contas_receber_aberto: number;
@@ -56,6 +58,7 @@ export type DashboardComparableKpiKey =
   | "faturamento"
   | "receita_liquida"
   | "ebitda"
+  | "resultado_liquido"
   | "contas_receber_aberto"
   | "contas_pagar_aberto"
   | "ticket_medio"
@@ -63,7 +66,7 @@ export type DashboardComparableKpiKey =
   | "cmv"
   | "quantidade_vendas";
 
-export type DashboardComparisons = Record<
+export type DashboardComparisons = Record
   DashboardComparableKpiKey,
   DashboardKpiComparison
 >;

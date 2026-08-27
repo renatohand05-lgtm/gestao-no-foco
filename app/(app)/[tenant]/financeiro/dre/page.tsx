@@ -148,3 +148,161 @@ export default async function DreEnterprisePage({
             if (detalhe === "__none__") return !item.detalhe;
             return item.detalhe === detalhe;
           })
+        : [];
+
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          tenantName={auth.tenant.name}
+          title="DRE — Comparativo Mensal"
+          description="Selecione dois períodos para comparar receitas, custos, resultado e margem."
+          actions={
+            <DreComparativeExportButtons
+              rows={view.rows}
+              mesA={mesALabel}
+              mesB={mesBLabel}
+              empresa={auth.tenant.name}
+            />
+          }
+        />
+
+        <Suspense fallback={<FiltersFallback />}>
+          <DreComparativeFilters
+            tenantSlug={tenantSlug}
+            year={year}
+            mesA={mesA}
+            mesB={mesB}
+          />
+        </Suspense>
+
+        <DreComparativeStatement
+          rows={view.rows}
+          mesALabel={mesALabel}
+          mesBLabel={mesBLabel}
+          tenantSlug={tenantSlug}
+          periodA={periodA}
+          periodB={periodB}
+        />
+
+        {linha ? (
+          <DreDrillPanel
+            tenantSlug={tenantSlug}
+            linha={linha}
+            detalhe={detalhe}
+            items={drill}
+          />
+        ) : null}
+      </ExecutivePage>
+    );
+  }
+
+  const defaults = defaultDrePeriodo();
+  const filters = {
+    centroCustoId: centroCusto || undefined,
+    categoriaId: categoria || undefined,
+    planoContaId: planoConta || undefined,
+    dataDe: dataDe ?? defaults.dataDe,
+    dataAte: dataAte ?? defaults.dataAte,
+  };
+
+  const { resumo, linhas, gaps, filterOptions, drillItems } =
+    await service.getDre(filters);
+
+  const [indicators, evolution] = await Promise.all([
+    getDreIndicators(auth.tenant.id, filters, resumo),
+    getDreEvolution(auth.tenant.id, {
+      centroCustoId: filters.centroCustoId,
+      categoriaId: filters.categoriaId,
+      planoContaId: filters.planoContaId,
+    }),
+  ]);
+  const composicaoLucro = getDreComposicaoLucro(resumo);
+  const verticalLines = getDreVerticalAnalysis(resumo);
+  const periodoLabel = formatPeriodoLabel(filters.dataDe, filters.dataAte);
+
+  const drill =
+    linha && drillItems
+      ? drillItems.filter((item) => {
+          if (item.linha !== linha) return false;
+          if (!detalhe) return true;
+          if (detalhe === "__none__") return !item.detalhe;
+          return item.detalhe === detalhe;
+        })
+      : [];
+
+  return (
+    <ExecutivePage width="wide" spacing="loose">
+      <FinancePageHeader
+        tenantSlug={tenantSlug}
+        tenantName={auth.tenant.name}
+        title="DRE"
+        description="Demonstração do Resultado por competência. Pagamentos alimentam o Fluxo de Caixa."
+        actions={
+          <Link
+            href={`/${tenantSlug}/financeiro/dre?comparativo=1`}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            Comparativo mensal
+          </Link>
+        }
+      />
+
+      <DreSummaryCards resumo={resumo} />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DreIndicatorsPanel indicators={indicators} />
+        <DreCompositionDonut
+          composicao={composicaoLucro}
+          resultadoFinal={resumo.resultado_final}
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DreEvolutionChart points={evolution} />
+        <DreVerticalAnalysis lines={verticalLines} periodoLabel={periodoLabel} />
+      </div>
+
+      <Suspense fallback={<FiltersFallback />}>
+        <DreFilters
+          tenantSlug={tenantSlug}
+          centrosCusto={filterOptions.centrosCusto}
+          categorias={filterOptions.categorias}
+          planosConta={filterOptions.planosConta}
+          currentCentroCustoId={centroCusto ?? ""}
+          currentCategoriaId={categoria ?? ""}
+          currentPlanoContaId={planoConta ?? ""}
+          dataDe={filters.dataDe}
+          dataAte={filters.dataAte}
+        />
+      </Suspense>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DreStatement
+          linhas={linhas}
+          tenantSlug={tenantSlug}
+          query={{
+            dataDe: filters.dataDe,
+            dataAte: filters.dataAte,
+            centroCusto,
+            categoria,
+            planoConta,
+            linha,
+            detalhe,
+          }}
+        />
+        <div className="space-y-6">
+          {linha ? (
+            <DreDrillPanel
+              tenantSlug={tenantSlug}
+              linha={linha}
+              detalhe={detalhe}
+              items={drill}
+            />
+          ) : null}
+          <DreGapsPanel tenantSlug={tenantSlug} gaps={gaps} />
+        </div>
+      </div>
+    </ExecutivePage>
+  );
+}

@@ -33,9 +33,9 @@ function IndicatorCard({
     delta != null && (lowerIsBetter ? delta < 0 : delta > 0);
   const deltaLabel =
     unit === "pp"
-      ? `${formatPercent(Math.abs(delta ?? 0))} p.p. vs mês anterior`
+      ? `${Math.abs(delta ?? 0).toFixed(1).replace(".", ",")} p.p. vs mês anterior`
       : deltaPctChange != null
-        ? `${formatPercent(Math.abs(deltaPctChange))}% vs mês anterior`
+        ? `${formatPercent(Math.abs(deltaPctChange))} vs mês anterior`
         : "vs mês anterior";
 
   return (
@@ -84,7 +84,7 @@ export function DreIndicatorsPanel({ indicators }: Props) {
           label="Margem Líquida"
           value={
             indicators.margemLiquidaPct != null
-              ? `${formatPercent(indicators.margemLiquidaPct)}%`
+              ? `${formatPercent(indicators.margemLiquidaPct)}`
               : "—"
           }
           current={indicators.margemLiquidaPct}
@@ -94,7 +94,7 @@ export function DreIndicatorsPanel({ indicators }: Props) {
           label="Margem Bruta"
           value={
             indicators.margemBrutaPct != null
-              ? `${formatPercent(indicators.margemBrutaPct)}%`
+              ? `${formatPercent(indicators.margemBrutaPct)}`
               : "—"
           }
           current={indicators.margemBrutaPct}
@@ -104,7 +104,7 @@ export function DreIndicatorsPanel({ indicators }: Props) {
           label="CMV sobre Receita"
           value={
             indicators.cmvSobreReceitaPct != null
-              ? `${formatPercent(indicators.cmvSobreReceitaPct)}%`
+              ? `${formatPercent(indicators.cmvSobreReceitaPct)}`
               : "—"
           }
           current={indicators.cmvSobreReceitaPct}

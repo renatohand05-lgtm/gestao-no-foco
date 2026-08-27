@@ -172,15 +172,18 @@ export async function getPlatformBillingSummary(
 
   const { data: subs } = await admin
     .from("billing_subscriptions" as never)
-    .select("tenant_id, plan_id, status")
-    .in("tenant_id", tenantIds)
-    .returns
-      { tenant_id: string; plan_id: string | null; status: string | null }[]
-    >();
+    .select("tenant_id, plan_id, status");
 
-  const subscriptions = subs ?? [];
+  const subscriptions = (subs ?? []) as {
+    tenant_id: string;
+    plan_id: string | null;
+    status: string | null;
+  }[];
+  const filteredSubscriptions = subscriptions.filter((s) =>
+    tenantIds.includes(s.tenant_id),
+  );
   const planIds = [
-    ...new Set(subscriptions.map((s) => s.plan_id).filter(Boolean)),
+    ...new Set(filteredSubscriptions.map((s) => s.plan_id).filter(Boolean)),
   ] as string[];
 
   const { data: plansData } =
@@ -189,22 +192,21 @@ export async function getPlatformBillingSummary(
           .from("billing_plans" as never)
           .select("id, name, amount_cents, is_pilot")
           .in("id", planIds)
-          .returns
-            {
-              id: string;
-              name: string;
-              amount_cents: number | null;
-              is_pilot: boolean;
-            }[]
-          >()
       : { data: [] };
 
-  const plansById = new Map((plansData ?? []).map((p) => [p.id, p]));
+  const plans = (plansData ?? []) as {
+    id: string;
+    name: string;
+    amount_cents: number | null;
+    is_pilot: boolean;
+  }[];
+
+  const plansById = new Map(plans.map((p) => [p.id, p]));
   const tenantNameById = new Map(
     access.tenants.map((t) => [t.tenantId, t.tenantName]),
   );
 
-  const rows: PlatformBillingRow[] = subscriptions.map((sub) => {
+  const rows: PlatformBillingRow[] = filteredSubscriptions.map((sub) => {
     const plan = sub.plan_id ? plansById.get(sub.plan_id) : undefined;
     return {
       tenantId: sub.tenant_id,

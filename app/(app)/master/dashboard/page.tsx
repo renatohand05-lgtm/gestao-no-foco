@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { Building2, TrendingUp, Users, Wallet } from "lucide-react";
+import {
+  AlertTriangle,
+  Building2,
+  TrendingUp,
+  Users,
+  Wallet,
+} from "lucide-react";
 
 import { requireAuth } from "@/lib/tenants";
 import {
@@ -16,6 +22,17 @@ function segmentLabel(segment: string | null) {
   if (!segment) return "Sem segmento";
   return CATALOG_SEGMENT_SHORT_LABEL[segment as ProductSegmentId] ?? segment;
 }
+
+const CHART_PALETTE = [
+  "var(--brand-gold, #C9A84C)",
+  "var(--brand-silver, #8B93A0)",
+  "#3B82F6",
+  "#10B981",
+  "#F59E0B",
+  "#EC4899",
+  "#8B5CF6",
+  "#06B6D4",
+];
 
 function KpiCard({
   icon: Icon,
@@ -111,10 +128,17 @@ export default async function MasterDashboardPage() {
       </div>
 
       {access.tenants.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <FaturamentoPorEmpresaChart tenants={access.tenants} />
-          <DistribuicaoFaturamentoDonut tenants={access.tenants} />
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <FaturamentoPorEmpresaChart tenants={access.tenants} />
+            <DistribuicaoFaturamentoDonut tenants={access.tenants} />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <EmpresasComAlertasPanel tenants={access.tenants} />
+            <RankingEmpresasTable tenants={access.tenants} />
+          </div>
+        </>
       ) : null}
 
       <section className="space-y-4">
@@ -134,16 +158,16 @@ export default async function MasterDashboardPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
             {access.tenants.map((tenant) => (
               <Link
                 key={tenant.tenantId}
                 href={`/${tenant.tenantSlug}/dashboard`}
-                className="group rounded-xl border border-border/70 bg-card/30 p-5 transition hover:border-[var(--brand-gold,#C9A84C)]/60 hover:bg-card/50"
+                className="group w-60 shrink-0 rounded-xl border border-border/70 bg-card/30 p-4 transition hover:border-[var(--brand-gold,#C9A84C)]/60 hover:bg-card/50"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-semibold text-foreground group-hover:text-[var(--brand-gold,#C9A84C)]">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-foreground group-hover:text-[var(--brand-gold,#C9A84C)]">
                       {tenant.tenantName}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -153,15 +177,15 @@ export default async function MasterDashboardPage() {
                   <span
                     className={
                       tenant.isActive
-                        ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300"
-                        : "rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                        ? "shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300"
+                        : "shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
                     }
                   >
                     {tenant.isActive ? "Ativa" : "Inativa"}
                   </span>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-2 gap-2">
                   <div>
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
                       Faturamento
@@ -185,6 +209,9 @@ export default async function MasterDashboardPage() {
                     </p>
                   </div>
                 </div>
+                <p className="mt-3 text-xs font-medium text-[var(--brand-gold,#C9A84C)] opacity-0 transition group-hover:opacity-100">
+                  Ver dashboard →
+                </p>
               </Link>
             ))}
           </div>
@@ -194,17 +221,7 @@ export default async function MasterDashboardPage() {
   );
 }
 
-const CHART_PALETTE = [
-  "var(--brand-gold, #C9A84C)",
-  "var(--brand-silver, #8B93A0)",
-  "#3B82F6",
-  "#10B981",
-  "#F59E0B",
-  "#EC4899",
-  "#8B5CF6",
-  "#06B6D4",
-];
-
+/** Gráfico de barras verticais — Faturamento por empresa (top 8). */
 function FaturamentoPorEmpresaChart({
   tenants,
 }: {
@@ -212,6 +229,10 @@ function FaturamentoPorEmpresaChart({
 }) {
   const top = tenants.slice(0, 8);
   const max = Math.max(1, ...top.map((t) => t.faturamento));
+  const chartHeight = 200;
+  const barAreaHeight = 150;
+  const slotWidth = 70;
+  const width = top.length * slotWidth;
 
   return (
     <div className="rounded-xl border border-border/70 bg-card/40 p-5">
@@ -221,28 +242,62 @@ function FaturamentoPorEmpresaChart({
       <p className="mb-4 text-xs text-muted-foreground">
         Mês corrente · top {top.length}
       </p>
-      <div className="space-y-3">
-        {top.map((tenant, i) => (
-          <div key={tenant.tenantId}>
-            <div className="mb-1 flex items-center justify-between text-xs">
-              <span className="truncate text-foreground/85">
-                {tenant.tenantName}
-              </span>
-              <span className="tabular-nums text-muted-foreground">
-                {formatCurrencyCompact(tenant.faturamento)}
-              </span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${(tenant.faturamento / max) * 100}%`,
-                  backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length],
-                }}
-              />
-            </div>
-          </div>
-        ))}
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${width} ${chartHeight}`}
+          className="h-52 w-full"
+          style={{ minWidth: width }}
+          role="img"
+          aria-label="Faturamento por empresa"
+        >
+          {top.map((tenant, i) => {
+            const barHeight = (tenant.faturamento / max) * barAreaHeight;
+            const x = i * slotWidth;
+            const barWidth = 32;
+            const barX = x + (slotWidth - barWidth) / 2;
+            const barY = barAreaHeight - barHeight + 10;
+
+            return (
+              <g key={tenant.tenantId}>
+                <text
+                  x={x + slotWidth / 2}
+                  y={barY - 6}
+                  textAnchor="middle"
+                  className="fill-muted-foreground text-[9px]"
+                >
+                  {formatCurrencyCompact(tenant.faturamento)}
+                </text>
+                <rect
+                  x={barX}
+                  y={barY}
+                  width={barWidth}
+                  height={Math.max(barHeight, 2)}
+                  rx={4}
+                  fill={CHART_PALETTE[i % CHART_PALETTE.length]}
+                />
+                <text
+                  x={x + slotWidth / 2}
+                  y={barAreaHeight + 28}
+                  textAnchor="middle"
+                  className="fill-muted-foreground text-[9px]"
+                >
+                  {tenant.tenantName.length > 10
+                    ? `${tenant.tenantName.slice(0, 9)}…`
+                    : tenant.tenantName}
+                </text>
+              </g>
+            );
+          })}
+          <line
+            x1="0"
+            x2={width}
+            y1={barAreaHeight + 10}
+            y2={barAreaHeight + 10}
+            stroke="currentColor"
+            className="text-border"
+            strokeWidth="1"
+          />
+        </svg>
       </div>
     </div>
   );
@@ -352,6 +407,156 @@ function DistribuicaoFaturamentoDonut({
             </li>
           ))}
         </ul>
+      </div>
+    </div>
+  );
+}
+
+type Alert = {
+  tenantId: string;
+  tenantName: string;
+  tenantSlug: string;
+  label: string;
+  severity: "warning" | "danger";
+};
+
+/**
+ * Empresas com alertas — baseado só em dados que já temos (sem movimento no
+ * mês, ou lucro negativo). Não inventa sinais de estoque/OS que ainda não
+ * cruzamos entre empresas.
+ */
+function EmpresasComAlertasPanel({
+  tenants,
+}: {
+  tenants: PlatformTenantSummary[];
+}) {
+  const alerts: Alert[] = [];
+
+  for (const tenant of tenants) {
+    if (!tenant.isActive) {
+      alerts.push({
+        tenantId: tenant.tenantId,
+        tenantName: tenant.tenantName,
+        tenantSlug: tenant.tenantSlug,
+        label: "Sem movimento no mês",
+        severity: "warning",
+      });
+    } else if (tenant.lucroLiquido < 0) {
+      alerts.push({
+        tenantId: tenant.tenantId,
+        tenantName: tenant.tenantName,
+        tenantSlug: tenant.tenantSlug,
+        label: "Prejuízo no mês",
+        severity: "danger",
+      });
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-border/70 bg-card/40 p-5">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="size-4 text-amber-500" />
+        <h3 className="text-sm font-semibold text-foreground">
+          Empresas com alertas
+        </h3>
+      </div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Baseado no faturamento e resultado do mês corrente
+      </p>
+
+      {alerts.length === 0 ? (
+        <p className="py-6 text-center text-sm text-muted-foreground">
+          Nenhum alerta neste ciclo — todas as empresas com movimento estão
+          com resultado positivo.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {alerts.slice(0, 6).map((alert) => (
+            <li key={`${alert.tenantId}-${alert.label}`}>
+              <Link
+                href={`/${alert.tenantSlug}/dashboard`}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2 text-sm transition hover:border-[var(--brand-gold,#C9A84C)]/50 hover:bg-card/50"
+              >
+                <span className="truncate text-foreground/85">
+                  {alert.tenantName}
+                </span>
+                <span
+                  className={
+                    alert.severity === "danger"
+                      ? "shrink-0 rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-rose-700 dark:text-rose-300"
+                      : "shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300"
+                  }
+                >
+                  {alert.label}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Tabela de ranking — empresas ordenadas por faturamento (já vem ordenado). */
+function RankingEmpresasTable({
+  tenants,
+}: {
+  tenants: PlatformTenantSummary[];
+}) {
+  const ranked = tenants.slice(0, 8);
+
+  return (
+    <div className="rounded-xl border border-border/70 bg-card/40 p-5">
+      <h3 className="text-sm font-semibold text-foreground">
+        Ranking de empresas
+      </h3>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Ordenado por faturamento do mês
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border/60 text-left text-[10px] uppercase tracking-wide text-muted-foreground">
+              <th className="w-8 pb-2 font-medium">#</th>
+              <th className="pb-2 font-medium">Empresa</th>
+              <th className="pb-2 text-right font-medium">Faturamento</th>
+              <th className="pb-2 text-right font-medium">Lucro líquido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ranked.map((tenant, i) => (
+              <tr
+                key={tenant.tenantId}
+                className="border-b border-border/30 last:border-0"
+              >
+                <td className="py-2 tabular-nums text-muted-foreground">
+                  {i + 1}
+                </td>
+                <td className="py-2">
+                  <Link
+                    href={`/${tenant.tenantSlug}/dashboard`}
+                    className="text-foreground/90 hover:text-[var(--brand-gold,#C9A84C)]"
+                  >
+                    {tenant.tenantName}
+                  </Link>
+                </td>
+                <td className="py-2 text-right tabular-nums text-foreground">
+                  {formatCurrency(tenant.faturamento)}
+                </td>
+                <td
+                  className={
+                    tenant.lucroLiquido >= 0
+                      ? "py-2 text-right tabular-nums text-emerald-700 dark:text-emerald-400"
+                      : "py-2 text-right tabular-nums text-rose-700 dark:text-rose-400"
+                  }
+                >
+                  {formatCurrency(tenant.lucroLiquido)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

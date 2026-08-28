@@ -400,7 +400,8 @@
     opacity: 0.35;
   }
   .premium-loader-ring {
-    animation-duration: 2.2s;
+    animation-duration: 2.2s !important;
+    animation-iteration-count: infinite !important;
   }
 }
 

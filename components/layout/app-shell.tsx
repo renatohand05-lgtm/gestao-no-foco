@@ -18,6 +18,7 @@ type AppShellProps = {
   tenant: TenantWithRole;
   tenants: TenantWithRole[];
   permissions?: readonly string[];
+  isPlatformPartner?: boolean;
   user?: {
     email?: string;
     name?: string;
@@ -38,6 +39,7 @@ function DemoAwareChrome({
   tenant,
   tenants,
   permissions,
+  isPlatformPartner,
   user,
   children,
 }: AppShellProps) {
@@ -56,6 +58,7 @@ function DemoAwareChrome({
           tenant={tenant}
           tenants={tenants}
           permissions={permissions}
+          isPlatformPartner={isPlatformPartner}
         />
       ) : null}
       <SidebarInset
@@ -113,6 +116,7 @@ export function AppShell(props: AppShellProps) {
             tenant={props.tenant}
             tenants={props.tenants}
             permissions={props.permissions}
+            isPlatformPartner={props.isPlatformPartner}
           />
           <SidebarInset className="min-h-svh bg-background">
             <AppHeader
@@ -130,6 +134,7 @@ export function AppShell(props: AppShellProps) {
           tenant={props.tenant}
           tenants={props.tenants}
           permissions={props.permissions}
+          isPlatformPartner={props.isPlatformPartner}
           user={props.user}
         >
           {props.children}

@@ -40,6 +40,30 @@ type PlatformTenantRow = {
 };
 
 /**
+ * Checagem "leve": só confirma se o usuário é dono/associado da plataforma,
+ * sem calcular faturamento/lucro de nenhuma empresa. Usada em lugares que
+ * rodam em TODA navegação (como o layout do tenant), onde a versão completa
+ * (getPlatformAccess) seria cara demais — recalcularia o DRE de todas as
+ * empresas só pra mostrar um link no menu.
+ */
+export async function isPlatformPartner(): Promise<boolean> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: partnerRow } = await supabase
+    .from("platform_partners" as never)
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  return Boolean(partnerRow);
+}
+
+/**
  * Retorna o acesso do usuário logado ao painel de plataforma (dono/associado),
  * ou `null` se ele não estiver cadastrado em platform_partners — nesse caso a
  * página deve mostrar acesso negado, nunca dados de nenhuma empresa.
@@ -47,6 +71,10 @@ type PlatformTenantRow = {
  * A autorização acontece dentro da função do banco (SECURITY DEFINER), usando
  * a sessão do usuário — o filtro "quais empresas ele pode ver" nunca depende
  * de nada vindo da tela.
+ *
+ * Custo: calcula o DRE de cada empresa visível — use só quando for realmente
+ * mostrar esses números (ex: dashboard, painel do dono). Para só saber "é
+ * dono/associado?" (ex: mostrar um link no menu), use isPlatformPartner().
  */
 export async function getPlatformAccess(): Promise<PlatformAccess | null> {
   const supabase = await createClient();

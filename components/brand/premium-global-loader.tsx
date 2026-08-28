@@ -66,6 +66,10 @@ export function PremiumGlobalLoader({
           className="premium-loader-halo pointer-events-none absolute inset-[-18%] rounded-full"
           aria-hidden
         />
+        <div
+          className="premium-loader-ring pointer-events-none absolute inset-[-22%] rounded-full border-[3px] border-transparent border-t-[var(--brand-gold,#C9A84C)] border-r-[var(--brand-gold,#C9A84C)]/70"
+          aria-hidden
+        />
         {/* eslint-disable-next-line @next/next/no-img-element -- PNG oficial alta resolução */}
         <img
           src={brandAssets.icon192}

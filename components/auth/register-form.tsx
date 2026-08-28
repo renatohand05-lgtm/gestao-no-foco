@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { AuthAlert } from "@/components/auth/auth-alert";
@@ -13,9 +13,11 @@ import { Input } from "@/components/ui/input";
 import { siteConfig } from "@/config/site";
 import { getAuthRedirectPath } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/client";
+import { REFERRAL_CODE_COOKIE } from "@/lib/platform/referral-cookie";
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,6 +48,16 @@ export function RegisterForm() {
         setError(signUpError.message);
         setLoading(false);
         return;
+      }
+
+      // Guarda o código de indicação (se veio de um link ?ref=) por 30 dias —
+      // sobrevive à confirmação de e-mail, que pode acontecer bem depois e em
+      // outra aba. É lido e limpo no onboarding, ao criar a primeira empresa.
+      const refCode = searchParams.get("ref");
+      if (refCode) {
+        document.cookie = `${REFERRAL_CODE_COOKIE}=${encodeURIComponent(
+          refCode,
+        )}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
       }
 
       if (!data.session) {

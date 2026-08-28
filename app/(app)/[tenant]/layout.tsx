@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { resolveTenantNavPermissions } from "@/lib/navigation/resolve-nav-auth";
-import { getPlatformAccess } from "@/lib/platform/platform-access-service";
+import { isPlatformPartner } from "@/lib/platform/platform-access-service";
 import { getUserTenants, requireTenant } from "@/lib/tenants";
 
 export default async function TenantLayout({
@@ -13,11 +13,13 @@ export default async function TenantLayout({
 }) {
   const { tenant: tenantSlug } = await params;
   // Cold path: paralelo (React.cache já deduplica se a page também chamar).
-  const [tenant, tenants, profile, platformAccess] = await Promise.all([
+  // isPlatformPartner() é uma checagem leve (1 linha) — não recalcula
+  // financeiro de nenhuma empresa, diferente de getPlatformAccess().
+  const [tenant, tenants, profile, isPartner] = await Promise.all([
     requireTenant(tenantSlug),
     getUserTenants(),
     getCurrentProfile(),
-    getPlatformAccess(),
+    isPlatformPartner(),
   ]);
   const permissions = await resolveTenantNavPermissions(tenant);
 
@@ -26,7 +28,7 @@ export default async function TenantLayout({
       tenant={tenant}
       tenants={tenants}
       permissions={permissions}
-      isPlatformPartner={Boolean(platformAccess)}
+      isPlatformPartner={isPartner}
       user={{
         email: profile?.email,
         name: profile?.name ?? undefined,

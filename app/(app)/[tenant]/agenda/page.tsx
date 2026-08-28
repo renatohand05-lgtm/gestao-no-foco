@@ -30,7 +30,7 @@ import { serviceSuggestionsForContext } from "@/lib/segments/catalogs/suggest.ts
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
-export const metadata = { title: "Agenda Enterprise" };
+export const metadata = { title: "Agenda Inteligente" };
 export const dynamic = "force-dynamic";
 
 export default async function AgendaPage({
@@ -220,7 +220,7 @@ export default async function AgendaPage({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Agenda Enterprise
+            Agenda Inteligente
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {rangeStart} → {rangeEnd} · Google/Outlook: aguardando integração.

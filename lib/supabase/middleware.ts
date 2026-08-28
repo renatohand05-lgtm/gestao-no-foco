@@ -123,20 +123,17 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     const redirectTo = request.nextUrl.searchParams.get("redirectTo");
-    const defaultDestination = await getPostLoginPath(
-      supabase,
-      user.id,
-      null,
-      preferredSlug,
-    );
-    const destination = await getPostLoginPath(
-      supabase,
-      user.id,
-      redirectTo,
-      preferredSlug,
-    );
 
+    // Navegação normal (empresa válida) é o caso mais comum — nenhum dos
+    // ramos abaixo se aplica, então não calculamos nada de graça: cada
+    // redirecionamento só busca o que precisa, na hora que precisa.
     if (isAuthRoute) {
+      const destination = await getPostLoginPath(
+        supabase,
+        user.id,
+        redirectTo,
+        preferredSlug,
+      );
       const url = request.nextUrl.clone();
       url.pathname = destination;
       url.searchParams.delete("redirectTo");
@@ -144,10 +141,18 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Primeira empresa: /onboarding. Empresa adicional: /empresas/nova (não redirecionar).
-    if (pathname === "/onboarding" && defaultDestination !== "/onboarding") {
-      const url = request.nextUrl.clone();
-      url.pathname = defaultDestination;
-      return NextResponse.redirect(url);
+    if (pathname === "/onboarding") {
+      const defaultDestination = await getPostLoginPath(
+        supabase,
+        user.id,
+        null,
+        preferredSlug,
+      );
+      if (defaultDestination !== "/onboarding") {
+        const url = request.nextUrl.clone();
+        url.pathname = defaultDestination;
+        return NextResponse.redirect(url);
+      }
     }
 
     if (isTenantRoute(pathname)) {
@@ -163,6 +168,12 @@ export async function updateSession(request: NextRequest) {
             userId: user.id,
             authorizedCount: tenantSlugs.length,
           });
+          const defaultDestination = await getPostLoginPath(
+            supabase,
+            user.id,
+            null,
+            preferredSlug,
+          );
           const url = request.nextUrl.clone();
           url.pathname = defaultDestination;
           return NextResponse.redirect(url);

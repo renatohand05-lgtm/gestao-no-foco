@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { BrandLogo, BrandMark } from "@/components/brand";
 import { useTheme } from "@/components/brand/theme-provider";
@@ -38,6 +39,8 @@ type AppSidebarProps = {
   tenants: TenantWithRole[];
   /** Permissões efetivas (UX). Backend/RLS continuam autoridade. */
   permissions?: readonly string[];
+  /** true se o usuário é dono da plataforma ou associado com indicações. */
+  isPlatformPartner?: boolean;
 };
 
 /**
@@ -48,6 +51,7 @@ export function AppSidebar({
   tenant,
   tenants,
   permissions,
+  isPlatformPartner,
 }: AppSidebarProps) {
   const pathname = usePathname();
   const { state } = useSidebar();
@@ -104,6 +108,19 @@ export function AppSidebar({
           <p className="truncate px-3 text-[11px] text-muted-foreground">
             {tenant.name}
           </p>
+        ) : null}
+        {isPlatformPartner ? (
+          <Link
+            href="/master/dashboard"
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-[var(--brand-gold)] transition-colors hover:bg-sidebar-accent",
+              collapsed && "justify-center px-0",
+            )}
+            title="Voltar para Visão do Dono"
+          >
+            <ArrowLeft className="size-3.5 shrink-0" />
+            {!collapsed ? <span>Visão do Dono</span> : null}
+          </Link>
         ) : null}
       </SidebarHeader>
 

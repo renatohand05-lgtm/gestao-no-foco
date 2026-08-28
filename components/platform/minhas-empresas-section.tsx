@@ -76,55 +76,57 @@ export async function MinhasEmpresasSection({
           {access.tenants.map((tenant) => {
             const isCurrent = tenant.tenantSlug === currentTenantSlug;
             return (
-              <Link
-                key={tenant.tenantId}
-                href={`/${tenant.tenantSlug}/dashboard`}
-                className={`group w-64 shrink-0 rounded-lg border p-4 transition ${
-                  isCurrent
-                    ? "border-[var(--brand-gold,#C9A84C)] bg-[var(--brand-gold,#C9A84C)]/5"
-                    : "border-border/70 bg-card/40 hover:border-[var(--brand-gold,#C9A84C)]/50"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-foreground group-hover:text-[var(--brand-gold,#C9A84C)]">
-                      {tenant.tenantName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {segmentLabel(tenant.segment)}
-                    </p>
+              <div key={tenant.tenantId} className="w-64 shrink-0">
+                <Link
+                  href={`/${tenant.tenantSlug}/dashboard`}
+                  className={`group block rounded-lg border p-4 transition ${
+                    isCurrent
+                      ? "border-[var(--brand-gold,#C9A84C)] bg-[var(--brand-gold,#C9A84C)]/5"
+                      : "border-border/70 bg-card/40 hover:border-[var(--brand-gold,#C9A84C)]/50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-foreground group-hover:text-[var(--brand-gold,#C9A84C)]">
+                        {tenant.tenantName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {segmentLabel(tenant.segment)}
+                      </p>
+                    </div>
+                    {isCurrent ? (
+                      <span className="shrink-0 rounded-full bg-[var(--brand-gold,#C9A84C)]/15 px-2 py-0.5 text-[10px] font-medium text-[var(--brand-gold,#C9A84C)]">
+                        Atual
+                      </span>
+                    ) : null}
                   </div>
-                  {isCurrent ? (
-                    <span className="shrink-0 rounded-full bg-[var(--brand-gold,#C9A84C)]/15 px-2 py-0.5 text-[10px] font-medium text-[var(--brand-gold,#C9A84C)]">
-                      Atual
-                    </span>
-                  ) : null}
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                      Faturamento
-                    </p>
-                    <p className="text-sm font-semibold tabular-nums text-foreground">
-                      {formatCurrency(tenant.faturamento)}
-                    </p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Faturamento
+                      </p>
+                      <p className="text-sm font-semibold tabular-nums text-foreground">
+                        {formatCurrency(tenant.faturamento)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Lucro
+                      </p>
+                      <p
+                        className={
+                          tenant.lucroLiquido >= 0
+                            ? "text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-400"
+                            : "text-sm font-semibold tabular-nums text-rose-700 dark:text-rose-400"
+                        }
+                      >
+                        {formatCurrency(tenant.lucroLiquido)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                      Lucro
-                    </p>
-                    <p
-                      className={
-                        tenant.lucroLiquido >= 0
-                          ? "text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-400"
-                          : "text-sm font-semibold tabular-nums text-rose-700 dark:text-rose-400"
-                      }
-                    >
-                      {formatCurrency(tenant.lucroLiquido)}
-                    </p>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+                <Link href={`/master/empresas/${tenant.tenantId}`} className="mt-1.5 block text-xs font-medium text-muted-foreground hover:text-[var(--brand-gold,#C9A84C)] hover:underline">Gerenciar empresa →</Link>
+              </div>
             );
           })}
         </div>

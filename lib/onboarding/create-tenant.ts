@@ -9,6 +9,8 @@ type CreateTenantInput = {
   slug: string;
   segment: TenantSegment;
   userId: string;
+  /** ID do parceiro (platform_partners) que indicou esta empresa, se houver. */
+  referredByPartnerId?: string | null;
 };
 
 type CreateTenantResult =
@@ -78,12 +80,16 @@ export async function createTenantWithOwner(
   }
 
   try {
+    const updatePayload: Record<string, unknown> = {
+      segment_version: SEGMENT_ENGINE_VERSION,
+      segment_config: {},
+    };
+    if (input.referredByPartnerId) {
+      updatePayload.referred_by_partner_id = input.referredByPartnerId;
+    }
     await supabase
       .from("tenants")
-      .update({
-        segment_version: SEGMENT_ENGINE_VERSION,
-        segment_config: {},
-      })
+      .update(updatePayload as never)
       .eq("id", tenantId);
   } catch {
     // Colunas 35.0 podem ainda não existir — tenant permanece legado-compatible.

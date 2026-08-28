@@ -160,11 +160,11 @@ export default async function MasterDashboardPage() {
         ) : (
           <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
             {access.tenants.map((tenant) => (
-              <Link
-                key={tenant.tenantId}
-                href={`/${tenant.tenantSlug}/dashboard`}
-                className="group w-60 shrink-0 rounded-xl border border-border/70 bg-card/30 p-4 transition hover:border-[var(--brand-gold,#C9A84C)]/60 hover:bg-card/50"
-              >
+              <div key={tenant.tenantId} className="w-60 shrink-0">
+                <Link
+                  href={`/${tenant.tenantSlug}/dashboard`}
+                  className="group block rounded-xl border border-border/70 bg-card/30 p-4 transition hover:border-[var(--brand-gold,#C9A84C)]/60 hover:bg-card/50"
+                >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-foreground group-hover:text-[var(--brand-gold,#C9A84C)]">
@@ -212,7 +212,14 @@ export default async function MasterDashboardPage() {
                 <p className="mt-3 text-xs font-medium text-[var(--brand-gold,#C9A84C)] opacity-0 transition group-hover:opacity-100">
                   Ver dashboard →
                 </p>
-              </Link>
+                </Link>
+                
+                  href={`/master/empresas/${tenant.tenantId}`}
+                  className="mt-2 block text-xs font-medium text-muted-foreground hover:text-[var(--brand-gold,#C9A84C)] hover:underline"
+                >
+                  Gerenciar empresa →
+                </a>
+              </div>
             ))}
           </div>
         )}

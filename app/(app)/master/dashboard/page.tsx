@@ -213,12 +213,7 @@ export default async function MasterDashboardPage() {
                   Ver dashboard →
                 </p>
                 </Link>
-                
-                  href={`/master/empresas/${tenant.tenantId}`}
-                  className="mt-2 block text-xs font-medium text-muted-foreground hover:text-[var(--brand-gold,#C9A84C)] hover:underline"
-                >
-                  Gerenciar empresa →
-                </a>
+                <Link href={`/master/empresas/${tenant.tenantId}`} className="mt-2 block text-xs font-medium text-muted-foreground hover:text-[var(--brand-gold,#C9A84C)] hover:underline">Gerenciar empresa →</Link>
               </div>
             ))}
           </div>

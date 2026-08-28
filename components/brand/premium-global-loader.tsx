@@ -67,7 +67,12 @@ export function PremiumGlobalLoader({
           aria-hidden
         />
         <div
-          className="premium-loader-ring pointer-events-none absolute inset-[-22%] rounded-full border-[3px] border-transparent border-t-[var(--brand-gold,#C9A84C)] border-r-[var(--brand-gold,#C9A84C)]/70"
+          className="premium-loader-ring pointer-events-none absolute inset-[-22%] rounded-full"
+          style={{
+            border: "3px solid transparent",
+            borderTopColor: "#C9A84C",
+            borderRightColor: "rgba(201, 168, 76, 0.55)",
+          }}
           aria-hidden
         />
         {/* eslint-disable-next-line @next/next/no-img-element -- PNG oficial alta resolução */}

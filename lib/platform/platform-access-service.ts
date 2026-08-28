@@ -155,14 +155,14 @@ export type PlatformBillingSummary = {
 };
 
 /**
- * Quanto cada empresa paga pela sua consultoria/assinatura.
- * Restrito ao dono da plataforma — nunca chamar para um associado (partner),
- * mesmo que ele tenha acesso às empresas: esse valor é informação sua, não dele.
+ * Quanto cada empresa (que o chamador pode ver) paga de assinatura/plano.
+ * Já vem naturalmente restrito: `access.tenants` é preenchido por
+ * getPlatformAccess() com todas as empresas (dono) ou só as indicadas
+ * (associado) — nunca inclui empresas de fora do escopo do chamador.
  */
 export async function getPlatformBillingSummary(
   access: PlatformAccess,
 ): Promise<PlatformBillingSummary | null> {
-  if (access.role !== "owner") return null;
   if (access.tenants.length === 0) {
     return { rows: [], mrrCents: 0, assinaturasAtivas: 0 };
   }
@@ -225,4 +225,22 @@ export async function getPlatformBillingSummary(
   const assinaturasAtivas = rows.filter((r) => r.status === "active").length;
 
   return { rows, mrrCents, assinaturasAtivas };
+}
+
+/**
+ * Confirma que o usuário logado tem autorização de plataforma sobre a
+ * empresa `tenantId` (é o dono, ou é o associado que a indicou), e devolve
+ * o resumo dela. Retorna `null` se não tiver — nunca lança exceção com
+ * detalhes que ajudem a "adivinhar" outra empresa.
+ */
+export async function getAuthorizedPlatformTenant(
+  tenantId: string,
+): Promise<{ access: PlatformAccess; tenant: PlatformTenantSummary } | null> {
+  const access = await getPlatformAccess();
+  if (!access) return null;
+
+  const tenant = access.tenants.find((t) => t.tenantId === tenantId);
+  if (!tenant) return null;
+
+  return { access, tenant };
 }

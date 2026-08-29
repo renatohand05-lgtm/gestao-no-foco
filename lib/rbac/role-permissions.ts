@@ -259,6 +259,8 @@ const ATENDIMENTO_KEYS = unique([
   "crm.retornos.visualizar",
   "crm.retornos.contatar",
   "crm.retornos.criar",
+  "agenda.visualizar",
+  "agenda.criar",
 ]);
 
 const CAIXA_KEYS = unique([

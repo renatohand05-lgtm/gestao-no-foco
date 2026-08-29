@@ -20,6 +20,14 @@ import { useBillingSelection } from "./billing-selection-context";
 
 type BillingMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
 
+/** Fora do componente: evita a regra react-hooks/purity (impure call durante render). */
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `chk-${Date.now()}`;
+}
+
 type Props = {
   tenantSlug: string;
   canManage: boolean;
@@ -108,10 +116,7 @@ export function BillingActionsPanel({
       );
       return;
     }
-    const idempotencyKey =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `chk-${Date.now()}`;
+    const idempotencyKey = generateIdempotencyKey();
     startTransition(async () => {
       const res = await requestCheckoutAction({
         tenantSlug,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import {
   cancelSubscriptionAction,
@@ -19,6 +19,14 @@ import { Input } from "@/components/ui/input";
 import { useBillingSelection } from "./billing-selection-context";
 
 type BillingMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
+
+type ViaCepResult = {
+  logradouro?: string;
+  bairro?: string;
+  localidade?: string;
+  uf?: string;
+  erro?: boolean;
+};
 
 /** Fora do componente: evita a regra react-hooks/purity (impure call durante render). */
 function generateIdempotencyKey(): string {
@@ -70,6 +78,47 @@ export function BillingActionsPanel({
   const [cardAddressNumber, setCardAddressNumber] = useState("");
   const [cardPhone, setCardPhone] = useState("");
   const [cardHolderDoc, setCardHolderDoc] = useState("");
+  const [cepAddress, setCepAddress] = useState<ViaCepResult | null>(null);
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+
+  // Busca automática de endereço pelo CEP (ViaCEP) — só exibição/confirmação,
+  // não altera o que é enviado à Asaas (que usa apenas CEP + número).
+  useEffect(() => {
+    const digits = cardPostal.replace(/\D/g, "");
+    if (digits.length !== 8) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      setCepLoading(true);
+      setCepError(null);
+      fetch(`https://viacep.com.br/ws/${digits}/json/`)
+        .then((res) => res.json())
+        .then((data: ViaCepResult) => {
+          if (data.erro) {
+            setCepAddress(null);
+            setCepError("CEP não encontrado.");
+          } else {
+            setCepAddress(data);
+          }
+        })
+        .catch(() => {
+          setCepAddress(null);
+          setCepError("Não foi possível consultar o CEP agora.");
+        })
+        .finally(() => setCepLoading(false));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [cardPostal]);
+
+  function onCardPostalChange(value: string) {
+    setCardPostal(value);
+    const digits = value.replace(/\D/g, "");
+    if (digits.length !== 8) {
+      setCepAddress(null);
+      setCepError(null);
+    }
+  }
 
   if (!canManage) {
     return (
@@ -90,6 +139,8 @@ export function BillingActionsPanel({
     setCardAddressNumber("");
     setCardPhone("");
     setCardHolderDoc("");
+    setCepAddress(null);
+    setCepError(null);
   }
 
   function onStartTrial() {
@@ -339,11 +390,29 @@ export function BillingActionsPanel({
               <Input
                 className="mt-1"
                 value={cardPostal}
-                onChange={(e) => setCardPostal(e.target.value)}
+                onChange={(e) => onCardPostalChange(e.target.value)}
+                placeholder="Somente números"
                 disabled={pending}
+                inputMode="numeric"
                 autoComplete="postal-code"
+                maxLength={9}
               />
             </label>
+            {cepLoading ? (
+              <p className="text-[11px] text-muted-foreground">
+                Buscando endereço…
+              </p>
+            ) : cepAddress ? (
+              <p className="rounded-md bg-muted px-2 py-1.5 text-[11px] text-foreground">
+                {[cepAddress.logradouro, cepAddress.bairro]
+                  .filter(Boolean)
+                  .join(", ")}
+                {cepAddress.localidade ? ` — ${cepAddress.localidade}` : ""}
+                {cepAddress.uf ? `/${cepAddress.uf}` : ""}
+              </p>
+            ) : cepError ? (
+              <p className="text-[11px] text-destructive">{cepError}</p>
+            ) : null}
             <label className="block text-xs text-muted-foreground">
               Nº endereço
               <Input

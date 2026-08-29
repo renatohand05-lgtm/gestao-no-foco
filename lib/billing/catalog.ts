@@ -23,6 +23,8 @@ export type CommercialPlan = {
   trialDays: number | null;
   includesConsulting: boolean;
   requiresSalesContact: boolean;
+  /** Total de logins incluídos no plano, contando o dono. */
+  maxSeats: number;
   /** Mesmos módulos CORE — diferenças por plano = PENDENTE DE DECISÃO. */
   entitlements: {
     modules: readonly string[];
@@ -51,6 +53,7 @@ export const COMMERCIAL_CATALOG: readonly CommercialPlan[] = [
     displayOrder: 1,
     recommended: false,
     trialDays: 14,
+    maxSeats: 3,
     includesConsulting: false,
     requiresSalesContact: false,
     entitlements: {
@@ -75,6 +78,7 @@ export const COMMERCIAL_CATALOG: readonly CommercialPlan[] = [
     displayOrder: 2,
     recommended: true,
     trialDays: 14,
+    maxSeats: 6,
     includesConsulting: false,
     requiresSalesContact: false,
     entitlements: {
@@ -99,6 +103,7 @@ export const COMMERCIAL_CATALOG: readonly CommercialPlan[] = [
     displayOrder: 3,
     recommended: false,
     trialDays: 14,
+    maxSeats: 16,
     includesConsulting: false,
     requiresSalesContact: false,
     entitlements: {
@@ -124,6 +129,7 @@ export const COMMERCIAL_CATALOG: readonly CommercialPlan[] = [
     displayOrder: 4,
     recommended: false,
     trialDays: null,
+    maxSeats: 21,
     includesConsulting: true,
     requiresSalesContact: true,
     entitlements: {
@@ -159,6 +165,15 @@ export function getRecommendedPlan(): CommercialPlan {
 
 export function getCommercialTrialDays(slug: string): number | null {
   return getCommercialPlan(slug)?.trialDays ?? null;
+}
+
+/**
+ * Vagas de login (dono + equipe) do plano. Piloto/sem plano comercial = 3
+ * (mesmo teto do Essencial), pra não travar tenants ainda sem plano definido.
+ */
+export function getMaxSeatsForPlanSlug(slug: string | null | undefined): number {
+  if (!slug) return 3;
+  return getCommercialPlan(slug)?.maxSeats ?? 3;
 }
 
 /** Preço confiável — nunca aceitar amount do cliente. */

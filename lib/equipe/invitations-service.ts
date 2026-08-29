@@ -10,6 +10,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { absoluteAppUrl } from "@/lib/config/app-url";
+import { getMaxSeatsForPlanSlug } from "@/lib/billing/catalog";
+import { getSubscriptionWithPlan } from "@/lib/billing/repository";
 import { createAdminClient, isAdminClientAvailable } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -137,6 +139,25 @@ export async function createInvitation(input: {
     .from("tenant_members")
     .select("id, user_id, status")
     .eq("tenant_id", input.tenantId);
+
+  // Limite de vagas (dono + equipe) do plano contratado — conta membros
+  // ativos + convites pendentes, pra não deixar passar do teto do plano.
+  const activeMemberCount =
+    existingMember?.filter((m) => (m.status ?? "active") !== "inactive").length ?? 0;
+  const { count: pendingInviteCount } = await client
+    .from("tenant_invitations" as never)
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", input.tenantId)
+    .eq("status", "pending");
+  const { plan } = await getSubscriptionWithPlan(client, input.tenantId);
+  const maxSeats = getMaxSeatsForPlanSlug(plan?.slug ?? null);
+  const seatsInUse = activeMemberCount + (pendingInviteCount ?? 0);
+  if (seatsInUse >= maxSeats) {
+    throw new Error(
+      `Limite de ${maxSeats} logins do plano atingido (contando o dono). ` +
+        `Cancele um convite pendente, remova um membro ou faça upgrade de plano.`,
+    );
+  }
 
   if (existingMember?.length) {
     const userIds = existingMember.map((m) => m.user_id);

@@ -8,6 +8,7 @@ import {
   listCommercialPlans,
 } from "@/lib/billing/catalog";
 import { Button } from "@/components/ui/button";
+import { useBillingSelection } from "./billing-selection-context";
 
 type Props = {
   tenantSlug: string;
@@ -23,11 +24,13 @@ export function BillingCatalogPanel({
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { selectedPlanSlug, selectPlan } = useBillingSelection();
   const plans = listCommercialPlans();
 
   function onSelect(slug: string) {
     setMessage(null);
     setError(null);
+    selectPlan(slug);
     startTransition(async () => {
       const res = await requestPlanChangeAction({
         tenantSlug,
@@ -44,18 +47,22 @@ export function BillingCatalogPanel({
         Planos disponíveis
       </p>
       <p className="text-[11px] text-muted-foreground">
-        Preços comerciais server-side. R$ 19,90 de homologação sandbox não é
-        preço comercial. Nenhuma cobrança real nesta tela.
+        Preços comerciais, definidos no servidor. Escolha um plano abaixo —
+        ele será usado no pagamento no painel &quot;Gerenciar&quot;.
       </p>
       <div className="grid gap-2">
         {plans.map((plan) => {
           const current = currentPlanSlug === plan.slug;
+          const selected = selectedPlanSlug === plan.slug;
           return (
             <div
               key={plan.slug}
-              className="rounded-md border border-border/70 px-3 py-2 text-sm"
+              className={`rounded-md border px-3 py-2 text-sm ${
+                selected ? "border-primary bg-primary/5" : "border-border/70"
+              }`}
               data-plan-slug={plan.slug}
               data-recommended={plan.recommended ? "true" : "false"}
+              data-selected={selected ? "true" : "false"}
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="font-medium">
@@ -68,6 +75,11 @@ export function BillingCatalogPanel({
                   {current ? (
                     <span className="ml-2 text-[10px] text-muted-foreground">
                       Plano atual
+                    </span>
+                  ) : null}
+                  {selected ? (
+                    <span className="ml-2 text-[10px] text-primary">
+                      Selecionado para pagamento
                     </span>
                   ) : null}
                 </p>
@@ -92,11 +104,11 @@ export function BillingCatalogPanel({
                 <Button
                   className="mt-2"
                   size="sm"
-                  variant="outline"
+                  variant={selected ? "default" : "outline"}
                   disabled={pending}
                   onClick={() => onSelect(plan.slug)}
                 >
-                  Solicitar troca
+                  {selected ? "Selecionado ✓" : "Selecionar para pagamento"}
                 </Button>
               ) : null}
             </div>

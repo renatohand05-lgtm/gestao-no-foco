@@ -8,6 +8,7 @@ import {
   requestCheckoutAction,
   startPilotTrialAction,
 } from "@/lib/billing/actions";
+import { formatBrlFromCents, getCommercialPlan } from "@/lib/billing/catalog";
 import {
   formatProviderPaymentStatus,
   methodDisplayLabel,
@@ -15,6 +16,7 @@ import {
 } from "@/lib/billing/payment-hint";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useBillingSelection } from "./billing-selection-context";
 
 type BillingMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
 
@@ -38,6 +40,8 @@ export function BillingActionsPanel({
   initialPaymentHint = null,
 }: Props) {
   const router = useRouter();
+  const { selectedPlanSlug } = useBillingSelection();
+  const selectedPlan = selectedPlanSlug ? getCommercialPlan(selectedPlanSlug) : null;
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -98,6 +102,12 @@ export function BillingActionsPanel({
     setMessage(null);
     setError(null);
     setPaymentHint(null);
+    if (!isSandbox && !selectedPlan) {
+      setError(
+        "Selecione um plano em \"Planos disponíveis\" antes de pagar.",
+      );
+      return;
+    }
     const idempotencyKey =
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
@@ -105,6 +115,7 @@ export function BillingActionsPanel({
     startTransition(async () => {
       const res = await requestCheckoutAction({
         tenantSlug,
+        planSlug: selectedPlan?.slug,
         idempotencyKey,
         billingType,
         customerEmail: email || undefined,
@@ -180,6 +191,20 @@ export function BillingActionsPanel({
         <p className="text-xs font-medium text-muted-foreground">
           Checkout Asaas (PIX / Boleto / Cartão)
         </p>
+        {selectedPlan ? (
+          <p className="rounded-md bg-primary/10 px-3 py-2 text-xs text-foreground">
+            Plano selecionado: <strong>{selectedPlan.name}</strong> —{" "}
+            {formatBrlFromCents(selectedPlan.amountCents)}/mês
+          </p>
+        ) : !isSandbox ? (
+          <p
+            className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-100"
+            role="status"
+          >
+            Nenhum plano selecionado ainda. Escolha um em &quot;Planos
+            disponíveis&quot; abaixo antes de pagar.
+          </p>
+        ) : null}
         <label className="block text-xs text-muted-foreground">
           E-mail de cobrança
           <Input
@@ -337,7 +362,11 @@ export function BillingActionsPanel({
           </div>
         ) : null}
 
-        <Button variant="outline" disabled={pending} onClick={onCheckout}>
+        <Button
+          variant="outline"
+          disabled={pending || (!isSandbox && !selectedPlan)}
+          onClick={onCheckout}
+        >
           {providerConfigured
             ? `Iniciar checkout ${billingType === "CREDIT_CARD" ? "CARTÃO" : billingType}`
             : "Checkout (Asaas não configurado)"}
@@ -404,7 +433,7 @@ export function BillingActionsPanel({
             </p>
           ) : null}
           {paymentHint.invoiceUrl ? (
-            <a
+            
               className="text-primary underline"
               href={paymentHint.invoiceUrl}
               target="_blank"
@@ -418,7 +447,7 @@ export function BillingActionsPanel({
             </a>
           ) : null}
           {paymentHint.billingType === "BOLETO" && paymentHint.bankSlipUrl ? (
-            <a
+            
               className="block text-primary underline"
               href={paymentHint.bankSlipUrl}
               target="_blank"

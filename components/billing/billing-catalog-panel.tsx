@@ -100,6 +100,9 @@ export function BillingCatalogPanel({
                   Sem trial automático — contato/onboarding comercial.
                 </p>
               )}
+              <p className="text-[11px] text-muted-foreground">
+                Até {plan.maxSeats} logins (dono + equipe).
+              </p>
               {canManage && !current ? (
                 <Button
                   className="mt-2"

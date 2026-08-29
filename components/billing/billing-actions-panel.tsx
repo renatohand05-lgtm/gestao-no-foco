@@ -438,8 +438,7 @@ export function BillingActionsPanel({
             </p>
           ) : null}
           {paymentHint.invoiceUrl ? (
-            
-              className="text-primary underline"
+            <a className="text-primary underline"
               href={paymentHint.invoiceUrl}
               target="_blank"
               rel="noreferrer"
@@ -452,8 +451,7 @@ export function BillingActionsPanel({
             </a>
           ) : null}
           {paymentHint.billingType === "BOLETO" && paymentHint.bankSlipUrl ? (
-            
-              className="block text-primary underline"
+            <a className="block text-primary underline"
               href={paymentHint.bankSlipUrl}
               target="_blank"
               rel="noreferrer"

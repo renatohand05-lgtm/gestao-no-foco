@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 
 import { BillingActionsPanel } from "@/components/billing/billing-actions-panel";
 import { BillingCatalogPanel } from "@/components/billing/billing-catalog-panel";
+import { BillingSelectionProvider } from "@/components/billing/billing-selection-context";
+import { isCommercialPlanSlug } from "@/lib/billing/catalog";
 import { ModuleHeader } from "@/components/layout/module-header";
 import {
   Card,
@@ -121,8 +123,11 @@ export default async function AssinaturaPage({
   /** Piloto/beta: cobrança real OFF e enforcement OFF — não expor checkout sandbox ao cliente. */
   const pilotBillingFrozen =
     !isBillingEnforcementEnabled() && !isRealChargesAuthorized();
+  const initialPlanSlug =
+    plan?.slug && isCommercialPlanSlug(plan.slug) ? plan.slug : null;
 
   return (
+    <BillingSelectionProvider initialPlanSlug={initialPlanSlug}>
     <div className="space-y-6">
       <ModuleHeader
         title="Assinatura"
@@ -312,7 +317,9 @@ export default async function AssinaturaPage({
           <CardDescription>
             {pilotBillingFrozen
               ? "Referência comercial. Nenhuma cobrança é iniciada nesta tela no piloto."
-              : "Catálogo comercial mensal (BRL). Checkout production e cobrança real permanecem desligados."}
+              : ops.realChargesEnabled
+                ? "Catálogo comercial mensal (BRL). Selecione um plano para pagar no painel Gerenciar — cobrança real ativa."
+                : "Catálogo comercial mensal (BRL). Checkout production e cobrança real permanecem desligados."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -332,5 +339,6 @@ export default async function AssinaturaPage({
         </CardContent>
       </Card>
     </div>
+    </BillingSelectionProvider>
   );
 }

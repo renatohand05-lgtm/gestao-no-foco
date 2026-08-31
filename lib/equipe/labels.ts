@@ -1,214 +1,104 @@
 /**
- * Sprint 22.2 RC1 — Compatibilidade RBAC financeiro.
- *
- * Bridge controlada entre:
- * - snapshot Enterprise (`tenant_user_roles` / role_permissions)
- * - papel legado em `tenant_members.role`
- * - catálogo canónico `ROLE_PERMISSIONS`
- *
- * Não concede acesso cross-tenant nem fallback global irrestrito.
+ * Sprint 30.2 — Rótulos Equipe (papéis, status) + presets de departamento por segmento.
+ * Sem imports de path alias — seguro para Next e testes Node (mesma convenção de
+ * config/segment-labels.ts).
  */
 
-import type { TenantRole } from "../../constants.ts";
-import { ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES } from "../../rbac/membership.ts";
-import { getPermissionsForRoles } from "../../rbac/role-permissions.ts";
-import { FINANCE_ERROR_CODES, FinanceError } from "./errors.ts";
+import { getOrgTeamLabels } from "../../config/segment-labels.ts";
+import type {
+  InvitationStatus,
+  JobTitleStatus,
+  MemberStatus,
+  MembershipRole,
+  TeamStatus,
+} from "./types.ts";
 
-/** Papel de membership legado → papéis Enterprise do catálogo. */
-export const MEMBERSHIP_TO_ENTERPRISE_ROLES: Readonly
-  Record<TenantRole, readonly string[]>
-> = {
-  owner: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.owner,
-  admin: ELEVATED_MEMBERSHIP_TO_ENTERPRISE_ROLES.admin,
-  manager: ["financeiro"],
-  /**
-   * "Funcionário": sub-login liberado pelo proprietário, restrito a este
-   * tenant. Vendas, OS e Agenda — SEM financeiro/DRE/relatórios contábeis.
-   */
-  member: ["atendimento"],
+export const MEMBERSHIP_ROLE_LABELS: Readonly<Record<MembershipRole, string>> = {
+  owner: "Proprietário",
+  admin: "Administrador",
+  manager: "Gerente",
+  member: "Funcionário",
 };
 
-/** Permissões granulares 22.2 implicadas por equivalentes anteriores. */
-const IMPLIED_BY_LEGACY: Readonly<Record<string, readonly string[]>> = {
-  /** Analytics/Dashboard financeiro (Enterprise) → módulo financeiro canónico. */
-  "financeiro.visualizar": [
-    "dashboard.financeiro",
-    "analytics.financeiro",
-  ],
-  "financeiro.ver_saldos": [
-    "dashboard.financeiro",
-    "analytics.financeiro",
-    "financeiro.visualizar",
-  ],
-  "financeiro.ver_fluxo_caixa": [
-    "dashboard.financeiro",
-    "analytics.financeiro",
-    "financeiro.visualizar",
-  ],
-  "financeiro.ver_dre": [
-    "dashboard.financeiro",
-    "analytics.financeiro",
-    "financeiro.visualizar",
-  ],
-  "financeiro.contas.visualizar": [
-    "financeiro.visualizar",
-    "financeiro.ver_saldos",
-    "dashboard.financeiro",
-    "analytics.financeiro",
-  ],
-  "financeiro.movimentacoes.visualizar": [
-    "financeiro.visualizar",
-    "financeiro.ver_fluxo_caixa",
-  ],
-  "financeiro.alertas.visualizar": [
-    "financeiro.visualizar",
-    "financeiro.ver_saldos",
-  ],
-  "financeiro.tributos.visualizar": [
-    "financeiro.visualizar",
-    "financeiro.ver_dre",
-    "dashboard.financeiro",
-    "analytics.financeiro",
-  ],
-  "financeiro.tributos.simular": [
-    "financeiro.criar",
-    "financeiro.tributos.visualizar",
-  ],
-  "financeiro.tributos.configurar": [
-    "financeiro.aprovar",
-  ],
-  "financeiro.cfo.visualizar": [
-    "financeiro.visualizar",
-    "financeiro.ver_saldos",
-    "dashboard.financeiro",
-    "analytics.financeiro",
-  ],
-  "financeiro.aging.visualizar": [
-    "financeiro.visualizar",
-  ],
-  "financeiro.orcamento.visualizar": [
-    "financeiro.visualizar",
-    "financeiro.ver_dre",
-  ],
-  "financeiro.orcamento.criar": [
-    "financeiro.criar",
-    "financeiro.orcamento.visualizar",
-  ],
-  "financeiro.orcamento.editar": [
-    "financeiro.editar",
-    "financeiro.orcamento.criar",
-  ],
-  "financeiro.orcamento.aprovar": [
-    "financeiro.aprovar",
-  ],
+export const MEMBERSHIP_ROLE_DESCRIPTIONS: Readonly<Record<MembershipRole, string>> = {
+  owner: "Acesso total ao tenant. Precisa existir pelo menos um proprietário ativo.",
+  admin: "Acesso administrativo amplo — gerencia equipe, configurações e módulos.",
+  manager: "Gestão operacional do dia a dia dos módulos do negócio.",
+  member:
+    "Sub-login liberado pelo proprietário: lançar venda, abrir/editar OS e usar a agenda. Sem acesso a financeiro, DRE ou relatórios contábeis.",
 };
 
-export function mapMembershipRoleToEnterpriseRoles(
-  membershipRole: string | null | undefined,
-): string[] {
-  if (!membershipRole?.trim()) return [];
-  const key = membershipRole.trim() as TenantRole;
-  return [...(MEMBERSHIP_TO_ENTERPRISE_ROLES[key] ?? [])];
+export const MEMBER_STATUS_LABELS: Readonly<Record<MemberStatus, string>> = {
+  active: "Ativo",
+  inactive: "Inativo",
+};
+
+export const TEAM_STATUS_LABELS: Readonly<Record<TeamStatus, string>> = {
+  active: "Ativa",
+  inactive: "Inativa",
+  archived: "Arquivada",
+};
+
+export const JOB_TITLE_STATUS_LABELS: Readonly<Record<JobTitleStatus, string>> = {
+  active: "Ativo",
+  inactive: "Inativo",
+};
+
+export const INVITATION_STATUS_LABELS: Readonly<Record<InvitationStatus, string>> = {
+  pending: "Pendente",
+  accepted: "Aceito",
+  expired: "Expirado",
+  cancelled: "Cancelado",
+};
+
+/** Sprint 30.2 — presets de departamento/equipe por segmento (fonte única: config/segment-labels.ts). */
+export function getDepartmentPresets(
+  segment: string | null | undefined,
+): readonly string[] {
+  return getOrgTeamLabels(segment).departmentPresets;
 }
 
-export function hasFinancePermissionKey(permission: string): boolean {
+export function membershipRoleLabel(role: string | null | undefined): string {
+  if (!role) return "—";
   return (
-    permission.startsWith("financeiro.") ||
-    permission === "dashboard.financeiro" ||
-    permission === "analytics.financeiro"
+    MEMBERSHIP_ROLE_LABELS[role as MembershipRole] ??
+    role.charAt(0).toUpperCase() + role.slice(1)
   );
 }
 
-/**
- * Expande permissões legadas para as chaves granulares 22.2
- * sem remover restrições existentes.
- */
-export function expandFinancePermissions(
-  permissions: readonly string[],
-): string[] {
-  const set = new Set(permissions);
-  for (const [granular, legacy] of Object.entries(IMPLIED_BY_LEGACY)) {
-    if (set.has(granular)) continue;
-    if (legacy.some((p) => set.has(p))) set.add(granular);
-  }
-  return [...set].sort();
+export function memberStatusLabel(status: string | null | undefined): string {
+  if (!status) return MEMBER_STATUS_LABELS.active;
+  return MEMBER_STATUS_LABELS[status as MemberStatus] ?? status;
 }
 
-/**
- * Verifica se o utilizador possui a permissão pedida ou um equivalente legado.
- */
-export function financePermissionSatisfied(
-  permissions: readonly string[],
-  required: string | readonly string[],
-): boolean {
-  const need = Array.isArray(required) ? required : [required];
-  const set = new Set(permissions);
-  return need.some((p) => {
-    if (set.has(p)) return true;
-    const impliedBy = IMPLIED_BY_LEGACY[p];
-    return impliedBy?.some((legacy) => set.has(legacy)) ?? false;
-  });
+export function teamStatusLabel(status: string | null | undefined): string {
+  if (!status) return "—";
+  return TEAM_STATUS_LABELS[status as TeamStatus] ?? status;
 }
 
-export type FinanceEffectiveAuth = {
-  roles: string[];
-  permissions: string[];
-  /** snapshot = só DB; compat = catálogo membership/roles; merged = ambos */
-  source: "snapshot" | "compat" | "merged";
-};
-
-/**
- * Resolve permissões efetivas para Server Actions financeiras.
- */
-export function resolveFinanceEffectivePermissions(input: {
-  membershipRole?: string | null;
-  snapshotRoles?: readonly string[] | null;
-  snapshotPermissions?: readonly string[] | null;
-}): FinanceEffectiveAuth {
-  const snapshotRoles = [...new Set(input.snapshotRoles ?? [])].filter(Boolean);
-  const snapshotPermissions = [
-    ...new Set(input.snapshotPermissions ?? []),
-  ].filter(Boolean);
-  const membershipRoles = mapMembershipRoleToEnterpriseRoles(
-    input.membershipRole,
-  );
-
-  const roles = [...new Set([...snapshotRoles, ...membershipRoles])];
-  const permissions = new Set(snapshotPermissions);
-
-  const snapshotHasFinance = snapshotPermissions.some(hasFinancePermissionKey);
-
-  // Catálogo vazio ou sem chaves financeiras: completar a partir dos papéis conhecidos.
-  if (!snapshotHasFinance && roles.length > 0) {
-    for (const p of getPermissionsForRoles(roles)) {
-      if (hasFinancePermissionKey(p) || snapshotPermissions.length === 0) {
-        // Se o snapshot está totalmente vazio, herda o catálogo do papel (scoped ao tenant via membership).
-        if (snapshotPermissions.length === 0) {
-          permissions.add(p);
-        } else if (hasFinancePermissionKey(p)) {
-          permissions.add(p);
-        }
-      }
-    }
-  }
-
-  const expanded = expandFinancePermissions([...permissions]);
-  const source: FinanceEffectiveAuth["source"] =
-    snapshotPermissions.length === 0 && roles.length > 0
-      ? "compat"
-      : snapshotPermissions.length > 0 &&
-          (membershipRoles.length > 0 || !snapshotHasFinance)
-        ? "merged"
-        : "snapshot";
-
-  return { roles, permissions: expanded, source };
+export function jobTitleStatusLabel(status: string | null | undefined): string {
+  if (!status) return "—";
+  return JOB_TITLE_STATUS_LABELS[status as JobTitleStatus] ?? status;
 }
 
-export function assertFinanceAccess(permissions: readonly string[]) {
-  if (!permissions.some(hasFinancePermissionKey)) {
-    throw new FinanceError(
-      "Sem permissão para o módulo financeiro.",
-      FINANCE_ERROR_CODES.PERMISSION_DENIED,
-    );
-  }
+export function invitationStatusLabel(status: string | null | undefined): string {
+  if (!status) return "—";
+  return INVITATION_STATUS_LABELS[status as InvitationStatus] ?? status;
 }
+
+export const MEMBERSHIP_ROLE_OPTIONS: readonly {
+  value: MembershipRole;
+  label: string;
+}[] = (Object.keys(MEMBERSHIP_ROLE_LABELS) as MembershipRole[]).map((value) => ({
+  value,
+  label: MEMBERSHIP_ROLE_LABELS[value],
+}));
+
+/** Opções de papel no formulário de convite (sem Proprietário). */
+export const INVITABLE_MEMBERSHIP_ROLE_OPTIONS: readonly {
+  value: Exclude<MembershipRole, "owner">;
+  label: string;
+}[] = MEMBERSHIP_ROLE_OPTIONS.filter(
+  (option): option is { value: Exclude<MembershipRole, "owner">; label: string } =>
+    option.value !== "owner",
+);

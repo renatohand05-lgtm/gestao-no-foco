@@ -5,6 +5,7 @@ import {
 } from "./catalog.ts";
 
 const RANK: Record<CommercialPlanSlug, number> = {
+  start: 0,
   essential: 1,
   management: 2,
   pro: 3,

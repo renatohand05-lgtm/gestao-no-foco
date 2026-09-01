@@ -205,6 +205,30 @@ async function updateAsaasSubscriptionBilling(input: {
   });
 }
 
+/**
+ * Atualiza SOMENTE o valor recorrente da assinatura na Asaas — não mexe
+ * em billingType/cartão. Usado pelo cron de step-up de preço promocional
+ * (ex: plano Início R$39,90 → R$59,90 após 30 dias).
+ */
+export async function updateAsaasSubscriptionValue(input: {
+  subscriptionId: string;
+  value: number;
+  requestId?: string;
+}): Promise<AsaasSubscription> {
+  const updated = await asaasRequest<AsaasSubscription>({
+    method: "PUT",
+    path: `/v3/subscriptions/${encodeURIComponent(input.subscriptionId)}`,
+    requestId: input.requestId,
+    body: { value: input.value, updatePendingPayments: false },
+  });
+  logger.info("billing.subscription.value_stepped_up", {
+    requestId: input.requestId,
+    subscriptionId: input.subscriptionId,
+    newValue: input.value,
+  });
+  return updated;
+}
+
 export async function cancelAsaasSubscription(input: {
   subscriptionId: string;
   requestId?: string;

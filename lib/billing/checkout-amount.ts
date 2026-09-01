@@ -11,7 +11,7 @@ export type CheckoutAmountResult =
       valueReais: number;
       amountCents: number;
       currency: "BRL";
-      source: "plan" | "catalog" | "sandbox_homologation";
+      source: "plan" | "catalog" | "catalog_intro" | "sandbox_homologation";
     }
   | { ok: false; code: string; message: string };
 
@@ -19,8 +19,16 @@ export type CheckoutAmountResult =
  * Preço somente server-side.
  * R$ 19,90 = homologação sandbox do plano piloto — NÃO é preço comercial.
  * Planos do catálogo: amount_cents do catálogo (não do cliente).
+ *
+ * `isFirstChargeForPlan`: quando true e o plano tem preço promocional
+ * (introAmountCents), cobra o valor promocional no 1º ciclo. Ciclos
+ * seguintes sempre usam o preço cheio — o cron de step-up cuida da
+ * transição na Asaas, não esta função.
  */
-export function resolveCheckoutAmount(plan: BillingPlan): CheckoutAmountResult {
+export function resolveCheckoutAmount(
+  plan: BillingPlan,
+  isFirstChargeForPlan = false,
+): CheckoutAmountResult {
   if (plan.status === "inactive" || plan.status === "archived") {
     return {
       ok: false,
@@ -43,12 +51,19 @@ export function resolveCheckoutAmount(plan: BillingPlan): CheckoutAmountResult {
 
   const commercial = getCommercialPlan(plan.slug);
   if (commercial) {
+    const useIntro =
+      isFirstChargeForPlan &&
+      commercial.introAmountCents != null &&
+      commercial.introAmountCents > 0;
+    const amountCents = useIntro
+      ? commercial.introAmountCents!
+      : commercial.amountCents;
     return {
       ok: true,
-      valueReais: commercial.amountCents / 100,
-      amountCents: commercial.amountCents,
+      valueReais: amountCents / 100,
+      amountCents,
       currency: "BRL",
-      source: "catalog",
+      source: useIntro ? "catalog_intro" : "catalog",
     };
   }
 
@@ -126,6 +141,7 @@ export function rejectClientPriceFields(input: Record<string, unknown>): string 
 export function resolveAmountIgnoringClient(
   plan: BillingPlan,
   clientPayload: Record<string, unknown>,
+  isFirstChargeForPlan = false,
 ): CheckoutAmountResult {
   const rejected = rejectClientPriceFields(clientPayload);
   if (rejected) {
@@ -135,5 +151,5 @@ export function resolveAmountIgnoringClient(
       message: rejected,
     };
   }
-  return resolveCheckoutAmount(plan);
+  return resolveCheckoutAmount(plan, isFirstChargeForPlan);
 }

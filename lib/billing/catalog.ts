@@ -1,6 +1,7 @@
 import { CORE_BILLING_MODULES } from "./types.ts";
 
 export const COMMERCIAL_PLAN_SLUGS = [
+  "start",
   "essential",
   "management",
   "pro",
@@ -25,6 +26,14 @@ export type CommercialPlan = {
   requiresSalesContact: boolean;
   /** Total de logins incluídos no plano, contando o dono. */
   maxSeats: number;
+  /**
+   * Preço promocional do 1º ciclo de cobrança (opcional). Após
+   * `introDurationDays` dias da criação da assinatura, um job diário
+   * (/api/cron/billing-price-stepup) atualiza o valor na Asaas para
+   * `amountCents` (preço cheio). Nunca usado após o 1º ciclo.
+   */
+  introAmountCents?: number;
+  introDurationDays?: number;
   /** Mesmos módulos CORE — diferenças por plano = PENDENTE DE DECISÃO. */
   entitlements: {
     modules: readonly string[];
@@ -42,6 +51,34 @@ const CORE_NOTE =
   "Entitlements de módulo iguais ao CORE até decisão comercial. Não bloquear piloto.";
 
 export const COMMERCIAL_CATALOG: readonly CommercialPlan[] = [
+  {
+    slug: "start",
+    name: "Início",
+    description:
+      "Plano de entrada — R$ 39,90 nos primeiros 30 dias, depois R$ 59,90/mês.",
+    amountCents: 5990,
+    currency: "BRL",
+    billingInterval: "month",
+    status: "active",
+    displayOrder: 0,
+    recommended: false,
+    trialDays: null,
+    maxSeats: 1,
+    introAmountCents: 3990,
+    introDurationDays: 30,
+    includesConsulting: false,
+    requiresSalesContact: false,
+    entitlements: {
+      modules: CORE_BILLING_MODULES,
+      includesConsulting: false,
+      requiresSalesContact: false,
+      trialDays: null,
+      recommended: false,
+      displayOrder: 0,
+      description: "Início",
+      note: CORE_NOTE,
+    },
+  },
   {
     slug: "essential",
     name: "Essencial",

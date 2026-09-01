@@ -307,3 +307,24 @@ export async function getLatestCheckoutForTenant(
   if (error) throw error;
   return data;
 }
+
+/**
+ * True quando este tenant nunca teve um checkout "completed" para este
+ * plan_slug — usado para decidir se o preço promocional (introAmountCents)
+ * do plano se aplica. Idempotency evita duplicar; isto evita reaplicar o
+ * preço de entrada num 2º ciclo/upgrade de volta ao mesmo plano.
+ */
+export async function isFirstCompletedChargeForPlan(
+  client: Client,
+  tenantId: string,
+  planSlug: string,
+): Promise<boolean> {
+  const { count, error } = await client
+    .from("billing_checkout_attempts")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .eq("plan_slug", planSlug)
+    .eq("status", "completed");
+  if (error) throw error;
+  return (count ?? 0) === 0;
+}

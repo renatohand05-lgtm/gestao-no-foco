@@ -113,6 +113,20 @@ const ODONTO_FINANCE: readonly DespesaPresetId[] = [
   "outras",
 ];
 
+const RESTAURANTE_FINANCE: readonly DespesaPresetId[] = [
+  "salarios",
+  "comissoes",
+  "aluguel",
+  "condominio",
+  "energia",
+  "agua",
+  "frete",
+  "manutencao",
+  "marketing",
+  "impostos",
+  "outras",
+];
+
 export const SEGMENT_PROFILES: Record<ProductSegmentId, SegmentProfile> = {
   oficina: {
     id: "oficina",
@@ -418,6 +432,60 @@ export const SEGMENT_PROFILES: Record<ProductSegmentId, SegmentProfile> = {
       "Pacientes e agenda",
       "Procedimentos e financeiro",
       "Contas a receber",
+    ],
+  },
+  restaurante: {
+    id: "restaurante",
+    label: "Restaurante",
+    shortDescription: "Cardápio, comandas, garçons, estoque e financeiro",
+    version: SEGMENT_ENGINE_VERSION,
+    capabilities: cap([
+      "professionals",
+      "commissions",
+      "work_orders",
+      "inventory",
+      "sales",
+      "purchases",
+      "operations_board",
+      "crm",
+      "analytics",
+      "packages",
+    ]),
+    /**
+     * Controle de mesas/salão, cozinha (KDS) e delivery entram em fases
+     * seguintes — hoje mapeiam para o quadro operacional genérico.
+     */
+    futureCapabilities: ["appointments"],
+    terminology: {
+      customer: "Cliente",
+      customers: "Clientes",
+      professional: "Garçom",
+      professionals: "Garçons",
+      workOrder: "Comanda",
+      catalog: "Cardápio",
+      appointment: "Reserva",
+    },
+    recommendedNavIds: [
+      "ops-center",
+      "dashboard",
+      "clients",
+      "mechanics",
+      "work-orders",
+      "products",
+      "inventory",
+      "sales",
+      "finance",
+      "crm",
+      "analytics-reports",
+    ],
+    defaultDashboard: "operacoes",
+    financePresetIds: RESTAURANTE_FINANCE,
+    costCenterSuggestions: ["Salão", "Cozinha", "Delivery", "Administrativo"],
+    beneficiarioTipos: [...SERVICE_PAYEES, "vendedor"],
+    onboardingHighlights: [
+      "Cardápio e comandas",
+      "Garçons e comissões",
+      "Estoque e financeiro",
     ],
   },
 };

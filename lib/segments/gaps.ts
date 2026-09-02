@@ -52,6 +52,15 @@ const GAPS: Record<ProductSegmentId, SegmentGapRow[]> = {
     { capability: "patient_records", module: "Prontuário / odontograma", status: "MISSING", note: "OFF nesta sprint" },
     { capability: "treatment_plans", module: "Plano clínico", status: "MISSING", note: "OFF nesta sprint" },
   ],
+  restaurante: [
+    { capability: "work_orders", module: "Comandas", status: "READY", note: "Mesma tabela OS, copy Comanda" },
+    { capability: "professionals", module: "Garçons", status: "REUSABLE", note: "Reusa cadastro mecanicos; UI /profissionais" },
+    { capability: "catalog", module: "Cardápio", status: "READY", note: "Catálogo sugerido com pratos, bebidas e combos" },
+    { capability: "commissions", module: "Comissões", status: "PARTIAL", note: "Mesma base da oficina; sem folha" },
+    { capability: "operations_board", module: "Quadro operacional", status: "READY", note: "Quadro genérico — sem visão de mesas/salão ainda" },
+    { capability: "appointments", module: "Reservas de mesa", status: "MISSING", note: "Fase 2 — controle de mesas/salão ainda não implementado" },
+    { capability: "packages", module: "Combos", status: "PARTIAL", note: "Catálogo suporta combo; sem motor de composição de itens" },
+  ],
 };
 
 export function getSegmentGaps(id: ProductSegmentId): readonly SegmentGapRow[] {

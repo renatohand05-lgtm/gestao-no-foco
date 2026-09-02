@@ -20,6 +20,7 @@ const NEW_PRODUCT_IDS: readonly string[] = [
   "clinica_estetica",
   "consultorio_odontologico",
   "lava_rapido",
+  "restaurante",
 ];
 
 const ALIASES: Record<string, ProductSegmentId> = {

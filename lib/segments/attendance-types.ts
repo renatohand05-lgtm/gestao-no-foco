@@ -63,6 +63,15 @@ const ODONTO_OPTIONS: AttendanceTypeOption[] = [
   { value: "servicos_gerais", label: "Atendimento" },
 ];
 
+const RESTAURANTE_OPTIONS: AttendanceTypeOption[] = [
+  { value: "salao", label: "Salão" },
+  { value: "delivery", label: "Delivery" },
+  { value: "retirada", label: "Retirada no balcão" },
+];
+const RESTAURANTE_VALUES = new Set(
+  RESTAURANTE_OPTIONS.map((o) => o.value),
+);
+
 export function isLavaAttendanceType(value: string): boolean {
   return LAVA_VALUES.has(value);
 }
@@ -76,6 +85,7 @@ export function attendanceOptionsForContext(
   if (segment === "clinica_estetica") return ESTETICA_OPTIONS;
   if (segment === "barbearia") return BARBEARIA_OPTIONS;
   if (segment === "consultorio_odontologico") return ODONTO_OPTIONS;
+  if (segment === "restaurante") return RESTAURANTE_OPTIONS;
   return OFICINA_ATTENDANCE_OPTIONS;
 }
 
@@ -89,6 +99,7 @@ export function defaultAttendanceType(
   if (segment === "barbearia" || segment === "consultorio_odontologico") {
     return "servicos_gerais";
   }
+  if (segment === "restaurante") return "salao";
   return "oficina";
 }
 
@@ -96,6 +107,7 @@ export function resolveWorkOrderTemplateKey(tipo: string | null | undefined): Wo
   const value = tipo?.trim() || "oficina";
   if (isLavaAttendanceType(value)) return "lava_rapido";
   if (OFICINA_VALUES.has(value)) return "oficina";
+  if (RESTAURANTE_VALUES.has(value)) return "servicos_gerais";
   return (WORK_ORDER_TIPOS as readonly string[]).includes(value)
     ? (value as WorkOrderTipo)
     : "oficina";
@@ -113,6 +125,7 @@ export const ALLOWED_ATTENDANCE_TYPE_VALUES = [
   ...ESTETICA_OPTIONS.map((o) => o.value),
   ...BARBEARIA_OPTIONS.map((o) => o.value),
   ...ODONTO_OPTIONS.map((o) => o.value),
+  ...RESTAURANTE_OPTIONS.map((o) => o.value),
 ] as const;
 
 export { WORK_ORDER_TIPO_LABELS };

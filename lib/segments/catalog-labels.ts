@@ -7,4 +7,5 @@ export const CATALOG_SEGMENT_SHORT_LABEL: Record<ProductSegmentId, string> = {
   consultoria: "Consultoria",
   clinica_estetica: "Estética",
   consultorio_odontologico: "Odontologia",
+  restaurante: "Restaurante",
 };

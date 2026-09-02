@@ -263,6 +263,34 @@ function configFor(segment: ProductSegmentId): SegmentCatalogFormConfig {
         requiredFields: [],
         serviceLibrary: "consultorio_odontologico",
       };
+    case "restaurante":
+      return {
+        segment,
+        allowedItemTypes: [
+          { value: "produto", label: "Item do cardápio" },
+          { value: "materia_prima", label: "Insumo" },
+          { value: "combo", label: "Combo" },
+        ],
+        allowedOperationTypes: ["work_order", "attendance"],
+        visibleFields: [
+          "codigo_interno",
+          "tempo_estimado_minutos",
+          "custo",
+          "estoque",
+        ],
+        hiddenFields: [
+          ...PROFESSIONAL_HIDE,
+          "ncm",
+          "cest",
+          "peso_kg",
+          "dimensoes",
+          "checklist",
+          "fotos",
+        ],
+        optionalFields: ["custo", "tempo_estimado_minutos"],
+        requiredFields: [],
+        serviceLibrary: "restaurante",
+      };
   }
 }
 

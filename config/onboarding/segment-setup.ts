@@ -206,9 +206,9 @@ const SETUPS: Record<EnterpriseSegmentId, PartialSetup> = {
   },
   restaurante: {
     labels: {
-      workOrder: "Pedido",
+      workOrder: "Comanda",
       catalog: "Cardápio",
-      team: "Equipe",
+      team: "Garçons",
       opsBoard: "Salão e produção",
     },
     modules: [
@@ -218,10 +218,10 @@ const SETUPS: Record<EnterpriseSegmentId, PartialSetup> = {
       { key: "delivery", label: "Delivery" },
       { key: "caixa", label: "Caixa" },
     ],
-    menus: ["Pedidos", "Cardápio", "Salão", "Delivery", "Caixa"],
+    menus: ["Comandas", "Cardápio", "Salão", "Delivery", "Caixa"],
     cadastros: ["Itens do cardápio", "Mesas", "Taxas delivery"],
-    fluxos: ["Pedido → Cozinha → Entrega (salão/delivery)"],
-    kpis: ["Pedidos abertos", "Tempo médio", "Ticket médio"],
+    fluxos: ["Comanda → Cozinha → Entrega (salão/delivery)"],
+    kpis: ["Comandas abertas", "Tempo médio", "Ticket médio"],
     dashboards: ["Operações", "Caixa"],
     campos: ["mesa", "item", "observacao", "canal"],
   },

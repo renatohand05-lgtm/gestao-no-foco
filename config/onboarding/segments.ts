@@ -184,7 +184,7 @@ export function searchEnterpriseSegments(
   });
 }
 
-/** Sprint 35.0 — os 6 segmentos de produto da fundação (onboarding). */
+/** Sprint 35.0 — os 7 segmentos de produto da fundação (onboarding). */
 export const PRODUCT_ONBOARDING_SEGMENT_IDS = [
   "oficina",
   "barbearia",
@@ -192,6 +192,7 @@ export const PRODUCT_ONBOARDING_SEGMENT_IDS = [
   "consultoria",
   "clinica_estetica",
   "consultorio_odontologico",
+  "restaurante",
 ] as const;
 
 export function listProductOnboardingSegments(): readonly EnterpriseSegmentDef[] {

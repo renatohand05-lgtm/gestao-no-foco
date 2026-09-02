@@ -10,7 +10,7 @@ import type { BeneficiarioTipo } from "../financeiro/beneficiario-types.ts";
 /** Versão do motor. Tenants com version null = comportamento legado (pré-35.0). */
 export const SEGMENT_ENGINE_VERSION = 1 as const;
 
-/** Os 6 segmentos de produto desta fundação. */
+/** Os 7 segmentos de produto desta fundação. */
 export const PRODUCT_SEGMENT_IDS = [
   "oficina",
   "barbearia",
@@ -18,6 +18,7 @@ export const PRODUCT_SEGMENT_IDS = [
   "consultoria",
   "clinica_estetica",
   "consultorio_odontologico",
+  "restaurante",
 ] as const;
 
 export type ProductSegmentId = (typeof PRODUCT_SEGMENT_IDS)[number];

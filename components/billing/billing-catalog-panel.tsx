@@ -84,7 +84,15 @@ export function BillingCatalogPanel({
                   ) : null}
                 </p>
                 <p className="text-xs">
-                  {formatBrlFromCents(plan.amountCents)}/mês
+                  {plan.introAmountCents ? (
+                    <>
+                      {formatBrlFromCents(plan.introAmountCents)}/mês nos
+                      primeiros {plan.introDurationDays} dias, depois{" "}
+                      {formatBrlFromCents(plan.amountCents)}/mês
+                    </>
+                  ) : (
+                    <>{formatBrlFromCents(plan.amountCents)}/mês</>
+                  )}
                 </p>
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">

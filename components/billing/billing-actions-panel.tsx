@@ -250,7 +250,15 @@ export function BillingActionsPanel({
         {selectedPlan ? (
           <p className="rounded-md bg-primary/10 px-3 py-2 text-xs text-foreground">
             Plano selecionado: <strong>{selectedPlan.name}</strong> —{" "}
-            {formatBrlFromCents(selectedPlan.amountCents)}/mês
+            {selectedPlan.introAmountCents ? (
+              <>
+                {formatBrlFromCents(selectedPlan.introAmountCents)}/mês nos
+                primeiros {selectedPlan.introDurationDays} dias, depois{" "}
+                {formatBrlFromCents(selectedPlan.amountCents)}/mês
+              </>
+            ) : (
+              <>{formatBrlFromCents(selectedPlan.amountCents)}/mês</>
+            )}
           </p>
         ) : !isSandbox ? (
           <p

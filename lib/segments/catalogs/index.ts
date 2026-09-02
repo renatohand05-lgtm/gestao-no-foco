@@ -6,6 +6,7 @@ import { CONSULTORIA_LIBRARY } from "./consultoria.ts";
 import { LAVA_RAPIDO_LIBRARY } from "./lava-rapido.ts";
 import { CONSULTORIO_ODONTOLOGICO_LIBRARY } from "./odontologia.ts";
 import { OFICINA_LIBRARY } from "./oficina.ts";
+import { RESTAURANTE_LIBRARY } from "./restaurante.ts";
 import type { SegmentLibraryItem } from "./types.ts";
 
 export type { SegmentLibraryItem, LibraryGroup, LibrarySeed } from "./types.ts";
@@ -24,6 +25,7 @@ const LIBRARIES: Record<ProductSegmentId, SegmentLibraryItem[]> = {
   consultoria: CONSULTORIA_LIBRARY,
   clinica_estetica: CLINICA_ESTETICA_LIBRARY,
   consultorio_odontologico: CONSULTORIO_ODONTOLOGICO_LIBRARY,
+  restaurante: RESTAURANTE_LIBRARY,
 };
 
 export function getSegmentServiceLibrary(

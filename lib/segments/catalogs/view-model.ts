@@ -14,6 +14,7 @@ export const MIN_LIBRARY_COUNTS: Record<ProductSegmentId, number> = {
   consultoria: 46,
   clinica_estetica: 44,
   consultorio_odontologico: 36,
+  restaurante: 30,
 };
 
 export type CatalogPickerView = {

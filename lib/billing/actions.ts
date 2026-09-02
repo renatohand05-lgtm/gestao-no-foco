@@ -48,6 +48,7 @@ import {
   getPlanBySlug,
   getSubscriptionForTenant,
   getSubscriptionWithPlan,
+  isFirstCompletedChargeForPlan,
   linkProviderSubscription,
   markSubscriptionCanceled,
   recordCheckoutAttempt,
@@ -339,7 +340,10 @@ export async function requestCheckoutAction(input: {
       };
     }
 
-    const priced = resolveCheckoutAmount(plan);
+    const priced = resolveCheckoutAmount(
+      plan,
+      await isFirstCompletedChargeForPlan(supabase, auth.tenant.id, planSlug),
+    );
     if (!priced.ok) {
       await updateCheckoutAttempt(supabase, attempt.id, {
         status: "failed",

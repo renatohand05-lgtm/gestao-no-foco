@@ -128,6 +128,7 @@ export type Database = {
           current_period_start: string | null;
           current_period_end: string | null;
           cancel_at_period_end: boolean;
+          intro_price_stepped_up_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -144,6 +145,7 @@ export type Database = {
           current_period_start?: string | null;
           current_period_end?: string | null;
           cancel_at_period_end?: boolean;
+          intro_price_stepped_up_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -160,6 +162,7 @@ export type Database = {
           current_period_start?: string | null;
           current_period_end?: string | null;
           cancel_at_period_end?: boolean;
+          intro_price_stepped_up_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -10,15 +10,24 @@ import { BrandInstitutionalFooter } from "@/components/brand/brand-institutional
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { PageContainer } from "@/components/layout/page-container";
+import { PlanSimulationBanner } from "@/components/layout/plan-simulation-banner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { TenantWithRole } from "@/types";
+
+export type PlanSimulationInfo = {
+  planSlug: string;
+  planName: string;
+  lockedNavIds: readonly string[];
+};
 
 type AppShellProps = {
   tenant: TenantWithRole;
   tenants: TenantWithRole[];
   permissions?: readonly string[];
   isPlatformPartner?: boolean;
+  /** Modo "simular plano" ativo (só dono da plataforma) — nunca altera dados reais. */
+  planSimulation?: PlanSimulationInfo | null;
   user?: {
     email?: string;
     name?: string;
@@ -40,6 +49,7 @@ function DemoAwareChrome({
   tenants,
   permissions,
   isPlatformPartner,
+  planSimulation,
   user,
   children,
 }: AppShellProps) {
@@ -59,6 +69,7 @@ function DemoAwareChrome({
           tenants={tenants}
           permissions={permissions}
           isPlatformPartner={isPlatformPartner}
+          lockedNavIds={planSimulation?.lockedNavIds}
         />
       ) : null}
       <SidebarInset
@@ -86,6 +97,9 @@ function DemoAwareChrome({
         )}
 
         <PageContainer>
+          {planSimulation ? (
+            <PlanSimulationBanner planName={planSimulation.planName} />
+          ) : null}
           {/* Sprint 30.1: chrome Apresentação colapsado por padrão (mobile-first). */}
           <div className="mb-3 space-y-2 md:mb-4">
             {!hide.appSidebar ? (
@@ -117,6 +131,7 @@ export function AppShell(props: AppShellProps) {
             tenants={props.tenants}
             permissions={props.permissions}
             isPlatformPartner={props.isPlatformPartner}
+            lockedNavIds={props.planSimulation?.lockedNavIds}
           />
           <SidebarInset className="min-h-svh bg-background">
             <AppHeader
@@ -135,6 +150,7 @@ export function AppShell(props: AppShellProps) {
           tenants={props.tenants}
           permissions={props.permissions}
           isPlatformPartner={props.isPlatformPartner}
+          planSimulation={props.planSimulation}
           user={props.user}
         >
           {props.children}

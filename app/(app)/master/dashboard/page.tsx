@@ -83,18 +83,28 @@ export default async function MasterDashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="flex flex-col gap-1 border-b border-border/60 pb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-[var(--brand-gold,#C9A84C)]">
-          {isOwner ? "Visão do Dono / Gestor Master" : "Painel do Associado"}
-        </p>
-        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-          Olá, {access.partnerName.split(" ")[0]}.
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {isOwner
-            ? "Todas as empresas da plataforma, na palma da sua mão."
-            : "As empresas que você trouxe para a plataforma."}
-        </p>
+      <header className="flex flex-col gap-3 border-b border-border/60 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[var(--brand-gold,#C9A84C)]">
+            {isOwner ? "Visão do Dono / Gestor Master" : "Painel do Associado"}
+          </p>
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+            Olá, {access.partnerName.split(" ")[0]}.
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {isOwner
+              ? "Todas as empresas da plataforma, na palma da sua mão."
+              : "As empresas que você trouxe para a plataforma."}
+          </p>
+        </div>
+        {isOwner ? (
+          <Link
+            href="/master/plano-preview"
+            className="inline-flex h-9 items-center justify-center rounded-md border border-border/70 bg-card/40 px-4 text-sm font-medium text-foreground transition-colors hover:bg-card/70"
+          >
+            Simular planos
+          </Link>
+        ) : null}
       </header>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

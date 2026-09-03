@@ -252,6 +252,15 @@ export function getTenantNav(
             description: "Fila de preparo das comandas abertas",
             requiredAnyPermissions: ["os.visualizar"],
           },
+          {
+            id: "delivery",
+            title: "Delivery",
+            href: `${base}/delivery`,
+            icon: Truck,
+            group: "operacao" as const,
+            description: "Pedidos de entrega em preparo e prontos para sair",
+            requiredAnyPermissions: ["os.visualizar"],
+          },
         ]
       : []),
     {

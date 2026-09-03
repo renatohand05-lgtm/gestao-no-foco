@@ -81,6 +81,10 @@ type FeatureRow = { id: string; label: string; minPlanLabel: string; unlocked: b
         plans={planPreviews}
         coreLabels={[...CORE_ALWAYS_UNLOCKED_LABELS]}
         featuresByPlan={featuresByPlan}
+        tenants={access.tenants.map((t) => ({
+          slug: t.tenantSlug,
+          name: t.tenantName,
+        }))}
       />
     </div>
   );

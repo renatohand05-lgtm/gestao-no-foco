@@ -3,6 +3,7 @@ import {
   BarChart3,
   Brain,
   CalendarDays,
+  ChefHat,
   FileBarChart,
   Landmark,
   LayoutDashboard,
@@ -240,6 +241,15 @@ export function getTenantNav(
             icon: LayoutGrid,
             group: "operacao" as const,
             description: "Controle de mesas e comandas do salão",
+            requiredAnyPermissions: ["os.visualizar"],
+          },
+          {
+            id: "cozinha",
+            title: "Cozinha",
+            href: `${base}/cozinha`,
+            icon: ChefHat,
+            group: "operacao" as const,
+            description: "Fila de preparo das comandas abertas",
             requiredAnyPermissions: ["os.visualizar"],
           },
         ]

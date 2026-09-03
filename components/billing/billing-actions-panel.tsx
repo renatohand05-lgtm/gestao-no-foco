@@ -18,8 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBillingSelection } from "./billing-selection-context";
 
-type BillingMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
-
 type ViaCepResult = {
   logradouro?: string;
   bairro?: string;
@@ -61,7 +59,6 @@ export function BillingActionsPanel({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [billingType, setBillingType] = useState<BillingMethod>("PIX");
   const [email, setEmail] = useState("");
   const [document, setDocument] = useState("");
   const [paymentHint, setPaymentHint] = useState<PaymentHint | null>(
@@ -173,33 +170,30 @@ export function BillingActionsPanel({
         tenantSlug,
         planSlug: selectedPlan?.slug,
         idempotencyKey,
-        billingType,
+        billingType: "CREDIT_CARD",
         customerEmail: email || undefined,
         customerDocument: document || undefined,
-        card:
-          billingType === "CREDIT_CARD"
-            ? {
-                holderName: cardHolderName,
-                number: cardNumber,
-                expiryMonth: cardMonth,
-                expiryYear: cardYear,
-                ccv: cardCcv,
-                holderInfoName: cardHolderName,
-                holderEmail: email,
-                holderCpfCnpj: cardHolderDoc || document,
-                postalCode: cardPostal,
-                addressNumber: cardAddressNumber,
-                phone: cardPhone,
-              }
-            : undefined,
+        card: {
+          holderName: cardHolderName,
+          number: cardNumber,
+          expiryMonth: cardMonth,
+          expiryYear: cardYear,
+          ccv: cardCcv,
+          holderInfoName: cardHolderName,
+          holderEmail: email,
+          holderCpfCnpj: cardHolderDoc || document,
+          postalCode: cardPostal,
+          addressNumber: cardAddressNumber,
+          phone: cardPhone,
+        },
       });
       if (res.ok) {
         setMessage(res.message);
         if (res.paymentHint) setPaymentHint(res.paymentHint);
-        if (billingType === "CREDIT_CARD") clearCardFields();
+        clearCardFields();
       } else {
         setError(res.message);
-        if (billingType === "CREDIT_CARD") clearCardFields();
+        clearCardFields();
       }
       router.refresh();
     });
@@ -245,7 +239,8 @@ export function BillingActionsPanel({
 
       <div className="space-y-2 rounded-md border border-border/70 p-3">
         <p className="text-xs font-medium text-muted-foreground">
-          Checkout Asaas (PIX / Boleto / Cartão)
+          Checkout Asaas (Cartão de crédito) — cobrança recorrente automática
+          mensal, cancele quando quiser
         </p>
         {selectedPlan ? (
           <p className="rounded-md bg-primary/10 px-3 py-2 text-xs text-foreground">
@@ -292,42 +287,12 @@ export function BillingActionsPanel({
             autoComplete="off"
           />
         </label>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant={billingType === "PIX" ? "default" : "outline"}
-            disabled={pending}
-            onClick={() => setBillingType("PIX")}
-          >
-            PIX
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant={billingType === "BOLETO" ? "default" : "outline"}
-            disabled={pending}
-            onClick={() => setBillingType("BOLETO")}
-          >
-            Boleto
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant={billingType === "CREDIT_CARD" ? "default" : "outline"}
-            disabled={pending}
-            onClick={() => setBillingType("CREDIT_CARD")}
-          >
-            Cartão
-          </Button>
-        </div>
 
-        {billingType === "CREDIT_CARD" ? (
-          <div className="space-y-2 rounded-md border border-dashed border-border/80 p-2">
-            <p className="text-[11px] text-muted-foreground">
-              Cartão enviado só via HTTPS para tokenização Asaas. PAN/CVV não
-              são gravados.
-            </p>
+        <div className="space-y-2 rounded-md border border-dashed border-border/80 p-2">
+          <p className="text-[11px] text-muted-foreground">
+            Cartão enviado só via HTTPS para tokenização Asaas. PAN/CVV não
+            são gravados.
+          </p>
             <label className="block text-xs text-muted-foreground">
               Nome no cartão
               <Input
@@ -441,8 +406,7 @@ export function BillingActionsPanel({
                 autoComplete="tel"
               />
             </label>
-          </div>
-        ) : null}
+        </div>
 
         <Button
           variant="outline"
@@ -450,7 +414,7 @@ export function BillingActionsPanel({
           onClick={onCheckout}
         >
           {providerConfigured
-            ? `Iniciar checkout ${billingType === "CREDIT_CARD" ? "CARTÃO" : billingType}`
+            ? "Iniciar assinatura no cartão"
             : "Checkout (Asaas não configurado)"}
         </Button>
       </div>

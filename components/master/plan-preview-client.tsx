@@ -5,6 +5,7 @@ import { Lock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { startPlanSimulationAction } from "@/lib/platform/plan-simulation-actions";
 
 type PlanPreview = {
   slug: string;
@@ -20,14 +21,23 @@ type FeaturePreview = {
   unlocked: boolean;
 };
 
+type TenantOption = { slug: string; name: string };
+
 type Props = {
   plans: PlanPreview[];
   coreLabels: string[];
   featuresByPlan: Record<string, FeaturePreview[]>;
+  tenants: TenantOption[];
 };
 
-export function PlanPreviewClient({ plans, coreLabels, featuresByPlan }: Props) {
+export function PlanPreviewClient({
+  plans,
+  coreLabels,
+  featuresByPlan,
+  tenants,
+}: Props) {
   const [selectedSlug, setSelectedSlug] = useState(plans[0]?.slug ?? "");
+  const [targetTenant, setTargetTenant] = useState(tenants[0]?.slug ?? "");
   const selectedPlan = plans.find((p) => p.slug === selectedSlug) ?? plans[0];
   const features = featuresByPlan[selectedSlug] ?? [];
   const unlocked = features.filter((f) => f.unlocked);
@@ -59,6 +69,31 @@ export function PlanPreviewClient({ plans, coreLabels, featuresByPlan }: Props) 
         <p className="text-sm text-muted-foreground">
           {selectedPlan?.priceLabel}
         </p>
+
+        {tenants.length > 0 ? (
+          <form
+            action={startPlanSimulationAction.bind(null, selectedSlug, targetTenant)}
+            className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--brand-gold,#C9A84C)]/30 pt-3"
+          >
+            <label className="text-xs text-muted-foreground">
+              Ver dentro de
+              <select
+                className="ml-2 rounded-md border border-border/70 bg-background px-2 py-1.5 text-xs"
+                value={targetTenant}
+                onChange={(e) => setTargetTenant(e.target.value)}
+              >
+                {tenants.map((t) => (
+                  <option key={t.slug} value={t.slug}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button type="submit" size="sm" disabled={!targetTenant}>
+              Ver no app real com este plano
+            </Button>
+          </form>
+        ) : null}
       </div>
 
       <div className="rounded-xl border border-border/70 bg-card/40 p-5">

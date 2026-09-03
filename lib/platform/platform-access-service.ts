@@ -64,6 +64,28 @@ export async function isPlatformPartner(): Promise<boolean> {
 }
 
 /**
+ * Checagem leve: só confirma se o usuário logado é o DONO da plataforma
+ * (não associado). Usada pelo modo "simular plano" — só o dono pode ver o
+ * app real sob a ótica de um plano, nunca associados nem clientes.
+ */
+export async function isPlatformOwner(): Promise<boolean> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: partnerRow } = await supabase
+    .from("platform_partners" as never)
+    .select("role")
+    .eq("user_id", user.id)
+    .maybeSingle<{ role: PlatformRole }>();
+
+  return partnerRow?.role === "owner";
+}
+
+/**
  * Retorna o acesso do usuário logado ao painel de plataforma (dono/associado),
  * ou `null` se ele não estiver cadastrado em platform_partners — nesse caso a
  * página deve mostrar acesso negado, nunca dados de nenhuma empresa.

@@ -471,6 +471,7 @@ export const SEGMENT_PROFILES: Record<ProductSegmentId, SegmentProfile> = {
       "clients",
       "mechanics",
       "work-orders",
+      "salao",
       "products",
       "inventory",
       "sales",

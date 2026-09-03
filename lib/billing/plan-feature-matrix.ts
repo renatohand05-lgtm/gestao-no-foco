@@ -111,3 +111,33 @@ export function planSlugsOrdered(): readonly CommercialPlanSlug[] {
     (a, b) => PLAN_RANK[a] - PLAN_RANK[b],
   );
 }
+
+/**
+ * Feature → id(s) de item de menu (config/navigation.ts). Usado pelo modo
+ * "simular plano" pra esconder do menu real o que aquele plano não libera.
+ * Recursos sem nav id próprio (ex: financeiro_avancado, consultoria_humana)
+ * ficam de fora — são sub-páginas, tratadas na Etapa B (bloqueio por página).
+ */
+const FEATURE_TO_NAV_IDS: Partial<Record<PlanFeatureId, readonly string[]>> = {
+  crm: ["crm"],
+  relatorios: ["analytics-reports"],
+  analytics_bi: ["analytics"],
+  tributario: ["tax-hub"],
+  integracoes: ["integrations"],
+  automacoes: ["automacoes"],
+  inteligencia_ia: ["intelligence-hub"],
+};
+
+/** IDs de item de menu que este plano NÃO libera — pra esconder do sidebar real. */
+export function lockedNavIdsForPlan(
+  planSlug: CommercialPlanSlug,
+): readonly string[] {
+  const locked = featuresLockedForPlan(planSlug);
+  const ids = new Set<string>();
+  for (const feature of locked) {
+    for (const navId of FEATURE_TO_NAV_IDS[feature.id] ?? []) {
+      ids.add(navId);
+    }
+  }
+  return [...ids];
+}

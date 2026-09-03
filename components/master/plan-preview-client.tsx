@@ -49,15 +49,22 @@ export function PlanPreviewClient({ plans, coreLabels, featuresByPlan }: Props) 
         ))}
       </div>
 
+      <div className="rounded-xl border-2 border-[var(--brand-gold,#C9A84C)] bg-[var(--brand-gold,#C9A84C)]/10 px-5 py-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[var(--brand-gold,#C9A84C)]">
+          Você está vendo agora
+        </p>
+        <p className="mt-1 text-xl font-bold text-foreground">
+          {selectedPlan?.name}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {selectedPlan?.priceLabel}
+        </p>
+      </div>
+
       <div className="rounded-xl border border-border/70 bg-card/40 p-5">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-semibold text-foreground">
-            {selectedPlan?.name}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {selectedPlan?.priceLabel} · até {selectedPlan?.maxSeats} logins
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Até {selectedPlan?.maxSeats} logins (dono + equipe)
+        </p>
 
         <div className="mt-5 grid gap-6 sm:grid-cols-2">
           <div>

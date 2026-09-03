@@ -58,10 +58,10 @@ const BY_SEGMENT: Record<SegmentId, SegmentNavLabels> = {
     showWorkOrders: true,
   },
   restaurante: {
-    team: "Equipe",
+    team: "Garçons",
     teamDescription: "Salão, cozinha e turnos",
-    workOrders: "Pedidos",
-    workOrdersDescription: "Pedidos e produção",
+    workOrders: "Comandas",
+    workOrdersDescription: "Comandas e produção",
     opsCenterDescription: "Quadro ao vivo do salão e da produção",
     opsCenterTitle: "Centro de Operações",
     showTeamNavItem: false,
@@ -207,7 +207,7 @@ export function getOpsCenterCopy(
   } else if (resolved === "restaurante") {
     copy = {
       pageDescription: "Visão rápida do salão e da produção agora",
-      openOrdersLabel: "Pedidos abertos",
+      openOrdersLabel: "Comandas abertas",
       assetsInOpsLabel: "Em produção / salão",
       boardTitle: "Quadro da operação",
       boardDescriptionCanEdit:

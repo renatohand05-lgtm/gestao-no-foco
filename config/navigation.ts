@@ -6,6 +6,7 @@ import {
   FileBarChart,
   Landmark,
   LayoutDashboard,
+  LayoutGrid,
   Package,
   Plug,
   Search,
@@ -230,6 +231,19 @@ export function getTenantNav(
       description: labels.workOrdersDescription,
       requiredAnyPermissions: ["os.visualizar"],
     },
+    ...(segmentCtx.productSegment === "restaurante"
+      ? [
+          {
+            id: "salao",
+            title: "Salão",
+            href: `${base}/salao`,
+            icon: LayoutGrid,
+            group: "operacao" as const,
+            description: "Controle de mesas e comandas do salão",
+            requiredAnyPermissions: ["os.visualizar"],
+          },
+        ]
+      : []),
     {
       id: "agenda",
       title: "Agenda",

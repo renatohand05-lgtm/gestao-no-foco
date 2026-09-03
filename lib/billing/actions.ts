@@ -130,9 +130,13 @@ export async function startPilotTrialAction(
   }
 }
 
+/**
+ * Só cartão de crédito é aceito neste checkout (decisão de produto: sem
+ * PIX/Boleto). Qualquer outro valor — mesmo enviado direto pela API sem
+ * passar pela tela — é rejeitado aqui, não só escondido na UI.
+ */
 function normalizeBillingType(raw: string | undefined): AsaasBillingType | null {
-  const t = (raw || "PIX").toUpperCase();
-  if (t === "PIX" || t === "BOLETO") return t;
+  const t = (raw || "CREDIT_CARD").toUpperCase();
   if (t === "CREDIT_CARD" || t === "CARTAO" || t === "CARD") return "CREDIT_CARD";
   return null;
 }
@@ -197,7 +201,7 @@ export async function requestCheckoutAction(input: {
       return {
         ok: false,
         code: "BILLING_TYPE_INVALID",
-        message: "Método inválido. Use PIX, BOLETO ou CREDIT_CARD.",
+        message: "Este checkout aceita apenas cartão de crédito.",
       };
     }
 

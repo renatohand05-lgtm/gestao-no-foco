@@ -125,7 +125,9 @@ export default async function QualidadeOperacionalPage({
           <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Cliente</th>
-              <th className="px-4 py-3">Veículo</th>
+              {ui.showVehicles !== false ? (
+                <th className="px-4 py-3">Veículo</th>
+              ) : null}
               <th className="px-4 py-3">{ui.workOrder} original</th>
               <th className="px-4 py-3">Data retorno</th>
               <th className="px-4 py-3">Dias</th>
@@ -139,7 +141,9 @@ export default async function QualidadeOperacionalPage({
             {data.drillDown.map((item) => (
               <tr key={item.id} className="border-t border-border/60">
                 <td className="px-4 py-3">{item.cliente}</td>
-                <td className="px-4 py-3">{item.veiculo}</td>
+                {ui.showVehicles !== false ? (
+                  <td className="px-4 py-3">{item.veiculo}</td>
+                ) : null}
                 <td className="px-4 py-3">{item.osOriginal}</td>
                 <td className="px-4 py-3 tabular-nums">{item.dataRetorno}</td>
                 <td className="px-4 py-3 tabular-nums">

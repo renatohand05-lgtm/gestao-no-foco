@@ -182,13 +182,15 @@ export function OsConfirmDialog({
             <dt className="text-xs text-muted-foreground">Cliente</dt>
             <dd>{clienteNome ?? "—"}</dd>
           </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Veículo</dt>
-            <dd>
-              {placa ?? "—"}
-              {modelo ? ` · ${modelo}` : ""}
-            </dd>
-          </div>
+          {placa || modelo ? (
+            <div>
+              <dt className="text-xs text-muted-foreground">Veículo</dt>
+              <dd>
+                {placa ?? "—"}
+                {modelo ? ` · ${modelo}` : ""}
+              </dd>
+            </div>
+          ) : null}
           <div className="sm:col-span-2">
             <dt className="text-xs text-muted-foreground">Impacto estoque</dt>
             <dd className="text-muted-foreground">{impactoEstoque}</dd>
@@ -274,7 +276,7 @@ export function OsConfirmDialog({
         ) : null}
 
         <p className="text-xs text-muted-foreground">
-          Cliente, veículo, catálogo e agenda original não são apagados.
+          Cliente, catálogo e agenda original não são apagados.
         </p>
 
         <div className="flex flex-wrap justify-end gap-2">

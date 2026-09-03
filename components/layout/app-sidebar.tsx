@@ -41,6 +41,8 @@ type AppSidebarProps = {
   permissions?: readonly string[];
   /** true se o usuário é dono da plataforma ou associado com indicações. */
   isPlatformPartner?: boolean;
+  /** IDs de item de menu escondidos — modo "simular plano" (só dono). */
+  lockedNavIds?: readonly string[];
 };
 
 /**
@@ -52,6 +54,7 @@ export function AppSidebar({
   tenants,
   permissions,
   isPlatformPartner,
+  lockedNavIds,
 }: AppSidebarProps) {
   const pathname = usePathname();
   const { state } = useSidebar();
@@ -64,12 +67,23 @@ export function AppSidebar({
       segmentVersion: tenant.segment_version,
       segmentConfig: tenant.segment_config,
     });
-    const items =
+    const permitted =
       permissions === undefined
         ? raw
         : filterNavByPermissions(raw, permissions);
+    const items =
+      lockedNavIds && lockedNavIds.length > 0
+        ? permitted.filter((item) => !lockedNavIds.includes(item.id))
+        : permitted;
     return buildSidebarNavGroups(items);
-  }, [tenant.slug, tenant.segment, tenant.segment_version, tenant.segment_config, permissions]);
+  }, [
+    tenant.slug,
+    tenant.segment,
+    tenant.segment_version,
+    tenant.segment_config,
+    permissions,
+    lockedNavIds,
+  ]);
 
   return (
     <Sidebar

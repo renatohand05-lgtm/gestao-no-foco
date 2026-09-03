@@ -47,10 +47,9 @@ export default async function PlanPreviewPage() {
     maxSeats: plan.maxSeats,
   }));
 
-  const featuresByPlan: Record
-    string,
-    { id: string; label: string; minPlanLabel: string; unlocked: boolean }[]
-  > = {};
+type FeatureRow = { id: string; label: string; minPlanLabel: string; unlocked: boolean };
+
+  const featuresByPlan: Record<string, FeatureRow[]> = {};
   for (const plan of plans) {
     featuresByPlan[plan.slug] = PLAN_FEATURES.map((feature) => ({
       id: feature.id,

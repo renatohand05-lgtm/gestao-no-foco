@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { getCommercialPlan } from "@/lib/billing/catalog";
+import { getTenantCommercialPlanSlug } from "@/lib/billing/finance-entitlement";
 import {
   lockedNavIdsForPlan,
   type CommercialPlanSlug,
@@ -8,6 +9,7 @@ import {
 import { resolveTenantNavPermissions } from "@/lib/navigation/resolve-nav-auth";
 import { isPlatformPartner } from "@/lib/platform/platform-access-service";
 import { getPlanSimulationSlug } from "@/lib/platform/plan-simulation";
+import { createClient } from "@/lib/supabase/server";
 import { getUserTenants, requireTenant } from "@/lib/tenants";
 
 export default async function TenantLayout({
@@ -38,6 +40,14 @@ export default async function TenantLayout({
       }
     : null;
 
+  // Fase 2 do financeiro: trava real do menu, conforme o plano comercial de
+  // verdade do tenant. Piloto/sem plano comercial = sempre liberado.
+  const client = await createClient();
+  const realPlanSlug = await getTenantCommercialPlanSlug(client, tenant.id);
+  const lockedNavIds = realPlanSlug
+    ? lockedNavIdsForPlan(realPlanSlug as CommercialPlanSlug)
+    : [];
+
   return (
     <AppShell
       tenant={tenant}
@@ -45,6 +55,7 @@ export default async function TenantLayout({
       permissions={permissions}
       isPlatformPartner={isPartner}
       planSimulation={planSimulation}
+      lockedNavIds={lockedNavIds}
       user={{
         email: profile?.email,
         name: profile?.name ?? undefined,

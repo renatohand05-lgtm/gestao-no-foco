@@ -1,11 +1,14 @@
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { ReconciliationClient } from "@/components/finance/cash-intelligence/reconciliation-client";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
 import { getTreasuryAccounts } from "@/lib/finance/actions";
 import { listBankStatementLines } from "@/lib/finance/cash-intelligence/cash-intelligence-actions";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Conciliação Bancária" };
 
@@ -16,13 +19,15 @@ export default async function ConciliacaoPage({
 }) {
   const { tenant: tenantSlug } = await params;
 
+  let tenantId: string;
   try {
-    await requireFinancePagePermission(tenantSlug, [
+    const auth = await requireFinancePagePermission(tenantSlug, [
       "financeiro.visualizar",
       "financeiro.criar",
       "financeiro.editar",
       "financeiro.conciliar",
     ]);
+    tenantId = auth.tenant.id;
   } catch (error) {
     const auth = financePageAuthError(error);
     return (
@@ -31,6 +36,28 @@ export default async function ConciliacaoPage({
           tenantSlug={tenantSlug}
           title="Conciliação Bancária"
           description={auth.message}
+        />
+      </div>
+    );
+  }
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    tenantId,
+    "financeiro_avancado",
+  );
+  if (!unlocked) {
+    return (
+      <div className="p-6 space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Conciliação Bancária"
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="financeiro_avancado"
+          title="Conciliação bancária"
         />
       </div>
     );

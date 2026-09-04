@@ -28,6 +28,8 @@ type AppShellProps = {
   isPlatformPartner?: boolean;
   /** Modo "simular plano" ativo (só dono da plataforma) — nunca altera dados reais. */
   planSimulation?: PlanSimulationInfo | null;
+  /** IDs de item de menu travados pelo plano REAL do tenant (Fase 2 do financeiro). */
+  lockedNavIds?: readonly string[];
   user?: {
     email?: string;
     name?: string;
@@ -50,10 +52,12 @@ function DemoAwareChrome({
   permissions,
   isPlatformPartner,
   planSimulation,
+  lockedNavIds,
   user,
   children,
 }: AppShellProps) {
   const { hide, active } = useDemoMode();
+  const effectiveLockedNavIds = planSimulation?.lockedNavIds ?? lockedNavIds;
 
   return (
     <SidebarProvider
@@ -69,7 +73,7 @@ function DemoAwareChrome({
           tenants={tenants}
           permissions={permissions}
           isPlatformPartner={isPlatformPartner}
-          lockedNavIds={planSimulation?.lockedNavIds}
+          lockedNavIds={effectiveLockedNavIds}
         />
       ) : null}
       <SidebarInset
@@ -131,7 +135,7 @@ export function AppShell(props: AppShellProps) {
             tenants={props.tenants}
             permissions={props.permissions}
             isPlatformPartner={props.isPlatformPartner}
-            lockedNavIds={props.planSimulation?.lockedNavIds}
+            lockedNavIds={props.planSimulation?.lockedNavIds ?? props.lockedNavIds}
           />
           <SidebarInset className="min-h-svh bg-background">
             <AppHeader
@@ -151,6 +155,7 @@ export function AppShell(props: AppShellProps) {
           permissions={props.permissions}
           isPlatformPartner={props.isPlatformPartner}
           planSimulation={props.planSimulation}
+          lockedNavIds={props.lockedNavIds}
           user={props.user}
         >
           {props.children}

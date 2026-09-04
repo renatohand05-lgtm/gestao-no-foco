@@ -76,11 +76,7 @@ export default async function FinanceiroOrcamentoPage({
     );
   }
 
-  let budgets: Awaited
-    ReturnType
-      Awaited<ReturnType<typeof createFinanceBudgetService>>["list"]
-    >
-  > = [];
+  let budgets: Awaited<ReturnType<Awaited<ReturnType<typeof createFinanceBudgetService>>["list"]>> = [];
   let schemaReady = true;
   let schemaError: string | null = null;
   try {

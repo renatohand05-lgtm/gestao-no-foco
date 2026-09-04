@@ -1,11 +1,14 @@
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { ImportWizardClient } from "@/components/finance/import/import-wizard-client";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import { listBankAccounts } from "@/lib/finance/actions";
 import { listFinanceImportHistory } from "@/lib/finance/import/import-actions";
 import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Importar Dados" };
 
@@ -35,6 +38,29 @@ export default async function ImportarDadosPage({
         >
           {err.message}
         </p>
+      </div>
+    );
+  }
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    auth.tenant.id,
+    "integracoes",
+  );
+  if (!unlocked) {
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Importar Dados"
+          description="Engine de importação Excel/CSV."
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="integracoes"
+          title="Importação de dados"
+        />
       </div>
     );
   }

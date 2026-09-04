@@ -1,3 +1,4 @@
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import {
   Card,
@@ -6,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import {
   civilDateInTimezone,
   DEFAULT_TENANT_TIMEZONE,
@@ -17,6 +19,7 @@ import {
 } from "@/lib/finance/page-auth";
 import { createContaReceberService } from "@/lib/financeiro/conta-receber-service";
 import { formatCurrency } from "@/lib/format";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Aging / Inadimplência" };
 export const dynamic = "force-dynamic";
@@ -42,6 +45,28 @@ export default async function FinanceiroAgingPage({
           tenantSlug={tenantSlug}
           title="Aging / Inadimplência"
           description={err.message}
+        />
+      </div>
+    );
+  }
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    auth.tenant.id,
+    "analytics_bi",
+  );
+  if (!unlocked) {
+    return (
+      <div className="space-y-4 p-4 sm:p-6" data-phase28="finance-aging">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Aging / Inadimplência"
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="analytics_bi"
+          title="Aging / Inadimplência"
         />
       </div>
     );

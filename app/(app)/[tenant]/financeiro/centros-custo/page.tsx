@@ -1,13 +1,16 @@
 import Link from "next/link";
 
 import { CostCenterManager } from "@/components/finance/cost-center-manager";
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { Button } from "@/components/ui/button";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import { listCostCenters } from "@/lib/finance/actions";
 import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Centros de Custo" };
 
@@ -44,6 +47,31 @@ export default async function CentrosCustoEnterprisePage({
   }
 
   const { tenant } = auth;
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    tenant.id,
+    "financeiro_avancado",
+  );
+  if (!unlocked) {
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          tenantName={tenant.name}
+          title="Centros de custo"
+          description="Cadastro, edição e arquivamento · associação em movimentações."
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="financeiro_avancado"
+          title="Centros de custo"
+        />
+      </div>
+    );
+  }
+
   const result = await listCostCenters(tenantSlug);
 
   return (

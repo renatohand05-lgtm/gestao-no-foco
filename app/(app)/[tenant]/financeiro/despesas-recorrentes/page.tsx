@@ -2,12 +2,15 @@ import { RefreshCw } from "lucide-react";
 
 import { DespesaRecorrenteTable } from "@/components/financeiro/despesa-recorrente-table";
 import { FinanceiroEmptyState } from "@/components/financeiro/financeiro-empty-state";
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { ActionButton } from "@/components/ui/action-button";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import { createDespesaRecorrenteService } from "@/lib/financeiro/despesa-recorrente-service";
 import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
+import { createClient } from "@/lib/supabase/server";
 import {
   ExecutiveHeader,
   ExecutivePage,
@@ -49,6 +52,30 @@ export default async function Page({ params }: PageProps) {
   }
 
   const { tenant } = auth;
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    tenant.id,
+    "financeiro_avancado",
+  );
+  if (!unlocked) {
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            { label: "Despesas Recorrentes" },
+          ]} />
+        <ExecutiveHeader title="Despesas Recorrentes" description="Séries mensais" />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="financeiro_avancado"
+          title="Despesas recorrentes"
+        />
+      </ExecutivePage>
+    );
+  }
+
   const service = await createDespesaRecorrenteService(tenant.id);
   const items = await service.list();
 

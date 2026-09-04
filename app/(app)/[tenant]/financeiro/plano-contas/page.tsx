@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { BookOpen } from "lucide-react";
 
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { PlanoContaTable } from "@/components/financeiro/plano-conta-table";
 import { PlanoContaTree } from "@/components/financeiro/plano-conta-tree";
 import { FinanceiroEmptyState } from "@/components/financeiro/financeiro-empty-state";
@@ -12,6 +13,7 @@ import { FinanceiroSort } from "@/components/financeiro/financeiro-sort";
 import { ActionButton } from "@/components/ui/action-button";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import {
   FINANCEIRO_DEFAULT_PER_PAGE,
   PLANO_CONTA_SORT_OPTIONS,
@@ -24,6 +26,7 @@ import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
+import { createClient } from "@/lib/supabase/server";
 import type {
   FinanceiroSuccessMessage,
   SortOrder,
@@ -87,6 +90,30 @@ export default async function Page({ params, searchParams }: PageProps) {
   }
 
   const { tenant } = auth;
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    tenant.id,
+    "financeiro_avancado",
+  );
+  if (!unlocked) {
+    return (
+      <ExecutivePage width="wide" spacing="loose">
+        <Breadcrumbs items={[
+            { label: "Financeiro", href: `/${tenantSlug}/financeiro` },
+            { label: "Plano de Contas" },
+          ]} />
+        <ExecutiveHeader title="Plano de Contas" description="Estrutura hierárquica" />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="financeiro_avancado"
+          title="Plano de contas"
+        />
+      </ExecutivePage>
+    );
+  }
+
   const service = await createPlanoContaService(tenant.id);
 
   const currentPage = Number(page) > 0 ? Number(page) : 1;

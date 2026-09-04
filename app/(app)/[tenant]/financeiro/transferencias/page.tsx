@@ -1,14 +1,17 @@
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { TransferForm } from "@/components/finance/transfer-form";
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import { listBankAccounts } from "@/lib/finance/actions";
 import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Transferências" };
 
@@ -47,6 +50,31 @@ export default async function TransferenciasPage({
   }
 
   const { tenant } = auth;
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    tenant.id,
+    "financeiro_avancado",
+  );
+  if (!unlocked) {
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          tenantName={tenant.name}
+          title="Transferências"
+          description="Movimentação atómica entre contas com idempotência."
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="financeiro_avancado"
+          title="Transferências"
+        />
+      </div>
+    );
+  }
+
   const accounts = await listBankAccounts(tenantSlug);
 
   return (

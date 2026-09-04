@@ -1,14 +1,17 @@
 import { Suspense } from "react";
 
 import { ExecutiveTaxDashboardClient } from "@/components/finance/tax-intelligence/executive-tax-dashboard";
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
 import { getTaxIntelligenceDashboard } from "@/lib/finance/tax-intelligence/tax-intelligence-actions";
 import { isTaxIntelligenceEnabled } from "@/lib/finance/tax-intelligence";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Tributos Enterprise" };
 
@@ -31,19 +34,42 @@ export default async function TributosEnterprisePage({
     );
   }
 
+  let auth;
   try {
-    await requireFinancePagePermission(tenantSlug, [
+    auth = await requireFinancePagePermission(tenantSlug, [
       "financeiro.visualizar",
       "financeiro.tributos.visualizar",
     ]);
   } catch (error) {
-    const auth = financePageAuthError(error);
+    const authErr = financePageAuthError(error);
     return (
       <div className="p-6">
         <FinancePageHeader
           tenantSlug={tenantSlug}
           title="Tributos Enterprise"
-          description={auth.message}
+          description={authErr.message}
+        />
+      </div>
+    );
+  }
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    auth.tenant.id,
+    "tributario",
+  );
+  if (!unlocked) {
+    return (
+      <div className="p-6 space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Tributos Enterprise"
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="tributario"
+          title="Tributos"
         />
       </div>
     );

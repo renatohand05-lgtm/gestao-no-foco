@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import {
   Card,
@@ -8,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import {
   computeBudgetVariance,
   summarizeBudgetVariance,
@@ -21,6 +23,7 @@ import {
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
 import { formatCurrency } from "@/lib/format";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Orçamento empresarial" };
 export const dynamic = "force-dynamic";
@@ -51,8 +54,30 @@ export default async function FinanceiroOrcamentoPage({
     );
   }
 
-  let budgets: Awaited<
-    ReturnType<
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    auth.tenant.id,
+    "financeiro_avancado",
+  );
+  if (!unlocked) {
+    return (
+      <div className="space-y-4 p-4 sm:p-6" data-phase28="finance-orcamento">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Orçamento empresarial"
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="financeiro_avancado"
+          title="Orçamento"
+        />
+      </div>
+    );
+  }
+
+  let budgets: Awaited
+    ReturnType
       Awaited<ReturnType<typeof createFinanceBudgetService>>["list"]
     >
   > = [];

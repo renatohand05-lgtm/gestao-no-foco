@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { FiDrillPreview } from "@/components/financeiro/inteligencia/fi-drill-preview";
 import { FiExpenseBreakdown } from "@/components/financeiro/inteligencia/fi-expense-breakdown";
@@ -10,6 +11,7 @@ import { FiTrendsSection } from "@/components/financeiro/inteligencia/fi-trends-
 import { ExecutivePage } from "@/components/executive";
 import { SectionCard } from "@/components/ui/section-card";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
+import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import { formatCurrency } from "@/lib/format";
 import {
   createFinancialIntelligenceService,
@@ -19,6 +21,7 @@ import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Inteligência Financeira" };
 
@@ -58,6 +61,29 @@ export default async function Page({ params, searchParams }: PageProps) {
         >
           {err.message}
         </p>
+      </div>
+    );
+  }
+
+  const client = await createClient();
+  const unlocked = await isFinanceFeatureUnlocked(
+    client,
+    auth.tenant.id,
+    "analytics_bi",
+  );
+  if (!unlocked) {
+    return (
+      <div className="space-y-6">
+        <FinancePageHeader
+          tenantSlug={tenantSlug}
+          title="Inteligência"
+          description="Cockpit de leitura executiva sobre DRE e Fluxo."
+        />
+        <FinanceFeatureLocked
+          tenantSlug={tenantSlug}
+          feature="analytics_bi"
+          title="Inteligência financeira"
+        />
       </div>
     );
   }

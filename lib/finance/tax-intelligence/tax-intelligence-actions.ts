@@ -24,11 +24,13 @@ import {
   buildUniversalTaxReform2027Templates,
   describeRegimeSpecificNote2027,
   isTaxIntelligenceEnabled,
+  listRequiredKeysHint,
   taxIntelligenceDrillDown,
   taxIntelligenceSimulate,
   validateRuleVersionShape,
   type TaxDrillDownRequest,
   type TaxIntelligenceSnapshot,
+  type TaxParameterMap,
   type TaxRegimeCode,
   type TaxRuleVersion,
   type TaxSimulationInput,
@@ -563,6 +565,318 @@ export async function applyTaxReform2027(
         error instanceof Error
           ? error.message
           : "Falha ao aplicar as regras 2027.",
+    };
+  }
+}
+
+export type TaxRuleVersionForManagement = {
+  id: string;
+  regimeCode: TaxRegimeCode;
+  versionLabel: string;
+  effectiveFrom: string;
+  effectiveTo: string | null;
+  status: TaxRuleVersion["status"];
+  parameters: TaxParameterMap;
+  requiredKeys: string[];
+  missingParameters: string[];
+  notes: string | null;
+};
+
+/** Lista todas as versões de regra do tenant, pra tela de revisão/ativação. */
+export async function listTaxRuleVersionsForManagement(tenantSlug: string) {
+  try {
+    const auth = await resolveTaxAuth(tenantSlug, [
+      "financeiro.tributos.visualizar",
+      "financeiro.tributos.configurar",
+    ]);
+    const db = auth.client as unknown as TaxLooseDb;
+
+    const { data, error } = await db
+      .from("tax_rule_versions")
+      .select(
+        "id, regime_code, version_label, effective_from, effective_to, status, parameters, notes",
+      )
+      .eq("tenant_id", auth.tenant.id)
+      .limit(200);
+    if (error) throw new Error(error.message);
+
+    const rows = ((data ?? []) as unknown as Array<{
+      id: string;
+      regime_code: string;
+      version_label: string;
+      effective_from: string;
+      effective_to: string | null;
+      status: string;
+      parameters: Record<string, unknown> | null;
+      notes: string | null;
+    }>)
+      .slice()
+      .sort((a, b) => b.effective_from.localeCompare(a.effective_from));
+
+    const result: TaxRuleVersionForManagement[] = rows.map((row) => {
+      const regimeCode = row.regime_code as TaxRegimeCode;
+      const parameters = (row.parameters ?? {}) as TaxParameterMap;
+      const requiredKeys = listRequiredKeysHint(regimeCode);
+      const missing = validateRuleVersionShape({
+        id: row.id,
+        tenantId: auth.tenant.id,
+        regimeCode,
+        versionLabel: row.version_label,
+        effectiveFrom: row.effective_from.slice(0, 10),
+        effectiveTo: row.effective_to ? row.effective_to.slice(0, 10) : null,
+        status: row.status as TaxRuleVersion["status"],
+        parameters,
+      });
+
+      return {
+        id: row.id,
+        regimeCode,
+        versionLabel: row.version_label,
+        effectiveFrom: row.effective_from.slice(0, 10),
+        effectiveTo: row.effective_to ? row.effective_to.slice(0, 10) : null,
+        status: row.status as TaxRuleVersion["status"],
+        parameters,
+        requiredKeys,
+        missingParameters: missing,
+        notes: row.notes,
+      };
+    });
+
+    return { success: true as const, rules: result };
+  } catch (error) {
+    return {
+      success: false as const,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Falha ao carregar as regras tributárias.",
+    };
+  }
+}
+
+/** Atualiza os parâmetros de uma versão de regra (nunca muda status aqui). */
+export async function updateTaxRuleVersionParameters(
+  tenantSlug: string,
+  ruleId: string,
+  parameters: TaxParameterMap,
+) {
+  try {
+    const auth = await resolveTaxAuth(tenantSlug, [
+      "financeiro.tributos.configurar",
+    ]);
+    const db = auth.client as unknown as TaxLooseDb;
+
+    const { data: existing, error: readError } = await db
+      .from("tax_rule_versions")
+      .select("id, parameters")
+      .eq("tenant_id", auth.tenant.id)
+      .eq("id", ruleId)
+      .maybeSingle();
+    if (readError) throw new Error(readError.message);
+    if (!existing) throw new Error("Regra tributária não encontrada.");
+
+    const merged: TaxParameterMap = {
+      ...((existing.parameters as TaxParameterMap) ?? {}),
+      ...parameters,
+    };
+
+    const updateClient = auth.client as unknown as {
+      from: (table: string) => {
+        update: (row: Record<string, unknown>) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => Promise<{ error: { message: string } | null }>;
+          };
+        };
+      };
+    };
+
+    const { error } = await updateClient
+      .from("tax_rule_versions")
+      .update({ parameters: merged, updated_at: new Date().toISOString() })
+      .eq("tenant_id", auth.tenant.id)
+      .eq("id", ruleId);
+    if (error) throw new Error(error.message);
+
+    revalidatePath(`/${tenantSlug}/financeiro/tributos`);
+    return { success: true as const };
+  } catch (error) {
+    return {
+      success: false as const,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Falha ao salvar os parâmetros.",
+    };
+  }
+}
+
+/**
+ * Ativa uma versão de regra — só se todos os parâmetros obrigatórios já
+ * estiverem preenchidos. Ao ativar, supera (marca como 'superseded')
+ * qualquer outra versão ativa do mesmo regime com vigência mais antiga,
+ * pra não haver duas regras "active" competindo pela mesma data.
+ */
+export async function activateTaxRuleVersion(
+  tenantSlug: string,
+  ruleId: string,
+) {
+  try {
+    const auth = await resolveTaxAuth(tenantSlug, [
+      "financeiro.tributos.configurar",
+    ]);
+    const db = auth.client as unknown as TaxLooseDb;
+
+    const { data: rule, error: readError } = await db
+      .from("tax_rule_versions")
+      .select(
+        "id, regime_code, version_label, effective_from, effective_to, status, parameters",
+      )
+      .eq("tenant_id", auth.tenant.id)
+      .eq("id", ruleId)
+      .maybeSingle();
+    if (readError) throw new Error(readError.message);
+    if (!rule) throw new Error("Regra tributária não encontrada.");
+
+    const regimeCode = rule.regime_code as TaxRegimeCode;
+    const missing = validateRuleVersionShape({
+      id: String(rule.id),
+      tenantId: auth.tenant.id,
+      regimeCode,
+      versionLabel: String(rule.version_label),
+      effectiveFrom: String(rule.effective_from).slice(0, 10),
+      effectiveTo: rule.effective_to
+        ? String(rule.effective_to).slice(0, 10)
+        : null,
+      status: rule.status as TaxRuleVersion["status"],
+      parameters: (rule.parameters as TaxParameterMap) ?? {},
+    });
+
+    if (missing.length > 0) {
+      throw new Error(
+        `Não é possível ativar: faltam os parâmetros ${missing.join(", ")}.`,
+      );
+    }
+
+    const updateClient = auth.client as unknown as {
+      from: (table: string) => {
+        update: (row: Record<string, unknown>) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
+              eq: (
+                col: string,
+                val: string,
+              ) => Promise<{ error: { message: string } | null }>;
+            } & Promise<{ error: { message: string } | null }>;
+          };
+        };
+      };
+    };
+
+    // Supera outras versões ativas do mesmo regime com vigência anterior.
+    const { error: supersedeError } = await updateClient
+      .from("tax_rule_versions")
+      .update({ status: "superseded", updated_at: new Date().toISOString() })
+      .eq("tenant_id", auth.tenant.id)
+      .eq("regime_code", regimeCode)
+      .eq("status", "active");
+    if (supersedeError) throw new Error(supersedeError.message);
+
+    const { error: activateError } = await updateClient
+      .from("tax_rule_versions")
+      .update({ status: "active", updated_at: new Date().toISOString() })
+      .eq("tenant_id", auth.tenant.id)
+      .eq("id", ruleId);
+    if (activateError) throw new Error(activateError.message);
+
+    try {
+      await auth.audit.append({
+        tenantId: auth.tenant.id,
+        userId: auth.profile.id,
+        actorType: auth.context.actorType,
+        systemActorKey: auth.context.systemActorKey,
+        event: "tax.rule_version.activated",
+        category: "finance",
+        severity: "warning",
+        targetType: "tax_rule_versions",
+        targetId: ruleId,
+        resource: "tax_rule_versions",
+        module: "financeiro",
+        description: `Regra tributária ativada: ${rule.version_label}`,
+        metadata: { regimeCode, ruleId },
+        origin: auth.context.source,
+        correlationId: auth.context.correlationId,
+        requestId: auth.context.requestId,
+        sessionId: auth.context.sessionId,
+        ipAddress: null,
+        device: null,
+      });
+    } catch {
+      /* auditoria não bloqueia */
+    }
+
+    revalidatePath(`/${tenantSlug}/financeiro/tributos`);
+    return { success: true as const };
+  } catch (error) {
+    return {
+      success: false as const,
+      error:
+        error instanceof Error ? error.message : "Falha ao ativar a regra.",
+    };
+  }
+}
+
+/** Arquiva uma versão de regra (sai de circulação, mas fica no histórico). */
+export async function archiveTaxRuleVersion(
+  tenantSlug: string,
+  ruleId: string,
+) {
+  try {
+    const auth = await resolveTaxAuth(tenantSlug, [
+      "financeiro.tributos.configurar",
+    ]);
+
+    const updateClient = auth.client as unknown as {
+      from: (table: string) => {
+        update: (row: Record<string, unknown>) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => Promise<{ error: { message: string } | null }>;
+          };
+        };
+      };
+    };
+
+    const { error } = await updateClient
+      .from("tax_rule_versions")
+      .update({ status: "archived", updated_at: new Date().toISOString() })
+      .eq("tenant_id", auth.tenant.id)
+      .eq("id", ruleId);
+    if (error) throw new Error(error.message);
+
+    revalidatePath(`/${tenantSlug}/financeiro/tributos`);
+    return { success: true as const };
+  } catch (error) {
+    return {
+      success: false as const,
+      error:
+        error instanceof Error ? error.message : "Falha ao arquivar a regra.",
     };
   }
 }

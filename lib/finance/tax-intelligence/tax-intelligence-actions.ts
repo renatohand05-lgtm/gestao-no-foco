@@ -4,6 +4,8 @@
  * Sprint 26.7 — Server actions Tax Intelligence.
  */
 
+import { revalidatePath } from "next/cache";
+
 import { getCurrentProfile } from "@/lib/auth/session";
 import {
   createAuditSupabaseAdapter,
@@ -19,11 +21,15 @@ import {
 import type { FinancePermission } from "@/lib/finance/shared/types";
 import {
   buildTaxIntelligenceBundle,
+  buildUniversalTaxReform2027Templates,
+  describeRegimeSpecificNote2027,
   isTaxIntelligenceEnabled,
   taxIntelligenceDrillDown,
   taxIntelligenceSimulate,
+  validateRuleVersionShape,
   type TaxDrillDownRequest,
   type TaxIntelligenceSnapshot,
+  type TaxRegimeCode,
   type TaxRuleVersion,
   type TaxSimulationInput,
 } from "@/lib/finance/tax-intelligence";
@@ -359,6 +365,204 @@ export async function runTaxSimulation(
     return {
       success: false as const,
       error: error instanceof Error ? error.message : "Falha na simulação.",
+    };
+  }
+}
+
+type TaxLooseChain = {
+  eq: (col: string, val: string) => TaxLooseChain;
+  limit: (
+    n: number,
+  ) => Promise<{
+    data: Record<string, unknown>[] | null;
+    error: { message: string } | null;
+  }>;
+  maybeSingle: () => Promise<{
+    data: Record<string, unknown> | null;
+    error: { message: string } | null;
+  }>;
+};
+
+type TaxLooseDb = {
+  from: (table: string) => {
+    select: (cols: string) => TaxLooseChain;
+    insert: (row: Record<string, unknown>) => {
+      select: (cols: string) => {
+        single: () => Promise<{
+          data: Record<string, unknown> | null;
+          error: { message: string } | null;
+        }>;
+      };
+    };
+  };
+};
+
+export type ApplyTaxReform2027RuleResult = {
+  id: string;
+  regimeCode: TaxRegimeCode;
+  versionLabel: string;
+  status: string;
+  alreadyExisted: boolean;
+  missingParameters: string[];
+  notes: string | null;
+};
+
+/**
+ * "Aplicar regras 2027": identifica o regime da empresa (ou cadastra a
+ * entidade fiscal se ainda não existir) e cria — como rascunho — as
+ * versões de regra CBS/IBS vigentes a partir de 2027. Nunca ativa sozinha:
+ * o que já é fato legal vem parametrizado, o que ainda depende do Senado
+ * fica marcado como pendente, e cabe ao contador revisar antes de ativar.
+ */
+export async function applyTaxReform2027(
+  tenantSlug: string,
+  regimeCode: TaxRegimeCode,
+) {
+  try {
+    const auth = await resolveTaxAuth(tenantSlug, [
+      "financeiro.criar",
+      "financeiro.tributos.configurar",
+    ]);
+
+    const db = auth.client as unknown as TaxLooseDb;
+
+    const { data: existingEntities, error: entityReadError } = await db
+      .from("tax_entities")
+      .select("id, regime_code")
+      .eq("tenant_id", auth.tenant.id)
+      .eq("kind", "company")
+      .limit(1);
+    if (entityReadError) throw new Error(entityReadError.message);
+
+    let entityCreated = false;
+    if (!existingEntities || existingEntities.length === 0) {
+      const { error: entityInsertError } = await db
+        .from("tax_entities")
+        .insert({
+          tenant_id: auth.tenant.id,
+          kind: "company",
+          name: auth.tenant.name,
+          regime_code: regimeCode,
+          active: true,
+        })
+        .select("id")
+        .single();
+      if (entityInsertError) throw new Error(entityInsertError.message);
+      entityCreated = true;
+    }
+
+    const templates = buildUniversalTaxReform2027Templates();
+    const rules: ApplyTaxReform2027RuleResult[] = [];
+
+    for (const template of templates) {
+      const { data: existingRule, error: ruleReadError } = await db
+        .from("tax_rule_versions")
+        .select("id, status, parameters, version_label")
+        .eq("tenant_id", auth.tenant.id)
+        .eq("regime_code", template.regimeCode)
+        .eq("effective_from", template.effectiveFrom)
+        .maybeSingle();
+      if (ruleReadError) throw new Error(ruleReadError.message);
+
+      if (existingRule) {
+        const missing = validateRuleVersionShape({
+          id: String(existingRule.id),
+          tenantId: auth.tenant.id,
+          regimeCode: template.regimeCode,
+          versionLabel: String(existingRule.version_label ?? template.versionLabel),
+          effectiveFrom: template.effectiveFrom,
+          effectiveTo: template.effectiveTo,
+          status: (existingRule.status as TaxRuleVersion["status"]) ?? "draft",
+          parameters: (existingRule.parameters as TaxRuleVersion["parameters"]) ?? {},
+        });
+        rules.push({
+          id: String(existingRule.id),
+          regimeCode: template.regimeCode,
+          versionLabel: String(existingRule.version_label ?? template.versionLabel),
+          status: String(existingRule.status ?? "draft"),
+          alreadyExisted: true,
+          missingParameters: missing,
+          notes: template.notes,
+        });
+        continue;
+      }
+
+      const { data: created, error: createError } = await db
+        .from("tax_rule_versions")
+        .insert({
+          tenant_id: auth.tenant.id,
+          regime_code: template.regimeCode,
+          version_label: template.versionLabel,
+          effective_from: template.effectiveFrom,
+          effective_to: template.effectiveTo,
+          status: "draft",
+          parameters: template.parameters,
+          jurisdiction: "BR",
+          notes: template.notes,
+          created_by: auth.profile.id,
+        })
+        .select("id")
+        .single();
+      if (createError || !created) {
+        throw new Error(createError?.message ?? "Falha ao criar a regra 2027.");
+      }
+
+      rules.push({
+        id: String(created.id),
+        regimeCode: template.regimeCode,
+        versionLabel: template.versionLabel,
+        status: "draft",
+        alreadyExisted: false,
+        missingParameters: template.pendingParameters,
+        notes: template.notes,
+      });
+    }
+
+    try {
+      await auth.audit.append({
+        tenantId: auth.tenant.id,
+        userId: auth.profile.id,
+        actorType: auth.context.actorType,
+        systemActorKey: auth.context.systemActorKey,
+        event: "tax.reform_2027.applied",
+        category: "finance",
+        severity: "info",
+        targetType: "tax_rule_versions",
+        targetId: auth.tenant.id,
+        resource: "tax_rule_versions",
+        module: "financeiro",
+        description: "Regras da Reforma Tributária 2027 aplicadas (rascunho)",
+        metadata: {
+          regimeCode,
+          rulesCreated: rules.filter((r) => !r.alreadyExisted).length,
+        },
+        origin: auth.context.source,
+        correlationId: auth.context.correlationId,
+        requestId: auth.context.requestId,
+        sessionId: auth.context.sessionId,
+        ipAddress: null,
+        device: null,
+      });
+    } catch {
+      /* auditoria não bloqueia */
+    }
+
+    revalidatePath(`/${tenantSlug}/financeiro/tributos`);
+
+    return {
+      success: true as const,
+      entityCreated,
+      regimeCode,
+      regimeNote: describeRegimeSpecificNote2027(regimeCode),
+      rules,
+    };
+  } catch (error) {
+    return {
+      success: false as const,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Falha ao aplicar as regras 2027.",
     };
   }
 }

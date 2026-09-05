@@ -44,9 +44,36 @@ export type DreEvolutionPoint = {
   margemPct: number | null;
 };
 
+export type DreTrendPoint = DreEvolutionPoint & {
+  isProjected: boolean;
+};
+
 function pct(numerador: number, denominador: number): number | null {
   if (!denominador) return null;
   return (numerador / denominador) * 100;
+}
+
+/** Regressão linear simples (mínimos quadrados) sobre uma série de valores. */
+function linearRegression(values: number[]): {
+  slope: number;
+  intercept: number;
+} {
+  const n = values.length;
+  if (n === 0) return { slope: 0, intercept: 0 };
+  if (n === 1) return { slope: 0, intercept: values[0] };
+
+  const xs = values.map((_, i) => i);
+  const sumX = xs.reduce((a, b) => a + b, 0);
+  const sumY = values.reduce((a, b) => a + b, 0);
+  const sumXY = xs.reduce((acc, x, i) => acc + x * values[i], 0);
+  const sumXX = xs.reduce((acc, x) => acc + x * x, 0);
+  const denom = n * sumXX - sumX * sumX;
+
+  if (denom === 0) return { slope: 0, intercept: sumY / n };
+
+  const slope = (n * sumXY - sumX * sumY) / denom;
+  const intercept = (sumY - slope * sumX) / n;
+  return { slope, intercept };
 }
 
 async function fetchTicketMedio(
@@ -187,4 +214,84 @@ export function getDreVerticalAnalysis(resumo: DreResumo): DreVerticalLine[] {
     { label: "EBITDA", valor: resumo.ebitda, pct: pct(resumo.ebitda, base) },
     { label: "Lucro Líquido", valor: resumo.resultado_final, pct: pct(resumo.resultado_final, base) },
   ];
+}
+
+/**
+ * Tendência de resultado com projeção futura: parte dos últimos
+ * `monthsBack` meses CALENDÁRIO COMPLETOS (antes do mês atual — nunca inclui
+ * o mês corrente, que estaria com vendas e lançamentos parciais e enviesaria
+ * a tendência pra baixo) e projeta `monthsForward` meses à frente (o mês
+ * corrente + os seguintes) por regressão linear simples sobre a receita
+ * líquida e o lucro líquido realizados.
+ *
+ * É uma extrapolação estatística da tendência recente, não uma previsão
+ * orçamentária — some com o Orçamento (`/financeiro/orcamento`) pra comparar
+ * orçado × projeção × realizado.
+ */
+export async function getDreTrendProjection(
+  tenantId: string,
+  filters: Pick<DreFilters, "centroCustoId" | "categoriaId" | "planoContaId">,
+  referenceDate = new Date(),
+  monthsBack = 6,
+  monthsForward = 3,
+): Promise<DreTrendPoint[]> {
+  const service = await createDreService(tenantId);
+
+  const baseMonths: { year: number; month: number }[] = [];
+  for (let i = monthsBack; i >= 1; i -= 1) {
+    const d = new Date(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth() - i,
+      1,
+    );
+    baseMonths.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
+  }
+
+  const historical: DreTrendPoint[] = await Promise.all(
+    baseMonths.map(async ({ year, month }) => {
+      const period = buildCalendarMonthPeriod(year, month);
+      const dre = await service.getDre({ ...filters, ...period });
+      return {
+        label: `${MONTH_LABELS_SHORT[month - 1]}/${year}`,
+        receitaLiquida: dre.resumo.receita_liquida,
+        lucroLiquido: dre.resumo.resultado_final,
+        margemPct: pct(dre.resumo.resultado_final, dre.resumo.receita_liquida),
+        isProjected: false,
+      };
+    }),
+  );
+
+  const hasHistoricalData = historical.some((p) => p.receitaLiquida !== 0);
+  if (!hasHistoricalData) return historical;
+
+  const receitaTrend = linearRegression(historical.map((p) => p.receitaLiquida));
+  const lucroTrend = linearRegression(historical.map((p) => p.lucroLiquido));
+
+  const projected: DreTrendPoint[] = [];
+  for (let i = 0; i < monthsForward; i += 1) {
+    const index = historical.length + i;
+    const d = new Date(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth() + i,
+      1,
+    );
+    const receitaProjetada = Math.max(
+      0,
+      Math.round((receitaTrend.intercept + receitaTrend.slope * index) * 100) /
+        100,
+    );
+    const lucroProjetado =
+      Math.round((lucroTrend.intercept + lucroTrend.slope * index) * 100) /
+      100;
+
+    projected.push({
+      label: `${MONTH_LABELS_SHORT[d.getMonth()]}/${d.getFullYear()}`,
+      receitaLiquida: receitaProjetada,
+      lucroLiquido: lucroProjetado,
+      margemPct: pct(lucroProjetado, receitaProjetada),
+      isProjected: true,
+    });
+  }
+
+  return [...historical, ...projected];
 }

@@ -63,3 +63,9 @@ export {
   taxIntelligenceDrillDown,
   taxIntelligenceSimulate,
 } from "./tax-intelligence-service.ts";
+export {
+  TAX_REFORM_2027_EFFECTIVE_FROM,
+  buildUniversalTaxReform2027Templates,
+  describeRegimeSpecificNote2027,
+  type TaxReform2027Template,
+} from "./tax-reform-2027.ts";

@@ -1,13 +1,14 @@
 import { Suspense } from "react";
 
 import { ExecutiveTaxDashboardClient } from "@/components/finance/tax-intelligence/executive-tax-dashboard";
+import { TaxReform2027Panel } from "@/components/finance/tax-intelligence/tax-reform-2027-panel";
 import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
 import {
   financePageAuthError,
-  requireFinancePagePermission,
+  requireFinancePagePermission, 
 } from "@/lib/finance/page-auth";
 import { getTaxIntelligenceDashboard } from "@/lib/finance/tax-intelligence/tax-intelligence-actions";
 import { isTaxIntelligenceEnabled } from "@/lib/finance/tax-intelligence";
@@ -96,6 +97,7 @@ export default async function TributosEnterprisePage({
         title="Inteligência Tributária Enterprise"
         description="Carga consolidada, Reforma Tributária, simulações, ranking, fluxo de caixa tributário e IA com revisão humana — regras 100% parametrizadas."
       />
+      <TaxReform2027Panel tenantSlug={tenantSlug} />
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <ExecutiveTaxDashboardClient
           tenantSlug={tenantSlug}

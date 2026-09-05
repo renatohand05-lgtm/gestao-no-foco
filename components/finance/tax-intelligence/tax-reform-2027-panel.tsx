@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-https://github.com/renatohand05-lgtm/gestao-no-foco/new/mainimport {
+import {
   Card,
   CardContent,
   CardDescription,

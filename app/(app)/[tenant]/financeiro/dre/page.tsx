@@ -13,6 +13,7 @@ import { DreGapsPanel } from "@/components/financeiro/dre-gaps-panel";
 import { DreIndicatorsPanel } from "@/components/financeiro/dre-indicators-panel";
 import { DreStatement } from "@/components/financeiro/dre-statement";
 import { DreSummaryCards } from "@/components/financeiro/dre-summary-cards";
+import { DreTrendProjectionChart } from "@/components/financeiro/dre-trend-projection-chart";
 import { DreVerticalAnalysis } from "@/components/financeiro/dre-vertical-analysis";
 import { buttonVariants } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
@@ -25,6 +26,7 @@ import {
   getDreComposicaoLucro,
   getDreEvolution,
   getDreIndicators,
+  getDreTrendProjection,
   getDreVerticalAnalysis,
 } from "@/lib/dre/dre-insights-service";
 import {
@@ -209,9 +211,14 @@ export default async function DreEnterprisePage({
   const { resumo, linhas, gaps, filterOptions, drillItems } =
     await service.getDre(filters);
 
-  const [indicators, evolution] = await Promise.all([
+  const [indicators, evolution, trendProjection] = await Promise.all([
     getDreIndicators(auth.tenant.id, filters, resumo),
     getDreEvolution(auth.tenant.id, {
+      centroCustoId: filters.centroCustoId,
+      categoriaId: filters.categoriaId,
+      planoContaId: filters.planoContaId,
+    }),
+    getDreTrendProjection(auth.tenant.id, {
       centroCustoId: filters.centroCustoId,
       categoriaId: filters.categoriaId,
       planoContaId: filters.planoContaId,
@@ -262,6 +269,8 @@ export default async function DreEnterprisePage({
         <DreEvolutionChart points={evolution} />
         <DreVerticalAnalysis lines={verticalLines} periodoLabel={periodoLabel} />
       </div>
+
+      <DreTrendProjectionChart points={trendProjection} />
 
       <Suspense fallback={<FiltersFallback />}>
         <DreFilters

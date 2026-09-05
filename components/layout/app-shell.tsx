@@ -11,6 +11,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { PageContainer } from "@/components/layout/page-container";
 import { PlanSimulationBanner } from "@/components/layout/plan-simulation-banner";
+import { HelpWidget } from "@/components/support/help-widget";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { TenantWithRole } from "@/types";
@@ -121,6 +122,7 @@ function DemoAwareChrome({
           <BrandInstitutionalFooter compact className="mt-auto" />
         ) : null}
       </SidebarInset>
+      {!hide.appSidebar ? <HelpWidget tenantSlug={tenant.slug} /> : null}
     </SidebarProvider>
   );
 }

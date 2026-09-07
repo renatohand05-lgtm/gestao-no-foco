@@ -41,11 +41,11 @@ export type PlanFeatureDef = {
  *   fornecedores) e Inteligência Comercial completa.
  * - Essencial: + CRM, Relatórios, Financeiro avançado (centros de custo,
  *   plano de contas, conciliação, despesas recorrentes, orçamento,
- *   transferências, 2ª conta bancária).
+ *   transferências, 2ª conta bancária), Inteligência/copiloto (assistente
+ *   IA dentro do portal).
  * - Gestão: + Analytics/BI geral do negócio.
  * - Pro: + Tributário, Integrações, Automações.
- * - Pro Plus + Consultoria: + Inteligência/copiloto (assistente IA geral) e
- *   consultoria humana.
+ * - Pro Plus + Consultoria: + consultoria humana.
  */
 export const PLAN_FEATURES: readonly PlanFeatureDef[] = [
   { id: "crm", label: "CRM", minPlanSlug: "essential" },
@@ -62,7 +62,7 @@ export const PLAN_FEATURES: readonly PlanFeatureDef[] = [
   {
     id: "inteligencia_ia",
     label: "Inteligência / copiloto",
-    minPlanSlug: "pro_plus_consulting",
+    minPlanSlug: "essential",
   },
   {
     id: "consultoria_humana",

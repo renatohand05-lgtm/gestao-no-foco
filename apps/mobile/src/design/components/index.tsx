@@ -1,5 +1,6 @@
 import { useTheme } from "@/design/theme";
 import { useHasPermission } from "@/permissions/gate";
+import { Feather } from "@expo/vector-icons";
 import {
   ActivityIndicator,
   Pressable,
@@ -143,7 +144,7 @@ export function Badge({ label, tone = "default", style, ...props }: BadgeProps) 
     tone === "success"
       ? colors.success
       : tone === "warning"
-        ? colors.primary
+        ? colors.warning
         : tone === "danger"
           ? colors.danger
           : colors.primary;
@@ -168,6 +169,204 @@ export function Alert({ title, message, tone = "info", style, ...props }: AlertP
         <Text variant="body" muted style={{ marginTop: 4 }}>
           {message}
         </Text>
+      ) : null}
+    </View>
+  );
+}
+
+export type Severity = "critical" | "warning" | "success" | "info";
+
+const SEVERITY_ICON: Record<Severity, keyof typeof Feather.glyphMap> = {
+  critical: "alert-triangle",
+  warning: "clock",
+  success: "check-circle",
+  info: "info",
+};
+
+/** Ícone dentro de um círculo colorido — usado em listas (alertas, empresas). */
+export function IconCircle({
+  name,
+  tone = "info",
+  size = 34,
+}: {
+  name: keyof typeof Feather.glyphMap;
+  tone?: Severity;
+  size?: number;
+}) {
+  const { colors } = useTheme();
+  const color =
+    tone === "critical"
+      ? colors.danger
+      : tone === "warning"
+        ? colors.warning
+        : tone === "success"
+          ? colors.success
+          : colors.primary;
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.28,
+        backgroundColor: `${color}22`,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Feather name={name} size={size * 0.48} color={color} />
+    </View>
+  );
+}
+
+type SeverityCardProps = {
+  title: string;
+  subtitle?: string;
+  tone?: Severity;
+  icon?: keyof typeof Feather.glyphMap;
+  onPress?: () => void;
+};
+
+/** Card de alerta/decisão com borda colorida à esquerda + ícone — substitui listas de texto cru. */
+export function SeverityCard({ title, subtitle, tone = "info", icon, onPress }: SeverityCardProps) {
+  const { colors } = useTheme();
+  const accent =
+    tone === "critical"
+      ? colors.danger
+      : tone === "warning"
+        ? colors.warning
+        : tone === "success"
+          ? colors.success
+          : colors.primary;
+  const Wrapper = onPress ? Pressable : View;
+  return (
+    <Wrapper
+      onPress={onPress}
+      style={({ pressed }: { pressed?: boolean } = {}) => [
+        styles.severityCard,
+        {
+          backgroundColor: colors.surfaceElevated,
+          borderLeftColor: accent,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <Feather
+        name={icon ?? SEVERITY_ICON[tone]}
+        size={16}
+        color={accent}
+        style={{ marginTop: 2 }}
+      />
+      <View style={{ flex: 1 }}>
+        <Text variant="body" style={{ fontWeight: "500" }}>
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text variant="caption" muted style={{ marginTop: 2 }} numberOfLines={2}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+    </Wrapper>
+  );
+}
+
+type KpiCardProps = {
+  label: string;
+  value: string;
+  /** Positivo = verde, negativo = vermelho, indefinido = cor padrão. */
+  trend?: "up" | "down" | "neutral";
+  trendLabel?: string;
+  supportingText?: string;
+  unavailable?: boolean;
+};
+
+/** KPI com cor de status real (verde/vermelho), não texto branco genérico. */
+export function KpiCard({ label, value, trend, trendLabel, supportingText, unavailable }: KpiCardProps) {
+  const { colors } = useTheme();
+  const trendColor =
+    trend === "up" ? colors.success : trend === "down" ? colors.danger : colors.textMuted;
+  return (
+    <Card style={styles.kpiCard}>
+      <Text variant="caption" muted>
+        {label}
+      </Text>
+      <Text variant="title" style={{ color: unavailable ? colors.textMuted : colors.text }}>
+        {value}
+      </Text>
+      {trendLabel ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          {trend && trend !== "neutral" ? (
+            <Feather
+              name={trend === "up" ? "trending-up" : "trending-down"}
+              size={12}
+              color={trendColor}
+            />
+          ) : null}
+          <Text variant="caption" style={{ color: trend ? trendColor : colors.textMuted }}>
+            {trendLabel}
+          </Text>
+        </View>
+      ) : supportingText ? (
+        <Text variant="caption" muted numberOfLines={2}>
+          {supportingText}
+        </Text>
+      ) : null}
+    </Card>
+  );
+}
+
+/** Gráfico de barras simples — sem dependência nova, só Views proporcionais. */
+export function MiniBarChart({
+  data,
+  labels,
+  highlightLast = true,
+}: {
+  data: number[];
+  labels?: string[];
+  highlightLast?: boolean;
+}) {
+  const { colors } = useTheme();
+  const max = Math.max(...data, 1);
+  return (
+    <View>
+      <View style={styles.chartRow}>
+        {data.map((v, i) => {
+          const isLast = i === data.length - 1;
+          const heightPct = Math.max((v / max) * 100, 4);
+          return (
+            <View key={i} style={styles.chartBarTrack}>
+              <View
+                style={[
+                  styles.chartBar,
+                  {
+                    height: `${heightPct}%`,
+                    backgroundColor:
+                      isLast && highlightLast ? colors.primary : colors.border,
+                  },
+                ]}
+              />
+            </View>
+          );
+        })}
+      </View>
+      {labels ? (
+        <View style={styles.chartRow}>
+          {labels.map((l, i) => (
+            <Text
+              key={i}
+              variant="caption"
+              muted={!(highlightLast && i === labels.length - 1)}
+              style={[
+                styles.chartLabel,
+                highlightLast && i === labels.length - 1
+                  ? { color: colors.primary }
+                  : null,
+              ]}
+            >
+              {l}
+            </Text>
+          ))}
+        </View>
       ) : null}
     </View>
   );
@@ -378,5 +577,36 @@ const styles = StyleSheet.create({
   kpi: {
     minWidth: 140,
     flex: 1,
+  },
+  severityCard: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "flex-start",
+    borderLeftWidth: 3,
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 8,
+  },
+  kpiCard: {
+    width: "47%",
+    flexGrow: 1,
+    gap: 4,
+  },
+  chartRow: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  chartBarTrack: {
+    flex: 1,
+    height: 64,
+    justifyContent: "flex-end",
+  },
+  chartBar: {
+    borderRadius: 4,
+    minHeight: 3,
+  },
+  chartLabel: {
+    flex: 1,
+    textAlign: "center",
   },
 });

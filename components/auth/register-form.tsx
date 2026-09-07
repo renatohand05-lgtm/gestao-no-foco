@@ -14,6 +14,7 @@ import { siteConfig } from "@/config/site";
 import { getAuthRedirectPath } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/client";
 import { REFERRAL_CODE_COOKIE } from "@/lib/platform/referral-cookie";
+import { FREE_ACCESS_CODE_COOKIE } from "@/lib/platform/free-access-cookie";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -57,6 +58,14 @@ export function RegisterForm() {
       if (refCode) {
         document.cookie = `${REFERRAL_CODE_COOKIE}=${encodeURIComponent(
           refCode,
+        )}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+      }
+
+      // Mesma lógica pro código de convite de acesso gratuito (?convite=).
+      const freeAccessCode = searchParams.get("convite");
+      if (freeAccessCode) {
+        document.cookie = `${FREE_ACCESS_CODE_COOKIE}=${encodeURIComponent(
+          freeAccessCode,
         )}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
       }
 

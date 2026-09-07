@@ -2,6 +2,7 @@
 
 import { memo, Suspense, type ReactNode } from "react";
 
+import { AiAssistantWidget } from "@/components/ai-assistant/ai-assistant-widget";
 import { DemoModeProvider } from "@/components/demo/demo-mode-provider";
 import { DemoModeControls } from "@/components/demo/demo-mode-controls";
 import { DemoNavRail } from "@/components/demo/demo-nav-rail";
@@ -123,6 +124,9 @@ function DemoAwareChrome({
         ) : null}
       </SidebarInset>
       {!hide.appSidebar ? <HelpWidget tenantSlug={tenant.slug} /> : null}
+      {!hide.appSidebar ? (
+        <AiAssistantWidget tenantSlug={tenant.slug} />
+      ) : null}
     </SidebarProvider>
   );
 }

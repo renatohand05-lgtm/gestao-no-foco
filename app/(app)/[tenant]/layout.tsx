@@ -1,8 +1,10 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { getCommercialPlan } from "@/lib/billing/catalog";
+import { isPlanFeatureUnlocked } from "@/lib/billing/feature-entitlement";
 import { getTenantCommercialPlanSlug } from "@/lib/billing/finance-entitlement";
 import {
+  isFeatureUnlockedForPlan,
   lockedNavIdsForPlan,
   type CommercialPlanSlug,
 } from "@/lib/billing/plan-feature-matrix";
@@ -34,6 +36,10 @@ export default async function TenantLayout({
         planSlug: planSimSlug,
         planName: getCommercialPlan(planSimSlug)?.name ?? planSimSlug,
         lockedNavIds: lockedNavIdsForPlan(planSimSlug as CommercialPlanSlug),
+        aiAssistantUnlocked: isFeatureUnlockedForPlan(
+          "inteligencia_ia",
+          planSimSlug as CommercialPlanSlug,
+        ),
       }
     : null;
 
@@ -43,6 +49,13 @@ export default async function TenantLayout({
     ? lockedNavIdsForPlan(realPlanSlug as CommercialPlanSlug)
     : [];
 
+  // IA copiloto: liberada a partir do plano Essencial (R$279,90/mês).
+  const aiAssistantUnlocked = await isPlanFeatureUnlocked(
+    client,
+    tenant.id,
+    "inteligencia_ia",
+  );
+
   return (
     <AppShell
       tenant={tenant}
@@ -51,6 +64,7 @@ export default async function TenantLayout({
       isPlatformPartner={isPartner}
       planSimulation={planSimulation}
       lockedNavIds={lockedNavIds}
+      aiAssistantUnlocked={aiAssistantUnlocked}
       user={{
         email: profile?.email,
         name: profile?.name ?? undefined,

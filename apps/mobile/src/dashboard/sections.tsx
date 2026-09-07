@@ -3,15 +3,37 @@ import {
   Avatar,
   Badge,
   Card,
+  KpiCard,
+  Severity,
+  SeverityCard,
   Skeleton,
   Text,
 } from "@/design/components";
 import { useTheme } from "@/design/theme";
+import { Feather } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
 const PRIORITY_ORDER = ["critica", "alta", "media", "baixa"] as const;
 
-type BadgeTone = "default" | "success" | "warning" | "danger";
+function severityFromKpiTone(tone: string): Severity {
+  if (tone === "danger") return "critical";
+  if (tone === "warning") return "warning";
+  if (tone === "success") return "success";
+  return "info";
+}
+
+function severityFromDecision(severity: string): Severity {
+  if (severity === "critical") return "critical";
+  if (severity === "warning") return "warning";
+  if (severity === "opportunity") return "success";
+  return "info";
+}
+
+function severityFromAlertPriority(priority: string): Severity {
+  if (priority === "critica") return "critical";
+  if (priority === "alta" || priority === "media") return "warning";
+  return "info";
+}
 
 export function DashboardHeader({
   data,
@@ -31,6 +53,7 @@ export function DashboardHeader({
             {data.welcome}
           </Text>
         </View>
+        <Feather name="bell" size={18} color={colors.textMuted} />
       </View>
       <View style={styles.metaRow}>
         <Badge label={data.context.tenantName} />
@@ -61,31 +84,24 @@ export function KpiGrid({
 }: {
   kpis: MobileExecutiveDashboard["kpis"];
 }) {
-  const { colors } = useTheme();
   return (
     <View style={styles.kpiGrid}>
-      {kpis.map((kpi) => (
-        <Card key={kpi.id} style={styles.kpiCard}>
-          <Text variant="caption" muted>
-            {kpi.title}
-          </Text>
-          <Text
-            variant="title"
-            style={{ color: kpi.unavailable ? colors.textMuted : colors.text }}
-          >
-            {kpi.value}
-          </Text>
-          {kpi.trendLabel ? (
-            <Text variant="caption" muted>
-              {kpi.trendLabel}
-            </Text>
-          ) : (
-            <Text variant="caption" muted numberOfLines={2}>
-              {kpi.supportingText}
-            </Text>
-          )}
-        </Card>
-      ))}
+      {kpis.map((kpi) => {
+        const severity = severityFromKpiTone(kpi.tone);
+        const trend =
+          severity === "success" ? "up" : severity === "critical" ? "down" : "neutral";
+        return (
+          <KpiCard
+            key={kpi.id}
+            label={kpi.title}
+            value={kpi.value}
+            unavailable={kpi.unavailable}
+            trend={kpi.trendLabel ? trend : undefined}
+            trendLabel={kpi.trendLabel ?? undefined}
+            supportingText={kpi.supportingText}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -132,21 +148,20 @@ export function DecisionSection({
         {decision.summary.headline}
       </Text>
       <View style={styles.metaRow}>
-        <Badge label={`${decision.summary.criticalCount} críticos`} tone={"danger" as BadgeTone} />
-        <Badge label={`${decision.summary.warningCount} alertas`} tone={"warning" as BadgeTone} />
+        <Badge label={`${decision.summary.criticalCount} críticos`} tone="danger" />
+        <Badge label={`${decision.summary.warningCount} alertas`} tone="warning" />
         <Badge
           label={`${decision.summary.opportunityCount} oportunidades`}
-          tone={"success" as BadgeTone}
+          tone="success"
         />
       </View>
       {decision.items.slice(0, 8).map((item) => (
-        <View key={item.id} style={styles.listItem}>
-          <Badge label={item.severity} />
-          <Text variant="body">{item.title}</Text>
-          <Text variant="caption" muted numberOfLines={3}>
-            {item.description}
-          </Text>
-        </View>
+        <SeverityCard
+          key={item.id}
+          title={item.title}
+          subtitle={item.description}
+          tone={severityFromDecision(item.severity)}
+        />
       ))}
     </Card>
   );
@@ -172,19 +187,12 @@ export function AlertsSection({
         </Text>
       ) : (
         sorted.map((alert) => (
-          <View key={alert.id} style={styles.listItem}>
-            <View style={styles.metaRow}>
-              <Badge label={alert.priority} />
-              <Badge label={alert.category} />
-            </View>
-            <Text variant="body">{alert.title}</Text>
-            <Text variant="caption" muted numberOfLines={3}>
-              {alert.description}
-            </Text>
-            <Text variant="caption" muted>
-              {alert.suggestedAction} · {alert.source}
-            </Text>
-          </View>
+          <SeverityCard
+            key={alert.id}
+            title={alert.title}
+            subtitle={`${alert.description}\n${alert.suggestedAction} · ${alert.source}`}
+            tone={severityFromAlertPriority(alert.priority)}
+          />
         ))
       )}
     </Card>
@@ -243,9 +251,7 @@ const styles = StyleSheet.create({
   headerText: { flex: 1, gap: 4 },
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   kpiGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  kpiCard: { width: "47%", flexGrow: 1, gap: 4 },
   section: { gap: 10, marginTop: 12 },
   briefRow: { gap: 2, marginTop: 8 },
   briefAction: { gap: 2, marginTop: 12 },
-  listItem: { gap: 4, marginTop: 10, paddingTop: 8 },
 });

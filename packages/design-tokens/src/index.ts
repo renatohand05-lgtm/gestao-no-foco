@@ -59,23 +59,27 @@ export const gofMotion = {
 export const lightTheme = {
   background: gofPalette.white,
   surface: gofPalette.white,
+  surfaceElevated: gofPalette.grayLight,
   text: gofPalette.navy,
   textMuted: gofPalette.silverMuted,
   primary: gofPalette.gold,
   border: gofPalette.border,
   danger: gofPalette.danger,
   success: gofPalette.success,
+  warning: gofPalette.warning,
 } as const;
 
 export const darkTheme = {
   background: gofPalette.navy,
   surface: gofPalette.graphite,
+  surfaceElevated: gofPalette.graphiteElevated,
   text: gofPalette.white,
   textMuted: gofPalette.silverMuted,
   primary: gofPalette.gold,
   border: gofPalette.graphiteElevated,
   danger: gofPalette.danger,
   success: gofPalette.success,
+  warning: gofPalette.warning,
 } as const;
 
 /**

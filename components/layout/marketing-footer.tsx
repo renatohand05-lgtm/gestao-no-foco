@@ -94,8 +94,9 @@ export function MarketingFooter() {
             ))}
           </ul>
           <p className="mt-6 text-xs text-white/40">
-            Termos e Privacidade disponíveis no ambiente autenticado da
-            plataforma.
+            <Link href="/privacidade" className="underline hover:text-white">
+              Política de Privacidade
+            </Link>
           </p>
         </div>
       </div>

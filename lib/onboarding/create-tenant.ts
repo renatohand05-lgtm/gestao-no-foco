@@ -11,6 +11,8 @@ type CreateTenantInput = {
   userId: string;
   /** ID do parceiro (platform_partners) que indicou esta empresa, se houver. */
   referredByPartnerId?: string | null;
+  /** Código de convite de acesso gratuito (?convite=), se houver. */
+  freeAccessCode?: string | null;
 };
 
 type CreateTenantResult =
@@ -97,6 +99,26 @@ export async function createTenantWithOwner(
       .eq("id", tenantId);
   } catch {
     // Colunas 35.0 podem ainda não existir — tenant permanece legado-compatible.
+  }
+
+  // Convite de acesso gratuito (?convite=código): se válido e ainda não
+  // usado, libera esta empresa da trava — sem precisar de assinatura ativa.
+  if (input.freeAccessCode) {
+    try {
+      const { data: redeemed } = await supabase.rpc(
+        "platform_redeem_free_access_code" as never,
+        { p_code: input.freeAccessCode, p_tenant_id: tenantId } as never,
+      );
+      if (redeemed) {
+        await supabase
+          .from("tenants")
+          .update({ access_gated: false } as never)
+          .eq("id", tenantId);
+      }
+    } catch {
+      // Código inválido/já usado não bloqueia a criação da empresa —
+      // ela só permanece com access_gated = true (trava normal).
+    }
   }
 
   return { success: true, tenantId, slug };

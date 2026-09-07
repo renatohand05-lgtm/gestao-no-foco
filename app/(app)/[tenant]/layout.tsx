@@ -1,5 +1,8 @@
+import { redirect } from "next/navigation";
+
 import { AppShell } from "@/components/layout/app-shell";
 import { getCurrentProfile } from "@/lib/auth/session";
+import { hasConfirmedBillingAccess } from "@/lib/billing/access-gate";
 import { getCommercialPlan } from "@/lib/billing/catalog";
 import { isPlanFeatureUnlocked } from "@/lib/billing/feature-entitlement";
 import { getTenantCommercialPlanSlug } from "@/lib/billing/finance-entitlement";
@@ -9,7 +12,10 @@ import {
   type CommercialPlanSlug,
 } from "@/lib/billing/plan-feature-matrix";
 import { resolveTenantNavPermissions } from "@/lib/navigation/resolve-nav-auth";
-import { isPlatformPartner } from "@/lib/platform/platform-access-service";
+import {
+  isPlatformOwner,
+  isPlatformPartner,
+} from "@/lib/platform/platform-access-service";
 import { getPlanSimulationSlug } from "@/lib/platform/plan-simulation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserTenants, requireTenant } from "@/lib/tenants";
@@ -44,6 +50,18 @@ export default async function TenantLayout({
     : null;
 
   const client = await createClient();
+
+  // Trava de acesso: empresa nova sem assinatura ativa não entra no
+  // sistema — exceto o dono da plataforma, que precisa entrar pra dar
+  // suporte independente do status de pagamento.
+  const [owner, confirmedAccess] = await Promise.all([
+    isPlatformOwner(),
+    hasConfirmedBillingAccess(client, tenant.id),
+  ]);
+  if (!owner && !confirmedAccess) {
+    redirect(`/assinatura-pendente/${tenantSlug}`);
+  }
+
   const realPlanSlug = await getTenantCommercialPlanSlug(client, tenant.id);
   const lockedNavIds = realPlanSlug
     ? lockedNavIdsForPlan(realPlanSlug as CommercialPlanSlug)

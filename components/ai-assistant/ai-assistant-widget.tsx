@@ -35,6 +35,7 @@ export function AiAssistantWidget({ tenantSlug }: Props) {
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [notConfigured, setNotConfigured] = useState(false);
+  const [planLocked, setPlanLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSending, startSending] = useTransition();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -68,6 +69,7 @@ export function AiAssistantWidget({ tenantSlug }: Props) {
     if (!body) return;
     setError(null);
     setNotConfigured(false);
+    setPlanLocked(false);
 
     const optimisticId = `optimistic-${Date.now()}`;
     setMessages((prev) => [
@@ -86,6 +88,7 @@ export function AiAssistantWidget({ tenantSlug }: Props) {
       if (!result.success) {
         setError(result.error);
         if (result.notConfigured) setNotConfigured(true);
+        if (result.planLocked) setPlanLocked(true);
         return;
       }
       setMessages((prev) => [...prev, result.data]);
@@ -158,7 +161,9 @@ export function AiAssistantWidget({ tenantSlug }: Props) {
             <p className="px-4 text-xs text-red-600" role="alert">
               {notConfigured
                 ? "O assistente ainda não foi ativado nesta conta."
-                : error}
+                : planLocked
+                  ? "O assistente de IA é um recurso do plano Essencial em diante."
+                  : error}
             </p>
           ) : null}
 

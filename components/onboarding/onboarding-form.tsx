@@ -16,6 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { buildLastTenantCookie } from "@/lib/tenant/active-tenant";
 import { REFERRAL_CODE_COOKIE } from "@/lib/platform/referral-cookie";
+import { FREE_ACCESS_CODE_COOKIE } from "@/lib/platform/free-access-cookie";
 import { listProductOnboardingSegments } from "@/config/onboarding/segments";
 import type { TenantSegment } from "@/types";
 
@@ -78,12 +79,20 @@ export function OnboardingForm({ mode = "first" }: OnboardingFormProps) {
         referredByPartnerId = (partnerId as string | null) ?? null;
       }
 
+      const freeAccessMatch = document.cookie.match(
+        new RegExp(`(?:^|; )${FREE_ACCESS_CODE_COOKIE}=([^;]*)`),
+      );
+      const freeAccessCodeCookie = freeAccessMatch
+        ? decodeURIComponent(freeAccessMatch[1])
+        : null;
+
       const result = await createTenantWithOwner(supabase, {
         name,
         slug,
         segment,
         userId: user.id,
         referredByPartnerId,
+        freeAccessCode: freeAccessCodeCookie,
       });
 
       if (!result.success) {
@@ -99,6 +108,7 @@ export function OnboardingForm({ mode = "first" }: OnboardingFormProps) {
       // Indicação já foi aplicada (ou não havia) — limpa o cookie pra não
       // vazar pra uma segunda empresa criada depois pela mesma conta.
       document.cookie = `${REFERRAL_CODE_COOKIE}=; path=/; max-age=0`;
+      document.cookie = `${FREE_ACCESS_CODE_COOKIE}=; path=/; max-age=0`;
 
       setSubmitted(true);
       document.cookie = buildLastTenantCookie(result.slug);

@@ -83,6 +83,10 @@ export async function createTenantWithOwner(
     const updatePayload: Record<string, unknown> = {
       segment_version: SEGMENT_ENGINE_VERSION,
       segment_config: {},
+      // Trava de acesso (2026-09-07): empresas novas só entram com
+      // assinatura ativa (pagamento confirmado). Decisão explícita do
+      // dono da plataforma — empresas legadas (criadas antes) não mudam.
+      access_gated: true,
     };
     if (input.referredByPartnerId) {
       updatePayload.referred_by_partner_id = input.referredByPartnerId;

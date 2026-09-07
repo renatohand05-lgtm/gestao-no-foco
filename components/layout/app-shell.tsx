@@ -21,6 +21,7 @@ export type PlanSimulationInfo = {
   planSlug: string;
   planName: string;
   lockedNavIds: readonly string[];
+  aiAssistantUnlocked: boolean;
 };
 
 type AppShellProps = {
@@ -32,6 +33,8 @@ type AppShellProps = {
   planSimulation?: PlanSimulationInfo | null;
   /** IDs de item de menu travados pelo plano REAL do tenant (Fase 2 do financeiro). */
   lockedNavIds?: readonly string[];
+  /** IA copiloto liberada pelo plano REAL do tenant (Essencial em diante). */
+  aiAssistantUnlocked?: boolean;
   user?: {
     email?: string;
     name?: string;
@@ -55,11 +58,14 @@ function DemoAwareChrome({
   isPlatformPartner,
   planSimulation,
   lockedNavIds,
+  aiAssistantUnlocked,
   user,
   children,
 }: AppShellProps) {
   const { hide, active } = useDemoMode();
   const effectiveLockedNavIds = planSimulation?.lockedNavIds ?? lockedNavIds;
+  const effectiveAiAssistantUnlocked =
+    planSimulation?.aiAssistantUnlocked ?? aiAssistantUnlocked ?? false;
 
   return (
     <SidebarProvider
@@ -124,7 +130,7 @@ function DemoAwareChrome({
         ) : null}
       </SidebarInset>
       {!hide.appSidebar ? <HelpWidget tenantSlug={tenant.slug} /> : null}
-      {!hide.appSidebar ? (
+      {!hide.appSidebar && effectiveAiAssistantUnlocked ? (
         <AiAssistantWidget tenantSlug={tenant.slug} />
       ) : null}
     </SidebarProvider>
@@ -162,6 +168,7 @@ export function AppShell(props: AppShellProps) {
           isPlatformPartner={props.isPlatformPartner}
           planSimulation={props.planSimulation}
           lockedNavIds={props.lockedNavIds}
+          aiAssistantUnlocked={props.aiAssistantUnlocked}
           user={props.user}
         >
           {props.children}

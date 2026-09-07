@@ -6,6 +6,7 @@ import {
   callAiAssistant,
   type AiAssistantChatMessage,
 } from "@/lib/ai-assistant/ai-assistant-service";
+import { isPlanFeatureUnlocked } from "@/lib/billing/feature-entitlement";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 
@@ -18,7 +19,12 @@ export type AiAssistantMessage = {
 
 type ActionResult<T> =
   | { success: true; data: T }
-  | { success: false; error: string; notConfigured?: boolean };
+  | {
+      success: false;
+      error: string;
+      notConfigured?: boolean;
+      planLocked?: boolean;
+    };
 
 async function getOrCreateConversationId(
   client: Awaited<ReturnType<typeof createClient>>,
@@ -56,6 +62,19 @@ export async function fetchAiAssistantConversation(
       data: { user },
     } = await client.auth.getUser();
     if (!user) throw new Error("Não autenticado.");
+
+    const unlocked = await isPlanFeatureUnlocked(
+      client,
+      tenant.id,
+      "inteligencia_ia",
+    );
+    if (!unlocked) {
+      return {
+        success: false,
+        error: "O assistente de IA é um recurso do plano Essencial em diante.",
+        planLocked: true,
+      };
+    }
 
     const conversationId = await getOrCreateConversationId(
       client,
@@ -107,6 +126,19 @@ export async function sendAiAssistantMessage(
       data: { user },
     } = await client.auth.getUser();
     if (!user) throw new Error("Não autenticado.");
+
+    const unlocked = await isPlanFeatureUnlocked(
+      client,
+      tenant.id,
+      "inteligencia_ia",
+    );
+    if (!unlocked) {
+      return {
+        success: false,
+        error: "O assistente de IA é um recurso do plano Essencial em diante.",
+        planLocked: true,
+      };
+    }
 
     const conversationId = await getOrCreateConversationId(
       client,

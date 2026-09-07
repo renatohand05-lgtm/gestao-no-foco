@@ -5,7 +5,6 @@ import {
   CalendarDays,
   ChefHat,
   FileBarChart,
-  Landmark,
   LayoutDashboard,
   LayoutGrid,
   Package,
@@ -152,19 +151,12 @@ export function getTenantNav(
         "dashboard.executivo",
       ],
     },
-    {
-      id: "tax-hub",
-      title: "Tributário",
-      href: `${base}/tributario`,
-      icon: Landmark,
-      group: "inteligencia",
-      description: "Regras, simulações e cockpit fiscal",
-      requiredAnyPermissions: [
-        "tax.visualizar",
-        "financeiro.tributos.visualizar",
-        "dashboard.executivo",
-      ],
-    },
+    // "tax-hub" (/tributario) removido do menu principal em 2026-09-07:
+    // workflow de aprovação de regras fiscais, redundante com o dashboard
+    // de Financeiro > Tributos e desalinhado com o público (Oficina,
+    // Lava-rápido, Restaurante). Código e rotas continuam intactos —
+    // reavaliar como recurso avançado (ex.: plano Pro Plus + Consultoria)
+    // antes de reativar no menu.
     {
       id: "crm",
       title: "CRM",

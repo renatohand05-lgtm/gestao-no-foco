@@ -109,7 +109,7 @@ export function AiAssistantWidget({ tenantSlug }: Props) {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Sparkles className="size-4 text-[var(--brand-gold,#C9A84C)]" />
-              Assistente Gestão no Foco
+              Gestão no Foco
             </SheetTitle>
           </SheetHeader>
 

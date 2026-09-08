@@ -140,6 +140,14 @@ export default function AppLayout() {
         name="scanner"
         options={{ title: "Scanner", href: null, headerShown: true }}
       />
+      <Tabs.Screen
+        name="suporte"
+        options={{ title: "Suporte", href: null, headerShown: true }}
+      />
+      <Tabs.Screen
+        name="assistente-ia"
+        options={{ title: "Assistente IA", href: null, headerShown: true }}
+      />
     </Tabs>
   );
 }

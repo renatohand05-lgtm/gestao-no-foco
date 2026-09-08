@@ -71,6 +71,84 @@ export async function postLogout() {
   });
 }
 
+// ---------- Central de Suporte ----------
+
+export type SupportMessage = {
+  id: string;
+  ticketId: string;
+  senderId: string;
+  senderRole: "tenant_user" | "platform_owner";
+  body: string;
+  createdAt: string;
+};
+
+export type SupportConversationResponse = {
+  ticketId: string | null;
+  messages: SupportMessage[];
+};
+
+export async function fetchSupportConversation(tenantId: string) {
+  return withToken<SupportConversationResponse>(
+    `api/mobile/v1/tenants/${tenantId}/support/conversation`,
+  );
+}
+
+export async function sendSupportMessage(tenantId: string, body: string) {
+  const accessToken = await getAccessToken();
+  return apiRequest<SupportConversationResponse>(
+    `api/mobile/v1/tenants/${tenantId}/support/conversation`,
+    { method: "POST", body: { body }, context: { accessToken } },
+  );
+}
+
+// ---------- Assistente de IA ----------
+
+export type AiAssistantMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+};
+
+export async function fetchAiAssistantConversation(tenantId: string) {
+  return withToken<{ messages: AiAssistantMessage[] }>(
+    `api/mobile/v1/tenants/${tenantId}/ai-assistant/conversation`,
+  );
+}
+
+export async function sendAiAssistantMessage(tenantId: string, body: string) {
+  const accessToken = await getAccessToken();
+  return apiRequest<AiAssistantMessage>(
+    `api/mobile/v1/tenants/${tenantId}/ai-assistant/conversation`,
+    { method: "POST", body: { body }, context: { accessToken } },
+  );
+}
+
+// ---------- Financeiro avançado (resumo) ----------
+
+export type FinanceAdvancedSummary = {
+  generatedAt: string;
+  aging: {
+    totalVencido: string;
+    totalAVencer: string;
+    totalGeral: string;
+    tituloCount: number;
+  } | null;
+  orcamento: {
+    count: number;
+    latestNome: string | null;
+    latestAno: number | null;
+    latestStatus: string | null;
+  } | null;
+  unavailable: string[];
+};
+
+export async function fetchFinanceAdvancedSummary(tenantId: string) {
+  return withToken<FinanceAdvancedSummary>(
+    `api/mobile/v1/tenants/${tenantId}/financeiro/advanced-summary`,
+  );
+}
+
 export type MobileExecutiveDashboard = {
   generatedAt: string;
   greeting: string;

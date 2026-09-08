@@ -285,12 +285,17 @@ export function KpiCard({ label, value, trend, trendLabel, supportingText, unava
   const { colors } = useTheme();
   const trendColor =
     trend === "up" ? colors.success : trend === "down" ? colors.danger : colors.textMuted;
+  const valueColor = unavailable
+    ? colors.textMuted
+    : trend && trend !== "neutral"
+      ? trendColor
+      : colors.text;
   return (
     <Card style={styles.kpiCard}>
       <Text variant="caption" muted>
         {label}
       </Text>
-      <Text variant="title" style={{ color: unavailable ? colors.textMuted : colors.text }}>
+      <Text variant="title" style={{ color: valueColor }}>
         {value}
       </Text>
       {trendLabel ? (

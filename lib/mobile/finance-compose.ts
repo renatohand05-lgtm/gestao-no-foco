@@ -8,6 +8,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { formatCurrencyCompact, formatPercent } from "@/lib/dashboard/format";
+import { buildAgingReport } from "@/lib/finance/aging/aging";
+import { FinanceBudgetService } from "@/lib/finance/budget/budget-service";
 import { ContaPagarService } from "@/lib/financeiro/conta-pagar-service";
 import { ContaReceberService } from "@/lib/financeiro/conta-receber-service";
 import {
@@ -540,6 +542,110 @@ export async function composeDreMobile(input: {
         emphasis: true,
       },
     ],
+  };
+}
+
+export type MobileFinanceAdvancedSummary = {
+  generatedAt: string;
+  aging: {
+    totalVencido: string;
+    totalAVencer: string;
+    totalGeral: string;
+    tituloCount: number;
+  } | null;
+  orcamento: {
+    count: number;
+    latestNome: string | null;
+    latestAno: number | null;
+    latestStatus: string | null;
+  } | null;
+  unavailable: string[];
+};
+
+/**
+ * Resumo mobile de Aging e Orçamento — leitura simples, sem edição.
+ * Orçamento mostra só existência/status (a variação orçado×realizado
+ * ainda não está com dados reais nem no site — ver orcamento/page.tsx).
+ */
+export async function composeFinanceAdvancedSummary(input: {
+  client: SupabaseClient<Database>;
+  tenantId: string;
+  permissions: readonly string[];
+}): Promise<MobileFinanceAdvancedSummary> {
+  if (!canViewFinance(input.permissions)) {
+    throw new Error("FORBIDDEN_FINANCE");
+  }
+
+  const client = resolveFinanceDataClient(input.client);
+  const unavailable: string[] = [];
+
+  const aging = await soft(async () => {
+    const svc = new ContaReceberService(client, input.tenantId);
+    const hoje = new Date().toISOString().slice(0, 10);
+    const titulos: Parameters<typeof buildAgingReport>[0] = [];
+    let page = 1;
+    const maxPages = 5;
+    let totalPages = 1;
+    do {
+      const list = await svc.list({
+        page,
+        perPage: 50,
+        status: "all",
+        sort: "data_vencimento",
+        order: "asc",
+      });
+      totalPages = list.totalPages;
+      for (const i of list.data) {
+        if (i.status_exibicao !== "aberto" && i.status_exibicao !== "vencido") {
+          continue;
+        }
+        titulos.push({
+          id: i.id,
+          clienteId: i.cliente_id,
+          clienteNome: i.cliente?.nome ?? null,
+          valor: Math.max(
+            Number(i.valor_original ?? 0) +
+              Number(i.juros ?? 0) +
+              Number(i.multa ?? 0) -
+              Number(i.desconto ?? 0) -
+              Number(i.valor_recebido ?? 0),
+            0,
+          ),
+          dataVencimento: i.data_vencimento,
+          status: i.status_exibicao,
+        });
+      }
+      page += 1;
+    } while (page <= totalPages && page <= maxPages);
+
+    const report = buildAgingReport(titulos, hoje);
+    return {
+      totalVencido: formatCurrencyCompact(report.totalVencido),
+      totalAVencer: formatCurrencyCompact(report.totalAVencer),
+      totalGeral: formatCurrencyCompact(report.totalGeral),
+      tituloCount: titulos.length,
+    };
+  });
+  if (!aging) unavailable.push("aging");
+
+  const orcamento = await soft(async () => {
+    const svc = new FinanceBudgetService(client, input.tenantId);
+    const budgets = await svc.list(20);
+    const latest = budgets[0] ?? null;
+    return {
+      count: budgets.length,
+      latestNome: latest?.nome ?? null,
+      latestAno: latest?.ano ?? null,
+      latestStatus: latest?.status ?? null,
+    };
+  });
+  if (!orcamento) unavailable.push("orcamento");
+
+  return {
+    generatedAt: new Date().toISOString(),
+    aging,
+    orcamento,
+    unavailable,
   };
 }
 

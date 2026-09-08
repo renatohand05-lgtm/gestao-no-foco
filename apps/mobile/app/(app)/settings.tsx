@@ -85,6 +85,20 @@ export default function SettingsScreen() {
         </Card>
 
         <Card style={styles.card}>
+          <Text variant="subtitle">Ajuda</Text>
+          <ListItem
+            title="Central de Suporte"
+            subtitle="Fale com o suporte"
+            onPress={() => router.push("/(app)/suporte")}
+          />
+          <ListItem
+            title="Assistente de IA"
+            subtitle="Tire dúvidas sobre o sistema e seus dados"
+            onPress={() => router.push("/(app)/assistente-ia")}
+          />
+        </Card>
+
+        <Card style={styles.card}>
           <Text variant="subtitle">Sobre</Text>
           <ListItem title="Versão" trailing={<Text variant="body">{version}</Text>} />
           <ListItem

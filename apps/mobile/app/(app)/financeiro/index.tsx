@@ -1,12 +1,16 @@
 import {
+  fetchFinanceAdvancedSummary,
   fetchFinanceSummary,
   type MobileFinanceSummary,
 } from "@/api/mobile-api";
 import { webHref } from "@/dashboard/web-links";
 import {
   Button,
+  Card,
   ErrorState,
+  KpiCard,
   SafeAreaScreen,
+  Text,
 } from "@/design/components";
 import {
   FINANCE_VIEW_PERMS,
@@ -61,6 +65,19 @@ export default function FinanceHomeScreen() {
         throw err;
       }
       await saveFinanceSnapshot(tenantId, result.data);
+      return result.data;
+    },
+  });
+
+  const advancedQuery = useQuery({
+    queryKey: qk.module(tenantId || null, branchId, "finance-advanced-summary"),
+    enabled: Boolean(tenantId) && online && canView,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const result = await fetchFinanceAdvancedSummary(tenantId);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
       return result.data;
     },
   });
@@ -143,6 +160,45 @@ export default function FinanceHomeScreen() {
         ) : null}
         <FinanceSummaryCards data={data} />
         <View style={{ height: 12 }} />
+        {advancedQuery.data ? (
+          <>
+            <Text variant="subtitle" style={{ marginBottom: 8 }}>
+              Avançado
+            </Text>
+            <View style={styles.advancedRow}>
+              {advancedQuery.data.aging ? (
+                <>
+                  <KpiCard
+                    label="A receber vencido"
+                    value={advancedQuery.data.aging.totalVencido}
+                    supportingText={`${advancedQuery.data.aging.tituloCount} título(s)`}
+                  />
+                  <KpiCard
+                    label="A vencer"
+                    value={advancedQuery.data.aging.totalAVencer}
+                  />
+                </>
+              ) : null}
+            </View>
+            {advancedQuery.data.orcamento ? (
+              <Card style={{ marginTop: 8 }}>
+                <Text variant="caption" muted>
+                  Orçamento
+                </Text>
+                {advancedQuery.data.orcamento.count === 0 ? (
+                  <Text variant="body">Nenhum orçamento cadastrado</Text>
+                ) : (
+                  <Text variant="body">
+                    {advancedQuery.data.orcamento.latestNome} (
+                    {advancedQuery.data.orcamento.latestAno}) ·{" "}
+                    {advancedQuery.data.orcamento.latestStatus}
+                  </Text>
+                )}
+              </Card>
+            ) : null}
+            <View style={{ height: 12 }} />
+          </>
+        ) : null}
         <FinanceAlerts alerts={data.alerts} />
         <View style={{ height: 12 }} />
         <FinanceQuickActions
@@ -171,4 +227,5 @@ export default function FinanceHomeScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 8, paddingBottom: 40 },
+  advancedRow: { flexDirection: "row", gap: 10, flexWrap: "wrap" },
 });

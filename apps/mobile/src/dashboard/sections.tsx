@@ -90,13 +90,18 @@ export function KpiGrid({
         const severity = severityFromKpiTone(kpi.tone);
         const trend =
           severity === "success" ? "up" : severity === "critical" ? "down" : "neutral";
+        const tone =
+          kpi.tone === "danger" || kpi.tone === "warning" || kpi.tone === "success"
+            ? kpi.tone
+            : "neutral";
         return (
           <KpiCard
             key={kpi.id}
             label={kpi.title}
             value={kpi.value}
             unavailable={kpi.unavailable}
-            trend={kpi.trendLabel ? trend : undefined}
+            trend={trend}
+            tone={tone}
             trendLabel={kpi.trendLabel ?? undefined}
             supportingText={kpi.supportingText}
           />

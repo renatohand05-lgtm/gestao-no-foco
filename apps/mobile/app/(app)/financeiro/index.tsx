@@ -171,6 +171,9 @@ export default function FinanceHomeScreen() {
                   <KpiCard
                     label="A receber vencido"
                     value={advancedQuery.data.aging.totalVencido}
+                    tone={
+                      advancedQuery.data.aging.tituloCount > 0 ? "danger" : "neutral"
+                    }
                     supportingText={`${advancedQuery.data.aging.tituloCount} título(s)`}
                   />
                   <KpiCard

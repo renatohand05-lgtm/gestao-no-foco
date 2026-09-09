@@ -273,23 +273,35 @@ export function SeverityCard({ title, subtitle, tone = "info", icon, onPress }: 
 type KpiCardProps = {
   label: string;
   value: string;
-  /** Positivo = verde, negativo = vermelho, indefinido = cor padrão. */
+  /** Seta pra cima/baixo — só aparece junto do trendLabel (comparação "vs ontem"). */
   trend?: "up" | "down" | "neutral";
   trendLabel?: string;
+  /** Cor do número principal: independe de ter comparação "vs ontem" — reflete se o dado em si é bom, ruim ou requer atenção. */
+  tone?: "danger" | "warning" | "success" | "neutral";
   supportingText?: string;
   unavailable?: boolean;
 };
 
-/** KPI com cor de status real (verde/vermelho), não texto branco genérico. */
-export function KpiCard({ label, value, trend, trendLabel, supportingText, unavailable }: KpiCardProps) {
+/** KPI com cor de status real (verde/âmbar/vermelho), não texto branco genérico. */
+export function KpiCard({ label, value, trend, trendLabel, tone, supportingText, unavailable }: KpiCardProps) {
   const { colors } = useTheme();
   const trendColor =
     trend === "up" ? colors.success : trend === "down" ? colors.danger : colors.textMuted;
+  const toneColor =
+    tone === "danger"
+      ? colors.danger
+      : tone === "warning"
+        ? colors.warning
+        : tone === "success"
+          ? colors.success
+          : null;
   const valueColor = unavailable
     ? colors.textMuted
-    : trend && trend !== "neutral"
-      ? trendColor
-      : colors.text;
+    : toneColor
+      ? toneColor
+      : trend && trend !== "neutral"
+        ? trendColor
+        : colors.text;
   return (
     <Card style={styles.kpiCard}>
       <Text variant="caption" muted>

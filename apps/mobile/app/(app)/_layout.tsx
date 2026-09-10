@@ -148,6 +148,14 @@ export default function AppLayout() {
         name="assistente-ia"
         options={{ title: "Assistente IA", href: null, headerShown: true }}
       />
+      <Tabs.Screen
+        name="master-dashboard"
+        options={{ title: "Painel master", href: null, headerShown: true }}
+      />
+      <Tabs.Screen
+        name="master-suporte"
+        options={{ title: "Central de suporte", href: null, headerShown: true }}
+      />
     </Tabs>
   );
 }

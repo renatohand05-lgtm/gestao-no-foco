@@ -99,6 +99,15 @@ export default function SettingsScreen() {
         </Card>
 
         <Card style={styles.card}>
+          <Text variant="subtitle">Painel master</Text>
+          <ListItem
+            title="Empresas e métricas"
+            subtitle="Visão de dono/parceiro da plataforma"
+            onPress={() => router.push("/(app)/master-dashboard")}
+          />
+        </Card>
+
+        <Card style={styles.card}>
           <Text variant="subtitle">Sobre</Text>
           <ListItem title="Versão" trailing={<Text variant="body">{version}</Text>} />
           <ListItem

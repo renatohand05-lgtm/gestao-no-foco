@@ -149,6 +149,76 @@ export async function fetchFinanceAdvancedSummary(tenantId: string) {
   );
 }
 
+// ---------- Painel master (dono/parceiro da plataforma) ----------
+
+export type MasterCompany = {
+  tenantId: string;
+  tenantSlug: string;
+  tenantName: string;
+  segment: string | null;
+  faturamentoLabel: string;
+  isActive: boolean;
+};
+
+export type MasterDashboard = {
+  role: "owner" | "partner";
+  partnerName: string;
+  companies: MasterCompany[];
+  totals: {
+    faturamentoLabel: string;
+    lucroLiquidoLabel: string;
+    empresasAtivas: number;
+    empresasTotal: number;
+  };
+  unreadSupportMessages: number;
+};
+
+export async function fetchMasterDashboard() {
+  return withToken<MasterDashboard>("api/mobile/v1/master/dashboard");
+}
+
+export type MasterSupportTicket = {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  tenantSlug: string;
+  status: "open" | "closed";
+  createdAt: string;
+  updatedAt: string;
+  lastMessageAt: string;
+  lastMessagePreview: string | null;
+  lastSenderRole: "tenant_user" | "platform_owner" | null;
+  unreadForOwner: number;
+};
+
+export async function fetchMasterSupportTickets() {
+  return withToken<{ tickets: MasterSupportTicket[] }>(
+    "api/mobile/v1/master/suporte/tickets",
+  );
+}
+
+export async function fetchMasterTicketThread(ticketId: string) {
+  return withToken<{ messages: SupportMessage[] }>(
+    `api/mobile/v1/master/suporte/tickets/${ticketId}`,
+  );
+}
+
+export async function sendMasterTicketReply(ticketId: string, body: string) {
+  const accessToken = await getAccessToken();
+  return apiRequest<{ messages: SupportMessage[] }>(
+    `api/mobile/v1/master/suporte/tickets/${ticketId}`,
+    { method: "POST", body: { body }, context: { accessToken } },
+  );
+}
+
+export async function closeMasterTicket(ticketId: string) {
+  const accessToken = await getAccessToken();
+  return apiRequest<{ ok: boolean }>(
+    `api/mobile/v1/master/suporte/tickets/${ticketId}`,
+    { method: "PATCH", body: { action: "close" }, context: { accessToken } },
+  );
+}
+
 export type MobileExecutiveDashboard = {
   generatedAt: string;
   greeting: string;

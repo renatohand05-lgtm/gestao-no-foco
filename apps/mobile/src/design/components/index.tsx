@@ -310,6 +310,9 @@ export function KpiCard({ label, value, trend, trendLabel, tone, supportingText,
       <Text variant="title" style={{ color: valueColor }}>
         {value}
       </Text>
+      <Text variant="caption" style={{ color: "#FF00FF" }}>
+        [debug tone={String(tone)}]
+      </Text>
       {trendLabel ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
           {trend && trend !== "neutral" ? (

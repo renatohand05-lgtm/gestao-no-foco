@@ -119,8 +119,7 @@ export async function ensureAsaasSubscription(
   }
 
   const nextDue =
-    input.nextDueDate ||
-    new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    input.nextDueDate || new Date().toISOString().slice(0, 10);
 
   const body: Record<string, unknown> = {
     customer: input.customerId,

@@ -8,6 +8,7 @@ import {
   getPlatformBillingSummary,
 } from "@/lib/platform/platform-access-service";
 import { PartnerTenantManageForm } from "@/components/platform/partner-tenant-manage-form";
+import { DeleteTenantButton } from "@/components/platform/delete-tenant-button";
 import { formatCurrency } from "@/lib/format";
 import { CATALOG_SEGMENT_SHORT_LABEL } from "@/lib/segments/catalog-labels";
 import type { ProductSegmentId } from "@/lib/segments/types";
@@ -114,6 +115,14 @@ export default async function ManageReferredTenantPage({
         currentName={tenant.tenantName}
         currentSegment={tenant.segment}
       />
+
+      {access.role === "owner" ? (
+        <DeleteTenantButton
+          tenantId={tenant.tenantId}
+          tenantSlug={tenant.tenantSlug}
+          tenantName={tenant.tenantName}
+        />
+      ) : null}
     </div>
   );
 }

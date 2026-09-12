@@ -13,20 +13,8 @@ import { PasswordField } from "@/components/auth/password-field";
 import { Input } from "@/components/ui/input";
 import { brandConfig } from "@/config/brand";
 import { getPostLoginPath } from "@/lib/auth/redirect";
+import { humanizeAuthError } from "@/lib/auth/error-messages";
 import { createClient } from "@/lib/supabase/client";
-
-function humanizeLoginError(message: string): string {
-  if (/invalid login credentials/i.test(message)) {
-    return "E-mail ou senha incorretos. Verifique e tente novamente.";
-  }
-  if (/email not confirmed/i.test(message)) {
-    return "Confirme seu e-mail antes de entrar.";
-  }
-  if (/failed to fetch/i.test(message)) {
-    return "Falha de comunicação com o servidor. Verifique a conexão e tente de novo.";
-  }
-  return message;
-}
 
 /**
  * Login premium — hierarquia, a11y e Brand (Gate 19.4).
@@ -58,7 +46,7 @@ export function LoginForm() {
 
       if (signInError) {
         console.error(signInError);
-        setError(humanizeLoginError(signInError.message));
+        setError(humanizeAuthError(signInError.message));
         return;
       }
 
@@ -77,7 +65,7 @@ export function LoginForm() {
     } catch (err) {
       console.error(err);
       const message = err instanceof Error ? err.message : "Erro desconhecido";
-      setError(humanizeLoginError(message));
+      setError(humanizeAuthError(message));
     } finally {
       setLoading(false);
     }

@@ -1,48 +1,82 @@
-const modules = [
+import {
+  BarChart3,
+  Boxes,
+  ClipboardList,
+  FileText,
+  Landmark,
+  Receipt,
+  Sparkles,
+  TrendingUp,
+  Truck,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+
+type Module = {
+  title: string;
+  body: string;
+  icon: LucideIcon;
+};
+
+const featured: Module[] = [
   {
     title: "Financeiro",
-    body: "Caixa, DRE, contas e conciliação no mesmo fluxo.",
+    body: "Caixa, DRE, contas e conciliação no mesmo fluxo — sem planilha paralela.",
+    icon: Landmark,
   },
   {
     title: "Vendas",
-    body: "Metas, ticket e ritmo comercial com visão executiva.",
+    body: "Metas, ticket médio e ritmo comercial com visão executiva do dia a dia.",
+    icon: TrendingUp,
   },
+  {
+    title: "CRM",
+    body: "Pipeline, relacionamento e retorno de clientes num só lugar.",
+    icon: Users,
+  },
+];
+
+const compact: Module[] = [
   {
     title: "Compras",
     body: "Supply chain, cotações e fornecedores integrados.",
+    icon: Truck,
   },
   {
     title: "Estoque",
     body: "Saldos, mínimos e alertas operacionais.",
-  },
-  {
-    title: "CRM",
-    body: "Pipeline, relacionamento e retorno de clientes.",
+    icon: Boxes,
   },
   {
     title: "BI",
     body: "Analytics e painéis sem inventar métricas.",
+    icon: BarChart3,
   },
   {
     title: "Tributário",
     body: "Obrigações quando houver fonte confiável no tenant.",
+    icon: Receipt,
   },
   {
     title: "Importações",
     body: "Catálogo, NF-e e conciliação com governança.",
+    icon: FileText,
   },
   {
     title: "IA",
     body: "Regras e histórico do tenant — transparente.",
+    icon: Sparkles,
   },
   {
     title: "Relatórios",
     body: "Exportações e leitura consolidada para decisão.",
+    icon: ClipboardList,
   },
-] as const;
+];
 
 /**
- * Ecossistema de módulos — cards conectados (Sprint 25.5.2).
+ * Ecossistema de módulos — hierarquia real (3 módulos em destaque + 7
+ * compactos) em vez de dez cards idênticos.
  */
 export function ModulesSection() {
   return (
@@ -65,18 +99,38 @@ export function ModulesSection() {
           </p>
         </div>
 
-        <div className="relative grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <div
-            className="pointer-events-none absolute inset-x-8 top-1/2 hidden h-px bg-gradient-to-r from-transparent via-[var(--brand-gold)]/25 to-transparent lg:block"
-            aria-hidden
-          />
-          {modules.map((m) => (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {featured.map((m) => (
             <article
               key={m.title}
-              className="relative rounded-2xl border border-white/10 bg-[var(--brand-navy)]/80 p-4 transition hover:border-[var(--brand-gold)]/40 hover:bg-[var(--brand-graphite)]/80"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[var(--brand-graphite)]/90 to-[var(--brand-navy)]/90 p-6 transition hover:border-[var(--brand-gold)]/50"
             >
-              <h3 className="text-sm font-semibold text-white">{m.title}</h3>
-              <p className="mt-2 text-xs leading-relaxed text-white/55">
+              <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand-gold)]/12 text-[var(--brand-gold)] transition group-hover:bg-[var(--brand-gold)]/20">
+                <m.icon className="size-5" strokeWidth={1.75} aria-hidden />
+              </div>
+              <h3 className="mt-5 text-lg font-semibold text-white">
+                {m.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/60">
+                {m.body}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+          {compact.map((m) => (
+            <article
+              key={m.title}
+              className="group relative rounded-xl border border-white/10 bg-[var(--brand-navy)]/70 p-4 transition hover:border-[var(--brand-gold)]/35 hover:bg-[var(--brand-graphite)]/70"
+            >
+              <div className="flex size-8 items-center justify-center rounded-lg bg-white/5 text-white/60 transition group-hover:text-[var(--brand-gold)]">
+                <m.icon className="size-4" strokeWidth={1.75} aria-hidden />
+              </div>
+              <h3 className="mt-3 text-sm font-semibold text-white">
+                {m.title}
+              </h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-white/50">
                 {m.body}
               </p>
             </article>

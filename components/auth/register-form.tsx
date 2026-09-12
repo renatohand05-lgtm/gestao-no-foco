@@ -12,6 +12,7 @@ import { PasswordField } from "@/components/auth/password-field";
 import { Input } from "@/components/ui/input";
 import { siteConfig } from "@/config/site";
 import { getAuthRedirectPath } from "@/lib/auth/actions";
+import { humanizeAuthError } from "@/lib/auth/error-messages";
 import { createClient } from "@/lib/supabase/client";
 import { REFERRAL_CODE_COOKIE } from "@/lib/platform/referral-cookie";
 import { FREE_ACCESS_CODE_COOKIE } from "@/lib/platform/free-access-cookie";
@@ -46,7 +47,7 @@ export function RegisterForm() {
 
       if (signUpError) {
         console.error(signUpError);
-        setError(signUpError.message);
+        setError(humanizeAuthError(signUpError.message));
         setLoading(false);
         return;
       }
@@ -82,7 +83,9 @@ export function RegisterForm() {
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Erro desconhecido");
+      setError(
+        err instanceof Error ? humanizeAuthError(err.message) : "Erro desconhecido.",
+      );
       setLoading(false);
     }
   }

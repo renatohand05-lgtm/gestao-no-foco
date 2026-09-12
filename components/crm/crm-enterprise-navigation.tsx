@@ -14,6 +14,7 @@ const CRM_ENTERPRISE_LINKS = [
   { href: "crm/follow-ups", label: "Follow-ups" },
   { href: "crm/pipeline", label: "Pipeline" },
   { href: "crm/automacao", label: "Automação" },
+  { href: "crm/propostas", label: "Propostas" },
   { href: "clientes/funil", label: "Funil clientes" },
   { href: "crm/agenda", label: "Agenda CRM" },
   { href: "crm/retornos", label: "Retornos" },

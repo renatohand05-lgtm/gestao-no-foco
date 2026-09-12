@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ModuleHeader } from "@/components/layout/module-header";
 import { VendaCancelarButton } from "@/components/vendas/venda-cancelar-button";
 import { VendaDeleteButton } from "@/components/vendas/venda-delete-button";
+import { VendaEnviarReciboButton } from "@/components/vendas/venda-enviar-recibo-button";
 import { VendaFaturarButton } from "@/components/vendas/venda-faturar-button";
 import { VendaFaturarEReceberButton } from "@/components/vendas/venda-faturar-e-receber-button";
 import { VendaStatusBadge } from "@/components/vendas/venda-status-badge";
@@ -79,6 +80,12 @@ export function VendaDetailView({
         ]}
       >
         <VendaStatusBadge status={venda.status} />
+        <VendaEnviarReciboButton
+          tenantSlug={tenantSlug}
+          vendaId={venda.id}
+          clienteTelefone={venda.cliente.telefone}
+          clienteEmail={venda.cliente.email}
+        />
         <ConvertOrcamentoButtons
           tenantSlug={tenantSlug}
           vendaId={venda.id}

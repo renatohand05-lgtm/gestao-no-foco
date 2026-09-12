@@ -83,7 +83,7 @@ export function MarketingHeader() {
             href="/register"
             className="inline-flex items-center justify-center rounded-xl bg-[var(--brand-gold)] px-4 py-2 text-sm font-semibold text-[var(--brand-navy)] shadow-[0_0_24px_rgb(201_168_76_/0.25)] transition hover:bg-[var(--brand-gold-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/60"
           >
-            Começar grátis
+            Assinar agora
           </Link>
         </div>
 
@@ -128,7 +128,7 @@ export function MarketingHeader() {
                 onClick={() => setOpen(false)}
                 className="rounded-xl bg-[var(--brand-gold)] px-3 py-3 text-center text-sm font-semibold text-[var(--brand-navy)]"
               >
-                Começar grátis
+                Assinar agora
               </Link>
             </div>
           </nav>

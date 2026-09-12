@@ -32,7 +32,7 @@ export function CtaSection() {
               {brandConfig.positioning}
             </h2>
             <p className="mt-4 text-[var(--brand-silver)]/85">
-              Comece grátis ou fale com o time de suporte para entender o
+              Assine agora ou fale com o time de suporte para entender o
               encaixe no seu segmento.
             </p>
             <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
@@ -40,7 +40,7 @@ export function CtaSection() {
                 href="/register"
                 className="inline-flex items-center justify-center rounded-xl bg-[var(--brand-gold)] px-6 py-3 text-sm font-semibold text-[var(--brand-navy)] transition hover:bg-[var(--brand-gold-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/60"
               >
-                Começar grátis
+                Assinar agora
               </Link>
               <Link
                 href={siteConfig.links.support}

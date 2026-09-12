@@ -90,7 +90,7 @@ export function RegisterForm() {
   return (
     <AuthFormShell
       title="Crie sua conta"
-      description={`Comece gratuitamente no ${siteConfig.name}`}
+      description={`Cadastre sua empresa no ${siteConfig.name}`}
       footer={
         <AuthFooterLink
           text="Já tem conta?"
@@ -143,7 +143,7 @@ export function RegisterForm() {
         </AuthField>
 
         <AuthSubmitButton loading={loading} loadingText="Criando conta...">
-          Criar conta grátis
+          Criar minha conta
         </AuthSubmitButton>
       </form>
     </AuthFormShell>

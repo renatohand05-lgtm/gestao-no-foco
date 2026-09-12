@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ConvertOppToOrcamentoButton } from "@/components/crm/convert-opp-orcamento-button";
+import { OpportunityAiButton } from "@/components/crm/opportunity-ai-button";
 import { CrmEnterpriseNavigation } from "@/components/crm/crm-enterprise-navigation";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -133,15 +134,19 @@ export default async function CrmOportunidadesPage({
                     </Link>
                   </td>
                   <td className="px-3 py-2">
-                    {row.status === "aberta" ? (
-                      <ConvertOppToOrcamentoButton
+                    <div className="flex items-center gap-1">
+                      <OpportunityAiButton
                         tenantSlug={tenantSlug}
                         oportunidadeId={row.id}
-                        titulo={row.titulo}
                       />
-                    ) : (
-                      "—"
-                    )}
+                      {row.status === "aberta" ? (
+                        <ConvertOppToOrcamentoButton
+                          tenantSlug={tenantSlug}
+                          oportunidadeId={row.id}
+                          titulo={row.titulo}
+                        />
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))}

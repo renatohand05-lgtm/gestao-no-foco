@@ -1,7 +1,9 @@
 import { Plug, Upload } from "lucide-react";
 
 import { ComingSoonPanel } from "@/components/pilot/coming-soon-panel";
+import { VendasWebhookPanel } from "@/components/integracoes/vendas-webhook-panel";
 import { PageHeader } from "@/components/ui/page-header";
+import { siteConfig } from "@/config/site";
 import { integrationsImportPath } from "@/lib/pilot/readiness";
 import { requireIntegracoesAccess } from "@/lib/integracoes/page-auth";
 
@@ -13,7 +15,8 @@ export const metadata = {
 /**
  * Sprint 34.5 — Hub mock substituído por landing honesta.
  * Importação real permanece em /integracoes/importar.
- * Marketplace / webhooks / scheduler externos: Em breve.
+ * Webhook de vendas externas: real, via chave de API (ver abaixo).
+ * Marketplace / ERPs específicos / scheduler externos: Em breve.
  */
 export default async function IntegracoesPage({
   params,
@@ -23,12 +26,13 @@ export default async function IntegracoesPage({
   const { tenant: tenantSlug } = await params;
   await requireIntegracoesAccess(tenantSlug);
   const importHref = integrationsImportPath(tenantSlug);
+  const webhookUrl = `${siteConfig.url}/api/webhooks/vendas`;
 
   return (
     <div className="space-y-6 p-4 sm:p-6" data-integration-hub="pilot">
       <PageHeader
         title="Integrações"
-        description="Importe planilhas e arquivos agora. Conexões externas com ERPs e marketplaces chegam em breve."
+        description="Importe planilhas e arquivos, ou conecte qualquer sistema externo via webhook de vendas."
       />
 
       <ComingSoonPanel
@@ -39,10 +43,12 @@ export default async function IntegracoesPage({
         testId="integrations-import-cta"
       />
 
+      <VendasWebhookPanel tenantSlug={tenantSlug} webhookUrl={webhookUrl} />
+
       <ComingSoonPanel
         icon={Plug}
-        title="Conexões externas"
-        description="Omie, Conta Azul, Bling e demais conectores ainda não estão disponíveis para configuração. Quando forem liberados, aparecerão aqui com status claro (Em breve / Disponível / Ativa)."
+        title="Conectores prontos (ERPs e marketplaces)"
+        description="Omie, Conta Azul, Bling e demais conectores prontos (sem precisar programar nada) ainda não estão disponíveis. O webhook de vendas acima já permite conectar qualquer sistema que consiga fazer uma chamada HTTP."
         secondaryAction={{
           label: "Voltar ao dashboard",
           href: `/${tenantSlug}/dashboard`,

@@ -9,6 +9,7 @@ const RESERVED_SEGMENTS = new Set([
   "inspecao",
   "manutencao",
   "convite",
+  "assinatura-pendente",
   "api",
   "_next",
 ]);

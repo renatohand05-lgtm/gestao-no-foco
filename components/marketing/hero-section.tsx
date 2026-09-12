@@ -72,7 +72,7 @@ export function HeroSection() {
               href="/register"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand-gold)] px-6 py-3.5 text-sm font-semibold text-[var(--brand-navy)] shadow-[0_0_36px_rgb(201_168_76_/0.32)] transition hover:bg-[var(--brand-gold-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/60"
             >
-              Começar grátis
+              Assinar agora
               <ArrowRight className="size-4" aria-hidden />
             </Link>
             <Link

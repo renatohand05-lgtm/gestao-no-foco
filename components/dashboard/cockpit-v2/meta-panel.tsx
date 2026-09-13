@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Target } from "lucide-react";
 
 import type { MetaPanelModel } from "@/lib/dashboard/cockpit-v2/panels";
 import { cn } from "@/lib/utils";
@@ -16,15 +17,20 @@ export function MetaPanel({ meta }: Props) {
     <section
       aria-label="Painel de metas"
       data-cockpit-block="metas"
-      data-sprint="30.4"
+      data-sprint="30.4.1"
       className="rounded-2xl border border-[var(--border-premium)] bg-[var(--surface-raised)] p-4 sm:p-5 dark:bg-[var(--brand-graphite-elevated)]/90"
     >
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <p className="text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
-            Metas
-          </p>
-          <h2 className="mt-1 text-lg font-semibold tracking-tight">Meta do mês</h2>
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-gold)]/15 text-[var(--brand-gold)]">
+            <Target className="size-4" aria-hidden />
+          </span>
+          <div>
+            <p className="text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
+              Metas
+            </p>
+            <h2 className="mt-0.5 text-lg font-semibold tracking-tight">Meta do mês</h2>
+          </div>
         </div>
         <Link
           href={meta.href}

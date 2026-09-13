@@ -46,23 +46,43 @@ export function buildPremiumTopKpis(input: {
   primary: DashboardPrimaryData | null;
   hoje: DashboardHojeSnapshot;
   tenantSlug: string;
+  /** Presente quando o filtro escolhido não é "hoje" — substitui o valor/comparação do Faturamento. */
+  periodOverride?: {
+    faturamentoAtual: number;
+    variacaoPct: number | null;
+    periodoLabel: string;
+  } | null;
 }): PremiumKpiItem[] {
-  const { primary, hoje, tenantSlug } = input;
+  const { primary, hoje, tenantSlug, periodOverride } = input;
   const k = primary?.kpis;
   const c = primary?.comparisons;
   const base = `/${tenantSlug}`;
 
+  const faturamentoValue = periodOverride
+    ? periodOverride.faturamentoAtual
+    : hoje.mes.faturamento;
+  const faturamentoTrend = periodOverride
+    ? periodOverride.variacaoPct != null
+      ? {
+          label: `${formatPercent(periodOverride.variacaoPct)} vs ${periodOverride.periodoLabel}`,
+          direction:
+            periodOverride.variacaoPct > 0
+              ? ("up" as const)
+              : periodOverride.variacaoPct < 0
+                ? ("down" as const)
+                : ("flat" as const),
+        }
+      : undefined
+    : trendFromComparison(c?.faturamento);
+
   return [
     {
       id: "faturamento",
-      title: "Faturamento do mês",
-      value:
-        k != null
-          ? formatCurrencyCompact(hoje.mes.faturamento)
-          : formatCurrencyCompact(hoje.mes.faturamento),
-      supportingText: "Mês corrente · vendas",
+      title: periodOverride ? "Faturamento do período" : "Faturamento do mês",
+      value: formatCurrencyCompact(faturamentoValue),
+      supportingText: periodOverride ? "Período selecionado · vendas" : "Mês corrente · vendas",
       tone: "primary",
-      trend: trendFromComparison(c?.faturamento),
+      trend: faturamentoTrend,
       href: `${base}/vendas`,
     },
     {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Banknote,
   CircleDollarSign,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { KpiDrilldownDialog } from "@/components/dashboard/cockpit-v2/kpi-drilldown-dialog";
+import { fetchKpiHistoryAction } from "@/lib/dashboard/kpi-history-action";
 import type { CockpitKpiItem } from "@/lib/dashboard/cockpit-v2/kpis";
 import { cn } from "@/lib/utils";
 
@@ -86,6 +87,58 @@ const DEFAULT_ACCENT = {
   bar: "bg-gradient-to-r from-[var(--brand-gold)] to-amber-300",
 };
 
+/** KPIs que já têm histórico diário gravado pelo cron — só esses ganham sparkline real. */
+const HAS_HISTORY = new Set(["faturamento", "lucro", "caixa"]);
+
+function KpiSparkline({
+  tenantSlug,
+  kpiId,
+  accentBar,
+}: {
+  tenantSlug: string;
+  kpiId: string;
+  accentBar: string;
+}) {
+  const [points, setPoints] = useState<number[] | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetchKpiHistoryAction(tenantSlug, kpiId).then((result) => {
+      if (active && result.success) {
+        setPoints(result.data.map((p) => p.value));
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [tenantSlug, kpiId]);
+
+  // Menos de 2 pontos ainda não forma gráfico — mantém a barra simples.
+  if (!points || points.length < 2) {
+    return (
+      <div className="h-[3px] w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/8">
+        <div className={cn("h-full rounded-full", accentBar)} style={{ width: "40%" }} />
+      </div>
+    );
+  }
+
+  const max = Math.max(...points, 1);
+  const min = Math.min(...points, 0);
+  const range = Math.max(max - min, 1);
+
+  return (
+    <div className="flex h-8 items-end gap-0.5" aria-hidden>
+      {points.map((v, i) => (
+        <div
+          key={i}
+          className={cn("flex-1 rounded-sm", accentBar)}
+          style={{ height: `${Math.max(10, ((v - min) / range) * 100)}%` }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function TrendIcon({ direction }: { direction?: "up" | "down" | "flat" }) {
   if (direction === "up")
     return <TrendingUp className="size-3.5 shrink-0" aria-hidden />;
@@ -97,9 +150,10 @@ function TrendIcon({ direction }: { direction?: "up" | "down" | "flat" }) {
 type Props = {
   items: CockpitKpiItem[];
   periodoLabel: string;
+  tenantSlug: string;
 };
 
-export function CockpitKpiGrid({ items, periodoLabel }: Props) {
+export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
   const [active, setActive] = useState<CockpitKpiItem | null>(null);
 
   return (
@@ -188,12 +242,20 @@ export function CockpitKpiGrid({ items, periodoLabel }: Props) {
                 </p>
                 {!item.unavailable ? (
                   <div className="mt-auto pt-3">
-                    <div className="h-[3px] w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/8">
-                      <div
-                        className={cn("h-full rounded-full", accent.bar)}
-                        style={{ width: featured ? "78%" : "58%" }}
+                    {HAS_HISTORY.has(item.id) ? (
+                      <KpiSparkline
+                        tenantSlug={tenantSlug}
+                        kpiId={item.id}
+                        accentBar={accent.bar}
                       />
-                    </div>
+                    ) : (
+                      <div className="h-[3px] w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/8">
+                        <div
+                          className={cn("h-full rounded-full", accent.bar)}
+                          style={{ width: featured ? "78%" : "58%" }}
+                        />
+                      </div>
+                    )}
                   </div>
                 ) : null}
               </button>

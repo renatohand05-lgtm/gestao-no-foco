@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Download, Focus } from "lucide-react";
+import { Download } from "lucide-react";
 
 import { DashboardRefreshButton } from "@/components/dashboard/dashboard-refresh-button";
 import { GFIcon } from "@/components/gf/gf-icon";
@@ -232,32 +232,18 @@ export function GFExecutiveHeader({
           <div className="flex flex-wrap items-center gap-2">
             <DashboardRefreshButton updatedAtLabel={updatedAtLabel} />
             {tenantSlug ? (
-              <>
-                <Link
-                  href={`/${tenantSlug}/dashboard`}
-                  className={cn(
-                    "inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/15",
-                    "bg-white/5 px-3 text-xs font-medium text-white/70",
-                    "hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
-                  )}
-                  aria-label="Abrir foco no dashboard"
-                >
-                  <GFIcon icon={Focus} size="sm" variant="neutral" />
-                  Foco
-                </Link>
-                <Link
-                  href={`/${tenantSlug}/relatorios`}
-                  className={cn(
-                    "inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/15",
-                    "bg-white/5 px-3 text-xs font-medium text-white/70",
-                    "hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
-                  )}
-                  aria-label="Exportar e relatórios"
-                >
-                  <GFIcon icon={Download} size="sm" variant="neutral" />
-                  Exportar
-                </Link>
-              </>
+              <Link
+                href={`/${tenantSlug}/relatorios`}
+                className={cn(
+                  "inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/15",
+                  "bg-white/5 px-3 text-xs font-medium text-white/70",
+                  "hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
+                )}
+                aria-label="Exportar e relatórios"
+              >
+                <GFIcon icon={Download} size="sm" variant="neutral" />
+                Exportar
+              </Link>
             ) : null}
           </div>
         </div>

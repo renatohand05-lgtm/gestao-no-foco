@@ -59,7 +59,25 @@ export function AlertsCenter({ alerts }: Props) {
               )}
             >
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md border border-border/60 px-1.5 py-0.5 text-[10px] font-medium uppercase">
+                <span
+                  className={cn(
+                    "size-1.5 shrink-0 rounded-full",
+                    a.priority === "critica" && "bg-danger",
+                    a.priority === "alta" && "bg-warning",
+                    (a.priority === "media" || a.priority === "baixa") &&
+                      "bg-[var(--text-muted)]",
+                  )}
+                  aria-hidden
+                />
+                <span
+                  className={cn(
+                    "rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase",
+                    a.priority === "critica" && "bg-danger/15 text-danger",
+                    a.priority === "alta" && "bg-warning/15 text-warning",
+                    (a.priority === "media" || a.priority === "baixa") &&
+                      "border border-border/60",
+                  )}
+                >
                   {PRIORITY_LABEL[a.priority]}
                 </span>
                 <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px]">

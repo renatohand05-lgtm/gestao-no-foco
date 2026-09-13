@@ -6,30 +6,101 @@ import { cn } from "@/lib/utils";
 
 type Props = { meta: MetaPanelModel };
 
+/** Anel de progresso compacto — substitui o texto solto por um indicador visual imediato. */
+function RadialProgress({
+  pctNum,
+  available,
+  tone,
+}: {
+  pctNum: number;
+  available: boolean;
+  tone: MetaPanelModel["tone"];
+}) {
+  const radius = 24;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, pctNum));
+  const offset = circumference - (clamped / 100) * circumference;
+
+  return (
+    <svg
+      width="60"
+      height="60"
+      viewBox="0 0 60 60"
+      className={cn(
+        "shrink-0",
+        tone === "success" && "text-success",
+        tone === "warning" && "text-warning",
+        tone === "danger" && "text-danger",
+        (tone === "info" || tone === "neutral") && "text-[var(--brand-gold)]",
+      )}
+      role="img"
+      aria-label={available ? `${Math.round(clamped)}% da meta atingido` : "Meta indisponível para este período"}
+    >
+      <circle
+        cx="30"
+        cy="30"
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeOpacity="0.15"
+        strokeWidth="5"
+      />
+      {available ? (
+        <circle
+          cx="30"
+          cy="30"
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="5"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          transform="rotate(-90 30 30)"
+          className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-500"
+        />
+      ) : null}
+      <text
+        x="30"
+        y="34"
+        textAnchor="middle"
+        className="fill-current text-[11px] font-semibold"
+      >
+        {available ? `${Math.round(clamped)}%` : "—"}
+      </text>
+    </svg>
+  );
+}
+
 export function MetaPanel({ meta }: Props) {
   const pctNum = Number.parseFloat(meta.pct.replace("%", "").replace(",", "."));
-  const width =
-    meta.available && Number.isFinite(pctNum)
-      ? Math.min(100, Math.max(0, pctNum))
-      : 0;
+  const hasPct = meta.available && Number.isFinite(pctNum);
 
   return (
     <section
       aria-label="Painel de metas"
       data-cockpit-block="metas"
-      data-sprint="30.4.1"
+      data-sprint="30.4.2"
       className="rounded-2xl border border-[var(--border-premium)] bg-[var(--surface-raised)] p-4 sm:p-5 dark:bg-[var(--brand-graphite-elevated)]/90"
     >
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div className="flex items-start gap-2.5">
-          <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-gold)]/15 text-[var(--brand-gold)]">
-            <Target className="size-4" aria-hidden />
-          </span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <RadialProgress
+            pctNum={hasPct ? pctNum : 0}
+            available={hasPct}
+            tone={meta.tone}
+          />
           <div>
-            <p className="text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
-              Metas
+            <p className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
+              <Target className="size-3" aria-hidden />
+              Meta do mês
             </p>
-            <h2 className="mt-0.5 text-lg font-semibold tracking-tight">Meta do mês</h2>
+            <p className="mt-0.5 text-sm font-semibold tabular-nums">
+              {meta.realizado}
+              <span className="ml-1 text-xs font-normal text-[var(--text-muted)]">
+                de {meta.meta}
+              </span>
+            </p>
           </div>
         </div>
         <Link
@@ -44,38 +115,13 @@ export function MetaPanel({ meta }: Props) {
         </Link>
       </div>
 
-      <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <Stat label="Meta" value={meta.meta} />
-        <Stat label="Realizado" value={meta.realizado} />
-        <Stat label="%" value={meta.pct} />
+      <dl className="mt-4 grid gap-2 grid-cols-2 sm:grid-cols-3">
         <Stat label="Projeção" value={meta.projecao} />
         <Stat label="Dias restantes" value={meta.diasRestantes} />
         <Stat label="Valor restante" value={meta.valorRestante} />
       </dl>
 
-      <div className="mt-4">
-        <div
-          className="h-2 overflow-hidden rounded-full bg-muted"
-          role="progressbar"
-          aria-valuenow={width}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Progresso da meta"
-        >
-          <div
-            className={cn(
-              "h-full rounded-full motion-safe:transition-[width]",
-              meta.tone === "success" && "bg-success",
-              meta.tone === "warning" && "bg-warning",
-              meta.tone === "danger" && "bg-danger",
-              (meta.tone === "info" || meta.tone === "neutral") &&
-                "bg-[var(--brand-gold)]",
-            )}
-            style={{ width: `${width}%` }}
-          />
-        </div>
-        <p className="mt-2 text-xs text-[var(--text-secondary)]">{meta.vsMesAnterior}</p>
-      </div>
+      <p className="mt-3 text-xs text-[var(--text-secondary)]">{meta.vsMesAnterior}</p>
     </section>
   );
 }

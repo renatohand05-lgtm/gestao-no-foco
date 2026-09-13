@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, CalendarDays, Sparkles } from "lucide-react";
+import { AlertTriangle, CalendarDays, LineChart, Sparkles, Wallet } from "lucide-react";
 
 import type { PremiumInsightCard } from "@/lib/dashboard/premium-dashboard-map";
+import type {
+  CashExecutiveCardModel,
+  DreExecutiveCardModel,
+} from "@/lib/dashboard/cockpit-v2/panels";
 import type { DashboardChartPoint } from "@/types/dashboard-executive";
-import type { ExecutiveFinancialCockpitData } from "@/lib/dashboard/executive-financial-cockpit-types";
-import { formatCurrency, formatCurrencyCompact } from "@/lib/dashboard/format";
+import { formatCurrency } from "@/lib/dashboard/format";
 import { GFInsightCard } from "@/components/gf/gf-insight-card";
 import { GFRevenueChart } from "@/components/gf/gf-revenue-chart";
 import { cn } from "@/lib/utils";
@@ -78,20 +81,17 @@ function CashSpark({
 export function PremiumMainRow({
   faturamentoDiario,
   receitasVsDespesas,
-  insights,
-  cockpit,
-  tenantSlug,
+  dre,
+  cash,
   periodoLabel,
 }: {
   faturamentoDiario: DashboardChartPoint[];
   receitasVsDespesas: DashboardChartPoint[];
-  insights: PremiumInsightCard[];
-  cockpit: ExecutiveFinancialCockpitData;
-  tenantSlug: string;
+  dre: DreExecutiveCardModel;
+  cash: CashExecutiveCardModel;
   periodoLabel: string;
 }) {
-  const topInsights = insights.slice(0, 3);
-  const moreCount = Math.max(0, insights.length - 3);
+  const maxSpark = Math.max(1, ...dre.spark.map((p) => Math.abs(p.value)));
 
   return (
     <section
@@ -106,7 +106,7 @@ export function PremiumMainRow({
           "gf-surface min-w-0 overflow-hidden rounded-2xl p-4",
           "border border-border bg-card shadow-[var(--elevation-card)]",
           "dark:bg-[var(--brand-graphite-elevated)]",
-          "lg:col-span-5 2xl:col-span-7",
+          "lg:col-span-5 2xl:col-span-5",
         )}
         data-chart-panel="revenue"
       >
@@ -126,131 +126,184 @@ export function PremiumMainRow({
         />
       </div>
 
-      {/* Inteligência — três níveis: top 3 · ver todos · detalhes */}
+      {/* DRE executivo */}
       <div
         className={cn(
           "min-w-0 overflow-hidden rounded-2xl border border-[var(--border)]",
           "bg-[var(--card)] p-4 shadow-[var(--elevation-card)]",
-          "lg:col-span-3 2xl:col-span-3",
+          "lg:col-span-3 2xl:col-span-4",
         )}
-        data-intel-panel=""
-        data-intel-no-scroll=""
-        data-intel-levels="3"
+        data-dre-panel=""
       >
-        <div className="mb-2 flex items-center gap-2">
-          <Sparkles className="size-4 shrink-0 text-[var(--brand-gold)]" aria-hidden />
-          <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)]">
-            Central de Inteligência
-          </h2>
-        </div>
-        <p className="mb-2 text-[11px] text-[var(--text-secondary)]">
-          Top 3 · Análise baseada em regras, métricas e histórico do tenant.
-        </p>
-        <ul className="space-y-2 overflow-visible">
-          {topInsights.map((card) => (
-            <li key={card.id}>
-              <GFInsightCard
-                title={card.title}
-                body={card.body}
-                confianca={card.confianca}
-                origem={card.origem}
-                href={card.href ?? `/${tenantSlug}/dashboard`}
-                severity={card.severity}
-              />
-            </li>
-          ))}
-        </ul>
-        {moreCount > 0 ? (
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2">
+            <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400">
+              <LineChart className="size-3.5" aria-hidden />
+            </span>
+            <div>
+              <p className="text-[10px] font-medium tracking-[0.14em] text-sky-500 dark:text-sky-400 uppercase">
+                DRE executivo
+              </p>
+              <h2 className="mt-0.5 font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)]">
+                Leitura do resultado
+              </h2>
+            </div>
+          </div>
           <Link
-            href={`#premium-trigger-alertas`}
-            className="mt-2 inline-flex text-xs font-medium text-[var(--brand-gold)] hover:underline"
+            href={dre.href}
+            className="shrink-0 text-xs font-medium text-[var(--brand-gold)] hover:underline"
           >
-            Ver todos ({insights.length})
+            Drill-down
           </Link>
+        </div>
+        <dl className="grid grid-cols-2 gap-2 text-sm">
+          <DreRow label="Receita" value={dre.receita} />
+          <DreRow label="Custos" value={dre.custos} />
+          <DreRow label="Despesas" value={dre.despesas} />
+          <DreRow label="Lucro" value={dre.lucro} />
+          <DreRow label="EBITDA" value={dre.ebitda} />
+          <DreRow label="Margem" value={dre.margem} />
+        </dl>
+        <p className="mt-3 text-xs text-[var(--text-secondary)]">{dre.comparativo}</p>
+        {dre.spark.length > 0 ? (
+          <div className="mt-3 flex h-10 items-end gap-1" aria-label="Mini gráfico EBITDA">
+            {dre.spark.map((p) => (
+              <div
+                key={`${p.label}-${p.value}`}
+                className="flex-1 rounded-sm bg-gradient-to-t from-sky-600 to-sky-400"
+                style={{
+                  height: `${Math.max(8, (Math.abs(p.value) / maxSpark) * 100)}%`,
+                }}
+                title={`${p.label}: ${p.value}`}
+              />
+            ))}
+          </div>
         ) : null}
       </div>
 
-      {/* Fluxo — SEM overflow-x */}
+      {/* Fluxo de caixa — SEM overflow-x */}
       <div
         className={cn(
-          "min-w-0 overflow-x-hidden rounded-2xl border border-border",
-          "bg-card p-4 shadow-[var(--elevation-card)]",
-          "dark:bg-[var(--brand-graphite-elevated)]",
-          "lg:col-span-2 2xl:col-span-2",
+          "min-w-0 overflow-x-hidden rounded-2xl border p-4 shadow-[var(--elevation-card)]",
+          "border-border bg-card dark:bg-[var(--brand-graphite-elevated)]",
+          cash.tone === "danger" && "border-danger/40",
+          cash.tone === "warning" && "border-warning/40",
         )}
         data-cash-panel=""
       >
-        <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)]">
-          Fluxo de caixa
-        </h2>
-        <p className="mt-1 text-xs text-[var(--text-secondary)] text-pretty">
-          {cockpit.saudeLabel}
-        </p>
-        <dl className="mt-4 space-y-3 text-sm">
-          <div className="min-w-0 space-y-0.5">
-            <dt className="text-[10px] tracking-wide text-muted-foreground uppercase">
-              Saldo
-            </dt>
-            <dd
-              className="whitespace-nowrap font-semibold tabular-nums text-[clamp(0.9rem,0.8rem+0.35vw,1.05rem)]"
-              title={
-                cockpit.saldoAtual != null
-                  ? formatCurrency(cockpit.saldoAtual)
-                  : undefined
-              }
-            >
-              {cockpit.saldoAtual != null
-                ? formatCurrencyCompact(cockpit.saldoAtual)
-                : "Indisponível"}
-            </dd>
+        <div className="mb-2 flex items-start gap-2">
+          <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-teal-500/15 text-teal-400">
+            <Wallet className="size-3.5" aria-hidden />
+          </span>
+          <div>
+            <p className="text-[10px] font-medium tracking-[0.14em] text-teal-500 dark:text-teal-400 uppercase">
+              Fluxo de caixa
+            </p>
+            <h2 className="mt-0.5 font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)]">
+              7 dias
+            </h2>
           </div>
-          <div className="min-w-0 space-y-0.5">
-            <dt className="text-[10px] tracking-wide text-muted-foreground uppercase">
-              Proj. 7d
-            </dt>
-            <dd
-              className="whitespace-nowrap font-semibold tabular-nums text-[clamp(0.9rem,0.8rem+0.35vw,1.05rem)]"
-              title={
-                cockpit.dias7.saldoProjetado != null
-                  ? formatCurrency(cockpit.dias7.saldoProjetado)
-                  : undefined
-              }
-            >
-              {cockpit.dias7.saldoProjetado != null
-                ? formatCurrencyCompact(cockpit.dias7.saldoProjetado)
-                : "Indisponível"}
-            </dd>
-          </div>
-          <div className="min-w-0 space-y-0.5">
-            <dt className="text-[10px] tracking-wide text-muted-foreground uppercase">
-              Entradas
-            </dt>
-            <dd className="whitespace-nowrap tabular-nums text-muted-foreground text-[clamp(0.85rem,0.75rem+0.3vw,1rem)]">
-              {cockpit.dias7.entradasPrevistas != null
-                ? formatCurrencyCompact(cockpit.dias7.entradasPrevistas)
-                : "—"}
-            </dd>
-          </div>
-          <div className="min-w-0 space-y-0.5">
-            <dt className="text-[10px] tracking-wide text-muted-foreground uppercase">
-              Saídas
-            </dt>
-            <dd className="whitespace-nowrap tabular-nums text-muted-foreground text-[clamp(0.85rem,0.75rem+0.3vw,1rem)]">
-              {cockpit.dias7.saidasPrevistas != null
-                ? formatCurrencyCompact(cockpit.dias7.saidasPrevistas)
-                : "—"}
-            </dd>
-          </div>
+        </div>
+        <dl className="grid grid-cols-2 gap-2 text-sm">
+          <DreRow label="Saldo atual" value={cash.saldoAtual} />
+          <DreRow label="Saldo proj." value={cash.saldoProjetado} />
+          <DreRow label="Entradas" value={cash.entradas} />
+          <DreRow label="Saídas" value={cash.saidas} />
         </dl>
         <CashSpark data={receitasVsDespesas} />
-        <Link
-          href={`/${tenantSlug}/financeiro/fluxo-caixa`}
-          className="mt-3 inline-flex text-xs font-medium text-[var(--brand-gold)] hover:underline"
+        <p className="mt-2 text-xs text-[var(--text-secondary)]">
+          <span className="font-medium text-[var(--text-primary)]">Vencimento · </span>
+          {cash.maiorVencimento}
+        </p>
+        <p
+          className={cn(
+            "mt-1 text-xs",
+            cash.tone === "danger" && "text-danger",
+            cash.tone === "warning" && "text-warning",
+            cash.tone === "success" && "text-success",
+            cash.tone === "neutral" && "text-[var(--text-muted)]",
+          )}
         >
-          Abrir fluxo completo
+          <span className="font-medium">Risco · </span>
+          {cash.maiorRisco}
+        </p>
+        <Link
+          href={cash.href}
+          className="mt-2 inline-flex text-xs font-medium text-[var(--brand-gold)] hover:underline"
+        >
+          Abrir fluxo completo →
         </Link>
       </div>
     </section>
+  );
+}
+
+function DreRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border/50 px-2.5 py-2">
+      <dt className="text-[10px] text-[var(--text-muted)] uppercase">{label}</dt>
+      <dd className="mt-0.5 truncate font-semibold tabular-nums">{value}</dd>
+    </div>
+  );
+}
+
+/**
+ * Central de Inteligência — extraída do main-row (Sprint 30.4.2) pra
+ * abrir espaço pro DRE/Caixa ficarem lado a lado com o Faturamento.
+ * Mesmos dados, só reposicionada.
+ */
+export function IntelligenceCenterPanel({
+  insights,
+  tenantSlug,
+}: {
+  insights: PremiumInsightCard[];
+  tenantSlug: string;
+}) {
+  const topInsights = insights.slice(0, 3);
+  const moreCount = Math.max(0, insights.length - 3);
+
+  return (
+    <div
+      className={cn(
+        "min-w-0 overflow-hidden rounded-2xl border border-[var(--border)]",
+        "bg-[var(--card)] p-4 shadow-[var(--elevation-card)]",
+      )}
+      data-intel-panel=""
+      data-intel-no-scroll=""
+      data-intel-levels="3"
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <Sparkles className="size-4 shrink-0 text-[var(--brand-gold)]" aria-hidden />
+        <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)]">
+          Central de Inteligência
+        </h2>
+      </div>
+      <p className="mb-2 text-[11px] text-[var(--text-secondary)]">
+        Top 3 · Análise baseada em regras, métricas e histórico do tenant.
+      </p>
+      <ul className="grid gap-2 sm:grid-cols-3">
+        {topInsights.map((card) => (
+          <li key={card.id}>
+            <GFInsightCard
+              title={card.title}
+              body={card.body}
+              confianca={card.confianca}
+              origem={card.origem}
+              href={card.href ?? `/${tenantSlug}/dashboard`}
+              severity={card.severity}
+            />
+          </li>
+        ))}
+      </ul>
+      {moreCount > 0 ? (
+        <Link
+          href={`#premium-trigger-alertas`}
+          className="mt-2 inline-flex text-xs font-medium text-[var(--brand-gold)] hover:underline"
+        >
+          Ver todos ({insights.length})
+        </Link>
+      ) : null}
+    </div>
   );
 }
 

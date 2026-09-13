@@ -46,15 +46,20 @@ export function buildCockpitKpis(input: {
   segment: string | null;
   segmentVersion?: number | null;
   segmentConfig?: unknown;
+  periodOverride?: {
+    faturamentoAtual: number;
+    variacaoPct: number | null;
+    periodoLabel: string;
+  } | null;
 }): CockpitKpiItem[] {
-  const { primary, hoje, intelligence, cockpit, tenantSlug, segment } = input;
+  const { primary, hoje, intelligence, cockpit, tenantSlug, segment, periodOverride } = input;
   const copy = getSegmentCockpitCopy(segment);
   const ui = getSegmentUiCopy({
     segment,
     segmentVersion: input.segmentVersion,
     segmentConfig: input.segmentConfig,
   });
-  const base = buildPremiumTopKpis({ primary, hoje, tenantSlug });
+  const base = buildPremiumTopKpis({ primary, hoje, tenantSlug, periodOverride });
   const k = primary?.kpis;
   const c = primary?.comparisons;
   const op = intelligence.saudeOperacao;
@@ -64,7 +69,11 @@ export function buildCockpitKpis(input: {
     if (item.trend?.label) {
       return withContext(item, item.trend.label);
     }
-    if (item.id === "faturamento" && hoje.comparacoes.vs_ontem_pct != null) {
+    if (
+      item.id === "faturamento" &&
+      !periodOverride &&
+      hoje.comparacoes.vs_ontem_pct != null
+    ) {
       return withContext(
         {
           ...item,

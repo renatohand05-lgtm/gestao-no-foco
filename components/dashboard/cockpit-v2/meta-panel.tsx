@@ -36,7 +36,11 @@ export function MetaPanel({ meta }: Props) {
           href={meta.href}
           className="text-xs font-medium text-[var(--brand-gold)] underline-offset-2 hover:underline"
         >
-          {meta.available ? "Ajustar meta" : "Cadastrar meta"}
+          {meta.available
+            ? "Ajustar meta"
+            : meta.outOfPeriodView
+              ? "Ver meta do mês"
+              : "Cadastrar meta"}
         </Link>
       </div>
 

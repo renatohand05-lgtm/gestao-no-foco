@@ -207,17 +207,11 @@ export function PremiumDashboardView({
       />
 
       <div className={cn("relative", gfSpace.stackSection)}>
-        {/* Bloco 1 — Saudação inteligente */}
+        {/* Bloco 1 — Saudação + cabeçalho executivo */}
         <div
           className="premium-enter premium-enter-delay-1 space-y-2"
           data-cockpit-block="greeting"
         >
-          <p
-            className="text-sm text-[var(--text-secondary)] text-pretty"
-            data-cockpit-greeting=""
-          >
-            {greeting.includes(".") ? greeting : `${greeting}.`}
-          </p>
           <GFExecutiveHeader
             greeting={greeting}
             tenantName={tenantName}

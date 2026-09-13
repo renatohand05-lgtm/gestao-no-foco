@@ -4,13 +4,13 @@ import Link from "next/link";
 import { BrandInstitutionalFooter } from "@/components/brand/brand-institutional-footer";
 import { AlertsCenter } from "@/components/dashboard/cockpit-v2/alerts-center";
 import { CockpitKpiGrid } from "@/components/dashboard/cockpit-v2/cockpit-kpi-grid";
-import { DreCashCards } from "@/components/dashboard/cockpit-v2/dre-cash-cards";
 import { EmptyStatesRail } from "@/components/dashboard/cockpit-v2/empty-states-rail";
 import { ExecutiveBriefV2 } from "@/components/dashboard/cockpit-v2/executive-brief-v2";
 import { MetaPanel } from "@/components/dashboard/cockpit-v2/meta-panel";
 import { QuickActionsPanel } from "@/components/dashboard/cockpit-v2/quick-actions-panel";
 import { PremiumDisclosure } from "@/components/dashboard/premium/premium-disclosure";
 import {
+  IntelligenceCenterPanel,
   PremiumAlertsRail,
   PremiumMainRow,
 } from "@/components/dashboard/premium/premium-main-row";
@@ -238,30 +238,31 @@ export function PremiumDashboardView({
           <ExecutiveBriefV2 brief={brief} />
         </div>
 
-        {/* Blocos 4–6 — Metas · DRE · Caixa */}
-        <div className="premium-enter premium-enter-delay-3 space-y-[var(--gf-space-block)]">
+        {/* Bloco 4 — Meta do mês */}
+        <div className="premium-enter premium-enter-delay-3">
           <MetaPanel meta={meta} />
-          <DreCashCards dre={dre} cash={cash} />
         </div>
 
-        {/* Gráfico / inteligência — streamado (30.4.1) ou inline */}
+        {/* Gráfico + DRE + Caixa + Inteligência — streamado (30.4.1) ou inline */}
         <div
-          className="premium-enter premium-enter-delay-4"
+          className="premium-enter premium-enter-delay-4 space-y-[var(--gf-space-block)]"
           data-cockpit-block="charts"
         >
           {mainRowSlot ?? (
-            <PremiumMainRow
-              faturamentoDiario={charts?.faturamentoDiario ?? []}
-              receitasVsDespesas={
-                charts?.receitasVsDespesas ??
-                primary?.fluxoCharts.receitasVsDespesas ??
-                []
-              }
-              insights={insights}
-              cockpit={cockpit}
-              tenantSlug={tenantSlug}
-              periodoLabel={periodoLabel}
-            />
+            <>
+              <PremiumMainRow
+                faturamentoDiario={charts?.faturamentoDiario ?? []}
+                receitasVsDespesas={
+                  charts?.receitasVsDespesas ??
+                  primary?.fluxoCharts.receitasVsDespesas ??
+                  []
+                }
+                dre={dre}
+                cash={cash}
+                periodoLabel={periodoLabel}
+              />
+              <IntelligenceCenterPanel insights={insights} tenantSlug={tenantSlug} />
+            </>
           )}
         </div>
 

@@ -142,7 +142,7 @@ export function PremiumDashboardView({
     insights,
     tenantSlug,
   });
-  const meta = buildMetaPanel({ hoje, tenantSlug });
+  const meta = buildMetaPanel({ hoje, tenantSlug, periodOverride });
   const dre = buildDreExecutiveCard({ primary, charts, tenantSlug });
   const cash = buildCashExecutiveCard({ cockpit, tenantSlug });
   const ui = getSegmentUiCopy({

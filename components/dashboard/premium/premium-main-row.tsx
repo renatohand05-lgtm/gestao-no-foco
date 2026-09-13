@@ -98,7 +98,7 @@ export function PremiumMainRow({
       data-premium-block="main-row"
       data-dashboard-layout="main-row"
       data-authorial-charts=""
-      className="grid grid-cols-1 gap-[var(--dashboard-gap)] lg:grid-cols-5 2xl:grid-cols-12"
+      className="grid grid-cols-1 gap-[var(--dashboard-gap)] lg:grid-cols-10"
     >
       {/* Gráfico autoral — full no lg; 7 cols no 2xl */}
       <div
@@ -106,7 +106,7 @@ export function PremiumMainRow({
           "gf-surface min-w-0 overflow-hidden rounded-2xl p-4",
           "border border-border bg-card shadow-[var(--elevation-card)]",
           "dark:bg-[var(--brand-graphite-elevated)]",
-          "lg:col-span-5 2xl:col-span-5",
+          "lg:col-span-4",
         )}
         data-chart-panel="revenue"
       >
@@ -131,7 +131,7 @@ export function PremiumMainRow({
         className={cn(
           "min-w-0 overflow-hidden rounded-2xl border border-[var(--border)]",
           "bg-[var(--card)] p-4 shadow-[var(--elevation-card)]",
-          "lg:col-span-3 2xl:col-span-4",
+          "lg:col-span-3",
         )}
         data-dre-panel=""
       >
@@ -186,6 +186,7 @@ export function PremiumMainRow({
         className={cn(
           "min-w-0 overflow-x-hidden rounded-2xl border p-4 shadow-[var(--elevation-card)]",
           "border-border bg-card dark:bg-[var(--brand-graphite-elevated)]",
+          "lg:col-span-3",
           cash.tone === "danger" && "border-danger/40",
           cash.tone === "warning" && "border-warning/40",
         )}

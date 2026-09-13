@@ -154,13 +154,39 @@ export function GFExecutiveHeader({
         "border border-white/10 text-white shadow-[var(--elevation-card)]",
       )}
       style={{
-        background:
-          "radial-gradient(ellipse 120% 100% at 20% 0%, rgba(201,168,76,0.16), transparent 55%)," +
-          "linear-gradient(155deg, #05070c 0%, #0b1220 45%, #10141d 100%)",
+        backgroundImage:
+          "radial-gradient(ellipse 130% 90% at 18% -15%, rgba(230,192,105,0.30), transparent 52%)," +
+          "radial-gradient(ellipse 90% 70% at 88% 115%, rgba(59,92,158,0.32), transparent 60%)," +
+          "linear-gradient(175deg, #04060b 0%, #0a1120 34%, #131a2a 62%, #05070c 100%)",
       }}
     >
+      {/* Camada atmosférica — silhueta de montanhas + névoa, dá a sensação de
+          fundo fotográfico (nascer do sol) sem usar uma foto de terceiros. */}
+      <svg
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-32 w-full opacity-[0.55] sm:h-40"
+        viewBox="0 0 800 200"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <path
+          d="M0 200 L0 120 L90 60 L170 130 L240 40 L320 150 L410 70 L480 160 L560 90 L650 170 L740 100 L800 150 L800 200 Z"
+          fill="rgba(6,9,16,0.55)"
+        />
+        <path
+          d="M0 200 L0 150 L120 100 L210 160 L300 90 L390 175 L470 120 L560 180 L650 130 L740 185 L800 160 L800 200 Z"
+          fill="rgba(4,6,11,0.85)"
+        />
+      </svg>
       <div
-        className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(201_168_76_/0.18),transparent_70%)]"
+        className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(230_192_105_/0.22),transparent_70%)]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        }}
         aria-hidden
       />
 

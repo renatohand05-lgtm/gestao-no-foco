@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { BrandInstitutionalFooter } from "@/components/brand/brand-institutional-footer";
+import { DashboardAiBar } from "@/components/dashboard/premium/dashboard-ai-bar";
 import { AlertsCenter } from "@/components/dashboard/cockpit-v2/alerts-center";
 import { CockpitKpiGrid } from "@/components/dashboard/cockpit-v2/cockpit-kpi-grid";
 import { EmptyStatesRail } from "@/components/dashboard/cockpit-v2/empty-states-rail";
@@ -339,6 +340,10 @@ export function PremiumDashboardView({
               },
             ]}
           />
+        </div>
+
+        <div className="premium-enter premium-enter-delay-5">
+          <DashboardAiBar tenantSlug={tenantSlug} />
         </div>
 
         <BrandInstitutionalFooter compact />

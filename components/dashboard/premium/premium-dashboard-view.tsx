@@ -231,7 +231,7 @@ export function PremiumDashboardView({
 
         {/* Bloco 2 — KPIs */}
         <div className="premium-enter premium-enter-delay-2">
-          <CockpitKpiGrid items={kpis} periodoLabel={periodoLabel} />
+          <CockpitKpiGrid items={kpis} periodoLabel={periodoLabel} tenantSlug={tenantSlug} />
         </div>
 
         {/* Bloco 3 — Executive Brief */}

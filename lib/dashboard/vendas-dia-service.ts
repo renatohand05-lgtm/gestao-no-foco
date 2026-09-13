@@ -531,6 +531,96 @@ export class VendasDiaService {
       String(row.data).slice(0, 10),
     );
   }
+
+  /**
+   * Faturamento de um período arbitrário (usado quando o usuário escolhe
+   * um filtro de data diferente de "hoje"/"mês atual") + comparação com
+   * o período anterior de mesmo tamanho. Não mexe em nada da lógica de
+   * "hoje"/meta diária — método novo e isolado.
+   */
+  async getPeriodTotal(
+    dataDe: string,
+    dataAte: string,
+    centroCustoId?: string | null,
+  ): Promise<{
+    faturamentoAtual: number;
+    faturamentoAnterior: number | null;
+    variacaoPct: number | null;
+    quantidadeVendas: number;
+    ticketMedio: number;
+  }> {
+    const dias = diasEntre(dataDe, dataAte) + 1;
+    const dataDeAnterior = shiftCivilDate(dataDe, -dias);
+    const dataAteAnterior = shiftCivilDate(dataDe, -1);
+
+    const [vendasAtual, crAtual, vendasAnterior, crAnterior] = await Promise.all([
+      this.fetchVendas(dataDe, dataAte, centroCustoId),
+      this.fetchCrAvulsas(dataDe, dataAte, centroCustoId),
+      this.fetchVendas(dataDeAnterior, dataAteAnterior, centroCustoId),
+      this.fetchCrAvulsas(dataDeAnterior, dataAteAnterior, centroCustoId),
+    ]);
+
+    const atual = aggregateFaturamentoLiquido({
+      vendas: vendasAtual.map((v) => ({
+        status: v.status,
+        deleted_at: v.deleted_at,
+        subtotal: Number(v.subtotal),
+        desconto_total: Number(v.desconto_total),
+        total: Number(v.total),
+        data_venda: v.data_venda,
+      })),
+      crAvulsas: crAtual.map((r) => ({
+        status: r.status,
+        deleted_at: r.deleted_at,
+        venda_id: r.venda_id,
+        valor_original: Number(r.valor_original),
+        data_competencia: r.data_competencia,
+        data_emissao: r.data_emissao,
+      })),
+      dataDe,
+      dataAte,
+    });
+
+    const anterior = aggregateFaturamentoLiquido({
+      vendas: vendasAnterior.map((v) => ({
+        status: v.status,
+        deleted_at: v.deleted_at,
+        subtotal: Number(v.subtotal),
+        desconto_total: Number(v.desconto_total),
+        total: Number(v.total),
+        data_venda: v.data_venda,
+      })),
+      crAvulsas: crAnterior.map((r) => ({
+        status: r.status,
+        deleted_at: r.deleted_at,
+        venda_id: r.venda_id,
+        valor_original: Number(r.valor_original),
+        data_competencia: r.data_competencia,
+        data_emissao: r.data_emissao,
+      })),
+      dataDe: dataDeAnterior,
+      dataAte: dataAteAnterior,
+    });
+
+    const variacaoPct =
+      anterior.liquido > 0
+        ? ((atual.liquido - anterior.liquido) / anterior.liquido) * 100
+        : null;
+
+    return {
+      faturamentoAtual: atual.liquido,
+      faturamentoAnterior: anterior.liquido,
+      variacaoPct,
+      quantidadeVendas: atual.quantidade_vendas,
+      ticketMedio: atual.ticket_medio,
+    };
+  }
+}
+
+function diasEntre(dataDe: string, dataAte: string): number {
+  const de = new Date(`${dataDe}T00:00:00Z`).getTime();
+  const ate = new Date(`${dataAte}T00:00:00Z`).getTime();
+  return Math.max(0, Math.round((ate - de) / 86_400_000));
 }
 
 export async function createVendasDiaService(tenantId: string) {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { MetaVendasDeleteButton } from "@/components/metas/meta-vendas-delete-button";
 import { CancelButton } from "@/components/ui/cancel-button";
@@ -32,9 +32,6 @@ import {
 import type { MetaVendasMensal } from "@/types/metas-vendas";
 
 type CentroOption = { id: string; nome: string };
-
-const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 type SharedProps = {
   tenantSlug: string;
@@ -70,38 +67,9 @@ export function MetaVendasForm(
   );
 }
 
-function CentroCustoSelect({
-  value,
-  onChange,
-  centrosCusto,
-  id = "centro_custo_id",
-}: {
-  value: string | null | undefined;
-  onChange: (value: string) => void;
-  centrosCusto: CentroOption[];
-  id?: string;
-}) {
-  return (
-    <select
-      id={id}
-      className={selectClassName}
-      value={value ?? ""}
-      onChange={(event) => onChange(event.target.value)}
-      aria-label="Centro de custo"
-    >
-      <option value="">Meta geral (sem centro)</option>
-      {centrosCusto.map((centro) => (
-        <option key={centro.id} value={centro.id}>
-          {centro.nome}
-        </option>
-      ))}
-    </select>
-  );
-}
-
 function MetaVendasCreateForm({
   tenantSlug,
-  centrosCusto,
+  centrosCusto: _centrosCusto,
   defaultCompetencia,
   defaultCentroCustoId,
 }: SharedProps & {
@@ -120,7 +88,7 @@ function MetaVendasCreateForm({
     defaultValues: {
       competencia: (defaultCompetencia ?? defaultMonth).slice(0, 7),
       valor_meta: 0,
-      centro_custo_id: defaultCentroCustoId ?? "",
+      centro_custo_id: defaultCentroCustoId ?? null,
       observacao: "",
     },
   });
@@ -147,7 +115,7 @@ function MetaVendasCreateForm({
 
       <FormSection
         title="Meta mensal de vendas"
-        description="Competência no primeiro dia do mês. Meta geral quando o centro de custo não é informado."
+        description="Competência no primeiro dia do mês. A meta vale para a empresa toda."
       >
         <FormGrid>
           <FormField
@@ -177,24 +145,6 @@ function MetaVendasCreateForm({
           </FormField>
 
           <FormField
-            label="Centro de custo (opcional)"
-            htmlFor="centro_custo_id"
-            error={form.formState.errors.centro_custo_id?.message}
-          >
-            <Controller
-              control={form.control}
-              name="centro_custo_id"
-              render={({ field }) => (
-                <CentroCustoSelect
-                  value={field.value}
-                  onChange={field.onChange}
-                  centrosCusto={centrosCusto}
-                />
-              )}
-            />
-          </FormField>
-
-          <FormField
             label="Observação"
             htmlFor="observacao"
             className="md:col-span-2"
@@ -218,7 +168,7 @@ function MetaVendasCreateForm({
 function MetaVendasEditForm({
   tenantSlug,
   item,
-  centrosCusto,
+  centrosCusto: _centrosCusto,
 }: SharedProps & { item: MetaVendasMensal }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -256,7 +206,7 @@ function MetaVendasEditForm({
 
       <FormSection
         title="Editar meta"
-        description={`Competência ${item.competencia.slice(0, 7)} · altere o valor, o centro ou a observação.`}
+        description={`Competência ${item.competencia.slice(0, 7)} · altere o valor ou a observação.`}
       >
         <FormGrid>
           <FormField
@@ -270,24 +220,6 @@ function MetaVendasEditForm({
               step="0.01"
               min="0"
               {...form.register("valor_meta", { valueAsNumber: true })}
-            />
-          </FormField>
-
-          <FormField
-            label="Centro de custo (opcional)"
-            htmlFor="centro_custo_id"
-            error={form.formState.errors.centro_custo_id?.message}
-          >
-            <Controller
-              control={form.control}
-              name="centro_custo_id"
-              render={({ field }) => (
-                <CentroCustoSelect
-                  value={field.value}
-                  onChange={field.onChange}
-                  centrosCusto={centrosCusto}
-                />
-              )}
             />
           </FormField>
 

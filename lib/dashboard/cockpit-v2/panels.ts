@@ -185,6 +185,8 @@ export type MetaPanelModel = {
   vsMesAnterior: string;
   tone: "success" | "warning" | "danger" | "neutral" | "info";
   available: boolean;
+  /** true quando o motivo de "available: false" é período ≠ mês atual, não falta de meta. */
+  outOfPeriodView: boolean;
   href: string;
 };
 
@@ -198,8 +200,38 @@ function daysRemainingInMonth(civilDate: string): number | null {
 export function buildMetaPanel(input: {
   hoje: DashboardHojeSnapshot;
   tenantSlug: string;
+  periodOverride?: {
+    faturamentoAtual: number;
+    variacaoPct: number | null;
+    periodoLabel: string;
+  } | null;
 }): MetaPanelModel {
-  const { hoje, tenantSlug } = input;
+  const { hoje, tenantSlug, periodOverride } = input;
+
+  // Período diferente de "hoje/mês atual" — meta é um compromisso mensal,
+  // não faz sentido comparar progresso de meta com um recorte arbitrário.
+  // Mostra o faturamento real do período, sem inventar % de meta.
+  if (periodOverride) {
+    const vs =
+      periodOverride.variacaoPct != null
+        ? `${formatPercent(periodOverride.variacaoPct)} vs ${periodOverride.periodoLabel}`
+        : "Sem dado do período anterior pra comparar";
+
+    return {
+      meta: "Meta é mensal — selecione \"Mês atual\"",
+      realizado: formatCurrencyCompact(periodOverride.faturamentoAtual),
+      pct: "Indisponível para este período",
+      projecao: "Indisponível",
+      diasRestantes: "Indisponível",
+      valorRestante: "Indisponível",
+      vsMesAnterior: vs,
+      tone: "neutral",
+      available: false,
+      outOfPeriodView: true,
+      href: `/${tenantSlug}/configuracoes/metas`,
+    };
+  }
+
   const dias = daysRemainingInMonth(hoje.data_hoje);
   const hasMeta = hoje.mes.meta != null && hoje.mes.meta > 0;
   const restante =
@@ -239,6 +271,7 @@ export function buildMetaPanel(input: {
           ? "info"
           : "warning",
     available: hasMeta,
+    outOfPeriodView: false,
     href: `/${tenantSlug}/configuracoes/metas`,
   };
 }

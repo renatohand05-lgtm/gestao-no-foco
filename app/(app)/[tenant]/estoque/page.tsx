@@ -108,6 +108,11 @@ export default async function EstoquePage({
           label="Reposição"
           href={`/${tenantSlug}/estoque/reposicao`}
         />
+        <ActionButton
+          action="view"
+          label="Contagem"
+          href={`/${tenantSlug}/estoque/contagem`}
+        />
       </ModuleHeader>
 
       <EstoqueFeedback

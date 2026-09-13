@@ -84,7 +84,7 @@ export class EstoqueContagemService {
 
     if (error) throw new Error(error.message);
 
-    return ((data ?? []) as Array<
+    return ((data ?? []) as unknown as Array<
       EstoqueContagem & {
         estoque_contagem_itens: Array<{ quantidade_contada: number | null }>;
       }

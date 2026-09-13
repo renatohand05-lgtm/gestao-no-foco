@@ -4,12 +4,16 @@ import Link from "next/link";
 import {
   Banknote,
   CircleDollarSign,
+  ClipboardList,
   Gauge,
   LineChart,
+  PackageSearch,
+  ShoppingCart,
   Target,
   TrendingDown,
   TrendingUp,
   Minus,
+  Users,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -159,6 +163,13 @@ export function PremiumKpiStrip({
   return <GFKpiCockpit items={items} featuredIndex={0} />;
 }
 
+const OPS_ACCENT: Record<string, { icon: LucideIcon; classes: string }> = {
+  "vendas-hoje": { icon: ShoppingCart, classes: "bg-blue-500/15 text-blue-400" },
+  pedidos: { icon: ClipboardList, classes: "bg-amber-500/15 text-amber-400" },
+  estoque: { icon: PackageSearch, classes: "bg-orange-500/15 text-orange-400" },
+  clientes: { icon: Users, classes: "bg-indigo-500/15 text-indigo-400" },
+};
+
 export function PremiumOpsStrip({
   items,
 }: {
@@ -177,33 +188,49 @@ export function PremiumOpsStrip({
       data-premium-block="ops-strip"
       className="grid grid-cols-1 gap-[var(--dashboard-gap)] sm:grid-cols-2 xl:grid-cols-4"
     >
-      {items.map((item) => (
-        <Link
-          key={item.id}
-          href={item.href}
-          className={cn(
-            "gf-surface gf-surface-raised rounded-2xl border border-[var(--border-subtle)]",
-            "bg-[var(--surface-2)] p-4 transition-colors",
-            "hover:border-[var(--brand-gold)]/40",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
-          )}
-        >
-          <p className="text-[10px] font-medium tracking-[0.14em] text-[var(--text-muted)] uppercase">
-            {item.title}
-          </p>
-          <p
+      {items.map((item) => {
+        const accent = OPS_ACCENT[item.id];
+        const Icon = accent?.icon;
+        return (
+          <Link
+            key={item.id}
+            href={item.href}
             className={cn(
-              "mt-2 whitespace-nowrap text-2xl font-semibold tabular-nums tracking-tight",
-              item.unavailable && "text-[var(--text-muted)]",
+              "gf-surface gf-surface-raised rounded-2xl border border-[var(--border-subtle)]",
+              "bg-[var(--surface-2)] p-4 transition-colors",
+              "hover:border-[var(--brand-gold)]/40",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
             )}
           >
-            {item.value}
-          </p>
-          <p className="mt-1 text-xs text-[var(--text-secondary)] text-pretty">
-            {item.hint}
-          </p>
-        </Link>
-      ))}
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[10px] font-medium tracking-[0.14em] text-[var(--text-muted)] uppercase">
+                {item.title}
+              </p>
+              {Icon ? (
+                <span
+                  className={cn(
+                    "inline-flex size-7 shrink-0 items-center justify-center rounded-lg",
+                    accent.classes,
+                  )}
+                >
+                  <Icon className="size-3.5" aria-hidden />
+                </span>
+              ) : null}
+            </div>
+            <p
+              className={cn(
+                "mt-2 whitespace-nowrap text-2xl font-semibold tabular-nums tracking-tight",
+                item.unavailable && "text-[var(--text-muted)]",
+              )}
+            >
+              {item.value}
+            </p>
+            <p className="mt-1 text-xs text-[var(--text-secondary)] text-pretty">
+              {item.hint}
+            </p>
+          </Link>
+        );
+      })}
     </section>
   );
 }

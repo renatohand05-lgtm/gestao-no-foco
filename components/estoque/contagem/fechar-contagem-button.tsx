@@ -55,11 +55,9 @@ export function FecharContagemButton({
         if (!v) setResultado(null);
       }}
     >
-      <DialogTrigger asChild>
-        <Button>
-          <Lock className="size-4" aria-hidden />
-          Fechar contagem
-        </Button>
+      <DialogTrigger render={<Button />}>
+        <Lock className="size-4" aria-hidden />
+        Fechar contagem
       </DialogTrigger>
       <DialogContent>
         {resultado ? (

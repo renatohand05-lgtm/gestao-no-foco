@@ -95,7 +95,7 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
       <ul
         className={cn(
           "grid gap-2.5",
-          "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+          "grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4",
         )}
       >
         {items.map((item) => {
@@ -107,7 +107,7 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
                 type="button"
                 onClick={() => setActive(item)}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-2xl border p-3 text-left",
+                  "flex w-full items-start gap-2.5 rounded-2xl border p-3 text-left",
                   "border-[var(--border-premium)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)]",
                   "dark:bg-[var(--brand-graphite-elevated)]/85",
                   "transition-[border-color,transform] motion-safe:duration-200",
@@ -119,19 +119,19 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
               >
                 <span
                   className={cn(
-                    "inline-flex size-9 shrink-0 items-center justify-center rounded-xl",
+                    "mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl",
                     accent,
                   )}
                 >
                   <Icon className="size-4" aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[10px] font-medium tracking-[0.08em] text-[var(--text-muted)] uppercase">
+                  <p className="line-clamp-2 text-[10px] font-medium leading-snug tracking-[0.06em] text-[var(--text-muted)] uppercase">
                     {item.title}
                   </p>
                   <p
                     className={cn(
-                      "font-semibold tracking-tight tabular-nums",
+                      "mt-1 font-semibold tracking-tight tabular-nums",
                       item.unavailable
                         ? "text-sm leading-snug"
                         : "truncate text-base",
@@ -142,7 +142,7 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
                   </p>
                   <p
                     className={cn(
-                      "mt-0.5 inline-flex items-center gap-1 truncate text-[11px]",
+                      "mt-1 flex items-start gap-1 text-[11px] leading-snug",
                       item.trend?.direction === "up" && "text-success",
                       item.trend?.direction === "down" && "text-danger",
                       (!item.trend?.direction || item.trend.direction === "flat") &&
@@ -150,7 +150,7 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
                     )}
                   >
                     <TrendIcon direction={item.trend?.direction} />
-                    <span className="truncate">{item.comparisonLabel}</span>
+                    <span className="line-clamp-2">{item.comparisonLabel}</span>
                   </p>
                 </div>
               </button>

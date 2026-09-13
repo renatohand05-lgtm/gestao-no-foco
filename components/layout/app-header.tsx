@@ -11,6 +11,7 @@ import {
 
 import { BrandMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/brand/theme-toggle";
+import { DashboardAlertBell } from "@/components/layout/dashboard-alert-bell";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -83,13 +84,15 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
             type="button"
             variant="outline"
             size="sm"
-            className="hidden h-9 max-w-[12rem] gap-1.5 border-border/50 bg-muted/30 lg:inline-flex"
+            className="hidden h-9 max-w-[22rem] flex-1 justify-start gap-2 border-border/50 bg-muted/40 lg:inline-flex"
             onClick={() => router.push(`/${slug}/busca`)}
             aria-label="Busca global"
           >
             <Search className="size-4 shrink-0 text-muted-foreground" />
-            <span className="truncate text-muted-foreground">Buscar…</span>
-            <kbd className="ml-1 hidden rounded border border-border/60 px-1.5 text-[10px] text-muted-foreground xl:inline">
+            <span className="truncate text-muted-foreground">
+              Buscar clientes, produtos, ordens de serviço, relatórios…
+            </span>
+            <kbd className="ml-auto hidden rounded border border-border/60 px-1.5 text-[10px] text-muted-foreground xl:inline">
               ⌘K
             </kbd>
           </Button>
@@ -178,6 +181,8 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : null}
+
+        {slug ? <DashboardAlertBell tenantSlug={slug} /> : null}
 
         <ThemeToggle />
 

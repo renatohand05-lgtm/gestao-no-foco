@@ -30,6 +30,19 @@ const ICONS: Record<string, typeof ShoppingCart> = {
   importar: Upload,
 };
 
+const ACTION_COLOR: Record<string, string> = {
+  venda: "bg-blue-500/15 text-blue-400",
+  os: "bg-[var(--brand-gold)]/15 text-[var(--brand-gold)]",
+  cliente: "bg-indigo-500/15 text-indigo-400",
+  conta: "bg-teal-500/15 text-teal-400",
+  orcamento: "bg-violet-500/15 text-violet-400",
+  compra: "bg-orange-500/15 text-orange-400",
+  produto: "bg-emerald-500/15 text-emerald-400",
+  servico: "bg-amber-500/15 text-amber-400",
+  membro: "bg-pink-500/15 text-pink-400",
+  importar: "bg-sky-500/15 text-sky-400",
+};
+
 type Props = {
   tenantSlug: string;
   actions: QuickActionDef[];
@@ -64,7 +77,13 @@ export function QuickActionsPanel({ tenantSlug, actions }: Props) {
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
                 )}
               >
-                <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-gold)]/12 text-[var(--brand-gold)]">
+                <span
+                  className={cn(
+                    "mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg",
+                    ACTION_COLOR[action.id] ??
+                      "bg-[var(--brand-gold)]/12 text-[var(--brand-gold)]",
+                  )}
+                >
                   <Icon className="size-3.5" aria-hidden />
                 </span>
                 <span>

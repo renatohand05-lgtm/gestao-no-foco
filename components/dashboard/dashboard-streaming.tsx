@@ -21,6 +21,7 @@ import {
   type PredictiveIntelligenceResult,
 } from "@/lib/predictive";
 import {
+  civilDateInTimezone,
   formatDateTimeInTimezone,
   resolveTenantTimezone,
 } from "@/lib/dashboard/tenant-timezone";
@@ -43,6 +44,7 @@ import {
   loadDashboardCharts,
   loadDashboardFull,
   loadDashboardHojeSnapshot,
+  loadDashboardPeriodTotal,
   loadDashboardPrimary,
   loadDashboardResumoMes,
 } from "@/lib/dashboard/dashboard-loaders";
@@ -410,15 +412,23 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   let intelligence = null;
   let cockpit = null;
   let primary = null;
+  let periodOverride: {
+    faturamentoAtual: number;
+    variacaoPct: number | null;
+    periodoLabel: string;
+  } | null = null;
   let execCtxLoaded: Awaited<
     ReturnType<typeof loadExecutiveDashboardContext>
   > | null = null;
   let loadError: unknown = null;
   const centroCustoId =
     ctx.resumoFilters.centroCustoId ?? ctx.filters.centroCusto ?? null;
+  const hojeCivil = civilDateInTimezone(new Date(), resolveTenantTimezone());
+  const isCustomPeriod =
+    ctx.filters.dataDe !== hojeCivil || ctx.filters.dataAte !== hojeCivil;
   try {
     // Sprint 30.4.1 — critical path sem CI e sem charts (8× DRE)
-    const [hoje, resumo, execCtx, primaryData] = await Promise.all([
+    const [hoje, resumo, execCtx, primaryData, periodTotal] = await Promise.all([
       loadDashboardHojeSnapshot(ctx.tenantId, centroCustoId),
       loadDashboardResumoMes(ctx.tenantId, {
         year: ctx.resumoFilters.year,
@@ -429,10 +439,25 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
       }),
       loadExecutiveDashboardContext(ctx.tenantId, ctx.tenantSlug),
       softLoadPrimary(ctx.tenantId, ctx.segment, ctx.filters),
+      isCustomPeriod
+        ? loadDashboardPeriodTotal(
+            ctx.tenantId,
+            ctx.filters.dataDe,
+            ctx.filters.dataAte,
+            centroCustoId,
+          )
+        : Promise.resolve(null),
     ]);
     hojeData = hoje;
     primary = primaryData;
     execCtxLoaded = execCtx;
+    if (periodTotal) {
+      periodOverride = {
+        faturamentoAtual: periodTotal.faturamentoAtual,
+        variacaoPct: periodTotal.variacaoPct,
+        periodoLabel: "período anterior",
+      };
+    }
     decision = composeExecutiveDecision({
       tenantSlug: ctx.tenantSlug,
       hoje,
@@ -483,6 +508,7 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
         segmentConfig={ctx.segmentConfig}
         hoje={hojeData}
         primary={primary}
+        periodOverride={periodOverride}
         charts={null}
         cockpit={cockpit}
         intelligence={intelligence}

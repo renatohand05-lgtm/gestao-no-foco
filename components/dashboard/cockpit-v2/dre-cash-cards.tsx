@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LineChart, Wallet } from "lucide-react";
 
 import type {
   CashExecutiveCardModel,
@@ -18,22 +19,27 @@ export function DreCashCards({ dre, cash }: Props) {
     <div
       className="grid gap-3 lg:grid-cols-2"
       data-cockpit-block="dre-cash"
-      data-sprint="30.4"
+      data-sprint="30.4.1"
     >
       <section
         aria-label="DRE executivo"
         className="rounded-2xl border border-[var(--border-premium)] bg-[var(--surface-raised)] p-4 sm:p-5 dark:bg-[var(--brand-graphite-elevated)]/90"
       >
-        <div className="flex items-end justify-between gap-2">
-          <div>
-            <p className="text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
-              DRE executivo
-            </p>
-            <h2 className="mt-1 text-lg font-semibold">Leitura do resultado</h2>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400">
+              <LineChart className="size-4" aria-hidden />
+            </span>
+            <div>
+              <p className="text-[10px] font-medium tracking-[0.14em] text-sky-500 dark:text-sky-400 uppercase">
+                DRE executivo
+              </p>
+              <h2 className="mt-0.5 text-lg font-semibold">Leitura do resultado</h2>
+            </div>
           </div>
           <Link
             href={dre.href}
-            className="text-xs font-medium text-[var(--brand-gold)] hover:underline"
+            className="shrink-0 text-xs font-medium text-[var(--brand-gold)] hover:underline"
           >
             Drill-down DRE
           </Link>
@@ -58,7 +64,7 @@ export function DreCashCards({ dre, cash }: Props) {
             {dre.spark.map((p) => (
               <div
                 key={`${p.label}-${p.value}`}
-                className="flex-1 rounded-sm bg-[var(--brand-gold)]/70"
+                className="flex-1 rounded-sm bg-gradient-to-t from-sky-600 to-sky-400"
                 style={{
                   height: `${Math.max(8, (Math.abs(p.value) / maxSpark) * 100)}%`,
                 }}
@@ -83,16 +89,21 @@ export function DreCashCards({ dre, cash }: Props) {
           cash.tone === "warning" && "border-warning/40",
         )}
       >
-        <div className="flex items-end justify-between gap-2">
-          <div>
-            <p className="text-[10px] font-medium tracking-[0.14em] text-[var(--brand-gold)] uppercase">
-              Fluxo de caixa
-            </p>
-            <h2 className="mt-1 text-lg font-semibold">Cartão executivo · 7 dias</h2>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-500/15 text-teal-400">
+              <Wallet className="size-4" aria-hidden />
+            </span>
+            <div>
+              <p className="text-[10px] font-medium tracking-[0.14em] text-teal-500 dark:text-teal-400 uppercase">
+                Fluxo de caixa
+              </p>
+              <h2 className="mt-0.5 text-lg font-semibold">Cartão executivo · 7 dias</h2>
+            </div>
           </div>
           <Link
             href={cash.href}
-            className="text-xs font-medium text-[var(--brand-gold)] hover:underline"
+            className="shrink-0 text-xs font-medium text-[var(--brand-gold)] hover:underline"
           >
             Abrir fluxo
           </Link>

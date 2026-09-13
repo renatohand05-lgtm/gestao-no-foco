@@ -3231,6 +3231,112 @@ export type Database = {
         };
         Relationships: [];
       };
+      estoque_contagens: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          periodicidade: string;
+          status: string;
+          data_inicio: string;
+          data_fim: string | null;
+          estoque_inicial_valor: number | null;
+          compras_periodo_valor: number | null;
+          estoque_final_valor: number | null;
+          perdas_valor: number | null;
+          sobras_valor: number | null;
+          cmv_sugerido: number | null;
+          observacoes: string | null;
+          created_by: string | null;
+          fechada_por: string | null;
+          fechada_em: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          periodicidade: string;
+          status?: string;
+          data_inicio?: string;
+          data_fim?: string | null;
+          estoque_inicial_valor?: number | null;
+          compras_periodo_valor?: number | null;
+          estoque_final_valor?: number | null;
+          perdas_valor?: number | null;
+          sobras_valor?: number | null;
+          cmv_sugerido?: number | null;
+          observacoes?: string | null;
+          created_by?: string | null;
+          fechada_por?: string | null;
+          fechada_em?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          periodicidade?: string;
+          status?: string;
+          data_inicio?: string;
+          data_fim?: string | null;
+          estoque_inicial_valor?: number | null;
+          compras_periodo_valor?: number | null;
+          estoque_final_valor?: number | null;
+          perdas_valor?: number | null;
+          sobras_valor?: number | null;
+          cmv_sugerido?: number | null;
+          observacoes?: string | null;
+          created_by?: string | null;
+          fechada_por?: string | null;
+          fechada_em?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      estoque_contagem_itens: {
+        Row: {
+          id: string;
+          contagem_id: string;
+          tenant_id: string;
+          produto_id: string;
+          quantidade_sistema: number;
+          custo_unitario_snapshot: number;
+          quantidade_contada: number | null;
+          diferenca: number | null;
+          observacao: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          contagem_id: string;
+          tenant_id: string;
+          produto_id: string;
+          quantidade_sistema?: number;
+          custo_unitario_snapshot?: number;
+          quantidade_contada?: number | null;
+          observacao?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          contagem_id?: string;
+          tenant_id?: string;
+          produto_id?: string;
+          quantidade_sistema?: number;
+          custo_unitario_snapshot?: number;
+          quantidade_contada?: number | null;
+          observacao?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       metas_vendas_mensais: {
         Row: {
           id: string;

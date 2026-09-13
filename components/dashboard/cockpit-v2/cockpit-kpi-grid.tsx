@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Banknote,
   CircleDollarSign,
@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 
 import { KpiDrilldownDialog } from "@/components/dashboard/cockpit-v2/kpi-drilldown-dialog";
-import { fetchKpiHistoryAction } from "@/lib/dashboard/kpi-history-action";
 import type { CockpitKpiItem } from "@/lib/dashboard/cockpit-v2/kpis";
 import { cn } from "@/lib/utils";
 
@@ -40,111 +39,26 @@ const ICONS: Record<string, LucideIcon> = {
  * financeiro premium). Status de bom/ruim continua vindo do trend
  * (verde/vermelho), aplicado à parte.
  */
-const KPI_ACCENT: Record<
-  string,
-  { icon: string; bar: string }
-> = {
-  faturamento: {
-    icon: "bg-blue-500/15 text-blue-400",
-    bar: "bg-gradient-to-r from-blue-500 to-blue-400",
-  },
-  lucro: {
-    icon: "bg-emerald-500/15 text-emerald-400",
-    bar: "bg-gradient-to-r from-emerald-500 to-emerald-400",
-  },
-  margem: {
-    icon: "bg-violet-500/15 text-violet-400",
-    bar: "bg-gradient-to-r from-violet-500 to-violet-400",
-  },
-  ebitda: {
-    icon: "bg-sky-500/15 text-sky-400",
-    bar: "bg-gradient-to-r from-sky-500 to-sky-400",
-  },
-  caixa: {
-    icon: "bg-teal-500/15 text-teal-400",
-    bar: "bg-gradient-to-r from-teal-500 to-teal-400",
-  },
-  clientes: {
-    icon: "bg-indigo-500/15 text-indigo-400",
-    bar: "bg-gradient-to-r from-indigo-500 to-indigo-400",
-  },
-  meta: {
-    icon: "bg-[var(--brand-gold)]/15 text-[var(--brand-gold)]",
-    bar: "bg-gradient-to-r from-[var(--brand-gold)] to-amber-300",
-  },
-  ordens: {
-    icon: "bg-amber-500/15 text-amber-400",
-    bar: "bg-gradient-to-r from-amber-500 to-amber-400",
-  },
-  pendencias: {
-    icon: "bg-rose-500/15 text-rose-400",
-    bar: "bg-gradient-to-r from-rose-500 to-rose-400",
-  },
+const KPI_ACCENT: Record<string, string> = {
+  faturamento: "bg-blue-500/15 text-blue-400",
+  lucro: "bg-emerald-500/15 text-emerald-400",
+  margem: "bg-violet-500/15 text-violet-400",
+  ebitda: "bg-sky-500/15 text-sky-400",
+  caixa: "bg-teal-500/15 text-teal-400",
+  clientes: "bg-indigo-500/15 text-indigo-400",
+  meta: "bg-[var(--brand-gold)]/15 text-[var(--brand-gold)]",
+  ordens: "bg-amber-500/15 text-amber-400",
+  pendencias: "bg-rose-500/15 text-rose-400",
 };
 
-const DEFAULT_ACCENT = {
-  icon: "bg-[var(--brand-gold)]/12 text-[var(--brand-gold)]",
-  bar: "bg-gradient-to-r from-[var(--brand-gold)] to-amber-300",
-};
-
-/** KPIs que já têm histórico diário gravado pelo cron — só esses ganham sparkline real. */
-const HAS_HISTORY = new Set(["faturamento", "lucro", "caixa"]);
-
-function KpiSparkline({
-  tenantSlug,
-  kpiId,
-  accentBar,
-}: {
-  tenantSlug: string;
-  kpiId: string;
-  accentBar: string;
-}) {
-  const [points, setPoints] = useState<number[] | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    fetchKpiHistoryAction(tenantSlug, kpiId).then((result) => {
-      if (active && result.success) {
-        setPoints(result.data.map((p) => p.value));
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [tenantSlug, kpiId]);
-
-  // Menos de 2 pontos ainda não forma gráfico — mantém a barra simples.
-  if (!points || points.length < 2) {
-    return (
-      <div className="h-[3px] w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/8">
-        <div className={cn("h-full rounded-full", accentBar)} style={{ width: "40%" }} />
-      </div>
-    );
-  }
-
-  const max = Math.max(...points, 1);
-  const min = Math.min(...points, 0);
-  const range = Math.max(max - min, 1);
-
-  return (
-    <div className="flex h-8 items-end gap-0.5" aria-hidden>
-      {points.map((v, i) => (
-        <div
-          key={i}
-          className={cn("flex-1 rounded-sm", accentBar)}
-          style={{ height: `${Math.max(10, ((v - min) / range) * 100)}%` }}
-        />
-      ))}
-    </div>
-  );
-}
+const DEFAULT_ACCENT = "bg-[var(--brand-gold)]/12 text-[var(--brand-gold)]";
 
 function TrendIcon({ direction }: { direction?: "up" | "down" | "flat" }) {
   if (direction === "up")
-    return <TrendingUp className="size-3.5 shrink-0" aria-hidden />;
+    return <TrendingUp className="size-3 shrink-0" aria-hidden />;
   if (direction === "down")
-    return <TrendingDown className="size-3.5 shrink-0" aria-hidden />;
-  return <Minus className="size-3.5 shrink-0" aria-hidden />;
+    return <TrendingDown className="size-3 shrink-0" aria-hidden />;
+  return <Minus className="size-3 shrink-0" aria-hidden />;
 }
 
 type Props = {
@@ -153,6 +67,11 @@ type Props = {
   tenantSlug: string;
 };
 
+/**
+ * Grid compacto de KPIs — Sprint 30.4.3 (alinhado à referência visual do
+ * Renato: chips curtos com ícone à esquerda, valor + variação, várias
+ * métricas numa única faixa em vez de cards grandes empilhados).
+ */
 export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
   const [active, setActive] = useState<CockpitKpiItem | null>(null);
 
@@ -160,7 +79,7 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
     <section
       aria-label="KPIs principais"
       data-cockpit-block="kpis"
-      data-sprint="30.4.2"
+      data-sprint="30.4.3"
     >
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
@@ -168,96 +87,69 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
             KPIs principais
           </p>
           <p className="text-sm text-[var(--text-secondary)]">
-            Valor · variação · contexto · drill-down
+            Valor · variação · drill-down
           </p>
         </div>
       </div>
 
       <ul
         className={cn(
-          "grid gap-3",
-          "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3",
+          "grid gap-2.5",
+          "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
         )}
       >
-        {items.map((item, index) => {
+        {items.map((item) => {
           const Icon = ICONS[item.id] ?? CircleDollarSign;
           const accent = KPI_ACCENT[item.id] ?? DEFAULT_ACCENT;
-          const featured = index === 0;
           return (
             <li key={item.id}>
               <button
                 type="button"
                 onClick={() => setActive(item)}
                 className={cn(
-                  "flex h-full min-h-[9.5rem] w-full flex-col overflow-hidden rounded-2xl border p-4 text-left",
+                  "flex w-full items-center gap-2.5 rounded-2xl border p-3 text-left",
                   "border-[var(--border-premium)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)]",
                   "dark:bg-[var(--brand-graphite-elevated)]/85",
                   "transition-[border-color,transform] motion-safe:duration-200",
                   "hover:border-[var(--brand-gold)]/45 hover:-translate-y-0.5",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
-                  featured &&
-                    "bg-[linear-gradient(165deg,rgb(201_168_76_/0.12),transparent_55%)] sm:col-span-2 lg:col-span-1",
                 )}
                 aria-label={`${item.title}: ${item.value}. ${item.comparisonLabel}. Abrir detalhe.`}
                 data-kpi-id={item.id}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-[11px] font-medium tracking-[0.1em] text-[var(--text-muted)] uppercase">
+                <span
+                  className={cn(
+                    "inline-flex size-9 shrink-0 items-center justify-center rounded-xl",
+                    accent,
+                  )}
+                >
+                  <Icon className="size-4" aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[10px] font-medium tracking-[0.08em] text-[var(--text-muted)] uppercase">
                     {item.title}
                   </p>
-                  <span
+                  <p
                     className={cn(
-                      "inline-flex size-8 items-center justify-center rounded-lg",
-                      accent.icon,
+                      "truncate text-base font-semibold tracking-tight tabular-nums",
+                      item.unavailable && "text-[var(--text-muted)]",
                     )}
                   >
-                    <Icon className="size-3.5" aria-hidden />
-                  </span>
-                </div>
-                <p
-                  className={cn(
-                    "mt-3 font-semibold tracking-tight tabular-nums",
-                    featured
-                      ? "text-[clamp(1.45rem,1.1rem+1vw,2.1rem)]"
-                      : "text-[clamp(1.2rem,0.95rem+0.6vw,1.65rem)]",
-                    item.unavailable && "text-[var(--text-muted)]",
-                  )}
-                >
-                  {item.value}
-                </p>
-                <p className="mt-2 text-xs text-[var(--text-secondary)] text-pretty">
-                  {item.supportingText}
-                </p>
-                <p
-                  className={cn(
-                    "mt-2 inline-flex items-center gap-1 text-xs",
-                    item.trend?.direction === "up" && "text-success",
-                    item.trend?.direction === "down" && "text-danger",
-                    (!item.trend?.direction || item.trend.direction === "flat") &&
-                      "text-[var(--text-muted)]",
-                  )}
-                >
-                  <TrendIcon direction={item.trend?.direction} />
-                  <span>{item.comparisonLabel}</span>
-                </p>
-                {!item.unavailable ? (
-                  <div className="mt-auto pt-3">
-                    {HAS_HISTORY.has(item.id) ? (
-                      <KpiSparkline
-                        tenantSlug={tenantSlug}
-                        kpiId={item.id}
-                        accentBar={accent.bar}
-                      />
-                    ) : (
-                      <div className="h-[3px] w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/8">
-                        <div
-                          className={cn("h-full rounded-full", accent.bar)}
-                          style={{ width: featured ? "78%" : "58%" }}
-                        />
-                      </div>
+                    {item.value}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-0.5 inline-flex items-center gap-1 truncate text-[11px]",
+                      item.trend?.direction === "up" && "text-success",
+                      item.trend?.direction === "down" && "text-danger",
+                      (!item.trend?.direction || item.trend.direction === "flat") &&
+                        "text-[var(--text-muted)]",
                     )}
-                  </div>
-                ) : null}
+                  >
+                    <TrendIcon direction={item.trend?.direction} />
+                    <span className="truncate">{item.comparisonLabel}</span>
+                  </p>
+                </div>
               </button>
             </li>
           );

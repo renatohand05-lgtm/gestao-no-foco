@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { ModuleHeader } from "@/components/layout/module-header";
+import { ProdutoActionCards } from "@/components/produtos/produto-action-cards";
 import { ProdutoEmptyState } from "@/components/produtos/produto-empty-state";
 import { ProdutoFeedback } from "@/components/produtos/produto-feedback";
 import { ProdutoFilters } from "@/components/produtos/produto-filters";
@@ -129,31 +130,13 @@ export default async function ProdutosPage({
           />
         ) : null}
         <ActionButton
-          action="create"
-          label="Importar produtos"
-          href={`/${tenantSlug}/produtos/importar?kind=produtos`}
-        />
-        <ActionButton
-          action="create"
-          label="Importar serviços"
-          href={`/${tenantSlug}/produtos/importar?kind=servicos`}
-        />
-        <ActionButton
-          action="create"
-          label="Novo produto"
-          href={`/${tenantSlug}/produtos/novo?tipo=produto`}
-        />
-        <ActionButton
-          action="create"
-          label="Novo serviço"
-          href={`/${tenantSlug}/produtos/novo?tipo=servico`}
-        />
-        <ActionButton
           action="view"
           label="Gerenciar serviços"
           href={`/${tenantSlug}/produtos/gerenciar-servicos`}
         />
       </ModuleHeader>
+
+      <ProdutoActionCards tenantSlug={tenantSlug} />
 
       <ProdutoHubTabs tenantSlug={tenantSlug} currentTipo={tipoFilter} />
 

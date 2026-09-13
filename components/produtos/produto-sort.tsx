@@ -44,7 +44,7 @@ export function ProdutoSort({
           key={option.value}
           type="button"
           size="sm"
-          variant={currentSort === option.value ? "default" : "outline"}
+          variant={currentSort === option.value ? "default" : "ghost"}
           disabled={isPending}
           onClick={() => updateSort(option.value)}
         >

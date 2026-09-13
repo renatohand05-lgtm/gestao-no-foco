@@ -424,8 +424,12 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
   const centroCustoId =
     ctx.resumoFilters.centroCustoId ?? ctx.filters.centroCusto ?? null;
   const hojeCivil = civilDateInTimezone(new Date(), resolveTenantTimezone());
-  const isCustomPeriod =
-    ctx.filters.dataDe !== hojeCivil || ctx.filters.dataAte !== hojeCivil;
+  const mesAtualInicio = `${hojeCivil.slice(0, 7)}-01`;
+  const isHojeRange =
+    ctx.filters.dataDe === hojeCivil && ctx.filters.dataAte === hojeCivil;
+  const isMesAtualRange =
+    ctx.filters.dataDe === mesAtualInicio && ctx.filters.dataAte === hojeCivil;
+  const isCustomPeriod = !isHojeRange && !isMesAtualRange;
   try {
     // Sprint 30.4.1 — critical path sem CI e sem charts (8× DRE)
     const [hoje, resumo, execCtx, primaryData, periodTotal] = await Promise.all([

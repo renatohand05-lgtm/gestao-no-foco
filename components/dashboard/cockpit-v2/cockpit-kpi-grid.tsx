@@ -131,7 +131,10 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
                   </p>
                   <p
                     className={cn(
-                      "truncate text-base font-semibold tracking-tight tabular-nums",
+                      "font-semibold tracking-tight tabular-nums",
+                      item.unavailable
+                        ? "text-sm leading-snug"
+                        : "truncate text-base",
                       item.unavailable && "text-[var(--text-muted)]",
                     )}
                   >

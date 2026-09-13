@@ -106,6 +106,23 @@ export const loadDashboardHojeSnapshot = cache(
   },
 );
 
+/**
+ * Faturamento de um período arbitrário (usado quando o filtro escolhido
+ * não é "hoje") — não substitui loadDashboardHojeSnapshot, é usado só
+ * quando o período selecionado é diferente de hoje.
+ */
+export const loadDashboardPeriodTotal = cache(
+  async (
+    tenantId: string,
+    dataDe: string,
+    dataAte: string,
+    centroCustoId: string | null,
+  ) => {
+    const service = await createVendasDiaService(tenantId);
+    return service.getPeriodTotal(dataDe, dataAte, centroCustoId);
+  },
+);
+
 /** Resumo mensal — mesma fonte da tabela e da leitura do dia. */
 export const loadDashboardResumoMes = cache(
   async (

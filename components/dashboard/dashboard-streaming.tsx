@@ -9,7 +9,10 @@ import {
   ExecutiveFooterSkeleton,
 } from "@/components/dashboard/executive/executive-footer";
 import { PremiumDashboardView } from "@/components/dashboard/premium/premium-dashboard-view";
-import { PremiumMainRow } from "@/components/dashboard/premium/premium-main-row";
+import {
+  IntelligenceCenterPanel,
+  PremiumMainRow,
+} from "@/components/dashboard/premium/premium-main-row";
 import { buildPremiumInsights } from "@/lib/dashboard/premium-dashboard-map";
 import { buildExecutiveAiBundle } from "@/lib/ai/executive-ai-snapshot";
 import type { ExecutiveAiResult } from "@/lib/ai/executive-ai-types";
@@ -31,6 +34,10 @@ import {
   toIntelligenceFeeds,
 } from "@/lib/dashboard/executive-dashboard-context-service";
 import { composeExecutiveFinancialCockpit } from "@/lib/dashboard/executive-financial-cockpit-service";
+import {
+  buildCashExecutiveCard,
+  buildDreExecutiveCard,
+} from "@/lib/dashboard/cockpit-v2/panels";
 import { ExecutiveWorkspace } from "@/components/executive/workspace";
 import {
   loadDashboardCharts,
@@ -376,19 +383,24 @@ async function ChartsMainRowBlock({
     segmentConfig: ctx.segmentConfig,
   });
 
+  const dre = buildDreExecutiveCard({ primary, charts, tenantSlug: ctx.tenantSlug });
+  const cash = buildCashExecutiveCard({ cockpit, tenantSlug: ctx.tenantSlug });
+
   return (
-    <PremiumMainRow
-      faturamentoDiario={charts?.faturamentoDiario ?? []}
-      receitasVsDespesas={
-        charts?.receitasVsDespesas ??
-        primary?.fluxoCharts.receitasVsDespesas ??
-        []
-      }
-      insights={insights}
-      cockpit={cockpit}
-      tenantSlug={ctx.tenantSlug}
-      periodoLabel={periodoLabel}
-    />
+    <div className="space-y-[var(--gf-space-block)]">
+      <PremiumMainRow
+        faturamentoDiario={charts?.faturamentoDiario ?? []}
+        receitasVsDespesas={
+          charts?.receitasVsDespesas ??
+          primary?.fluxoCharts.receitasVsDespesas ??
+          []
+        }
+        dre={dre}
+        cash={cash}
+        periodoLabel={periodoLabel}
+      />
+      <IntelligenceCenterPanel insights={insights} tenantSlug={ctx.tenantSlug} />
+    </div>
   );
 }
 

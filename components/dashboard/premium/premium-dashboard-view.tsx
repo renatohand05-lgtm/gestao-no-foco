@@ -53,6 +53,11 @@ type Props = {
   segmentConfig?: unknown;
   hoje: DashboardHojeSnapshot;
   primary: DashboardPrimaryData | null;
+  periodOverride?: {
+    faturamentoAtual: number;
+    variacaoPct: number | null;
+    periodoLabel: string;
+  } | null;
   charts: DashboardCharts | null;
   cockpit: ExecutiveFinancialCockpitData;
   intelligence: ExecutiveIntelligenceData;
@@ -87,6 +92,7 @@ export function PremiumDashboardView({
   segmentConfig,
   hoje,
   primary,
+  periodOverride,
   charts,
   cockpit,
   intelligence,
@@ -127,6 +133,7 @@ export function PremiumDashboardView({
     segment,
     segmentVersion,
     segmentConfig,
+    periodOverride,
   });
   const alerts = buildCockpitAlerts({ insights, decision, tenantSlug });
   const brief = buildExecutiveBriefV2({

@@ -190,7 +190,7 @@ export function GFExecutiveHeader({
           src={logoUrl}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute -right-4 -top-4 h-32 w-32 object-contain opacity-[0.16] sm:h-44 sm:w-44 sm:opacity-[0.18]"
+          className="pointer-events-none absolute top-1/2 right-6 h-36 w-36 -translate-y-1/2 object-contain opacity-[0.22] sm:right-10 sm:h-52 sm:w-52 sm:opacity-[0.24]"
         />
       ) : null}
       <div

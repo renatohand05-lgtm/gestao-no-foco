@@ -190,7 +190,13 @@ export function GFExecutiveHeader({
           src={logoUrl}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute top-1/2 right-6 h-36 w-36 -translate-y-1/2 object-contain opacity-[0.22] sm:right-10 sm:h-52 sm:w-52 sm:opacity-[0.24]"
+          className="pointer-events-none absolute top-[58%] right-6 h-32 w-32 -translate-y-1/2 object-contain opacity-[0.26] sm:right-10 sm:top-[56%] sm:h-48 sm:w-48 sm:opacity-[0.28]"
+          style={{
+            maskImage:
+              "linear-gradient(to right, transparent, black 35%)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent, black 35%)",
+          }}
         />
       ) : null}
       <div

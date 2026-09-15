@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   tenantSlug: string;
   tenantName: string;
+  tenantLogoUrl?: string | null;
   greeting: string;
   segment: string | null;
   segmentVersion?: number | null;
@@ -86,6 +87,7 @@ function companyTone(
 export function PremiumDashboardView({
   tenantSlug,
   tenantName,
+  tenantLogoUrl,
   greeting,
   segment,
   segmentVersion,
@@ -223,6 +225,7 @@ export function PremiumDashboardView({
           <GFExecutiveHeader
             greeting={greeting}
             tenantName={tenantName}
+            logoUrl={tenantLogoUrl}
             dataHoje={hoje.data_hoje}
             updatedAtLabel={hoje.atualizado_em_label}
             status={hoje.hoje.status}

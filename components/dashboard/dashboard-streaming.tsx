@@ -73,6 +73,7 @@ export type DashboardStreamCtx = {
   tenantId: string;
   tenantSlug: string;
   tenantName: string;
+  tenantLogoUrl?: string | null;
   segment: TenantSegment | null;
   segmentVersion?: number | null;
   segmentConfig?: unknown;
@@ -506,6 +507,7 @@ async function HojeExecutiveBlock({ ctx }: { ctx: DashboardStreamCtx }) {
       <PremiumDashboardView
         tenantSlug={ctx.tenantSlug}
         tenantName={ctx.tenantName}
+        tenantLogoUrl={ctx.tenantLogoUrl}
         greeting={ctx.greeting}
         segment={ctx.segment}
         segmentVersion={ctx.segmentVersion}

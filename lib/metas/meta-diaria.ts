@@ -35,6 +35,24 @@ function countWeekdaysInMonth(year: number, monthIndex: number): number {
   return count;
 }
 
+/** Padrão quando o tenant não configurou dias de operação: seg–sex (comportamento histórico). */
+const DIAS_OPERACAO_PADRAO_LEGADO = [1, 2, 3, 4, 5];
+
+function countDiasOperacaoNoMes(
+  diasOperacao: number[],
+  year: number,
+  monthIndex: number,
+): number {
+  const diasTotais = new Date(year, monthIndex + 1, 0).getDate();
+  const set = new Set(diasOperacao);
+  let count = 0;
+  for (let day = 1; day <= diasTotais; day += 1) {
+    const dow = new Date(year, monthIndex, day).getDay();
+    if (set.has(dow)) count += 1;
+  }
+  return count;
+}
+
 export type MetaDiariaOverride = {
   data: string;
   valor_meta: number;
@@ -52,6 +70,11 @@ export type ResolveMetaDiariaInput = {
   override?: MetaDiariaOverride | null;
   /** Dia fechado / feriado configurado → meta 0 se não houver override. */
   diaFechado?: boolean;
+  /**
+   * Dias da semana em que a empresa opera (0=domingo…6=sábado).
+   * Sem isso, mantém o comportamento histórico (seg–sex).
+   */
+  diasOperacao?: number[];
 };
 
 /**
@@ -76,8 +99,9 @@ export function resolveMetaDiaria(input: ResolveMetaDiariaInput): {
     return { meta_diaria: 0, fonte: "zero_fechado" };
   }
 
+  const diasOperacao = input.diasOperacao ?? DIAS_OPERACAO_PADRAO_LEGADO;
   const dow = new Date(`${input.data}T12:00:00`).getDay();
-  if (dow === 0 || dow === 6) {
+  if (!diasOperacao.includes(dow)) {
     return { meta_diaria: 0, fonte: "zero_fds" };
   }
 
@@ -86,7 +110,7 @@ export function resolveMetaDiaria(input: ResolveMetaDiariaInput): {
   }
 
   const { year, monthIndex } = monthBounds(input.competencia);
-  const uteis = countWeekdaysInMonth(year, monthIndex);
+  const uteis = countDiasOperacaoNoMes(diasOperacao, year, monthIndex);
   if (uteis <= 0) {
     return { meta_diaria: 0, fonte: "sem_meta" };
   }
@@ -100,9 +124,10 @@ export function resolveMetaDiaria(input: ResolveMetaDiariaInput): {
 export function rateioMetaMensalPorDiaUtil(
   valorMetaMensal: number,
   competencia: string,
+  diasOperacao: number[] = DIAS_OPERACAO_PADRAO_LEGADO,
 ): number {
   const { year, monthIndex } = monthBounds(competencia);
-  const uteis = countWeekdaysInMonth(year, monthIndex);
+  const uteis = countDiasOperacaoNoMes(diasOperacao, year, monthIndex);
   if (uteis <= 0) return 0;
   return valorMetaMensal / uteis;
 }

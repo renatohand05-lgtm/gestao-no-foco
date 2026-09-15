@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { TenantLogoUpload } from "@/components/configuracoes/tenant-logo-upload";
+import { DiasOperacaoForm } from "@/components/configuracoes/dias-operacao-form";
 import {
   Card,
   CardContent,
@@ -11,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireTenant } from "@/lib/tenants";
+import { resolveDiasOperacao } from "@/lib/tenants/dias-operacao";
 
 export const metadata = { title: "Configurações" };
 
@@ -74,6 +76,22 @@ export default async function ConfiguracoesPage({
             <Button variant="outline" render={<Link href={`/${tenantSlug}/configuracoes/metas`} />}>
               Gerenciar metas
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Dias de operação</CardTitle>
+            <CardDescription>
+              Em quais dias da semana a empresa funciona de verdade
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DiasOperacaoForm
+              tenantSlug={tenantSlug}
+              diasOperacaoAtuais={resolveDiasOperacao(tenant.segment_config)}
+              canManage={tenant.role === "owner" || tenant.role === "admin"}
+            />
           </CardContent>
         </Card>
 

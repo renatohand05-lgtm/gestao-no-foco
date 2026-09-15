@@ -23,6 +23,11 @@ import { resolveMetaDiaria } from "@/lib/metas/meta-diaria";
 import { toCompetenciaMonthStart } from "@/lib/metas/projection";
 import { resolveMetaMensalVigente } from "@/lib/metas/resolve-meta-mensal";
 import { createClient } from "@/lib/supabase/server";
+import {
+  countDiasOperacaoInMonth,
+  countDiasOperacaoInRange,
+  resolveDiasOperacao,
+} from "@/lib/tenants/dias-operacao";
 import type { Database } from "@/types/database";
 
 export type VendaDiaDrillItem = {
@@ -140,13 +145,17 @@ export class VendasDiaService {
 
     const lookback = shiftCivilDate(mesIni, -40);
 
-    const [vendas, cr, metaMensal, overrides, fechados] = await Promise.all([
-      this.fetchVendas(lookback, hoje, centroCustoId),
-      this.fetchCrAvulsas(lookback, hoje, centroCustoId),
-      this.fetchMetaMensal(competencia, centroCustoId),
-      this.fetchMetaDiariaOverrides(mesIni, hoje, centroCustoId),
-      this.fetchDiasFechados(mesIni, hoje),
-    ]);
+    const [vendas, cr, metaMensal, overrides, fechados, segmentConfig] =
+      await Promise.all([
+        this.fetchVendas(lookback, hoje, centroCustoId),
+        this.fetchCrAvulsas(lookback, hoje, centroCustoId),
+        this.fetchMetaMensal(competencia, centroCustoId),
+        this.fetchMetaDiariaOverrides(mesIni, hoje, centroCustoId),
+        this.fetchDiasFechados(mesIni, hoje),
+        this.fetchSegmentConfig(),
+      ]);
+
+    const diasOperacao = resolveDiasOperacao(segmentConfig);
 
     const overrideMap = new Map(
       overrides.map((o) => [o.data, Number(o.valor_meta)] as const),
@@ -188,6 +197,7 @@ export class VendasDiaService {
         ? { data: hoje, valor_meta: overrideMap.get(hoje)! }
         : null,
       diaFechado: fechadoSet.has(hoje),
+      diasOperacao,
     });
 
     // FDS / dia fechado: meta diária é 0 por rateio — não exibir R$ 0,00
@@ -216,6 +226,7 @@ export class VendasDiaService {
       fechadoSet,
       vendas,
       cr,
+      diasOperacao,
     });
 
     const melhor = serie.reduce<{ data: string; valor: number } | null>(
@@ -236,13 +247,27 @@ export class VendasDiaService {
     const mediaDiaria = mesAgg.liquido / diasDecorridos;
 
     const diaDoMes = Number(hoje.slice(8, 10));
-    const ultimoDia = new Date(
-      Number(hoje.slice(0, 4)),
-      Number(hoje.slice(5, 7)),
-      0,
-    ).getDate();
+    const anoNum = Number(hoje.slice(0, 4));
+    const mesIndexNum = Number(hoje.slice(5, 7)) - 1;
+    const ultimoDia = new Date(anoNum, mesIndexNum + 1, 0).getDate();
+    const diasOperacaoDecorridos = countDiasOperacaoInRange(
+      diasOperacao,
+      anoNum,
+      mesIndexNum,
+      1,
+      diaDoMes,
+    );
+    const diasOperacaoNoMes = countDiasOperacaoInMonth(
+      diasOperacao,
+      anoNum,
+      mesIndexNum,
+    );
     const projecao =
-      diaDoMes > 0 ? (mesAgg.liquido / diaDoMes) * ultimoDia : null;
+      diasOperacaoDecorridos > 0
+        ? (mesAgg.liquido / diasOperacaoDecorridos) * diasOperacaoNoMes
+        : diaDoMes > 0
+          ? (mesAgg.liquido / diaDoMes) * ultimoDia
+          : null;
 
     const vendasHoje = vendas
       .filter(
@@ -319,6 +344,7 @@ export class VendasDiaService {
     fechadoSet: Set<string>;
     vendas: VendaRow[];
     cr: CrRow[];
+    diasOperacao: number[];
   }) {
     const rows: DashboardHojeSnapshot["serie_diaria"] = [];
     let cursor = input.mesIni;
@@ -356,6 +382,7 @@ export class VendasDiaService {
           ? { data: cursor, valor_meta: input.overrideMap.get(cursor)! }
           : null,
         diaFechado: input.fechadoSet.has(cursor),
+        diasOperacao: input.diasOperacao,
       });
 
       acumReal += realizado;
@@ -530,6 +557,17 @@ export class VendasDiaService {
     return (data ?? []).map((row: { data: string }) =>
       String(row.data).slice(0, 10),
     );
+  }
+
+  /** Dias da semana em que a empresa opera — usado pra meta diária e projeção mensal. */
+  private async fetchSegmentConfig(): Promise<unknown> {
+    const { data, error } = await this.supabase
+      .from("tenants")
+      .select("segment_config")
+      .eq("id", this.tenantId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data.segment_config;
   }
 
   /**

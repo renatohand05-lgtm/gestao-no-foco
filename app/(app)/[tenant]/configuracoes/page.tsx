@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { TenantLogoUpload } from "@/components/configuracoes/tenant-logo-upload";
 import {
   Card,
   CardContent,
@@ -34,22 +35,29 @@ export default async function ConfiguracoesPage({
             <CardTitle>Dados da empresa</CardTitle>
             <CardDescription>Informações básicas do negócio</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <p>
-              <span className="text-muted-foreground">Nome:</span> {tenant.name}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Identificador:</span>{" "}
-              {tenant.slug}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Segmento:</span>{" "}
-              {tenant.segment ?? "Não definido"}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Seu perfil:</span>{" "}
-              <span className="capitalize">{tenant.role}</span>
-            </p>
+          <CardContent className="space-y-4 text-sm">
+            <TenantLogoUpload
+              tenantSlug={tenantSlug}
+              currentLogoUrl={tenant.logo_url}
+              canManage={tenant.role === "owner" || tenant.role === "admin"}
+            />
+            <div className="space-y-2 border-t border-border/50 pt-3">
+              <p>
+                <span className="text-muted-foreground">Nome:</span> {tenant.name}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Identificador:</span>{" "}
+                {tenant.slug}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Segmento:</span>{" "}
+                {tenant.segment ?? "Não definido"}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Seu perfil:</span>{" "}
+                <span className="capitalize">{tenant.role}</span>
+              </p>
+            </div>
           </CardContent>
         </Card>
 

@@ -115,6 +115,7 @@ async function DashboardStreamingRoot({
     tenantId: tenant.id,
     tenantSlug,
     tenantName: tenant.name,
+    tenantLogoUrl: tenant.logo_url,
     segment: tenant.segment,
     segmentVersion: tenant.segment_version,
     segmentConfig: tenant.segment_config,

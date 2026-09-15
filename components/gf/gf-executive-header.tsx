@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 type Props = {
   greeting?: string;
   tenantName: string;
+  /** Logo da empresa (cliente) — opcional, mostrado no cabeçalho quando cadastrado. */
+  logoUrl?: string | null;
   dataHoje: string;
   updatedAtLabel: string;
   status: MetaDiaStatus;
@@ -102,6 +104,7 @@ function metaTone(
 export function GFExecutiveHeader({
   greeting,
   tenantName,
+  logoUrl,
   dataHoje,
   updatedAtLabel,
   status,
@@ -181,6 +184,15 @@ export function GFExecutiveHeader({
         className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(230_192_105_/0.22),transparent_70%)]"
         aria-hidden
       />
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={logoUrl}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute -right-4 -top-4 h-32 w-32 object-contain opacity-[0.16] sm:h-44 sm:w-44 sm:opacity-[0.18]"
+        />
+      ) : null}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay"
         style={{

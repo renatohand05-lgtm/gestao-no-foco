@@ -5,6 +5,7 @@ import {
   setBiometricPref,
 } from "@/auth/biometrics";
 import { useSessionStore } from "@/auth/session-store";
+import { fetchMasterDashboard } from "@/api/mobile-api";
 import {
   Button,
   Card,
@@ -18,7 +19,7 @@ import Constants from "expo-constants";
 import * as Application from "expo-application";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, Switch, View } from "react-native";
 
 export default function SettingsScreen() {
   const { resolved, preference, toggle, setPreference } = useTheme();
@@ -30,12 +31,22 @@ export default function SettingsScreen() {
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLabel, setBiometricLabel] = useState("Biometria");
+  const [isMaster, setIsMaster] = useState(false);
 
   useEffect(() => {
     void (async () => {
       setBiometricEnabled(await loadBiometricPref());
       setBiometricAvailable(await isBiometricAvailable());
       setBiometricLabel(await getBiometricLabel());
+    })();
+  }, []);
+
+  useEffect(() => {
+    // Mesma checagem de autorização do servidor usada na tela real —
+    // só mostra o card pra quem de fato é dono/parceiro da plataforma.
+    void (async () => {
+      const result = await fetchMasterDashboard();
+      setIsMaster(result.ok);
     })();
   }, []);
 
@@ -98,14 +109,16 @@ export default function SettingsScreen() {
           />
         </Card>
 
-        <Card style={styles.card}>
-          <Text variant="subtitle">Painel master</Text>
-          <ListItem
-            title="Empresas e métricas"
-            subtitle="Visão de dono/parceiro da plataforma"
-            onPress={() => router.push("/(app)/master-dashboard")}
-          />
-        </Card>
+        {isMaster ? (
+          <Card style={styles.card}>
+            <Text variant="subtitle">Painel master</Text>
+            <ListItem
+              title="Empresas e métricas"
+              subtitle="Visão de dono/parceiro da plataforma"
+              onPress={() => router.push("/(app)/master-dashboard")}
+            />
+          </Card>
+        ) : null}
 
         <Card style={styles.card}>
           <Text variant="subtitle">Sobre</Text>
@@ -123,6 +136,23 @@ export default function SettingsScreen() {
             .
           </Text>
           <ListItem title="Ambiente" trailing={<Text variant="body">{appEnv}</Text>} />
+        </Card>
+
+        <Card style={styles.card}>
+          <Text variant="subtitle">Conta</Text>
+          <ListItem
+            title="Política de Privacidade"
+            onPress={() => Linking.openURL("https://gestaonofoco.com.br/privacidade")}
+          />
+          <ListItem
+            title="Termos de Uso"
+            onPress={() => Linking.openURL("https://gestaonofoco.com.br/termos")}
+          />
+          <ListItem
+            title="Excluir minha conta"
+            subtitle="Apaga seu login e acesso permanentemente"
+            onPress={() => router.push("/(app)/excluir-conta")}
+          />
         </Card>
 
         <Button title="Sair" variant="secondary" onPress={handleLogout} />

@@ -71,6 +71,15 @@ export async function postLogout() {
   });
 }
 
+/** Exclusão da própria conta — exigência da Apple (Guideline 5.1.1(v)). */
+export async function deleteAccount() {
+  const accessToken = await getAccessToken();
+  return apiRequest<{ ok: boolean }>("api/mobile/v1/account", {
+    method: "DELETE",
+    context: { accessToken },
+  });
+}
+
 // ---------- Central de Suporte ----------
 
 export type SupportMessage = {

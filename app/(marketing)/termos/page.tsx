@@ -44,7 +44,7 @@ export default function TermosPage() {
           Foco (site, aplicativo móvel e integrações associadas), operada por
           Renato Aquino Franco. Ao criar uma conta ou usar a plataforma, você
           concorda com estes termos e com a nossa{" "}
-          
+          <a
             href="/privacidade"
             className="text-[var(--brand-gold,#C9A84C)] underline underline-offset-2"
           >
@@ -184,7 +184,7 @@ export default function TermosPage() {
       <Section title="12. Contato">
         <p>
           Dúvidas sobre estes termos podem ser enviadas para{" "}
-          
+          <a
             href="mailto:contato@gestaonofoco.com.br"
             className="text-[var(--brand-gold,#C9A84C)] underline underline-offset-2"
           >

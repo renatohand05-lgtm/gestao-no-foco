@@ -13,6 +13,7 @@ export const WORK_ORDER_TIPOS = [
   "producao_leve",
   "estetica",
   "lava_rapido",
+  "odontologia",
 ] as const;
 
 export type WorkOrderTipo = (typeof WORK_ORDER_TIPOS)[number];
@@ -27,6 +28,7 @@ export const WORK_ORDER_TIPO_LABELS: Record<WorkOrderTipo, string> = {
   producao_leve: "Produção leve",
   estetica: "Estética",
   lava_rapido: "Lava-rápido",
+  odontologia: "Odontologia",
 };
 
 export type WorkOrderTemplateDef = {
@@ -115,11 +117,11 @@ export const WORK_ORDER_TEMPLATES: WorkOrderTemplateDef[] = [
   {
     key: "estetica",
     nome: "Estética",
-    requiresVeiculo: true,
+    requiresVeiculo: false,
     requiresChecklist: true,
     defaultStatus: "aberta",
     etapas: ["aberta", "em_execucao", "concluida", "entregue"],
-    campos: ["veiculo", "checklist", "fotos"],
+    campos: ["checklist", "fotos"],
   },
   {
     key: "lava_rapido",
@@ -129,6 +131,15 @@ export const WORK_ORDER_TEMPLATES: WorkOrderTemplateDef[] = [
     defaultStatus: "aberta",
     etapas: ["aberta", "em_execucao", "entregue"],
     campos: ["veiculo", "checklist", "fotos", "servicos"],
+  },
+  {
+    key: "odontologia",
+    nome: "Odontologia",
+    requiresVeiculo: false,
+    requiresChecklist: false,
+    defaultStatus: "aberta",
+    etapas: ["aberta", "em_execucao", "concluida"],
+    campos: ["descricao", "servicos"],
   },
 ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import { RelationshipTypeSelector } from "@/components/clientes/relationship-type-selector";
 import { buttonVariants } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
 } from "@/lib/clientes/relationship";
 import { CRM_FUNIL_LABELS, CRM_FUNIL_STAGES } from "@/lib/crm/constants";
 import { createVeiculoAction } from "@/lib/ordens/actions";
+import { inferirMarcaPeloModelo } from "@/lib/veiculos/modelo-marca";
 import { cn } from "@/lib/utils";
 
 type Dup = { id: string; label: string; matchedOn: string[] };
@@ -98,6 +99,19 @@ export function QuickClientCreate({
   const [error, setError] = useState<string | null>(null);
   const [dups, setDups] = useState<Dup[]>([]);
   const [pending, startTransition] = useTransition();
+  const modeloRef = useRef<HTMLInputElement>(null);
+  const marcaRef = useRef<HTMLInputElement>(null);
+  const marcaEditadaManualmente = useRef(false);
+
+  function handleModeloChange(e: React.ChangeEvent<HTMLInputElement>) {
+    // Só preenche sozinho se a pessoa ainda não digitou a marca na mão —
+    // nunca sobrescreve o que ela já escreveu.
+    if (marcaEditadaManualmente.current) return;
+    const marca = inferirMarcaPeloModelo(e.target.value);
+    if (marca && marcaRef.current) {
+      marcaRef.current.value = marca;
+    }
+  }
 
   if (!open) {
     return (
@@ -270,11 +284,25 @@ export function QuickClientCreate({
             <p className="text-xs font-medium sm:col-span-2">Veículo</p>
             <label className="text-xs sm:col-span-2">
               Modelo *
-              <Input name="veiculo_modelo" disabled={pending} className="mt-1 h-11" />
+              <Input
+                name="veiculo_modelo"
+                ref={modeloRef}
+                onChange={handleModeloChange}
+                disabled={pending}
+                className="mt-1 h-11"
+              />
             </label>
             <label className="text-xs">
               Marca
-              <Input name="veiculo_marca" disabled={pending} className="mt-1 h-11" />
+              <Input
+                name="veiculo_marca"
+                ref={marcaRef}
+                onChange={() => {
+                  marcaEditadaManualmente.current = true;
+                }}
+                disabled={pending}
+                className="mt-1 h-11"
+              />
             </label>
             <label className="text-xs">
               Placa

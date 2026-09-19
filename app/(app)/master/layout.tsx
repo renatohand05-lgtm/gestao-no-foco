@@ -4,6 +4,7 @@ import {
   Gift,
   LayoutDashboard,
   LifeBuoy,
+  MessageCircle,
   Sparkles,
 } from "lucide-react";
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { href: "/master/suporte", label: "Suporte", icon: LifeBuoy },
   { href: "/master/convites", label: "Convites", icon: Gift },
   { href: "/master/plano-preview", label: "Simulador de planos", icon: Sparkles },
+  { href: "/master/whatsapp", label: "WhatsApp", icon: MessageCircle },
 ] as const;
 
 export default async function MasterLayout({
@@ -46,7 +48,9 @@ export default async function MasterLayout({
             {NAV_ITEMS.filter(
               (item) =>
                 isOwner ||
-                (item.href !== "/master/suporte" && item.href !== "/master/convites"),
+                (item.href !== "/master/suporte" &&
+                  item.href !== "/master/convites" &&
+                  item.href !== "/master/whatsapp"),
             ).map((item) => (
                 <Link
                   key={item.href}

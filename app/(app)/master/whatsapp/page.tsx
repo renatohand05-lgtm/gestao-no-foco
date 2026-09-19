@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/tenants";
-import { getPlatformAccess } from "@/lib/platform/platform-access-service";
+import { isPlatformOwner } from "@/lib/platform/platform-access-service";
 import { WhatsAppDiagnosticsPanel } from "@/components/master/whatsapp-diagnostics-panel";
 
 export const metadata = { title: "WhatsApp Business · Gestão no Foco" };
@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function WhatsAppDiagnosticsPage() {
   await requireAuth();
-  const access = await getPlatformAccess();
+  const isOwner = await isPlatformOwner();
 
-  if (!access) {
+  if (!isOwner) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center gap-3 text-center">
         <h1 className="text-xl font-semibold text-foreground">Acesso restrito</h1>

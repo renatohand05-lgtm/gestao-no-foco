@@ -9,9 +9,11 @@ import {
 } from "@/lib/retention/providers/whatsapp-diagnostics";
 import { actionFail, actionOk, type ActionResult } from "@/types/action-result";
 
-export async function checkWhatsAppStatusAction(): Promise
-  { success: true; data: WhatsAppPhoneStatus } | { success: false; error: string }
-> {
+export type WhatsAppStatusActionResult =
+  | { success: true; data: WhatsAppPhoneStatus }
+  | { success: false; error: string };
+
+export async function checkWhatsAppStatusAction(): Promise<WhatsAppStatusActionResult> {
   const isOwner = await isPlatformOwner();
   if (!isOwner) return { success: false, error: "Sem permissão." };
 

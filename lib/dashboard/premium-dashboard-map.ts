@@ -106,14 +106,14 @@ export function buildPremiumTopKpis(input: {
     },
     {
       id: "margem",
-      title: "Margem líquida",
+      title: "Margem de contribuição",
       value:
         k?.margem_media != null
           ? formatPercent(k.margem_media)
           : "Indisponível",
       supportingText:
         k?.margem_media != null
-          ? "Margem de contribuição / receita líquida"
+          ? "Receita líquida menos CMV — antes das despesas fixas/operacionais"
           : "Sem base DRE no período",
       tone: k?.margem_media != null && k.margem_media < 0 ? "danger" : "info",
       unavailable: k?.margem_media == null,
@@ -298,10 +298,10 @@ export function buildPremiumInsights(input: {
   const margem = primary?.kpis.margem_media;
   cards.push({
     id: "margem",
-    title: "Margem",
+    title: "Margem de contribuição",
     body:
       margem != null
-        ? `Margem média ${formatPercent(margem)} no período filtrado.`
+        ? `Margem de contribuição de ${formatPercent(margem)} no período filtrado (receita líquida menos CMV).`
         : "Margem indisponível sem base DRE/contribuição no período.",
     origem: "Dashboard Primary · DRE",
     periodo: primary?.periodo.label ?? "Período filtrado",

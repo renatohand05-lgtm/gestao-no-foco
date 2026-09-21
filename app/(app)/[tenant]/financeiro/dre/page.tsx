@@ -42,6 +42,8 @@ import { cn } from "@/lib/utils";
 import { formatPeriodoLabel } from "@/lib/dashboard/period";
 
 export const metadata = { title: "DRE Enterprise" };
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type PageProps = {
   params: Promise<{ tenant: string }>;

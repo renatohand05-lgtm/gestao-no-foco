@@ -65,6 +65,7 @@ import {
   OS_TRANSITIONS,
   type OsStatus,
 } from "@/lib/ordens/os-status";
+import { OsPrintButton } from "@/components/ordens/os-print-button";
 import type { ShareListItem } from "@/lib/ordens/compartilhamento-service";
 import type { OsAnexoRecord } from "@/lib/ordens/inspecao-storage-service";
 import type { OrcamentoVersaoRecord } from "@/lib/ordens/orcamento-versao-service";
@@ -378,6 +379,12 @@ export function OsWorkspace({
         <span className="ml-auto text-sm font-semibold tabular-nums">
           {formatCurrency(os.valor_total)}
         </span>
+        <OsPrintButton
+          os={os}
+          empresaNome={empresaNome}
+          workOrderLabel={uiCopy?.workOrder ?? "Ordem de Serviço"}
+          responsavelNome={os.responsavel?.nome}
+        />
       </div>
 
       <OsLifecycleMenu

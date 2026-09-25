@@ -158,11 +158,41 @@ export function GFExecutiveHeader({
       )}
       style={{
         backgroundImage:
-          "radial-gradient(ellipse 130% 90% at 18% -15%, rgba(230,192,105,0.30), transparent 52%)," +
-          "radial-gradient(ellipse 90% 70% at 88% 115%, rgba(59,92,158,0.32), transparent 60%)," +
           "linear-gradient(175deg, #04060b 0%, #0a1120 34%, #131a2a 62%, #05070c 100%)",
       }}
     >
+      {/* Aurora animada — as duas manchas de luz (dourado/azul) respiram
+          devagar por cima do gradiente base. */}
+      <div
+        className="gf-hero-aurora pointer-events-none absolute inset-0"
+        aria-hidden
+      />
+
+      {/* Estrelas piscando no céu — reforça a leitura de "amanhecer" da
+          silhueta de montanhas logo abaixo. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 sm:h-28" aria-hidden>
+        {[
+          { top: "18%", left: "12%", size: 2, delay: "0s" },
+          { top: "35%", left: "28%", size: 1.5, delay: "0.6s" },
+          { top: "12%", left: "48%", size: 2, delay: "1.4s" },
+          { top: "42%", left: "63%", size: 1.5, delay: "0.9s" },
+          { top: "22%", left: "78%", size: 2, delay: "2.1s" },
+          { top: "50%", left: "90%", size: 1.5, delay: "1.7s" },
+        ].map((star, i) => (
+          <span
+            key={i}
+            className="gf-hero-star absolute rounded-full bg-white"
+            style={{
+              top: star.top,
+              left: star.left,
+              width: star.size,
+              height: star.size,
+              animationDelay: star.delay,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Camada atmosférica — silhueta de montanhas + névoa, dá a sensação de
           fundo fotográfico (nascer do sol) sem usar uma foto de terceiros. */}
       <svg
@@ -181,7 +211,7 @@ export function GFExecutiveHeader({
         />
       </svg>
       <div
-        className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(230_192_105_/0.22),transparent_70%)]"
+        className="gf-hero-glow-pulse pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(230_192_105_/0.22),transparent_70%)]"
         aria-hidden
       />
       {logoUrl ? (

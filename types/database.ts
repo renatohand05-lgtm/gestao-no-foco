@@ -72,6 +72,144 @@ export type Database = {
         };
         Relationships: [];
       };
+      tenant_whatsapp_channels: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          instance_name: string;
+          evolution_instance_id: string | null;
+          instance_token: string | null;
+          status: string;
+          phone_number: string | null;
+          last_error: string | null;
+          qr_generated_at: string | null;
+          connected_at: string | null;
+          disconnected_at: string | null;
+          first_send_at: string | null;
+          messages_sent_today: number;
+          daily_counter_date: string | null;
+          daily_send_limit: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          instance_name: string;
+          evolution_instance_id?: string | null;
+          instance_token?: string | null;
+          status?: string;
+          phone_number?: string | null;
+          last_error?: string | null;
+          qr_generated_at?: string | null;
+          connected_at?: string | null;
+          disconnected_at?: string | null;
+          first_send_at?: string | null;
+          messages_sent_today?: number;
+          daily_counter_date?: string | null;
+          daily_send_limit?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          instance_name?: string;
+          evolution_instance_id?: string | null;
+          instance_token?: string | null;
+          status?: string;
+          phone_number?: string | null;
+          last_error?: string | null;
+          qr_generated_at?: string | null;
+          connected_at?: string | null;
+          disconnected_at?: string | null;
+          first_send_at?: string | null;
+          messages_sent_today?: number;
+          daily_counter_date?: string | null;
+          daily_send_limit?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tenant_whatsapp_channels_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: true;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      whatsapp_send_queue: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          channel_id: string;
+          outbox_id: string | null;
+          to_address: string;
+          body: string;
+          status: string;
+          scheduled_for: string;
+          attempt_count: number;
+          last_error: string | null;
+          sent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          channel_id: string;
+          outbox_id?: string | null;
+          to_address: string;
+          body: string;
+          status?: string;
+          scheduled_for?: string;
+          attempt_count?: number;
+          last_error?: string | null;
+          sent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          channel_id?: string;
+          outbox_id?: string | null;
+          to_address?: string;
+          body?: string;
+          status?: string;
+          scheduled_for?: string;
+          attempt_count?: number;
+          last_error?: string | null;
+          sent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_send_queue_channel_id_fkey";
+            columns: ["channel_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_whatsapp_channels";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "whatsapp_send_queue_outbox_id_fkey";
+            columns: ["outbox_id"];
+            isOneToOne: false;
+            referencedRelation: "notification_outbox";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "whatsapp_send_queue_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       billing_plans: {
         Row: {
           id: string;

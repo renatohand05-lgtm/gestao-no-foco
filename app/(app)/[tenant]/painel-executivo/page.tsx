@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
+import { PainelAgencia } from "@/components/painel-agencia/painel-agencia";
 import { PainelExecutivo } from "@/components/painel-executivo/painel-executivo";
 import { resolveTenantNavPermissions } from "@/lib/navigation/resolve-nav-auth";
+import { loadPainelAgenciaDados } from "@/lib/painel-agencia/build-data";
 import { loadPainelDados } from "@/lib/painel-executivo/build-data";
 import { hasExecutiveDashboardAccess } from "@/lib/rbac/executive-access";
 import { requireTenant } from "@/lib/tenants";
@@ -20,6 +22,19 @@ export default async function PainelExecutivoPage({
   const permissions = await resolveTenantNavPermissions(tenant);
   if (!hasExecutiveDashboardAccess(permissions)) {
     redirect(`/${slug}/dashboard`);
+  }
+
+  // Agências com histórico importado (ex.: X Company) usam o painel de agência.
+  const agencia = await loadPainelAgenciaDados(tenant.id);
+  if (agencia) {
+    return (
+      <PainelAgencia
+        dados={agencia}
+        nome={tenant.name}
+        logoUrl={tenant.logo_url ?? null}
+        voltarHref={`/${slug}/dashboard`}
+      />
+    );
   }
 
   const dados = await loadPainelDados(tenant.id);

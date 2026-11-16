@@ -18,7 +18,7 @@ export const NAV_ITEM_CAPABILITY: Record<string, ProductCapability | ProductCapa
     mechanics: ["workshop_mechanics", "professionals"],
     finance: "financial_management",
     integrations: "integrations",
-    "painel-executivo": ["workshop_mechanics", "work_orders"],
+    "painel-executivo": ["workshop_mechanics", "work_orders", "professionals"],
     analytics: "analytics",
     "analytics-reports": "reports",
     "intelligence-hub": "analytics",

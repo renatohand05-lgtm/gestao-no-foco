@@ -150,7 +150,7 @@ export function ReturnQuickCreate({
                 type="button"
                 className={cn(
                   "min-h-11 rounded-md border px-3 py-1.5 text-sm",
-                  presetKey === p.key ? "bg-muted font-medium" : "hover:bg-muted",
+                  presetKey === p.key ? "bg-muted font-medium dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]" : "hover:bg-muted",
                 )}
                 onClick={() => setPresetKey(p.key)}
               >
@@ -161,7 +161,7 @@ export function ReturnQuickCreate({
               type="button"
               className={cn(
                 "min-h-11 rounded-md border px-3 py-1.5 text-sm",
-                presetKey === "custom" ? "bg-muted font-medium" : "hover:bg-muted",
+                presetKey === "custom" ? "bg-muted font-medium dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]" : "hover:bg-muted",
               )}
               onClick={() => setPresetKey("custom")}
             >

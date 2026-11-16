@@ -42,6 +42,7 @@ export function ExecutiveMetric({
 }: Props) {
   const valueClass =
     size === "primary" ? exTypography.kpiPrimary : exTypography.kpiSecondary;
+  const isTextValue = typeof value === "string" && !/\d/.test(value);
   const iconBox = size === "primary" ? "size-10" : "size-9";
   const iconSize = size === "primary" ? "md" : "sm";
 
@@ -70,7 +71,16 @@ export function ExecutiveMetric({
         ) : null}
         <p className={exTypography.label}>{label}</p>
       </div>
-      <p className={cn(valueClass, toneText(tone), "leading-none")}>{value}</p>
+      <p
+        className={cn(
+          isTextValue
+            ? "text-base leading-snug font-semibold text-muted-foreground"
+            : cn(valueClass, "leading-none"),
+          !isTextValue && toneText(tone),
+        )}
+      >
+        {value}
+      </p>
       {hint ? <p className={exTypography.caption}>{hint}</p> : null}
     </div>
   );

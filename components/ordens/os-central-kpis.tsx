@@ -47,7 +47,6 @@ export function OsCentralKpis({ tenantSlug, kpis, copy }: Props) {
       key: "abertas",
       label: copy?.openWorkOrdersLabel ?? "OS abertas",
       href: base,
-      emphasize: true,
     },
     {
       key: "emDiagnostico",

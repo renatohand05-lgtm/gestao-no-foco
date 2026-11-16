@@ -40,8 +40,8 @@ export const exColors = {
   info: {
     hex: "#5B6B7A",
     solid: "bg-[var(--brand-info)] text-white",
-    soft: "bg-[var(--brand-info)]/10 text-[var(--brand-info)]",
-    text: "text-[var(--brand-info)]",
+    soft: "bg-[var(--brand-info)]/10 text-[var(--brand-info)] dark:bg-[#1a86e0]/15 dark:text-[#4da3ff]",
+    text: "text-[var(--brand-info)] dark:text-[#4da3ff]",
     border: "border-[var(--brand-info)]/30",
     ring: "ring-[var(--brand-info)]/20",
   },

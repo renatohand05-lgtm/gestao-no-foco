@@ -37,9 +37,11 @@ function smoothPath(pts: ReadonlyArray<readonly [number, number]>): string {
     const p2 = pts[i + 1];
     const p3 = pts[i + 2] ?? p2;
     const c1x = p1[0] + (p2[0] - p0[0]) / 6;
-    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const lo = Math.min(p1[1], p2[1]);
+    const hi = Math.max(p1[1], p2[1]);
+    const c1y = Math.min(hi, Math.max(lo, p1[1] + (p2[1] - p0[1]) / 6));
     const c2x = p2[0] - (p3[0] - p1[0]) / 6;
-    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    const c2y = Math.min(hi, Math.max(lo, p2[1] - (p3[1] - p1[1]) / 6));
     d += ` C${c1x},${c1y} ${c2x},${c2y} ${p2[0]},${p2[1]}`;
   }
   return d;
@@ -186,10 +188,10 @@ export function PremiumRevenueChart({
                 tabIndex={isFocusable || breakpoint === "desktop" ? 0 : -1}
                 className={cn(
                   "pointer-events-auto absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full",
-                  "border border-[var(--brand-gold)]/80 bg-[var(--brand-gold)]",
+                  "border border-transparent bg-transparent transition-colors hover:border-[var(--brand-gold)]/80 hover:bg-[var(--brand-gold)]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/70",
-                  isPeak && "size-3.5 ring-2 ring-[var(--brand-gold)]/35",
-                  isActive && "ring-2 ring-white/40",
+                  isPeak && "size-3.5 border-[var(--brand-gold)]/80 bg-[var(--brand-gold)] ring-2 ring-[var(--brand-gold)]/35",
+                  isActive && "border-[var(--brand-gold)]/80 bg-[var(--brand-gold)] ring-2 ring-white/40",
                 )}
                 style={{
                   left: `${c.x}%`,

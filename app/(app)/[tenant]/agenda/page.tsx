@@ -237,7 +237,7 @@ export default async function AgendaPage({
               key={v.key}
               href={`/${tenantSlug}/agenda?view=${v.key}&day=${anchor}`}
               className={`rounded-md border px-3 py-1.5 hover:bg-muted ${
-                view === v.key ? "bg-muted font-medium" : ""
+                view === v.key ? "bg-muted font-medium dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]" : ""
               }`}
             >
               {v.label}

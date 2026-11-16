@@ -420,3 +420,11 @@
 .dark .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* Rodada 5: logo oficial sem o quadrado preto no tema escuro */
+.dark img[data-brand-logo="wordmark"] {
+  mix-blend-mode: screen;
+}
+.dark [data-brand-mark] {
+  background: transparent;
+}

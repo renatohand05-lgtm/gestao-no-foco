@@ -42,7 +42,7 @@ export function AnalyticsNavigation({ tenantSlug }: { tenantSlug: string }) {
               "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
               gofTypography.caption,
               active
-                ? "bg-foreground text-background"
+                ? "bg-foreground text-background dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]"
                 : "text-[var(--text-secondary)] hover:bg-muted hover:text-foreground",
             )}
           >

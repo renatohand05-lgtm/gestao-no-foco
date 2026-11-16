@@ -100,7 +100,7 @@ export function AppSidebar({
             <SidebarMenuButton
               size="lg"
               className={cn(
-                "rounded-xl transition-colors duration-150",
+                "h-auto min-h-12 overflow-visible rounded-xl py-1.5 transition-colors duration-150",
                 "hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent",
               )}
               render={<Link href={`/${tenant.slug}/dashboard`} />}

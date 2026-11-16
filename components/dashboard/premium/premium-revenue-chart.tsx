@@ -26,6 +26,25 @@ type Props = {
   metaByDate?: Record<string, number> | null;
 };
 
+/** Curva suave (Catmull-Rom → Bézier), como no visual Aurora. */
+function smoothPath(pts: ReadonlyArray<readonly [number, number]>): string {
+  if (pts.length === 0) return "";
+  if (pts.length === 1) return `M${pts[0][0]},${pts[0][1]}`;
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C${c1x},${c1y} ${c2x},${c2y} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+
 /**
  * Gráfico de faturamento com labels executivos (Sprint 25.6.3).
  */
@@ -81,8 +100,8 @@ export function PremiumRevenueChart({
   }
 
   const { w, h } = REVENUE_CHART_VIEW;
-  const polyline = coords.map((c) => `${c.x},${c.y}`).join(" ");
-  const area = `0,${h} ${polyline} ${w},${h}`;
+  const linePath = smoothPath(coords.map((c) => [c.x, c.y] as const));
+  const areaPath = `M0,${h} L${coords[0]?.x ?? 0},${coords[0]?.y ?? h} ${linePath.replace(/^M[^C]*/, "")} L${w},${h} Z`;
   const last = coords[coords.length - 1]!;
   const lastMeaningful =
     [...coords].reverse().find((c) => c.point.value !== 0) ?? last;
@@ -134,18 +153,18 @@ export function PremiumRevenueChart({
             <linearGradient id="revStroke" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="var(--brand-gold-soft)" />
               <stop offset="55%" stopColor="var(--brand-gold)" />
-              <stop offset="100%" stopColor="var(--brand-gold-deep)" />
+              <stop offset="100%" stopColor="#1a86e0" />
             </linearGradient>
           </defs>
-          <polygon fill="url(#revFill)" points={area} className="gf-chart-area" />
-          <polyline
+          <path fill="url(#revFill)" d={areaPath} className="gf-chart-area" />
+          <path
             fill="none"
             stroke="url(#revStroke)"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
-            points={polyline}
+            d={linePath}
             pathLength={1}
             className="premium-chart-line gf-chart-line"
             data-chart-line=""

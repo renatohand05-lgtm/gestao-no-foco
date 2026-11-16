@@ -107,7 +107,7 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
                 type="button"
                 onClick={() => setActive(item)}
                 className={cn(
-                  "flex w-full items-start gap-2.5 rounded-2xl border p-3 text-left",
+                  "flex w-full flex-col items-stretch gap-3 rounded-[1.25rem] border p-4 text-left",
                   "border-[var(--border-premium)] bg-[var(--surface-raised)] shadow-[var(--shadow-card)]",
                   "dark:bg-[var(--brand-graphite-elevated)]/85",
                   "transition-[border-color,transform] motion-safe:duration-200",
@@ -119,22 +119,22 @@ export function CockpitKpiGrid({ items, periodoLabel, tenantSlug }: Props) {
               >
                 <span
                   className={cn(
-                    "mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl",
+                    "inline-flex size-10 shrink-0 items-center justify-center rounded-xl self-end order-first -mb-9",
                     accent,
                   )}
                 >
-                  <Icon className="size-4" aria-hidden />
+                  <Icon className="size-5" aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 text-[10px] font-medium leading-snug tracking-[0.06em] text-[var(--text-muted)] uppercase">
+                  <p className="line-clamp-2 pr-12 text-[12.5px] font-medium leading-snug text-[var(--text-secondary)]">
                     {item.title}
                   </p>
                   <p
                     className={cn(
-                      "mt-1 font-semibold tracking-tight tabular-nums",
+                      "mt-2 font-bold tracking-[-0.035em] tabular-nums",
                       item.unavailable
                         ? "text-sm leading-snug"
-                        : "truncate text-base",
+                        : "truncate text-[clamp(1.5rem,1.2rem+0.9vw,2rem)] leading-none",
                       item.unavailable && "text-[var(--text-muted)]",
                     )}
                   >

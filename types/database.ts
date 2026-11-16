@@ -2991,6 +2991,7 @@ export type Database = {
           status: string;
           tipo_ordem: string;
           template_key: string | null;
+          categoria_operacional: string | null;
           mecanico_id: string | null;
           consultor_id: string | null;
           centro_custo_id: string | null;
@@ -3051,6 +3052,7 @@ export type Database = {
           status?: string;
           tipo_ordem?: string;
           template_key?: string | null;
+          categoria_operacional?: string | null;
           mecanico_id?: string | null;
           consultor_id?: string | null;
           centro_custo_id?: string | null;
@@ -3110,6 +3112,7 @@ export type Database = {
           status?: string;
           tipo_ordem?: string;
           template_key?: string | null;
+          categoria_operacional?: string | null;
           mecanico_id?: string | null;
           consultor_id?: string | null;
           centro_custo_id?: string | null;
@@ -6377,9 +6380,85 @@ export type Database = {
         };
         Relationships: [];
       };
+      painel_planejamento: {
+        Row: {
+          tenant_id: string;
+          chave: string;
+          payload: Json;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          tenant_id: string;
+          chave: string;
+          payload?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          tenant_id?: string;
+          chave?: string;
+          payload?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      painel_notas_pecas: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          data: string;
+          nota: string | null;
+          fornecedor: string | null;
+          peca: string | null;
+          os_ref: string | null;
+          quantidade: number | null;
+          unidade: string | null;
+          total: number;
+          receita: number | null;
+          created_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          data: string;
+          nota?: string | null;
+          fornecedor?: string | null;
+          peca?: string | null;
+          os_ref?: string | null;
+          quantidade?: number | null;
+          unidade?: string | null;
+          total?: number;
+          receita?: number | null;
+          created_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          data?: string;
+          nota?: string | null;
+          fornecedor?: string | null;
+          peca?: string | null;
+          os_ref?: string | null;
+          quantidade?: number | null;
+          unidade?: string | null;
+          total?: number;
+          receita?: number | null;
+          created_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
+      painel_executivo_dados: {
+        Args: { p_tenant: string };
+        Returns: Json;
+      };
       ensure_consumidor_balcao: {
         Args: { p_tenant_id: string };
         Returns: string;

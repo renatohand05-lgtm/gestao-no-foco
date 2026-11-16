@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ChefHat,
   FileBarChart,
+  Gauge,
   LayoutDashboard,
   LayoutGrid,
   Package,
@@ -318,6 +319,15 @@ export function getTenantNav(
       icon: BarChart3,
       group: "inteligencia",
       description: "BI e indicadores Enterprise",
+      requiredAnyPermissions: NAV_ANALYTICS_EXECUTIVE_ANY_OF,
+    },
+    {
+      id: "painel-executivo",
+      title: "Painel Executivo",
+      href: `${base}/painel-executivo`,
+      icon: Gauge,
+      group: "inteligencia",
+      description: "15 telas de gestão: OS, DRE, caixa, metas e plano",
       requiredAnyPermissions: NAV_ANALYTICS_EXECUTIVE_ANY_OF,
     },
     {

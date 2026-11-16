@@ -225,7 +225,7 @@ export function SalesImportWizardClient({ tenantSlug, initialHistory }: Props) {
             key={key}
             className={cn(
               "rounded-full px-2.5 py-1",
-              step === key ? "bg-[var(--brand-graphite)] text-white" : "bg-muted",
+              step === key ? "bg-[var(--brand-graphite)] text-white dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]" : "bg-muted",
             )}
           >
             {label}

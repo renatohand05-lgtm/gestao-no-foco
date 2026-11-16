@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Activity, AlertTriangle, CheckCircle2, ClipboardList, Flame, type LucideIcon } from "lucide-react";
+
 import { MetricCard } from "@/components/executive";
 import type { ExColorTone } from "@/lib/design-system/colors";
 import { gofGrid } from "@/lib/design-system";
@@ -12,6 +14,15 @@ const toneMap: Record<NonNullable<CentroOpsCard["tone"]>, ExColorTone> = {
   ok: "success",
 };
 
+const defaultIcons: LucideIcon[] = [ClipboardList, Activity];
+
+function iconFor(tone: CentroOpsCard["tone"], index: number): LucideIcon {
+  if (tone === "danger") return Flame;
+  if (tone === "warn") return AlertTriangle;
+  if (tone === "ok") return CheckCircle2;
+  return defaultIcons[index % defaultIcons.length];
+}
+
 export function CentroOpsKpiCards({ cards }: { cards: CentroOpsCard[] }) {
   return (
     <div
@@ -20,7 +31,7 @@ export function CentroOpsKpiCards({ cards }: { cards: CentroOpsCard[] }) {
       role="region"
       aria-label="Indicadores do Centro de Operações"
     >
-      {cards.map((card) => (
+      {cards.map((card, index) => (
         <Link
           key={card.key}
           href={card.hrefFilter}
@@ -33,6 +44,7 @@ export function CentroOpsKpiCards({ cards }: { cards: CentroOpsCard[] }) {
             value={card.count}
             hint="Toque para abrir a lista"
             tone={toneMap[card.tone ?? "default"]}
+            icon={iconFor(card.tone, index)}
             className="h-full"
           />
         </Link>

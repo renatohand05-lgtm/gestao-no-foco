@@ -347,3 +347,76 @@
   border-radius: 9999px;
   font-weight: 600;
 }
+
+/* ---------- Janelas, menus e painéis flutuantes ---------- */
+.dark [data-slot="dialog-content"],
+.dark [data-slot="sheet-content"],
+.dark [data-slot="popover-content"],
+.dark [data-slot="dropdown-menu-content"],
+.dark [data-slot="select-content"],
+.dark [data-slot="tooltip-content"] {
+  background-color: rgb(10 22 44 / 0.92);
+  border: 1px solid var(--portal-line-2);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  backdrop-filter: saturate(180%) blur(28px);
+  box-shadow: 0 30px 70px -24px rgb(0 0 0 / 0.8);
+}
+.dark [data-slot="dialog-content"] {
+  border-radius: 1.25rem;
+}
+.dark [data-slot="dialog-overlay"],
+.dark [data-slot="sheet-overlay"] {
+  background-color: rgb(3 8 20 / 0.6);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* ---------- Campos (11px de raio, como no demo) ---------- */
+.dark [data-slot="input"],
+.dark [data-slot="textarea"],
+.dark [data-slot="native-select"],
+.dark select.gof-native-select {
+  border-radius: 0.7rem;
+  border-color: var(--portal-line);
+  background-color: rgb(118 118 128 / 0.16);
+}
+.dark [data-slot="input"]:focus-visible,
+.dark [data-slot="textarea"]:focus-visible {
+  border-color: rgb(248 194 8 / 0.55);
+  box-shadow: 0 0 0 3px rgb(248 194 8 / 0.18);
+}
+
+/* ---------- Botões secundários (vidro) ---------- */
+.dark [data-slot="button"][data-variant="outline"],
+.dark [data-slot="button"][data-variant="secondary"] {
+  background-color: rgb(118 118 128 / 0.18);
+  border: 1px solid var(--portal-line);
+  color: #f5f7fb;
+  border-radius: 0.7rem;
+}
+.dark [data-slot="button"][data-variant="outline"]:hover,
+.dark [data-slot="button"][data-variant="secondary"]:hover {
+  border-color: var(--portal-line-2);
+  background-color: rgb(118 118 128 / 0.26);
+}
+
+/* ---------- Barras de progresso ---------- */
+.dark [role="progressbar"] {
+  background-color: rgb(255 255 255 / 0.08);
+  border-radius: 9999px;
+}
+
+/* ---------- Linhas de tabela do portal ---------- */
+.dark table tbody tr {
+  border-color: var(--portal-line);
+}
+.dark table td,
+.dark table th {
+  border-color: var(--portal-line);
+}
+
+/* ---------- Valores monetários e métricas ---------- */
+.dark [data-kpi-value],
+.dark .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

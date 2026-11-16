@@ -9,7 +9,7 @@ import { gofPadding, gofRadius, gofShadow } from "./foundation";
 /** Receita única de superfície (Card / Panel / Section panel / Metric) */
 export const gofCardSurface = [
   "border border-border/60 bg-card text-card-foreground",
-  "dark:border-white/[0.08] dark:bg-card/95",
+  "dark:rounded-[1.25rem] dark:border-white/10 dark:bg-card dark:backdrop-blur-xl",
   gofRadius.lg,
   gofShadow.sm,
 ].join(" ");

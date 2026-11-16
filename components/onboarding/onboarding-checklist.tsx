@@ -50,7 +50,7 @@ export function OnboardingChecklist({ checklist }: Props) {
                     gofTypography.caption,
                     gofRadius.sm,
                     item.required
-                      ? "bg-[var(--brand-graphite)] text-white"
+                      ? "bg-[var(--brand-graphite)] text-white dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]"
                       : "bg-muted text-muted-foreground",
                   )}
                 >

@@ -457,7 +457,7 @@ export function MappingStudioClient({
                       className={cn(
                         "w-full rounded-md px-2 py-1.5 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         selectedProfileId === p.id
-                          ? "bg-[var(--brand-graphite)] text-white"
+                          ? "bg-[var(--brand-graphite)] text-white dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]"
                           : "hover:bg-muted",
                       )}
                       onClick={() => loadProfile(p)}

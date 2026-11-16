@@ -144,7 +144,7 @@ export type GofShadowScale = keyof typeof gofShadow;
  */
 export const gofTypography = {
   title:
-    "font-[family-name:var(--font-display)] text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl",
+    "font-[family-name:var(--font-display)] text-lg font-bold leading-snug tracking-[-0.025em] text-foreground sm:text-xl",
   subtitle:
     "text-sm font-normal leading-snug tracking-normal text-[var(--text-secondary)] sm:text-[0.9375rem]",
   body: "text-sm font-normal leading-relaxed tracking-normal text-foreground",

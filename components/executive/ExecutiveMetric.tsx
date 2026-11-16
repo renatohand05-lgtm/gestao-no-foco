@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
 import { DsIcon } from "@/components/ui/ds-icon";
+import { kpiChipStyleById } from "@/lib/design-system/chip-palette";
 import { cn } from "@/lib/utils";
 import { exAnimations } from "@/lib/design-system/animations";
 import { exColors, type ExColorTone } from "@/lib/design-system/colors";
@@ -60,8 +61,9 @@ export function ExecutiveMetric({
               "inline-flex shrink-0 items-center justify-center",
               iconBox,
               exRadius[12],
-              toneSoft(tone),
+              tone === "neutral" ? "" : toneSoft(tone),
             )}
+            style={tone === "neutral" ? kpiChipStyleById(label) : undefined}
           >
             <DsIcon icon={Icon} size={iconSize} />
           </span>

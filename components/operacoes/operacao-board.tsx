@@ -92,7 +92,7 @@ export function OperacaoBoard({
             <div
               key={col.key}
               className={cn(
-                "min-w-[200px] w-[78vw] max-w-[260px] sm:min-w-[220px] sm:w-[240px] shrink-0 rounded-lg border bg-card p-2",
+                "min-w-[200px] w-[78vw] max-w-[260px] sm:min-w-[220px] sm:w-[240px] shrink-0 rounded-2xl border bg-card p-2.5 dark:border-white/10 dark:backdrop-blur-xl",
                 isOver && "border-emerald-600 ring-2 ring-emerald-600/20",
               )}
               onDragOver={(e) => {
@@ -178,7 +178,7 @@ function BoardCard({
       }}
       onDragEnd={onDragEnd}
       className={cn(
-        "rounded-md border bg-background p-2.5 text-xs shadow-sm transition",
+        "rounded-xl border bg-background p-2.5 text-xs shadow-sm transition dark:border-white/10 dark:bg-white/[0.05] dark:hover:border-white/20",
         card.atrasada && "border-rose-400/70 bg-rose-50/50 dark:bg-rose-950/20",
         card.semAtualizacao && !card.atrasada && "border-amber-400/60",
         dragging && "opacity-50",

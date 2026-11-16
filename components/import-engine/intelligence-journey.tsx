@@ -91,7 +91,7 @@ export function IntelligenceJourney({
                 }
                 className={cn(
                   "flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium",
-                  current && "bg-[var(--brand-graphite)] text-white",
+                  current && "bg-[var(--brand-graphite)] text-white dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]",
                   done && !current && "text-emerald-700 dark:text-emerald-400",
                   pending && "text-muted-foreground",
                 )}

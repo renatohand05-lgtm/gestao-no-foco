@@ -175,7 +175,7 @@ export function IntelligenceHubNav({ tenantSlug, className }: Props) {
                 "inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm transition-colors duration-150",
                 "outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40 focus-visible:ring-offset-2",
                 active
-                  ? "bg-[var(--brand-graphite)] text-white shadow-sm"
+                  ? "bg-[var(--brand-graphite)] text-white dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428] shadow-sm"
                   : "bg-transparent text-muted-foreground hover:bg-muted/80 hover:text-foreground",
               )}
             >

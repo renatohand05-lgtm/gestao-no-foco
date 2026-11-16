@@ -162,7 +162,7 @@ export function PremiumPreviewTabs({
                 "outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40 focus-visible:ring-offset-2",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 selected
-                  ? "bg-[var(--brand-graphite)] text-white"
+                  ? "bg-[var(--brand-graphite)] text-white dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]"
                   : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >

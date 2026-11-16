@@ -6,12 +6,12 @@
 
 export const exTypography = {
   display:
-    "text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl",
-  hero: "text-[2rem] font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem]",
+    "text-4xl font-bold tracking-[-0.035em] text-foreground sm:text-5xl lg:text-6xl",
+  hero: "text-[2rem] font-bold tracking-[-0.035em] text-foreground sm:text-4xl lg:text-[2.75rem]",
   headline:
-    "text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] lg:text-3xl",
+    "text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-[1.75rem] lg:text-3xl",
   heading:
-    "text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[1.75rem]",
+    "text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl lg:text-[1.75rem]",
   title:
     "text-lg font-semibold tracking-tight text-foreground sm:text-xl",
   sectionTitle:
@@ -36,15 +36,15 @@ export const exTypography = {
     "text-xl font-semibold tracking-tight tabular-nums text-foreground sm:text-[1.5rem] lg:text-[1.65rem]",
   /** Metric LG — KPIs primários / Meta Gap Forecast */
   metricLg:
-    "text-[1.75rem] font-semibold tracking-tight tabular-nums text-foreground sm:text-[2rem] lg:text-[2.25rem]",
+    "text-[1.75rem] font-bold tracking-[-0.035em] tabular-nums text-foreground sm:text-[2rem] lg:text-[2.25rem]",
   metric:
-    "text-3xl font-semibold tracking-tight tabular-nums text-foreground sm:text-4xl",
+    "text-3xl font-bold tracking-[-0.035em] tabular-nums text-foreground sm:text-4xl",
   metricSm:
-    "text-xl font-semibold tracking-tight tabular-nums text-foreground sm:text-[1.65rem]",
+    "text-xl font-bold tracking-[-0.03em] tabular-nums text-foreground sm:text-[1.65rem]",
   kpiPrimary:
-    "text-[1.75rem] font-semibold tracking-tight tabular-nums text-foreground sm:text-[2rem] lg:text-[2.25rem]",
+    "text-[1.75rem] font-bold tracking-[-0.035em] tabular-nums text-foreground sm:text-[2rem] lg:text-[2.25rem]",
   kpiSecondary:
-    "text-xl font-semibold tracking-tight tabular-nums text-foreground sm:text-[1.35rem]",
+    "text-xl font-bold tracking-[-0.03em] tabular-nums text-foreground sm:text-[1.35rem]",
 } as const;
 
 export type ExTypographyScale = keyof typeof exTypography;

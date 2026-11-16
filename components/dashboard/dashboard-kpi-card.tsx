@@ -24,10 +24,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { kpiChipStyle } from "@/lib/design-system/chip-palette";
 import { formatVariationPct } from "@/lib/dashboard/format";
 import {
   dsElevation,
-  dsIconBox,
   dsIconSize,
   dsInteractive,
   dsMotion,
@@ -58,6 +58,11 @@ export type DashboardKpiIconKey =
   | "ticket"
   | "sales"
   | "customers";
+
+const KPI_ICON_ORDER = [
+  "revenue", "net-revenue", "ebitda", "cmv", "margin", "cash", "receivables",
+  "payables", "inflow", "outflow", "ticket", "sales", "customers",
+] as const;
 
 const KPI_ICON_MAP: Record<DashboardKpiIconKey, LucideIcon> = {
   revenue: TrendingUp,
@@ -145,8 +150,11 @@ function DashboardKpiCardComponent({
           ) : null}
         </div>
         {Icon ? (
-          <div className={dsIconBox.md}>
-            <Icon className={dsIconSize.lg} aria-hidden />
+          <div
+            className="flex size-10 shrink-0 items-center justify-center rounded-xl"
+            style={kpiChipStyle(KPI_ICON_ORDER.indexOf(icon as (typeof KPI_ICON_ORDER)[number]))}
+          >
+            <Icon className="size-5" aria-hidden />
           </div>
         ) : null}
       </div>

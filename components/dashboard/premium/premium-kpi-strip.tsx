@@ -20,6 +20,7 @@ import {
 
 import type { PremiumKpiItem } from "@/lib/dashboard/premium-dashboard-map";
 import { GFKpiCockpit } from "@/components/gf/gf-kpi-cockpit";
+import { kpiChipStyleById } from "@/lib/design-system/chip-palette";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, LucideIcon> = {
@@ -61,9 +62,10 @@ export function PremiumKpiCard({
         </p>
         <span
           className={cn(
-            "inline-flex shrink-0 items-center justify-center rounded-lg bg-[var(--brand-gold)]/12 text-[var(--brand-gold)]",
+            "inline-flex shrink-0 items-center justify-center rounded-xl",
             featured ? "size-10" : "size-8",
           )}
+          style={kpiChipStyleById(item.id)}
         >
           <Icon className={featured ? "size-5" : "size-3.5"} aria-hidden />
         </span>
@@ -71,7 +73,7 @@ export function PremiumKpiCard({
 
       <p
         className={cn(
-          "mt-auto font-semibold tracking-tight text-[var(--text-primary)]",
+          "mt-auto font-bold tracking-[-0.035em] text-[var(--text-primary)]",
           "whitespace-nowrap tabular-nums",
           "overflow-x-clip",
           featured

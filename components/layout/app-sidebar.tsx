@@ -31,6 +31,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { TenantSwitcher } from "@/components/layout/tenant-switcher";
+import { navChipGradient } from "@/lib/design-system/chip-palette";
 import { cn } from "@/lib/utils";
 import type { TenantWithRole } from "@/types";
 
@@ -161,14 +162,14 @@ export function AppSidebar({
                         isActive={active}
                         tooltip={item.title}
                         className={cn(
-                          "h-9 rounded-lg px-3 text-[13px] font-medium transition-all duration-150",
+                          "h-10 gap-3 rounded-[10px] px-3 text-[13.5px] font-medium transition-all duration-150",
                           "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                          "data-[active=true]:bg-[var(--brand-gold)]/12 data-[active=true]:text-[var(--brand-gold-soft)]",
-                          "data-[active=true]:shadow-[inset_3px_0_0_0_var(--brand-gold)]",
+                          "data-[active=true]:bg-gradient-to-r data-[active=true]:from-[var(--brand-gold)]/16 data-[active=true]:to-[var(--brand-gold)]/3 data-[active=true]:text-white",
+                          "data-[active=true]:shadow-[inset_0_0_0_1px_rgb(248_194_8_/_0.22)]",
                           "focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
                         )}
                       >
-                        <NavIcon icon={item.icon} active={active} />
+                        <NavIcon icon={item.icon} id={item.id} />
                         <span>{item.title}</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -189,20 +190,13 @@ export function AppSidebar({
   );
 }
 
-function NavIcon({
-  icon: Icon,
-  active,
-}: {
-  icon: LucideIcon;
-  active: boolean;
-}) {
+function NavIcon({ icon: Icon, id }: { icon: LucideIcon; id: string }) {
   return (
-    <Icon
-      className={cn(
-        "size-4 stroke-[1.75] transition-colors duration-150",
-        active ? "text-[var(--brand-gold)]" : "text-muted-foreground",
-      )}
-      aria-hidden
-    />
+    <span
+      className="nav-chip inline-flex size-[26px] shrink-0 items-center justify-center rounded-[7px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]"
+      style={{ background: navChipGradient(id) }}
+    >
+      <Icon className="size-3.5 stroke-2" aria-hidden />
+    </span>
   );
 }

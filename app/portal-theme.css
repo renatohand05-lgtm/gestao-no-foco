@@ -114,6 +114,9 @@
   backdrop-filter: saturate(160%) blur(18px);
   border-radius: 1.25rem;
 }
+.dark [data-slot="card"] {
+  position: relative;
+}
 .dark [data-slot="card"]:hover {
   border-color: var(--portal-line-2);
 }
@@ -274,4 +277,73 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .portal-orb, .portal-mesh, .portal-wm { animation: none !important; }
+}
+
+/* ---------- Cabeçalhos de página ---------- */
+.dark h1 {
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+.dark h1 + p,
+.dark [data-slot="page-header"] p {
+  color: #a7b3c8;
+}
+
+/* Chips do menu lateral: modo colapsado mantém o ícone centralizado */
+.dark .nav-chip {
+  flex: none;
+}
+
+/* ---------- Brilho que segue o mouse nos cartões (como no demo) ---------- */
+.dark [data-slot="card"]::after,
+.dark [data-kpi-card]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / 0.06), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.dark [data-slot="card"]:hover::after,
+.dark [data-kpi-card]:hover::after {
+  opacity: 1;
+}
+.dark [data-kpi-card] {
+  position: relative;
+  background-color: var(--portal-glass);
+  border-color: var(--portal-line);
+  border-radius: 1.25rem;
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  backdrop-filter: saturate(160%) blur(18px);
+}
+.dark [data-kpi-value] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Pílulas / abas (chips) ---------- */
+.dark [role="tablist"] {
+  gap: 0.375rem;
+}
+.dark [role="tab"] {
+  border-radius: 9999px;
+  border: 1px solid var(--portal-line);
+  background: var(--portal-glass-2);
+  color: #a7b3c8;
+  font-weight: 500;
+}
+.dark [role="tab"][aria-selected="true"],
+.dark [role="tab"][data-active],
+.dark [role="tab"][data-selected] {
+  background: linear-gradient(180deg, #ffd43a, #f8c208);
+  color: #0a1428;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+/* ---------- Badges ---------- */
+.dark [data-slot="badge"] {
+  border-radius: 9999px;
+  font-weight: 600;
 }

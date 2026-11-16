@@ -24,12 +24,12 @@ export const dsShadow = {
 
 /** Superfícies de card padronizadas */
 export const dsElevation = {
-  card: "border border-border/60 bg-card/80 shadow-sm",
+  card: "border border-border/60 bg-card/80 shadow-sm dark:rounded-[1.25rem] dark:border-white/10 dark:backdrop-blur-xl",
   cardMuted: "border border-border/60 bg-muted/20",
   cardInteractive:
     "border border-border/60 bg-gradient-to-br from-card via-card to-muted/30 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md hover:shadow-primary/5",
   cardPremium:
-    "border border-border/60 bg-gradient-to-br from-card via-card to-muted/25 shadow-sm ring-1 ring-black/[0.02] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:ring-primary/10",
+    "border border-border/60 bg-gradient-to-br from-card via-card to-muted/25 shadow-sm ring-1 ring-black/[0.02] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:ring-primary/10 dark:rounded-[1.25rem] dark:border-white/10 dark:from-transparent dark:via-transparent dark:to-transparent dark:ring-0 dark:backdrop-blur-xl dark:hover:border-white/20",
   section: "border border-border/60 bg-card/80 shadow-sm",
   empty:
     "rounded-xl border border-dashed border-border/60 bg-card/50",
@@ -97,7 +97,7 @@ export const dsGrid = {
 
 /** Tipografia */
 export const dsType = {
-  pageTitle: "text-2xl font-semibold tracking-tight sm:text-3xl",
+  pageTitle: "text-2xl font-bold tracking-[-0.035em] sm:text-3xl",
   sectionTitle: "text-lg font-semibold tracking-tight",
   cardTitle: "text-base font-semibold",
   eyebrow:
@@ -105,8 +105,8 @@ export const dsType = {
   description: "text-sm text-muted-foreground",
   descriptionLg: "text-sm text-muted-foreground sm:text-base",
   kpiLabel: "text-sm font-medium text-muted-foreground",
-  kpiValue: "text-2xl font-semibold tracking-tight tabular-nums",
-  kpiValueLg: "text-3xl font-semibold tracking-tight tabular-nums",
+  kpiValue: "text-2xl font-bold tracking-[-0.035em] tabular-nums",
+  kpiValueLg: "text-3xl font-bold tracking-[-0.035em] tabular-nums",
   metricValue: "text-2xl font-semibold tracking-tight sm:text-3xl tabular-nums",
   legend: "text-xs text-muted-foreground",
   caption: "text-[11px] text-muted-foreground",

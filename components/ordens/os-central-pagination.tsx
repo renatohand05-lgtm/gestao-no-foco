@@ -20,19 +20,28 @@ export function OsCentralPaginationBar({
   nextHref,
   perPageHrefs,
 }: Props) {
+  const prevNextClass = cn(
+    buttonVariants({ size: "sm", variant: "outline" }),
+    "max-md:h-11 max-md:w-full",
+  );
+  const disabledClass = cn(prevNextClass, "pointer-events-none opacity-40");
+
   return (
     <nav
       className="mt-4 flex flex-col gap-3 border-t border-border/50 pt-4 sm:flex-row sm:items-center sm:justify-between"
       aria-label="Paginação da lista de OS"
       data-os-block="central-pagination"
     >
-      <p className="text-xs text-muted-foreground" role="status">
+      <p
+        className="text-xs text-muted-foreground max-sm:order-3 max-sm:text-center"
+        role="status"
+      >
         {pagination.label}
       </p>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 max-sm:contents">
         <div
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 max-sm:order-2 max-sm:justify-center"
           role="group"
           aria-label="Registros por página"
         >
@@ -55,49 +64,31 @@ export function OsCentralPaginationBar({
           ))}
         </div>
 
-        {prevHref ? (
-          <Link
-            href={prevHref}
-            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-            rel="prev"
-          >
-            Anterior
-          </Link>
-        ) : (
-          <span
-            className={cn(
-              buttonVariants({ size: "sm", variant: "outline" }),
-              "pointer-events-none opacity-40",
-            )}
-            aria-disabled="true"
-          >
-            Anterior
-          </span>
-        )}
+        <div className="flex items-center gap-2 max-sm:order-1 max-sm:grid max-sm:grid-cols-[1fr_auto_1fr]">
+          {prevHref ? (
+            <Link href={prevHref} className={prevNextClass} rel="prev">
+              Anterior
+            </Link>
+          ) : (
+            <span className={disabledClass} aria-disabled="true">
+              Anterior
+            </span>
+          )}
 
-        <span className="text-xs tabular-nums text-muted-foreground">
-          {pagination.page} / {pagination.totalPages}
-        </span>
-
-        {nextHref ? (
-          <Link
-            href={nextHref}
-            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-            rel="next"
-          >
-            Próximo
-          </Link>
-        ) : (
-          <span
-            className={cn(
-              buttonVariants({ size: "sm", variant: "outline" }),
-              "pointer-events-none opacity-40",
-            )}
-            aria-disabled="true"
-          >
-            Próximo
+          <span className="text-xs tabular-nums text-muted-foreground">
+            {pagination.page} / {pagination.totalPages}
           </span>
-        )}
+
+          {nextHref ? (
+            <Link href={nextHref} className={prevNextClass} rel="next">
+              Próximo
+            </Link>
+          ) : (
+            <span className={disabledClass} aria-disabled="true">
+              Próximo
+            </span>
+          )}
+        </div>
       </div>
     </nav>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Car } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import {
   ExecutiveBadge,
@@ -56,6 +57,16 @@ function formatPrevisao(value: string | null) {
   return value.slice(0, 16).replace("T", " ");
 }
 
+/** "2026-11-14T17:00" → "14/11 · 17:00" (celular). */
+function formatPrevisaoCurta(value: string | null) {
+  if (!value) return "—";
+  const [date = "", time = ""] = value.slice(0, 16).split(/[T ]/);
+  const [, month, day] = date.split("-");
+  if (!month || !day) return formatPrevisao(value);
+  const hhmm = time && time !== "00:00" ? ` · ${time}` : "";
+  return `${day}/${month}${hhmm}`;
+}
+
 export function OsCentralTable({
   tenantSlug,
   rows,
@@ -67,6 +78,24 @@ export function OsCentralTable({
   copy,
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const close = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      // Não fecha ao tocar no menu nem numa janela de confirmação aberta por ele.
+      if (
+        !target?.closest(
+          '[data-os-menu], [role="dialog"], [data-slot="dialog-content"], [data-slot="dialog-overlay"]',
+        )
+      ) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [openMenuId]);
+
   const showVehicles = copy?.showVehicles !== false;
   const statusOf = (status: string) =>
     copy?.statusLabels
@@ -91,73 +120,88 @@ export function OsCentralTable({
             key={item.id}
             className={cn(
               gofCardSurface,
-              "p-3.5",
+              "relative p-0",
               item.atrasada && "ring-1 ring-[var(--brand-danger)]/40",
             )}
           >
-            <div className="flex items-start justify-between gap-2">
-              <Link
-                href={`/${tenantSlug}/ordens/${item.id}`}
-                className="font-semibold underline-offset-2 hover:underline"
-              >
-                #{item.numero}
-              </Link>
-              <ExecutiveBadge tone={SLA_TONE[item.slaTone]} variant="soft">
-                {item.slaLabel}
-              </ExecutiveBadge>
-            </div>
-            <p className="mt-1 truncate text-sm">{item.cliente_nome ?? "—"}</p>
-            <p className="text-xs text-muted-foreground">
-              {showVehicles
-                ? [item.placa, item.modelo].filter(Boolean).join(" · ") || "—"
-                : item.responsavel.nome}
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <StatusBadge label={statusOf(item.status)} />
-              <ExecutiveBadge tone="neutral" variant="soft">
-                {prioridadeLabel(item.prioridade)}
-              </ExecutiveBadge>
-            </div>
-            <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <dt className="text-muted-foreground">Responsável</dt>
-                <dd className="truncate font-medium">
+            <Link
+              href={`/${tenantSlug}/ordens/${item.id}`}
+              className="block rounded-t-[inherit] p-4 pb-3 active:bg-white/[0.04]"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xl font-extrabold leading-none tracking-tight text-[var(--brand-gold)]">
+                  #{item.numero}
+                </span>
+                <ExecutiveBadge tone={SLA_TONE[item.slaTone]} variant="soft">
+                  {item.slaLabel}
+                </ExecutiveBadge>
+              </div>
+
+              <p className="mt-2.5 truncate text-base font-semibold">
+                {item.cliente_nome ?? "—"}
+              </p>
+
+              {showVehicles && (item.placa || item.modelo) ? (
+                <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                  <Car className="size-4 shrink-0" aria-hidden />
+                  {item.placa ? (
+                    <span className="rounded-md border border-border/70 bg-white/5 px-1.5 py-0.5 font-mono text-[13px] font-semibold tracking-wide text-foreground">
+                      {item.placa}
+                    </span>
+                  ) : null}
+                  {item.modelo ? (
+                    <span className="min-w-0 truncate">{item.modelo}</span>
+                  ) : null}
+                </p>
+              ) : null}
+
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <StatusBadge label={statusOf(item.status)} />
+                {item.prioridade !== "normal" ? (
+                  <ExecutiveBadge
+                    tone={item.prioridade === "baixa" ? "neutral" : "warning"}
+                    variant="soft"
+                  >
+                    {prioridadeLabel(item.prioridade)}
+                  </ExecutiveBadge>
+                ) : null}
+                {item.arquivado_em ? (
+                  <ExecutiveBadge tone="neutral" variant="outline">
+                    Arquivada
+                  </ExecutiveBadge>
+                ) : null}
+              </div>
+
+              <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border/50 pt-3">
+                <div>
+                  <dt className="text-xs text-muted-foreground">Valor</dt>
+                  <dd className="text-lg font-bold tabular-nums">
+                    {formatCurrency(item.valor_total)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Prevista</dt>
+                  <dd className="text-base font-semibold tabular-nums">
+                    {formatPrevisaoCurta(item.previsao_entrega)}
+                  </dd>
+                </div>
+              </dl>
+            </Link>
+
+            <div className="flex items-center justify-between gap-2 border-t border-border/50 py-1.5 pl-4 pr-2">
+              <p className="min-w-0 truncate text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">
                   {item.responsavel.nome}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Valor</dt>
-                <dd className="font-medium tabular-nums">
-                  {formatCurrency(item.valor_total)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Prevista</dt>
-                <dd className="tabular-nums">
-                  {formatPrevisao(item.previsao_entrega)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Tempo desde abertura</dt>
-                <dd className="tabular-nums">
-                  {formatTempoDesdeAbertura(item.tempoDesdeAberturaHoras)}
-                </dd>
-              </div>
-            </dl>
-            <div className="mt-3 flex items-center gap-2">
-              <Link
-                href={`/${tenantSlug}/ordens/${item.id}`}
-                className={cn(
-                  buttonVariants({ size: "sm", variant: "outline" }),
-                )}
-              >
-                Abrir
-              </Link>
-              <div className="relative">
+                </span>
+                {" · "}
+                {formatTempoDesdeAbertura(item.tempoDesdeAberturaHoras)}
+              </p>
+              <div className="relative shrink-0" data-os-menu="">
                 <button
                   type="button"
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "sm" }),
+                    "min-w-11 text-lg",
                   )}
                   aria-label={`Ações do ${copy?.workOrder ?? "registro"} #${item.numero}`}
                   aria-expanded={openMenuId === item.id}
@@ -168,7 +212,13 @@ export function OsCentralTable({
                   ⋯
                 </button>
                 {openMenuId === item.id ? (
-                  <div className="absolute left-0 z-10 mt-1 min-w-[200px] rounded-md border bg-background p-2 shadow-md">
+                  <div className="absolute bottom-full right-0 z-30 mb-1 w-60 rounded-xl border bg-background p-1.5 shadow-lg">
+                    <Link
+                      href={`/${tenantSlug}/ordens/${item.id}`}
+                      className="block min-h-11 rounded px-3 py-3 text-base hover:bg-muted"
+                    >
+                      Abrir {copy?.workOrder ?? "registro"}
+                    </Link>
                     <OsLifecycleMenu
                       tenantSlug={tenantSlug}
                       osId={item.id}
@@ -183,7 +233,7 @@ export function OsCentralTable({
                       canArquivar={canArquivar}
                       canExcluirRascunho={canExcluirRascunho}
                       canRestaurar={canRestaurar}
-                      compact
+                      inline
                     />
                   </div>
                 ) : null}
@@ -296,7 +346,7 @@ export function OsCentralTable({
                     </ExecutiveBadge>
                   </td>
                   <td className="px-3 py-2.5">
-                    <div className="relative">
+                    <div className="relative" data-os-menu="">
                       <button
                         type="button"
                         className={cn(

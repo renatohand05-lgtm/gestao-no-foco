@@ -274,7 +274,7 @@ export function GFExecutiveHeader({
         </div>
 
         <div className="flex shrink-0 flex-col items-start gap-3 lg:items-end">
-          <p className="max-w-[220px] text-right text-sm italic text-white/50">
+          <p className="max-w-[220px] text-right text-sm italic text-white/50 max-md:hidden">
             &quot;{quote}&quot;
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -297,14 +297,14 @@ export function GFExecutiveHeader({
         </div>
       </div>
 
-      <div className="relative mt-6 flex flex-wrap gap-1.5">
+      <div className="relative mt-6 -mx-5 flex gap-1.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
         {periodTabs.map((tab) => (
           <Link
             key={tab.label}
             href={periodHref(tab.range)}
             onClick={() => setCustomOpen(false)}
             className={cn(
-              "rounded-lg px-3.5 py-1.5 text-xs font-medium transition",
+              "rounded-lg px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition max-sm:py-2.5 max-sm:text-sm",
               !customOpen && isActive(tab.range)
                 ? "bg-[var(--brand-gold)] text-[var(--brand-navy)]"
                 : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/85",
@@ -317,7 +317,7 @@ export function GFExecutiveHeader({
           type="button"
           onClick={() => setCustomOpen((v) => !v)}
           className={cn(
-            "rounded-lg px-3.5 py-1.5 text-xs font-medium transition",
+            "rounded-lg px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition max-sm:py-2.5 max-sm:text-sm",
             customOpen
               ? "bg-[var(--brand-gold)] text-[var(--brand-navy)]"
               : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/85",

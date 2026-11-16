@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { MetricCard } from "@/components/executive";
+import { cn } from "@/lib/utils";
 import type { ExColorTone } from "@/lib/design-system/colors";
 import { gofGrid } from "@/lib/design-system";
 import type { OsCentralKpis } from "@/lib/ordens/os-central-compose";
@@ -105,7 +106,11 @@ export function OsCentralKpis({ tenantSlug, kpis, copy }: Props) {
 
   return (
     <div
-      className={gofGrid.kpis}
+      className={cn(
+        gofGrid.kpis,
+        // Celular: faixa que desliza para o lado (em vez de 5 linhas de cartões).
+        "max-md:-mx-4 max-md:flex max-md:snap-x max-md:gap-2.5 max-md:overflow-x-auto max-md:px-4 max-md:pb-1 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden",
+      )}
       data-os-block="central-kpis"
       role="region"
       aria-label={copy?.centralKpisAria ?? "Indicadores da Central de OS"}
@@ -124,6 +129,7 @@ export function OsCentralKpis({ tenantSlug, kpis, copy }: Props) {
             hint={def.supporting}
             tone={def.tone ?? "neutral"}
             emphasize={def.emphasize}
+            hintClassName="max-md:hidden"
             className="h-full"
           />
         );
@@ -132,7 +138,7 @@ export function OsCentralKpis({ tenantSlug, kpis, copy }: Props) {
             <Link
               key={def.key}
               href={def.href}
-              className="block h-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40"
+              className="block h-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40 max-md:h-auto max-md:w-[9.5rem] max-md:shrink-0 max-md:snap-start"
               aria-label={`${def.label}: ${value}`}
             >
               {card}
@@ -140,7 +146,11 @@ export function OsCentralKpis({ tenantSlug, kpis, copy }: Props) {
           );
         }
         return (
-          <div key={def.key} aria-label={`${def.label}: ${value}`}>
+          <div
+            key={def.key}
+            aria-label={`${def.label}: ${value}`}
+            className="max-md:w-[9.5rem] max-md:shrink-0 max-md:snap-start"
+          >
             {card}
           </div>
         );

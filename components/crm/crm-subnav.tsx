@@ -21,7 +21,7 @@ type CrmSubnavProps = {
 
 export function CrmSubnav({ tenantSlug, active }: CrmSubnavProps) {
   return (
-    <nav className="flex flex-wrap gap-2 border-b pb-3">
+    <nav className="-mx-4 flex gap-2 overflow-x-auto border-b px-4 pb-3 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
       {CRM_LINKS.map((link) => {
         const href = `/${tenantSlug}/${link.href}`;
         const isActive = active === link.href;
@@ -30,7 +30,7 @@ export function CrmSubnav({ tenantSlug, active }: CrmSubnavProps) {
             key={link.href}
             href={href}
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              "shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors max-md:py-2.5",
               isActive
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",

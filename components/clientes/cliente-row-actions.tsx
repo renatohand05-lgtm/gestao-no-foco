@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { ClienteDeleteDialog } from "@/components/clientes/cliente-delete-dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,11 +18,13 @@ import type { ClienteListItem } from "@/types/clientes";
 type ClienteRowActionsProps = {
   tenantSlug: string;
   cliente: ClienteListItem;
+  triggerClassName?: string;
 };
 
 export function ClienteRowActions({
   tenantSlug,
   cliente,
+  triggerClassName,
 }: ClienteRowActionsProps) {
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -30,7 +33,12 @@ export function ClienteRowActions({
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon" className="size-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("size-8", triggerClassName)}
+              aria-label="Mais ações"
+            >
               <MoreHorizontal className="size-4" />
             </Button>
           }

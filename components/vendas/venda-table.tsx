@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { gofCardSurface } from "@/lib/design-system/primitives";
+import { cn } from "@/lib/utils";
 import { VendaRowActions } from "@/components/vendas/venda-row-actions";
 import { VendaStatusBadge } from "@/components/vendas/venda-status-badge";
 import {
@@ -26,7 +28,58 @@ type VendaTableProps = {
 
 export function VendaTable({ tenantSlug, vendas }: VendaTableProps) {
   return (
-    <DataTable>
+    <>
+      <ul className="space-y-3 md:hidden" aria-label="Lista de vendas">
+        {vendas.map((venda) => (
+          <li key={venda.id} className={cn(gofCardSurface, "relative p-0")}>
+            <Link
+              href={`/${tenantSlug}/vendas/${venda.id}`}
+              className="block rounded-t-[inherit] p-4 pb-3 active:bg-white/[0.04]"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xl font-extrabold leading-none tracking-tight text-[var(--brand-gold)]">
+                  {formatVendaNumero(venda.numero)}
+                </span>
+                <VendaStatusBadge status={venda.status} />
+              </div>
+              <p className="mt-2.5 truncate text-base font-semibold">
+                {venda.cliente.nome}
+              </p>
+              {venda.cliente.documento ? (
+                <p className="text-xs text-muted-foreground">
+                  {venda.cliente.documento}
+                </p>
+              ) : null}
+              <dl className="mt-3 flex items-end justify-between gap-3 border-t border-border/50 pt-3">
+                <div>
+                  <dt className="text-xs text-muted-foreground">Total</dt>
+                  <dd className="text-lg font-bold tabular-nums">
+                    {formatCurrency(venda.total)}
+                  </dd>
+                </div>
+                <div className="text-right">
+                  <dt className="text-xs text-muted-foreground">Data</dt>
+                  <dd className="text-base font-semibold tabular-nums">
+                    {formatVendaDate(venda.data_venda)}
+                  </dd>
+                </div>
+              </dl>
+            </Link>
+            <div className="flex items-center justify-between gap-2 border-t border-border/50 py-1 pl-4 pr-2">
+              <p className="text-xs text-muted-foreground">
+                Cadastro {formatVendaDateTime(venda.created_at)}
+              </p>
+              <VendaRowActions
+                tenantSlug={tenantSlug}
+                venda={venda}
+                triggerClassName="size-11"
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <DataTable className="max-md:hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -83,5 +136,6 @@ export function VendaTable({ tenantSlug, vendas }: VendaTableProps) {
         </TableBody>
       </Table>
     </DataTable>
+    </>
   );
 }

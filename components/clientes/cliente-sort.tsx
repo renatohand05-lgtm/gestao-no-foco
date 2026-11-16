@@ -37,7 +37,7 @@ export function ClienteSort({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
       <span className="text-sm text-muted-foreground">Ordenar por:</span>
       {CLIENTE_SORT_OPTIONS.map((option) => (
         <Button

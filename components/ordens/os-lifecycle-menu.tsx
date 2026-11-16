@@ -25,6 +25,8 @@ type Props = {
   canExcluirPermanente?: boolean;
   canRestaurar: boolean;
   compact?: boolean;
+  /** Lista as ações direto (sem botão ⋯ dentro de outro ⋯) — usado no celular. */
+  inline?: boolean;
   cancelLabel?: string;
 };
 
@@ -44,6 +46,7 @@ export function OsLifecycleMenu({
   canExcluirPermanente = false,
   canRestaurar,
   compact = false,
+  inline = false,
   cancelLabel = "Cancelar OS",
 }: Props) {
   const [mode, setMode] = useState<OsLifecycleMode | null>(null);
@@ -68,91 +71,106 @@ export function OsLifecycleMenu({
 
   const size = compact ? "sm" : "default";
 
+  const itemClass =
+    "block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted max-md:min-h-11 max-md:py-3 max-md:text-base";
+
+  const menuItems = (
+    <>
+    {showCancel ? (
+      <button
+        type="button"
+        role="menuitem"
+        className={itemClass}
+        onClick={() => {
+          setOpen(false);
+          setMode("cancelar");
+        }}
+      >
+        {cancelLabel}
+      </button>
+    ) : null}
+    {canArquivar && !isArquivada && !isRascunho ? (
+      <button
+        type="button"
+        role="menuitem"
+        className={itemClass}
+        onClick={() => {
+          setOpen(false);
+          setMode("arquivar");
+        }}
+      >
+        Arquivar
+      </button>
+    ) : null}
+    {showExcluirRascunho ? (
+      <button
+        type="button"
+        role="menuitem"
+        className={itemClass}
+        onClick={() => {
+          setOpen(false);
+          setMode("excluir");
+        }}
+      >
+        Excluir rascunho
+      </button>
+    ) : null}
+    {showExcluirPermanente ? (
+      <button
+        type="button"
+        role="menuitem"
+        className={cn(itemClass, "text-destructive")}
+        onClick={() => {
+          setOpen(false);
+          setMode("excluir_permanente");
+        }}
+      >
+        Excluir permanentemente
+      </button>
+    ) : null}
+    {canRestaurar && isArquivada ? (
+      <button
+        type="button"
+        role="menuitem"
+        className={itemClass}
+        onClick={() => {
+          setOpen(false);
+          setMode("restaurar");
+        }}
+      >
+        Restaurar
+      </button>
+    ) : null}
+    </>
+  );
+
   return (
     <div className="space-y-2">
-      <div className="relative inline-block">
-        <button
-          type="button"
-          className={cn(buttonVariants({ variant: "outline", size }))}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          ⋯
-        </button>
-        {open ? (
-          <div
-            role="menu"
-            className="absolute right-0 z-20 mt-1 min-w-56 rounded-md border bg-background p-1 shadow-md"
+      {inline ? (
+        <div role="menu" className="space-y-0.5">
+          {menuItems}
+        </div>
+      ) : (
+        <div className="relative inline-block">
+          <button
+            type="button"
+            className={cn(buttonVariants({ variant: "outline", size }))}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
           >
-            {showCancel ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
-                onClick={() => {
-                  setOpen(false);
-                  setMode("cancelar");
-                }}
-              >
-                {cancelLabel}
-              </button>
-            ) : null}
-            {canArquivar && !isArquivada && !isRascunho ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
-                onClick={() => {
-                  setOpen(false);
-                  setMode("arquivar");
-                }}
-              >
-                Arquivar
-              </button>
-            ) : null}
-            {showExcluirRascunho ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
-                onClick={() => {
-                  setOpen(false);
-                  setMode("excluir");
-                }}
-              >
-                Excluir rascunho
-              </button>
-            ) : null}
-            {showExcluirPermanente ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="block w-full rounded px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
-                onClick={() => {
-                  setOpen(false);
-                  setMode("excluir_permanente");
-                }}
-              >
-                Excluir permanentemente
-              </button>
-            ) : null}
-            {canRestaurar && isArquivada ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-muted"
-                onClick={() => {
-                  setOpen(false);
-                  setMode("restaurar");
-                }}
-              >
-                Restaurar
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+            ⋯
+          </button>
+          {open ? (
+            <div
+              role="menu"
+              className="absolute right-0 z-20 mt-1 min-w-56 rounded-md border bg-background p-1 shadow-md"
+            >
+              {menuItems}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <OsConfirmDialog
         tenantSlug={tenantSlug}

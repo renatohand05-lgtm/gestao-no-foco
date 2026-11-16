@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { ChevronDown, Wrench } from "lucide-react";
 
 import { OsDescontoPanel } from "@/components/ordens/os-desconto-panel";
 import { OsLifecycleMenu } from "@/components/ordens/os-lifecycle-menu";
@@ -34,6 +35,14 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ExecutiveSection } from "@/components/executive";
 import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { prioridadeLabel } from "@/lib/ordens/os-central-compose";
 import {
   applyOsAprovacaoAction,
   changeOsStatusAction,
@@ -141,6 +150,33 @@ const EXEC_LABELS: Record<string, string> = {
   cancelado: "Cancelar item",
 };
 
+/** "2026-11-14T17:00" → "14/11/2026 · 17:00"; "2026-11-10" → "10/11/2026". */
+function formatDataHora(value: string | null | undefined) {
+  if (!value) return "—";
+  const [date = "", time = ""] = value.slice(0, 16).split(/[T ]/);
+  const [y, m, d] = date.split("-");
+  if (!y || !m || !d) return value;
+  return `${d}/${m}/${y}${time && time !== "00:00" ? ` · ${time}` : ""}`;
+}
+
+/** Campo com rótulo visível (placeholder some quando o campo é preenchido). */
+function LabeledField({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={cn("grid min-w-0 gap-1", className)}>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      {children}
+    </label>
+  );
+}
+
 function canEditOs(os: OrdemServicoDetail) {
   return (
     !os.venda_id &&
@@ -202,6 +238,9 @@ export function OsWorkspace({
   const [veiculoEditId, setVeiculoEditId] = useState(os.veiculo_id ?? "");
   const [execHoras, setExecHoras] = useState<Record<string, string>>({});
   const [veiculoMasterOpen, setVeiculoMasterOpen] = useState(false);
+  const [statusSheetOpen, setStatusSheetOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const tabsRef = useRef<HTMLDivElement | null>(null);
   const [formaPagamentoFaturar, setFormaPagamentoFaturar] = useState(
     formasPagamento[0]?.id ?? "",
   );
@@ -295,6 +334,13 @@ export function OsWorkspace({
     />
   );
 
+  useEffect(() => {
+    const active = tabsRef.current?.querySelector<HTMLElement>(
+      '[data-tab-active="true"]',
+    );
+    active?.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [tab]);
+
   function run(
     action: () => Promise<{ success: boolean; error?: string }>,
     okMessage?: string,
@@ -352,17 +398,13 @@ export function OsWorkspace({
         <FeedbackMessage variant="success">{success}</FeedbackMessage>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge
-          label={statusCopy(os.status)}
-        />
-        {os.arquivado_em ? (
-          <StatusBadge label="Arquivada" />
-        ) : null}
-        <span className="text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-3 max-md:rounded-2xl max-md:border max-md:border-border/60 max-md:bg-card max-md:p-4">
+        <StatusBadge label={statusCopy(os.status)} />
+        {os.arquivado_em ? <StatusBadge label="Arquivada" /> : null}
+        <span className="text-sm text-muted-foreground max-md:hidden">
           #{os.numero}
         </span>
-        <div className="text-sm">
+        <div className="text-sm max-md:hidden">
           <p className="font-medium">{os.cliente_nome ?? uiCopy?.customer ?? "Cliente"}</p>
           {uiCopy?.showVehicles !== false ? (
             <>
@@ -376,38 +418,93 @@ export function OsWorkspace({
             </>
           ) : null}
         </div>
-        <span className="ml-auto text-sm font-semibold tabular-nums">
-          {formatCurrency(os.valor_total)}
-        </span>
-        <OsPrintButton
-          os={os}
-          empresaNome={empresaNome}
-          workOrderLabel={uiCopy?.workOrder ?? "Ordem de Serviço"}
-          responsavelNome={os.responsavel?.nome}
-        />
+        <div className="ml-auto text-right">
+          <p className="text-xs text-muted-foreground md:hidden">Total</p>
+          <span className="text-sm font-semibold tabular-nums max-md:text-2xl max-md:font-extrabold">
+            {formatCurrency(os.valor_total)}
+          </span>
+        </div>
+
+        {nextStatuses.length > 0 ? (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setStatusSheetOpen(true)}
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "h-12 w-full text-base font-bold md:hidden",
+            )}
+          >
+            <Wrench className="size-4" aria-hidden />
+            Mudar status
+            <ChevronDown className="size-4" aria-hidden />
+          </button>
+        ) : null}
+
+        <div className="flex items-center gap-2 max-md:w-full max-md:[&>div:first-child]:flex-1 max-md:[&>div:first-child>button]:w-full max-md:[&>div:first-child>button]:h-11">
+          <div>
+            <OsPrintButton
+              os={os}
+              empresaNome={empresaNome}
+              workOrderLabel={uiCopy?.workOrder ?? "Ordem de Serviço"}
+              responsavelNome={os.responsavel?.nome}
+            />
+          </div>
+          <OsLifecycleMenu
+            tenantSlug={tenantSlug}
+            osId={os.id}
+            numero={os.numero}
+            clienteNome={os.cliente_nome}
+            placa={os.placa}
+            modelo={os.modelo}
+            status={os.status}
+            vendaId={os.venda_id}
+            arquivadoEm={os.arquivado_em}
+            canCancel={canCancel}
+            canArquivar={canArquivar}
+            canExcluirRascunho={canExcluirRascunho}
+            canExcluirPermanente={canExcluirPermanente}
+            canRestaurar={canRestaurar}
+            cancelLabel={
+              uiCopy && !uiCopy.automotiveWorkflow
+                ? `Cancelar ${uiCopy.workOrder.toLowerCase()}`
+                : "Cancelar OS"
+            }
+          />
+        </div>
       </div>
 
-      <OsLifecycleMenu
-        tenantSlug={tenantSlug}
-        osId={os.id}
-        numero={os.numero}
-        clienteNome={os.cliente_nome}
-        placa={os.placa}
-        modelo={os.modelo}
-        status={os.status}
-        vendaId={os.venda_id}
-        arquivadoEm={os.arquivado_em}
-        canCancel={canCancel}
-        canArquivar={canArquivar}
-        canExcluirRascunho={canExcluirRascunho}
-        canExcluirPermanente={canExcluirPermanente}
-        canRestaurar={canRestaurar}
-        cancelLabel={
-          uiCopy && !uiCopy.automotiveWorkflow
-            ? `Cancelar ${uiCopy.workOrder.toLowerCase()}`
-            : "Cancelar OS"
-        }
-      />
+      <Sheet open={statusSheetOpen} onOpenChange={setStatusSheetOpen}>
+        <SheetContent
+          side="bottom"
+          className="mobile-create-sheet rounded-t-[1.5rem] px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-2 md:hidden"
+        >
+          <div className="mx-auto mt-1 h-1 w-10 rounded-full bg-white/20" aria-hidden />
+          <SheetHeader className="px-1 pb-0 pt-2">
+            <SheetTitle className="text-lg font-bold">Mudar status</SheetTitle>
+            <SheetDescription>
+              Agora: {statusCopy(os.status)}. Escolha o próximo passo.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="grid gap-2">
+            {nextStatuses.map((status) => (
+              <button
+                key={status}
+                type="button"
+                disabled={pending}
+                className="flex min-h-14 items-center justify-between rounded-xl border border-border/70 bg-white/[0.04] px-4 text-left text-base font-semibold active:bg-white/10"
+                onClick={() => {
+                  setStatusSheetOpen(false);
+                  handleStatusChange(status);
+                }}
+              >
+                {statusCopy(status)}
+                <span aria-hidden className="text-[var(--brand-gold)]">→</span>
+              </button>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <OsRecursoBinder
         tenantSlug={tenantSlug}
@@ -434,18 +531,26 @@ export function OsWorkspace({
         professionalsLabel={professionalsLabel}
       />
 
-      <div className="flex flex-wrap gap-1.5">
+      <div
+        ref={tabsRef}
+        role="tablist"
+        aria-label="Seções da OS"
+        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:gap-1.5 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
+      >
         {TABS.filter(
           (t) => t !== "diagnostico" || uiCopy?.automotiveWorkflow !== false,
         ).map((t) => (
           <button
             key={t}
             type="button"
+            role="tab"
+            aria-selected={tab === t}
+            data-tab-active={tab === t ? "true" : "false"}
             onClick={() => setTab(t)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium",
+              "shrink-0 rounded-full border px-4 py-2 text-sm font-medium md:px-3 md:py-1 md:text-xs",
               tab === t
-                ? "border-emerald-600 bg-emerald-600/10 text-emerald-800 dark:text-emerald-300"
+                ? "border-emerald-600 bg-emerald-600/10 text-emerald-800 dark:border-[#f8c208] dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]"
                 : "border-border hover:bg-muted",
             )}
           >
@@ -456,23 +561,93 @@ export function OsWorkspace({
 
       {tab === "resumo" ? (
         <ExecutiveSection title="Resumo" panel>
-          <div className="mb-3 rounded-lg border p-3 text-sm" data-phase35-3="channel-ux">
-            <p className="font-medium">Canal do cliente</p>
-            <p className="text-muted-foreground">
-              WhatsApp cadastrado: {clientePhone?.replace(/\D/g, "") ? "sim" : "não"}
-            </p>
-            <p className="text-muted-foreground">
-              E-mail cadastrado: {clienteEmail?.includes("@") ? "sim" : "não"}
-            </p>
-            <p className="mt-2 font-medium">Status do provider</p>
-            <p className="text-muted-foreground">
-              WhatsApp: {whatsappProviderConfigured ? "configurado" : "não configurado"}
-            </p>
-            <p className="text-muted-foreground">
-              E-mail: {emailProviderConfigured ? "configurado" : "não configurado"}
-            </p>
-          </div>
-          {serviceReadyPanel}
+          <div className="flex flex-col gap-4">
+            {os.reclamacao_cliente ? (
+              <div className="rounded-xl border border-border/60 bg-white/[0.03] p-3 max-md:order-1 md:hidden">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Reclamação do cliente
+                </p>
+                <p className="mt-1 text-base">{os.reclamacao_cliente}</p>
+              </div>
+            ) : null}
+
+            <dl className="grid grid-cols-2 gap-3 text-sm max-md:order-2 md:gap-2">
+              <div>
+                <dt className="text-xs text-muted-foreground md:text-sm">Entrada</dt>
+                <dd className="max-md:text-base max-md:font-semibold">
+                  {formatDataHora(os.data_hora_entrada ?? os.data_abertura)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground md:text-sm">Previsão</dt>
+                <dd className="max-md:text-base max-md:font-semibold">
+                  {formatDataHora(os.previsao_entrega)}
+                </dd>
+              </div>
+              {uiCopy?.showVehicles !== false ? (
+                <div>
+                  <dt className="text-xs text-muted-foreground md:text-sm">Km entrada</dt>
+                  <dd className="max-md:text-base max-md:font-semibold">
+                    {os.quilometragem_entrada != null
+                      ? `${os.quilometragem_entrada.toLocaleString("pt-BR")} km`
+                      : "—"}
+                  </dd>
+                </div>
+              ) : null}
+              <div>
+                <dt className="text-xs text-muted-foreground md:text-sm">Prioridade</dt>
+                <dd className="max-md:text-base max-md:font-semibold">
+                  {prioridadeLabel(os.prioridade)}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="rounded-xl border border-border/60 p-3 max-md:order-3 md:hidden">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-semibold">Itens ({os.itens.length})</p>
+                <button
+                  type="button"
+                  className="min-h-11 px-1 text-sm font-semibold text-[var(--brand-gold)] underline-offset-2 hover:underline"
+                  onClick={() => setTab("orcamento")}
+                >
+                  Ver orçamento
+                </button>
+              </div>
+              {os.itens.length === 0 ? (
+                <p className="py-2 text-sm text-muted-foreground">
+                  Nenhum item adicionado ainda.
+                </p>
+              ) : (
+                <ul className="divide-y divide-border/50">
+                  {os.itens.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-start justify-between gap-3 py-2.5"
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium">
+                          {item.descricao}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {item.quantidade} × {formatCurrency(item.valor_unitario)}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums">
+                        {formatCurrency(item.valor_total)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex items-center justify-between border-t border-border/50 pt-2.5 font-bold">
+                <span>Total</span>
+                <span className="tabular-nums">{formatCurrency(os.valor_total)}</span>
+              </div>
+            </div>
+
+            <div className="empty:hidden max-md:order-4">{serviceReadyPanel}</div>
+
+            <div className="empty:hidden max-md:order-5">
           {os.status === "pronto_para_entrega" && canFinalize ? (
             <button
               type="button"
@@ -489,9 +664,30 @@ export function OsWorkspace({
               {uiCopy?.registerPickupLabel ?? "Registrar retirada"}
             </button>
           ) : null}
-          {canEditOs(os) ? (
-            <form
-              className="space-y-2 rounded-lg border p-3"
+            </div>
+
+            {canEditOs(os) ? (
+              <button
+                type="button"
+                aria-expanded={editOpen}
+                onClick={() => setEditOpen((v) => !v)}
+                className="flex min-h-12 items-center justify-between rounded-xl border border-dashed border-border px-4 text-left text-base font-semibold max-md:order-6 md:hidden"
+              >
+                {uiCopy && !uiCopy.automotiveWorkflow
+                  ? `Editar dados do ${uiCopy.workOrder.toLowerCase()}`
+                  : "Editar dados da OS"}
+                <ChevronDown
+                  className={cn("size-4 transition-transform", editOpen && "rotate-180")}
+                  aria-hidden
+                />
+              </button>
+            ) : null}
+            {canEditOs(os) ? (
+              <form
+                className={cn(
+                  "space-y-3 rounded-lg border p-3 max-md:order-6",
+                  !editOpen && "max-md:hidden",
+                )}
               onSubmit={(e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
@@ -520,82 +716,99 @@ export function OsWorkspace({
                 );
               }}
             >
-              <p className="text-xs font-medium text-muted-foreground">
-                {uiCopy && !uiCopy.automotiveWorkflow
-                  ? `Editar dados do ${uiCopy.workOrder.toLowerCase()}`
-                  : "Editar dados da OS"}
-              </p>
-              <textarea
-                name="reclamacao_cliente"
-                defaultValue={os.reclamacao_cliente ?? ""}
-                placeholder="Reclamação do cliente"
-                rows={2}
-                disabled={pending}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-              />
-              <textarea
-                name="observacoes"
-                defaultValue={os.observacoes ?? ""}
-                placeholder="Observações internas"
-                rows={2}
-                disabled={pending}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-              />
-              <div className="grid gap-2 md:grid-cols-2">
-                {uiCopy?.showVehicles !== false && !uiCopy?.compactVehicleVitals ? (
-                  <Input
-                    name="quilometragem_entrada"
-                    type="number"
-                    min={0}
-                    defaultValue={os.quilometragem_entrada ?? ""}
-                    placeholder="Km entrada"
+                <p className="text-xs font-medium text-muted-foreground max-md:hidden">
+                  {uiCopy && !uiCopy.automotiveWorkflow
+                    ? `Editar dados do ${uiCopy.workOrder.toLowerCase()}`
+                    : "Editar dados da OS"}
+                </p>
+                <LabeledField label="Reclamação do cliente">
+                  <textarea
+                    name="reclamacao_cliente"
+                    defaultValue={os.reclamacao_cliente ?? ""}
+                    placeholder="Reclamação do cliente"
+                    rows={2}
                     disabled={pending}
+                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
                   />
-                ) : null}
-                <Input
-                  name="previsao_entrega"
-                  type="datetime-local"
-                  defaultValue={os.previsao_entrega ?? ""}
-                  disabled={pending}
-                />
-                {uiCopy?.showVehicles !== false && !uiCopy?.compactVehicleVitals ? (
-                  <Input
-                    name="nivel_combustivel"
-                    defaultValue={os.nivel_combustivel ?? ""}
-                    placeholder="Nível combustível"
+                </LabeledField>
+                <LabeledField label="Observações internas">
+                  <textarea
+                    name="observacoes"
+                    defaultValue={os.observacoes ?? ""}
+                    placeholder="Observações internas"
+                    rows={2}
                     disabled={pending}
+                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
                   />
-                ) : null}
-                <NativeSelect
-                  name="prioridade"
-                  defaultValue={os.prioridade}
-                  disabled={pending}
-                  className="h-10"
-                >
-                  <option value="baixa">Baixa</option>
-                  <option value="normal">Normal</option>
-                  <option value="alta">Alta</option>
-                  <option value="urgente">Urgente</option>
-                </NativeSelect>
-                <Input
-                  name="objetos_deixados"
-                  defaultValue={os.objetos_deixados ?? ""}
-                  placeholder="Objetos deixados"
-                  disabled={pending}
-                />
-                <Input
-                  name="danos_aparentes"
-                  defaultValue={os.danos_aparentes ?? ""}
-                  placeholder="Danos aparentes"
-                  disabled={pending}
-                />
-                <Input
-                  name="origem_atendimento"
-                  defaultValue={os.origem_atendimento ?? ""}
-                  placeholder="Origem do atendimento"
-                  disabled={pending}
-                  className="md:col-span-2"
-                />
+                </LabeledField>
+                <div className="grid gap-3 md:grid-cols-2 md:gap-2">
+                  {uiCopy?.showVehicles !== false && !uiCopy?.compactVehicleVitals ? (
+                    <LabeledField label="Km de entrada">
+                      <Input
+                        name="quilometragem_entrada"
+                        type="number"
+                        min={0}
+                        defaultValue={os.quilometragem_entrada ?? ""}
+                        placeholder="Km entrada"
+                        disabled={pending}
+                      />
+                    </LabeledField>
+                  ) : null}
+                  <LabeledField label="Previsão de entrega">
+                    <Input
+                      name="previsao_entrega"
+                      type="datetime-local"
+                      defaultValue={os.previsao_entrega ?? ""}
+                      disabled={pending}
+                    />
+                  </LabeledField>
+                  {uiCopy?.showVehicles !== false && !uiCopy?.compactVehicleVitals ? (
+                    <LabeledField label="Nível de combustível">
+                      <Input
+                        name="nivel_combustivel"
+                        defaultValue={os.nivel_combustivel ?? ""}
+                        placeholder="Nível combustível"
+                        disabled={pending}
+                      />
+                    </LabeledField>
+                  ) : null}
+                  <LabeledField label="Prioridade">
+                    <NativeSelect
+                      name="prioridade"
+                      defaultValue={os.prioridade}
+                      disabled={pending}
+                      className="h-10"
+                    >
+                      <option value="baixa">Baixa</option>
+                      <option value="normal">Normal</option>
+                      <option value="alta">Alta</option>
+                      <option value="urgente">Urgente</option>
+                    </NativeSelect>
+                  </LabeledField>
+                  <LabeledField label="Objetos deixados">
+                    <Input
+                      name="objetos_deixados"
+                      defaultValue={os.objetos_deixados ?? ""}
+                      placeholder="Objetos deixados"
+                      disabled={pending}
+                    />
+                  </LabeledField>
+                  <LabeledField label="Danos aparentes">
+                    <Input
+                      name="danos_aparentes"
+                      defaultValue={os.danos_aparentes ?? ""}
+                      placeholder="Danos aparentes"
+                      disabled={pending}
+                    />
+                  </LabeledField>
+                  <LabeledField label="Origem do atendimento" className="md:col-span-2">
+                    <Input
+                      name="origem_atendimento"
+                      defaultValue={os.origem_atendimento ?? ""}
+                      placeholder="Origem do atendimento"
+                      disabled={pending}
+                    />
+                  </LabeledField>
                 {uiCopy?.compactVehicleVitals && uiCopy.showVehicles !== false ? (
                   <details className="md:col-span-2 rounded-md border border-border/60 p-2">
                     <summary className="cursor-pointer text-xs text-muted-foreground">
@@ -619,41 +832,48 @@ export function OsWorkspace({
                     </div>
                   </details>
                 ) : null}
-              </div>
-              <button
-                type="submit"
-                disabled={pending}
-                className={cn(buttonVariants({ size: "sm" }))}
-              >
-                Salvar alterações
-              </button>
-            </form>
-          ) : (
-            <p className="text-sm">
-              {os.reclamacao_cliente ?? os.observacoes ?? "—"}
-            </p>
-          )}
-          <dl className="grid gap-2 text-sm md:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground">Entrada</dt>
-              <dd>{os.data_hora_entrada ?? os.data_abertura}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">Previsão</dt>
-              <dd>{os.previsao_entrega ?? "—"}</dd>
-            </div>
-            {uiCopy?.showVehicles !== false ? (
-            <div>
-              <dt className="text-muted-foreground">Km entrada</dt>
-              <dd>{os.quilometragem_entrada ?? "—"}</dd>
-            </div>
-            ) : null}
-            <div>
-              <dt className="text-muted-foreground">Prioridade</dt>
-              <dd>{os.prioridade}</dd>
-            </div>
-          </dl>
+                </div>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className={cn(buttonVariants({ size: "sm" }), "max-md:h-12 max-md:w-full max-md:text-base")}
+                >
+                  Salvar alterações
+                </button>
+              </form>
+            ) : (
+              <p className="text-sm max-md:order-6 max-md:hidden">
+                {os.reclamacao_cliente ?? os.observacoes ?? "—"}
+              </p>
+            )}
 
+            <div
+              className="rounded-lg border p-3 text-xs md:text-sm max-md:order-7"
+              data-phase35-3="channel-ux"
+            >
+              <div className="grid grid-cols-2 gap-3 md:block">
+                <div>
+                  <p className="font-medium">Canal do cliente</p>
+                  <p className="text-muted-foreground">
+                    WhatsApp: {clientePhone?.replace(/\D/g, "") ? "sim" : "não"}
+                  </p>
+                  <p className="text-muted-foreground">
+                    E-mail: {clienteEmail?.includes("@") ? "sim" : "não"}
+                  </p>
+                </div>
+                <div className="md:mt-2">
+                  <p className="font-medium">Status do provider</p>
+                  <p className="text-muted-foreground">
+                    WhatsApp: {whatsappProviderConfigured ? "configurado" : "não configurado"}
+                  </p>
+                  <p className="text-muted-foreground">
+                    E-mail: {emailProviderConfigured ? "configurado" : "não configurado"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="empty:hidden max-md:order-8">
           {!os.venda_id && os.status !== "cancelado" && uiCopy?.showVehicles !== false ? (
             <div className="space-y-2 rounded-lg border p-3">
               <p className="text-sm font-medium">Veículo vinculado</p>
@@ -700,7 +920,9 @@ export function OsWorkspace({
               ) : null}
             </div>
           ) : null}
+            </div>
 
+            <div className="max-md:hidden">
           <div className="flex flex-wrap gap-2">
             {nextStatuses.length === 0 ? (
               <p className="text-xs text-muted-foreground">
@@ -724,6 +946,8 @@ export function OsWorkspace({
                 </button>
               ))
             )}
+          </div>
+            </div>
           </div>
         </ExecutiveSection>
       ) : null}

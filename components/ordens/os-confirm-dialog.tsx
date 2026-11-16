@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import { ExecutiveButton } from "@/components/executive";
@@ -152,8 +153,9 @@ export function OsConfirmDialog({
     });
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+  // Portal no <body>: dentro de cartões com blur o "fixed" ficava preso ao cartão.
+  return createPortal(
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:items-center">
       <div
         role="dialog"
         aria-modal="true"
@@ -317,6 +319,7 @@ export function OsConfirmDialog({
           </ExecutiveButton>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

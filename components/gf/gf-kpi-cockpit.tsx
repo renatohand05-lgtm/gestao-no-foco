@@ -86,7 +86,7 @@ function KpiCellImpl({ item, featured = false }: CellProps) {
   );
 
   const cellClass = cn(
-    "gf-kpi gf-kpi-cockpit-cell relative flex min-h-[7.5rem] min-w-0 flex-col p-3.5 sm:p-4",
+    "gf-kpi gf-kpi-cockpit-cell relative flex min-h-[7.5rem] min-w-0 flex-col p-3.5 max-sm:min-h-[6.25rem] sm:p-4",
     "premium-kpi-lift",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40 focus-visible:z-[1]",
     featured &&
@@ -156,6 +156,7 @@ export function GFKpiCockpit({
       <div
         className={cn(
           "grid grid-cols-1 divide-y divide-border",
+          "max-sm:grid-cols-2 max-sm:gap-px max-sm:divide-y-0 max-sm:bg-border",
           "sm:grid-cols-2 sm:divide-x sm:divide-y-0",
           "md:grid-cols-3 lg:grid-cols-3",
           "lg:[&>*:nth-child(n+4)]:border-t lg:[&>*:nth-child(n+4)]:border-border",
@@ -166,7 +167,12 @@ export function GFKpiCockpit({
           <div
             key={item.id}
             className={cn(
-              "min-w-0",
+              "min-w-0 max-sm:bg-card",
+              index === featuredIndex && "max-sm:col-span-2",
+              // sobrou um KPI sozinho na última linha → ocupa a linha toda
+              (items.length - 1) % 2 === 1 &&
+                index === items.length - 1 &&
+                "max-sm:col-span-2",
               /* notebook 3×2: divisores internos */
               "md:[&:nth-child(3n)]:border-r-0",
               "2xl:border-r 2xl:border-border 2xl:last:border-r-0",

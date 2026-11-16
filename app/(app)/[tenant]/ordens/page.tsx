@@ -121,6 +121,17 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
     sort: sp.sort,
   };
   const hasFilters = hasOsCentralFilters(filterState);
+  const activeFilterCount = [
+    sp.status && sp.status !== "all",
+    sp.mecanico_id,
+    sp.de,
+    sp.ate,
+    sp.cliente?.trim(),
+    sp.veiculo?.trim(),
+    sp.prioridade && sp.prioridade !== "all",
+    sp.q?.trim(),
+    sp.incluir_arquivadas === "1",
+  ].filter(Boolean).length;
 
   const baseParams = {
     status: sp.status,
@@ -283,8 +294,10 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
 
         <ExecutiveFilter
           label="Filtros"
+          mobileCollapse
+          activeCount={activeFilterCount}
           actions={
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 max-md:grid max-md:grid-cols-2">
               <ExecutiveButton type="submit" size="sm">
                 Filtrar
               </ExecutiveButton>
@@ -412,7 +425,8 @@ async function OrdensCentralBody({ params, searchParams }: PageProps) {
           <ExecutiveFilterField
             label="Pesquisa rápida"
             htmlFor="os-filter-q"
-            className="sm:col-span-2"
+            className="max-md:order-first sm:col-span-2"
+            primaryOnMobile
           >
             <input
               id="os-filter-q"

@@ -16,6 +16,7 @@ type Props = {
   size?: "primary" | "secondary";
   icon?: LucideIcon;
   className?: string;
+  hintClassName?: string;
 };
 
 function toneText(tone: ExColorTone) {
@@ -39,6 +40,7 @@ export function ExecutiveMetric({
   size = "secondary",
   icon: Icon,
   className,
+  hintClassName,
 }: Props) {
   const valueClass =
     size === "primary" ? exTypography.kpiPrimary : exTypography.kpiSecondary;
@@ -84,7 +86,9 @@ export function ExecutiveMetric({
       >
         {value}
       </p>
-      {hint ? <p className={exTypography.caption}>{hint}</p> : null}
+      {hint ? (
+        <p className={cn(exTypography.caption, hintClassName)}>{hint}</p>
+      ) : null}
     </div>
   );
 }

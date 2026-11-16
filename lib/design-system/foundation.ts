@@ -14,7 +14,7 @@ export const gofColors = {
   primary: {
     hex: "#C9A84C",
     solid: "bg-primary text-primary-foreground",
-    soft: "bg-primary/15 text-[var(--brand-graphite)]",
+    soft: "bg-primary/15 text-[var(--brand-graphite)] dark:text-[#ffd84d]",
     text: "text-primary",
     border: "border-primary/40",
   },
@@ -35,8 +35,8 @@ export const gofColors = {
   warning: {
     hex: "#D97706",
     solid: "bg-warning text-warning-foreground",
-    soft: "bg-warning/15 text-warning-foreground",
-    text: "text-warning-foreground",
+    soft: "bg-warning/15 text-warning-foreground dark:text-amber-300",
+    text: "text-warning-foreground dark:text-amber-300",
     border: "border-warning/40",
   },
   danger: {
@@ -49,8 +49,8 @@ export const gofColors = {
   info: {
     hex: "#5B6B7A",
     solid: "bg-[var(--brand-info)] text-white",
-    soft: "bg-[var(--brand-info)]/10 text-[var(--brand-info)]",
-    text: "text-[var(--brand-info)]",
+    soft: "bg-[var(--brand-info)]/10 text-[var(--brand-info)] dark:bg-[#1a86e0]/15 dark:text-[#4da3ff]",
+    text: "text-[var(--brand-info)] dark:text-[#4da3ff]",
     border: "border-[var(--brand-info)]/30",
   },
   background: {

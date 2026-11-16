@@ -12,6 +12,7 @@ type Props = {
   tone?: ExColorTone;
   icon?: LucideIcon;
   className?: string;
+  hintClassName?: string;
   emphasize?: boolean;
 };
 
@@ -26,6 +27,7 @@ export function MetricCard({
   tone = "neutral",
   icon,
   className,
+  hintClassName,
   emphasize = false,
 }: Props) {
   return (
@@ -38,6 +40,7 @@ export function MetricCard({
         label={label}
         value={value}
         hint={hint}
+        hintClassName={hintClassName}
         tone={tone}
         icon={icon}
         size={emphasize ? "primary" : "secondary"}

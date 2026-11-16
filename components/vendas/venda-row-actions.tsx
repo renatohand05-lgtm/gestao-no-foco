@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { VendaDeleteDialog } from "@/components/vendas/venda-delete-dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,12 +20,14 @@ type VendaRowActionsProps = {
   tenantSlug: string;
   venda: VendaListItem;
   deleteRedirectTo?: string;
+  triggerClassName?: string;
 };
 
 export function VendaRowActions({
   tenantSlug,
   venda,
   deleteRedirectTo,
+  triggerClassName,
 }: VendaRowActionsProps) {
   const [openDelete, setOpenDelete] = useState(false);
   const canEdit = VENDA_STATUS_EDITAVEIS.includes(
@@ -36,7 +39,12 @@ export function VendaRowActions({
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon" className="size-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("size-8", triggerClassName)}
+              aria-label="Mais ações"
+            >
               <MoreHorizontal className="size-4" />
             </Button>
           }

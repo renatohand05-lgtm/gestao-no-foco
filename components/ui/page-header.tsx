@@ -36,6 +36,8 @@ export function PageHeader({
           className={cn(
             "flex flex-wrap items-center",
             dsGap.sm,
+            // Celular: uma faixa que desliza para o lado (em vez de 3 linhas de botões).
+            "max-md:-mx-4 max-md:flex-nowrap max-md:overflow-x-auto max-md:px-4 max-md:pb-1 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden max-md:[&>*]:shrink-0",
             actionsClassName,
           )}
         >

@@ -188,7 +188,7 @@ export function PremiumOpsStrip({
     <section
       aria-label="Blocos operacionais"
       data-premium-block="ops-strip"
-      className="grid grid-cols-1 gap-[var(--dashboard-gap)] sm:grid-cols-2 xl:grid-cols-4"
+      className="grid grid-cols-2 gap-3 sm:gap-[var(--dashboard-gap)] xl:grid-cols-4"
     >
       {items.map((item) => {
         const accent = OPS_ACCENT[item.id];
@@ -199,7 +199,7 @@ export function PremiumOpsStrip({
             href={item.href}
             className={cn(
               "gf-surface gf-surface-raised rounded-2xl border border-[var(--border-subtle)]",
-              "bg-[var(--surface-2)] p-4 transition-colors",
+              "bg-[var(--surface-2)] p-3.5 transition-colors sm:p-4",
               "hover:border-[var(--brand-gold)]/40",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]/40",
             )}
@@ -221,13 +221,13 @@ export function PremiumOpsStrip({
             </div>
             <p
               className={cn(
-                "mt-2 whitespace-nowrap text-2xl font-semibold tabular-nums tracking-tight",
+                "mt-2 whitespace-nowrap text-xl font-semibold tabular-nums tracking-tight sm:text-2xl",
                 item.unavailable && "text-[var(--text-muted)]",
               )}
             >
               {item.value}
             </p>
-            <p className="mt-1 text-xs text-[var(--text-secondary)] text-pretty">
+            <p className="mt-1 line-clamp-2 text-xs text-[var(--text-secondary)] text-pretty">
               {item.hint}
             </p>
           </Link>

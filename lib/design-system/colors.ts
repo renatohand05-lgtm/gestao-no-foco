@@ -8,7 +8,7 @@ export const exColors = {
   primary: {
     hex: "#C9A84C",
     solid: "bg-[var(--brand-gold)] text-[var(--brand-graphite)]",
-    soft: "bg-[var(--brand-gold)]/15 text-[var(--brand-graphite)]",
+    soft: "bg-[var(--brand-gold)]/15 text-[var(--brand-graphite)] dark:text-[#ffd84d]",
     text: "text-[var(--brand-gold)]",
     border: "border-[var(--brand-gold)]/35",
     ring: "ring-[var(--brand-gold)]/25",

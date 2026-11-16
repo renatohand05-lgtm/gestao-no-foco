@@ -23,7 +23,7 @@ export function DashboardRefreshButton({ updatedAtLabel, className }: Props) {
         className,
       )}
     >
-      <span>
+      <span className="max-sm:hidden">
         Última atualização:{" "}
         <time className="font-medium text-foreground">{updatedAtLabel}</time>
       </span>

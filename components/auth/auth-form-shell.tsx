@@ -31,7 +31,7 @@ export function AuthFormShell({
       )}
     >
       <CardHeader className="space-y-2">
-        <CardTitle className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-[var(--brand-graphite)]">
+        <CardTitle className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-foreground">
           {title}
         </CardTitle>
         <CardDescription>{description}</CardDescription>

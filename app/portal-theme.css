@@ -1,0 +1,277 @@
+/*
+ * Tema oficial do portal — "Gestão Aurora"
+ * Visual aprovado no demo v5: fundo azul-marinho profundo com aurora, vidro
+ * (glass), dourado #f8c208 + azul #1a86e0 e o G da marca como marca d'água.
+ * Só altera aparência (tokens + camada visual). Nenhuma regra de negócio.
+ * O tema claro continua intacto.
+ */
+
+.dark {
+  --portal-bg: #060c1a; /* um pouco mais escuro que o demo (#0a1428) */
+  --portal-glass: rgb(14 27 52 / 0.58);
+  --portal-glass-2: rgb(255 255 255 / 0.04);
+  --portal-line: rgb(255 255 255 / 0.09);
+  --portal-line-2: rgb(255 255 255 / 0.14);
+  --portal-gold: #f8c208;
+  --portal-blue: #1a86e0;
+
+  --background: var(--portal-bg);
+  --foreground: #f5f7fb;
+  --card: rgb(14 27 52 / 0.58);
+  --card-foreground: #f5f7fb;
+  --popover: #0d1830;
+  --popover-foreground: #f5f7fb;
+  --primary: #f8c208;
+  --primary-foreground: #0a1428;
+  --secondary: rgb(255 255 255 / 0.06);
+  --secondary-foreground: #f5f7fb;
+  --muted: rgb(255 255 255 / 0.06);
+  --muted-foreground: #a7b3c8;
+  --accent: rgb(255 255 255 / 0.07);
+  --accent-foreground: #f5f7fb;
+  --destructive: #ff453a;
+  --success: #30d158;
+  --success-foreground: #04210d;
+  --warning: #ff9f0a;
+  --warning-foreground: #2a1700;
+  --danger: #ff453a;
+  --danger-foreground: #ffffff;
+  --border: var(--portal-line);
+  --input: rgb(255 255 255 / 0.12);
+  --ring: #f8c208;
+  --chart-1: #f8c208;
+  --chart-2: #1a86e0;
+  --chart-3: #30d158;
+  --chart-4: #bf5af2;
+  --chart-5: #ff9f0a;
+  --sidebar: rgb(6 14 32 / 0.62);
+  --sidebar-foreground: #f5f7fb;
+  --sidebar-primary: #f8c208;
+  --sidebar-primary-foreground: #0a1428;
+  --sidebar-accent: rgb(255 255 255 / 0.06);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: var(--portal-line);
+  --sidebar-ring: #f8c208;
+
+  --brand-graphite: #1d5a9e; /* pílulas/abas ativas: azul vidro com texto branco */
+  --brand-gold: #f8c208;
+  --brand-gold-soft: #ffe27a;
+  --brand-graphite-elevated: rgb(255 255 255 / 0.06);
+  --border-premium: rgb(248 194 8 / 0.3);
+  --text-muted: #8493ad;
+  --text-secondary: #a7b3c8;
+  --gf-border-active: rgb(248 194 8 / 0.5);
+
+  --elevation-card: 0 1px 0 rgb(255 255 255 / 0.05) inset,
+    0 18px 40px -22px rgb(0 0 0 / 0.7);
+  --elevation-raised: 0 24px 60px -24px rgb(0 0 0 / 0.75),
+    0 0 40px rgb(26 134 224 / 0.1);
+  --premium-glow: 0 0 48px rgb(248 194 8 / 0.14);
+  --gf-depth-1: 0 1px 0 rgb(255 255 255 / 0.05) inset,
+    0 14px 34px -20px rgb(0 0 0 / 0.7);
+  --gf-depth-2: 0 20px 50px -22px rgb(0 0 0 / 0.75),
+    0 0 0 1px rgb(255 255 255 / 0.08);
+  --gf-depth-3: 0 28px 70px -24px rgb(0 0 0 / 0.8),
+    0 0 48px rgb(248 194 8 / 0.12);
+  --radius: 0.9rem;
+}
+
+/* ---------- Base ---------- */
+.dark body {
+  background: var(--portal-bg);
+  letter-spacing: -0.01em;
+}
+.dark ::selection {
+  background: rgb(248 194 8 / 0.35);
+}
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.12);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Conteúdo transparente para a aurora aparecer por trás */
+.dark [data-slot="sidebar-inset"],
+.dark [data-slot="sidebar-wrapper"],
+.dark main {
+  background-color: transparent;
+}
+
+/* ---------- Cartões de vidro ---------- */
+.dark [data-slot="card"],
+.dark .gf-surface-raised,
+.dark .gf-surface-authorial,
+.dark .gf-surface-brief,
+.dark .gf-kpi-cockpit {
+  background-color: var(--portal-glass);
+  border-color: var(--portal-line);
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  backdrop-filter: saturate(160%) blur(18px);
+  border-radius: 1.25rem;
+}
+.dark [data-slot="card"]:hover {
+  border-color: var(--portal-line-2);
+}
+
+/* ---------- Sidebar ---------- */
+.dark [data-slot="sidebar-inner"],
+.dark [data-sidebar="sidebar"] {
+  background-color: var(--sidebar);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+  backdrop-filter: saturate(180%) blur(30px);
+}
+.dark [data-sidebar="menu-button"] {
+  border-radius: 0.65rem;
+  transition: background 0.2s, color 0.2s;
+}
+.dark [data-sidebar="menu-button"]:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+.dark [data-sidebar="menu-button"][data-active]:not([data-active="false"]) {
+  background: linear-gradient(90deg, rgb(248 194 8 / 0.16), rgb(248 194 8 / 0.03));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgb(248 194 8 / 0.22);
+}
+
+/* ---------- Header ---------- */
+.dark [data-app-header-premium] {
+  background-color: rgb(6 12 26 / 0.55);
+  border-bottom-color: var(--portal-line);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+}
+
+/* ---------- Botão principal dourado ---------- */
+.dark [data-slot="button"][data-variant="default"],
+.dark .gf-cta {
+  background-image: linear-gradient(180deg, #ffd43a, #f8c208);
+  color: #0a1428;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgb(248 194 8 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.4);
+}
+.dark [data-slot="button"][data-variant="default"]:hover {
+  filter: brightness(1.06);
+}
+
+/* ---------- Tabelas ---------- */
+.dark thead th,
+.dark [data-slot="table-head"] {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6f7d96;
+  background-color: rgb(12 26 52 / 0.5);
+}
+.dark [data-slot="table-row"]:hover {
+  background-color: rgb(255 255 255 / 0.035);
+}
+
+/* ---------- Campos ---------- */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: rgb(255 255 255 / 0.05);
+}
+
+/* ---------- Fundo aurora + marca d'água G ---------- */
+.portal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--portal-bg);
+  display: none;
+}
+.dark .portal-backdrop {
+  display: block;
+}
+.portal-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(110px);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.portal-orb.o1 {
+  width: 52vmax; height: 52vmax; left: -8%; top: -12%;
+  background: radial-gradient(circle at 30% 30%, #0078d0 0%, rgb(0 120 208 / 0) 65%);
+  opacity: 0.5;
+  animation: portal-f1 28s ease-in-out infinite;
+}
+.portal-orb.o2 {
+  width: 46vmax; height: 46vmax; right: -6%; top: 6%;
+  background: radial-gradient(circle, #f8c208 0%, rgb(248 194 8 / 0) 62%);
+  opacity: 0.2;
+  animation: portal-f2 34s ease-in-out infinite;
+}
+.portal-orb.o3 {
+  width: 40vmax; height: 40vmax; left: 28%; bottom: -18%;
+  background: radial-gradient(circle, #1a86e0 0%, rgb(26 134 224 / 0) 65%);
+  opacity: 0.3;
+  animation: portal-f3 40s ease-in-out infinite;
+}
+.portal-orb.o4 {
+  width: 30vmax; height: 30vmax; right: 18%; bottom: 4%;
+  background: radial-gradient(circle, #ffb000 0%, rgb(255 176 0 / 0) 65%);
+  opacity: 0.14;
+  animation: portal-f2 46s ease-in-out infinite reverse;
+}
+.portal-mesh {
+  position: absolute;
+  inset: -20%;
+  background: conic-gradient(from 0deg at 50% 50%, rgb(0 120 208 / 0.08), rgb(248 194 8 / 0.05), rgb(26 134 224 / 0.06), rgb(0 120 208 / 0.08));
+  filter: blur(40px);
+  animation: portal-spin 60s linear infinite;
+}
+.portal-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, transparent 30%, rgb(3 8 20 / 0.85) 100%);
+}
+.portal-wm {
+  position: absolute;
+  filter: drop-shadow(0 0 60px rgb(201 168 76 / 0.25));
+}
+.portal-wm.w1 {
+  right: -6vmax; top: 50%; width: 62vmax; height: 62vmax; margin-top: -31vmax;
+  opacity: 0.14;
+  animation: portal-wf 26s ease-in-out infinite;
+}
+.portal-wm.w2 {
+  left: -8vmax; bottom: -10vmax; width: 34vmax; height: 34vmax;
+  opacity: 0.08;
+  animation: portal-wf 34s ease-in-out infinite reverse;
+}
+@keyframes portal-f1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(14vw, 10vh, 0) scale(1.12); }
+  66% { transform: translate3d(-6vw, 18vh, 0) scale(0.92); }
+}
+@keyframes portal-f2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-18vw, 14vh, 0) scale(1.18); }
+}
+@keyframes portal-f3 {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-12vw, -10vh, 0) scale(1.1); }
+  50% { transform: translate3d(10vw, -16vh, 0); }
+  75% { transform: translate3d(6vw, 4vh, 0) scale(0.95); }
+}
+@keyframes portal-spin { to { transform: rotate(360deg); } }
+@keyframes portal-wf {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-4deg); }
+  50% { transform: translate3d(-2vw, 2vh, 0) rotate(4deg); }
+}
+@media (max-width: 767px) {
+  .portal-orb { filter: blur(70px); }
+  .portal-mesh, .portal-orb.o4 { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-orb, .portal-mesh, .portal-wm { animation: none !important; }
+}

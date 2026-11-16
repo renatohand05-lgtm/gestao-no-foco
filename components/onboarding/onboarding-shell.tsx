@@ -34,7 +34,7 @@ export function OnboardingShell({
         </p>
         <h1
           className={cn(
-            "font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-[var(--brand-graphite)]",
+            "font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-foreground",
           )}
         >
           {title}

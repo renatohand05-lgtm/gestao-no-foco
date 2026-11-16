@@ -15,7 +15,7 @@ export function AuthBrandPanel({ className }: AuthBrandPanelProps) {
   return (
     <div
       className={cn(
-        "relative hidden overflow-hidden bg-[var(--brand-navy)] p-10 text-white lg:flex lg:flex-col lg:justify-between",
+        "relative hidden overflow-hidden bg-[var(--brand-navy)] dark:bg-transparent p-10 text-white lg:flex lg:flex-col lg:justify-between",
         className,
       )}
       data-auth-brand-panel=""

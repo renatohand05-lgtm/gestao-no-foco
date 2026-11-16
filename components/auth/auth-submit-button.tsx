@@ -16,7 +16,7 @@ export function AuthSubmitButton({
   return (
     <Button
       type="submit"
-      className="h-11 w-full bg-[var(--brand-graphite)] text-white hover:bg-[var(--brand-graphite)]/90"
+      className="h-11 w-full bg-[var(--brand-graphite)] text-white hover:bg-[var(--brand-graphite)]/90 dark:bg-gradient-to-b dark:from-[#ffd43a] dark:to-[#f8c208] dark:font-bold dark:text-[#0a1428]"
       disabled={loading}
       aria-busy={loading}
     >

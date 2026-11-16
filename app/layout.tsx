@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 
+import { PortalBackdrop } from "@/components/layout/portal-backdrop";
 import { AppProviders } from "@/components/platform/app-providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { brandAssets, brandConfig, brandPalette } from "@/config/brand";
@@ -11,6 +12,7 @@ import {
 } from "@/lib/design-system/theme";
 
 import "./globals.css";
+import "./portal-theme.css";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -129,6 +131,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body className="flex min-h-full flex-col font-sans">
+        <PortalBackdrop />
         <TooltipProvider>
           <AppProviders>{children}</AppProviders>
         </TooltipProvider>

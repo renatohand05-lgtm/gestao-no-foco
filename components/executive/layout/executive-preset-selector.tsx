@@ -102,7 +102,7 @@ export function ExecutivePresetSelector() {
                 className={cn(
                   "inline-flex size-11 items-center justify-center rounded-xl",
                   active
-                    ? "bg-[var(--brand-gold)] text-[var(--brand-graphite)]"
+                    ? "bg-[var(--brand-gold)] text-[#0a1428]"
                     : "bg-slate-100 text-slate-600 group-hover:bg-slate-200/80 dark:bg-white/5",
                   exMotion.transition,
                 )}

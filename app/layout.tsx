@@ -95,6 +95,7 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: brandPalette.navy },
   ],
   colorScheme: "dark light",
+  viewportFit: "cover",
 };
 
 const themeBootScript = `

@@ -142,7 +142,7 @@ export function HelpWidget({ tenantSlug }: Props) {
         type="button"
         size="icon"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-40 size-12 rounded-full shadow-lg"
+        className="fixed bottom-5 right-5 z-40 size-12 rounded-full shadow-lg max-md:bottom-[calc(5.5rem+env(safe-area-inset-bottom))] max-md:right-3 max-md:size-11"
         aria-label="Preciso de ajuda"
       >
         <LifeBuoy className="size-5" />

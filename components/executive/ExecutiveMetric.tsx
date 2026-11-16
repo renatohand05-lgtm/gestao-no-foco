@@ -75,7 +75,10 @@ export function ExecutiveMetric({
         className={cn(
           isTextValue
             ? "text-base leading-snug font-semibold text-muted-foreground"
-            : cn(valueClass, "leading-none"),
+            : cn(
+                valueClass,
+                "leading-none max-md:text-[clamp(1rem,4.6vw,1.3rem)] max-md:whitespace-nowrap",
+              ),
           !isTextValue && toneText(tone),
         )}
       >

@@ -101,7 +101,7 @@ export function AiAssistantWidget({ tenantSlug }: Props) {
         type="button"
         size="icon"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-20 z-40 size-12 rounded-full bg-[var(--brand-gold,#C9A84C)] text-black shadow-lg hover:bg-[var(--brand-gold,#C9A84C)]/90"
+        className="fixed bottom-5 right-20 z-40 size-12 rounded-full max-md:bottom-[calc(5.5rem+env(safe-area-inset-bottom))] max-md:right-[4.25rem] max-md:size-11 bg-[var(--brand-gold,#C9A84C)] text-black shadow-lg hover:bg-[var(--brand-gold,#C9A84C)]/90"
         aria-label="Assistente de IA"
       >
         <Sparkles className="size-5" />

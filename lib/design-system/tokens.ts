@@ -87,7 +87,7 @@ export const dsLayout = {
 
 /** Grids responsivos padronizados (24px = gap-6) */
 export const dsGrid = {
-  kpis: "grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4",
+  kpis: "grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-3 2xl:grid-cols-4",
   twoCol: "grid gap-6 lg:grid-cols-2",
   threeCol: "grid gap-6 lg:grid-cols-3",
   metrics: "grid gap-6 sm:grid-cols-2 lg:grid-cols-4",

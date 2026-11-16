@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 
 import { BrandLogo, BrandMark } from "@/components/brand";
+import { ThemeToggle } from "@/components/brand/theme-toggle";
 import { useTheme } from "@/components/brand/theme-provider";
 import { getTenantNav } from "@/config/navigation";
 import { filterNavByPermissions } from "@/lib/navigation/filter-nav-by-permissions";
@@ -162,7 +163,7 @@ export function AppSidebar({
                         isActive={active}
                         tooltip={item.title}
                         className={cn(
-                          "h-10 gap-3 rounded-[10px] px-3 text-[13.5px] font-medium transition-all duration-150",
+                          "h-10 gap-3 rounded-[10px] px-3 text-[13.5px] font-medium transition-all duration-150 max-md:h-12 max-md:text-[15px]",
                           "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                           "data-[active=true]:bg-gradient-to-r data-[active=true]:from-[var(--brand-gold)]/16 data-[active=true]:to-[var(--brand-gold)]/3 data-[active=true]:text-white",
                           "data-[active=true]:shadow-[inset_0_0_0_1px_rgb(248_194_8_/_0.22)]",
@@ -182,6 +183,10 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter className="gap-2 px-3 py-4">
+        <div className="flex items-center justify-between rounded-lg px-1 md:hidden">
+          <span className="text-xs text-muted-foreground">Aparência</span>
+          <ThemeToggle />
+        </div>
         <TenantSwitcher currentTenant={tenant} tenants={tenants} />
       </SidebarFooter>
 

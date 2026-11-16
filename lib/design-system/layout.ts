@@ -26,8 +26,8 @@ export const gofPagePadding = {
  * Grids responsivos — mobile → tablet → notebook → desktop
  */
 export const gofGrid = {
-  kpis: "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4",
-  metrics: "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4",
+  kpis: "grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4",
+  metrics: "grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4",
   twoCol: "grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2",
   threeCol: "grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3",
   filters:

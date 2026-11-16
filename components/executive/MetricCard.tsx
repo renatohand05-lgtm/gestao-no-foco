@@ -31,7 +31,7 @@ export function MetricCard({
   return (
     <ExecutiveCard
       padding={20}
-      className={cn("h-full min-w-0 overflow-hidden", className)}
+      className={cn("h-full min-w-0 overflow-hidden max-md:p-3.5", className)}
       priority={emphasize ? "action" : "info"}
     >
       <ExecutiveMetric

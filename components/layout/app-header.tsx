@@ -56,11 +56,19 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
       data-app-header-premium=""
       data-premium-v257="header"
     >
-      <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-[var(--brand-gold)]" />
+      <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-[var(--brand-gold)] max-md:hidden" />
       <Separator orientation="vertical" className="mr-1 hidden h-4 sm:block" />
 
       <div className="flex min-w-0 items-center gap-2.5">
-        <BrandMark size="sm" className="hidden sm:inline-flex" />
+        <BrandMark size="sm" />
+        <div className="min-w-0 md:hidden">
+          <p className="truncate text-[15px] leading-tight font-bold tracking-tight">
+            {tenantName ?? brandConfig.name}
+          </p>
+          <p className="truncate text-[11px] leading-tight text-muted-foreground">
+            {brandConfig.name}
+          </p>
+        </div>
         <div className="hidden min-w-0 md:block">
           <p className="truncate font-[family-name:var(--font-display)] text-sm font-semibold tracking-tight">
             {brandConfig.name}
@@ -116,7 +124,7 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
             type="button"
             variant="ghost"
             size="icon"
-            className="size-9 shrink-0 text-muted-foreground hover:text-[var(--brand-gold)]"
+            className="hidden size-9 shrink-0 text-muted-foreground hover:text-[var(--brand-gold)] md:inline-flex"
             aria-label="Atalhos"
             onClick={() => router.push(`/${slug}/centro-operacoes`)}
           >
@@ -158,7 +166,7 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="size-9 shrink-0 text-muted-foreground hover:text-[var(--brand-gold)] xl:hidden"
+                  className="hidden size-9 shrink-0 text-muted-foreground hover:text-[var(--brand-gold)] md:inline-flex xl:hidden"
                   aria-label="Mais ações"
                 >
                   <MoreHorizontal className="size-4" />
@@ -184,7 +192,7 @@ export function AppHeader({ tenantName, tenantSlug, user }: AppHeaderProps) {
 
         {slug ? <DashboardAlertBell tenantSlug={slug} /> : null}
 
-        <ThemeToggle />
+        <ThemeToggle className="hidden md:inline-flex" />
 
         <UserNav
           email={user?.email}

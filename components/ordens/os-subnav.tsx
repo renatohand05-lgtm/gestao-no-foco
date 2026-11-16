@@ -56,7 +56,7 @@ export function OsSubnav({ tenantSlug, active, copy = OFICINA_SUBNAV }: Props) {
   ];
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
       {items.map((item) => (
         <Link
           key={item.key}
@@ -66,6 +66,7 @@ export function OsSubnav({ tenantSlug, active, copy = OFICINA_SUBNAV }: Props) {
               variant: active === item.key ? "default" : "outline",
               size: "sm",
             }),
+            "shrink-0",
           )}
         >
           {item.label}
@@ -73,13 +74,13 @@ export function OsSubnav({ tenantSlug, active, copy = OFICINA_SUBNAV }: Props) {
       ))}
       <Link
         href={`/${tenantSlug}/ordens/qualidade-operacional`}
-        className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+        className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "shrink-0")}
       >
         Qualidade
       </Link>
       <Link
         href={`/${tenantSlug}/centro-operacoes`}
-        className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+        className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "shrink-0")}
       >
         Centro de Ops
       </Link>

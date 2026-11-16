@@ -10,6 +10,7 @@ import { useDemoMode } from "@/components/demo/demo-mode-provider";
 import { BrandInstitutionalFooter } from "@/components/brand/brand-institutional-footer";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { PageContainer } from "@/components/layout/page-container";
 import { PlanSimulationBanner } from "@/components/layout/plan-simulation-banner";
 import { HelpWidget } from "@/components/support/help-widget";
@@ -84,6 +85,13 @@ function DemoAwareChrome({
           lockedNavIds={effectiveLockedNavIds}
         />
       ) : null}
+      {!hide.appSidebar ? (
+        <MobileBottomNav
+          tenant={tenant}
+          permissions={permissions}
+          lockedNavIds={effectiveLockedNavIds}
+        />
+      ) : null}
       <SidebarInset
         className={cn(
           "min-h-svh min-w-0 overflow-x-hidden bg-background",
@@ -118,7 +126,7 @@ function DemoAwareChrome({
               <DemoModeControls
                 compact
                 defaultCollapsed
-                className="max-w-3xl"
+                className="max-w-3xl max-md:hidden"
               />
             ) : null}
             {active ? <DemoNavRail tenantSlug={tenant.slug} /> : null}
@@ -126,7 +134,7 @@ function DemoAwareChrome({
           <PageSlot>{children}</PageSlot>
         </PageContainer>
         {!hide.appSidebar ? (
-          <BrandInstitutionalFooter compact className="mt-auto" />
+          <BrandInstitutionalFooter compact className="mt-auto max-md:hidden" />
         ) : null}
       </SidebarInset>
       {!hide.appSidebar ? <HelpWidget tenantSlug={tenant.slug} /> : null}

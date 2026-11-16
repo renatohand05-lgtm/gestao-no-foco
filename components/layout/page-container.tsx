@@ -9,7 +9,14 @@ type PageContainerProps = {
 export function PageContainer({ children, className }: PageContainerProps) {
   return (
     <main className="flex-1 overflow-auto">
-      <div className={cn(dsLayout.content, dsPadding.page, className)}>
+      <div
+        className={cn(
+          dsLayout.content,
+          dsPadding.page,
+          "max-md:pb-[calc(6.5rem+env(safe-area-inset-bottom))]",
+          className,
+        )}
+      >
         {children}
       </div>
     </main>

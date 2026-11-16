@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
+import { Check, ChevronDown } from "lucide-react";
 
 import { AgendaServiceField, type AgendaServiceOption } from "@/components/agenda/agenda-service-field";
 import { QuickClientCreate } from "@/components/clientes/quick-client-create";
@@ -11,6 +13,7 @@ import {
   useClienteVeiculos,
 } from "@/components/ordens/os-veiculo-picker";
 import { buttonVariants } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -65,6 +68,7 @@ export function OsOpenForm({
   allowBusiness = false,
 }: Props) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<Mode>("existente");
@@ -72,6 +76,7 @@ export function OsOpenForm({
   const [hits, setHits] = useState<OsSearchHit[]>([]);
   const [searching, setSearching] = useState(false);
   const [duplicates, setDuplicates] = useState<OsAbrirDuplicate[] | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const [clienteId, setClienteId] = useState("");
   const [clienteNome, setClienteNome] = useState("");
@@ -170,6 +175,28 @@ export function OsOpenForm({
     });
   }
 
+  const actionsBar = (
+    <div className="os-sticky-actions flex gap-3 pt-2">
+      <SaveButton
+        form="os-open-form"
+        loading={pending}
+        loadingText={openingLabel}
+        className="max-md:h-12 max-md:flex-1 max-md:text-base"
+      >
+        {openCta}
+      </SaveButton>
+      <Link
+        href={`/${tenantSlug}/ordens`}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "lg" }),
+          "max-md:h-12",
+        )}
+      >
+        Cancelar
+      </Link>
+    </div>
+  );
+
   return (
     <form
       id="os-open-form"
@@ -182,13 +209,25 @@ export function OsOpenForm({
       {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
       <ol
-        className="flex flex-wrap gap-2 text-xs text-muted-foreground sm:hidden"
+        className="os-steps sm:hidden"
         data-os-mobile-steps=""
+        aria-label="Progresso da OS"
       >
-        <li>1. Cliente</li>
-        {showVehicles ? <li>2. Veículo</li> : null}
-        <li>{showVehicles ? "3" : "2"}. Serviço</li>
-        <li>{showVehicles ? "4" : "3"}. Confirmar</li>
+        {[
+          { label: "Cliente", done: Boolean(clienteId) },
+          ...(showVehicles
+            ? [{ label: "Veículo", done: Boolean(veiculoId) }]
+            : []),
+          { label: "Serviço", done: servicoIds.length > 0 },
+          { label: "Confirmar", done: false },
+        ].map((step, index) => (
+          <li key={step.label} data-done={step.done ? "true" : "false"}>
+            <span className="os-step-dot">
+              {step.done ? <Check className="size-3" aria-hidden /> : index + 1}
+            </span>
+            {step.label}
+          </li>
+        ))}
       </ol>
 
       {duplicates?.length ? (
@@ -255,7 +294,7 @@ export function OsOpenForm({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         <button
           type="button"
           className={cn(
@@ -263,6 +302,7 @@ export function OsOpenForm({
               variant: mode === "existente" ? "default" : "outline",
               size: "lg",
             }),
+            "max-sm:h-12 max-sm:text-[15px]",
           )}
           onClick={() => setMode("existente")}
         >
@@ -275,6 +315,7 @@ export function OsOpenForm({
               variant: mode === "novo_cliente" ? "default" : "outline",
               size: "lg",
             }),
+            "max-sm:h-12 max-sm:text-[15px]",
           )}
           onClick={() => setMode("novo_cliente")}
         >
@@ -294,7 +335,7 @@ export function OsOpenForm({
               placeholder="Digite para buscar…"
               disabled={pending}
               autoComplete="off"
-              className="h-11 text-base"
+              className="h-12 text-base"
             />
           </label>
 
@@ -350,7 +391,6 @@ export function OsOpenForm({
 
           {showVehicles ? (
           <div className="space-y-1" data-os-step="veiculo">
-            <p className="text-sm font-medium">Veículo *</p>
             <OsVeiculoPicker
               tenantSlug={tenantSlug}
               clienteId={clienteId}
@@ -394,6 +434,7 @@ export function OsOpenForm({
       )}
 
       <div className="border-t pt-4" data-os-open="services" data-os-step="servico">
+        <p className="os-section-title sm:hidden">{showVehicles ? "3" : "2"} · Serviços</p>
         <AgendaServiceField
           tenantSlug={tenantSlug}
           servicos={catalogoServicos}
@@ -421,6 +462,7 @@ export function OsOpenForm({
       </div>
 
       <div className="grid gap-3 border-t pt-4 md:grid-cols-3" data-os-step="confirmar">
+        <p className="os-section-title sm:hidden">{showVehicles ? "4" : "3"} · Detalhes e confirmação</p>
         {showMechanic && profissionais.length > 0 ? (
           <label className="block space-y-1 text-sm md:col-span-3">
             <span className="text-muted-foreground">Mecânico</span>
@@ -451,7 +493,7 @@ export function OsOpenForm({
           </NativeSelect>
         </label>
         {!compactVehicleVitals ? (
-          <label className="block space-y-1 text-sm">
+          <label className={cn("block space-y-1 text-sm", !moreOpen && "max-md:hidden", "max-md:order-2")}>
             <span className="text-muted-foreground">Km entrada</span>
             <Input
               name="quilometragem_entrada"
@@ -488,21 +530,33 @@ export function OsOpenForm({
           <span className="text-muted-foreground">Reclamação / motivo</span>
           <Input name="reclamacao_cliente" disabled={pending} className="h-11" />
         </label>
+        <button
+          type="button"
+          className="os-more-toggle max-md:order-1 md:hidden"
+          aria-expanded={moreOpen}
+          onClick={() => setMoreOpen((value) => !value)}
+        >
+          {moreOpen ? "Ocultar detalhes extras" : "Mais detalhes (km, combustível, observações)"}
+          <ChevronDown
+            className={cn("size-4 transition-transform", moreOpen && "rotate-180")}
+            aria-hidden
+          />
+        </button>
         {!compactVehicleVitals ? (
-          <label className="block space-y-1 text-sm">
+          <label className={cn("block space-y-1 text-sm", !moreOpen && "max-md:hidden", "max-md:order-2")}>
             <span className="text-muted-foreground">Combustível</span>
             <Input name="nivel_combustivel" disabled={pending} className="h-11" />
           </label>
         ) : null}
-        <label className="block space-y-1 text-sm">
+        <label className={cn("block space-y-1 text-sm", !moreOpen && "max-md:hidden", "max-md:order-2")}>
           <span className="text-muted-foreground">Objetos deixados</span>
           <Input name="objetos_deixados" disabled={pending} className="h-11" />
         </label>
-        <label className="block space-y-1 text-sm">
+        <label className={cn("block space-y-1 text-sm", !moreOpen && "max-md:hidden", "max-md:order-2")}>
           <span className="text-muted-foreground">Danos aparentes</span>
           <Input name="danos_aparentes" disabled={pending} className="h-11" />
         </label>
-        <label className="block space-y-1 text-sm md:col-span-3">
+        <label className={cn("block space-y-1 text-sm md:col-span-3", !moreOpen && "max-md:hidden", "max-md:order-2")}>
           <span className="text-muted-foreground">Observações</span>
           <Input name="observacoes" disabled={pending} className="h-11" />
         </label>
@@ -531,17 +585,15 @@ export function OsOpenForm({
         <input type="hidden" name="origem_atendimento" value="balcao" />
       </div>
 
-      <div className="flex flex-wrap gap-3 pt-2">
-        <SaveButton loading={pending} loadingText={openingLabel}>
-          {openCta}
-        </SaveButton>
-        <Link
-          href={`/${tenantSlug}/ordens`}
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-        >
-          Cancelar
-        </Link>
-      </div>
+      {isMobile ? (
+        <>
+          {/* Espaço para a barra fixa não cobrir o último campo */}
+          <div aria-hidden className="h-20" />
+          {createPortal(actionsBar, document.body)}
+        </>
+      ) : (
+        actionsBar
+      )}
     </form>
   );
 }

@@ -14,6 +14,8 @@ import {
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
 import { SaveButton } from "@/components/ui/save-button";
+import { useVeiculoCatalogoAtivo } from "@/components/veiculos/catalogo-context";
+import { VeiculoCatalogoCampos } from "@/components/veiculos/veiculo-catalogo-campos";
 import { updateVeiculoAction } from "@/lib/ordens/actions";
 import type { VeiculoOption } from "@/lib/ordens/veiculo-shared";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,7 @@ export function OsVeiculoEditDialog({
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const catalogo = useVeiculoCatalogoAtivo();
 
   function onSubmit(formData: FormData) {
     setError(null);
@@ -85,74 +88,122 @@ export function OsVeiculoEditDialog({
         <form action={onSubmit} className="space-y-3">
           {error ? <FeedbackMessage variant="error">{error}</FeedbackMessage> : null}
 
-          <div className="grid gap-2 sm:grid-cols-2">
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Placa</span>
-              <Input
-                name="placa"
-                defaultValue={veiculo.placa ?? ""}
+          {catalogo ? (
+            <>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Placa</span>
+                  <Input
+                    name="placa"
+                    defaultValue={veiculo.placa ?? ""}
+                    disabled={pending}
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Km</span>
+                  <Input
+                    name="quilometragem"
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    defaultValue={veiculo.quilometragem ?? ""}
+                    disabled={pending}
+                  />
+                </label>
+              </div>
+              <VeiculoCatalogoCampos
+                motorizacao="campos"
                 disabled={pending}
+                defaultValues={{
+                  marca: veiculo.marca ?? "",
+                  modelo: veiculo.modelo ?? "",
+                  versao: veiculo.versao ?? "",
+                  ano: veiculo.ano ? String(veiculo.ano) : "",
+                  combustivel: veiculo.combustivel ?? "",
+                  cambio: veiculo.cambio ?? "",
+                }}
               />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Ano</span>
-              <Input
-                name="ano"
-                type="number"
-                min={1950}
-                max={2100}
-                defaultValue={veiculo.ano ?? ""}
-                disabled={pending}
-              />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Marca</span>
-              <Input name="marca" defaultValue={veiculo.marca ?? ""} disabled={pending} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Modelo</span>
-              <Input name="modelo" defaultValue={veiculo.modelo ?? ""} disabled={pending} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Versão</span>
-              <Input
-                name="versao"
-                defaultValue={veiculo.versao ?? ""}
-                disabled={pending}
-              />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Cor</span>
-              <Input name="cor" defaultValue={veiculo.cor ?? ""} disabled={pending} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Combustível</span>
-              <Input
-                name="combustivel"
-                defaultValue={veiculo.combustivel ?? ""}
-                disabled={pending}
-              />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Câmbio</span>
-              <Input name="cambio" defaultValue={veiculo.cambio ?? ""} disabled={pending} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Km</span>
-              <Input
-                name="quilometragem"
-                type="number"
-                min={0}
-                step="0.1"
-                defaultValue={veiculo.quilometragem ?? ""}
-                disabled={pending}
-              />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">Chassi</span>
-              <Input name="chassi" defaultValue={veiculo.chassi ?? ""} disabled={pending} />
-            </label>
-          </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Cor</span>
+                  <Input name="cor" defaultValue={veiculo.cor ?? ""} disabled={pending} />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Chassi</span>
+                  <Input name="chassi" defaultValue={veiculo.chassi ?? ""} disabled={pending} />
+                </label>
+              </div>
+            </>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Placa</span>
+                <Input
+                  name="placa"
+                  defaultValue={veiculo.placa ?? ""}
+                  disabled={pending}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Ano</span>
+                <Input
+                  name="ano"
+                  type="number"
+                  min={1950}
+                  max={2100}
+                  defaultValue={veiculo.ano ?? ""}
+                  disabled={pending}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Marca</span>
+                <Input name="marca" defaultValue={veiculo.marca ?? ""} disabled={pending} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Modelo</span>
+                <Input name="modelo" defaultValue={veiculo.modelo ?? ""} disabled={pending} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Versão</span>
+                <Input
+                  name="versao"
+                  defaultValue={veiculo.versao ?? ""}
+                  disabled={pending}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Cor</span>
+                <Input name="cor" defaultValue={veiculo.cor ?? ""} disabled={pending} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Combustível</span>
+                <Input
+                  name="combustivel"
+                  defaultValue={veiculo.combustivel ?? ""}
+                  disabled={pending}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Câmbio</span>
+                <Input name="cambio" defaultValue={veiculo.cambio ?? ""} disabled={pending} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Km</span>
+                <Input
+                  name="quilometragem"
+                  type="number"
+                  min={0}
+                  step="0.1"
+                  defaultValue={veiculo.quilometragem ?? ""}
+                  disabled={pending}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Chassi</span>
+                <Input name="chassi" defaultValue={veiculo.chassi ?? ""} disabled={pending} />
+              </label>
+            </div>
+          )}
           <label className="block space-y-1 text-sm">
             <span className="text-muted-foreground">Observações</span>
             <Input

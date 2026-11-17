@@ -14,6 +14,8 @@ import {
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
 import { SaveButton } from "@/components/ui/save-button";
+import { useVeiculoCatalogoAtivo } from "@/components/veiculos/catalogo-context";
+import { VeiculoCatalogoCampos } from "@/components/veiculos/veiculo-catalogo-campos";
 import { createVeiculoAction } from "@/lib/ordens/actions";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +39,7 @@ export function OsVeiculoQuickDialog({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const catalogo = useVeiculoCatalogoAtivo();
 
   function onSubmit(formData: FormData) {
     setError(null);
@@ -96,7 +99,19 @@ export function OsVeiculoQuickDialog({
             <FeedbackMessage variant="success">{success}</FeedbackMessage>
           ) : null}
 
-          {compact ? (
+          {compact && catalogo ? (
+            <div className="grid gap-2">
+              <label className="space-y-1 text-sm">
+                <span className="text-muted-foreground">Placa</span>
+                <Input name="placa" placeholder="ABC1D23" disabled={pending} />
+              </label>
+              <VeiculoCatalogoCampos
+                modeloObrigatorio
+                motorizacao="oculto"
+                disabled={pending}
+              />
+            </div>
+          ) : compact ? (
             <div className="grid gap-2">
               <label className="space-y-1 text-sm">
                 <span className="text-muted-foreground">Modelo *</span>
@@ -111,6 +126,40 @@ export function OsVeiculoQuickDialog({
                 <Input name="marca" disabled={pending} />
               </label>
             </div>
+          ) : catalogo ? (
+            <>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Placa</span>
+                  <Input name="placa" placeholder="ABC1D23" disabled={pending} />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Km</span>
+                  <Input
+                    name="quilometragem"
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    disabled={pending}
+                  />
+                </label>
+              </div>
+              <VeiculoCatalogoCampos motorizacao="campos" disabled={pending} />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Cor</span>
+                  <Input name="cor" disabled={pending} />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Chassi</span>
+                  <Input name="chassi" disabled={pending} />
+                </label>
+              </div>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted-foreground">Observações</span>
+                <Input name="observacoes" disabled={pending} />
+              </label>
+            </>
           ) : (
             <>
           <div className="grid gap-2 sm:grid-cols-2">

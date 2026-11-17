@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { VeiculoCatalogoProvider } from "@/components/veiculos/catalogo-context";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { hasConfirmedBillingAccess } from "@/lib/billing/access-gate";
 import { getCommercialPlan } from "@/lib/billing/catalog";
@@ -17,6 +18,7 @@ import {
   isPlatformPartner,
 } from "@/lib/platform/platform-access-service";
 import { getPlanSimulationSlug } from "@/lib/platform/plan-simulation";
+import { getSegmentUiCopy } from "@/lib/segments/copy.ts";
 import { createClient } from "@/lib/supabase/server";
 import { getUserTenants, requireTenant } from "@/lib/tenants";
 
@@ -74,22 +76,31 @@ export default async function TenantLayout({
     "inteligencia_ia",
   );
 
+  // Catálogo de carros embutido (marca/modelo/versão/ano): só para oficina.
+  const catalogoVeiculos = getSegmentUiCopy({
+    segment: tenant.segment,
+    segmentVersion: tenant.segment_version,
+    segmentConfig: tenant.segment_config,
+  }).automotiveWorkflow;
+
   return (
-    <AppShell
-      tenant={tenant}
-      tenants={tenants}
-      permissions={permissions}
-      isPlatformPartner={isPartner}
-      planSimulation={planSimulation}
-      lockedNavIds={lockedNavIds}
-      aiAssistantUnlocked={aiAssistantUnlocked}
-      user={{
-        email: profile?.email,
-        name: profile?.name ?? undefined,
-        avatarUrl: profile?.avatarUrl ?? undefined,
-      }}
-    >
-      {children}
-    </AppShell>
+    <VeiculoCatalogoProvider ativo={catalogoVeiculos}>
+      <AppShell
+        tenant={tenant}
+        tenants={tenants}
+        permissions={permissions}
+        isPlatformPartner={isPartner}
+        planSimulation={planSimulation}
+        lockedNavIds={lockedNavIds}
+        aiAssistantUnlocked={aiAssistantUnlocked}
+        user={{
+          email: profile?.email,
+          name: profile?.name ?? undefined,
+          avatarUrl: profile?.avatarUrl ?? undefined,
+        }}
+      >
+        {children}
+      </AppShell>
+    </VeiculoCatalogoProvider>
   );
 }

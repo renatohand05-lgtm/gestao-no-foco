@@ -38,6 +38,7 @@
     "test:action-plan": "node --experimental-strip-types scripts/executive-action-plan-tests.mjs",
     "test:financial-cockpit": "node --experimental-strip-types scripts/executive-financial-cockpit-tests.mjs",
     "test:executive-dashboard": "node --experimental-strip-types scripts/executive-dashboard-tests.mjs",
+    "test:veiculo-catalogo": "node --experimental-strip-types scripts/veiculo-catalogo-tests.mjs",
     "test:os-central": "node --experimental-strip-types scripts/os-central-tests.mjs",
     "test:crm-executivo": "node --experimental-strip-types scripts/crm-executivo-tests.mjs",
     "test:commercial-intelligence": "node --experimental-strip-types scripts/commercial-intelligence-tests.mjs",

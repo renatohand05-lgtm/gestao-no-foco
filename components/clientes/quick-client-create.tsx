@@ -6,6 +6,8 @@ import { RelationshipTypeSelector } from "@/components/clientes/relationship-typ
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MoreDetails } from "@/components/ui/more-details";
+import { useVeiculoCatalogoAtivo } from "@/components/veiculos/catalogo-context";
+import { VeiculoCatalogoCampos } from "@/components/veiculos/veiculo-catalogo-campos";
 import {
   checkClienteDuplicatesAction,
   createClienteAction,
@@ -102,6 +104,7 @@ export function QuickClientCreate({
   const modeloRef = useRef<HTMLInputElement>(null);
   const marcaRef = useRef<HTMLInputElement>(null);
   const marcaEditadaManualmente = useRef(false);
+  const catalogo = useVeiculoCatalogoAtivo();
 
   function handleModeloChange(e: React.ChangeEvent<HTMLInputElement>) {
     // Só preenche sozinho se a pessoa ainda não digitou a marca na mão —
@@ -180,6 +183,9 @@ export function QuickClientCreate({
           const modelo = String(fd.get("veiculo_modelo") ?? "").trim();
           const marca = String(fd.get("veiculo_marca") ?? "").trim();
           const placa = String(fd.get("veiculo_placa") ?? "").trim();
+          const versao = String(fd.get("veiculo_versao") ?? "").trim();
+          const combustivel = String(fd.get("veiculo_combustivel") ?? "").trim();
+          const cambio = String(fd.get("veiculo_cambio") ?? "").trim();
           const anoRaw = String(fd.get("veiculo_ano") ?? "").trim();
           const kmRaw = String(fd.get("veiculo_km") ?? "").trim();
           if (showVehicles && atendimento && !modelo) {
@@ -218,6 +224,9 @@ export function QuickClientCreate({
                 cliente_id: result.id,
                 modelo,
                 marca: marca || null,
+                versao: versao || null,
+                combustivel: combustivel || null,
+                cambio: cambio || null,
                 placa: placa || null,
                 ano: anoRaw ? Number(anoRaw) : null,
                 quilometragem: kmRaw ? Number(kmRaw) : null,
@@ -282,36 +291,63 @@ export function QuickClientCreate({
         {showVehicles && atendimento ? (
           <>
             <p className="text-xs font-medium sm:col-span-2">Veículo</p>
-            <label className="text-xs sm:col-span-2">
-              Modelo *
-              <Input
-                name="veiculo_modelo"
-                ref={modeloRef}
-                onChange={handleModeloChange}
-                disabled={pending}
-                className="mt-1 h-11"
-              />
-            </label>
-            <label className="text-xs">
-              Marca
-              <Input
-                name="veiculo_marca"
-                ref={marcaRef}
-                onChange={() => {
-                  marcaEditadaManualmente.current = true;
-                }}
-                disabled={pending}
-                className="mt-1 h-11"
-              />
-            </label>
-            <label className="text-xs">
-              Placa
-              <Input name="veiculo_placa" disabled={pending} className="mt-1 h-11" />
-            </label>
-            <label className="text-xs">
-              Ano
-              <Input name="veiculo_ano" type="number" disabled={pending} className="mt-1 h-11" />
-            </label>
+            {catalogo ? (
+              <>
+                <div className="sm:col-span-2">
+                  <VeiculoCatalogoCampos
+                    estilo="quick"
+                    names={{
+                      marca: "veiculo_marca",
+                      modelo: "veiculo_modelo",
+                      versao: "veiculo_versao",
+                      ano: "veiculo_ano",
+                      combustivel: "veiculo_combustivel",
+                      cambio: "veiculo_cambio",
+                    }}
+                    modeloObrigatorio
+                    motorizacao="oculto"
+                    disabled={pending}
+                  />
+                </div>
+                <label className="text-xs">
+                  Placa
+                  <Input name="veiculo_placa" disabled={pending} className="mt-1 h-11" />
+                </label>
+              </>
+            ) : (
+              <>
+                <label className="text-xs sm:col-span-2">
+                  Modelo *
+                  <Input
+                    name="veiculo_modelo"
+                    ref={modeloRef}
+                    onChange={handleModeloChange}
+                    disabled={pending}
+                    className="mt-1 h-11"
+                  />
+                </label>
+                <label className="text-xs">
+                  Marca
+                  <Input
+                    name="veiculo_marca"
+                    ref={marcaRef}
+                    onChange={() => {
+                      marcaEditadaManualmente.current = true;
+                    }}
+                    disabled={pending}
+                    className="mt-1 h-11"
+                  />
+                </label>
+                <label className="text-xs">
+                  Placa
+                  <Input name="veiculo_placa" disabled={pending} className="mt-1 h-11" />
+                </label>
+                <label className="text-xs">
+                  Ano
+                  <Input name="veiculo_ano" type="number" disabled={pending} className="mt-1 h-11" />
+                </label>
+              </>
+            )}
             <label className="text-xs">
               Km
               <Input name="veiculo_km" type="number" disabled={pending} className="mt-1 h-11" />

@@ -1,13 +1,28 @@
 import "server-only";
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
-const MAX_TOKENS = 1024;
+import {
+  buildAnthropicBody,
+  SseParser,
+  textoDoEvento,
+  type AiAssistantChatMessage,
+  type AiAssistantRequestContext,
+} from "./ai-assistant-request";
 
-export type AiAssistantChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-};
+export type { AiAssistantChatMessage, AiAssistantRequestContext };
+
+const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+
+/**
+ * Modelo principal: um nível acima do Haiku antigo, que é o que dá respostas
+ * analíticas e planos de ação de verdade. Pode ser trocado sem novo deploy
+ * pela variável AI_ASSISTANT_MODEL. Se o modelo principal não existir ou
+ * estiver sobrecarregado, cai para o modelo de reserva em vez de quebrar.
+ */
+const DEFAULT_MODEL = "claude-sonnet-5-5";
+const FALLBACK_MODEL = "claude-haiku-4-5-20251001";
+
+/** Tempo máximo esperando a IA (a rota roda com maxDuration de 60s). */
+const REQUEST_TIMEOUT_MS = 55_000;
 
 export class AiAssistantNotConfiguredError extends Error {
   constructor() {
@@ -18,83 +33,102 @@ export class AiAssistantNotConfiguredError extends Error {
   }
 }
 
-function buildSystemPrompt(dataContext: string): string {
-  return [
-    "Você é o Gestão no Foco, o assistente dentro da própria plataforma de " +
-      "gestão para pequenos negócios nos segmentos de Oficina mecânica, " +
-      "Lava-rápido e Restaurante — cobrindo cadastro de clientes/veículos/" +
-      "mesas, ordens de serviço, vendas, financeiro (contas a pagar/" +
-      "receber, DRE, fluxo de caixa, tributos) e um painel de suporte.",
-    "Quando alguém perguntar seu nome ou quem você é, responda que você é " +
-      "o Gestão no Foco — não use 'assistente' ou qualquer outro nome.",
-    "Seu papel é ajudar a pessoa a USAR o sistema (onde encontrar cada " +
-      "tela, como fazer uma tarefa, o que significa cada campo ou relatório) " +
-      "e, quando fizer sentido, responder perguntas sobre os DADOS REAIS da " +
-      "empresa dela usando exclusivamente o resumo abaixo.",
-    "Regras importantes:",
-    "- Nunca invente números. Se a pergunta exigir um dado que não está no " +
-      "resumo abaixo, diga claramente que não tem essa informação disponível " +
-      "ainda e sugira onde a pessoa pode encontrá-la dentro do sistema " +
-      "(ex.: 'isso você confere em Financeiro > DRE').",
-    "- Seja direto, curto e prático. Respostas de 2 a 5 frases na maioria " +
-      "das vezes; só se alongue se a pergunta pedir explicação detalhada.",
-    "- NUNCA use formatação Markdown (sem #, sem **negrito**, sem listas com " +
-      "- ou *). Escreva em texto corrido, como numa conversa de WhatsApp. Se " +
-      "precisar listar itens, numere com '1.', '2.' direto no texto.",
-    "- Se a pergunta não tiver nada a ver com o sistema Gestão no Foco, " +
-      "responda educadamente que seu foco é ajudar com o sistema.",
-    "- Você não executa ações no sistema (não cria, edita ou apaga nada) — " +
-      "só orienta e explica.",
-    "",
-    "Resumo dos dados reais desta empresa agora:",
-    dataContext,
-  ].join("\n");
+export function isAiAssistantConfigured(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY?.trim());
+}
+
+function modelosParaTentar(): string[] {
+  const principal = process.env.AI_ASSISTANT_MODEL?.trim() || DEFAULT_MODEL;
+  return principal === FALLBACK_MODEL ? [principal] : [principal, FALLBACK_MODEL];
+}
+
+async function abrirStream(
+  history: AiAssistantChatMessage[],
+  context: AiAssistantRequestContext,
+  signal: AbortSignal,
+): Promise<Response> {
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
+  if (!apiKey) throw new AiAssistantNotConfiguredError();
+
+  let ultimoErro: Error | null = null;
+  for (const model of modelosParaTentar()) {
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify(
+        buildAnthropicBody({ model, history, context, stream: true }),
+      ),
+      signal,
+    });
+
+    if (response.ok && response.body) return response;
+
+    const corpo = await response.text().catch(() => "");
+    ultimoErro = new Error(
+      `Falha ao chamar a IA (status ${response.status}): ${corpo.slice(0, 300)}`,
+    );
+    // modelo inexistente (404), limite (429) ou instabilidade (5xx): tenta o modelo de reserva
+    const podeTentarOutro =
+      response.status === 404 || response.status === 429 || response.status >= 500;
+    if (!podeTentarOutro) break;
+  }
+  throw ultimoErro ?? new Error("Falha ao chamar a IA.");
 }
 
 /**
- * Chama a API da Anthropic com o histórico da conversa + contexto de dados.
+ * Resposta da IA em pedaços de texto, conforme ela escreve.
  * Lança AiAssistantNotConfiguredError se a chave ainda não foi configurada.
+ */
+export async function* streamAiAssistant(
+  history: AiAssistantChatMessage[],
+  context: AiAssistantRequestContext,
+  options: { signal?: AbortSignal } = {},
+): AsyncGenerator<string, void, void> {
+  const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+  const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
+
+  const response = await abrirStream(history, context, signal);
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  const parser = new SseParser();
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      for (const event of parser.push(decoder.decode(value, { stream: true }))) {
+        const texto = textoDoEvento(event);
+        if (texto) yield texto;
+
+        if (event.type === "error") {
+          throw new Error(
+            `A IA interrompeu a resposta: ${event.error?.message ?? event.error?.type ?? "erro desconhecido"}`,
+          );
+        }
+        if (event.type === "message_delta" && event.delta?.stop_reason === "max_tokens") {
+          yield "\n\n_(Resposta cortada pelo limite de tamanho — peça \"continue\" para ver o resto.)_";
+        }
+      }
+    }
+  } finally {
+    reader.cancel().catch(() => undefined);
+  }
+}
+
+/**
+ * Chama a IA e devolve a resposta completa (usado onde não há streaming,
+ * como o app mobile). Lança AiAssistantNotConfiguredError se faltar a chave.
  */
 export async function callAiAssistant(
   history: AiAssistantChatMessage[],
-  dataContext: string,
+  context: AiAssistantRequestContext,
 ): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
-  if (!apiKey) {
-    throw new AiAssistantNotConfiguredError();
-  }
-
-  const response = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: ANTHROPIC_MODEL,
-      max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(dataContext),
-      messages: history.map((m) => ({ role: m.role, content: m.content })),
-    }),
-  });
-
-  if (!response.ok) {
-    const bodyText = await response.text().catch(() => "");
-    throw new Error(
-      `Falha ao chamar a IA (status ${response.status}): ${bodyText.slice(0, 300)}`,
-    );
-  }
-
-  const data = (await response.json()) as {
-    content?: Array<{ type: string; text?: string }>;
-  };
-
-  const text = (data.content ?? [])
-    .filter((block) => block.type === "text" && block.text)
-    .map((block) => block.text)
-    .join("\n")
-    .trim();
-
-  return text || "Não consegui gerar uma resposta agora. Tenta de novo?";
+  let texto = "";
+  for await (const pedaco of streamAiAssistant(history, context)) texto += pedaco;
+  texto = texto.trim();
+  return texto || "Não consegui gerar uma resposta agora. Tenta de novo?";
 }

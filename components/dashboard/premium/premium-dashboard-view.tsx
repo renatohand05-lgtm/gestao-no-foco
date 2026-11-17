@@ -353,7 +353,7 @@ export function PremiumDashboardView({
         </div>
 
         <div className="premium-enter premium-enter-delay-5">
-          <DashboardAiBar tenantSlug={tenantSlug} />
+          <DashboardAiBar tenantSlug={tenantSlug} segment={segment} />
         </div>
 
         <BrandInstitutionalFooter compact />

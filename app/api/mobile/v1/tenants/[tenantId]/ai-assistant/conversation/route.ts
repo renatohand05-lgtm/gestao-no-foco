@@ -12,17 +12,21 @@ import {
   mobileUnauthorized,
 } from "@/lib/mobile/response";
 import { isPlanFeatureUnlocked } from "@/lib/billing/feature-entitlement";
-import { buildAiAssistantDataContext } from "@/lib/ai-assistant/ai-assistant-context";
+import { buildAiAssistantRequestContext } from "@/lib/ai-assistant/ai-assistant-context";
+import { textoSemSugestoes } from "@/lib/ai-assistant/ai-assistant-format";
 import {
   AiAssistantNotConfiguredError,
   callAiAssistant,
   type AiAssistantChatMessage,
 } from "@/lib/ai-assistant/ai-assistant-service";
 import type { TenantSegment } from "@/types";
+import type { Database } from "@/types/database";
 import { mapDatabaseErrorToUserMessage } from "@/lib/supabase/friendly-error";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+/** A IA pode levar algumas dezenas de segundos para escrever uma análise completa. */
+export const maxDuration = 60;
 
 type RouteContext = { params: Promise<{ tenantId: string }> };
 
@@ -92,10 +96,21 @@ export async function GET(request: Request, context: RouteContext) {
       .from("ai_assistant_messages" as never)
       .select("id, role, content, created_at")
       .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(100);
 
-    return mobileJson({ messages: messages ?? [] });
+    const ordered = (
+      (messages ?? []) as unknown as Array<{
+        id: string;
+        role: "user" | "assistant";
+        content: string;
+        created_at: string;
+      }>
+    )
+      .reverse()
+      .map((m) => ({ ...m, content: textoSemSugestoes(m.content) }));
+
+    return mobileJson({ messages: ordered });
   } catch (err) {
     return mobileError(mapDatabaseErrorToUserMessage(err));
   }
@@ -158,7 +173,7 @@ export async function POST(request: Request, context: RouteContext) {
       .from("ai_assistant_messages" as never)
       .select("role, content")
       .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(30);
 
     const history: AiAssistantChatMessage[] = (
@@ -166,7 +181,9 @@ export async function POST(request: Request, context: RouteContext) {
         role: "user" | "assistant";
         content: string;
       }>
-    ).map((m) => ({ role: m.role, content: m.content }));
+    )
+      .reverse()
+      .map((m) => ({ role: m.role, content: m.content }));
 
     const { data: tenant } = await auth.supabase
       .from("tenants")
@@ -174,16 +191,23 @@ export async function POST(request: Request, context: RouteContext) {
       .eq("id", tenantId)
       .maybeSingle();
 
-    const dataContext = tenant
-      ? await buildAiAssistantDataContext({
-          ...tenant,
-          segment: tenant.segment as TenantSegment | null,
-        })
-      : "Dados da empresa indisponíveis no momento.";
+    // No app o texto aparece sem Markdown; DRE/caixa dependem da sessão do site, então ficam de fora.
+    const requestContext = tenant
+      ? await buildAiAssistantRequestContext(
+          { ...tenant, segment: tenant.segment as TenantSegment | null },
+          auth.supabase as unknown as SupabaseClient<Database>,
+          { incluirDreECaixa: false, formato: "texto" },
+        )
+      : {
+          tenantSlug: "",
+          segment: null,
+          dataContext: "Dados da empresa indisponíveis no momento.",
+          formato: "texto" as const,
+        };
 
     let replyText: string;
     try {
-      replyText = await callAiAssistant(history, dataContext);
+      replyText = textoSemSugestoes(await callAiAssistant(history, requestContext));
     } catch (err) {
       if (err instanceof AiAssistantNotConfiguredError) {
         return mobileForbidden(err.message);

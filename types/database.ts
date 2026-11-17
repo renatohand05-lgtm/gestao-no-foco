@@ -6459,6 +6459,10 @@ export type Database = {
         Args: { p_tenant: string };
         Returns: Json;
       };
+      ai_assistant_snapshot: {
+        Args: { p_tenant: string; p_hoje?: string | null };
+        Returns: Json;
+      };
       metas_realizado_mensal: {
         Args: { p_tenant: string; p_de: string; p_ate: string };
         Returns: {

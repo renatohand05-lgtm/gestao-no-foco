@@ -1,10 +1,15 @@
 "use server";
 
-import { buildAiAssistantDataContext } from "@/lib/ai-assistant/ai-assistant-context";
+import { buildAiAssistantRequestContext } from "@/lib/ai-assistant/ai-assistant-context";
+import {
+  getOrCreateConversationId,
+  insertMessage,
+  loadHistory,
+} from "@/lib/ai-assistant/ai-assistant-conversation";
+import { MAX_USER_MESSAGE_CHARS } from "@/lib/ai-assistant/ai-assistant-request";
 import {
   AiAssistantNotConfiguredError,
   callAiAssistant,
-  type AiAssistantChatMessage,
 } from "@/lib/ai-assistant/ai-assistant-service";
 import { isPlanFeatureUnlocked } from "@/lib/billing/feature-entitlement";
 import { createClient } from "@/lib/supabase/server";
@@ -26,31 +31,8 @@ type ActionResult<T> =
       planLocked?: boolean;
     };
 
-async function getOrCreateConversationId(
-  client: Awaited<ReturnType<typeof createClient>>,
-  tenantId: string,
-  userId: string,
-): Promise<string> {
-  const { data: existing } = await client
-    .from("ai_assistant_conversations" as never)
-    .select("id")
-    .eq("tenant_id", tenantId)
-    .eq("user_id", userId)
-    .maybeSingle<{ id: string }>();
-
-  if (existing) return existing.id;
-
-  const { data: created, error } = await client
-    .from("ai_assistant_conversations" as never)
-    .insert({ tenant_id: tenantId, user_id: userId } as never)
-    .select("id")
-    .single<{ id: string }>();
-
-  if (error || !created) {
-    throw new Error(error?.message ?? "Não foi possível iniciar a conversa.");
-  }
-  return created.id;
-}
+const PLAN_LOCKED_MESSAGE =
+  "O assistente de IA é um recurso do plano Essencial em diante.";
 
 export async function fetchAiAssistantConversation(
   tenantSlug: string,
@@ -69,11 +51,7 @@ export async function fetchAiAssistantConversation(
       "inteligencia_ia",
     );
     if (!unlocked) {
-      return {
-        success: false,
-        error: "O assistente de IA é um recurso do plano Essencial em diante.",
-        planLocked: true,
-      };
+      return { success: false, error: PLAN_LOCKED_MESSAGE, planLocked: true };
     }
 
     const conversationId = await getOrCreateConversationId(
@@ -86,7 +64,7 @@ export async function fetchAiAssistantConversation(
       .from("ai_assistant_messages" as never)
       .select("id, role, content, created_at")
       .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(100);
 
     const mapped = ((messages ?? []) as unknown as Array<{
@@ -94,12 +72,14 @@ export async function fetchAiAssistantConversation(
       role: "user" | "assistant";
       content: string;
       created_at: string;
-    }>).map((m) => ({
-      id: m.id,
-      role: m.role,
-      content: m.content,
-      createdAt: m.created_at,
-    }));
+    }>)
+      .reverse()
+      .map((m) => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        createdAt: m.created_at,
+      }));
 
     return { success: true, data: mapped };
   } catch (error) {
@@ -113,12 +93,19 @@ export async function fetchAiAssistantConversation(
   }
 }
 
+/** Resposta completa de uma vez (sem streaming). A tela usa a rota de streaming; isto fica como alternativa. */
 export async function sendAiAssistantMessage(
   tenantSlug: string,
   body: string,
 ): Promise<ActionResult<AiAssistantMessage>> {
   try {
-    if (!body.trim()) throw new Error("Escreva uma mensagem antes de enviar.");
+    const text = body.trim();
+    if (!text) throw new Error("Escreva uma mensagem antes de enviar.");
+    if (text.length > MAX_USER_MESSAGE_CHARS) {
+      throw new Error(
+        `A mensagem é longa demais (máximo ${MAX_USER_MESSAGE_CHARS} caracteres).`,
+      );
+    }
 
     const tenant = await requireTenant(tenantSlug);
     const client = await createClient();
@@ -133,11 +120,7 @@ export async function sendAiAssistantMessage(
       "inteligencia_ia",
     );
     if (!unlocked) {
-      return {
-        success: false,
-        error: "O assistente de IA é um recurso do plano Essencial em diante.",
-        planLocked: true,
-      };
+      return { success: false, error: PLAN_LOCKED_MESSAGE, planLocked: true };
     }
 
     const conversationId = await getOrCreateConversationId(
@@ -145,55 +128,23 @@ export async function sendAiAssistantMessage(
       tenant.id,
       user.id,
     );
+    await insertMessage(client, conversationId, "user", text);
 
-    const { error: userInsertError } = await client
-      .from("ai_assistant_messages" as never)
-      .insert({
-        conversation_id: conversationId,
-        role: "user",
-        content: body.trim(),
-      } as never);
-    if (userInsertError) throw new Error(userInsertError.message);
+    const [history, context] = await Promise.all([
+      loadHistory(client, conversationId),
+      buildAiAssistantRequestContext(tenant, client),
+    ]);
+    const replyText = await callAiAssistant(history, context);
 
-    const { data: historyRows } = await client
-      .from("ai_assistant_messages" as never)
-      .select("role, content")
-      .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true })
-      .limit(30);
-
-    const history: AiAssistantChatMessage[] = (
-      (historyRows ?? []) as unknown as Array<{
-        role: "user" | "assistant";
-        content: string;
-      }>
-    ).map((m) => ({ role: m.role, content: m.content }));
-
-    const dataContext = await buildAiAssistantDataContext(tenant);
-    const replyText = await callAiAssistant(history, dataContext);
-
-    const { data: assistantRow, error: assistantInsertError } = await client
-      .from("ai_assistant_messages" as never)
-      .insert({
-        conversation_id: conversationId,
-        role: "assistant",
-        content: replyText,
-      } as never)
-      .select("id, created_at")
-      .single<{ id: string; created_at: string }>();
-    if (assistantInsertError || !assistantRow) {
-      throw new Error(
-        assistantInsertError?.message ?? "Falha ao salvar a resposta.",
-      );
-    }
+    const saved = await insertMessage(client, conversationId, "assistant", replyText);
 
     return {
       success: true,
       data: {
-        id: assistantRow.id,
+        id: saved.id,
         role: "assistant",
         content: replyText,
-        createdAt: assistantRow.created_at,
+        createdAt: saved.createdAt,
       },
     };
   } catch (error) {
@@ -204,6 +155,41 @@ export async function sendAiAssistantMessage(
       success: false,
       error:
         error instanceof Error ? error.message : "Erro ao enviar mensagem.",
+    };
+  }
+}
+
+/** "Nova conversa": apaga as mensagens da conversa da pessoa nesta empresa. */
+export async function clearAiAssistantConversation(
+  tenantSlug: string,
+): Promise<ActionResult<null>> {
+  try {
+    const tenant = await requireTenant(tenantSlug);
+    const client = await createClient();
+    const {
+      data: { user },
+    } = await client.auth.getUser();
+    if (!user) throw new Error("Não autenticado.");
+
+    const conversationId = await getOrCreateConversationId(
+      client,
+      tenant.id,
+      user.id,
+    );
+    const { error } = await client
+      .from("ai_assistant_messages" as never)
+      .delete()
+      .eq("conversation_id", conversationId);
+    if (error) throw new Error(error.message);
+
+    return { success: true, data: null };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Não foi possível iniciar uma nova conversa.",
     };
   }
 }

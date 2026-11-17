@@ -139,7 +139,7 @@ function DemoAwareChrome({
       </SidebarInset>
       {!hide.appSidebar ? <HelpWidget tenantSlug={tenant.slug} /> : null}
       {!hide.appSidebar && effectiveAiAssistantUnlocked ? (
-        <AiAssistantWidget tenantSlug={tenant.slug} />
+        <AiAssistantWidget tenantSlug={tenant.slug} segment={tenant.segment} />
       ) : null}
     </SidebarProvider>
   );

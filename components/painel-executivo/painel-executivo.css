@@ -138,7 +138,7 @@
 
 /* Rings */
 .pe-root .rings{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 10px}
-.pe-root .ring{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.pe-root .ring{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;box-shadow:none}
 .pe-root .ring svg{transform:rotate(-90deg);overflow:visible}
 .pe-root .ring .rc{position:relative;width:104px;height:104px}
 .pe-root .ring .rv{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:20px;letter-spacing:-.03em}

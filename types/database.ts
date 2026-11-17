@@ -6459,6 +6459,15 @@ export type Database = {
         Args: { p_tenant: string };
         Returns: Json;
       };
+      metas_realizado_mensal: {
+        Args: { p_tenant: string; p_de: string; p_ate: string };
+        Returns: {
+          mes_ref: string;
+          meta_valor: number | null;
+          realizado_valor: number;
+          carros_qtd: number;
+        }[];
+      };
       ensure_consumidor_balcao: {
         Args: { p_tenant_id: string };
         Returns: string;

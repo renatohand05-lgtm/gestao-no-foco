@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BudgetMatrix } from "@/components/finance/budget-matrix";
 import { FinanceBudgetActions } from "@/components/finance/finance-budget-actions";
 import { FinanceBudgetForm } from "@/components/finance/finance-budget-form";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
@@ -12,10 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  computeBudgetVariance,
-  summarizeBudgetVariance,
-} from "@/lib/finance/budget/budget-variance";
-import {
   createFinanceBudgetService,
   labelFinanceBudgetStatus,
 } from "@/lib/finance/budget/budget-service";
@@ -24,6 +21,8 @@ import {
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
 import { formatCurrency } from "@/lib/format";
+import { loadMetasRealizado } from "@/lib/metas/metas-realizado";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Orçamento empresarial" };
 export const dynamic = "force-dynamic";
@@ -62,16 +61,6 @@ export default async function OrcamentoDetailPage({
   if (!full) notFound();
 
   const { budget, lines } = full;
-  const variance = lines.map((l) =>
-    computeBudgetVariance({
-      id: l.id,
-      label: `${l.natureza} · mês ${l.mes}`,
-      natureza: l.natureza as "receita" | "despesa" | "custo",
-      orcado: Number(l.valor_orcado),
-      realizado: 0,
-    }),
-  );
-  const summary = summarizeBudgetVariance(variance);
   const editable =
     budget.status === "rascunho" ||
     budget.status === "em_revisao" ||
@@ -110,6 +99,27 @@ export default async function OrcamentoDetailPage({
       </div>
     );
   }
+
+  const somaPorNatureza = (natureza: string) =>
+    lines
+      .filter((l) => l.natureza === natureza)
+      .reduce((acc, l) => acc + Number(l.valor_orcado), 0);
+  const receitaOrcada = somaPorNatureza("receita");
+  const custosEDespesas = somaPorNatureza("custo") + somaPorNatureza("despesa");
+  const resultadoOrcado = receitaOrcada - custosEDespesas;
+
+  // Faturamento realizado (OS faturadas) mês a mês — mesma base do Painel Executivo.
+  const realizadoRows = await loadMetasRealizado(
+    await createClient(),
+    auth.tenant.id,
+    `${budget.ano}-01-01`,
+    `${budget.ano}-12-01`,
+  );
+  const realizadoReceita: Record<number, number> = {};
+  for (const r of realizadoRows) {
+    if (r.realizado > 0) realizadoReceita[Number(r.competencia.slice(5, 7))] = r.realizado;
+  }
+  const realizadoAno = Object.values(realizadoReceita).reduce((a, b) => a + b, 0);
 
   return (
     <div
@@ -152,63 +162,47 @@ export default async function OrcamentoDetailPage({
         <CardHeader>
           <CardTitle className="text-base">Resumo orçado</CardTitle>
           <CardDescription>
-            Realizado = 0 até drill-down DRE (não inventado).
+            Faturamento realizado = OS faturadas (mesma base do Painel
+            Executivo). Custos e despesas realizados seguem o DRE.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-2 sm:grid-cols-3 text-sm">
+        <CardContent className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            Orçado:{" "}
-            <span className="tabular-nums font-medium">
-              {formatCurrency(summary.orcado)}
-            </span>
+            <div className="text-muted-foreground">Receita orçada</div>
+            <div className="text-base font-semibold tabular-nums">
+              {formatCurrency(receitaOrcada)}
+            </div>
           </div>
           <div>
-            Realizado:{" "}
-            <span className="tabular-nums font-medium">
-              {formatCurrency(summary.realizado)}
-            </span>
+            <div className="text-muted-foreground">Custos e despesas orçados</div>
+            <div className="text-base font-semibold tabular-nums">
+              {formatCurrency(custosEDespesas)}
+            </div>
           </div>
           <div>
-            Δ:{" "}
-            <span className="tabular-nums font-medium">
-              {formatCurrency(summary.diferenca)}
-            </span>
+            <div className="text-muted-foreground">Resultado orçado</div>
+            <div className="text-base font-semibold tabular-nums">
+              {formatCurrency(resultadoOrcado)}
+            </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Faturamento realizado no ano</div>
+            <div className="text-base font-semibold tabular-nums">
+              {realizadoAno > 0 ? formatCurrency(realizadoAno) : "—"}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="overflow-x-auto rounded-xl border">
-        <table className="w-full min-w-[480px] text-sm">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2">Mês</th>
-              <th className="px-3 py-2">Natureza</th>
-              <th className="px-3 py-2">Orçado</th>
-              <th className="px-3 py-2">Justificativa</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lines.length === 0 ? (
-              <tr>
-                <td className="px-3 py-4 text-muted-foreground" colSpan={4}>
-                  Sem linhas
-                </td>
-              </tr>
-            ) : (
-              lines.map((l) => (
-                <tr key={l.id} className="border-t">
-                  <td className="px-3 py-2 tabular-nums">{l.mes}</td>
-                  <td className="px-3 py-2">{l.natureza}</td>
-                  <td className="px-3 py-2 tabular-nums">
-                    {formatCurrency(Number(l.valor_orcado))}
-                  </td>
-                  <td className="px-3 py-2">{l.justificativa ?? "—"}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <BudgetMatrix
+        linhas={lines.map((l) => ({
+          mes: l.mes,
+          natureza: l.natureza,
+          valor: Number(l.valor_orcado),
+          justificativa: l.justificativa,
+        }))}
+        realizadoReceita={receitaOrcada > 0 ? realizadoReceita : null}
+      />
 
       <p className="text-xs text-muted-foreground">
         Conversão para venda/OS aplica-se a orçamentos comerciais (módulo

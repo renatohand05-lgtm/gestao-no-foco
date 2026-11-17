@@ -2,18 +2,14 @@ import Link from "next/link";
 
 import { FinanceFeatureLocked } from "@/components/finance/finance-feature-locked";
 import { FinancePageHeader } from "@/components/finance/finance-page-header";
+import { MetasRealizadoCard } from "@/components/metas/metas-realizado-card";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { isFinanceFeatureUnlocked } from "@/lib/billing/finance-entitlement";
-import {
-  computeBudgetVariance,
-  summarizeBudgetVariance,
-} from "@/lib/finance/budget/budget-variance";
 import {
   createFinanceBudgetService,
   labelFinanceBudgetStatus,
@@ -22,7 +18,11 @@ import {
   financePageAuthError,
   requireFinancePagePermission,
 } from "@/lib/finance/page-auth";
-import { formatCurrency } from "@/lib/format";
+import {
+  civilDateInTimezone,
+  resolveTenantTimezone,
+} from "@/lib/dashboard/tenant-timezone";
+import { loadMetasRealizado } from "@/lib/metas/metas-realizado";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Orçamento empresarial" };
@@ -87,23 +87,15 @@ export default async function FinanceiroOrcamentoPage({
     schemaError = e instanceof Error ? e.message : "Schema indisponível";
   }
 
-  const demoLines = [
-    computeBudgetVariance({
-      id: "demo-rec",
-      label: "Receita operacional (exemplo motor)",
-      natureza: "receita",
-      orcado: 100_000,
-      realizado: 0,
-    }),
-    computeBudgetVariance({
-      id: "demo-desp",
-      label: "Despesas (exemplo motor)",
-      natureza: "despesa",
-      orcado: 40_000,
-      realizado: 0,
-    }),
-  ];
-  const demoSummary = summarizeBudgetVariance(demoLines);
+  // Metas mensais (módulo Metas de Vendas) × faturamento realizado (OS faturadas).
+  const hoje = civilDateInTimezone(new Date(), resolveTenantTimezone());
+  const anoAtual = Number(hoje.slice(0, 4));
+  const metasRealizado = await loadMetasRealizado(
+    client,
+    auth.tenant.id,
+    `${anoAtual}-01-01`,
+    `${anoAtual + 1}-12-01`,
+  );
 
   return (
     <div className="space-y-4 p-4 sm:p-6" data-phase28="finance-orcamento">
@@ -177,35 +169,11 @@ export default async function FinanceiroOrcamentoPage({
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Motor orçado × realizado</CardTitle>
-          <CardDescription>
-            Cálculo puro (`computeBudgetVariance`). Realizado zerado até
-            drill-down canônico.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-2 sm:grid-cols-3 text-sm">
-          <div>
-            Orçado:{" "}
-            <span className="tabular-nums font-medium">
-              {formatCurrency(demoSummary.orcado)}
-            </span>
-          </div>
-          <div>
-            Realizado:{" "}
-            <span className="tabular-nums font-medium">
-              {formatCurrency(demoSummary.realizado)}
-            </span>
-          </div>
-          <div>
-            Δ:{" "}
-            <span className="tabular-nums font-medium">
-              {formatCurrency(demoSummary.diferenca)}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      <MetasRealizadoCard
+        tenantSlug={tenantSlug}
+        linhas={metasRealizado}
+        hoje={hoje}
+      />
     </div>
   );
 }

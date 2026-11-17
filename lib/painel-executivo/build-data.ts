@@ -4,7 +4,9 @@ import { createClient } from "@/lib/supabase/server";
  * Conjunto de dados do Painel Executivo (mesmo formato `D` do painel HTML original).
  * - "Realizado" (OS, despesas, clientes, serviços, mecânicos, DRE base, fluxo, notas) vem da função
  *   `painel_executivo_dados` (calculada sobre os lançamentos do sistema, respeitando RLS).
- * - Planejamento (premissas, metas, orçamento 2027, plano de ação) vem de `painel_planejamento`.
+ * - Planejamento (premissas, orçamento 2027, plano de ação) vem de `painel_planejamento`.
+ * - Metas mensais de faturamento vêm do módulo Metas de Vendas do portal (`metas_vendas_mensais`),
+ *   então editar uma meta no portal atualiza o painel na hora.
  */
 export type PainelDados = {
   os: unknown[][];
@@ -27,7 +29,10 @@ export type PainelDados = {
   tri27: unknown[][];
   oper27: unknown[][];
   acoes: unknown[][];
+  /** Metas padrão do mês (fat, carros, ticket, lucro) — usadas quando não há meta específica do mês. */
   metasMes: Record<string, number>;
+  /** Meta de faturamento por mês ("YYYY-MM" → R$), do módulo Metas de Vendas do portal. */
+  metasMensais: Record<string, number>;
 };
 
 /** chave em painel_planejamento → campo de `PainelDados` (listas). */
@@ -52,12 +57,18 @@ export async function loadPainelDados(
 ): Promise<PainelDados | null> {
   const supabase = await createClient();
 
-  const [dadosRes, planRes] = await Promise.all([
+  const [dadosRes, planRes, metasRes] = await Promise.all([
     supabase.rpc("painel_executivo_dados", { p_tenant: tenantId }),
     supabase
       .from("painel_planejamento")
       .select("chave, payload")
       .eq("tenant_id", tenantId),
+    supabase
+      .from("metas_vendas_mensais")
+      .select("competencia, valor_meta")
+      .eq("tenant_id", tenantId)
+      .is("centro_custo_id", null)
+      .is("deleted_at", null),
   ]);
 
   if (dadosRes.error || !dadosRes.data) return null;
@@ -67,6 +78,11 @@ export async function loadPainelDados(
     (planRes.data ?? []).map((r) => [r.chave, r.payload]),
   );
   const metasMesRaw = plan.get("metas_mes");
+  const metasMensais: Record<string, number> = {};
+  for (const m of metasRes.data ?? []) {
+    const valor = Number(m.valor_meta);
+    if (Number.isFinite(valor)) metasMensais[String(m.competencia).slice(0, 7)] = valor;
+  }
 
   const out: PainelDados = {
     os: asRows(real.os),
@@ -93,6 +109,7 @@ export async function loadPainelDados(
       metasMesRaw && typeof metasMesRaw === "object" && !Array.isArray(metasMesRaw)
         ? (metasMesRaw as Record<string, number>)
         : {},
+    metasMensais,
   };
   for (const k of PLAN_LIST_KEYS) out[k] = asRows(plan.get(k));
   return out;

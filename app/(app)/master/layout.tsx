@@ -1,25 +1,8 @@
-import Link from "next/link";
-import {
-  Building2,
-  Gift,
-  LayoutDashboard,
-  LifeBuoy,
-  MessageCircle,
-  Sparkles,
-} from "lucide-react";
-
+import { BrandMark } from "@/components/brand/brand-mark";
+import { MasterNav } from "@/components/master/master-nav";
 import { SupportNotificationBell } from "@/components/master/support-notification-bell";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/tenants";
-
-const NAV_ITEMS = [
-  { href: "/master/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/master/empresas", label: "Empresas", icon: Building2 },
-  { href: "/master/suporte", label: "Suporte", icon: LifeBuoy },
-  { href: "/master/convites", label: "Convites", icon: Gift },
-  { href: "/master/plano-preview", label: "Simulador de planos", icon: Sparkles },
-  { href: "/master/whatsapp", label: "WhatsApp", icon: MessageCircle },
-] as const;
 
 export default async function MasterLayout({
   children,
@@ -41,27 +24,23 @@ export default async function MasterLayout({
   const isOwner = partnerRow.role === "owner";
 
   return (
-    <div className="min-h-svh bg-background">
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-1 overflow-x-auto">
-            {NAV_ITEMS.filter(
-              (item) =>
-                isOwner ||
-                (item.href !== "/master/suporte" &&
-                  item.href !== "/master/convites" &&
-                  item.href !== "/master/whatsapp"),
-            ).map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <item.icon className="size-4" />
-                  {item.label}
-                </Link>
-            ))}
-          </nav>
+    // Sem fundo opaco: a aurora e o G da marca (PortalBackdrop) aparecem por trás.
+    <div className="min-h-svh">
+      <header className="sticky top-0 z-30 border-b border-border bg-sidebar backdrop-blur-xl [backdrop-filter:saturate(180%)_blur(30px)]">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:gap-5 sm:px-6 lg:px-8">
+          <div className="flex shrink-0 items-center gap-2.5">
+            <BrandMark size="lg" className="rounded-xl" />
+            <div className="hidden leading-none sm:block">
+              <p className="text-sm font-bold tracking-[0.22em] text-foreground">GESTÃO</p>
+              <p className="mt-1 text-[10px] tracking-wide text-muted-foreground">
+                {isOwner ? "Visão master" : "Painel do associado"}
+              </p>
+            </div>
+          </div>
+          <div className="hidden h-7 w-px shrink-0 bg-border sm:block" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <MasterNav isOwner={isOwner} />
+          </div>
           {isOwner ? <SupportNotificationBell /> : null}
         </div>
       </header>

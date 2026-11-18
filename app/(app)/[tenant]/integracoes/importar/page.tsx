@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingCart, Wallet, Wrench } from "lucide-react";
+import { FileSpreadsheet, ShoppingCart, Wallet, Wrench } from "lucide-react";
 
 import { ExecutiveHeader, ExecutivePage, ExecutiveSection } from "@/components/executive";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -36,6 +36,15 @@ export default async function ImportarArquivosPage({
   const showWorkOrders = hasCapability(ctx, "work_orders");
 
   const modules = [
+    {
+      key: "planilha",
+      title: "Planilha da empresa",
+      description:
+        "Clientes, MRR/churn e DRE mensal a partir da planilha que você já usa (.xlsx, .xlsb, .xls ou .csv).",
+      icon: FileSpreadsheet,
+      href: `/${tenantSlug}/integracoes/importar/planilha`,
+      action: "Importar planilha",
+    },
     {
       key: "financeiro",
       title: "Financeiro",
@@ -89,7 +98,7 @@ export default async function ImportarArquivosPage({
               </CardHeader>
               <CardContent>
                 <Button className="w-full" render={<Link href={m.href} />}>
-                  Importar {m.title}
+                  {"action" in m && m.action ? m.action : `Importar ${m.title}`}
                 </Button>
               </CardContent>
             </Card>

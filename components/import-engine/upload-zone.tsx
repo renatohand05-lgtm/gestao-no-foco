@@ -15,12 +15,15 @@ type Props = {
   disabled?: boolean;
   onFile: (file: File) => void;
   accept?: string;
+  /** Texto de apoio abaixo do título (formatos aceitos e tamanho). */
+  hint?: string;
 };
 
 export function ImportUploadZone({
   disabled,
   onFile,
   accept = ".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  hint = "Formatos: .xlsx, .xls, .csv · até 15 MB",
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -78,9 +81,7 @@ export function ImportUploadZone({
         <p className="text-sm font-medium">
           Arraste o arquivo aqui ou selecione
         </p>
-        <p className="text-xs text-muted-foreground">
-          Formatos: .xlsx, .xls, .csv · até 15 MB
-        </p>
+        <p className="text-xs text-muted-foreground">{hint}</p>
       </div>
       <Button
         type="button"

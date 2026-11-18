@@ -18,6 +18,8 @@ export type Tenant = {
   segment_version?: number | null;
   /** Overrides de capabilities/terminologia do tenant. */
   segment_config?: Record<string, unknown> | null;
+  /** Módulo "Rede de lojas" (painel operacional multi-loja) ligado para a empresa. */
+  rede_operacional?: boolean | null;
   logo_url: string | null;
   created_at: string;
   updated_at: string;

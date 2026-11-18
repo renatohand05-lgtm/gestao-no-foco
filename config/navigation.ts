@@ -12,6 +12,7 @@ import {
   Plug,
   Search,
   Settings,
+  Store,
   ShoppingCart,
   Truck,
   Users,
@@ -83,6 +84,8 @@ export function getTenantNav(
   options?: {
     segmentVersion?: number | null;
     segmentConfig?: unknown;
+    /** Empresa com o módulo "Rede de lojas" ligado (tenants.rede_operacional). */
+    redeOperacional?: boolean | null;
   },
 ): NavItem[] {
   const base = `/${tenantSlug}`;
@@ -118,6 +121,18 @@ export function getTenantNav(
         "os.visualizar",
       ],
     },
+    ...(options?.redeOperacional
+      ? [
+          {
+            id: "rede",
+            title: "Rede de lojas",
+            href: `${base}/rede`,
+            icon: Store,
+            group: "principal" as const,
+            description: "Painel operacional por loja: vendas, metas e indicadores",
+          },
+        ]
+      : []),
     {
       id: "dashboard",
       title: "Dashboard",

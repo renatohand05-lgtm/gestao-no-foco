@@ -68,6 +68,7 @@ export function AppSidebar({
     const raw = getTenantNav(tenant.slug, tenant.segment, {
       segmentVersion: tenant.segment_version,
       segmentConfig: tenant.segment_config,
+      redeOperacional: tenant.rede_operacional,
     });
     const permitted =
       permissions === undefined
@@ -83,6 +84,7 @@ export function AppSidebar({
     tenant.segment,
     tenant.segment_version,
     tenant.segment_config,
+    tenant.rede_operacional,
     permissions,
     lockedNavIds,
   ]);

@@ -300,3 +300,66 @@ export type ConfigExpansao = {
   faturamentoMinimo: number;
   lojasBase: string[];
 };
+
+/* ------------------------------------------------------------------ rodada 16: cozinha central e delivery */
+
+export const MOTIVOS_RUPTURA = [
+  "Falta na cozinha central",
+  "Atraso na entrega",
+  "Erro no pedido da loja",
+  "Problema de qualidade",
+  "Demanda acima do previsto",
+] as const;
+export type MotivoRuptura = (typeof MOTIVOS_RUPTURA)[number];
+
+export type Ruptura = {
+  id: string;
+  lojaId: string;
+  data: string;
+  item: string;
+  motivo: MotivoRuptura;
+  /** Horas em que o item ficou indisponível. */
+  horas: number;
+  acao: string | null;
+  origem: "manual" | "exemplo";
+};
+
+export type ProdutoCC = {
+  id: string;
+  item: string;
+  unidade: string;
+  atual: number;
+  minimo: number;
+  consumoDia: number;
+  custo: number;
+  origem: "manual" | "exemplo";
+};
+
+export type PeriodoDelivery = "diario" | "semanal";
+export type RespostaRotina = "sim" | "nao" | "na";
+
+export type RegistroDelivery = {
+  id: string;
+  lojaId: string;
+  /** Diário: o dia. Semanal: a segunda-feira da semana. */
+  data: string;
+  periodo: PeriodoDelivery;
+  responsavel: string | null;
+  preparo: number | null;
+  cancelamentos: number | null;
+  notaIfood: number | null;
+  tempoOnline: number | null;
+  rupturas: number | null;
+  pedidos: number | null;
+  ticketMedio: number | null;
+  conversao: number | null;
+  atrasos: number | null;
+  comissoes: number | null;
+  freteSubsidiado: number | null;
+  promocoes: number | null;
+  custoPedido: number | null;
+  /** Resposta de cada item da rotina (índice 0 a 6); item sem resposta = ausente. */
+  rotina: Record<number, RespostaRotina>;
+  observacoes: string | null;
+  origem: "manual" | "exemplo";
+};

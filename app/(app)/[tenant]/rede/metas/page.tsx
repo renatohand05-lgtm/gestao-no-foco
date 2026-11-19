@@ -27,7 +27,7 @@ export default async function RedeMetasPage({
       <SeletorAnoMes basePath={`/${slug}/rede/metas`} ano={d.ano} mes={d.mes} />
       <MetasIndicadores slug={slug} lojas={lojas} metas={d.base.metas} editaRede={editaRede} lojasEditaveis={lojasEditaveis} hoje={d.hoje} />
       <MetasFaturamento slug={slug} lojas={lojas} metasFat={d.metasFat} ano={d.ano} lojasEditaveis={lojasEditaveis} />
-      <IndicadoresDoMes slug={slug} lojas={lojas} metas={d.base.metas} indicadores={d.indicadores} cmvCalculado={d.cmvCalculado} mes={d.mes} lojasEditaveis={lojasEditaveis} />
+      <IndicadoresDoMes slug={slug} lojas={lojas} metas={d.base.metas} indicadores={d.indicadores} calculados={d.calculados} mes={d.mes} lojasEditaveis={lojasEditaveis} />
     </div>
   );
 }

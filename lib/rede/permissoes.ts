@@ -8,6 +8,11 @@ export function podeVer(perfil: PerfilRede | null | undefined, modulo: ModuloRed
   return perfil?.modulos[modulo]?.ver === true;
 }
 
+/** Vale se a pessoa vê pelo menos um dos módulos (abas que juntam mais de um módulo). */
+export function podeVerAlgum(perfil: PerfilRede | null | undefined, modulos: readonly ModuloRede[]): boolean {
+  return modulos.some((m) => podeVer(perfil, m));
+}
+
 export function podeEditar(perfil: PerfilRede | null | undefined, modulo: ModuloRede): boolean {
   return perfil?.modulos[modulo]?.editar === true;
 }

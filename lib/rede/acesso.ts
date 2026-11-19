@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { requireTenant } from "@/lib/tenants";
 import type { TenantWithRole } from "@/types";
 
-import { MENU_REDE } from "./menu";
-import { lerPerfil, podeEditar, podeVer } from "./permissoes";
+import { MENU_REDE, modulosDoItem } from "./menu";
+import { lerPerfil, podeEditar, podeVerAlgum } from "./permissoes";
 import type { ModuloRede, PerfilRede } from "./tipos";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,12 +38,15 @@ export const getRedeContexto = cache(async (slug: string): Promise<RedeContexto>
   return { tenant, userId: user.id, perfil: error ? null : lerPerfil(data), db };
 });
 
-/** Para páginas: exige acesso de leitura ao módulo (senão, volta à visão geral ou 404). */
-export async function exigirModulo(slug: string, modulo: ModuloRede): Promise<RedeContexto> {
+/**
+ * Para páginas: exige acesso de leitura ao módulo (ou a pelo menos um, nas abas que juntam mais de um).
+ * Sem acesso, leva para a primeira aba que a pessoa pode ver (ou 404 se nenhuma).
+ */
+export async function exigirModulo(slug: string, modulo: ModuloRede | readonly ModuloRede[]): Promise<RedeContexto> {
   const ctx = await getRedeContexto(slug);
-  if (!podeVer(ctx.perfil, modulo)) {
-    // Sem acesso a esta aba: leva para a primeira que a pessoa pode ver (ou 404 se nenhuma).
-    const destino = MENU_REDE.find((m) => m.modulo !== modulo && podeVer(ctx.perfil, m.modulo));
+  const pedidos: readonly ModuloRede[] = typeof modulo === "string" ? [modulo] : modulo;
+  if (!podeVerAlgum(ctx.perfil, pedidos)) {
+    const destino = MENU_REDE.find((m) => !modulosDoItem(m).some((x) => pedidos.includes(x)) && podeVerAlgum(ctx.perfil, modulosDoItem(m)));
     if (destino) redirect(`/${slug}/rede${destino.href}`);
     notFound();
   }

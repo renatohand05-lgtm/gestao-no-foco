@@ -5,8 +5,8 @@ import { ModuleHeader } from "@/components/layout/module-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getRedeContexto } from "@/lib/rede/acesso";
 import { carregarConfigAmbiente } from "@/lib/rede/loader";
-import { MENU_REDE } from "@/lib/rede/menu";
-import { podeVer } from "@/lib/rede/permissoes";
+import { MENU_REDE, modulosDoItem } from "@/lib/rede/menu";
+import { podeVerAlgum } from "@/lib/rede/permissoes";
 
 export const metadata = { title: "Rede de lojas" };
 
@@ -34,7 +34,7 @@ export default async function RedeLayout({
   }
 
   const ambiente = await carregarConfigAmbiente(ctx);
-  const itens = MENU_REDE.filter((m) => podeVer(ctx.perfil, m.modulo)).map(({ href, label }) => ({ href, label }));
+  const itens = MENU_REDE.filter((m) => podeVerAlgum(ctx.perfil, modulosDoItem(m))).map(({ href, label }) => ({ href, label }));
 
   return (
     <div className="space-y-5">

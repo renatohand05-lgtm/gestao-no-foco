@@ -12,6 +12,7 @@ import { SectionCard } from "@/components/ui/section-card";
 import { definirMetaAction, definirMetaFaturamentoAction, salvarIndicadorMesAction } from "@/lib/rede/actions";
 import { brl, resolverMeta, textoMeta } from "@/lib/rede/calculo";
 import { lerNumero } from "@/lib/rede/csv";
+import { FONTE_CALCULADA, FONTE_CALCULADA_CURTA } from "@/lib/rede/delivery";
 import { INDICADORES, type IndicadorKey, type IndicadorMes, type Loja, type MetaFaturamento, type MetaRow } from "@/lib/rede/tipos";
 
 type Msg = { tipo: "success" | "error"; texto: string } | null;
@@ -299,12 +300,12 @@ function CelulaIndicador({ slug, lojaId, mes, indicador, lancado, editavel, aoSa
   );
 }
 
-export function IndicadoresDoMes({ slug, lojas, metas, indicadores, cmvCalculado, mes, lojasEditaveis }: { slug: string; lojas: Loja[]; metas: MetaRow[]; indicadores: IndicadorMes[]; cmvCalculado: IndicadorMes[]; mes: string; lojasEditaveis: string[] }) {
+export function IndicadoresDoMes({ slug, lojas, metas, indicadores, calculados, mes, lojasEditaveis }: { slug: string; lojas: Loja[]; metas: MetaRow[]; indicadores: IndicadorMes[]; calculados: IndicadorMes[]; mes: string; lojasEditaveis: string[] }) {
   const [msg, setMsg] = useState<Msg>(null);
   const manuais = INDICADORES.filter((d) => !d.calculado);
   const ref = `${mes}-01`;
   return (
-    <SectionCard title={`Indicadores lançados — ${MESES[Number(mes.slice(5, 7)) - 1]}/${mes.slice(0, 4)}`} description="Faturamento e % da meta são calculados das vendas. O CMV vem das contagens semanais (aba CMV) quando elas existem no mês. Os demais são lançados aqui, por loja, até os módulos de origem (RH, delivery) alimentarem sozinhos.">
+    <SectionCard title={`Indicadores lançados — ${MESES[Number(mes.slice(5, 7)) - 1]}/${mes.slice(0, 4)}`} description="Faturamento e % da meta são calculados das vendas. Vêm de outros módulos quando eles têm dados no mês: o CMV das contagens semanais, as rupturas da cozinha central e preparo, cancelamentos, nota iFood e tempo online dos checklists de delivery (média do mês). Os demais são lançados aqui, por loja, até os módulos de origem (RH) alimentarem sozinhos.">
       <div className="space-y-3">
         {msg ? <FeedbackMessage variant={msg.tipo}>{msg.texto}</FeedbackMessage> : null}
         <div className="overflow-x-auto">
@@ -332,13 +333,13 @@ export function IndicadoresDoMes({ slug, lojas, metas, indicadores, cmvCalculado
                     <td className="py-1.5 pr-3 text-xs text-muted-foreground">{textoMeta(d.formato, m.meta, m.direcao)}</td>
                     {lojas.map((l) => {
                       const lanc = indicadores.find((i) => i.lojaId === l.id && i.indicador === d.k && i.mes === ref) ?? null;
-                      const calculado = d.k === "cmv" ? (cmvCalculado.find((i) => i.lojaId === l.id && i.mes === ref) ?? null) : null;
+                      const calculado = FONTE_CALCULADA[d.k] ? (calculados.find((i) => i.lojaId === l.id && i.indicador === d.k && i.mes === ref) ?? null) : null;
                       if (calculado) {
                         return (
                           <td key={l.id} className="px-1 py-1.5">
-                            <div className="flex flex-col items-end gap-0.5" title="O CMV do mês é calculado das contagens semanais e substitui o valor lançado à mão.">
+                            <div className="flex flex-col items-end gap-0.5" title={`O valor do mês é calculado ${FONTE_CALCULADA[d.k] ?? "de outro módulo"} e substitui o valor lançado à mão.`}>
                               <span className="inline-flex h-8 w-24 items-center justify-end rounded-lg border border-border bg-muted/50 px-3 text-sm tabular-nums">{String(Math.round(calculado.valor * 10) / 10).replace(".", ",")}</span>
-                              <span className="text-[10px] text-muted-foreground">das contagens</span>
+                              <span className="text-[10px] text-muted-foreground">{FONTE_CALCULADA_CURTA[d.k] ?? "calculado"}</span>
                             </div>
                           </td>
                         );

@@ -14,6 +14,8 @@ import {
   type PainelRede,
   type PontoHora,
 } from "./calculo";
+import { indicadoresRupturas } from "./cozinha";
+import { indicadoresDelivery } from "./delivery";
 import { lerFiltros, mesDeReferencia, mesesDoPeriodo, type FiltrosRede } from "./filtros";
 import { calcularContagens, indicadoresCmv, mesclarIndicadores, projecaoRede, vendasPorSemana, type ContagemCalculada } from "./financeiro";
 import { mapCmv, mapConfigExpansao } from "./mapeadores-financeiro";
@@ -216,6 +218,69 @@ export async function lerIndicadoresCmv(db: Db, lojaIds: string[], de: string, a
   return indicadoresCmv(await lerContagensCalculadas(db, lojaIds, de, ate));
 }
 
+/**
+ * Rupturas por semana de cada loja nos meses de `de` a `ate`, calculadas das rupturas registradas na cozinha
+ * central (a semana pertence ao mês em que começa; por isso a leitura passa 6 dias das bordas).
+ */
+export async function lerIndicadoresRupturas(db: Db, lojaIds: string[], de: string, ate: string, hoje: string): Promise<IndicadorMes[]> {
+  if (lojaIds.length === 0) return [];
+  const mDe = mesDe(de);
+  const mAte = mesDe(ate);
+  const linhas = await lerTudo((a, b) =>
+    db
+      .from("rede_rupturas")
+      .select("loja_id,data")
+      .in("loja_id", lojaIds)
+      .gte("data", somarDias(primeiroDiaDoMes(mDe), -6))
+      .lte("data", somarDias(ultimoDiaDoMes(mAte), 6))
+      .order("data")
+      .order("id")
+      .range(a, b),
+  );
+  const rupturas = linhas.map((r) => ({ lojaId: String(r.loja_id), data: String(r.data).slice(0, 10) }));
+  return indicadoresRupturas(rupturas, hoje).filter((i) => mesDe(i.mes) >= mDe && mesDe(i.mes) <= mAte);
+}
+
+/** Média do mês dos checklists de delivery (preparo, cancelamentos, nota iFood e tempo online) de cada loja. */
+export async function lerIndicadoresDelivery(db: Db, lojaIds: string[], de: string, ate: string): Promise<IndicadorMes[]> {
+  if (lojaIds.length === 0) return [];
+  const linhas = await lerTudo((a, b) =>
+    db
+      .from("rede_delivery_registros")
+      .select("loja_id,data,preparo,cancelamentos,nota_ifood,tempo_online")
+      .in("loja_id", lojaIds)
+      .gte("data", primeiroDiaDoMes(mesDe(de)))
+      .lte("data", ultimoDiaDoMes(mesDe(ate)))
+      .order("data")
+      .order("loja_id")
+      .order("periodo")
+      .range(a, b),
+  );
+  return indicadoresDelivery(
+    linhas.map((r) => ({
+      lojaId: String(r.loja_id),
+      data: String(r.data).slice(0, 10),
+      preparo: numOuNull(r.preparo),
+      cancelamentos: numOuNull(r.cancelamentos),
+      notaIfood: numOuNull(r.nota_ifood),
+      tempoOnline: numOuNull(r.tempo_online),
+    })),
+  );
+}
+
+/**
+ * Indicadores do mês que vêm de outros módulos (CMV das contagens, rupturas da cozinha central, médias dos
+ * checklists de delivery). Têm prioridade sobre o lançado à mão: o mesmo número não é digitado duas vezes.
+ */
+export async function lerIndicadoresCalculados(db: Db, lojaIds: string[], de: string, ate: string, hoje: string): Promise<IndicadorMes[]> {
+  const [cmv, rupturas, delivery] = await Promise.all([
+    lerIndicadoresCmv(db, lojaIds, de, ate),
+    lerIndicadoresRupturas(db, lojaIds, de, ate, hoje),
+    lerIndicadoresDelivery(db, lojaIds, de, ate),
+  ]);
+  return [...cmv, ...rupturas, ...delivery];
+}
+
 export async function lerConfigExpansao(db: Db, tenantId: string): Promise<ConfigExpansao | null> {
   const { data } = await db.from("rede_expansao_config").select("*").eq("tenant_id", tenantId).maybeSingle();
   return mapConfigExpansao((data as Linha | null) ?? null);
@@ -262,15 +327,15 @@ export async function carregarPainel(ctx: RedeContexto, params: Record<string, s
   // Janela em meses inteiros: ranking e alertas olham o mês de referência completo.
   const janelaDe = primeiroDiaDoMes(mesDe(filtros.de));
   const janelaAte = ultimoDiaDoMes(mesDe(filtros.ate));
-  const [vendas, metasFat, indicadoresLancados, indicadoresCmvCalc, configExpansao] = await Promise.all([
+  const [vendas, metasFat, indicadoresLancados, indicadoresCalc, configExpansao] = await Promise.all([
     lerVendas(db, lojaIds, janelaDe, janelaAte),
     lerMetasFaturamento(db, lojaIds, janelaDe, janelaAte),
     lerIndicadoresMes(db, lojaIds, janelaDe, janelaAte),
-    lerIndicadoresCmv(db, lojaIds, janelaDe, janelaAte),
+    lerIndicadoresCalculados(db, lojaIds, janelaDe, janelaAte, hoje),
     lojaFiltro ? Promise.resolve(null) : lerConfigExpansao(db, ctx.tenant.id),
   ]);
-  // CMV calculado das contagens semanais tem prioridade sobre o lançado à mão.
-  const indicadores = mesclarIndicadores(indicadoresLancados, indicadoresCmvCalc);
+  // O que vem de outros módulos (CMV das contagens, rupturas, delivery) tem prioridade sobre o lançado à mão.
+  const indicadores = mesclarIndicadores(indicadoresLancados, indicadoresCalc);
 
   const mesRef = mesDeReferencia(filtros.de, filtros.ate, hoje, vendas.map((v) => v.data));
   const painel = calcularPainelRede({
@@ -361,8 +426,8 @@ export type DadosMetas = {
   mes: string;
   metasFat: MetaFaturamento[];
   indicadores: IndicadorMes[];
-  /** CMV do mês calculado das contagens semanais (por loja): tem prioridade sobre o lançado à mão. */
-  cmvCalculado: IndicadorMes[];
+  /** Indicadores do mês calculados por outros módulos (CMV, rupturas, delivery): têm prioridade sobre o lançado à mão. */
+  calculados: IndicadorMes[];
   hoje: string;
 };
 
@@ -372,12 +437,12 @@ export async function carregarMetasTela(ctx: RedeContexto, params: Params): Prom
   const ids = base.lojas.map((l) => l.id);
   const ult = await ultimaVenda(ctx.db, ids);
   const f = lerFiltros(params, ult ? mesDe(ult) : mesDe(hoje));
-  const [metasFat, indicadores, cmvCalculado] = await Promise.all([
+  const [metasFat, indicadores, calculados] = await Promise.all([
     lerMetasFaturamento(ctx.db, ids, `${f.ano}-01-01`, `${f.ano}-12-31`),
     lerIndicadoresMes(ctx.db, ids, primeiroDiaDoMes(f.mes), ultimoDiaDoMes(f.mes)),
-    lerIndicadoresCmv(ctx.db, ids, primeiroDiaDoMes(f.mes), ultimoDiaDoMes(f.mes)),
+    lerIndicadoresCalculados(ctx.db, ids, primeiroDiaDoMes(f.mes), ultimoDiaDoMes(f.mes), hoje),
   ]);
-  return { base, ano: f.ano, mes: f.mes, metasFat, indicadores, cmvCalculado, hoje };
+  return { base, ano: f.ano, mes: f.mes, metasFat, indicadores, calculados, hoje };
 }
 
 /* ------------------------------------------------------------------ lojas e acessos */

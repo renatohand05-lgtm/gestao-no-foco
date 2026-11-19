@@ -3,7 +3,9 @@ import { VendasGestao } from "@/components/rede/vendas-gestao";
 import { exigirModulo } from "@/lib/rede/acesso";
 import { rotuloPeriodo } from "@/lib/rede/filtros";
 import { carregarVendasTela } from "@/lib/rede/loader";
-import { podeEditar } from "@/lib/rede/permissoes";
+import { podeEditar, veRedeInteira } from "@/lib/rede/permissoes";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { formatarGeradoEm, unidadesDaTela, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — Vendas" };
 
@@ -19,8 +21,16 @@ export default async function RedeVendasPage({
   const d = await carregarVendasTela(ctx, sp);
   const lojasAtivas = d.base.lojas.filter((l) => l.status !== "inativa");
 
+  const meta: RelatorioMeta = {
+    titulo: "Vendas por loja",
+    cliente: ctx.tenant.name,
+    filtros: `Período ${rotuloPeriodo(d.filtros)}`,
+    unidades: unidadesDaTela(lojasAtivas, d.lojaFiltro, !veRedeInteira(ctx.perfil)),
+    origemDados: "Vendas diárias lançadas ou importadas no Gestão no Foco",
+  };
+
   return (
-    <div className="space-y-5">
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <FiltrosRedeBarra basePath={`/${slug}/rede/vendas`} filtros={d.filtros} lojas={lojasAtivas.map((l) => ({ slug: l.slug, nome: l.nome }))} />
       <VendasGestao
         slug={slug}
@@ -30,6 +40,6 @@ export default async function RedeVendasPage({
         hoje={d.hoje}
         rotuloPeriodo={rotuloPeriodo(d.filtros)}
       />
-    </div>
+    </RelatorioProvider>
   );
 }

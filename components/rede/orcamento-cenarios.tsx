@@ -368,7 +368,7 @@ function ComparativoCenarios({ cenarios }: { cenarios: Cenario[] }) {
         <p className="text-sm text-muted-foreground">Nenhum cenário cadastrado.</p>
       ) : (
         <div className="space-y-4">
-          <AcoesExportar arquivo="orcamento-cenarios.csv" linhas={linhasCsv} imprimir={false} />
+          <AcoesExportar arquivo="orcamento-cenarios.csv" linhas={linhasCsv} />
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
               <thead>

@@ -8,8 +8,10 @@ import { exigirModulo } from "@/lib/rede/acesso";
 import { brl, pct1 } from "@/lib/rede/calculo";
 import { CHAVE_DRE, compararDre, consolidarDre, distribuicaoDeCem, linhasCsvDre, type DreCalc } from "@/lib/rede/financeiro";
 import { carregarDreTela } from "@/lib/rede/loader-financeiro";
-import { ehGestaoDaRede, podeEditar } from "@/lib/rede/permissoes";
+import { ehGestaoDaRede, podeEditar, veRedeInteira } from "@/lib/rede/permissoes";
 import { LINHAS_DRE_LANCAVEIS, type LinhaDreKey } from "@/lib/rede/tipos";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { descreverUnidades, formatarGeradoEm, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — DRE" };
 
@@ -78,8 +80,16 @@ export default async function RedeDrePage({
   const orcRede = d.dre.orcadoRede;
   const resultadoTom = rede ? (rede.res >= 0 ? "ok" : "critico") : "neutro";
 
+  const meta: RelatorioMeta = {
+    titulo: "DRE orçado × realizado",
+    cliente: ctx.tenant.name,
+    filtros: `Mês ${rotuloMes}`,
+    unidades: descreverUnidades(comVendas.map((p) => p.loja.nome), comVendas.length < lojasAtivas.length, !veRedeInteira(ctx.perfil)),
+    origemDados: "Vendas do módulo Vendas, CMV das contagens semanais, lançamentos reais e premissas da DRE no Gestão no Foco (linhas estimadas pela premissa ficam marcadas)",
+  };
+
   return (
-    <div className="space-y-5">
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <FiltrosRedeBarra basePath={`/${slug}/rede/dre`} filtros={d.filtros} lojas={lojasAtivas.map((l) => ({ slug: l.slug, nome: l.nome }))} modos={["mes"]} />
 
       {comVendas.length > 0 && estimadasRede > 0 ? (
@@ -121,6 +131,6 @@ export default async function RedeDrePage({
         editaRede={editaRede}
         lojasEditaveis={edita ? lojasAtivas.map((l) => l.id) : []}
       />
-    </div>
+    </RelatorioProvider>
   );
 }

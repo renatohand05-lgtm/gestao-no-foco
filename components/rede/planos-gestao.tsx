@@ -19,6 +19,7 @@ import { SectionCard } from "@/components/ui/section-card";
 import { Textarea } from "@/components/ui/textarea";
 import { atualizarPlanoAction, criarPlanoAction, excluirPlanoAction, historicoPlanoAction, verificarPlanoAction } from "@/lib/rede/actions-planos";
 import { LINHAS_NO_HISTORICO } from "@/lib/rede/cozinha";
+import { descreverUnidades, type RelatorioMeta } from "@/lib/rede/relatorio";
 import {
   FILTRO_VAZIO,
   ORIGENS_PLANO,
@@ -60,6 +61,8 @@ type Props = {
   planos: PlanoAcao[];
   hoje: string;
   geradoEm: string;
+  /** A pessoa só enxerga parte da rede (o cabeçalho diz "Lojas do seu acesso"). */
+  escopoParcial?: boolean;
   editavel: boolean;
   podeVerificar: boolean;
   podeVerHistorico: boolean;
@@ -68,7 +71,7 @@ type Props = {
   novo: NovoInicial | null;
 };
 
-export function PlanosGestao({ slug, cliente, lojas, todasLojas, planos, hoje, geradoEm, editavel, podeVerificar, podeVerHistorico, filtroInicial, abrirId, novo }: Props) {
+export function PlanosGestao({ slug, cliente, lojas, todasLojas, planos, hoje, geradoEm, escopoParcial = false, editavel, podeVerificar, podeVerHistorico, filtroInicial, abrirId, novo }: Props) {
   const router = useRouter();
   const [pendente, iniciar] = useTransition();
   const [msg, setMsg] = useState<Msg>(null);
@@ -97,6 +100,14 @@ export function PlanosGestao({ slug, cliente, lojas, todasLojas, planos, hoje, g
   ]
     .filter(Boolean)
     .join(" · ");
+
+  const meta: RelatorioMeta = {
+    titulo: "Planos de ação",
+    cliente,
+    filtros: textoFiltros,
+    unidades: filtro.loja ? nome(filtro.loja) : descreverUnidades(todasLojas.map((l) => l.nome), false, escopoParcial),
+    origemDados: "Planos de ação registrados no Gestão no Foco (checklists de qualidade e de delivery, indicadores e lançamentos manuais)",
+  };
 
   const verificar = (p: PlanoAcao) => {
     setMsg(null);
@@ -132,14 +143,7 @@ export function PlanosGestao({ slug, cliente, lojas, todasLojas, planos, hoje, g
 
   return (
     <div className="space-y-5">
-      <CabecalhoImpressao
-        titulo="Planos de ação"
-        cliente={cliente}
-        filtros={textoFiltros}
-        unidades={filtro.loja ? nome(filtro.loja) : `Rede toda (${todasLojas.length} ${todasLojas.length === 1 ? "unidade" : "unidades"})`}
-        geradoEm={geradoEm}
-        origemDados="Planos de ação registrados no Gestão no Foco (checklists de qualidade e de delivery, indicadores e lançamentos manuais)"
-      />
+      <CabecalhoImpressao titulo={meta.titulo} cliente={meta.cliente} filtros={meta.filtros} unidades={meta.unidades} geradoEm={geradoEm} origemDados={meta.origemDados} />
 
       {msg ? <FeedbackMessage variant={msg.tipo}>{msg.texto}</FeedbackMessage> : null}
 
@@ -306,7 +310,7 @@ export function PlanosGestao({ slug, cliente, lojas, todasLojas, planos, hoje, g
           </div>
         ) : null}
         <div className="mb-3 flex flex-wrap items-center gap-3">
-          <AcoesExportar arquivo="planos-de-acao-fat-buddha.csv" linhas={linhasCsvPlanos(lista, nome, hoje)} />
+          <AcoesExportar arquivo="planos-de-acao-fat-buddha.csv" linhas={linhasCsvPlanos(lista, nome, hoje)} meta={meta} />
           {alteradoFiltro ? (
             <Button type="button" variant="ghost" size="sm" className="print:hidden" onClick={() => setFiltro({ ...FILTRO_VAZIO })}>
               Limpar filtros

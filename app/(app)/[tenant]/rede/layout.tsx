@@ -38,7 +38,7 @@ export default async function RedeLayout({
 
   return (
     <div className="space-y-5">
-      <ModuleHeader title="Rede de lojas" description={`Painel operacional — ${ctx.tenant.name}`} breadcrumbs={[{ label: "Rede de lojas" }]} />
+      <ModuleHeader title="Rede de lojas" description={`Painel operacional — ${ctx.tenant.name}`} breadcrumbs={[{ label: "Rede de lojas" }]} className="print:hidden" />
       {ambiente === "demonstracao" ? (
         <div role="note" className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300">
           <FlaskConical className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -47,7 +47,9 @@ export default async function RedeLayout({
           </p>
         </div>
       ) : null}
-      <RedeNav base={`/${slug}/rede`} itens={itens} />
+      <div className="print:hidden">
+        <RedeNav base={`/${slug}/rede`} itens={itens} />
+      </div>
       {children}
     </div>
   );

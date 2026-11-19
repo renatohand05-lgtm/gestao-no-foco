@@ -29,6 +29,11 @@ export function ehGestaoDaRede(perfil: PerfilRede | null | undefined): boolean {
   return perfil?.papel === "administrador" || perfil?.papel === "consultor";
 }
 
+/** Vê a rede inteira (administrador, consultor, ou acesso a todas as lojas); senão só as lojas atribuídas. */
+export function veRedeInteira(perfil: PerfilRede | null | undefined): boolean {
+  return ehGestaoDaRede(perfil) || perfil?.todasLojas === true;
+}
+
 /** Interpreta o JSON de `rede_meu_perfil` (ou null se a pessoa não tem acesso). */
 export function lerPerfil(raw: unknown): PerfilRede | null {
   if (!raw || typeof raw !== "object") return null;

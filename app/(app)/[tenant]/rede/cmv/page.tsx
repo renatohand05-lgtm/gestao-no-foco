@@ -1,3 +1,4 @@
+import { AcoesExportar } from "@/components/rede/acoes-exportar";
 import { CmvGestao } from "@/components/rede/cmv-gestao";
 import { CmvGraficos, type DadosCmvGraficos } from "@/components/rede/cmv-graficos";
 import { AlertasCmv, TabelaItens, TabelaSemanaLoja } from "@/components/rede/cmv-tabelas";
@@ -7,7 +8,10 @@ import { exigirModulo } from "@/lib/rede/acesso";
 import { brl, pct1, statusMeta } from "@/lib/rede/calculo";
 import { statusDispersao } from "@/lib/rede/financeiro";
 import { carregarCmvTela } from "@/lib/rede/loader-financeiro";
-import { podeEditar } from "@/lib/rede/permissoes";
+import { podeEditar, veRedeInteira } from "@/lib/rede/permissoes";
+import { linhasCsvCmvItens, linhasCsvCmvSemanas } from "@/lib/rede/relatorios-csv";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { formatarGeradoEm, unidadesDaTela, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — CMV" };
 
@@ -46,9 +50,27 @@ export default async function RedeCmvPage({
     tolerancia: config.toleranciaCmv,
   };
 
+  const brData = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
+  const meta: RelatorioMeta = {
+    titulo: "CMV semanal",
+    cliente: ctx.tenant.name,
+    filtros: `Semana de ${brData(d.semana)}${d.semanas.length > 1 ? `; histórico de ${d.semanas.length} semanas` : ""}`,
+    unidades: unidadesDaTela(d.lojas, d.lojaFiltro, !veRedeInteira(ctx.perfil)),
+    origemDados: "Contagens semanais de estoque e compras lançadas no Gestão no Foco; vendas do módulo Vendas; CMV teórico pelas fichas técnicas",
+  };
+
   return (
-    <div className="space-y-5">
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <SeletorSemana basePath={base} semana={d.semana} hoje={d.hoje} loja={d.lojaFiltro?.slug ?? null} lojas={lojasFiltro.map((l) => ({ slug: l.slug, nome: l.nome }))} />
+
+      <div className="flex flex-wrap items-center gap-2 print:hidden">
+        <AcoesExportar
+          arquivo={`cmv-semanas-${d.semana}.csv`}
+          linhas={linhasCsvCmvSemanas({ lojas: d.lojas, calc: d.calc, metas: d.base.metas, tolPct: config.toleranciaSemaforoPct, tolDispersao: config.toleranciaCmv })}
+          rotulo="CMV por semana e loja (CSV)"
+        />
+        <AcoesExportar arquivo={`cmv-itens-${d.semana}.csv`} linhas={linhasCsvCmvItens(d.lojas, d.itens, d.semana)} rotulo="Consumo por item (CSV)" imprimir={false} />
+      </div>
 
       <section aria-label="Indicadores do CMV" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <KpiCard rotulo="CMV real da rede" valor={r.pctReal != null ? pct1(r.pctReal) : "—"} detalhe={semContagem ? `sem contagem na semana de ${ddmm(d.semana)}` : `semana de ${ddmm(d.semana)}${d.metaRede != null ? ` · meta até ${pct1(d.metaRede)}` : " · sem meta definida"}`} tom={TOM[statusRede]} />
@@ -89,6 +111,6 @@ export default async function RedeCmvPage({
         tolerancia={config.toleranciaCmv}
         lojaInicial={d.lojaFiltro?.id ?? null}
       />
-    </div>
+    </RelatorioProvider>
   );
 }

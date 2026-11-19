@@ -1,13 +1,12 @@
-import { CabecalhoImpressao } from "@/components/rede/cabecalho-impressao";
 import { FiltroLoja } from "@/components/rede/cozinha-nav";
 import { QualidadeGestao } from "@/components/rede/qualidade-gestao";
 import { exigirModulo } from "@/lib/rede/acesso";
 import { carregarQualidadeTela } from "@/lib/rede/loader-qualidade";
-import { podeEditar } from "@/lib/rede/permissoes";
+import { podeEditar, veRedeInteira } from "@/lib/rede/permissoes";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { formatarGeradoEm, unidadesDaTela, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — Checklist de qualidade" };
-
-const agora = () => new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date());
 
 export default async function RedeQualidadePage({
   params,
@@ -20,16 +19,16 @@ export default async function RedeQualidadePage({
   const ctx = await exigirModulo(slug, "qualidade");
   const d = await carregarQualidadeTela(ctx, sp);
 
+  const meta: RelatorioMeta = {
+    titulo: "Checklist de qualidade",
+    cliente: ctx.tenant.name,
+    filtros: "Visitas dos últimos 2 anos",
+    unidades: unidadesDaTela(d.lojas, d.lojaFiltro, !veRedeInteira(ctx.perfil)),
+    origemDados: "Visitas de qualidade registradas no Gestão no Foco",
+  };
+
   return (
-    <div className="space-y-5">
-      <CabecalhoImpressao
-        titulo="Checklist de qualidade"
-        cliente={ctx.tenant.name}
-        filtros="Visitas dos últimos 2 anos"
-        unidades={d.lojaFiltro ? d.lojaFiltro.nome : `Rede toda (${d.lojas.length} ${d.lojas.length === 1 ? "unidade" : "unidades"})`}
-        geradoEm={agora()}
-        origemDados="Visitas de qualidade registradas no Gestão no Foco"
-      />
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <FiltroLoja basePath={`/${slug}/rede/qualidade`} loja={d.lojaFiltro?.slug ?? null} lojas={d.lojas.map((l) => ({ slug: l.slug, nome: l.nome }))} />
       <QualidadeGestao
         slug={slug}
@@ -43,6 +42,6 @@ export default async function RedeQualidadePage({
         podeGerarPlanos={d.podeGerarPlanos}
         abrir={d.abrir}
       />
-    </div>
+    </RelatorioProvider>
   );
 }

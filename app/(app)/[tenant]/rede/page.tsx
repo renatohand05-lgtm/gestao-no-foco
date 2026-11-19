@@ -13,8 +13,10 @@ import { exigirModulo } from "@/lib/rede/acesso";
 import { brl2, brlCompacto, inteiro, pct1 } from "@/lib/rede/calculo";
 import { rotuloPeriodo } from "@/lib/rede/filtros";
 import { carregarPainel } from "@/lib/rede/loader";
-import { podeEditar, podeVer } from "@/lib/rede/permissoes";
+import { podeEditar, podeVer, veRedeInteira } from "@/lib/rede/permissoes";
 import { INDICADORES } from "@/lib/rede/tipos";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { formatarGeradoEm, unidadesDaTela, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — Visão geral" };
 
@@ -75,8 +77,16 @@ export default async function RedeVisaoGeralPage({
       }),
   ];
 
+  const meta: RelatorioMeta = {
+    titulo: "Visão geral da rede",
+    cliente: ctx.tenant.name,
+    filtros: `Período ${rotuloPer}; mês de referência ${rotuloRef}${painel.corte.parcial && painel.corte.dataCorte ? ` (em andamento, comparação até ${ddmm(painel.corte.dataCorte)})` : ""}`,
+    unidades: unidadesDaTela(base.lojas, d.lojaFiltro, !veRedeInteira(ctx.perfil)),
+    origemDados: "Vendas, metas e indicadores lançados no Gestão no Foco; CMV, rupturas, delivery e RH calculados dos respectivos módulos",
+  };
+
   return (
-    <div className="space-y-5">
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0 flex-1">
           <FiltrosRedeBarra basePath={`/${slug}/rede`} filtros={filtros} lojas={lojasLista} />
@@ -152,6 +162,6 @@ export default async function RedeVisaoGeralPage({
           </p>
         </>
       )}
-    </div>
+    </RelatorioProvider>
   );
 }

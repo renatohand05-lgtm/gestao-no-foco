@@ -8,8 +8,10 @@ import { SectionCard } from "@/components/ui/section-card";
 import { exigirModulo } from "@/lib/rede/acesso";
 import { brl, pct1 } from "@/lib/rede/calculo";
 import { SEMANAS_NA_RUPTURA } from "@/lib/rede/cozinha";
-import { carregarCozinhaTela } from "@/lib/rede/loader-cozinha";
-import { podeEditar, podeVer } from "@/lib/rede/permissoes";
+import { DIAS_RUPTURAS_NA_TELA, carregarCozinhaTela } from "@/lib/rede/loader-cozinha";
+import { podeEditar, podeVer, veRedeInteira } from "@/lib/rede/permissoes";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { formatarGeradoEm, unidadesDaTela, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — Cozinha central" };
 
@@ -34,8 +36,16 @@ export default async function RedeCozinhaPage({
   const r = d.resumo;
   const e = d.estoque;
 
+  const meta: RelatorioMeta = {
+    titulo: `Cozinha central — ${ROTULO_ABA[d.aba]}`,
+    cliente: ctx.tenant.name,
+    filtros: d.aba === "rupturas" ? `Rupturas dos últimos ${DIAS_RUPTURAS_NA_TELA} dias; semanas de segunda a domingo` : "Posição atual do estoque da cozinha central",
+    unidades: d.aba === "rupturas" ? unidadesDaTela(lojasDaTela, d.lojaFiltro, !veRedeInteira(ctx.perfil)) : "Cozinha central (estoque da empresa toda)",
+    origemDados: d.aba === "rupturas" ? "Rupturas registradas pelas lojas no Gestão no Foco" : "Estoque, mínimos e consumo registrados no Gestão no Foco",
+  };
+
   return (
-    <div className="space-y-5">
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <CozinhaNav
         basePath={base}
         abas={d.abas.map((a) => ({ chave: a, rotulo: ROTULO_ABA[a] }))}
@@ -126,6 +136,6 @@ export default async function RedeCozinhaPage({
           />
         </>
       )}
-    </div>
+    </RelatorioProvider>
   );
 }

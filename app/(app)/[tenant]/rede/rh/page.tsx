@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { CabecalhoImpressao } from "@/components/rede/cabecalho-impressao";
 import { KpiCard } from "@/components/rede/kpi-card";
 import { RhGerentes } from "@/components/rede/rh-gerentes";
 import { RhMovimentos } from "@/components/rede/rh-movimentos";
@@ -14,6 +13,9 @@ import { pct1 } from "@/lib/rede/calculo";
 import { carregarRhTela } from "@/lib/rede/loader-rh";
 import { JANELA_OCORRENCIAS_MESES, kpisOcorrencias, montarQuadro, ocorrenciasRecentes, statusQuadro, tempoMedioDeCasa, textoTempoDeCasa, ultimoMesRh } from "@/lib/rede/rh";
 import { contarTalentos, juntarNineBox } from "@/lib/rede/talentos";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { veRedeInteira } from "@/lib/rede/permissoes";
+import { formatarGeradoEm, unidadesDaTela, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — RH" };
 
@@ -29,7 +31,6 @@ const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "O
 const mesTxt = (iso: string) => `${MESES[Number(iso.slice(5, 7)) - 1]}/${iso.slice(2, 4)}`;
 const nf0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const TOM = { ok: "ok", warn: "atencao", bad: "critico" } as const;
-const agora = () => new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date());
 
 export default async function RedeRhPage({
   params,
@@ -49,16 +50,16 @@ export default async function RedeRhPage({
   const refs = lojasDaTela.map((l) => ({ id: l.id, nome: l.nome }));
   const colaboradores = d.colaboradores ?? [];
 
+  const meta: RelatorioMeta = {
+    titulo: `RH — ${ROTULO_ABA[d.aba]}`,
+    cliente: ctx.tenant.name,
+    filtros: `${d.lojaFiltro ? d.lojaFiltro.nome : "Todas as lojas"}${d.gerentes ? ` · ${new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${d.gerentes.mes}-01T12:00:00Z`))}` : ""}`,
+    unidades: unidadesDaTela(d.lojas, d.lojaFiltro, !veRedeInteira(ctx.perfil)),
+    origemDados: d.aba === "gerentes" ? "Vendas, indicadores, qualidade, RH e liderança registrados no Gestão no Foco" : "Cadastro e lançamentos de RH registrados no Gestão no Foco",
+  };
+
   return (
-    <div className="space-y-5">
-      <CabecalhoImpressao
-        titulo={`RH — ${ROTULO_ABA[d.aba]}`}
-        cliente={ctx.tenant.name}
-        filtros={`${d.lojaFiltro ? d.lojaFiltro.nome : "Todas as lojas"}${d.gerentes ? ` · ${new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${d.gerentes.mes}-01T12:00:00Z`))}` : ""}`}
-        unidades={d.lojaFiltro ? d.lojaFiltro.nome : `Rede toda (${d.lojas.length} ${d.lojas.length === 1 ? "unidade" : "unidades"})`}
-        geradoEm={agora()}
-        origemDados={d.aba === "gerentes" ? "Vendas, indicadores, qualidade, RH e liderança registrados no Gestão no Foco" : "Cadastro e lançamentos de RH registrados no Gestão no Foco"}
-      />
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <RhNav basePath={base} abas={d.abas.map((a) => ({ chave: a, rotulo: ROTULO_ABA[a] }))} aba={d.aba} loja={d.lojaFiltro?.slug ?? null} lojas={d.lojas.map((l) => ({ slug: l.slug, nome: l.nome }))} />
 
       {d.aba === "quadro" ? (
@@ -81,7 +82,7 @@ export default async function RedeRhPage({
       ) : null}
 
       {d.aba === "sucessao" ? <RhSucessao slug={slug} hoje={d.hoje} lojas={refs} colaboradores={colaboradores} ninebox={d.ninebox ?? []} criterios={d.criterios} editavel={d.edita.sucessao} /> : null}
-    </div>
+    </RelatorioProvider>
   );
 }
 

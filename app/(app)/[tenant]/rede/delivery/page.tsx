@@ -1,8 +1,10 @@
 import { DeliveryGestao } from "@/components/rede/delivery-gestao";
 import { FiltroLoja } from "@/components/rede/cozinha-nav";
 import { exigirModulo } from "@/lib/rede/acesso";
-import { carregarDeliveryTela } from "@/lib/rede/loader-cozinha";
-import { podeEditar, podeVer } from "@/lib/rede/permissoes";
+import { DIAS_DELIVERY_NA_TELA, carregarDeliveryTela } from "@/lib/rede/loader-cozinha";
+import { podeEditar, podeVer, veRedeInteira } from "@/lib/rede/permissoes";
+import { RelatorioProvider } from "@/components/rede/relatorio";
+import { formatarGeradoEm, unidadesDaTela, type RelatorioMeta } from "@/lib/rede/relatorio";
 
 export const metadata = { title: "Rede de lojas — Checklist de delivery" };
 
@@ -18,8 +20,16 @@ export default async function RedeDeliveryPage({
   const d = await carregarDeliveryTela(ctx, sp);
   const lojasDaTela = d.base.lojas.filter((l) => l.status !== "inativa");
 
+  const meta: RelatorioMeta = {
+    titulo: "Checklist de delivery",
+    cliente: ctx.tenant.name,
+    filtros: `Checklists dos últimos ${DIAS_DELIVERY_NA_TELA} dias`,
+    unidades: unidadesDaTela(lojasDaTela, d.lojaFiltro, !veRedeInteira(ctx.perfil)),
+    origemDados: "Checklists de delivery (diário e semanal) registrados no Gestão no Foco; metas de Metas e indicadores",
+  };
+
   return (
-    <div className="space-y-5">
+    <RelatorioProvider meta={meta} geradoEm={formatarGeradoEm(new Date())} className="space-y-5">
       <FiltroLoja basePath={`/${slug}/rede/delivery`} loja={d.lojaFiltro?.slug ?? null} lojas={lojasDaTela.map((l) => ({ slug: l.slug, nome: l.nome }))} />
       <DeliveryGestao
         slug={slug}
@@ -34,6 +44,6 @@ export default async function RedeDeliveryPage({
         planosPorRegistro={d.planosPorRegistro}
         podeGerarPlanos={d.podeGerarPlanos}
       />
-    </div>
+    </RelatorioProvider>
   );
 }

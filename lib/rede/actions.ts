@@ -6,9 +6,9 @@ import { z } from "zod";
 import { listMembers } from "@/lib/equipe/members-service";
 import { actionFail, actionOk, type ActionResult, type ActionResultWith } from "@/types/action-result";
 
+import { data, dinheiro, inteiro, lerEntrada, mes, traduzir, uuid } from "./acao-comum";
 import { exigirEdicao, getRedeContexto, type RedeContexto } from "./acesso";
 import { primeiroDiaDoMes } from "./calculo";
-import { dataValida } from "./filtros";
 import { hojeDoTenant } from "./loader";
 import { podeEditar } from "./permissoes";
 import { slugDe } from "./texto";
@@ -16,51 +16,6 @@ import { INDICADORES, MODULOS_COLABORADOR } from "./tipos";
 import type { ModuloRede } from "./tipos";
 
 /* ------------------------------------------------------------------ utilidades */
-
-const nomeCampo: Record<string, string> = {
-  lojaId: "loja",
-  data: "data",
-  salao: "venda do salão",
-  delivery: "venda do delivery",
-  pedidosSalao: "pedidos do salão",
-  pedidosDelivery: "pedidos do delivery",
-  mes: "mês",
-  valor: "valor",
-  meta: "meta",
-  direcao: "direção",
-  indicador: "indicador",
-  vigencia: "vigência",
-  nome: "nome",
-  slug: "identificador",
-  status: "situação",
-  canais: "canais",
-  papel: "perfil",
-  userId: "usuário",
-  pisoLoja: "piso por loja",
-  pesos: "pesos por dia da semana",
-  toleranciaCmv: "tolerância do CMV",
-  toleranciaSemaforoPct: "tolerância do semáforo",
-};
-
-function lerEntrada<T>(schema: z.ZodType<T>, entrada: unknown): T {
-  const r = schema.safeParse(entrada);
-  if (r.success) return r.data;
-  const p = r.error.issues[0];
-  const campo = nomeCampo[String(p?.path[0] ?? "")] ?? String(p?.path[0] ?? "dados");
-  const motivo = p?.message && /^[A-ZÀ-Ú]/.test(p.message) && !/^Invalid/i.test(p.message) ? p.message.replace(/\.$/, "") : "valor inválido";
-  throw new Error(`Confira o campo "${campo}": ${motivo}.`);
-}
-
-function traduzir(error: unknown, padrao: string): string {
-  if (error instanceof Error && !("code" in error)) return error.message;
-  const e = error as { code?: string; message?: string };
-  if (e?.code === "42501" || /row-level security/i.test(e?.message ?? "")) return "Você não tem permissão para esta operação.";
-  if (e?.code === "23505") return "Já existe um registro com esses dados.";
-  if (e?.code === "23503") return "Registro relacionado não encontrado.";
-  if (e?.code === "23514") return "Algum valor está fora do permitido.";
-  if (e?.message && !/[{}]|select|insert|violates/i.test(e.message)) return e.message;
-  return padrao;
-}
 
 async function executar(padrao: string, fn: () => Promise<ActionResult>): Promise<ActionResult> {
   try {
@@ -74,11 +29,6 @@ function atualizar(slug: string): void {
   revalidatePath(`/${slug}/rede`, "layout");
 }
 
-const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Identificador inválido.");
-const data = z.string().refine(dataValida, "Data inválida.");
-const mes = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Mês inválido.");
-const dinheiro = z.number({ message: "Informe um número." }).min(0, "Não pode ser negativo.").max(100_000_000, "Valor acima do limite.");
-const inteiro = z.number({ message: "Informe um número." }).int("Deve ser inteiro.").min(0, "Não pode ser negativo.").max(1_000_000, "Valor acima do limite.");
 const chaveIndicador = z.enum(INDICADORES.map((i) => i.k) as [string, ...string[]]);
 
 async function lojaVisivel(ctx: RedeContexto, lojaId: string) {

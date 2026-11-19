@@ -180,7 +180,123 @@ export type IndicadorMes = {
   mes: string;
   indicador: IndicadorKey;
   valor: number;
-  origem: "manual" | "exemplo";
+  /** "calculado" = vindo de um módulo de origem (ex.: contagens de CMV); nunca gravado nesta tabela. */
+  origem: "manual" | "exemplo" | "calculado";
 };
 
 export type MetaFaturamento = { lojaId: string; mes: string; valor: number };
+
+
+/* ------------------------------------------------------------------ rodada 15: CMV, DRE, orçamento */
+
+export type OrigemRegistro = "manual" | "exemplo";
+
+/** Contagem semanal de estoque de uma loja (semana começa na segunda). */
+export type CmvSemana = {
+  id: string;
+  lojaId: string;
+  semana: string;
+  /** null = usa a soma das vendas lançadas no módulo Vendas na semana. */
+  vendas: number | null;
+  cmvTeorico: number;
+  estoqueInicial: number;
+  compras: number;
+  transferenciasEntrada: number;
+  transferenciasSaida: number;
+  devolucoes: number;
+  estoqueFinal: number;
+  responsavel: string | null;
+  observacoes: string | null;
+  origem: OrigemRegistro;
+};
+
+export type CmvItem = { lojaId: string; semana: string; item: string; consumoTeorico: number; consumoReal: number };
+
+/** Linhas do DRE que aceitam lançamento real (em R$) no mês. */
+export type LinhaDreKey = "impostos" | "cmv" | "folha" | "delivery" | "manutencao" | "marketing" | "cto" | "agua" | "energia";
+
+export const LINHAS_DRE_LANCAVEIS: readonly { k: LinhaDreKey; nome: string }[] = [
+  { k: "impostos", nome: "Impostos" },
+  { k: "cmv", nome: "CMV" },
+  { k: "folha", nome: "Folha de pagamento" },
+  { k: "delivery", nome: "Custos de delivery" },
+  { k: "manutencao", nome: "Manutenção" },
+  { k: "marketing", nome: "Marketing, royalties, escritório e fundo de propaganda" },
+  { k: "cto", nome: "CTO (custo total de ocupação)" },
+  { k: "agua", nome: "Água" },
+  { k: "energia", nome: "Energia" },
+];
+
+export type BaseDelivery = "delivery" | "total";
+
+/** Premissas do DRE de uma loja (percentuais sobre o faturamento bruto; CTO, água e energia em R$). */
+export type PremissasDre = {
+  cmv: number;
+  pessoal: number;
+  impostos: number;
+  custoDelivery: number;
+  baseDelivery: BaseDelivery;
+  manutencao: number;
+  marketing: number;
+  cto: number;
+  agua: number;
+  energia: number;
+  /** Participação do delivery no faturamento orçado (%). */
+  mixDelivery: number;
+};
+
+/** Linha de premissa: lojaId nulo = padrão da rede; senão, só os campos preenchidos substituem o padrão. */
+export type PremissasDreRow = { lojaId: string | null } & Partial<PremissasDre>;
+
+export type LancamentoDre = {
+  id: string;
+  lojaId: string;
+  mes: string;
+  linha: LinhaDreKey;
+  valor: number;
+  observacao: string | null;
+  origem: OrigemRegistro;
+};
+
+/** Cenário de orçamento de nova loja. */
+export type Cenario = {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  faturamento: number;
+  mixDelivery: number;
+  cmv: number;
+  folha: number;
+  impostos: number;
+  custoDelivery: number;
+  baseDelivery: BaseDelivery;
+  manutencao: number;
+  marketing: number;
+  cto: number;
+  agua: number;
+  energia: number;
+  curva: number[];
+  padrao: boolean;
+  origem: OrigemRegistro;
+};
+
+export type StatusUnidade = "planejada" | "inaugurada" | "cancelada";
+
+export type UnidadeExpansao = {
+  id: string;
+  nome: string;
+  /** Primeiro dia do mês previsto de abertura (YYYY-MM-01) ou null. */
+  aberturaPrevista: string | null;
+  status: StatusUnidade;
+  cenarioId: string | null;
+  lojaId: string | null;
+  faturamentoAlvo: number | null;
+  observacao: string | null;
+  origem: OrigemRegistro;
+};
+
+export type ConfigExpansao = {
+  metaLojas: number;
+  faturamentoMinimo: number;
+  lojasBase: string[];
+};

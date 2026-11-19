@@ -299,12 +299,12 @@ function CelulaIndicador({ slug, lojaId, mes, indicador, lancado, editavel, aoSa
   );
 }
 
-export function IndicadoresDoMes({ slug, lojas, metas, indicadores, mes, lojasEditaveis }: { slug: string; lojas: Loja[]; metas: MetaRow[]; indicadores: IndicadorMes[]; mes: string; lojasEditaveis: string[] }) {
+export function IndicadoresDoMes({ slug, lojas, metas, indicadores, cmvCalculado, mes, lojasEditaveis }: { slug: string; lojas: Loja[]; metas: MetaRow[]; indicadores: IndicadorMes[]; cmvCalculado: IndicadorMes[]; mes: string; lojasEditaveis: string[] }) {
   const [msg, setMsg] = useState<Msg>(null);
   const manuais = INDICADORES.filter((d) => !d.calculado);
   const ref = `${mes}-01`;
   return (
-    <SectionCard title={`Indicadores lançados — ${MESES[Number(mes.slice(5, 7)) - 1]}/${mes.slice(0, 4)}`} description="Faturamento e % da meta são calculados das vendas. Os demais são lançados aqui, por loja, até os módulos de origem (CMV, RH, delivery) alimentarem sozinhos.">
+    <SectionCard title={`Indicadores lançados — ${MESES[Number(mes.slice(5, 7)) - 1]}/${mes.slice(0, 4)}`} description="Faturamento e % da meta são calculados das vendas. O CMV vem das contagens semanais (aba CMV) quando elas existem no mês. Os demais são lançados aqui, por loja, até os módulos de origem (RH, delivery) alimentarem sozinhos.">
       <div className="space-y-3">
         {msg ? <FeedbackMessage variant={msg.tipo}>{msg.texto}</FeedbackMessage> : null}
         <div className="overflow-x-auto">
@@ -332,6 +332,17 @@ export function IndicadoresDoMes({ slug, lojas, metas, indicadores, mes, lojasEd
                     <td className="py-1.5 pr-3 text-xs text-muted-foreground">{textoMeta(d.formato, m.meta, m.direcao)}</td>
                     {lojas.map((l) => {
                       const lanc = indicadores.find((i) => i.lojaId === l.id && i.indicador === d.k && i.mes === ref) ?? null;
+                      const calculado = d.k === "cmv" ? (cmvCalculado.find((i) => i.lojaId === l.id && i.mes === ref) ?? null) : null;
+                      if (calculado) {
+                        return (
+                          <td key={l.id} className="px-1 py-1.5">
+                            <div className="flex flex-col items-end gap-0.5" title="O CMV do mês é calculado das contagens semanais e substitui o valor lançado à mão.">
+                              <span className="inline-flex h-8 w-24 items-center justify-end rounded-lg border border-border bg-muted/50 px-3 text-sm tabular-nums">{String(Math.round(calculado.valor * 10) / 10).replace(".", ",")}</span>
+                              <span className="text-[10px] text-muted-foreground">das contagens</span>
+                            </div>
+                          </td>
+                        );
+                      }
                       return (
                         <td key={l.id} className="px-1 py-1.5">
                           <CelulaIndicador key={`${l.id}-${lanc?.valor ?? "x"}-${lanc?.origem ?? ""}`} slug={slug} lojaId={l.id} mes={mes} indicador={d.k} lancado={lanc} editavel={lojasEditaveis.includes(l.id)} aoSalvar={setMsg} />

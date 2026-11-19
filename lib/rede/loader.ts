@@ -9,14 +9,19 @@ import {
   mediaPorHora,
   mesDe,
   primeiroDiaDoMes,
+  somarDias,
   ultimoDiaDoMes,
   type PainelRede,
   type PontoHora,
 } from "./calculo";
 import { lerFiltros, mesDeReferencia, mesesDoPeriodo, type FiltrosRede } from "./filtros";
-import { lojasDoPerfil } from "./permissoes";
+import { calcularContagens, indicadoresCmv, mesclarIndicadores, projecaoRede, vendasPorSemana, type ContagemCalculada } from "./financeiro";
+import { mapCmv, mapConfigExpansao } from "./mapeadores-financeiro";
+import { lojasDoPerfil, podeVer } from "./permissoes";
 import type {
   CanaisLoja,
+  CmvSemana,
+  ConfigExpansao,
   ConfigRede,
   Direcao,
   IndicadorKey,
@@ -170,6 +175,52 @@ export async function lerIndicadoresMes(db: Db, lojaIds: string[], de: string, a
   }));
 }
 
+/* ------------------------------------------------------------------ CMV e expansão (usados pela visão geral e pelo DRE) */
+
+/** Contagens semanais cuja semana começa entre `de` e `ate`. */
+export async function lerCmvSemanal(db: Db, lojaIds: string[], de: string, ate: string): Promise<CmvSemana[]> {
+  if (lojaIds.length === 0) return [];
+  const linhas = await lerTudo((a, b) =>
+    db.from("rede_cmv_semanal").select("*").in("loja_id", lojaIds).gte("semana", de).lte("semana", ate).order("semana").order("loja_id").range(a, b),
+  );
+  return linhas.map(mapCmv);
+}
+
+/**
+ * Contagens semanais já calculadas (CMV real, %, dispersão). Se uma contagem não traz vendas, usa as
+ * vendas lançadas no módulo Vendas na semana (segunda a domingo).
+ */
+export async function calcularContagensLidas(db: Db, contagens: CmvSemana[]): Promise<ContagemCalculada[]> {
+  if (contagens.length === 0) return [];
+  let mapa = new Map<string, number>();
+  const semBase = contagens.filter((c) => c.vendas == null);
+  if (semBase.length > 0) {
+    const semanas = semBase.map((c) => c.semana).sort();
+    const vendas = await lerVendas(db, [...new Set(semBase.map((c) => c.lojaId))], semanas[0], somarDias(semanas[semanas.length - 1], 6));
+    mapa = vendasPorSemana(vendas);
+  }
+  return calcularContagens(contagens, mapa);
+}
+
+/** Contagens cujas semanas começam nos meses de `de` a `ate`, já calculadas. */
+export async function lerContagensCalculadas(db: Db, lojaIds: string[], de: string, ate: string): Promise<ContagemCalculada[]> {
+  const contagens = await lerCmvSemanal(db, lojaIds, primeiroDiaDoMes(mesDe(de)), ultimoDiaDoMes(mesDe(ate)));
+  return calcularContagensLidas(db, contagens);
+}
+
+/**
+ * CMV do mês de cada loja, calculado das contagens semanais (semanas que começam no mês). Alimenta o
+ * indicador "CMV" da visão geral e do semáforo — e tem prioridade sobre o valor lançado à mão.
+ */
+export async function lerIndicadoresCmv(db: Db, lojaIds: string[], de: string, ate: string): Promise<IndicadorMes[]> {
+  return indicadoresCmv(await lerContagensCalculadas(db, lojaIds, de, ate));
+}
+
+export async function lerConfigExpansao(db: Db, tenantId: string): Promise<ConfigExpansao | null> {
+  const { data } = await db.from("rede_expansao_config").select("*").eq("tenant_id", tenantId).maybeSingle();
+  return mapConfigExpansao((data as Linha | null) ?? null);
+}
+
 /* ------------------------------------------------------------------ painel */
 
 export type DadosPainel = {
@@ -180,6 +231,22 @@ export type DadosPainel = {
   horas: { pontos: PontoHora[]; pico: PontoHora | null; mesesComDados: number };
   hoje: string;
   temVendas: boolean;
+  /** Projeção "rede com N lojas" (só para quem enxerga o orçamento e sem filtro de loja). */
+  projecao: {
+    metaLojas: number;
+    qtdNovas: number;
+    faturamentoMinimo: number;
+    /** Faturamento do mês de referência das lojas-base. */
+    base: { nome: string; fat: number }[];
+    fatBase: number;
+    /** Faturamento do mês de referência de toda a rede em operação. */
+    fatRede: number;
+    lojasOperando: number;
+    projecao: number;
+    vezes: number | null;
+    /** Próximas inaugurações do calendário (planejadas, a partir do mês corrente), em ordem de data. */
+    proximas: { nome: string; mes: string | null }[];
+  } | null;
 };
 
 export async function carregarPainel(ctx: RedeContexto, params: Record<string, string | string[] | undefined>): Promise<DadosPainel> {
@@ -195,11 +262,15 @@ export async function carregarPainel(ctx: RedeContexto, params: Record<string, s
   // Janela em meses inteiros: ranking e alertas olham o mês de referência completo.
   const janelaDe = primeiroDiaDoMes(mesDe(filtros.de));
   const janelaAte = ultimoDiaDoMes(mesDe(filtros.ate));
-  const [vendas, metasFat, indicadores] = await Promise.all([
+  const [vendas, metasFat, indicadoresLancados, indicadoresCmvCalc, configExpansao] = await Promise.all([
     lerVendas(db, lojaIds, janelaDe, janelaAte),
     lerMetasFaturamento(db, lojaIds, janelaDe, janelaAte),
     lerIndicadoresMes(db, lojaIds, janelaDe, janelaAte),
+    lerIndicadoresCmv(db, lojaIds, janelaDe, janelaAte),
+    lojaFiltro ? Promise.resolve(null) : lerConfigExpansao(db, ctx.tenant.id),
   ]);
+  // CMV calculado das contagens semanais tem prioridade sobre o lançado à mão.
+  const indicadores = mesclarIndicadores(indicadoresLancados, indicadoresCmvCalc);
 
   const mesRef = mesDeReferencia(filtros.de, filtros.ate, hoje, vendas.map((v) => v.data));
   const painel = calcularPainelRede({
@@ -234,7 +305,37 @@ export async function carregarPainel(ctx: RedeContexto, params: Record<string, s
     pico = r.pico;
   }
 
-  return { base, filtros, lojaFiltro, painel, horas: { pontos, pico, mesesComDados }, hoje, temVendas: vendas.length > 0 };
+  let projecao: DadosPainel["projecao"] = null;
+  // A projeção da rede é do módulo Orçamento: quem não o enxerga (gerentes) não a recebe, além do que o RLS já nega.
+  if (configExpansao && !lojaFiltro && podeVer(ctx.perfil, "orcamento")) {
+    // Mês de referência (mês cheio), como no painel original: a projeção compara meses, não o período filtrado.
+    const base0 = painel.porLoja.filter((p) => configExpansao.lojasBase.includes(p.loja.id));
+    const fatBase = base0.reduce((a, p) => a + p.mes.totais.fat, 0);
+    const fatRede = painel.porLoja.reduce((a, p) => a + p.mes.totais.fat, 0);
+    const { data: unidadesLidas } = await db.from("rede_expansao_unidades").select("nome,abertura_prevista,status").eq("tenant_id", ctx.tenant.id).neq("status", "cancelada").order("abertura_prevista", { ascending: true, nullsFirst: false });
+    const mesCorrente = mesDe(hoje);
+    const proximas = ((unidadesLidas ?? []) as Linha[])
+      .map((u) => ({ nome: String(u.nome), mes: u.abertura_prevista ? mesDe(String(u.abertura_prevista)) : null, status: String(u.status) }))
+      .filter((u) => u.status === "planejada" && (u.mes == null || u.mes >= mesCorrente))
+      .slice(0, 3)
+      .map(({ nome, mes }) => ({ nome, mes }));
+    const qtdNovas = Math.max(0, configExpansao.metaLojas - configExpansao.lojasBase.length);
+    const pj = projecaoRede({ fatBase, qtdNovas, faturamentoMinimo: configExpansao.faturamentoMinimo, fatRede });
+    projecao = {
+      metaLojas: configExpansao.metaLojas,
+      qtdNovas,
+      faturamentoMinimo: configExpansao.faturamentoMinimo,
+      base: base0.map((p) => ({ nome: p.loja.nome, fat: p.mes.totais.fat })),
+      fatBase,
+      fatRede,
+      lojasOperando: painel.porLoja.length,
+      projecao: pj.projecao,
+      vezes: pj.vezes,
+      proximas,
+    };
+  }
+
+  return { base, filtros, lojaFiltro, painel, horas: { pontos, pico, mesesComDados }, hoje, temVendas: vendas.length > 0, projecao };
 }
 
 /* ------------------------------------------------------------------ telas de vendas e metas */
@@ -260,6 +361,8 @@ export type DadosMetas = {
   mes: string;
   metasFat: MetaFaturamento[];
   indicadores: IndicadorMes[];
+  /** CMV do mês calculado das contagens semanais (por loja): tem prioridade sobre o lançado à mão. */
+  cmvCalculado: IndicadorMes[];
   hoje: string;
 };
 
@@ -269,11 +372,12 @@ export async function carregarMetasTela(ctx: RedeContexto, params: Params): Prom
   const ids = base.lojas.map((l) => l.id);
   const ult = await ultimaVenda(ctx.db, ids);
   const f = lerFiltros(params, ult ? mesDe(ult) : mesDe(hoje));
-  const [metasFat, indicadores] = await Promise.all([
+  const [metasFat, indicadores, cmvCalculado] = await Promise.all([
     lerMetasFaturamento(ctx.db, ids, `${f.ano}-01-01`, `${f.ano}-12-31`),
     lerIndicadoresMes(ctx.db, ids, primeiroDiaDoMes(f.mes), ultimoDiaDoMes(f.mes)),
+    lerIndicadoresCmv(ctx.db, ids, primeiroDiaDoMes(f.mes), ultimoDiaDoMes(f.mes)),
   ]);
-  return { base, ano: f.ano, mes: f.mes, metasFat, indicadores, hoje };
+  return { base, ano: f.ano, mes: f.mes, metasFat, indicadores, cmvCalculado, hoje };
 }
 
 /* ------------------------------------------------------------------ lojas e acessos */

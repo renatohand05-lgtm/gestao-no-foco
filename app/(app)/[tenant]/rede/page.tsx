@@ -5,6 +5,7 @@ import { AcoesExportar } from "@/components/rede/acoes-exportar";
 import { FiltrosRedeBarra } from "@/components/rede/filtros-rede";
 import { GraficosPainel } from "@/components/rede/graficos-painel";
 import { KpiCard } from "@/components/rede/kpi-card";
+import { CrescimentoExpansao } from "@/components/rede/crescimento-expansao";
 import { AlertasRede, RankingLojas } from "@/components/rede/ranking-alertas";
 import { TabelaIndicadores } from "@/components/rede/tabela-indicadores";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -12,7 +13,7 @@ import { exigirModulo } from "@/lib/rede/acesso";
 import { brl2, brlCompacto, inteiro, pct1 } from "@/lib/rede/calculo";
 import { rotuloPeriodo } from "@/lib/rede/filtros";
 import { carregarPainel } from "@/lib/rede/loader";
-import { podeEditar } from "@/lib/rede/permissoes";
+import { podeEditar, podeVer } from "@/lib/rede/permissoes";
 import { INDICADORES } from "@/lib/rede/tipos";
 
 export const metadata = { title: "Rede de lojas — Visão geral" };
@@ -141,6 +142,8 @@ export default async function RedeVisaoGeralPage({
             <RankingLojas linhas={painel.ranking} />
             <AlertasRede alertas={painel.alertas} />
           </div>
+
+          {d.projecao ? <CrescimentoExpansao p={d.projecao} rotuloRef={rotuloRef} parcial={painel.corte.parcial} verOrcamento={podeVer(ctx.perfil, "orcamento")} slug={slug} /> : null}
 
           <TabelaIndicadores porLoja={painel.porLoja} rotuloMes={rotuloRef} />
           <p className="text-xs text-muted-foreground">

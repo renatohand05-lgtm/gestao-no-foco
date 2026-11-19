@@ -106,6 +106,23 @@ export const nomeCampo: Record<string, string> = {
   origemRotulo: "origem",
   o: "observação do item",
   v: "resposta do item",
+  // rodada 18
+  cargo: "cargo",
+  dataAdmissao: "data de admissão",
+  previstos: "quadro previsto",
+  gerente_loja: "gerente de loja",
+  chefe_cozinha: "chefe de cozinha",
+  lider_delivery: "líder de delivery",
+  auxiliar_cozinha: "auxiliar de cozinha",
+  atendente: "atendente",
+  headcount: "headcount médio",
+  admissoes: "admissões",
+  desligamentos: "desligamentos",
+  faltas: "dias de falta",
+  diasPrevistos: "dias previstos",
+  tipo: "tipo",
+  colaboradorId: "colaborador",
+  texto: "lista",
 };
 
 export function lerEntrada<T>(schema: z.ZodType<T>, entrada: unknown): T {

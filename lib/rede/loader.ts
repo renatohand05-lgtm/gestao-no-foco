@@ -19,7 +19,9 @@ import { indicadoresDelivery } from "./delivery";
 import { lerFiltros, mesDeReferencia, mesesDoPeriodo, type FiltrosRede } from "./filtros";
 import { calcularContagens, indicadoresCmv, mesclarIndicadores, projecaoRede, vendasPorSemana, type ContagemCalculada } from "./financeiro";
 import { mapCmv, mapConfigExpansao } from "./mapeadores-financeiro";
+import { COLUNAS_MES, mapMes } from "./mapeadores-rh";
 import { lojasDoPerfil, podeVer } from "./permissoes";
+import { indicadoresRh } from "./rh";
 import type {
   CanaisLoja,
   CmvSemana,
@@ -268,17 +270,36 @@ export async function lerIndicadoresDelivery(db: Db, lojaIds: string[], de: stri
   );
 }
 
+/** Turnover e absenteísmo do mês, calculados dos lançamentos mensais de RH (nada é gravado já calculado). */
+export async function lerIndicadoresRh(db: Db, lojaIds: string[], de: string, ate: string): Promise<IndicadorMes[]> {
+  if (lojaIds.length === 0) return [];
+  const linhas = await lerTudo((a, b) =>
+    db
+      .from("rede_rh_mensal")
+      .select(COLUNAS_MES)
+      .in("loja_id", lojaIds)
+      .gte("mes", primeiroDiaDoMes(mesDe(de)))
+      .lte("mes", primeiroDiaDoMes(mesDe(ate)))
+      .order("mes")
+      .order("loja_id")
+      .range(a, b),
+  );
+  return indicadoresRh(linhas.map(mapMes));
+}
+
 /**
  * Indicadores do mês que vêm de outros módulos (CMV das contagens, rupturas da cozinha central, médias dos
- * checklists de delivery). Têm prioridade sobre o lançado à mão: o mesmo número não é digitado duas vezes.
+ * checklists de delivery, turnover e absenteísmo do RH). Têm prioridade sobre o lançado à mão: o mesmo número
+ * não é digitado duas vezes.
  */
 export async function lerIndicadoresCalculados(db: Db, lojaIds: string[], de: string, ate: string, hoje: string): Promise<IndicadorMes[]> {
-  const [cmv, rupturas, delivery] = await Promise.all([
+  const [cmv, rupturas, delivery, rh] = await Promise.all([
     lerIndicadoresCmv(db, lojaIds, de, ate),
     lerIndicadoresRupturas(db, lojaIds, de, ate, hoje),
     lerIndicadoresDelivery(db, lojaIds, de, ate),
+    lerIndicadoresRh(db, lojaIds, de, ate),
   ]);
-  return [...cmv, ...rupturas, ...delivery];
+  return [...cmv, ...rupturas, ...delivery, ...rh];
 }
 
 export async function lerConfigExpansao(db: Db, tenantId: string): Promise<ConfigExpansao | null> {

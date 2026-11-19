@@ -19,6 +19,7 @@ export const MENU_REDE: readonly ItemMenuRede[] = [
   { href: "/qualidade", label: "Checklist de qualidade", modulo: "qualidade" },
   { href: "/delivery", label: "Checklist de delivery", modulo: "delivery" },
   { href: "/planos", label: "Planos de ação", modulo: "planos_acao" },
+  { href: "/rh", label: "RH", modulo: "rh_quadro", ou: ["rh_movimentos", "rh_ocorrencias"] },
   { href: "/orcamento", label: "Orçamento e expansão", modulo: "orcamento" },
   { href: "/lojas", label: "Lojas e acessos", modulo: "config" },
 ];

@@ -1,0 +1,1094 @@
+{
+ "fonte": "painel-operacional-fat-buddha.html — DATA.rh (dados demonstrativos)",
+ "lojaSlug": {
+  "brooklyn": "brooklyn",
+  "perdizes": "perdizes",
+  "vilamariana": "vila-mariana",
+  "tatuape": "tatuape",
+  "butanta": "butanta"
+ },
+ "cargos": {
+  "Gerente de loja": "gerente_loja",
+  "Chefe de cozinha": "chefe_cozinha",
+  "Líder de delivery": "lider_delivery",
+  "Auxiliar de cozinha": "auxiliar_cozinha",
+  "Atendente": "atendente"
+ },
+ "pessoas": [
+  {
+   "id": 1,
+   "nome": "Breno F.",
+   "cargo": "Gerente de loja",
+   "loja": "brooklyn",
+   "admissao": "2022-09-15",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 2,
+   "nome": "Cristiano E.",
+   "cargo": "Chefe de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2024-11-04",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 3,
+   "nome": "João A.",
+   "cargo": "Líder de delivery",
+   "loja": "brooklyn",
+   "admissao": "2024-10-10",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 4,
+   "nome": "Vanessa F.",
+   "cargo": "Líder de delivery",
+   "loja": "brooklyn",
+   "admissao": "2024-10-21",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 5,
+   "nome": "André E.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2023-08-09",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 6,
+   "nome": "Cíntia L.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2024-02-03",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 7,
+   "nome": "Letícia H.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2022-10-12",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 8,
+   "nome": "Flávia S.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2026-03-28",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 9,
+   "nome": "Priscila L.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2023-10-08",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 10,
+   "nome": "Ingrid V.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2023-11-13",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 11,
+   "nome": "Hugo P.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2022-02-04",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 12,
+   "nome": "Giovana H.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2025-12-13",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 13,
+   "nome": "Débora S.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2024-09-06",
+   "desempenho": 3,
+   "potencial": 1
+  },
+  {
+   "id": 14,
+   "nome": "Rayane E.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2023-08-18",
+   "desempenho": 2,
+   "potencial": 1
+  },
+  {
+   "id": 15,
+   "nome": "Leonardo C.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2024-04-07",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 16,
+   "nome": "Karina P.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "brooklyn",
+   "admissao": "2024-04-02",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 17,
+   "nome": "Murilo T.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2025-03-03",
+   "desempenho": 1,
+   "potencial": 3
+  },
+  {
+   "id": 18,
+   "nome": "Elaine M.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2025-12-23",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 19,
+   "nome": "Sérgio B.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2022-08-12",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 20,
+   "nome": "Natália A.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2025-11-03",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 21,
+   "nome": "Camila M.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2023-02-03",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 22,
+   "nome": "Tiago B.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2025-12-23",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 23,
+   "nome": "Paula M.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2024-02-22",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 24,
+   "nome": "Emerson P.",
+   "cargo": "Atendente",
+   "loja": "brooklyn",
+   "admissao": "2026-01-28",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 25,
+   "nome": "Marcos O.",
+   "cargo": "Gerente de loja",
+   "loja": "perdizes",
+   "admissao": "2021-10-20",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 26,
+   "nome": "Talita D.",
+   "cargo": "Chefe de cozinha",
+   "loja": "perdizes",
+   "admissao": "2023-07-13",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 27,
+   "nome": "Jéssica R.",
+   "cargo": "Líder de delivery",
+   "loja": "perdizes",
+   "admissao": "2024-08-27",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 28,
+   "nome": "Yasmin T.",
+   "cargo": "Líder de delivery",
+   "loja": "perdizes",
+   "admissao": "2022-05-20",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 29,
+   "nome": "Fernanda D.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2024-10-22",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 30,
+   "nome": "Matheus A.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2024-05-05",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 31,
+   "nome": "Carla F.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2026-06-22",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 32,
+   "nome": "Jorge H.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2024-07-22",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 33,
+   "nome": "Tatiane G.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2023-07-08",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 34,
+   "nome": "Fábio E.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2023-08-12",
+   "desempenho": 3,
+   "potencial": 1
+  },
+  {
+   "id": 35,
+   "nome": "Daniela C.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2024-03-04",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 36,
+   "nome": "Gabriela G.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2026-07-13",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 37,
+   "nome": "Pedro M.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2025-10-15",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 38,
+   "nome": "Patrícia J.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2026-01-22",
+   "desempenho": 2,
+   "potencial": 1
+  },
+  {
+   "id": 39,
+   "nome": "Fabiana L.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "perdizes",
+   "admissao": "2025-10-01",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 40,
+   "nome": "Nathan G.",
+   "cargo": "Atendente",
+   "loja": "perdizes",
+   "admissao": "2022-05-08",
+   "desempenho": 3,
+   "potencial": 1
+  },
+  {
+   "id": 41,
+   "nome": "Kleber D.",
+   "cargo": "Atendente",
+   "loja": "perdizes",
+   "admissao": "2024-02-21",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 42,
+   "nome": "Rodrigo N.",
+   "cargo": "Atendente",
+   "loja": "perdizes",
+   "admissao": "2022-11-07",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 43,
+   "nome": "Douglas F.",
+   "cargo": "Atendente",
+   "loja": "perdizes",
+   "admissao": "2025-01-25",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 44,
+   "nome": "Rafael F.",
+   "cargo": "Atendente",
+   "loja": "perdizes",
+   "admissao": "2023-05-25",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 45,
+   "nome": "Vitor T.",
+   "cargo": "Atendente",
+   "loja": "perdizes",
+   "admissao": "2025-10-25",
+   "desempenho": 3,
+   "potencial": 3
+  },
+  {
+   "id": 46,
+   "nome": "Nicole H.",
+   "cargo": "Atendente",
+   "loja": "perdizes",
+   "admissao": "2022-07-24",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 47,
+   "nome": "Elias G.",
+   "cargo": "Gerente de loja",
+   "loja": "vilamariana",
+   "admissao": "2024-01-18",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 48,
+   "nome": "Sabrina M.",
+   "cargo": "Chefe de cozinha",
+   "loja": "vilamariana",
+   "admissao": "2022-06-04",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 49,
+   "nome": "Aline D.",
+   "cargo": "Líder de delivery",
+   "loja": "vilamariana",
+   "admissao": "2023-04-13",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 50,
+   "nome": "Helena V.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "vilamariana",
+   "admissao": "2026-06-09",
+   "desempenho": 3,
+   "potencial": 1
+  },
+  {
+   "id": 51,
+   "nome": "Bárbara N.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "vilamariana",
+   "admissao": "2025-02-02",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 52,
+   "nome": "Bianca J.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "vilamariana",
+   "admissao": "2024-01-07",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 53,
+   "nome": "Ana B.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "vilamariana",
+   "admissao": "2023-09-11",
+   "desempenho": 1,
+   "potencial": 1
+  },
+  {
+   "id": 54,
+   "nome": "Juliana S.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "vilamariana",
+   "admissao": "2023-09-24",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 55,
+   "nome": "Mônica R.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "vilamariana",
+   "admissao": "2024-10-23",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 56,
+   "nome": "Vinícius T.",
+   "cargo": "Atendente",
+   "loja": "vilamariana",
+   "admissao": "2025-05-27",
+   "desempenho": 2,
+   "potencial": 1
+  },
+  {
+   "id": 57,
+   "nome": "Otávio T.",
+   "cargo": "Atendente",
+   "loja": "vilamariana",
+   "admissao": "2025-09-09",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 58,
+   "nome": "Larissa G.",
+   "cargo": "Atendente",
+   "loja": "vilamariana",
+   "admissao": "2024-03-18",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 59,
+   "nome": "Joice G.",
+   "cargo": "Atendente",
+   "loja": "vilamariana",
+   "admissao": "2024-09-04",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 60,
+   "nome": "Michele A.",
+   "cargo": "Gerente de loja",
+   "loja": "tatuape",
+   "admissao": "2024-01-18",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 61,
+   "nome": "Renata S.",
+   "cargo": "Chefe de cozinha",
+   "loja": "tatuape",
+   "admissao": "2022-12-03",
+   "desempenho": 2,
+   "potencial": 1
+  },
+  {
+   "id": 62,
+   "nome": "Gustavo O.",
+   "cargo": "Líder de delivery",
+   "loja": "tatuape",
+   "admissao": "2024-04-16",
+   "desempenho": 1,
+   "potencial": 1
+  },
+  {
+   "id": 63,
+   "nome": "Sueli S.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "tatuape",
+   "admissao": "2025-06-04",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 64,
+   "nome": "Everton J.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "tatuape",
+   "admissao": "2023-12-25",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 65,
+   "nome": "Diego E.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "tatuape",
+   "admissao": "2023-01-22",
+   "desempenho": 1,
+   "potencial": 3
+  },
+  {
+   "id": 66,
+   "nome": "Igor H.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "tatuape",
+   "admissao": "2025-08-04",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 67,
+   "nome": "Wagner T.",
+   "cargo": "Atendente",
+   "loja": "tatuape",
+   "admissao": "2025-05-23",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 68,
+   "nome": "Eduarda P.",
+   "cargo": "Atendente",
+   "loja": "tatuape",
+   "admissao": "2022-07-21",
+   "desempenho": 1,
+   "potencial": 2
+  },
+  {
+   "id": 69,
+   "nome": "Henrique F.",
+   "cargo": "Atendente",
+   "loja": "tatuape",
+   "admissao": "2025-04-28",
+   "desempenho": 1,
+   "potencial": 1
+  },
+  {
+   "id": 70,
+   "nome": "Isabela T.",
+   "cargo": "Gerente de loja",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 71,
+   "nome": "Kátia E.",
+   "cargo": "Chefe de cozinha",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 3,
+   "potencial": 2
+  },
+  {
+   "id": 72,
+   "nome": "Bruno N.",
+   "cargo": "Líder de delivery",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 73,
+   "nome": "Wesley G.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 74,
+   "nome": "Paulo D.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 75,
+   "nome": "Leandro C.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "butanta",
+   "admissao": "2026-10-13",
+   "desempenho": 1,
+   "potencial": 3
+  },
+  {
+   "id": 76,
+   "nome": "Felipe P.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 77,
+   "nome": "Luana A.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "butanta",
+   "admissao": "2026-09-15",
+   "desempenho": 2,
+   "potencial": 3
+  },
+  {
+   "id": 78,
+   "nome": "Lucas N.",
+   "cargo": "Auxiliar de cozinha",
+   "loja": "butanta",
+   "admissao": "2026-09-15",
+   "desempenho": 2,
+   "potencial": 1
+  },
+  {
+   "id": 79,
+   "nome": "Thiago M.",
+   "cargo": "Atendente",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 2,
+   "potencial": 1
+  },
+  {
+   "id": 80,
+   "nome": "Samuel A.",
+   "cargo": "Atendente",
+   "loja": "butanta",
+   "admissao": "2026-09-15",
+   "desempenho": 2,
+   "potencial": 1
+  },
+  {
+   "id": 81,
+   "nome": "Denise S.",
+   "cargo": "Atendente",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 2,
+   "potencial": 2
+  },
+  {
+   "id": 82,
+   "nome": "Mariana F.",
+   "cargo": "Atendente",
+   "loja": "butanta",
+   "admissao": "2026-10-01",
+   "desempenho": 3,
+   "potencial": 2
+  }
+ ],
+ "quadro": {
+  "brooklyn": {
+   "Gerente de loja": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Chefe de cozinha": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Líder de delivery": {
+    "previsto": 2,
+    "ativo": 2
+   },
+   "Auxiliar de cozinha": {
+    "previsto": 13,
+    "ativo": 12
+   },
+   "Atendente": {
+    "previsto": 8,
+    "ativo": 8
+   }
+  },
+  "perdizes": {
+   "Gerente de loja": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Chefe de cozinha": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Líder de delivery": {
+    "previsto": 2,
+    "ativo": 2
+   },
+   "Auxiliar de cozinha": {
+    "previsto": 12,
+    "ativo": 11
+   },
+   "Atendente": {
+    "previsto": 7,
+    "ativo": 7
+   }
+  },
+  "vilamariana": {
+   "Gerente de loja": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Chefe de cozinha": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Líder de delivery": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Auxiliar de cozinha": {
+    "previsto": 8,
+    "ativo": 6
+   },
+   "Atendente": {
+    "previsto": 5,
+    "ativo": 4
+   }
+  },
+  "tatuape": {
+   "Gerente de loja": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Chefe de cozinha": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Líder de delivery": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Auxiliar de cozinha": {
+    "previsto": 6,
+    "ativo": 4
+   },
+   "Atendente": {
+    "previsto": 4,
+    "ativo": 3
+   }
+  },
+  "butanta": {
+   "Gerente de loja": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Chefe de cozinha": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Líder de delivery": {
+    "previsto": 1,
+    "ativo": 1
+   },
+   "Auxiliar de cozinha": {
+    "previsto": 8,
+    "ativo": 6
+   },
+   "Atendente": {
+    "previsto": 5,
+    "ativo": 4
+   }
+  }
+ },
+ "lideranca": {
+  "brooklyn": 4.6,
+  "perdizes": 4.2,
+  "vilamariana": 3.5,
+  "tatuape": 2.8,
+  "butanta": 4
+ },
+ "registros": [
+  {
+   "loja": "brooklyn",
+   "mes": "2026-05",
+   "headcount": 25,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 13,
+   "diasPrevistos": 650
+  },
+  {
+   "loja": "brooklyn",
+   "mes": "2026-06",
+   "headcount": 24,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 12,
+   "diasPrevistos": 624
+  },
+  {
+   "loja": "brooklyn",
+   "mes": "2026-07",
+   "headcount": 25,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 11,
+   "diasPrevistos": 650
+  },
+  {
+   "loja": "brooklyn",
+   "mes": "2026-08",
+   "headcount": 24,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 12,
+   "diasPrevistos": 624
+  },
+  {
+   "loja": "brooklyn",
+   "mes": "2026-09",
+   "headcount": 25,
+   "admissoes": 0,
+   "desligamentos": 0,
+   "faltas": 11,
+   "diasPrevistos": 650
+  },
+  {
+   "loja": "brooklyn",
+   "mes": "2026-10",
+   "headcount": 25,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 13,
+   "diasPrevistos": 650
+  },
+  {
+   "loja": "perdizes",
+   "mes": "2026-05",
+   "headcount": 22,
+   "admissoes": 0,
+   "desligamentos": 0,
+   "faltas": 15,
+   "diasPrevistos": 572
+  },
+  {
+   "loja": "perdizes",
+   "mes": "2026-06",
+   "headcount": 21,
+   "admissoes": 0,
+   "desligamentos": 0,
+   "faltas": 14,
+   "diasPrevistos": 546
+  },
+  {
+   "loja": "perdizes",
+   "mes": "2026-07",
+   "headcount": 23,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 15,
+   "diasPrevistos": 598
+  },
+  {
+   "loja": "perdizes",
+   "mes": "2026-08",
+   "headcount": 21,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 13,
+   "diasPrevistos": 546
+  },
+  {
+   "loja": "perdizes",
+   "mes": "2026-09",
+   "headcount": 22,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 15,
+   "diasPrevistos": 572
+  },
+  {
+   "loja": "perdizes",
+   "mes": "2026-10",
+   "headcount": 21,
+   "admissoes": 2,
+   "desligamentos": 1,
+   "faltas": 12,
+   "diasPrevistos": 546
+  },
+  {
+   "loja": "vilamariana",
+   "mes": "2026-05",
+   "headcount": 13,
+   "admissoes": 0,
+   "desligamentos": 0,
+   "faltas": 12,
+   "diasPrevistos": 338
+  },
+  {
+   "loja": "vilamariana",
+   "mes": "2026-06",
+   "headcount": 14,
+   "admissoes": 2,
+   "desligamentos": 1,
+   "faltas": 11,
+   "diasPrevistos": 364
+  },
+  {
+   "loja": "vilamariana",
+   "mes": "2026-07",
+   "headcount": 14,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 12,
+   "diasPrevistos": 364
+  },
+  {
+   "loja": "vilamariana",
+   "mes": "2026-08",
+   "headcount": 12,
+   "admissoes": 0,
+   "desligamentos": 1,
+   "faltas": 9,
+   "diasPrevistos": 312
+  },
+  {
+   "loja": "vilamariana",
+   "mes": "2026-09",
+   "headcount": 14,
+   "admissoes": 0,
+   "desligamentos": 1,
+   "faltas": 11,
+   "diasPrevistos": 364
+  },
+  {
+   "loja": "vilamariana",
+   "mes": "2026-10",
+   "headcount": 13,
+   "admissoes": 1,
+   "desligamentos": 0,
+   "faltas": 11,
+   "diasPrevistos": 338
+  },
+  {
+   "loja": "tatuape",
+   "mes": "2026-05",
+   "headcount": 10,
+   "admissoes": 0,
+   "desligamentos": 1,
+   "faltas": 11,
+   "diasPrevistos": 260
+  },
+  {
+   "loja": "tatuape",
+   "mes": "2026-06",
+   "headcount": 10,
+   "admissoes": 2,
+   "desligamentos": 2,
+   "faltas": 10,
+   "diasPrevistos": 260
+  },
+  {
+   "loja": "tatuape",
+   "mes": "2026-07",
+   "headcount": 10,
+   "admissoes": 0,
+   "desligamentos": 1,
+   "faltas": 10,
+   "diasPrevistos": 260
+  },
+  {
+   "loja": "tatuape",
+   "mes": "2026-08",
+   "headcount": 11,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 11,
+   "diasPrevistos": 286
+  },
+  {
+   "loja": "tatuape",
+   "mes": "2026-09",
+   "headcount": 11,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 13,
+   "diasPrevistos": 286
+  },
+  {
+   "loja": "tatuape",
+   "mes": "2026-10",
+   "headcount": 9,
+   "admissoes": 1,
+   "desligamentos": 1,
+   "faltas": 11,
+   "diasPrevistos": 234
+  }
+ ]
+}

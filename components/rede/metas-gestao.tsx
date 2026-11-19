@@ -305,7 +305,7 @@ export function IndicadoresDoMes({ slug, lojas, metas, indicadores, calculados, 
   const manuais = INDICADORES.filter((d) => !d.calculado);
   const ref = `${mes}-01`;
   return (
-    <SectionCard title={`Indicadores lançados — ${MESES[Number(mes.slice(5, 7)) - 1]}/${mes.slice(0, 4)}`} description="Faturamento e % da meta são calculados das vendas. Vêm de outros módulos quando eles têm dados no mês: o CMV das contagens semanais, as rupturas da cozinha central e preparo, cancelamentos, nota iFood e tempo online dos checklists de delivery (média do mês). Os demais são lançados aqui, por loja, até os módulos de origem (RH) alimentarem sozinhos.">
+    <SectionCard title={`Indicadores lançados — ${MESES[Number(mes.slice(5, 7)) - 1]}/${mes.slice(0, 4)}`} description="Faturamento e % da meta são calculados das vendas. Vêm de outros módulos quando eles têm dados no mês: o CMV das contagens semanais, as rupturas da cozinha central, preparo, cancelamentos, nota iFood e tempo online dos checklists de delivery (média do mês) e o turnover e o absenteísmo do lançamento mensal de RH. Os demais são lançados aqui, por loja.">
       <div className="space-y-3">
         {msg ? <FeedbackMessage variant={msg.tipo}>{msg.texto}</FeedbackMessage> : null}
         <div className="overflow-x-auto">

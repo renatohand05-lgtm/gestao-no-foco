@@ -408,3 +408,64 @@ export type PlanoAcao = {
   verificadoEm: string | null;
   criadoEm: string;
 };
+
+/* ------------------------------------------------------------------ RH (rodada 18) */
+
+export type CargoRh = "gerente_loja" | "chefe_cozinha" | "lider_delivery" | "auxiliar_cozinha" | "atendente";
+export type StatusColaborador = "ativo" | "desligado";
+
+export type ColaboradorRh = {
+  id: string;
+  lojaId: string;
+  nome: string;
+  cargo: CargoRh;
+  /** AAAA-MM-DD. */
+  dataAdmissao: string;
+  status: StatusColaborador;
+  dataDesligamento: string | null;
+  motivoDesligamento: string | null;
+  observacoes: string | null;
+  origem: "manual" | "exemplo";
+};
+
+export type PrevistoRh = { lojaId: string; cargo: CargoRh; previsto: number; origem: "manual" | "exemplo" };
+
+/** Lançamento mensal de uma loja. Turnover e absenteísmo NÃO são gravados: saem destas contagens. */
+export type MesRh = {
+  id: string;
+  lojaId: string;
+  /** Primeiro dia do mês (AAAA-MM-01). */
+  mes: string;
+  headcount: number;
+  admissoes: number;
+  desligamentos: number;
+  faltas: number;
+  diasPrevistos: number;
+  origem: "manual" | "exemplo";
+};
+
+export type TipoOcorrencia =
+  | "advertencia_verbal"
+  | "advertencia_escrita"
+  | "suspensao"
+  | "falta_injustificada"
+  | "atraso"
+  | "atestado_medico"
+  | "feedback"
+  | "elogio"
+  | "treinamento"
+  | "desligamento";
+export type StatusOcorrencia = "registrada" | "aguardando_assinatura" | "assinada" | "recusou_assinar" | "concluida";
+
+export type OcorrenciaRh = {
+  id: string;
+  lojaId: string;
+  colaboradorId: string;
+  tipo: TipoOcorrencia;
+  data: string;
+  status: StatusOcorrencia;
+  motivo: string;
+  responsavel: string | null;
+  observacoes: string | null;
+  origem: "manual" | "exemplo";
+};

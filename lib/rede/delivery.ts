@@ -66,6 +66,8 @@ export const FONTE_CALCULADA: Partial<Record<IndicadorKey, string>> = {
   cancel: "dos checklists de delivery (média do mês)",
   ifood: "dos checklists de delivery (média do mês)",
   online: "dos checklists de delivery (média do mês)",
+  turnover: "dos lançamentos mensais de RH",
+  absent: "dos lançamentos mensais de RH",
 };
 
 /** Versão curta, para legenda embaixo do número na tela de Metas. */
@@ -76,6 +78,8 @@ export const FONTE_CALCULADA_CURTA: Partial<Record<IndicadorKey, string>> = {
   cancel: "dos checklists",
   ifood: "dos checklists",
   online: "dos checklists",
+  turnover: "do RH",
+  absent: "do RH",
 };
 
 /* ------------------------------------------------------------------ datas */

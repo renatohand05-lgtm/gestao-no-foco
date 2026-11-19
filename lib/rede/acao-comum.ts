@@ -123,6 +123,13 @@ export const nomeCampo: Record<string, string> = {
   tipo: "tipo",
   colaboradorId: "colaborador",
   texto: "lista",
+  // rodada 19
+  desempenho: "desempenho",
+  potencial: "potencial",
+  nota: "nota de liderança",
+  criterio: "critério",
+  tempoMinimoMeses: "tempo mínimo",
+  supervisor_regional: "supervisor regional",
 };
 
 export function lerEntrada<T>(schema: z.ZodType<T>, entrada: unknown): T {

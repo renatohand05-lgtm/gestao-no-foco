@@ -460,7 +460,7 @@ igual([mesesDeCasa("2026-01-30", "2026-02-27"), mesesDeCasa("2026-01-31", "2026-
 {
   const rh = MENU_REDE.find((i) => i.href === "/rh");
   assert(rh != null && rh.label === "RH", "o menu da rede tem o item RH");
-  igual(rh ? modulosDoItem(rh) : [], ["rh_quadro", "rh_movimentos", "rh_ocorrencias"], "RH abre com qualquer um dos 3 módulos");
+  igual(rh ? modulosDoItem(rh) : [], ["rh_quadro", "rh_movimentos", "rh_ocorrencias", "avaliacao_gerentes", "nine_box", "sucessao"], "RH abre com qualquer um dos 6 módulos (3 da rodada 18 + gerentes, nine box e sucessão)");
   const mod = (ver) => ({ ver, editar: false });
   const so = (k) => lerPerfil({ papel: "x", todas_lojas: true, loja_ids: [], modulos: { [k]: mod(true) } });
   assert(podeVerAlgum(so("rh_ocorrencias"), modulosDoItem(rh)), "quem só vê ocorrências enxerga o item RH");

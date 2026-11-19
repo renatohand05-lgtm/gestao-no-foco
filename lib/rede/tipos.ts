@@ -469,3 +469,40 @@ export type OcorrenciaRh = {
   observacoes: string | null;
   origem: "manual" | "exemplo";
 };
+
+/* ------------------------------------------------------------------ talentos (rodada 19) */
+
+/** 1 = baixo, 2 = médio, 3 = alto. */
+export type NivelNineBox = 1 | 2 | 3;
+
+export type NineBoxRh = {
+  id: string;
+  lojaId: string;
+  colaboradorId: string;
+  desempenho: NivelNineBox;
+  potencial: NivelNineBox;
+  observacoes: string | null;
+  origem: "manual" | "exemplo";
+};
+
+/** Nota de liderança (0 a 5) do gerente de loja em um mês. O score do gerente não é gravado. */
+export type LiderancaRh = {
+  id: string;
+  lojaId: string;
+  colaboradorId: string;
+  /** Primeiro dia do mês (AAAA-MM-01). */
+  mes: string;
+  nota: number;
+  observacoes: string | null;
+  origem: "manual" | "exemplo";
+};
+
+export type CargoCarreira = CargoRh | "supervisor_regional";
+
+/** Ajuste do consultor ao critério de promoção de um cargo. Sem registro vale o padrão do painel original. */
+export type CriterioCargo = {
+  cargo: CargoCarreira;
+  tempoMinimoMeses: number | null;
+  criterio: string;
+  origem: "manual" | "exemplo";
+};

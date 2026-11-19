@@ -486,11 +486,15 @@ export function erroRh(error: unknown): string | null {
     if (tem("rede_rh_colab_nome_uk")) return "Já existe um colaborador ativo com esse nome nesta loja.";
     if (tem("rede_rh_m_uk")) return "Já existe lançamento deste mês para esta loja.";
     if (tem("rede_rh_qp_uk")) return "O quadro previsto desta loja já foi salvo; atualize-o.";
+    if (tem("rede_rh_nb_uk")) return "Este colaborador já tem avaliação no Nine Box; atualize a existente.";
+    if (tem("rede_rh_lid_uk")) return "Já existe nota de liderança deste gerente neste mês; edite a existente.";
+    if (tem("rede_rh_crit_uk")) return "Este cargo já tem critério ajustado; edite o existente.";
     return null;
   }
   if (e.code === "23503") {
     if (tem("rede_rh_oco_colab_fk")) return "Este colaborador tem ocorrências registradas, então não pode ser excluído nem trocado de loja. Para tirá-lo do quadro, use \"Desligar\".";
-    if (tem("rede_rh_colab_loja_fk") || tem("rede_rh_m_loja_fk") || tem("rede_rh_qp_loja_fk") || tem("rede_rh_oco_loja_fk")) return "Loja não encontrada.";
+    if (tem("rede_rh_colab_loja_fk") || tem("rede_rh_m_loja_fk") || tem("rede_rh_qp_loja_fk") || tem("rede_rh_oco_loja_fk") || tem("rede_rh_nb_loja_fk") || tem("rede_rh_lid_loja_fk")) return "Loja não encontrada.";
+    if (tem("rede_rh_nb_colab_fk") || tem("rede_rh_lid_colab_fk")) return "Colaborador não encontrado nesta loja.";
     return null;
   }
   if (e.code === "23514") {
@@ -500,6 +504,12 @@ export function erroRh(error: unknown): string | null {
     if (tem("rede_rh_m_hc_chk")) return "O headcount médio deve ser maior que zero.";
     if (tem("rede_rh_m_mes_chk")) return "Mês fora do intervalo permitido.";
     if (tem("rede_rh_oco_data_chk")) return "Data da ocorrência fora do intervalo permitido.";
+    if (tem("rede_rh_nb_desemp_chk") || tem("rede_rh_nb_pot_chk")) return "Desempenho e potencial vão de Baixo a Alto.";
+    if (tem("rede_rh_nb_obs_chk") || tem("rede_rh_lid_obs_chk")) return "A observação passa de 500 caracteres.";
+    if (tem("rede_rh_lid_nota_chk")) return "A nota de liderança vai de 0 a 5.";
+    if (tem("rede_rh_lid_mes_chk")) return "Mês fora do intervalo permitido.";
+    if (tem("rede_rh_crit_tempo_chk")) return "O tempo mínimo vai de 0 a 120 meses.";
+    if (tem("rede_rh_crit_texto_chk")) return "Descreva o critério (até 500 caracteres).";
     return null; // as mensagens dos gatilhos já vêm em português e passam pela tradução geral
   }
   return null;

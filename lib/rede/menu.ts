@@ -8,7 +8,7 @@ export type ItemMenuRede = {
   ou?: readonly ModuloRede[];
 };
 
-/** Abas do módulo. As rodadas seguintes acrescentam as demais (qualidade, planos de ação, RH…). */
+/** Abas do módulo. As rodadas seguintes acrescentam as demais (RH, avaliação de gerentes…). */
 export const MENU_REDE: readonly ItemMenuRede[] = [
   { href: "", label: "Visão geral", modulo: "dashboard" },
   { href: "/vendas", label: "Vendas", modulo: "vendas" },
@@ -16,7 +16,9 @@ export const MENU_REDE: readonly ItemMenuRede[] = [
   { href: "/cmv", label: "CMV", modulo: "cmv" },
   { href: "/dre", label: "DRE", modulo: "dre" },
   { href: "/cozinha", label: "Cozinha central", modulo: "rupturas", ou: ["estoque_cc"] },
+  { href: "/qualidade", label: "Checklist de qualidade", modulo: "qualidade" },
   { href: "/delivery", label: "Checklist de delivery", modulo: "delivery" },
+  { href: "/planos", label: "Planos de ação", modulo: "planos_acao" },
   { href: "/orcamento", label: "Orçamento e expansão", modulo: "orcamento" },
   { href: "/lojas", label: "Lojas e acessos", modulo: "config" },
 ];

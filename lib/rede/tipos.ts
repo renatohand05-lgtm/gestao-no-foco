@@ -363,3 +363,48 @@ export type RegistroDelivery = {
   observacoes: string | null;
   origem: "manual" | "exemplo";
 };
+
+/* ------------------------------------------------------------------ checklist de qualidade e planos de ação (rodada 17) */
+
+export type RespostaQualidade = "sim" | "nao" | "na";
+/** Resposta de um item da visita: Sim/Não/N/A e a evidência (observação) opcional. */
+export type RespostaItemQualidade = { v: RespostaQualidade | null; o: string | null };
+/** Chave "<seção>-<item>" (ambos a partir de 0), como no painel original. */
+export type RespostasQualidade = Record<string, RespostaItemQualidade>;
+
+export type VisitaQualidade = {
+  id: string;
+  lojaId: string;
+  data: string;
+  avaliador: string;
+  gerente: string | null;
+  respostas: RespostasQualidade;
+  origem: "manual" | "exemplo";
+  criadaEm: string;
+};
+
+export type OrigemPlano = "qualidade" | "delivery" | "indicador" | "manual";
+export type StatusPlano = "pendente" | "em_andamento" | "concluido" | "cancelado";
+export type PrioridadePlano = "baixa" | "media" | "alta";
+
+export type PlanoAcao = {
+  id: string;
+  lojaId: string;
+  origemTipo: OrigemPlano;
+  /** Registro de origem (visita ou checklist); null quando é manual ou o registro foi excluído. */
+  origemId: string | null;
+  /** Item do registro de origem (ex.: "0-1" na visita, "rotina-2" no delivery). */
+  origemRef: string | null;
+  origemRotulo: string;
+  descricao: string;
+  acao: string | null;
+  responsavel: string | null;
+  prazo: string | null;
+  prioridade: PrioridadePlano;
+  status: StatusPlano;
+  dataConclusao: string | null;
+  evidencia: string | null;
+  observacoes: string | null;
+  verificadoEm: string | null;
+  criadoEm: string;
+};

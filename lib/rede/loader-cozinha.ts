@@ -6,7 +6,7 @@ import { LINHAS_NO_HISTORICO, META_RUPTURAS_SEMANA, resumirEstoque, resumirRuptu
 import { segundaDaSemana } from "./financeiro";
 import { carregarBase, hojeDoTenant, lerTudo, type BaseRede } from "./loader";
 import { mapProduto, mapRegistroDelivery, mapRuptura } from "./mapeadores-cozinha";
-import { podeVer } from "./permissoes";
+import { podeEditar, podeVer } from "./permissoes";
 import type { Loja, ProdutoCC, RegistroDelivery, Ruptura } from "./tipos";
 
 type Params = Record<string, string | string[] | undefined>;
@@ -119,6 +119,10 @@ export type DadosDelivery = {
   truncado: boolean;
   /** Rupturas registradas na cozinha central por loja e semana ("lojaId|segunda-feira" → quantidade). */
   rupturasPorSemana: Record<string, number>;
+  /** Planos de ação de cada checklist (id do registro → total e abertos); null = o perfil não vê planos de ação. */
+  planosPorRegistro: Record<string, { total: number; abertos: number }> | null;
+  /** O perfil pode criar planos de ação a partir dos desvios do checklist. */
+  podeGerarPlanos: boolean;
 };
 
 export async function carregarDeliveryTela(ctx: RedeContexto, params: Params): Promise<DadosDelivery> {
@@ -131,7 +135,8 @@ export async function carregarDeliveryTela(ctx: RedeContexto, params: Params): P
   const ids = lojas.map((l) => l.id);
   const idsTodas = visiveis.map((l) => l.id);
 
-  const [linhas, linhasRup] = await Promise.all([
+  const verPlanos = podeVer(perfil, "planos_acao");
+  const [linhas, linhasRup, linhasPlanos] = await Promise.all([
     ids.length > 0
       ? lerTudo((a, b) =>
           db
@@ -157,9 +162,21 @@ export async function carregarDeliveryTela(ctx: RedeContexto, params: Params): P
             .range(a, b),
         )
       : Promise.resolve([] as Linha[]),
+    verPlanos && ids.length > 0
+      ? lerTudo((a, b) => db.from("rede_planos_acao").select("origem_id,status").eq("origem_tipo", "delivery").in("loja_id", ids).not("origem_id", "is", null).order("id").range(a, b))
+      : Promise.resolve([] as Linha[]),
   ]);
 
   const registros = linhas.map(mapRegistroDelivery);
+  const planosPorRegistro: Record<string, { total: number; abertos: number }> | null = verPlanos ? {} : null;
+  if (planosPorRegistro) {
+    for (const l of linhasPlanos) {
+      const k = String(l.origem_id);
+      const x = (planosPorRegistro[k] ??= { total: 0, abertos: 0 });
+      x.total++;
+      if (l.status === "pendente" || l.status === "em_andamento") x.abertos++;
+    }
+  }
   const rupturasPorSemana: Record<string, number> = {};
   for (const r of linhasRup) {
     const k = `${String(r.loja_id)}|${segundaDaSemana(String(r.data).slice(0, 10))}`;
@@ -174,5 +191,7 @@ export async function carregarDeliveryTela(ctx: RedeContexto, params: Params): P
     registros,
     truncado: registros.length > LINHAS_NO_HISTORICO,
     rupturasPorSemana,
+    planosPorRegistro,
+    podeGerarPlanos: verPlanos && podeEditar(perfil, "planos_acao"),
   };
 }

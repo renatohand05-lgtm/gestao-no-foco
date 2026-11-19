@@ -31,6 +31,8 @@ export default async function RedeDeliveryPage({
         editavel={podeEditar(ctx.perfil, "delivery")}
         rupturasPorSemana={podeVer(ctx.perfil, "rupturas") ? d.rupturasPorSemana : null}
         lojaInicial={d.lojaFiltro?.id ?? null}
+        planosPorRegistro={d.planosPorRegistro}
+        podeGerarPlanos={d.podeGerarPlanos}
       />
     </div>
   );

@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { Pencil, Printer, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ClipboardList, Pencil, Printer, Trash2 } from "lucide-react";
 
 import { AcoesExportar } from "@/components/rede/acoes-exportar";
 import { StatusPill } from "@/components/rede/status";
@@ -15,6 +16,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { SectionCard } from "@/components/ui/section-card";
 import { Textarea } from "@/components/ui/textarea";
 import { excluirDeliveryAction, salvarDeliveryAction } from "@/lib/rede/actions-cozinha";
+import { gerarPlanosDeliveryAction } from "@/lib/rede/actions-planos";
 import { formatarValor, somarDias } from "@/lib/rede/calculo";
 import { LINHAS_NO_HISTORICO } from "@/lib/rede/cozinha";
 import { lerNumero } from "@/lib/rede/csv";
@@ -32,6 +34,7 @@ import {
   type CampoMeta,
 } from "@/lib/rede/delivery";
 import { segundaDaSemana } from "@/lib/rede/financeiro";
+import { textoGeracaoPlanos } from "@/lib/rede/planos";
 import type { MetaRow, PeriodoDelivery, RegistroDelivery, RespostaRotina, Status } from "@/lib/rede/tipos";
 
 type Msg = { tipo: "success" | "error"; texto: string } | null;
@@ -59,9 +62,13 @@ type Props = {
   rupturasPorSemana: Record<string, number> | null;
   /** Loja pré-selecionada (filtro da tela). */
   lojaInicial: string | null;
+  /** Planos de ação de cada checklist (id → total e abertos); null = o perfil não vê planos de ação. */
+  planosPorRegistro: Record<string, { total: number; abertos: number }> | null;
+  /** O perfil pode gerar planos de ação a partir dos desvios. */
+  podeGerarPlanos: boolean;
 };
 
-export function DeliveryGestao({ slug, lojas, registros, metas, tolPct, hoje, editavel, rupturasPorSemana, lojaInicial }: Props) {
+export function DeliveryGestao({ slug, lojas, registros, metas, tolPct, hoje, editavel, rupturasPorSemana, lojaInicial, planosPorRegistro, podeGerarPlanos }: Props) {
   const router = useRouter();
   const [pendente, iniciar] = useTransition();
   const [msg, setMsg] = useState<Msg>(null);
@@ -72,6 +79,17 @@ export function DeliveryGestao({ slug, lojas, registros, metas, tolPct, hoje, ed
   const nomeLoja = useMemo(() => new Map(lojas.map((l) => [l.id, l.nome] as const)), [lojas]);
   const nome = (id: string) => nomeLoja.get(id) ?? "Loja";
   const visiveis = registros.slice(0, LINHAS_NO_HISTORICO);
+
+  const gerarPlanos = (v: RegistroDelivery) => {
+    setMsg(null);
+    iniciar(async () => {
+      const r = await gerarPlanosDeliveryAction(slug, v.id);
+      if (r.success) {
+        setMsg({ tipo: "success", texto: `Planos de ação de ${nome(v.lojaId)} (${dmy(v.data)}): ${textoGeracaoPlanos(r)}` });
+        router.refresh();
+      } else setMsg({ tipo: "error", texto: r.error });
+    });
+  };
 
   const confirmarExclusao = () => {
     if (!excluir) return;
@@ -139,7 +157,8 @@ export function DeliveryGestao({ slug, lojas, registros, metas, tolPct, hoje, ed
                     </th>
                   ))}
                   <th className="py-2 pr-3 text-right font-medium">Rotina</th>
-                  {editavel ? <th className="py-2 text-right font-medium">Ações</th> : null}
+                  {planosPorRegistro ? <th className="py-2 pr-3 text-right font-medium">Planos de ação</th> : null}
+                  {editavel || podeGerarPlanos ? <th className="py-2 text-right font-medium">Ações</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -160,14 +179,37 @@ export function DeliveryGestao({ slug, lojas, registros, metas, tolPct, hoje, ed
                         </td>
                       ))}
                       <td className="py-2 pr-3 text-right tabular-nums">{av.rotina.aplicaveis > 0 ? `${av.rotina.sim}/${av.rotina.aplicaveis}` : "—"}</td>
-                      {editavel ? (
+                      {planosPorRegistro ? (
+                        <td className="py-2 pr-3 text-right tabular-nums">
+                          {planosPorRegistro[v.id]?.total ? (
+                            <Link href={`/${slug}/rede/planos?origem=delivery&registro=${v.id}&situacao=todas`} className="underline underline-offset-2" title="Ver os planos de ação deste checklist">
+                              {planosPorRegistro[v.id]?.abertos} {planosPorRegistro[v.id]?.abertos === 1 ? "aberto" : "abertos"}
+                              <span className="text-muted-foreground"> de {planosPorRegistro[v.id]?.total}</span>
+                            </Link>
+                          ) : av.desvios.length > 0 ? (
+                            <span className="text-amber-700 dark:text-amber-400">{av.desvios.length} {av.desvios.length === 1 ? "desvio sem plano" : "desvios sem plano"}</span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                      ) : null}
+                      {editavel || podeGerarPlanos ? (
                         <td className="py-1 text-right whitespace-nowrap">
+                          {podeGerarPlanos && (av.desvios.length > 0 || (planosPorRegistro?.[v.id]?.total ?? 0) > 0) ? (
+                            <Button type="button" variant="ghost" size="icon-sm" aria-label={`Gerar planos de ação do checklist de ${nome(v.lojaId)} de ${dmy(v.data)}`} title="Gerar planos de ação a partir dos desvios" disabled={pendente} onClick={() => gerarPlanos(v)}>
+                              <ClipboardList aria-hidden />
+                            </Button>
+                          ) : null}
+                          {editavel ? (
+                            <>
                           <Button type="button" variant="ghost" size="icon-sm" aria-label={`Editar o checklist de ${nome(v.lojaId)} de ${dmy(v.data)}`} onClick={() => { setMsg(null); setEditando(v); document.getElementById("dl-form")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>
                             <Pencil aria-hidden />
                           </Button>
                           <Button type="button" variant="ghost" size="icon-sm" aria-label={`Excluir o checklist de ${nome(v.lojaId)} de ${dmy(v.data)}`} onClick={() => { setErroExcluir(null); setExcluir(v); }}>
                             <Trash2 aria-hidden />
                           </Button>
+                            </>
+                          ) : null}
                         </td>
                       ) : null}
                     </tr>
@@ -183,7 +225,7 @@ export function DeliveryGestao({ slug, lojas, registros, metas, tolPct, hoje, ed
         open={excluir != null}
         onOpenChange={(o) => !o && setExcluir(null)}
         title="Excluir este checklist?"
-        description={excluir ? `${nome(excluir.lojaId)} · ${excluir.periodo === "semanal" ? "semana de" : ""} ${dmy(excluir.data)}. As médias do mês na tela de Metas são recalculadas sem ele. A exclusão fica registrada no histórico de alterações.` : ""}
+        description={excluir ? `${nome(excluir.lojaId)} · ${excluir.periodo === "semanal" ? "semana de" : ""} ${dmy(excluir.data)}. As médias do mês na tela de Metas são recalculadas sem ele. Os planos de ação deste checklist que ainda estão pendentes e sem ação somem junto; os que já têm trabalho feito ficam na lista de planos, sem o vínculo. A exclusão fica registrada no histórico de alterações.` : ""}
         confirmLabel="Excluir"
         loading={pendente}
         error={erroExcluir}
@@ -430,7 +472,7 @@ function FormularioDelivery({ slug, lojas, registros, metas, tolPct, hoje, edita
       </div>
 
       {previa.desvios.length > 0 ? (
-        <SectionCard title="Desvios encontrados" description="Indicadores fora da meta e itens da rotina marcados como Não. Registre nas observações o que foi combinado, com responsável e prazo.">
+        <SectionCard title="Desvios encontrados" description="Indicadores fora da meta e itens da rotina marcados como Não. Salve o checklist e use “Gerar planos de ação” no histórico para transformar cada desvio em um plano com responsável e prazo.">
           <ul className="space-y-1.5 text-sm">
             {previa.desvios.map((d) => (
               <li key={`${d.tipo}-${d.titulo}`} className="flex flex-wrap items-center gap-2">

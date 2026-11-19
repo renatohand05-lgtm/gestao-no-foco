@@ -8,7 +8,7 @@
  */
 import { formatarValor, mesDe, primeiroDiaDoMes, resolverMeta, statusMeta } from "./calculo.ts";
 import { segundaDaSemana } from "./financeiro.ts";
-import type { Direcao, FormatoValor, IndicadorKey, IndicadorMes, MetaRow, PeriodoDelivery, RegistroDelivery, RespostaRotina, Status } from "./tipos.ts";
+import type { Direcao, FormatoValor, IndicadorKey, IndicadorMes, MetaRow, PeriodoDelivery, PrioridadePlano, RegistroDelivery, RespostaRotina, Status } from "./tipos.ts";
 
 /** Rotina de delivery — textos do painel original. */
 export const ROTINA_DELIVERY: readonly string[] = [
@@ -107,7 +107,8 @@ export type ResumoRotina = {
   pct: number | null;
 };
 
-export type Desvio = { tipo: "indicador" | "rotina"; titulo: string; detalhe: string; status: Status };
+/** `ref` identifica o desvio no registro ("ind-preparo", "rotina-2"): é o que impede um plano de ação duplicado. */
+export type Desvio = { tipo: "indicador" | "rotina"; ref: string; titulo: string; detalhe: string; status: Status };
 
 export type AvaliacaoRegistro = {
   metas: AvaliacaoMeta[];
@@ -166,17 +167,37 @@ export function avaliarRegistro(reg: EntradaAvaliacao, metas: readonly MetaRow[]
     if (!def || m.valor == null || m.meta == null || m.direcao == null) continue;
     desvios.push({
       tipo: "indicador",
+      ref: `ind-${m.k}`,
       titulo: m.nome,
       detalhe: `${formatarValor(m.formato, m.valor)} (${textoMetaDelivery(def, m.meta, m.direcao)})`,
       status: m.status,
     });
   }
   ROTINA_DELIVERY.forEach((texto, i) => {
-    if (reg.rotina[i] === "nao") desvios.push({ tipo: "rotina", titulo: texto, detalhe: "Item da rotina marcado como não cumprido", status: "bad" });
+    if (reg.rotina[i] === "nao") desvios.push({ tipo: "rotina", ref: `rotina-${i}`, titulo: texto, detalhe: "Item da rotina marcado como não cumprido", status: "bad" });
   });
 
   return { metas: avaliadas, preenchidos: comValor.length, naMeta: comValor.filter((m) => m.status === "ok").length, rotina, desvios };
 }
+
+/* ------------------------------------------------------------------ planos de ação a partir dos desvios */
+
+export type PlanoSugerido = { ref: string; descricao: string; prioridade: PrioridadePlano };
+
+const dmy = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
+
+/** Indicador fora da meta crítico = prioridade alta; em atenção ou item da rotina = média. */
+export function planosSugeridos(desvios: readonly Desvio[]): PlanoSugerido[] {
+  return desvios.map((d) => ({
+    ref: d.ref,
+    descricao: (d.tipo === "indicador" ? `${d.titulo} fora da meta: ${d.detalhe}` : `Rotina de delivery não cumprida: ${d.titulo}`).slice(0, 500),
+    prioridade: d.tipo === "indicador" && d.status === "bad" ? "alta" : "media",
+  }));
+}
+
+/** Texto que identifica o checklist de origem na lista de planos de ação. */
+export const rotuloOrigemDelivery = (r: Pick<RegistroDelivery, "data" | "periodo">): string =>
+  r.periodo === "semanal" ? `Checklist de delivery da semana de ${dmy(r.data)}` : `Checklist de delivery de ${dmy(r.data)}`;
 
 /* ------------------------------------------------------------------ indicadores mensais */
 
